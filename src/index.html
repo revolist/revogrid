@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0">
+  <title>Revo Grid Component Demo</title>
+  <style type="text/css">
+  	body, html {
+  		height: 100%;
+      width: 100%;
+      padding: 0;
+      margin: 0;
+      overflow: hidden;
+	  }
+
+    .grid-component {
+      display: block;
+      width: 100%;
+      height: 80%;
+    }
+
+    .inner-cell {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+
+  <script type="module" src="/build/revogrid-component.esm.js"></script>
+  <script nomodule src="/build/revogrid-component.js"></script>
+</head>
+<body>
+	<div style="width: 100%; height: 100%">
+        <revo-grid class="grid-component"></revo-grid>
+    <script>
+      function generateHeader(index) {
+        var dividend = index + 1;
+        var columnLabel = '';
+        var modulo;
+        while (dividend > 0) {
+          modulo = (dividend - 1) % 26;
+          columnLabel = String.fromCharCode(65 + modulo) + columnLabel;
+          dividend = parseInt((dividend - modulo) / 26, 10);
+        }
+        return columnLabel;
+      }
+
+      function generateFakeData(rowsNumber, colsNumber) {
+        const result = [];
+        const rowData = [];
+        const headers = [];
+        for (let j = 0; j < colsNumber; j++) {
+          rowData.push(j.toString());
+          headers.push({
+            prop: j,
+            name: generateHeader(j),
+            cellTemplate: (h, props) => {
+              return h('div', {
+                style: {
+                  backgroundColor: j%2 ? 'gray' : undefined
+                },
+                class: 'inner-cell'
+              }, props.model[props.prop] || '');
+            }
+          });
+        }
+        for (let i = 0; i < rowsNumber; i++) {
+          result.push(rowData);
+        }
+        return {
+          rows: result,
+          headers: headers
+        };
+      }
+
+      function generateFakeDataObject(rowsNumber, colsNumber) {
+        const result = {};
+        const headers = {};
+        const all = colsNumber * rowsNumber;
+        for (let j = 0; j < all; j++) {
+          let col = j%colsNumber;
+          let row = j/colsNumber|0;
+          if (!result[row]) {
+            result[row] = {};
+          }
+          result[row][col] = row + ':' + col;
+          if (!headers[col]) {
+            headers[col] = {
+              name: generateHeader(col),
+              prop: col
+            }
+          }
+        }
+        return {
+          rows: result,
+          headers: headers
+        };
+      }
+
+
+      const grid = document.querySelector('revo-grid');
+
+      const data = generateFakeData(1000, 100);
+      grid.columns = data.headers;
+      grid.source = data.rows;
+    </script>
+	</div>
+</body>
+</html>
