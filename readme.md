@@ -6,6 +6,7 @@ Works in any major framework or with no framework at all.
 * [Overview](#overview)
 * [Installation](#installation)
 * [Basic Usage](#basic-usage)
+* [Development and support](docs/stenciljs.md)
 
 ## Overview
 
