@@ -3,6 +3,7 @@ import { sass } from '@stencil/sass';
 
 export const config: Config = {
   namespace: 'revo-grid',
+  taskQueue: 'async',
   plugins: [
     sass()
   ],
