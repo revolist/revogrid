@@ -22,7 +22,8 @@ export type ColumnProp = string|number;
 export type DataFormat = string;
 export type CellTemplateFunc<T> = (h: (sel: string, data?: object, text?: string) => T, props: ColumnDataSchemaModel) => T;
 export type ColumnData = ColumnDataSchema[];
-export type DataType = {[key: string]: DataFormat} | DataFormat[];
+type DataKey = string|number;
+export type DataType = {[T in DataKey]: DataFormat} | DataFormat[];
 
 export interface DataSourceState {
   data: DataType[];
