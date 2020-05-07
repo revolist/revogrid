@@ -5,6 +5,7 @@
  * It contains typing information for all components that exist in this project.
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
+import { ColumnData, DataType, InputSettings, MultiDimensionAction, } from "./interfaces";
 export namespace Components {
     interface RevoGrid {
         "columns": ColumnData;

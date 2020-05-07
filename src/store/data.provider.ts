@@ -2,6 +2,7 @@ import {ObservableMap} from '@stencil/store';
 import {h, VNode} from '@stencil/core';
 
 import {HyperFunc} from './index.stencil';
+import {CellTemplateFunc, ColumnDataSchemaModel, DataSourceState} from "../interfaces";
 
 type StoreMap = ObservableMap<DataSourceState>;
 

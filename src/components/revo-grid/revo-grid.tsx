@@ -3,6 +3,7 @@ import {Component, Prop, h, Watch, Element} from '@stencil/core';
 import {setData, setColumn} from '../../store/data.store';
 import {setDimensionSize, setSettings} from '../../store/dimension.store';
 import {setViewport} from '../../store/viewport.store';
+import {ColumnData, DataType, InputSettings, MultiDimensionAction} from "../../interfaces";
 
 
 const initialSettings: InputSettings = {

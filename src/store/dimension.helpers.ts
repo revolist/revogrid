@@ -3,6 +3,7 @@ import sortedIndex from 'lodash/sortedIndex';
 import reduce from 'lodash/reduce';
 
 import {mergeSortedArray} from '../utils/utils';
+import {DimensionSettingsState, PositionItem, ViewSettingSizeProp} from "../interfaces";
 
 /**
 * Pre-calculation dimension sizes and sizes for each cell

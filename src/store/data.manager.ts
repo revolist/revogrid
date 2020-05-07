@@ -2,6 +2,7 @@ import {ObservableMap} from '@stencil/store';
 
 import {setStore} from './helpers';
 import DataProvider from './data.provider';
+import {ColumnData, DataSourceState, DataType} from "../interfaces";
 
 export default class DataSource {
   public readonly provider: DataProvider;

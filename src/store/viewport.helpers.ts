@@ -1,5 +1,12 @@
 import sortedIndex from 'lodash/sortedIndex';
 import {range} from '../utils/utils';
+import {
+  DimensionSettingsState,
+  PositionItem,
+  ViewportStateItems,
+  ViewSettingSizeProp,
+  VirtualPositionItem
+} from "../interfaces";
 
 /**
 * Update items based on new scroll position

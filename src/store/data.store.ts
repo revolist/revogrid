@@ -8,6 +8,7 @@ import size from 'lodash/size';
 import DataSource from './data.manager';
 import {setViewport} from './viewport.store';
 import {setRealSize} from './dimension.store';
+import {ColumnData, DataSourceState, DataType} from "../interfaces";
 
 const store: ObservableMap<DataSourceState> = createStore({
   data: [],

@@ -9,6 +9,7 @@ import reduce from 'lodash/reduce';
 import {setStore} from './helpers';
 import {setViewPortDimension} from './viewport.store';
 import {calculateDimensionData} from './dimension.helpers';
+import {DimensionSettingsState, DimensionType, ViewSettingSizeProp} from "../interfaces";
 
 type Item = keyof DimensionSettingsState;
 

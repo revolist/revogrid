@@ -16,6 +16,13 @@ import {
 
 import {getCurrentState} from './dimension.store';
 import {setStore} from './helpers';
+import {
+  DimensionSettingsState,
+  DimensionType,
+  ViewportState,
+  ViewportStateItems, ViewSettingSizeProp,
+  VirtualPositionItem
+} from "../interfaces";
 
 function initialState(): ViewportState {
   return {

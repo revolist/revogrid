@@ -30,7 +30,7 @@
 </head>
 <body>
 	<div style="width: 100%; height: 100%">
-        <revo-grid class="grid-component"></revo-grid>
+		<revo-grid class="grid-component"/>
     <script>
       function generateHeader(index) {
         var dividend = index + 1;
@@ -56,7 +56,7 @@
             cellTemplate: (h, props) => {
               return h('div', {
                 style: {
-                  backgroundColor: j%2 ? 'gray' : undefined
+                  backgroundColor: j%2 ? 'red' : undefined
                 },
                 class: 'inner-cell'
               }, props.model[props.prop] || '');

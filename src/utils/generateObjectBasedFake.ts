@@ -1,4 +1,5 @@
 import {generateHeader} from "./generateAlphabetHeader";
+import {ColumnDataSchema, DataFormat} from "../interfaces";
 
 export default function generateFakeDataObject(rowsNumber:number, colsNumber: number) {
   const result: {[key: string]: {[key: string]: DataFormat}} = {};

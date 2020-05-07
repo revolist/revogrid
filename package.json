@@ -1,7 +1,13 @@
 {
-  "name": "revogrid",
-  "version": "0.0.1",
+  "name": "@revolist/revogrid",
+  "version": "0.0.3",
   "description": "Revo Grid Component",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/revolist/revogrid.git"
+  },
+  "keywords": [],
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "es2015": "dist/esm/index.mjs",
@@ -17,7 +23,9 @@
   "scripts": {
     "build": "stencil build --prod --docs",
     "start": "stencil build --dev --watch --serve",
-    "generate": "stencil generate"
+    "generate": "stencil generate",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d ./dist"
   },
   "devDependencies": {
     "@interactjs/types": "1.8.4",
@@ -26,12 +34,20 @@
     "@stencil/store": "^1.1.0",
     "@types/events": "^3.0.0",
     "@types/lodash": "^4.14.149",
-    "@types/resize-observer-browser": "^0.1.3"
+    "@types/resize-observer-browser": "^0.1.3",
+    "gh-pages": "^2.2.0"
   },
-  "license": "MIT",
   "dependencies": {
     "@juggle/resize-observer": "^3.1.2",
     "interactjs": "1.8.4",
     "lodash": "^4.17.15"
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/revolist/revogrid/issues"
+  },
+  "homepage": "https://github.com/revolist/revogrid#readme",
+  "directories": {
+    "doc": "docs"
+  },
+  "author": "revolist"
 }
