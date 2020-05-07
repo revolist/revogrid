@@ -7,12 +7,12 @@
 
 ## Properties
 
-| Property     | Attribute | Description | Type                                                                        | Default           |
-| ------------ | --------- | ----------- | --------------------------------------------------------------------------- | ----------------- |
-| `dimensions` | --        |             | `{ col?: ViewSettingSizeProp; row?: ViewSettingSizeProp; }`                 | `{}`              |
-| `headers`    | --        |             | `ColumnDataSchema[] \| string[] \| { [key: string]: ColumnDataSchema; }`    | `[]`              |
-| `settings`   | --        |             | `{ defaultColumnSize: number; defaultRowSize: number; frameSize: number; }` | `initialSettings` |
-| `source`     | --        |             | `string[][] \| { [key: string]: { [key: string]: string; }; }`              | `[]`              |
+| Property     | Attribute | Description | Type                                                                                                                                                | Default           |
+| ------------ | --------- | ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
+| `columns`    | --        |             | `ColumnDataSchema[]`                                                                                                                                | `[]`              |
+| `dimensions` | --        |             | `{ col?: ViewSettingSizeProp; row?: ViewSettingSizeProp; }`                                                                                         | `{}`              |
+| `settings`   | --        |             | `{ defaultColumnSize: number; defaultRowSize: number; frameSize: number; dimensions?: { col?: ViewSettingSizeProp; row?: ViewSettingSizeProp; }; }` | `initialSettings` |
+| `source`     | --        |             | `DataType[]`                                                                                                                                        | `[]`              |
 
 
 ## Dependencies
@@ -29,7 +29,6 @@ graph TD;
   revo-grid --> revogr-viewport-scrollable
   revo-grid --> revogr-header
   revo-grid --> revogr-data
-  revogr-header --> revogr-header-cell
   style revo-grid fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

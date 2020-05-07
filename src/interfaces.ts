@@ -60,7 +60,7 @@ export interface DimensionSettingsState {
   originItemSize: number;
 }
 
-export type InputSettings = {
+export type InitialSettings = {
   defaultColumnSize: number;
   defaultRowSize: number;
   frameSize: number;

@@ -3,10 +3,10 @@ import {Component, Prop, h, Watch, Element} from '@stencil/core';
 import {setData, setColumn} from '../../store/data.store';
 import {setDimensionSize, setSettings} from '../../store/dimension.store';
 import {setViewport} from '../../store/viewport.store';
-import {ColumnData, DataType, InputSettings, MultiDimensionAction} from "../../interfaces";
+import {ColumnData, DataType, InitialSettings, MultiDimensionAction} from "../../interfaces";
 
 
-const initialSettings: InputSettings = {
+const initialSettings: InitialSettings = {
   defaultColumnSize: 80,
   defaultRowSize: 30,
   frameSize: 10,
@@ -24,9 +24,9 @@ export class RevoGrid {
   @Element() element: HTMLElement;
 
   @Prop() dimensions: Partial<MultiDimensionAction> = {};
-  @Prop() settings: InputSettings = initialSettings;
+  @Prop() settings: InitialSettings = initialSettings;
   @Watch('settings')
-  onSettingsChange(newVal: InputSettings, oldVal?: Partial<InputSettings>): void {
+  onSettingsChange(newVal: InitialSettings, oldVal?: Partial<InitialSettings>): void {
     if (!oldVal || newVal.frameSize !== oldVal.frameSize) {
       setViewport({ frameOffset: newVal.frameSize || 0 }, 'row');
       setViewport({ frameOffset: newVal.frameSize || 0 }, 'col');
