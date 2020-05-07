@@ -25,7 +25,7 @@ The library is published as a [scoped NPM package](https://docs.npmjs.com/misc/s
 
 
 ```bash
-npm install --save '@revolist/revogrid';
+npm install --save @revolist/revogrid;
 ```
 
 ## Basic Usage
