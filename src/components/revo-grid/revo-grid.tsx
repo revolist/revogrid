@@ -54,13 +54,13 @@ export class RevoGrid {
     setColumn(newVal);
   }
 
-	async componentWillLoad(): Promise<void> {
+  async componentWillLoad(): Promise<void> {
     this.onSettingsChange(this.settings);
     setDimensionSize(this.dimensions.row, 'row');
     setDimensionSize(this.dimensions.col, 'col');
     this.columnChanged(this.columns);
     this.dataChanged(this.source);
-	}
+  }
 
   async componentDidLoad(): Promise<void> {
     if (!('ResizeObserver' in window)) {

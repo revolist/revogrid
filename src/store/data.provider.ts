@@ -11,7 +11,7 @@ class DataProviderObject {
 
   public data(r: number, c: number): string {
     const {prop, model} = this.rowDataModel(r, c);
-    return model[prop] || '';
+    return model[prop as number] || '';
   }
 
   public rowDataModel(r: number, c: number): ColumnDataSchemaModel {

@@ -5,12 +5,12 @@
  * It contains typing information for all components that exist in this project.
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
-import { ColumnData, DataType, InputSettings, MultiDimensionAction, } from "./interfaces";
+import { ColumnData, DataType, InitialSettings, MultiDimensionAction, } from "./interfaces";
 export namespace Components {
     interface RevoGrid {
         "columns": ColumnData;
         "dimensions": Partial<MultiDimensionAction>;
-        "settings": InputSettings;
+        "settings": InitialSettings;
         "source": DataType[];
     }
     interface RevogrData {
@@ -58,7 +58,7 @@ declare namespace LocalJSX {
     interface RevoGrid {
         "columns"?: ColumnData;
         "dimensions"?: Partial<MultiDimensionAction>;
-        "settings"?: InputSettings;
+        "settings"?: InitialSettings;
         "source"?: DataType[];
     }
     interface RevogrData {
