@@ -2,9 +2,10 @@ import {ObservableMap} from '@stencil/store';
 import {h, VNode} from '@stencil/core';
 
 import {HyperFunc} from './index.stencil';
-import {CellTemplateFunc, ColumnDataSchemaModel, DataSourceState} from "../interfaces";
+import {CellTemplateFunc, ColumnDataSchema, ColumnDataSchemaModel, DataSourceState} from "../interfaces";
 
 type StoreMap = ObservableMap<DataSourceState>;
+type PossibleCellFunc = CellTemplateFunc<VNode>|undefined;
 
 class DataProviderObject {
   constructor(private store: StoreMap) {}
@@ -27,11 +28,15 @@ class HeaderProviderObject {
   constructor(private store: StoreMap) {}
 
   public data(c: number): string {
-    return this.store.get('columns')[c]?.name || '';
+    return this.getColumn(c)?.name || '';
   }
 
-  public template(c: number): CellTemplateFunc<VNode>|undefined {
-    return this.store.get('columns')[c].cellTemplate as CellTemplateFunc<VNode>;
+  public template(c: number): PossibleCellFunc {
+    return this.getColumn(c)?.cellTemplate as PossibleCellFunc;
+  }
+
+  private getColumn(c: number): ColumnDataSchema|undefined {
+    return this.store.get('columns')[c];
   }
 }
 
