@@ -20,14 +20,6 @@ Grid supports:
 - Virtual scroll in-build by default.
 - Custom cell template.
 
-##Framework
-
-- [JavaScript](docs/vanilajs.md) or [Storybook Demo](https://revolist.github.io/revogrid.demo.js/?path=/docs/docs-getting-started-javascript--page).
-- [VueJs](docs/vue.md) or [Storybook Demo](https://revolist.github.io/revogrid.demo.js/?path=/docs/docs-getting-started-vue--page).
-- [React](docs/react.md).
-- [Angular](docs/angular.md).
-- [Ember](docs/ember.md).
-
 ##Installation
 
 The library is published as a [scoped NPM package](https://docs.npmjs.com/misc/scope) in the [NPMJS Revolist account](https://www.npmjs.com/org/revolist).
@@ -38,6 +30,15 @@ The library is published as a [scoped NPM package](https://docs.npmjs.com/misc/s
 ```bash
 npm install --save @revolist/revogrid;
 ```
+
+##Framework
+
+- [JavaScript](docs/vanilajs.md) or [Storybook Demo](https://revolist.github.io/revogrid.demo.js/?path=/docs/docs-getting-started-javascript--page).
+- [VueJs](docs/vue.md) or [Storybook Demo](https://revolist.github.io/revogrid.demo.js/?path=/docs/docs-getting-started-vue--page).
+- [React](docs/react.md).
+- [Angular](docs/angular.md).
+- [Ember](docs/ember.md).
+
 
 ## Basic Usage
 
