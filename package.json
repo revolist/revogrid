@@ -1,7 +1,7 @@
 {
   "name": "@revolist/revogrid",
-  "version": "0.0.7",
-  "description": "Revo Grid Component",
+  "version": "0.0.9",
+  "description": "Demo https://revolist.github.io/revogrid.demo.js. Super fast reactive grid component - Revo Grid Component.",
   "license": "MIT",
   "repository": {
     "type": "git",
