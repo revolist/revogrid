@@ -17,6 +17,7 @@ export const config: Config = {
     },
     {
       type: 'www',
+      baseUrl: 'https://revolist.github.io/revogrid/',
       serviceWorker: null // disable service workers
     }
   ]

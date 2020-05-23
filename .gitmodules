@@ -1,0 +1,4 @@
+[submodule "revogrid.demo.js"]
+	path = revogrid.demo.js
+	url = https://github.com/revolist/revogrid.demo.js.git
+	branch = gh-pages
