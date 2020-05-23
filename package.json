@@ -24,8 +24,7 @@
     "build": "stencil build --prod --docs",
     "start": "stencil build --dev --watch --serve",
     "generate": "stencil generate",
-    "predeploy": "npm run build",
-    "deploy": "gh-pages -d ./dist"
+    "deploy": "gh-pages -d ./demo"
   },
   "devDependencies": {
     "@interactjs/types": "1.8.4",
