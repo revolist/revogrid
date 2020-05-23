@@ -15,8 +15,8 @@
 
     .grid-component {
       display: block;
-      width: 100%;
-      height: 80%;
+      width: 660px;
+      height: 500px;
     }
 
     .inner-cell {
@@ -33,7 +33,7 @@
         <revo-grid class="grid-component"></revo-grid>
 	</div>
 
-    <script>
+    <script type="module">
         function generateHeader(index) {
             var dividend = index + 1;
             var columnLabel = '';
@@ -98,10 +98,9 @@
             };
         }
 
-
         const grid = document.querySelector('revo-grid');
 
-        const data = generateFakeData(1000, 100);
+        const data = generateFakeDataObject(1000, 100);
         grid.columns = data.headers;
         grid.source = data.rows;
     </script>

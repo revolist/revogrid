@@ -32,7 +32,7 @@ function initialState(): ViewportState {
     virtualSize: 0,
     realCount: 0
   };
-};
+}
 
 const rowsStore: ObservableMap<ViewportState> = createStore(initialState());
 const colsStore: ObservableMap<ViewportState> = createStore(initialState());

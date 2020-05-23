@@ -81,7 +81,7 @@ export function addMissingItems(
     startIndex: lastItem.itemIndex + 1,
     origSize: dimension.originItemSize,
     maxSize: virtualSize - (lastItem.end - firstItem.start),
-    maxCount: realCount - lastItem.itemIndex
+    maxCount: realCount - 1 - lastItem.itemIndex
   });
   return {
     items: data.items,

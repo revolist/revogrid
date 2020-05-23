@@ -77,7 +77,7 @@ function setDimensionSize(sizes: ViewSettingSizeProp, dimensionType: DimensionTy
   setStore(store, calculateDimensionData(getCurrentState(dimensionType), sizes));
 
   setViewPortDimension(sizes, dimensionType);
-};
+}
 
 export {
   rowsStore,

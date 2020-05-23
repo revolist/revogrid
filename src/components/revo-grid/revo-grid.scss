@@ -1,11 +1,23 @@
-:host {
+$header-size: 30px;
+
+$header-shadow: 0 1px 10px rgba(0,0,0,.2);
+
+$cell-border-color: #e0e0e0;
+$header-border-color: $cell-border-color;
+
+revo-grid {
   display: block;
   height: 100%;
+  font-family: Helvetica, Arial, Sans-Serif, serif;
+  font-size: 14px;
 }
 .header {
   position: relative;
-  height: 30px;
+  height: $header-size;
+  line-height: $header-size;
   display: table-cell;
+  box-shadow: $header-shadow;
+  font-weight: 600;
 }
 
 .header-wrapper {
@@ -37,9 +49,10 @@
 .data-cell {
   position: absolute;
   box-sizing: border-box;
-  box-shadow: 0 1px 0 0 #b5b5b5, 1px 0 0 0 #b5b5b5;
+  box-shadow: 0 1px 0 0 $cell-border-color, 1px 0 0 0 $cell-border-color;
   height: 100%;
   text-align: center;
+  padding: 5px 0;
 }
 
 .row {
@@ -50,7 +63,7 @@
 .data-header-cell {
   position: absolute;
   box-sizing: border-box;
-  box-shadow: 0 1px 0 0 #b5b5b5, 1px 0 0 0 #b5b5b5;
+  box-shadow: 0 1px 0 0 $header-border-color, 1px 0 0 0 $header-border-color;
   height: 100%;
   text-align: center;
 }
