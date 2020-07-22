@@ -1,15 +1,21 @@
 import {Component, Prop, h, Watch, Element} from '@stencil/core';
 
+
 import {setData, setColumn} from '../../store/data.store';
 import {setDimensionSize, setSettings} from '../../store/dimension.store';
 import {setViewport} from '../../store/viewport.store';
 import {ColumnData, DataType, InitialSettings, MultiDimensionAction} from "../../interfaces";
+import HeaderResize from "../../modules/headerResize";
+import CellSelection from "../../modules/cellSelection";
+import GridResize from "../../modules/gridResize";
+import moduleRegister from "../../modules/moduleRegister";
+import {CELL_CLASS, HEADER_CLASS, UUID, VIEWPORT_CLASS} from "../data/cellConsts";
 
 
 const initialSettings: InitialSettings = {
   defaultColumnSize: 80,
   defaultRowSize: 30,
-  frameSize: 10,
+  frameSize: 2,
   dimensions: undefined
 };
 
@@ -18,8 +24,8 @@ const initialSettings: InitialSettings = {
   styleUrl: 'revo-grid.scss'
 })
 export class RevoGrid {
-  private resizeObserver: ResizeObserver;
   private viewport: HTMLRevogrViewportScrollableElement;
+  private uuid: number|null = null;
 
   @Element() element: HTMLElement;
 
@@ -55,6 +61,7 @@ export class RevoGrid {
   }
 
   async componentWillLoad(): Promise<void> {
+    this.uuid = (new Date()).getTime();
     this.onSettingsChange(this.settings);
     setDimensionSize(this.dimensions.row, 'row');
     setDimensionSize(this.dimensions.col, 'col');
@@ -63,29 +70,28 @@ export class RevoGrid {
   }
 
   async componentDidLoad(): Promise<void> {
-    if (!('ResizeObserver' in window)) {
-      // Loads polyfill asynchronously, only if required.
-      const module = await import('@juggle/resize-observer');
-      window.ResizeObserver = (module.ResizeObserver as unknown as typeof ResizeObserver);
-    }
-    this.resizeObserver = new ResizeObserver(async() => {
-      setViewport({ virtualSize: this.element.clientHeight }, 'row');
-      setViewport({ virtualSize: this.element.clientWidth }, 'col');
-      await this.viewport.scrollX();
-      await this.viewport.scrollY();
-    });
-
-    this.resizeObserver.observe(this.element);
+    moduleRegister.register('resize',
+        new GridResize(this.element, this.viewport));
+    moduleRegister.register('headResize',
+        new HeaderResize(`.${VIEWPORT_CLASS}[${UUID}='${this.uuid}'] .${HEADER_CLASS}`));
+    moduleRegister.register('cellSelection',
+        new CellSelection(`.${VIEWPORT_CLASS}[${UUID}='${this.uuid}'] .${CELL_CLASS}`));
   }
 
   componentDidUnload(): void {
-    this.resizeObserver?.disconnect();
+    moduleRegister.destroy();
   }
 
   render() {
-    return <revogr-viewport-scrollable class='viewport' ref={(el: HTMLRevogrViewportScrollableElement) => { this.viewport = el; }}>
+    const viewportProp = {
+      class: `viewport ${VIEWPORT_CLASS}`,
+      [`${UUID}`]: this.uuid,
+      ref: (el: HTMLRevogrViewportScrollableElement) => { this.viewport = el; }
+    };
+    return <revogr-viewport-scrollable{...viewportProp}>
       <revogr-header slot='header' class='header'/>
-      <revogr-data slot='content' class={'viewport-layer'}/>
+      <revogr-data slot='content' class='viewport-layer'/>
+      <revogr-overlay-selection slot='content'/>
     </revogr-viewport-scrollable>;
   }
 }

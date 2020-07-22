@@ -5,6 +5,10 @@ $header-shadow: 0 1px 10px rgba(0,0,0,.2);
 $cell-border-color: #e0e0e0;
 $header-border-color: $cell-border-color;
 
+$selection-border: #0d63e8;
+$selection-bg: rgba($selection-border, .1);
+$tmp-selection-bg: $selection-bg;
+
 revo-grid {
   display: block;
   height: 100%;
@@ -53,6 +57,10 @@ revo-grid {
   height: 100%;
   text-align: center;
   padding: 5px 0;
+
+  &.active {
+    background: blue;
+  }
 }
 
 .row {
@@ -91,6 +99,7 @@ revo-grid {
 .vertical-inner {
   overflow-y: auto;
   height: 100%;
+  position: relative;
 
   /* Hide scrollbar for IE and Edge */
   -ms-overflow-style: none;
@@ -112,5 +121,28 @@ revo-grid {
 
   > div {
     width: 1px;
+  }
+}
+
+revogr-overlay-selection {
+  display: block;
+
+  .selection-border-range,
+  .selection-bg-range,
+  .temp-bg-range {
+    position: absolute;
+    pointer-events:none;
+  }
+
+  .selection-border-range {
+    border: 1px solid $selection-border;
+  }
+  .selection-bg-range {
+    background: $selection-bg;
+    z-index: -1;
+  }
+
+  .temp-bg-range {
+    background-color: $tmp-selection-bg;
   }
 }

@@ -33,7 +33,7 @@ function initialState(): DimensionSettingsState {
     // initial item size if it wasn't changed
     originItemSize: 0
   };
-};
+}
 
 const rowsStore: ObservableMap<DimensionSettingsState> = createStore(initialState());
 const colsStore: ObservableMap<DimensionSettingsState> = createStore(initialState());
@@ -73,9 +73,9 @@ function setRealSize(count: number, dimensionType: DimensionType): void {
 }
 
 function setDimensionSize(sizes: ViewSettingSizeProp, dimensionType: DimensionType): void {
-  const store = getStoreByType(dimensionType);
+  const store: ObservableMap<DimensionSettingsState> = getStoreByType(dimensionType);
   setStore(store, calculateDimensionData(getCurrentState(dimensionType), sizes));
-
+  console.log(store.get('itemIndexToCoordinate'));
   setViewPortDimension(sizes, dimensionType);
 }
 

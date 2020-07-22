@@ -1,5 +1,5 @@
-import sortedIndex from 'lodash/sortedIndex';
 import {range} from '../utils/utils';
+import {getItemByPosition} from "./dimension.helpers";
 import {
   DimensionSettingsState,
   PositionItem,
@@ -20,7 +20,7 @@ export function getUpdatedItemsByPosition(
   virtualSize: number,
   dimension: DimensionSettingsState
 ): ViewportStateItems {
-  const activeItem: PositionItem = getOffset(dimension, pos, dimension.originItemSize);
+  const activeItem: PositionItem = getItemByPosition(dimension, pos);
   const firstItem: VirtualPositionItem = getFirstItem(items);
   let toUpdate: ViewportStateItems;
 
@@ -90,33 +90,7 @@ export function addMissingItems(
 }
 
 // get first item in revo-viewport
-function getOffset(dimension: DimensionSettingsState, pos: number, origSize: number): PositionItem {
-  const item: PositionItem = {
-    itemIndex: 0,
-    start: 0,
-    end: 0
-  };
-  const currentPlace: number = dimension.indexes.length ? sortedIndex(dimension.positionIndexes, pos) : 0;
-  // not found or first index
-  if (!currentPlace) {
-    item.itemIndex = Math.floor(pos/origSize);
-    item.start = item.itemIndex * origSize;
-    item.end = item.start + origSize;
-    return item;
-  }
-  const positionItem: PositionItem = dimension.positionIndexToCoordinate[currentPlace - 1];
-  // if item has specified size
-  if (positionItem.end > pos) {
-    return positionItem;
-  }
-  // special size item was present before
-  const relativePos: number = pos - positionItem.end;
-  const relativeIndex: number = Math.floor(relativePos/origSize);
-  item.itemIndex = positionItem.itemIndex + 1 + relativeIndex;
-  item.start = positionItem.end + relativeIndex * origSize;
-  item.end = item.start + origSize;
-  return item;
-}
+
 
 // get revo-viewport items parameters, caching position and calculating items count in revo-viewport
 function getItems(opt: {

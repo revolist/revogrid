@@ -17,6 +17,8 @@ export namespace Components {
     }
     interface RevogrHeader {
     }
+    interface RevogrOverlaySelection {
+    }
     interface RevogrViewportScrollable {
         "scrollX": (x?: number) => Promise<void>;
         "scrollY": (y?: number) => Promise<void>;
@@ -41,6 +43,12 @@ declare global {
         prototype: HTMLRevogrHeaderElement;
         new (): HTMLRevogrHeaderElement;
     };
+    interface HTMLRevogrOverlaySelectionElement extends Components.RevogrOverlaySelection, HTMLStencilElement {
+    }
+    var HTMLRevogrOverlaySelectionElement: {
+        prototype: HTMLRevogrOverlaySelectionElement;
+        new (): HTMLRevogrOverlaySelectionElement;
+    };
     interface HTMLRevogrViewportScrollableElement extends Components.RevogrViewportScrollable, HTMLStencilElement {
     }
     var HTMLRevogrViewportScrollableElement: {
@@ -51,6 +59,7 @@ declare global {
         "revo-grid": HTMLRevoGridElement;
         "revogr-data": HTMLRevogrDataElement;
         "revogr-header": HTMLRevogrHeaderElement;
+        "revogr-overlay-selection": HTMLRevogrOverlaySelectionElement;
         "revogr-viewport-scrollable": HTMLRevogrViewportScrollableElement;
     }
 }
@@ -65,12 +74,15 @@ declare namespace LocalJSX {
     }
     interface RevogrHeader {
     }
+    interface RevogrOverlaySelection {
+    }
     interface RevogrViewportScrollable {
     }
     interface IntrinsicElements {
         "revo-grid": RevoGrid;
         "revogr-data": RevogrData;
         "revogr-header": RevogrHeader;
+        "revogr-overlay-selection": RevogrOverlaySelection;
         "revogr-viewport-scrollable": RevogrViewportScrollable;
     }
 }
@@ -81,6 +93,7 @@ declare module "@stencil/core" {
             "revo-grid": LocalJSX.RevoGrid & JSXBase.HTMLAttributes<HTMLRevoGridElement>;
             "revogr-data": LocalJSX.RevogrData & JSXBase.HTMLAttributes<HTMLRevogrDataElement>;
             "revogr-header": LocalJSX.RevogrHeader & JSXBase.HTMLAttributes<HTMLRevogrHeaderElement>;
+            "revogr-overlay-selection": LocalJSX.RevogrOverlaySelection & JSXBase.HTMLAttributes<HTMLRevogrOverlaySelectionElement>;
             "revogr-viewport-scrollable": LocalJSX.RevogrViewportScrollable & JSXBase.HTMLAttributes<HTMLRevogrViewportScrollableElement>;
         }
     }
