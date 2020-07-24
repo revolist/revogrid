@@ -144,6 +144,7 @@ function setViewPortDimension(sizes: ViewSettingSizeProp, dimensionType: Dimensi
       changedSize = size - item.size;
       changedCoordinate += changedSize;
       item.size = size;
+      item.end = item.start + size;
     }
     if (changedSize || changedCoordinate) {
       items[i] = {...item};
