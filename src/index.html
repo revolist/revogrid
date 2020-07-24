@@ -100,9 +100,10 @@
 
         const grid = document.querySelector('revo-grid');
 
-        const data = generateFakeDataObject(1000, 100);
+        const data = generateFakeDataObject(1000, 10);
         grid.columns = data.headers;
         grid.source = data.rows;
+        grid.readonly = true;
     </script>
 </body>
 </html>

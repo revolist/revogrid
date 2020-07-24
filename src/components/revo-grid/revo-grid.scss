@@ -14,6 +14,15 @@ revo-grid {
   height: 100%;
   font-family: Helvetica, Arial, Sans-Serif, serif;
   font-size: 14px;
+
+
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Old versions of Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
 }
 .header {
   position: relative;
@@ -135,7 +144,8 @@ revogr-overlay-selection {
   }
 
   .selection-border-range {
-    border: 1px solid $selection-border;
+    $c: $selection-border;
+    box-shadow: 1px 0 0 $c inset, 1px 0 0 $c, 0 1px 0 $c, 0 1px 0 $c inset;
   }
   .selection-bg-range {
     background: $selection-bg;
@@ -144,5 +154,20 @@ revogr-overlay-selection {
 
   .temp-bg-range {
     background-color: $tmp-selection-bg;
+  }
+}
+
+revogr-edit {
+  display: block;
+
+  .edit-input-wrapper {
+    position: absolute;
+    background-color: #fff;
+
+    input {
+      height: 100%;
+      width: 100%;
+      box-sizing: border-box;
+    }
   }
 }

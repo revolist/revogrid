@@ -7,22 +7,20 @@
 import {createStore, ObservableMap} from '@stencil/store';
 
 import {
-  addMissingItems,
+  addMissingItems, DimensionDataViewport,
   getFirstItem,
   getLastItem,
   getUpdatedItemsByPosition,
   isActiveRange
 } from './viewport.helpers';
 
-import {getCurrentState} from './dimension.store';
 import {setStore} from './helpers';
 import {
-  DimensionSettingsState,
   DimensionType,
   ViewportState,
   ViewportStateItems, ViewSettingSizeProp,
   VirtualPositionItem
-} from "../interfaces";
+} from '../interfaces';
 
 function initialState(): ViewportState {
   return {
@@ -55,7 +53,7 @@ function getItems(store: ObservableMap<ViewportState>): ViewportStateItems {
 }
 
 function setViewport(data: Partial<ViewportState>, dimensionType: DimensionType): void {
-  const store = getStoreByType(dimensionType);
+  const store: ObservableMap<ViewportState> = getStoreByType(dimensionType);
   if (!data.virtualSize) {
     store.set('itemIndexes', []);
     store.set('items', []);
@@ -63,16 +61,20 @@ function setViewport(data: Partial<ViewportState>, dimensionType: DimensionType)
   setStore(store, data);
 }
 
-function setViewPortCoordinate(position: number, dimensionType: DimensionType): void {
-  const store = getStoreByType(dimensionType);
+function setViewPortCoordinate(
+    position: number,
+    dimensionType: DimensionType,
+    dimension: DimensionDataViewport
+): void {
+  const store: ObservableMap<ViewportState> = getStoreByType(dimensionType);
 
   // no visible data to calculate
   if (!store.get('virtualSize')) {
     return;
   }
 
-  const dimension: DimensionSettingsState = getCurrentState(dimensionType);
-  const outsize: number = store.get('frameOffset') * 2 * dimension.originItemSize;
+  const frameOffset: number = store.get('frameOffset');
+  const outsize: number = frameOffset * 2 * dimension.originItemSize;
   const virtualSize = store.get('virtualSize') + outsize;
 
   let maxCoordinate: number = 0;
@@ -80,7 +82,7 @@ function setViewPortCoordinate(position: number, dimensionType: DimensionType): 
     maxCoordinate = dimension.realSize - virtualSize;
   }
   let pos: number = position;
-  pos -= store.get('frameOffset') * dimension.originItemSize;
+  pos -= frameOffset * dimension.originItemSize;
   pos = pos < 0 ? 0 : pos < maxCoordinate  ? pos : maxCoordinate;
 
 
@@ -115,7 +117,7 @@ function setViewPortCoordinate(position: number, dimensionType: DimensionType): 
 }
 
 function setViewPortDimension(sizes: ViewSettingSizeProp, dimensionType: DimensionType): void {
-  const store = getStoreByType(dimensionType);
+  const store: ObservableMap<ViewportState> = getStoreByType(dimensionType);
 
   // viewport not inited
   if (!store.get('items').length) {
@@ -123,9 +125,12 @@ function setViewPortDimension(sizes: ViewSettingSizeProp, dimensionType: Dimensi
   }
 
   const items = store.get('items');
+  const itemIndexes = store.get('itemIndexes');
   let changedCoordinate: number = 0;
 
-  for (let i of store.get('itemIndexes')) {
+  console.log(items);
+
+  for (let i of itemIndexes) {
     let changedSize: number = 0;
     const item: VirtualPositionItem = items[i];
     // change pos if size change present before
@@ -145,7 +150,7 @@ function setViewPortDimension(sizes: ViewSettingSizeProp, dimensionType: Dimensi
     }
   }
 
-  setStore(store, { items });
+  setStore(store, { items: [...items] });
 }
 
 export {

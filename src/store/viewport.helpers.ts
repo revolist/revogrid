@@ -1,12 +1,15 @@
 import {range} from '../utils/utils';
-import {getItemByPosition} from "./dimension.helpers";
+import {getItemByPosition} from './dimension.helpers';
 import {
   DimensionSettingsState,
   PositionItem,
   ViewportStateItems,
   ViewSettingSizeProp,
   VirtualPositionItem
-} from "../interfaces";
+} from '../interfaces';
+
+export type DimensionDataViewport =
+    Pick<DimensionSettingsState, 'indexes'|'positionIndexes'|'positionIndexToItem'|'sizes'|'originItemSize'|'realSize'>;
 
 /**
 * Update items based on new scroll position
@@ -18,7 +21,7 @@ export function getUpdatedItemsByPosition(
   items: ViewportStateItems,
   realCount: number,
   virtualSize: number,
-  dimension: DimensionSettingsState
+  dimension: DimensionDataViewport
 ): ViewportStateItems {
   const activeItem: PositionItem = getItemByPosition(dimension, pos);
   const firstItem: VirtualPositionItem = getFirstItem(items);
@@ -72,7 +75,7 @@ export function addMissingItems(
   realCount: number,
   virtualSize: number,
   existingCollection: ViewportStateItems,
-  dimension: DimensionSettingsState
+  dimension: Pick<DimensionSettingsState, 'sizes'|'originItemSize'>
 ): ViewportStateItems {
   const lastItem: VirtualPositionItem = getLastItem(existingCollection);
   const data = getItems({
@@ -88,9 +91,6 @@ export function addMissingItems(
     itemIndexes: range(data.items.length, existingCollection.items.length)
   };
 }
-
-// get first item in revo-viewport
-
 
 // get revo-viewport items parameters, caching position and calculating items count in revo-viewport
 function getItems(opt: {
@@ -132,9 +132,11 @@ function recombineByOffset(data: {
   prevItem: PositionItem,
   offset: number,
   positiveDirection: boolean,
-  dimension: DimensionSettingsState
-}, state: ViewportStateItems): ViewportStateItems|null {
-  const indexSize = state.itemIndexes.length;
+  dimension: Pick<DimensionSettingsState, 'sizes'|'realSize'|'originItemSize'>
+}, state: Pick<ViewportStateItems, 'itemIndexes'|'items'>): ViewportStateItems|null {
+  const newItems = [...state.items];
+  const newIndexes = [...state.itemIndexes];
+  const indexSize = newIndexes.length;
 
   // if offset out of revo-viewport, makes sense whole redraw
   if (data.offset > indexSize) {
@@ -142,7 +144,8 @@ function recombineByOffset(data: {
   }
   if (data.positiveDirection) {
     let lastItem: VirtualPositionItem = getLastItem(state);
-    for (let i: number = 0; i < data.offset; i++) {
+    let i: number = 0;
+    for (; i < data.offset; i++) {
       const newIndex: number = lastItem.itemIndex + 1;
       const size: number = getItemSize(newIndex, data.dimension.sizes, data.dimension.originItemSize);
 
@@ -151,23 +154,23 @@ function recombineByOffset(data: {
         break;
       }
 
-      state.items[state.itemIndexes[i]] = lastItem = {
+      newItems[newIndexes[i]] = lastItem = {
         itemIndex: newIndex,
         start: lastItem.end,
         end: lastItem.end + size,
         size: size
       };
-
     }
     // push item to the end
-    state.itemIndexes.push(...state.itemIndexes.splice(0, data.offset));
+    newIndexes.push(...newIndexes.splice(0, i));
   } else {
     const changed: number = indexSize - data.offset;
-    let firstItem: VirtualPositionItem =  getFirstItem(state);
-    for (let i: number = indexSize - 1; i >= changed; i--) {
+    let firstItem: VirtualPositionItem = getFirstItem(state);
+    let i: number = indexSize - 1;
+    for (; i >= changed; i--) {
       const newIndex: number = firstItem.itemIndex - 1;
       const size: number = getItemSize(newIndex, data.dimension.sizes, data.dimension.originItemSize);
-      state.items[state.itemIndexes[i]] = firstItem = {
+      newItems[newIndexes[i]] = firstItem = {
         itemIndex: newIndex,
         start: firstItem.start - size,
         end: firstItem.start,
@@ -175,11 +178,11 @@ function recombineByOffset(data: {
       };
     }
     // push item to the start
-    state.itemIndexes.unshift(...state.itemIndexes.splice(changed, indexSize - 1));
+    newIndexes.unshift(...newIndexes.splice(i, indexSize - 1));
   }
   return {
-    items: [...state.items],
-    itemIndexes: [...state.itemIndexes]
+    items: newItems,
+    itemIndexes: newIndexes
   };
 }
 

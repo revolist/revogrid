@@ -7,9 +7,8 @@ import {createStore, ObservableMap} from '@stencil/store';
 import reduce from 'lodash/reduce';
 
 import {setStore} from './helpers';
-import {setViewPortDimension} from './viewport.store';
 import {calculateDimensionData} from './dimension.helpers';
-import {DimensionSettingsState, DimensionType, ViewSettingSizeProp} from "../interfaces";
+import {DimensionSettingsState, DimensionType, ViewSettingSizeProp} from '../interfaces';
 
 type Item = keyof DimensionSettingsState;
 
@@ -21,10 +20,10 @@ function initialState(): DimensionSettingsState {
     sizes: {},
 
     // order in indexes[] to coordinate
-    positionIndexToCoordinate: {},
+    positionIndexToItem: {},
 
     // initial element to coordinate ^
-    itemIndexToCoordinate: {},
+    indexToItem: {},
     positionIndexes: [],
 
     // size which all items can take
@@ -74,9 +73,8 @@ function setRealSize(count: number, dimensionType: DimensionType): void {
 
 function setDimensionSize(sizes: ViewSettingSizeProp, dimensionType: DimensionType): void {
   const store: ObservableMap<DimensionSettingsState> = getStoreByType(dimensionType);
-  setStore(store, calculateDimensionData(getCurrentState(dimensionType), sizes));
-  console.log(store.get('itemIndexToCoordinate'));
-  setViewPortDimension(sizes, dimensionType);
+  const dimensionData = calculateDimensionData(getCurrentState(dimensionType), sizes);
+  setStore(store, dimensionData);
 }
 
 export {

@@ -3,7 +3,7 @@ import {HTMLStencilElement} from '@stencil/core/internal';
 
 import {rowsStore as viewportRows, colsStore as viewportCols} from '../../store/viewport.store';
 import dataProvider from '../../services/data.provider';
-import {CELL_CLASS, DATA_COL, DATA_ROW} from "./cellConsts";
+import {CELL_CLASS, DATA_COL, DATA_ROW} from './cellConsts';
 
 @Component({
   tag: 'revogr-data'
@@ -22,7 +22,7 @@ export class RevogrData {
           class: CELL_CLASS,
           style: { width: `${col.size}px`, transform: `translateX(${col.start}px)`}
         };
-        cells.push(<div {...dataProps}>{dataProvider.data(row.itemIndex, col.itemIndex)}</div>);
+        cells.push(<div {...dataProps}>{dataProvider.cellRenderer(row.itemIndex, col.itemIndex)}</div>);
       }
       rowsEls.push(<div class='row' style={{ height: `${row.size}px`, transform: `translateY(${row.start}px)` }}>{cells}</div>);
     }

@@ -38,6 +38,7 @@ export function pushSorted<T>(arr: T[], el: T, fn: (el: T, el2: T) => number): T
 function simpleCompare<T>(el1: T, el2: T): boolean {
   return el1 < el2;
 }
+
 export function mergeSortedArray<T>(arr1: T[], arr2: T[], compareFn: (el: T, el2: T) => boolean = simpleCompare): T[] {
   const merged: T[] = [];
   let index1: number = 0;
@@ -62,12 +63,16 @@ export function mergeSortedArray<T>(arr1: T[], arr2: T[], compareFn: (el: T, el2
   return merged;
 }
 
+interface CSSStyleDeclarationExtended extends CSSStyleDeclaration {
+  msOverflowStyle: string;
+}
 export function getScrollbarWidth(doc: Document): number {
   // Creating invisible container
-  const outer: HTMLDivElement = doc.createElement('div');
-  outer.style.visibility = 'hidden';
-  outer.style.overflow = 'scroll'; // forcing scrollbar to appear
-  outer.style.msOverflowStyle = 'scrollbar'; // needed for WinJS apps
+  const outer: HTMLElement = doc.createElement('div');
+  const styles: CSSStyleDeclarationExtended = outer.style as CSSStyleDeclarationExtended;
+  styles.visibility = 'hidden';
+  styles.overflow = 'scroll'; // forcing scrollbar to appear
+  styles.msOverflowStyle = 'scrollbar'; // needed for WinJS apps
   doc.body.appendChild(outer);
 
   // Creating inner element and placing it in the container
@@ -82,3 +87,4 @@ export function getScrollbarWidth(doc: Document): number {
 
   return scrollbarWidth;
 }
+

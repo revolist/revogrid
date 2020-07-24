@@ -2,7 +2,8 @@ import {Component, h, Method} from '@stencil/core';
 
 import {getScrollbarWidth} from '../../utils/utils';
 import {setViewPortCoordinate} from '../../store/viewport.store';
-import {rowsStore as rowDimension, colsStore as colDimension} from '../../store/dimension.store';
+import {rowsStore as rowDimension, colsStore as colDimension, getCurrentState} from '../../store/dimension.store';
+import {DimensionSettingsState} from '../../interfaces';
 
 @Component({
   tag: 'revogr-viewport-scrollable'
@@ -20,7 +21,9 @@ export class RevogrViewportScrollable {
     if (x) {
       this.horizontalScroll.scrollLeft = x;
     }
-    setViewPortCoordinate(x || this.horizontalScroll?.scrollLeft || 0, 'col');
+
+    const dimension: DimensionSettingsState = getCurrentState('col');
+    setViewPortCoordinate(x || this.horizontalScroll?.scrollLeft || 0, 'col', dimension);
   }
 
   @Method()
@@ -30,7 +33,8 @@ export class RevogrViewportScrollable {
       return;
     }
     const top: number = y || this.verticalScroll?.scrollTop || 0;
-    setViewPortCoordinate(top, 'row');
+    const dimension: DimensionSettingsState = getCurrentState('row');
+    setViewPortCoordinate(top, 'row', dimension);
     if (this.verticalVirtScroll) {
       this.preventArtificialScroll = true;
       this.verticalVirtScroll.scrollTop = top;
@@ -44,7 +48,8 @@ export class RevogrViewportScrollable {
     }
     const target: HTMLElement|undefined = this.verticalVirtScroll;
     const top: number = target?.scrollTop || 0;
-    setViewPortCoordinate( top, 'row');
+    const dimension: DimensionSettingsState = getCurrentState('row');
+    setViewPortCoordinate( top, 'row', dimension);
     if (this.verticalScroll) {
       this.preventArtificialScroll = true;
       this.verticalScroll.scrollTop = top;

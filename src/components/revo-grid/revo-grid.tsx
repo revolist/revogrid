@@ -2,21 +2,22 @@ import {Component, Prop, h, Watch, Element} from '@stencil/core';
 
 
 import {setData, setColumn} from '../../store/data.store';
-import {setDimensionSize, setSettings} from '../../store/dimension.store';
+import {setSettings} from '../../store/dimension.store';
 import {setViewport} from '../../store/viewport.store';
-import {ColumnData, DataType, InitialSettings, MultiDimensionAction} from "../../interfaces";
-import HeaderResize from "../../modules/headerResize";
-import CellSelection from "../../modules/cellSelection";
-import GridResize from "../../modules/gridResize";
-import moduleRegister from "../../modules/moduleRegister";
-import {CELL_CLASS, HEADER_CLASS, UUID, VIEWPORT_CLASS} from "../data/cellConsts";
+import {ColumnData, DataType, InitialSettings, MultiDimensionAction} from '../../interfaces';
+import GridResize from '../../services/gridResize';
+import moduleRegister from '../../services/moduleRegister';
+import {UUID, VIEWPORT_CLASS} from '../data/cellConsts';
+import dimensionProvider from '../../services/dimension.provider';
 
 
 const initialSettings: InitialSettings = {
   defaultColumnSize: 80,
   defaultRowSize: 30,
-  frameSize: 2,
-  dimensions: undefined
+  frameSize: 0,
+  dimensions: undefined,
+  readonly: true,
+  range: false
 };
 
 @Component({
@@ -30,7 +31,7 @@ export class RevoGrid {
   @Element() element: HTMLElement;
 
   @Prop() dimensions: Partial<MultiDimensionAction> = {};
-  @Prop() settings: InitialSettings = initialSettings;
+  @Prop() settings: InitialSettings = {...initialSettings};
   @Watch('settings')
   onSettingsChange(newVal: InitialSettings, oldVal?: Partial<InitialSettings>): void {
     if (!oldVal || newVal.frameSize !== oldVal.frameSize) {
@@ -60,25 +61,21 @@ export class RevoGrid {
     setColumn(newVal);
   }
 
-  async componentWillLoad(): Promise<void> {
+  connectedCallback(): void {
     this.uuid = (new Date()).getTime();
+    moduleRegister.baseClass = `.${VIEWPORT_CLASS}[${UUID}='${this.uuid}']`;
     this.onSettingsChange(this.settings);
-    setDimensionSize(this.dimensions.row, 'row');
-    setDimensionSize(this.dimensions.col, 'col');
+    dimensionProvider.setSize(this.dimensions.row, 'row');
+    dimensionProvider.setSize(this.dimensions.col, 'col');
     this.columnChanged(this.columns);
     this.dataChanged(this.source);
   }
 
   async componentDidLoad(): Promise<void> {
-    moduleRegister.register('resize',
-        new GridResize(this.element, this.viewport));
-    moduleRegister.register('headResize',
-        new HeaderResize(`.${VIEWPORT_CLASS}[${UUID}='${this.uuid}'] .${HEADER_CLASS}`));
-    moduleRegister.register('cellSelection',
-        new CellSelection(`.${VIEWPORT_CLASS}[${UUID}='${this.uuid}'] .${CELL_CLASS}`));
+    moduleRegister.register('resize', new GridResize(this.element, this.viewport));
   }
 
-  componentDidUnload(): void {
+  disconnectedCallback(): void {
     moduleRegister.destroy();
   }
 
@@ -91,7 +88,13 @@ export class RevoGrid {
     return <revogr-viewport-scrollable{...viewportProp}>
       <revogr-header slot='header' class='header'/>
       <revogr-data slot='content' class='viewport-layer'/>
-      <revogr-overlay-selection slot='content'/>
+      {
+        !this.settings.readonly || this.settings.range ?
+            <revogr-overlay-selection slot='content' range={this.settings.range}/> : ''
+      }
+      {
+        !this.settings.readonly ? <revogr-edit slot='content'/> : ''
+      }
     </revogr-viewport-scrollable>;
   }
 }

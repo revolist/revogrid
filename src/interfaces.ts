@@ -1,4 +1,5 @@
 /* Note: using `.d.ts` file extension will exclude it from the output build */
+import {EventEmitter} from "@stencil/core";
 
 export type DimensionType = 'col'|'row';
 
@@ -54,8 +55,8 @@ export interface PositionItem {
 export interface DimensionSettingsState {
   indexes: number[];
   positionIndexes: number[];
-  positionIndexToCoordinate: {[position: number]: PositionItem};
-  itemIndexToCoordinate: {[position: number]: PositionItem};
+  positionIndexToItem: {[position: number]: PositionItem};
+  indexToItem: {[index: number]: PositionItem};
   sizes: ViewSettingSizeProp;
   realSize: number;
   originItemSize: number;
@@ -65,9 +66,15 @@ export type InitialSettings = {
   defaultColumnSize: number;
   defaultRowSize: number;
   frameSize: number;
+  readonly: boolean;
+  range: boolean;
   dimensions?: {
     col?: ViewSettingSizeProp;
     row?: ViewSettingSizeProp;
   }
 };
 
+type SaveData = string;
+export interface EditorI {
+  save: EventEmitter<SaveData>
+}
