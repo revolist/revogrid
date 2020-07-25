@@ -2,7 +2,7 @@ import {Component, h, Prop} from '@stencil/core';
 import selectionStore, {RangeI} from '../../store/selection.strore';
 import {rowsStore, colsStore} from '../../store/dimension.store';
 import {getItemByIndex} from '../../store/dimension.helpers';
-import { SELECTION_BORDER_CLASS, SELECTION_BG_CLASS, TMP_SELECTION_BG_CLASS, CELL_CLASS } from '../data/cellConsts';
+import { SELECTION_BORDER_CLASS, SELECTION_BG_CLASS, TMP_SELECTION_BG_CLASS, CELL_CLASS } from '../../services/consts';
 import moduleRegister from '../../services/moduleRegister';
 import CellSelection from '../../services/cellSelection';
 

@@ -3,7 +3,7 @@ import {HTMLStencilElement} from '@stencil/core/internal';
 
 import {colsStore as viewportCols} from '../../store/viewport.store';
 import dataProvider from '../../services/data.provider';
-import {DATA_COL, HEADER_CLASS} from '../data/cellConsts';
+import {DATA_COL, HEADER_CLASS} from '../../services/consts';
 import moduleRegister from '../../services/moduleRegister';
 import HeaderResize from '../../services/headerResize';
 

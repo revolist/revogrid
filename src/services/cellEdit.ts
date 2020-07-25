@@ -38,7 +38,7 @@ export default class CellEdit implements Module {
         }
     }
 
-    save(): void {
+    close(): void {
         setEdit();
     }
 

@@ -1,5 +1,5 @@
 /* Note: using `.d.ts` file extension will exclude it from the output build */
-import {EventEmitter} from "@stencil/core";
+// import {EventEmitter} from "@stencil/core";
 
 export type DimensionType = 'col'|'row';
 
@@ -74,7 +74,19 @@ export type InitialSettings = {
   }
 };
 
-type SaveData = string;
+export type SaveData = string;
+export type SaveDataDetails = {
+  row: number;
+  col: number;
+  val: SaveData;
+};
 export interface EditorI {
-  save: EventEmitter<SaveData>
+  // save: EventEmitter<SaveData>
 }
+
+export type SelectionArea = {
+  left: string;
+  top: string;
+  width: string;
+  height: string;
+};

@@ -1,4 +1,4 @@
-import {DATA_COL, DATA_ROW} from "../components/data/cellConsts";
+import {DATA_COL, DATA_ROW} from "./consts";
 import {ActiveCell} from "./module.interfaces";
 
 export function getCell(cell: HTMLElement): ActiveCell {

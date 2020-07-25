@@ -1,4 +1,4 @@
-import {Component, h, Listen} from '@stencil/core';
+import {Component, Event, EventEmitter, h} from '@stencil/core';
 
 import selectionStore from '../../store/selection.strore';
 import {getItemByIndex} from '../../store/dimension.helpers';
@@ -6,15 +6,8 @@ import {colsStore, rowsStore} from '../../store/dimension.store';
 import dataProvider from '../../services/data.provider';
 import moduleRegister from '../../services/moduleRegister';
 import CellEdit from '../../services/cellEdit';
-import {CELL_CLASS} from '../data/cellConsts';
-import {PositionItem} from '../../interfaces';
-
-type SelectionArea = {
-    left: string;
-    top: string;
-    width: string;
-    height: string;
-};
+import {CELL_CLASS} from '../../services/consts';
+import {PositionItem, SaveData, SaveDataDetails, SelectionArea} from '../../interfaces';
 
 @Component({
     tag: 'revogr-edit'
@@ -22,13 +15,21 @@ type SelectionArea = {
 export class Edit {
     private editCell: typeof selectionStore.state.edit = null;
     private cellEditModule!: CellEdit;
-    @Listen('save')
-    onSave(e: CustomEvent<string>): void {
-        const cell: typeof selectionStore.state.edit = selectionStore.get('edit');
-        if (cell) {
-            dataProvider.setData(cell[1], cell[0], e.detail);
-        }
-        setTimeout(() => this.cellEditModule.save(), 0);
+
+    @Event() beforeEdit: EventEmitter<SaveDataDetails>;
+    onSave(e: CustomEvent<SaveData>): void {
+        e.stopPropagation();
+        setTimeout(() => {
+            this.editCell = selectionStore.get('edit');
+            if (this.editCell) {
+                this.beforeEdit.emit({
+                    col: this.editCell[0],
+                    row: this.editCell[1],
+                    val: e.detail
+                });
+            }
+            this.cellEditModule.close();
+        }, 0);
     }
 
     connectedCallback(): void {
@@ -57,7 +58,8 @@ export class Edit {
         };
         return <div style={style} class='edit-input-wrapper'>
             <revogr-text-editor
-                value={this.editCell[2] ? this.editCell[2] : dataProvider.data(y, x)}/>
+                value={this.editCell[2] ? this.editCell[2] : dataProvider.data(y, x)}
+                onEdit={(e) => this.onSave(e)}/>
         </div>;
     }
 }

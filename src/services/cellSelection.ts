@@ -13,7 +13,7 @@ export default class CellSelection implements Module {
                 .draggable({
                     listeners: {
                         start: (event): void => {
-                            const cell = getCell(event.target);
+                            const cell = getCell(event.currentTarget);
                             setRange([cell.x, cell.y], [cell.x, cell.y]);
                         }
                     },
@@ -21,20 +21,20 @@ export default class CellSelection implements Module {
                 })
                 .dropzone({
                     ondrop: (event): void => {
-                        const finalCell = getCell(event.target);
+                        const finalCell = getCell(event.currentTarget);
                         const first = getCell(event.relatedTarget);
                         setRange([first.x, first.y], [finalCell.x, finalCell.y]);
                         setTempRange();
                     },
                     ondragenter: (event): void => {
-                        const finalCell = getCell(event.target);
+                        const finalCell = getCell(event.currentTarget);
                         const first = getCell(event.relatedTarget);
                         setTempRange([first.x, first.y], [finalCell.x, finalCell.y]);
                     }
                 })
         }
         interact(target).on('tap', (event): void => {
-            const cell: ActiveCell = getCell(event.target);
+            const cell: ActiveCell = getCell(event.currentTarget);
             setRange([cell.x, cell.y], [cell.x, cell.y]);
         });
 

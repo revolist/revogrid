@@ -29,11 +29,9 @@
   <script nomodule src="/build/revo-grid.js"></script>
 </head>
 <body>
-	<div style="width: 100%; height: 100%">
-        <revo-grid class="grid-component"></revo-grid>
-	</div>
+    <revo-grid class="grid-component"></revo-grid>
 
-    <script type="module">
+    <script>
         function generateHeader(index) {
             var dividend = index + 1;
             var columnLabel = '';
@@ -100,10 +98,16 @@
 
         const grid = document.querySelector('revo-grid');
 
-        const data = generateFakeDataObject(1000, 10);
+        const data = generateFakeData(1000, 10);
         grid.columns = data.headers;
         grid.source = data.rows;
-        grid.readonly = true;
+        grid.readonly = false;
+        grid.addEventListener('beforeEdit', e => {
+            if (e.detail.row % 2) {
+                // cancel changes on edit
+                e.preventDefault();
+            }
+        });
     </script>
 </body>
 </html>

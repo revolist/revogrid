@@ -1,6 +1,6 @@
-import {Component, EventEmitter, Event, h, Prop} from "@stencil/core";
-import {codesLetter} from "../../../utils/keyCodes";
-import {EditorI} from "../../../interfaces";
+import {Component, EventEmitter, Event, h, Prop} from '@stencil/core';
+import {codesLetter} from '../../../utils/keyCodes';
+import {EditorI, SaveData} from '../../../interfaces';
 
 @Component({
     tag: 'revogr-text-editor'
@@ -8,7 +8,7 @@ import {EditorI} from "../../../interfaces";
 export class TextEditor implements EditorI {
     private editInput!: HTMLInputElement;
     @Prop() value: string;
-    @Event() save: EventEmitter<string>;
+    @Event() edit: EventEmitter<SaveData>;
 
     componentDidRender(): void {
         if (this.editInput) {
@@ -23,7 +23,7 @@ export class TextEditor implements EditorI {
     private onKeyDown(e: KeyboardEvent): void {
         const isEnter: boolean = codesLetter.ENTER === e.code;
         if (isEnter && e.target) {
-            this.save.emit((e.target as HTMLInputElement).value);
+            this.edit.emit((e.target as HTMLInputElement).value);
         }
     }
 }
