@@ -74,19 +74,42 @@ export type InitialSettings = {
   }
 };
 
-export type SaveData = string;
-export type SaveDataDetails = {
-  row: number;
-  col: number;
-  val: SaveData;
-};
-export interface EditorI {
-  // save: EventEmitter<SaveData>
+
+export declare namespace Selection  {
+  type RowIndex = number;
+  type ColIndex = number;
+
+  type RangeArea = {
+    x: ColIndex;
+    y: RowIndex;
+    x1: ColIndex;
+    y1: RowIndex;
+  };
+
+  interface Cell {
+    x: ColIndex;
+    y: RowIndex;
+  }
+
+  export type RangeAreaCss = {
+    left: string;
+    top: string;
+    width: string;
+    height: string;
+  };
 }
 
-export type SelectionArea = {
-  left: string;
-  top: string;
-  width: string;
-  height: string;
-};
+export declare namespace Edition {
+  type SaveData = string;
+  type SaveDataDetails = {
+    row: Selection.RowIndex;
+    col: Selection.ColIndex;
+    val: SaveData;
+  };
+  interface EditCell extends Selection.Cell {
+    val?: SaveData;
+  }
+  interface EditorBase {
+    // save: EventEmitter<SaveData>
+  }
+}

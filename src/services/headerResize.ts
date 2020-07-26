@@ -1,5 +1,5 @@
 import interact from 'interactjs';
-import {DATA_COL} from './consts';
+import {DATA_COL} from '../utils/consts';
 import {Module} from './module.interfaces';
 import dimensionProvider from "./dimension.provider";
 

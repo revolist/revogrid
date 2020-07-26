@@ -1,9 +1,11 @@
 import interact from 'interactjs';
-import {ActiveCell, Module} from './module.interfaces';
-import selectionStore, {setRange, setTempRange} from '../store/selection.strore';
+import {Module} from './module.interfaces';
+import selectionStore, {setFocus, setRange, setTempRange} from '../store/selection.strore';
 import {getCell} from './cell.helpers';
-import {codesLetter} from "../utils/keyCodes";
+import {codesLetter} from '../utils/keyCodes';
 import {rowsStore as viewportRows, colsStore as viewportCols} from '../store/viewport.store';
+import {Selection} from '../interfaces';
+import Cell = Selection.Cell;
 
 export default class CellSelection implements Module {
     private readonly keyDownFunc: ((e: KeyboardEvent) => void);
@@ -12,67 +14,101 @@ export default class CellSelection implements Module {
             interact(target)
                 .draggable({
                     listeners: {
-                        start: (event): void => {
-                            const cell = getCell(event.currentTarget);
-                            setRange([cell.x, cell.y], [cell.x, cell.y]);
+                        start: event => {
+                            const cell: Cell = getCell(event.currentTarget);
+                            setFocus(cell);
+                            setRange(cell, cell);
                         }
                     },
-                    cursorChecker: (): string => 'default'
+                    cursorChecker: () => 'default'
                 })
                 .dropzone({
-                    ondrop: (event): void => {
-                        const finalCell = getCell(event.currentTarget);
-                        const first = getCell(event.relatedTarget);
-                        setRange([first.x, first.y], [finalCell.x, finalCell.y]);
+                    ondrop: event => {
+                        const finalCell: Cell = getCell(event.currentTarget);
+                        const first: Cell = getCell(event.relatedTarget);
+                        setRange(first, finalCell);
                         setTempRange();
                     },
-                    ondragenter: (event): void => {
-                        const finalCell = getCell(event.currentTarget);
-                        const first = getCell(event.relatedTarget);
-                        setTempRange([first.x, first.y], [finalCell.x, finalCell.y]);
+                    ondragenter: event => {
+                        const finalCell: Cell = getCell(event.currentTarget);
+                        const first: Cell = getCell(event.relatedTarget);
+                        setTempRange(first, finalCell);
                     }
                 })
         }
-        interact(target).on('tap', (event): void => {
-            const cell: ActiveCell = getCell(event.currentTarget);
-            setRange([cell.x, cell.y], [cell.x, cell.y]);
+        interact(target).on('tap', event => {
+            const cell: Cell = getCell(event.currentTarget);
+            let prevCell: Cell = cell;
+            if (range && event.shiftKey) {
+                prevCell = selectionStore.get('focus') || cell;
+            }
+            setRange(prevCell, cell);
+            setFocus(prevCell);
         });
 
-        this.keyDownFunc = (e: KeyboardEvent) => this.handleKeyDown(e);
+        this.keyDownFunc = (e: KeyboardEvent) => CellSelection.handleKeyDown(e, range);
         document.addEventListener('keydown', this.keyDownFunc);
     }
 
-    private handleKeyDown(e: KeyboardEvent): void {
+    private static handleKeyDown(e: KeyboardEvent, canRange: boolean): void {
         const range: typeof selectionStore.state.range = selectionStore.get('range');
-        if (!range) {
+        const focus: typeof selectionStore.state.focus = selectionStore.get('focus');
+        if (!range || !focus) {
             return;
         }
 
+        let start: Cell = {
+            x: range.x,
+            y: range.y
+        };
+        let end: Cell = start;
+        let isMulti: boolean = canRange && e.shiftKey;
+
+        // continue selection
+        if (isMulti) {
+            end = {
+                x: range.x1,
+                y: range.y1
+            };
+        }
+
+        function doUpdate(start: Cell, end: Cell, isMulti: boolean = false) {
+            if (isMulti) {
+                setRange(start, end);
+            } else {
+                setRange(start, end);
+                setFocus(end);
+            }
+        }
+
+        let point: Cell;
         switch (e.code) {
             case codesLetter.ARROW_UP:
-                if (range.y > 0) {
-                    range.y--;
-                    setRange([range.x, range.y], [range.x, range.y]);
+                point = end.y > focus.y ? end : start;
+                if (point.y > 0) {
+                    point.y--;
+                    doUpdate(start, end, isMulti);
                 }
                 break;
             case codesLetter.ARROW_DOWN:
-                const maxY: number = viewportRows.get('realCount');
-                if (range.y < maxY) {
-                    range.y++;
-                    setRange([range.x, range.y], [range.x, range.y]);
+                point = end.y > focus.y ? end : start;
+                if (point.y < viewportRows.get('realCount')) {
+                    point.y++;
+                    doUpdate(start, end, isMulti);
                 }
                 break;
             case codesLetter.ARROW_LEFT:
-                if (range.x > 0) {
-                    range.x--;
-                    setRange([range.x, range.y], [range.x, range.y]);
+                point = end.x > focus.x ? end : start;
+                if (point.x > 0) {
+                    point.x--;
+                    doUpdate(start, end, isMulti);
                 }
                 break;
             case codesLetter.ARROW_RIGHT:
-                const maxX: number = viewportCols.get('realCount');
-                if (range.x < maxX) {
-                    range.x++;
-                    setRange([range.x, range.y], [range.x, range.y]);
+                point = end.x > focus.x ? end : start;
+                if (point.x < viewportCols.get('realCount')) {
+                    point.x++;
+                    doUpdate(start, end, isMulti);
                 }
                 break;
         }

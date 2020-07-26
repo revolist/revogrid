@@ -57,6 +57,7 @@ enum codesLetter {
     ARROW_LEFT = 'ArrowLeft',
     ARROW_UP = 'ArrowUp',
     ARROW_DOWN = 'ArrowDown',
+    SHIFT = 'Shift'
 }
 
 export default codes;

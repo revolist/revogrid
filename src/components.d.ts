@@ -5,7 +5,7 @@
  * It contains typing information for all components that exist in this project.
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
-import { ColumnData, DataType, DimensionSettingsState, MultiDimensionAction, SaveData, SaveDataDetails } from "./interfaces";
+import { ColumnData, DataType, DimensionSettingsState, Edition, MultiDimensionAction } from "./interfaces";
 export namespace Components {
     interface RevoGrid {
         "colSize": number;
@@ -101,7 +101,7 @@ declare namespace LocalJSX {
     interface RevogrData {
     }
     interface RevogrEdit {
-        "onBeforeEdit"?: (event: CustomEvent<SaveDataDetails>) => void;
+        "onBeforeEdit"?: (event: CustomEvent<Edition.SaveDataDetails>) => void;
     }
     interface RevogrHeader {
     }
@@ -109,7 +109,7 @@ declare namespace LocalJSX {
         "range"?: boolean;
     }
     interface RevogrTextEditor {
-        "onEdit"?: (event: CustomEvent<SaveData>) => void;
+        "onEdit"?: (event: CustomEvent<Edition.SaveData>) => void;
         "value"?: string;
     }
     interface RevogrViewportScrollable {

@@ -1,49 +1,52 @@
 import {createStore, ObservableMap} from '@stencil/store';
 import {setStore} from './helpers';
+import {Edition, Selection} from '../interfaces';
+import RangeArea = Selection.RangeArea;
+import Cell = Selection.Cell;
+import EditCell = Edition.EditCell;
 
-type RowIndex = number;
-type ColIndex = number;
-export type RangeI = {
-    x: number;
-    y: number;
-    x1: number;
-    y1: number;
-};
 export type State = {
-    range: RangeI|null;
-    edit: [ColIndex, RowIndex, string?] | null;
-    tempRange: RangeI|null;
+    range: RangeArea|null;
+    tempRange: RangeArea|null;
+    focus: Cell|null;
+    edit: EditCell | null;
 };
 const state: State = {
     range: null,
     tempRange: null,
+    focus: null,
     edit: null
 };
 const store: ObservableMap<State> = createStore(state);
 
-function getRange(start?: [ColIndex, RowIndex], end?: [ColIndex, RowIndex]): RangeI|null {
+function getRange(start?: Cell, end?: Cell): RangeArea|null {
     return start && end ? {
-        x: Math.min(start[0], end[0]),
-        y: Math.min(start[1], end[1]),
-        x1: Math.max(start[0], end[0]),
-        y1: Math.max(start[1], end[1])
-
+        x: Math.min(start.x, end.x),
+        y: Math.min(start.y, end.y),
+        x1: Math.max(start.x, end.x),
+        y1: Math.max(start.y, end.y)
     } : null;
 }
 
-function setRange(start?: [ColIndex, RowIndex], end?: [ColIndex, RowIndex]): void {
-    setStore(store, { range: getRange(start, end) });
+function setRange(start: Cell, end: Cell): void {
+    const range = getRange(start, end);
+    setStore(store, { range });
     setStore(store, { edit: null });
+    setStore(store, { tempRange: null });
 }
 
-function setTempRange(start?: [ColIndex, RowIndex], end?: [ColIndex, RowIndex]): void {
+function setTempRange(start?: Cell, end?: Cell): void {
     setStore(store, { tempRange: getRange(start, end) });
     setStore(store, { edit: null });
 }
 
-function setEdit(cell?: [ColIndex, RowIndex, string?]) {
+function setFocus(start: Cell): void {
+    setStore(store, { focus: start });
+}
+
+function setEdit(cell?: EditCell) {
     setStore(store, { edit: cell });
 }
 
-export {setRange, setTempRange, setEdit};
+export {setRange, setTempRange, setEdit, setFocus};
 export default store;

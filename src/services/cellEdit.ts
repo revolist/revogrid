@@ -1,8 +1,10 @@
 import {Module} from './module.interfaces';
 import interact from 'interactjs';
-import selectionStore, {RangeI, setEdit} from '../store/selection.strore';
+import selectionStore, {setEdit} from '../store/selection.strore';
 import {codesLetter} from '../utils/keyCodes';
 import {isLetterKey} from '../utils/keyCodes.utils';
+import {Selection} from '../interfaces';
+import Cell = Selection.Cell;
 
 export default class CellEdit implements Module {
     private editCell: typeof selectionStore.state.edit = null;
@@ -10,9 +12,12 @@ export default class CellEdit implements Module {
 
     constructor(private target: string) {
         interact(this.target).on('doubletap', (): void => {
-            const range: RangeI|null = selectionStore.get('range');
-            if (range) {
-                setEdit([range.x, range.y]);
+            const focus: Cell|null = selectionStore.get('focus');
+            if (focus) {
+                setEdit({
+                    x: focus.x,
+                    y: focus.y
+                });
             }
         });
         this.keyDownFunc = (e: KeyboardEvent) => this.handleKeyDown(e);
@@ -31,9 +36,13 @@ export default class CellEdit implements Module {
         }
         const isEnter: boolean = codesLetter.ENTER === e.code;
         if (isLetterKey(e.keyCode) || isEnter) {
-            const range: RangeI|null = selectionStore.get('range');
-            if (range) {
-                setEdit([range.x, range.y, !isEnter ? e.key : '']);
+            const focus: Cell|null = selectionStore.get('focus');
+            if (focus) {
+                setEdit({
+                    x: focus.x,
+                    y: focus.y,
+                    val: !isEnter ? e.key : ''
+                });
             }
         }
     }

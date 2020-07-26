@@ -1,14 +1,14 @@
 import {Component, EventEmitter, Event, h, Prop} from '@stencil/core';
 import {codesLetter} from '../../../utils/keyCodes';
-import {EditorI, SaveData} from '../../../interfaces';
+import {Edition} from '../../../interfaces';
 
 @Component({
     tag: 'revogr-text-editor'
 })
-export class TextEditor implements EditorI {
+export class TextEditor implements Edition.EditorBase {
     private editInput!: HTMLInputElement;
     @Prop() value: string;
-    @Event() edit: EventEmitter<SaveData>;
+    @Event() edit: EventEmitter<Edition.SaveData>;
 
     componentDidRender(): void {
         if (this.editInput) {

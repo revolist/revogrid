@@ -6,8 +6,8 @@ import {colsStore, rowsStore} from '../../store/dimension.store';
 import dataProvider from '../../services/data.provider';
 import moduleRegister from '../../services/moduleRegister';
 import CellEdit from '../../services/cellEdit';
-import {CELL_CLASS} from '../../services/consts';
-import {PositionItem, SaveData, SaveDataDetails, SelectionArea} from '../../interfaces';
+import {CELL_CLASS} from '../../utils/consts';
+import {Edition, PositionItem, Selection} from '../../interfaces';
 
 @Component({
     tag: 'revogr-edit'
@@ -16,15 +16,15 @@ export class Edit {
     private editCell: typeof selectionStore.state.edit = null;
     private cellEditModule!: CellEdit;
 
-    @Event() beforeEdit: EventEmitter<SaveDataDetails>;
-    onSave(e: CustomEvent<SaveData>): void {
+    @Event() beforeEdit: EventEmitter<Edition.SaveDataDetails>;
+    onSave(e: CustomEvent<Edition.SaveData>): void {
         e.stopPropagation();
         setTimeout(() => {
             this.editCell = selectionStore.get('edit');
             if (this.editCell) {
                 this.beforeEdit.emit({
-                    col: this.editCell[0],
-                    row: this.editCell[1],
+                    col: this.editCell.x,
+                    row: this.editCell.y,
                     val: e.detail
                 });
             }
@@ -46,11 +46,11 @@ export class Edit {
         if (!this.editCell) {
             return;
         }
-        const x: number = this.editCell[0];
-        const y: number = this.editCell[1];
+        const x: number = this.editCell.x;
+        const y: number = this.editCell.y;
         const col: PositionItem = getItemByIndex(colsStore.state, x);
         const row: PositionItem = getItemByIndex(rowsStore.state, y);
-        const style: SelectionArea = {
+        const style: Selection.RangeAreaCss = {
             left: `${col.start}px`,
             top: `${row.start}px`,
             width: `${col.end - col.start}px`,
@@ -58,7 +58,7 @@ export class Edit {
         };
         return <div style={style} class='edit-input-wrapper'>
             <revogr-text-editor
-                value={this.editCell[2] ? this.editCell[2] : dataProvider.data(y, x)}
+                value={this.editCell.val ? this.editCell.val : dataProvider.data(y, x)}
                 onEdit={(e) => this.onSave(e)}/>
         </div>;
     }

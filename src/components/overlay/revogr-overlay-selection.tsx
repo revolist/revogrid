@@ -1,17 +1,20 @@
 import {Component, h, Prop} from '@stencil/core';
-import selectionStore, {RangeI} from '../../store/selection.strore';
+import selectionStore from '../../store/selection.strore';
 import {rowsStore, colsStore} from '../../store/dimension.store';
 import {getItemByIndex} from '../../store/dimension.helpers';
-import { SELECTION_BORDER_CLASS, SELECTION_BG_CLASS, TMP_SELECTION_BG_CLASS, CELL_CLASS } from '../../services/consts';
+import {
+    SELECTION_BORDER_CLASS,
+    SELECTION_BG_CLASS,
+    TMP_SELECTION_BG_CLASS,
+    CELL_CLASS,
+    FOCUS_CLASS
+} from '../../utils/consts';
 import moduleRegister from '../../services/moduleRegister';
 import CellSelection from '../../services/cellSelection';
+import {Selection} from '../../interfaces';
 
-type SelectionArea = {
-  left: string;
-  top: string;
-  width: string;
-  height: string;
-};
+import RangeAreaCss = Selection.RangeAreaCss;
+import RangeArea = Selection.RangeArea;
 
 @Component({
     tag: 'revogr-overlay-selection'
@@ -29,23 +32,33 @@ export class OverlaySelection {
 
     render() {
         const range: typeof selectionStore.state.range = selectionStore.get('range');
+        const focus: typeof selectionStore.state.focus = selectionStore.get('focus');
         const tempRange: typeof selectionStore.state.tempRange = selectionStore.get('tempRange');
         const els: HTMLElement[] = [];
         if (range) {
-            const style: SelectionArea = OverlaySelection.getElStyle(range);
+            const style: RangeAreaCss = OverlaySelection.getElStyle(range);
             els.push(
                 <div class={SELECTION_BORDER_CLASS} style={style}/>,
                 <div class={SELECTION_BG_CLASS} style={style}/>
             );
         }
         if (tempRange) {
-            const style: SelectionArea = OverlaySelection.getElStyle(tempRange);
+            const style: RangeAreaCss = OverlaySelection.getElStyle(tempRange);
             els.push(<div class={TMP_SELECTION_BG_CLASS} style={style}/>);
+        }
+        if (focus) {
+            const style: RangeAreaCss = OverlaySelection.getElStyle({
+                x: focus.x,
+                y: focus.y,
+                x1: focus.x,
+                y1: focus.y
+            });
+            els.push(<div class={FOCUS_CLASS} style={style}/>);
         }
         return els;
     }
 
-    private static getElStyle(range: RangeI): SelectionArea {
+    private static getElStyle(range: RangeArea): RangeAreaCss {
         const y: number = getItemByIndex(rowsStore.state, range.y).start;
         const x: number = getItemByIndex(colsStore.state, range.x).start;
         const y1: number = getItemByIndex(rowsStore.state, range.y1).end;
