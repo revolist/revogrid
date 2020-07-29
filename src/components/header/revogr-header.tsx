@@ -1,20 +1,23 @@
-import {Component, Element, h} from '@stencil/core';
+import {Component, Element, h, Prop} from '@stencil/core';
 import {HTMLStencilElement} from '@stencil/core/internal';
 
 import {colsStore as viewportCols} from '../../store/viewport.store';
 import dataProvider from '../../services/data.provider';
 import {DATA_COL, HEADER_CLASS} from '../../utils/consts';
 import moduleRegister from '../../services/moduleRegister';
-import HeaderResize from '../../services/headerResize';
+import HeaderResizeService from './headerResizeService';
 
 @Component({
   tag: 'revogr-header'
 })
-export class ViewportDataComponent {
+export class RevogrHeaderComponent {
   @Element() element!: HTMLStencilElement;
+  @Prop() resize: boolean;
 
   connectedCallback(): void {
-      moduleRegister.register('headResize', new HeaderResize(`${moduleRegister.baseClass} .${HEADER_CLASS}`));
+    if (this.resize) {
+      moduleRegister.register('headResize', new HeaderResizeService(`${moduleRegister.baseClass} .${HEADER_CLASS}`));
+    }
   }
 
   disconnectedCallback(): void {

@@ -14,9 +14,12 @@ export type ColumnDataSchemaModel = {
   data: DataSource;
 };
 
+export type ReadOnlyFormat = boolean | ((row: number, col: number) => boolean);
+
 export interface ColumnDataSchema {
   prop: ColumnProp;
   name?: DataFormat;
+  readonly?: ReadOnlyFormat;
   cellTemplate?: Function;
 }
 
@@ -69,6 +72,7 @@ export type InitialSettings = {
   frameSize: number;
   readonly: boolean;
   range: boolean;
+  resize: boolean;
   dimensions?: {
     col?: ViewSettingSizeProp;
     row?: ViewSettingSizeProp;

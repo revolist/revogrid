@@ -5,7 +5,7 @@ import {setData, setColumn} from '../../store/data.store';
 import {setSettings} from '../../store/dimension.store';
 import {setViewport} from '../../store/viewport.store';
 import {ColumnData, DataType, Edition, InitialSettings, MultiDimensionAction} from '../../interfaces';
-import GridResize from '../../services/gridResize';
+import GridResizeService from './gridResizeService';
 import moduleRegister from '../../services/moduleRegister';
 import {UUID, VIEWPORT_CLASS} from '../../utils/consts';
 import dimensionProvider from '../../services/dimension.provider';
@@ -18,7 +18,8 @@ const initialSettings: InitialSettings = {
   frameSize: 0,
   dimensions: undefined,
   readonly: false,
-  range: false
+  range: false,
+  resize: false
 };
 
 @Component({
@@ -36,6 +37,7 @@ export class RevoGrid {
   @Prop() colSize: number = initialSettings.defaultColumnSize;
   @Prop() range: boolean = initialSettings.range;
   @Prop() readonly: boolean = initialSettings.readonly;
+  @Prop() resize: boolean = initialSettings.resize;
   @Prop() dimensions: Partial<MultiDimensionAction> = {};
 
   // data is array of objects
@@ -77,7 +79,7 @@ export class RevoGrid {
   }
 
   async componentDidLoad(): Promise<void> {
-    moduleRegister.register('resize', new GridResize(this.element, this.viewport));
+    moduleRegister.register('resize', new GridResizeService(this.element, this.viewport));
   }
 
   disconnectedCallback(): void {
@@ -91,7 +93,7 @@ export class RevoGrid {
       ref: (el: HTMLRevogrViewportScrollableElement) => { this.viewport = el; }
     };
     return <revogr-viewport-scrollable{...viewportProp}>
-      <revogr-header slot='header' class='header'/>
+      <revogr-header slot='header' class='header' resize={this.resize}/>
       <revogr-data slot='content' class='viewport-layer'/>
       {
         !this.readonly || this.range ? <revogr-overlay-selection slot='content' range={this.range}/> : ''

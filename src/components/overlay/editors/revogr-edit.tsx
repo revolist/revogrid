@@ -1,20 +1,20 @@
 import {Component, Event, EventEmitter, h} from '@stencil/core';
 
-import selectionStore from '../../store/selection.strore';
-import {getItemByIndex} from '../../store/dimension.helpers';
-import {colsStore, rowsStore} from '../../store/dimension.store';
-import dataProvider from '../../services/data.provider';
-import moduleRegister from '../../services/moduleRegister';
-import CellEdit from '../../services/cellEdit';
-import {CELL_CLASS} from '../../utils/consts';
-import {Edition, PositionItem, Selection} from '../../interfaces';
+import selectionStore from '../../../store/selection.strore';
+import {getItemByIndex} from '../../../store/dimension.helpers';
+import {colsStore, rowsStore} from '../../../store/dimension.store';
+import dataProvider from '../../../services/data.provider';
+import moduleRegister from '../../../services/moduleRegister';
+import CellEditService from './cellEditService';
+import {CELL_CLASS} from '../../../utils/consts';
+import {Edition, PositionItem, Selection} from '../../../interfaces';
 
 @Component({
     tag: 'revogr-edit'
 })
 export class Edit {
     private editCell: typeof selectionStore.state.edit = null;
-    private cellEditModule!: CellEdit;
+    private cellEditModule!: CellEditService;
 
     @Event() beforeEdit: EventEmitter<Edition.SaveDataDetails>;
     onSave(e: CustomEvent<Edition.SaveData>): void {
@@ -33,7 +33,7 @@ export class Edit {
     }
 
     connectedCallback(): void {
-        this.cellEditModule = new CellEdit(`${moduleRegister.baseClass} .${CELL_CLASS}`);
+        this.cellEditModule = new CellEditService(`${moduleRegister.baseClass} .${CELL_CLASS}`);
         moduleRegister.register('cellEdit', this.cellEditModule);
     }
 

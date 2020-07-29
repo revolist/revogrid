@@ -8,7 +8,7 @@ import {
   ColumnProp,
   DataSource,
   DataSourceState,
-  DataType
+  DataType, ReadOnlyFormat
 } from '../interfaces';
 import dataStore, {updateData} from '../store/data.store';
 import HeaderProviderObject from './header.data.provider';
@@ -49,6 +49,14 @@ class DataProvider {
 
   header(c: number): string {
     return this.columnProvider.data(c);
+  }
+
+  isReadOnly(r: number, c: number): boolean {
+    const readOnly: ReadOnlyFormat = this.dataSourceStore.get('columns')[c]?.readonly;
+    if (typeof readOnly === 'function') {
+      return readOnly(r, c);
+    }
+    return readOnly;
   }
 }
 

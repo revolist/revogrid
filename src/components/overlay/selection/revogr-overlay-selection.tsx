@@ -1,17 +1,17 @@
 import {Component, h, Prop} from '@stencil/core';
-import selectionStore from '../../store/selection.strore';
-import {rowsStore, colsStore} from '../../store/dimension.store';
-import {getItemByIndex} from '../../store/dimension.helpers';
+import selectionStore from '../../../store/selection.strore';
+import {rowsStore, colsStore} from '../../../store/dimension.store';
+import {getItemByIndex} from '../../../store/dimension.helpers';
 import {
     SELECTION_BORDER_CLASS,
     SELECTION_BG_CLASS,
     TMP_SELECTION_BG_CLASS,
     CELL_CLASS,
     FOCUS_CLASS
-} from '../../utils/consts';
-import moduleRegister from '../../services/moduleRegister';
-import CellSelection from '../../services/cellSelection';
-import {Selection} from '../../interfaces';
+} from '../../../utils/consts';
+import moduleRegister from '../../../services/moduleRegister';
+import CellSelectionService from './cellSelectionService';
+import {Selection} from '../../../interfaces';
 
 import RangeAreaCss = Selection.RangeAreaCss;
 import RangeArea = Selection.RangeArea;
@@ -23,7 +23,7 @@ export class OverlaySelection {
     @Prop() range: boolean;
     connectedCallback(): void {
         moduleRegister.register('cellSelection',
-            new CellSelection(`${moduleRegister.baseClass} .${CELL_CLASS}`, this.range));
+            new CellSelectionService(`${moduleRegister.baseClass} .${CELL_CLASS}`, this.range));
     }
 
     disconnectedCallback(): void {

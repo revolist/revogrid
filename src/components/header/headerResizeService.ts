@@ -1,9 +1,9 @@
 import interact from 'interactjs';
-import {DATA_COL} from '../utils/consts';
-import {Module} from './module.interfaces';
-import dimensionProvider from "./dimension.provider";
+import {DATA_COL} from '../../utils/consts';
+import {Module} from '../../services/module.interfaces';
+import dimensionProvider from "../../services/dimension.provider";
 
-export default class HeaderResize implements Module {
+export default class HeaderResizeService implements Module {
     constructor(private target: string) {
         interact(target).resizable({
             edges: { bottom: false, right: true },

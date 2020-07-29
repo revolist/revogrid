@@ -1,23 +1,21 @@
-import {Module} from './module.interfaces';
+import {Module} from '../../../services/module.interfaces';
 import interact from 'interactjs';
-import selectionStore, {setEdit} from '../store/selection.strore';
-import {codesLetter} from '../utils/keyCodes';
-import {isLetterKey} from '../utils/keyCodes.utils';
-import {Selection} from '../interfaces';
+import selectionStore, {setEdit} from '../../../store/selection.strore';
+import dataProvider from "../../../services/data.provider";
+import {codesLetter} from '../../../utils/keyCodes';
+import {isLetterKey} from '../../../utils/keyCodes.utils';
+import {Selection} from '../../../interfaces';
 import Cell = Selection.Cell;
 
-export default class CellEdit implements Module {
+export default class CellEditService implements Module {
     private editCell: typeof selectionStore.state.edit = null;
     private readonly keyDownFunc: ((e: KeyboardEvent) => void);
 
     constructor(private target: string) {
         interact(this.target).on('doubletap', (): void => {
             const focus: Cell|null = selectionStore.get('focus');
-            if (focus) {
-                setEdit({
-                    x: focus.x,
-                    y: focus.y
-                });
+            if (focus && !dataProvider.isReadOnly(focus.y, focus.x)) {
+                setEdit({ x: focus.x, y: focus.y });
             }
         });
         this.keyDownFunc = (e: KeyboardEvent) => this.handleKeyDown(e);
@@ -37,7 +35,7 @@ export default class CellEdit implements Module {
         const isEnter: boolean = codesLetter.ENTER === e.code;
         if (isLetterKey(e.keyCode) || isEnter) {
             const focus: Cell|null = selectionStore.get('focus');
-            if (focus) {
+            if (focus && !dataProvider.isReadOnly(focus.y, focus.x)) {
                 setEdit({
                     x: focus.x,
                     y: focus.y,

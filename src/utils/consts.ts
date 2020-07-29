@@ -3,6 +3,7 @@ export const DATA_ROW: string = 'data-row';
 
 export const UUID: string = 'grid-uuid';
 
+export const DISABLED_CLASS: string = 'disabled';
 export const CELL_CLASS: string = 'data-cell';
 export const HEADER_CLASS: string = 'data-header-cell';
 

@@ -14,6 +14,7 @@ export namespace Components {
         "frameSize": number;
         "range": boolean;
         "readonly": boolean;
+        "resize": boolean;
         "rowSize": number;
         "source": DataType[];
     }
@@ -22,6 +23,7 @@ export namespace Components {
     interface RevogrEdit {
     }
     interface RevogrHeader {
+        "resize": boolean;
     }
     interface RevogrOverlaySelection {
         "range": boolean;
@@ -95,6 +97,7 @@ declare namespace LocalJSX {
         "frameSize"?: number;
         "range"?: boolean;
         "readonly"?: boolean;
+        "resize"?: boolean;
         "rowSize"?: number;
         "source"?: DataType[];
     }
@@ -104,6 +107,7 @@ declare namespace LocalJSX {
         "onBeforeEdit"?: (event: CustomEvent<Edition.SaveDataDetails>) => void;
     }
     interface RevogrHeader {
+        "resize"?: boolean;
     }
     interface RevogrOverlaySelection {
         "range"?: boolean;

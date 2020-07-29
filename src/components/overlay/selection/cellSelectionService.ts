@@ -1,13 +1,13 @@
 import interact from 'interactjs';
-import {Module} from './module.interfaces';
-import selectionStore, {setFocus, setRange, setTempRange} from '../store/selection.strore';
-import {getCell} from './cell.helpers';
-import {codesLetter} from '../utils/keyCodes';
-import {rowsStore as viewportRows, colsStore as viewportCols} from '../store/viewport.store';
-import {Selection} from '../interfaces';
+import {Module} from '../../../services/module.interfaces';
+import selectionStore, {setFocus, setRange, setTempRange} from '../../../store/selection.strore';
+import {getCell} from '../../../services/cell.helpers';
+import {codesLetter} from '../../../utils/keyCodes';
+import {rowsStore as viewportRows, colsStore as viewportCols} from '../../../store/viewport.store';
+import {Selection} from '../../../interfaces';
 import Cell = Selection.Cell;
 
-export default class CellSelection implements Module {
+export default class CellSelectionService implements Module {
     private readonly keyDownFunc: ((e: KeyboardEvent) => void);
     constructor(private target: string, range: boolean = false) {
         if (range) {
@@ -46,7 +46,7 @@ export default class CellSelection implements Module {
             setFocus(prevCell);
         });
 
-        this.keyDownFunc = (e: KeyboardEvent) => CellSelection.handleKeyDown(e, range);
+        this.keyDownFunc = (e: KeyboardEvent) => CellSelectionService.handleKeyDown(e, range);
         document.addEventListener('keydown', this.keyDownFunc);
     }
 

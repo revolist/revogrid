@@ -1,7 +1,7 @@
-import {setViewport} from "../store/viewport.store";
-import {Module} from "./module.interfaces";
+import {setViewport} from "../../store/viewport.store";
+import {Module} from "../../services/module.interfaces";
 
-export default class GridResize implements Module {
+export default class GridResizeService implements Module {
     private resizeObserver: ResizeObserver;
     constructor(el: HTMLElement, private viewport: HTMLRevogrViewportScrollableElement) {
         this.init(el);
