@@ -73,8 +73,8 @@
         }
 
         function generateFakeDataObject(rowsNumber, colsNumber) {
-            const result = {};
-            const headers = {};
+            const result = [];
+            const headers = [];
             const all = colsNumber * rowsNumber;
             for (let j = 0; j < all; j++) {
                 let col = j%colsNumber;
@@ -106,7 +106,7 @@
         grid.range = true;
         grid.resize = true;
         grid.addEventListener('headerClick', e => {
-            alert('Header number:' + e.detail);
+            alert('Header number:' + e.prop);
         });
         grid.addEventListener('beforeEdit', e => {
             if (e.detail.row % 3) {

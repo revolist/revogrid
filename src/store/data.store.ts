@@ -3,11 +3,8 @@
 */
 
 import {createStore, ObservableMap} from '@stencil/store';
-import size from 'lodash/size';
 import reduce from 'lodash/reduce';
 
-import {setViewport} from './viewport.store';
-import {setRealSize} from './dimension.store';
 import {
   ColumnData,
   ColumnDataSchema,
@@ -48,16 +45,9 @@ function setDataColumn(columns: ColumnData): number {
   return columnsFlat.length;
 }
 
-function setData(data: DataType[]): void {
-  const rows: number = size(data);
-  updateData(data);
-  setViewport({ realCount: rows }, 'row');
-  setRealSize(rows, 'row' );
-}
-
 function updateData(data: DataType[]): void {
   setStore(dataStore, { data });
 }
 
-export {setDataColumn, setData, updateData};
+export {setDataColumn, updateData};
 export default dataStore;

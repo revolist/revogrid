@@ -3,12 +3,13 @@ import {DATA_COL} from '../../utils/consts';
 import {Module} from '../../services/module.interfaces';
 import dimensionProvider from '../../services/dimension.provider';
 import {getCell} from '../../services/cell.helpers';
-import {Selection} from '../../interfaces';
+import {ColumnDataSchemaRegular, Selection} from '../../interfaces';
 import Cell = Selection.Cell;
+import dataProvider from "../../services/data.provider";
 
 interface Config {
     resize?: boolean;
-    headerClick?(col: number): void;
+    headerClick?(col: ColumnDataSchemaRegular): void;
 }
 
 export default class HeaderService implements Module {
@@ -24,7 +25,8 @@ export default class HeaderService implements Module {
         }
         interact(target).on('tap', event => {
             const cell: Cell = getCell(event.currentTarget);
-            config?.headerClick(cell.x);
+            const col: ColumnDataSchemaRegular = dataProvider.column(cell.x);
+            col && config?.headerClick(col);
         });
     }
 

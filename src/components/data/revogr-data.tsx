@@ -13,9 +13,11 @@ export class RevogrData {
 
   render() {
     const rowsEls: HTMLElement[] = [];
-    for (let row of viewportRows.get('items')) {
+    const rows = viewportRows.get('items');
+    const cols = viewportCols.get('items');
+    for (let row of rows) {
       const cells: HTMLElement[] = [];
-      for (let col of viewportCols.get('items')) {
+      for (let col of cols) {
         const dataProps = {
           [DATA_COL]: col.itemIndex,
           [DATA_ROW]: row.itemIndex,

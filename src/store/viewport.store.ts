@@ -54,10 +54,6 @@ function getItems(store: ObservableMap<ViewportState>): ViewportStateItems {
 
 function setViewport(data: Partial<ViewportState>, dimensionType: DimensionType): void {
   const store: ObservableMap<ViewportState> = getStoreByType(dimensionType);
-  if (!data.virtualSize) {
-    store.set('itemIndexes', []);
-    store.set('items', []);
-  }
   setStore(store, data);
 }
 

@@ -6,6 +6,7 @@ import dataProvider from '../../services/data.provider';
 import {DATA_COL, HEADER_CLASS} from '../../utils/consts';
 import moduleRegister from '../../services/moduleRegister';
 import HeaderService from './headerService';
+import {ColumnDataSchemaRegular} from "../../interfaces";
 
 @Component({
   tag: 'revogr-header'
@@ -13,12 +14,12 @@ import HeaderService from './headerService';
 export class RevogrHeaderComponent {
   @Element() element!: HTMLStencilElement;
   @Prop() resize: boolean;
-  @Event() headerClick: EventEmitter<number>;
+  @Event() headerClick: EventEmitter<ColumnDataSchemaRegular>;
 
   connectedCallback(): void {
     const service: HeaderService = new HeaderService(`${moduleRegister.baseClass} .${HEADER_CLASS}`, {
       resize: this.resize,
-      headerClick: (col: number): void => {
+      headerClick: (col: ColumnDataSchemaRegular): void => {
         this.headerClick.emit(col);
       }
     });

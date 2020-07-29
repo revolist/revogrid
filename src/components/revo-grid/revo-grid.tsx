@@ -1,7 +1,6 @@
 import {Component, Prop, h, Watch, Element, Listen} from '@stencil/core';
 
 
-import {setData} from '../../store/data.store';
 import {setSettings} from '../../store/dimension.store';
 import {setViewport} from '../../store/viewport.store';
 import {ColumnData, DataType, Edition, InitialSettings, MultiDimensionAction} from '../../interfaces';
@@ -44,7 +43,7 @@ export class RevoGrid {
   @Prop() source: DataType[] = [];
   @Watch('source')
   dataChanged(newVal: DataType[]): void {
-    setData(newVal);
+    dataProvider.setData(newVal);
   }
 
   // if source provided as object header 'prop' will link to the object field

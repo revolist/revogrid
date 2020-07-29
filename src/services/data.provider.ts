@@ -4,7 +4,7 @@ import {h, VNode} from '@stencil/core';
 import {HyperFunc} from '../store/index.stencil';
 import {
   CellTemplateFunc, ColumnData,
-  ColumnDataSchemaModel,
+  ColumnDataSchemaModel, ColumnDataSchemaRegular,
   ColumnProp,
   DataSource,
   DataSourceState,
@@ -30,6 +30,13 @@ class DataProvider {
     return this.getCellData(r, c);
   }
 
+  setData(data: DataType[]): void {
+    updateData({...data});
+
+    const realCount: number = data.length;
+    setViewport({ realCount }, 'row');
+    setRealSize(realCount, 'row' );
+  }
 
   getCellData(r: number, c: number): string {
     const {prop, model} = this.rowDataModel(r, c);
@@ -57,6 +64,10 @@ class DataProvider {
 
   header(c: number): string {
     return this.columnProvider.data(c);
+  }
+
+  column(c: number): ColumnDataSchemaRegular|undefined {
+    return this.columnProvider.getColumn(c);
   }
 
   isReadOnly(r: number, c: number): boolean {
