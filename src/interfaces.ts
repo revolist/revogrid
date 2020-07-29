@@ -11,6 +11,7 @@ export interface MultiDimensionAction {
 export type ColumnDataSchemaModel = {
   prop: ColumnProp;
   model: DataType;
+  data: DataSource;
 };
 
 export interface ColumnDataSchema {
@@ -25,7 +26,7 @@ export type CellTemplateFunc<T> = (h: (sel: string, data?: object, text?: string
 export type ColumnData = ColumnDataSchema[];
 
 export type DataType = {[T in ColumnProp]: DataFormat} | DataFormat[];
-
+export type DataSource = DataType[];
 export interface DataSourceState {
   data: DataType[];
   columns: ColumnDataSchema[];

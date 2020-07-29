@@ -2,7 +2,14 @@ import {ObservableMap} from '@stencil/store';
 import {h, VNode} from '@stencil/core';
 
 import {HyperFunc} from '../store/index.stencil';
-import {CellTemplateFunc, ColumnDataSchemaModel, DataSourceState} from '../interfaces';
+import {
+  CellTemplateFunc,
+  ColumnDataSchemaModel,
+  ColumnProp,
+  DataSource,
+  DataSourceState,
+  DataType
+} from '../interfaces';
 import dataStore, {updateData} from '../store/data.store';
 import HeaderProviderObject from './header.data.provider';
 
@@ -28,15 +35,16 @@ class DataProvider {
   }
 
   setData(r: number, c: number, val: string): void {
-    const data = this.dataSourceStore.get('data');
-    data[r][c] = val;
+    const {data, model, prop} = this.rowDataModel(r, c);
+    model[prop as number] = val;
     updateData({...data});
   }
 
   rowDataModel(r: number, c: number): ColumnDataSchemaModel {
-    const prop = this.dataSourceStore.get('columns')[c]?.prop;
-    const model = this.dataSourceStore.get('data')[r] || {};
-    return { prop, model };
+    const prop: ColumnProp = this.dataSourceStore.get('columns')[c]?.prop;
+    const data: DataSource = this.dataSourceStore.get('data');
+    const model: DataType = data[r] || {};
+    return { prop, model, data };
   }
 
   header(c: number): string {

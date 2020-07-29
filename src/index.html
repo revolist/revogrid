@@ -98,10 +98,11 @@
 
         const grid = document.querySelector('revo-grid');
 
-        const data = generateFakeData(1000, 10);
+        const data = generateFakeDataObject(1000, 10);
         grid.columns = data.headers;
         grid.source = data.rows;
         grid.readonly = false;
+        grid.range = true;
         grid.addEventListener('beforeEdit', e => {
             if (e.detail.row % 2) {
                 // cancel changes on edit
