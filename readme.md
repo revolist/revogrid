@@ -1,4 +1,4 @@
-# Revo Grid
+# RevoGrid
 
 A repository for the virtual grid implementation based on Web Component using Stencil.
 Works in any major framework or with no framework at all.
