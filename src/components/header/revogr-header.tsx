@@ -1,11 +1,11 @@
-import {Component, Element, h, Prop} from '@stencil/core';
+import {Component, Element, Event, EventEmitter, h, Prop} from '@stencil/core';
 import {HTMLStencilElement} from '@stencil/core/internal';
 
 import {colsStore as viewportCols} from '../../store/viewport.store';
 import dataProvider from '../../services/data.provider';
 import {DATA_COL, HEADER_CLASS} from '../../utils/consts';
 import moduleRegister from '../../services/moduleRegister';
-import HeaderResizeService from './headerResizeService';
+import HeaderService from './headerService';
 
 @Component({
   tag: 'revogr-header'
@@ -13,11 +13,16 @@ import HeaderResizeService from './headerResizeService';
 export class RevogrHeaderComponent {
   @Element() element!: HTMLStencilElement;
   @Prop() resize: boolean;
+  @Event() headerClick: EventEmitter<number>;
 
   connectedCallback(): void {
-    if (this.resize) {
-      moduleRegister.register('headResize', new HeaderResizeService(`${moduleRegister.baseClass} .${HEADER_CLASS}`));
-    }
+    const service: HeaderService = new HeaderService(`${moduleRegister.baseClass} .${HEADER_CLASS}`, {
+      resize: this.resize,
+      headerClick: (col: number): void => {
+        this.headerClick.emit(col);
+      }
+    });
+    moduleRegister.register('headResize', service);
   }
 
   disconnectedCallback(): void {

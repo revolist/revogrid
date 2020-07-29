@@ -15,13 +15,21 @@ export type ColumnDataSchemaModel = {
 };
 
 export type ReadOnlyFormat = boolean | ((row: number, col: number) => boolean);
-
-export interface ColumnDataSchema {
-  prop: ColumnProp;
+interface ColumnDataSchemaBase {
   name?: DataFormat;
   readonly?: ReadOnlyFormat;
   cellTemplate?: Function;
 }
+export interface ColumnDataSchemaGrouping {
+  children: ColumnDataSchema[];
+  name: DataFormat;
+}
+
+export interface ColumnDataSchemaRegular extends ColumnDataSchemaBase {
+  prop: ColumnProp;
+}
+
+export type ColumnDataSchema = ColumnDataSchemaGrouping | ColumnDataSchemaRegular;
 
 export type ColumnProp = string|number;
 export type DataFormat = string;
@@ -33,6 +41,7 @@ export type DataSource = DataType[];
 export interface DataSourceState {
   data: DataType[];
   columns: ColumnDataSchema[];
+  columnsFlat: ColumnDataSchemaRegular[];
 }
 
 export interface ViewportStateItems {

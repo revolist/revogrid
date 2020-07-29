@@ -4,24 +4,50 @@
 
 import {createStore, ObservableMap} from '@stencil/store';
 import size from 'lodash/size';
+import reduce from 'lodash/reduce';
 
 import {setViewport} from './viewport.store';
 import {setRealSize} from './dimension.store';
-import {ColumnData, DataSourceState, DataType} from '../interfaces';
+import {
+  ColumnData,
+  ColumnDataSchema,
+  ColumnDataSchemaGrouping,
+  ColumnDataSchemaRegular,
+  DataSourceState,
+  DataType
+} from '../interfaces';
 import {setStore} from './helpers';
 
 const dataStore: ObservableMap<DataSourceState> = createStore({
   data: [],
-  columns: []
+  columns: [],
+  columnsFlat: []
 });
 
-function setColumn(data: ColumnData): void {
-  const cols: number = size(data);
-  setStore(dataStore, { columns: data });
-
-  setViewport({ realCount: cols }, 'col');
-  setRealSize(cols, 'col' );
+function getColumns(columns: ColumnData): ColumnDataSchemaRegular[] {
+  return reduce(columns, (res: ColumnDataSchemaRegular[], colData: ColumnDataSchema) => {
+    if (isColGrouping(colData)) {
+      res.push(...getColumns(colData.children));
+    } else {
+      res.push(colData);
+    }
+    return res;
+  }, []);
 }
+
+function isColGrouping(colData: ColumnDataSchemaGrouping | ColumnDataSchemaRegular): colData is ColumnDataSchemaGrouping {
+  return !!(colData as ColumnDataSchemaGrouping).children;
+}
+
+function setDataColumn(columns: ColumnData): number {
+  const columnsFlat: ColumnDataSchemaRegular[] = getColumns(columns);
+  setStore(dataStore, {
+    columns,
+    columnsFlat
+  });
+  return columnsFlat.length;
+}
+
 function setData(data: DataType[]): void {
   const rows: number = size(data);
   updateData(data);
@@ -33,5 +59,5 @@ function updateData(data: DataType[]): void {
   setStore(dataStore, { data });
 }
 
-export {setColumn, setData, updateData};
+export {setDataColumn, setData, updateData};
 export default dataStore;

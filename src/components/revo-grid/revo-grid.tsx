@@ -1,7 +1,7 @@
 import {Component, Prop, h, Watch, Element, Listen} from '@stencil/core';
 
 
-import {setData, setColumn} from '../../store/data.store';
+import {setData} from '../../store/data.store';
 import {setSettings} from '../../store/dimension.store';
 import {setViewport} from '../../store/viewport.store';
 import {ColumnData, DataType, Edition, InitialSettings, MultiDimensionAction} from '../../interfaces';
@@ -9,7 +9,7 @@ import GridResizeService from './gridResizeService';
 import moduleRegister from '../../services/moduleRegister';
 import {UUID, VIEWPORT_CLASS} from '../../utils/consts';
 import dimensionProvider from '../../services/dimension.provider';
-import dataProvider from "../../services/data.provider";
+import dataProvider from '../../services/data.provider';
 
 
 const initialSettings: InitialSettings = {
@@ -51,14 +51,14 @@ export class RevoGrid {
   @Prop() columns: ColumnData = [];
   @Watch('columns')
   columnChanged(newVal: ColumnData) {
-    setColumn(newVal);
+    dataProvider.setColumns(newVal);
   }
 
   @Listen('beforeEdit')
   beforeSave(e: CustomEvent<Edition.SaveDataDetails>): void {
     setTimeout(() => {
       if (!e.defaultPrevented) {
-        dataProvider.setData(e.detail.row, e.detail.col, e.detail.val);
+        dataProvider.setCellData(e.detail.row, e.detail.col, e.detail.val);
       }
     }, 0);
   }

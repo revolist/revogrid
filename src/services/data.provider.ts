@@ -3,15 +3,17 @@ import {h, VNode} from '@stencil/core';
 
 import {HyperFunc} from '../store/index.stencil';
 import {
-  CellTemplateFunc,
+  CellTemplateFunc, ColumnData,
   ColumnDataSchemaModel,
   ColumnProp,
   DataSource,
   DataSourceState,
   DataType, ReadOnlyFormat
 } from '../interfaces';
-import dataStore, {updateData} from '../store/data.store';
+import dataStore, {setDataColumn, updateData} from '../store/data.store';
 import HeaderProviderObject from './header.data.provider';
+import {setViewport} from '../store/viewport.store';
+import {setRealSize} from '../store/dimension.store';
 
 class DataProvider {
   private columnProvider?: HeaderProviderObject;
@@ -20,28 +22,34 @@ class DataProvider {
     this.columnProvider = new HeaderProviderObject(this.dataSourceStore);
   }
 
-  public cellRenderer(r: number, c: number): string|VNode {
+  cellRenderer(r: number, c: number): string|VNode {
     const tpl: CellTemplateFunc<VNode>|undefined = this.columnProvider.template(c);
     if (tpl) {
       return tpl(h as unknown as HyperFunc, this.rowDataModel(r, c));
     }
-    return this.data(r, c);
+    return this.getCellData(r, c);
   }
 
 
-  data(r: number, c: number): string {
+  getCellData(r: number, c: number): string {
     const {prop, model} = this.rowDataModel(r, c);
     return model[prop as number] || '';
   }
 
-  setData(r: number, c: number, val: string): void {
+  setCellData(r: number, c: number, val: string): void {
     const {data, model, prop} = this.rowDataModel(r, c);
     model[prop as number] = val;
     updateData({...data});
   }
 
+  setColumns(columns: ColumnData): void {
+    const realCount: number = setDataColumn(columns);
+    setViewport({ realCount }, 'col');
+    setRealSize(realCount, 'col' );
+  }
+
   rowDataModel(r: number, c: number): ColumnDataSchemaModel {
-    const prop: ColumnProp = this.dataSourceStore.get('columns')[c]?.prop;
+    const prop: ColumnProp = this.dataSourceStore.get('columnsFlat')[c]?.prop;
     const data: DataSource = this.dataSourceStore.get('data');
     const model: DataType = data[r] || {};
     return { prop, model, data };
@@ -52,7 +60,7 @@ class DataProvider {
   }
 
   isReadOnly(r: number, c: number): boolean {
-    const readOnly: ReadOnlyFormat = this.dataSourceStore.get('columns')[c]?.readonly;
+    const readOnly: ReadOnlyFormat = this.dataSourceStore.get('columnsFlat')[c]?.readonly;
     if (typeof readOnly === 'function') {
       return readOnly(r, c);
     }

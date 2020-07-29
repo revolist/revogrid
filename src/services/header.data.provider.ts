@@ -1,4 +1,4 @@
-import {CellTemplateFunc, ColumnDataSchema, DataSourceState} from "../interfaces";
+import {CellTemplateFunc, ColumnDataSchemaRegular, DataSourceState} from "../interfaces";
 import {ObservableMap} from "@stencil/store";
 import {VNode} from "@stencil/core";
 
@@ -16,7 +16,7 @@ export default class HeaderProviderObject {
         return this.getColumn(c)?.cellTemplate as PossibleCellFunc;
     }
 
-    private getColumn(c: number): ColumnDataSchema|undefined {
-        return this.dataSourceStore.get('columns')[c];
+    private getColumn(c: number): ColumnDataSchemaRegular|undefined {
+        return this.dataSourceStore.get('columnsFlat')[c];
     }
 }

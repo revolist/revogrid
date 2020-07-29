@@ -58,7 +58,7 @@ export class Edit {
         };
         return <div style={style} class='edit-input-wrapper'>
             <revogr-text-editor
-                value={this.editCell.val ? this.editCell.val : dataProvider.data(y, x)}
+                value={this.editCell.val ? this.editCell.val : dataProvider.getCellData(y, x)}
                 onEdit={(e) => this.onSave(e)}/>
         </div>;
     }

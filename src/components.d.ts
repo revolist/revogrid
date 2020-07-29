@@ -107,6 +107,7 @@ declare namespace LocalJSX {
         "onBeforeEdit"?: (event: CustomEvent<Edition.SaveDataDetails>) => void;
     }
     interface RevogrHeader {
+        "onHeaderClick"?: (event: CustomEvent<number>) => void;
         "resize"?: boolean;
     }
     interface RevogrOverlaySelection {
