@@ -1,9 +1,9 @@
 import interact from 'interactjs';
 import {Module} from '../../../services/module.interfaces';
-import selectionStore, {setFocus, setRange, setTempRange} from '../../../store/selection.strore';
+import selectionStore, {setFocus, setRange, setTempRange} from '../../../store/selection/selection.strore';
 import {getCell} from '../../../services/cell.helpers';
 import {codesLetter} from '../../../utils/keyCodes';
-import {rowsStore as viewportRows, colsStore as viewportCols} from '../../../store/viewport.store';
+import {rowsStore as viewportRows, colsStore as viewportCols} from '../../../store/viewPort/viewport.store';
 import {Selection} from '../../../interfaces';
 import Cell = Selection.Cell;
 

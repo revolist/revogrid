@@ -4,9 +4,7 @@ import { sass } from '@stencil/sass';
 export const config: Config = {
   namespace: 'revo-grid',
   taskQueue: 'async',
-  plugins: [
-    sass()
-  ],
+  plugins: [sass()],
   outputTargets: [
     {
       type: 'dist',
@@ -17,6 +15,9 @@ export const config: Config = {
     },
     {
       type: 'www',
+      copy: [
+        { src: 'utilsExternal' }
+      ],
       serviceWorker: null // disable service workers
     }
   ]

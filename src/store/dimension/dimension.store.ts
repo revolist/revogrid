@@ -6,9 +6,9 @@
 import {createStore, ObservableMap} from '@stencil/store';
 import reduce from 'lodash/reduce';
 
-import {setStore} from './helpers';
+import {setStore} from '../../utils/store.utils';
 import {calculateDimensionData} from './dimension.helpers';
-import {DimensionSettingsState, DimensionType, ViewSettingSizeProp} from '../interfaces';
+import {DimensionSettingsState, DimensionType, ViewSettingSizeProp} from '../../interfaces';
 
 type Item = keyof DimensionSettingsState;
 

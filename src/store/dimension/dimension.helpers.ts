@@ -3,8 +3,8 @@ import sortedIndex from 'lodash/sortedIndex';
 import reduce from 'lodash/reduce';
 
 
-import {mergeSortedArray} from '../utils/utils';
-import {DimensionSettingsState, PositionItem, ViewSettingSizeProp} from '../interfaces';
+import {mergeSortedArray} from '../../utils/utils';
+import {DimensionSettingsState, PositionItem, ViewSettingSizeProp} from '../../interfaces';
 
 export type DimensionPosition =
     Pick<DimensionSettingsState, 'indexes'|'positionIndexes'|'originItemSize'|'positionIndexToItem'>;

@@ -1,7 +1,7 @@
 import {Component, Element, h} from '@stencil/core';
 import {HTMLStencilElement} from '@stencil/core/internal';
 
-import {rowsStore as viewportRows, colsStore as viewportCols} from '../../store/viewport.store';
+import {rowsStore as viewportRows, colsStore as viewportCols} from '../../store/viewPort/viewport.store';
 import dataProvider from '../../services/data.provider';
 import {CELL_CLASS, DATA_COL, DATA_ROW, DISABLED_CLASS} from '../../utils/consts';
 

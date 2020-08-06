@@ -1,7 +1,7 @@
 import {Component, h, Prop} from '@stencil/core';
-import selectionStore from '../../../store/selection.strore';
-import {rowsStore, colsStore} from '../../../store/dimension.store';
-import {getItemByIndex} from '../../../store/dimension.helpers';
+import selectionStore from '../../../store/selection/selection.strore';
+import {rowsStore, colsStore} from '../../../store/dimension/dimension.store';
+import {getItemByIndex} from '../../../store/dimension/dimension.helpers';
 import {
     SELECTION_BORDER_CLASS,
     SELECTION_BG_CLASS,

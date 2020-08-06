@@ -1,7 +1,7 @@
 import {Component, Element, Event, EventEmitter, h, Prop} from '@stencil/core';
 import {HTMLStencilElement} from '@stencil/core/internal';
 
-import {colsStore as viewportCols} from '../../store/viewport.store';
+import {colsStore as viewportCols} from '../../store/viewPort/viewport.store';
 import dataProvider from '../../services/data.provider';
 import {DATA_COL, HEADER_CLASS} from '../../utils/consts';
 import moduleRegister from '../../services/moduleRegister';

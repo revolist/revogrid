@@ -1,8 +1,8 @@
 import {Component, h, Method} from '@stencil/core';
 
 import {getScrollbarWidth} from '../../utils/utils';
-import {setViewPortCoordinate} from '../../store/viewport.store';
-import {rowsStore as rowDimension, colsStore as colDimension, getCurrentState} from '../../store/dimension.store';
+import {setViewPortCoordinate} from '../../store/viewPort/viewport.store';
+import {rowsStore as rowDimension, colsStore as colDimension, getCurrentState} from '../../store/dimension/dimension.store';
 import {DimensionSettingsState} from '../../interfaces';
 
 @Component({
