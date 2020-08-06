@@ -31,75 +31,12 @@
 <body>
     <revo-grid class="grid-component"></revo-grid>
 
-    <script>
-        function generateHeader(index) {
-            var dividend = index + 1;
-            var columnLabel = '';
-            var modulo;
-            while (dividend > 0) {
-                modulo = (dividend - 1) % 26;
-                columnLabel = String.fromCharCode(65 + modulo) + columnLabel;
-                dividend = parseInt((dividend - modulo) / 26, 10);
-            }
-            return columnLabel;
-        }
-
-        function generateFakeData(rowsNumber, colsNumber) {
-            const result = [];
-            const rowData = [];
-            const headers = [];
-            for (let j = 0; j < colsNumber; j++) {
-                rowData.push(j.toString());
-                headers.push({
-                    prop: j,
-                    name: generateHeader(j),
-                    cellTemplate: (h, props) => {
-                        return h('div', {
-                            style: {
-                                backgroundColor: j%2 ? 'red' : undefined
-                            },
-                            class: 'inner-cell'
-                        }, props.model[props.prop] || '');
-                    }
-                });
-            }
-            for (let i = 0; i < rowsNumber; i++) {
-                result.push(rowData);
-            }
-            return {
-                rows: result,
-                headers: headers
-            };
-        }
-
-        function generateFakeDataObject(rowsNumber, colsNumber) {
-            const result = [];
-            const headers = [];
-            const all = colsNumber * rowsNumber;
-            for (let j = 0; j < all; j++) {
-                let col = j%colsNumber;
-                let row = j/colsNumber|0;
-                if (!result[row]) {
-                    result[row] = {};
-                }
-                result[row][col] = row + ':' + col;
-                if (!headers[col]) {
-                    headers[col] = {
-                        name: generateHeader(col),
-                        prop: col,
-                        readonly: !!(col%2)
-                    }
-                }
-            }
-            return {
-                rows: result,
-                headers: headers
-            };
-        }
+    <script type="module">
+        import {generateFakeDataObject} from "/utilsExternal/generate-data.js";
 
         const grid = document.querySelector('revo-grid');
 
-        const data = generateFakeDataObject(1000, 10);
+        const data = generateFakeDataObject(100, 10);
         grid.columns = data.headers;
         grid.source = data.rows;
         grid.readonly = false;

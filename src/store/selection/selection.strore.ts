@@ -1,6 +1,6 @@
 import {createStore, ObservableMap} from '@stencil/store';
-import {setStore} from './helpers';
-import {Edition, Selection} from '../interfaces';
+import {setStore} from '../../utils/store.utils';
+import {Edition, Selection} from '../../interfaces';
 import RangeArea = Selection.RangeArea;
 import Cell = Selection.Cell;
 import EditCell = Edition.EditCell;

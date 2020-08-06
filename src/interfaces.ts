@@ -36,7 +36,7 @@ export type DataFormat = string;
 export type CellTemplateFunc<T> = (h: (sel: string, data?: object, text?: string) => T, props: ColumnDataSchemaModel) => T;
 export type ColumnData = ColumnDataSchema[];
 
-export type DataType = {[T in ColumnProp]: DataFormat} | DataFormat[];
+export type DataType = {[T in ColumnProp]: DataFormat};
 export type DataSource = DataType[];
 export interface DataSourceState {
   data: DataType[];
@@ -46,7 +46,8 @@ export interface DataSourceState {
 
 export interface ViewportStateItems {
   items: VirtualPositionItem[];
-  itemIndexes: number[];
+  start: number;
+  end: number;
 }
 export interface ViewportState extends ViewportStateItems {
   realCount: number;

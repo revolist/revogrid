@@ -1,6 +1,6 @@
 {
   "name": "@revolist/revogrid",
-  "version": "1.0.23",
+  "version": "1.0.24",
   "description": "Reactive grid component - Revo Grid.",
   "license": "MIT",
   "repository": {
@@ -34,10 +34,13 @@
     "@types/events": "^3.0.0",
     "@types/lodash": "^4.14.149",
     "@types/resize-observer-browser": "^0.1.3",
-    "gh-pages": "^2.2.0"
+    "gh-pages": "^2.2.0",
+    "jest": "26.0.1",
+    "jest-cli": "26.0.1"
   },
   "dependencies": {
     "@juggle/resize-observer": "^3.1.2",
+    "@types/jest": "^26.0.8",
     "interactjs": "1.8.4",
     "lodash": "^4.17.15"
   },

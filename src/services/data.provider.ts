@@ -10,10 +10,10 @@ import {
   DataSourceState,
   DataType, ReadOnlyFormat
 } from '../interfaces';
-import dataStore, {setDataColumn, updateData} from '../store/data.store';
+import dataStore, {setDataColumn, updateData} from '../store/dataSource/data.store';
 import HeaderProviderObject from './header.data.provider';
-import {setViewport} from '../store/viewport.store';
-import {setRealSize} from '../store/dimension.store';
+import {setViewport} from '../store/viewPort/viewport.store';
+import {setRealSize} from '../store/dimension/dimension.store';
 
 class DataProvider {
   private columnProvider?: HeaderProviderObject;

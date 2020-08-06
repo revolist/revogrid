@@ -1,8 +1,8 @@
 import {Component, Event, EventEmitter, h} from '@stencil/core';
 
-import selectionStore from '../../../store/selection.strore';
-import {getItemByIndex} from '../../../store/dimension.helpers';
-import {colsStore, rowsStore} from '../../../store/dimension.store';
+import selectionStore from '../../../store/selection/selection.strore';
+import {getItemByIndex} from '../../../store/dimension/dimension.helpers';
+import {colsStore, rowsStore} from '../../../store/dimension/dimension.store';
 import dataProvider from '../../../services/data.provider';
 import moduleRegister from '../../../services/moduleRegister';
 import CellEditService from './cellEditService';

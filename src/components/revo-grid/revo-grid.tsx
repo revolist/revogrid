@@ -1,8 +1,8 @@
 import {Component, Prop, h, Watch, Element, Listen} from '@stencil/core';
 
 
-import {setSettings} from '../../store/dimension.store';
-import {setViewport} from '../../store/viewport.store';
+import {setSettings} from '../../store/dimension/dimension.store';
+import {setViewport} from '../../store/viewPort/viewport.store';
 import {ColumnData, DataType, Edition, InitialSettings, MultiDimensionAction} from '../../interfaces';
 import GridResizeService from './gridResizeService';
 import moduleRegister from '../../services/moduleRegister';

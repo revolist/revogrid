@@ -1,6 +1,6 @@
 import {Module} from '../../../services/module.interfaces';
 import interact from 'interactjs';
-import selectionStore, {setEdit} from '../../../store/selection.strore';
+import selectionStore, {setEdit} from '../../../store/selection/selection.strore';
 import dataProvider from "../../../services/data.provider";
 import {codesLetter} from '../../../utils/keyCodes';
 import {isLetterKey} from '../../../utils/keyCodes.utils';

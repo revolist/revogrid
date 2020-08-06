@@ -14,20 +14,30 @@ import {
   isActiveRange
 } from './viewport.helpers';
 
-import {setStore} from './helpers';
+import {setStore} from '../../utils/store.utils';
 import {
   DimensionType,
   ViewportState,
   ViewportStateItems, ViewSettingSizeProp,
   VirtualPositionItem
-} from '../interfaces';
+} from '../../interfaces';
 
 function initialState(): ViewportState {
   return {
+    // virtual item information per rendered item
     items: [],
-    itemIndexes: [],
+    // virtual dom item order to render
+    start: 0,
+
+    end: 0,
+
+    // space rendered outside of viewport
     frameOffset: 0,
+
+    // size of viewport in px
     virtualSize: 0,
+
+    // total number of items
     realCount: 0
   };
 }
@@ -45,10 +55,11 @@ function getStoreByType(type: DimensionType): ObservableMap<ViewportState> {
   }
 }
 
-function getItems(store: ObservableMap<ViewportState>): ViewportStateItems {
+function getItems(store: ObservableMap<ViewportState>): Pick<ViewportStateItems, 'items'|'start'|'end'> {
   return {
     items: store.get('items'),
-    itemIndexes: store.get('itemIndexes')
+    start: store.get('start'),
+    end: store.get('end')
   };
 }
 
@@ -87,7 +98,7 @@ function setViewPortCoordinate(
 
   // left position changed
   if (!isActiveRange(pos, firstItem)) {
-    const toUpdate: ViewportStateItems = getUpdatedItemsByPosition(
+    const toUpdate = getUpdatedItemsByPosition(
       pos,
       getItems(store),
       store.get('realCount'),
@@ -97,18 +108,33 @@ function setViewPortCoordinate(
     setStore(store, toUpdate);
     // right position changed
   } else if (firstItem && (store.get('virtualSize') + pos) > lastItem?.end) {
-    const toUpdate: ViewportStateItems = addMissingItems(
-      firstItem,
-      store.get('realCount'),
-      virtualSize + pos - firstItem.start,
-      getItems(store),
-      dimension
+    // check is any item missing for full fill content
+    const missing = addMissingItems(
+        firstItem,
+        store.get('realCount'),
+        virtualSize + pos - firstItem.start,
+        getItems(store),
+        dimension
     );
 
-    setStore(store, {
-      items: [...store.get('items'), ...toUpdate.items],
-      itemIndexes: [...store.get('itemIndexes'), ...toUpdate.itemIndexes]
-    });
+
+    if (missing.length) {
+      const items = [...store.get('items')];
+      const range = {
+        start: store.get('start'),
+        end: store.get('end')
+      };
+      items.splice(range.end + 1, 0, ...missing);
+      range.end += missing.length;
+
+      if (range.start >= range.end) {
+        range.start += missing.length;
+      }
+      setStore(store, {
+        items: [...items],
+        ...range
+      });
+    }
   }
 }
 
@@ -121,14 +147,10 @@ function setViewPortDimension(sizes: ViewSettingSizeProp, dimensionType: Dimensi
   }
 
   const items = store.get('items');
-  const itemIndexes = store.get('itemIndexes');
   let changedCoordinate: number = 0;
 
-  console.log(items);
-
-  for (let i of itemIndexes) {
+  for (let item of items) {
     let changedSize: number = 0;
-    const item: VirtualPositionItem = items[i];
     // change pos if size change present before
     if (changedCoordinate) {
       item.start += changedCoordinate;
@@ -141,9 +163,6 @@ function setViewPortDimension(sizes: ViewSettingSizeProp, dimensionType: Dimensi
       changedCoordinate += changedSize;
       item.size = size;
       item.end = item.start + size;
-    }
-    if (changedSize || changedCoordinate) {
-      items[i] = {...item};
     }
   }
 

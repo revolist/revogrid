@@ -1,4 +1,4 @@
-import {setViewport} from "../../store/viewport.store";
+import {setViewport} from "../../store/viewPort/viewport.store";
 import {Module} from "../../services/module.interfaces";
 
 export default class GridResizeService implements Module {
