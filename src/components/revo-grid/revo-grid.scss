@@ -17,6 +17,7 @@ revo-grid {
   height: 100%;
   font-family: Helvetica, Arial, Sans-Serif, serif;
   font-size: 14px;
+  position: relative;
 
 
   -webkit-touch-callout: none; /* iOS Safari */
@@ -70,7 +71,6 @@ revo-grid {
     box-shadow: $cell-shadow-cell;
     height: 100%;
     text-align: center;
-    padding: 5px 0;
 
     &.disabled {
       background-color: $cell-disabled-bg;

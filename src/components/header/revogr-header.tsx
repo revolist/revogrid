@@ -1,12 +1,11 @@
 import {Component, Element, Event, EventEmitter, h, Prop} from '@stencil/core';
 import {HTMLStencilElement} from '@stencil/core/internal';
 
-import {colsStore as viewportCols} from '../../store/viewPort/viewport.store';
 import dataProvider from '../../services/data.provider';
 import {DATA_COL, HEADER_CLASS} from '../../utils/consts';
 import moduleRegister from '../../services/moduleRegister';
 import HeaderService from './headerService';
-import {ColumnDataSchemaRegular} from "../../interfaces";
+import {ColumnDataSchemaRegular, VirtualPositionItem} from "../../interfaces";
 
 @Component({
   tag: 'revogr-header'
@@ -14,6 +13,7 @@ import {ColumnDataSchemaRegular} from "../../interfaces";
 export class RevogrHeaderComponent {
   @Element() element!: HTMLStencilElement;
   @Prop() resize: boolean;
+  @Prop() cols: VirtualPositionItem[];
   @Event() headerClick: EventEmitter<ColumnDataSchemaRegular>;
 
   connectedCallback(): void {
@@ -32,7 +32,7 @@ export class RevogrHeaderComponent {
 
   render() {
     const cells:HTMLElement[] = [];
-    for (let col of viewportCols.get('items')) {
+    for (let col of this.cols) {
       const dataProps = {
         [DATA_COL]: col.itemIndex,
         class: HEADER_CLASS,

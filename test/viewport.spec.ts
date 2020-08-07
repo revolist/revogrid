@@ -1,5 +1,6 @@
 import {getFirstItem, getItems, getLastItem, recombineByOffset} from '../src/store/viewPort/viewport.helpers';
 import {ViewportStateItems, VirtualPositionItem} from '../src/interfaces';
+import generateDataRows from '../src/utilsExternal/generate-data-rows';
 
 type ItemsToUpdate = Pick<ViewportStateItems, 'items'|'start'|'end'>;
 
@@ -7,7 +8,7 @@ type ItemsToUpdate = Pick<ViewportStateItems, 'items'|'start'|'end'>;
 describe('revo-grid-viewport', () => {
     const virtualSize: number = 600;
     const originItemSize: number = 30;
-    const data = generateData(100, 10);
+    const data = generateDataRows(100, 10);
     const realSize = data.length * originItemSize;
     let recombined: ItemsToUpdate;
     let range = { start: 0, end: 0 };
@@ -23,10 +24,10 @@ describe('revo-grid-viewport', () => {
     it('Items are ready for recombination', () => expect(items).toBeDefined());
 
     // repeat recombination several time same way as user scroll
-    for (let i = 0; i < 105; i++) {
+    for (let i = 0; i < 120; i++) {
         describe(`Recombination ${i}`, () => {
-            recombined = recombineByOffset(2, {
-                positiveDirection: true,
+            recombined = recombineByOffset(i % 5, {
+                positiveDirection: i < 100,
                 start: range.start,
                 end: range.end,
                 items,
@@ -95,16 +96,3 @@ describe('revo-grid-viewport', () => {
     console.log(recombined);
 });
 
-function generateData(rowsNumber: number, colsNumber: number): {[key: string]: string}[] {
-    const result: {[key: string]: string}[] = [];
-    const all = colsNumber * rowsNumber;
-    for (let j = 0; j < all; j++) {
-        let col = j%colsNumber;
-        let row = j/colsNumber|0;
-        if (!result[row]) {
-            result[row] = {};
-        }
-        result[row][col] = row + ':' + col;
-    }
-    return result;
-}

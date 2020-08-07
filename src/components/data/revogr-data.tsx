@@ -1,23 +1,23 @@
-import {Component, Element, h} from '@stencil/core';
+import {Component, Element, h, Prop} from '@stencil/core';
 import {HTMLStencilElement} from '@stencil/core/internal';
 
-import {rowsStore as viewportRows, colsStore as viewportCols} from '../../store/viewPort/viewport.store';
 import dataProvider from '../../services/data.provider';
 import {CELL_CLASS, DATA_COL, DATA_ROW, DISABLED_CLASS} from '../../utils/consts';
+import {VirtualPositionItem} from "../../interfaces";
 
 @Component({
   tag: 'revogr-data'
 })
 export class RevogrData {
   @Element() element!: HTMLStencilElement;
+  @Prop() rows: VirtualPositionItem[];
+  @Prop() cols: VirtualPositionItem[];
 
   render() {
     const rowsEls: HTMLElement[] = [];
-    const rows = viewportRows.get('items');
-    const cols = viewportCols.get('items');
-    for (let row of rows) {
+    for (let row of this.rows) {
       const cells: HTMLElement[] = [];
-      for (let col of cols) {
+      for (let col of this.cols) {
         const dataProps = {
           [DATA_COL]: col.itemIndex,
           [DATA_ROW]: row.itemIndex,

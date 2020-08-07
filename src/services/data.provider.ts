@@ -4,22 +4,19 @@ import {h, VNode} from '@stencil/core';
 import {HyperFunc} from '../store/index.stencil';
 import {
   CellTemplateFunc, ColumnData,
-  ColumnDataSchemaModel, ColumnDataSchemaRegular,
-  ColumnProp,
-  DataSource,
-  DataSourceState,
-  DataType, ReadOnlyFormat
+  ColumnDataSchemaModel, ColumnDataSchemaRegular, ColumnProp,
+  DataSource, DataSourceState, DataType,
 } from '../interfaces';
-import dataStore, {setDataColumn, updateData} from '../store/dataSource/data.store';
-import HeaderProviderObject from './header.data.provider';
+import dataStore, {updateData} from '../store/dataSource/data.store';
+import ColumnDataProvider from './column.data.provider';
 import {setViewport} from '../store/viewPort/viewport.store';
 import {setRealSize} from '../store/dimension/dimension.store';
 
 class DataProvider {
-  private columnProvider?: HeaderProviderObject;
+  private columnProvider?: ColumnDataProvider;
 
   constructor(private dataSourceStore:  ObservableMap<DataSourceState>) {
-    this.columnProvider = new HeaderProviderObject(this.dataSourceStore);
+    this.columnProvider = new ColumnDataProvider(this.dataSourceStore);
   }
 
   cellRenderer(r: number, c: number): string|VNode {
@@ -50,7 +47,7 @@ class DataProvider {
   }
 
   setColumns(columns: ColumnData): void {
-    const realCount: number = setDataColumn(columns);
+    const realCount: number = this.columnProvider.setColumns(columns);
     setViewport({ realCount }, 'col');
     setRealSize(realCount, 'col' );
   }
@@ -71,11 +68,7 @@ class DataProvider {
   }
 
   isReadOnly(r: number, c: number): boolean {
-    const readOnly: ReadOnlyFormat = this.dataSourceStore.get('columnsFlat')[c]?.readonly;
-    if (typeof readOnly === 'function') {
-      return readOnly(r, c);
-    }
-    return readOnly;
+    return this.columnProvider.isReadOnly(r, c);
   }
 }
 

@@ -3,10 +3,10 @@
 
 export type DimensionType = 'col'|'row';
 
-export interface MultiDimensionAction {
-  col: ViewSettingSizeProp;
-  row: ViewSettingSizeProp;
-}
+export type ViewPortScrollEvent = {
+  dimension: DimensionType;
+  coordinate: number;
+};
 
 export type ColumnDataSchemaModel = {
   prop: ColumnProp;
@@ -18,6 +18,8 @@ export type ReadOnlyFormat = boolean | ((row: number, col: number) => boolean);
 interface ColumnDataSchemaBase {
   name?: DataFormat;
   readonly?: ReadOnlyFormat;
+  size?: number;
+  minSize?: number;
   cellTemplate?: Function;
 }
 export interface ColumnDataSchemaGrouping {
@@ -27,6 +29,7 @@ export interface ColumnDataSchemaGrouping {
 
 export interface ColumnDataSchemaRegular extends ColumnDataSchemaBase {
   prop: ColumnProp;
+  pin: 'start'|'end';
 }
 
 export type ColumnDataSchema = ColumnDataSchemaGrouping | ColumnDataSchemaRegular;
@@ -83,10 +86,6 @@ export type InitialSettings = {
   readonly: boolean;
   range: boolean;
   resize: boolean;
-  dimensions?: {
-    col?: ViewSettingSizeProp;
-    row?: ViewSettingSizeProp;
-  }
 };
 
 

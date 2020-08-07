@@ -1,13 +1,17 @@
-import {setViewport} from "../../store/viewPort/viewport.store";
-import {Module} from "../../services/module.interfaces";
+import {setViewport} from '../../store/viewPort/viewport.store';
+import {Module} from '../../services/module.interfaces';
+import {DimensionType} from '../../interfaces';
 
+interface Events {
+    scroll(type: DimensionType): void;
+}
 export default class GridResizeService implements Module {
     private resizeObserver: ResizeObserver;
-    constructor(el: HTMLElement, private viewport: HTMLRevogrViewportScrollableElement) {
+    constructor(el: HTMLRevogrViewportElement, private events: Events) {
         this.init(el);
     }
 
-    private async init(el: HTMLElement): Promise<void> {
+    private async init(el: HTMLRevogrViewportElement): Promise<void> {
         if (!('ResizeObserver' in window)) {
             const module = await import('@juggle/resize-observer');
             window.ResizeObserver = (module.ResizeObserver as unknown as typeof ResizeObserver);
@@ -16,8 +20,8 @@ export default class GridResizeService implements Module {
         this.resizeObserver = new ResizeObserver(async() => {
             setViewport({ virtualSize: el.clientHeight }, 'row');
             setViewport({ virtualSize: el.clientWidth }, 'col');
-            await this.viewport.scrollX();
-            await this.viewport.scrollY();
+            this.events?.scroll('row');
+            this.events?.scroll('col');
         });
 
         this.resizeObserver.observe(el);

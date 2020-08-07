@@ -36,7 +36,8 @@
 
         const grid = document.querySelector('revo-grid');
 
-        const data = generateFakeDataObject(100, 10);
+        grid.frameSize = 10;
+        const data = generateFakeDataObject(1000, 50);
         grid.columns = data.headers;
         grid.source = data.rows;
         grid.readonly = false;
@@ -48,8 +49,8 @@
         grid.addEventListener('beforeEdit', e => {
             if (e.detail.row % 3) {
                 // cancel changes on edit
-                e.preventDefault();
-                alert('edit cancelled');
+                // e.preventDefault();
+                // alert('edit cancelled');
             }
         });
     </script>

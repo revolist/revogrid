@@ -2,32 +2,29 @@ import {Component, Prop, h, Watch, Element, Listen} from '@stencil/core';
 
 
 import {setSettings} from '../../store/dimension/dimension.store';
-import {setViewport} from '../../store/viewPort/viewport.store';
-import {ColumnData, DataType, Edition, InitialSettings, MultiDimensionAction} from '../../interfaces';
+import {colsStore as viewportCols, rowsStore as viewportRows, setViewport} from '../../store/viewPort/viewport.store';
+import {
+  ColumnData,
+  DataType, DimensionType,
+  Edition,
+  ViewPortScrollEvent, VirtualPositionItem
+} from '../../interfaces';
 import GridResizeService from './gridResizeService';
 import moduleRegister from '../../services/moduleRegister';
 import {UUID, VIEWPORT_CLASS} from '../../utils/consts';
-import dimensionProvider from '../../services/dimension.provider';
 import dataProvider from '../../services/data.provider';
-
-
-const initialSettings: InitialSettings = {
-  defaultColumnSize: 80,
-  defaultRowSize: 30,
-  frameSize: 0,
-  dimensions: undefined,
-  readonly: false,
-  range: false,
-  resize: false
-};
+import GridScrollingService from './gridScrollingService';
+import initialSettings from "../../utils/initialSettings";
 
 @Component({
   tag: 'revo-grid',
   styleUrl: 'revo-grid.scss'
 })
 export class RevoGrid {
-  private viewport: HTMLRevogrViewportScrollableElement;
+  private viewport: HTMLRevogrViewportElement;
+  private verticalScroll: HTMLRevogrScrollVirtualElement;
   private uuid: number|null = null;
+  private scrollingService: GridScrollingService;
 
   @Element() element: HTMLElement;
 
@@ -37,7 +34,6 @@ export class RevoGrid {
   @Prop() range: boolean = initialSettings.range;
   @Prop() readonly: boolean = initialSettings.readonly;
   @Prop() resize: boolean = initialSettings.resize;
-  @Prop() dimensions: Partial<MultiDimensionAction> = {};
 
   // data is array of objects
   @Prop() source: DataType[] = [];
@@ -64,42 +60,62 @@ export class RevoGrid {
 
   connectedCallback(): void {
     this.uuid = (new Date()).getTime();
+    this.scrollingService = new GridScrollingService({
+      scrollVirtual: (e: ViewPortScrollEvent) => {
+        switch (e.dimension) {
+          case 'col':
+            break;
+          case 'row':
+            this.verticalScroll?.setScroll(e);
+            break;
+        }
+      },
+      scroll: e => this.viewport?.setScroll(e)
+    })
     moduleRegister.baseClass = `.${VIEWPORT_CLASS}[${UUID}='${this.uuid}']`;
+    moduleRegister.register('scrolling', this.scrollingService);
 
     setViewport({ frameOffset: this.frameSize || 0 }, 'row');
     setViewport({ frameOffset: this.frameSize || 0 }, 'col');
     setSettings(this.rowSize, 'row');
     setSettings(this.colSize, 'col');
 
-    dimensionProvider.setSize(this.dimensions.row, 'row');
-    dimensionProvider.setSize(this.dimensions.col, 'col');
     this.columnChanged(this.columns);
     this.dataChanged(this.source);
-  }
-
-  async componentDidLoad(): Promise<void> {
-    moduleRegister.register('resize', new GridResizeService(this.element, this.viewport));
   }
 
   disconnectedCallback(): void {
     moduleRegister.destroy();
   }
 
+  async componentDidLoad(): Promise<void> {
+    moduleRegister.register('resize', new GridResizeService(this.viewport, {
+      scroll: async(dimension: DimensionType) => this.scrollingService.onScroll({
+        dimension,
+        coordinate: await this.viewport.getScroll(dimension)
+      })
+    }));
+  }
+
   render() {
     const viewportProp = {
-      class: `viewport ${VIEWPORT_CLASS}`,
+      class: `viewport ${VIEWPORT_CLASS} horizontal-wrapper`,
       [`${UUID}`]: this.uuid,
-      ref: (el: HTMLRevogrViewportScrollableElement) => { this.viewport = el; }
+      onScrollViewport: (e: CustomEvent<ViewPortScrollEvent>) => this.scrollingService.onScroll(e.detail),
+      ref: (el: HTMLRevogrViewportElement) => { this.viewport = el; }
     };
-    return <revogr-viewport-scrollable{...viewportProp}>
-      <revogr-header slot='header' class='header' resize={this.resize}/>
-      <revogr-data slot='content' class='viewport-layer'/>
-      {
-        !this.readonly || this.range ? <revogr-overlay-selection slot='content' range={this.range}/> : ''
-      }
-      {
-        !this.readonly ? <revogr-edit slot='content'/> : ''
-      }
-    </revogr-viewport-scrollable>;
+    const rows: VirtualPositionItem[] = viewportRows.get('items');
+    const cols: VirtualPositionItem[] = viewportCols.get('items');
+
+    return [
+      <revogr-viewport{...viewportProp}>
+          <revogr-header slot='header' class='header' resize={this.resize} cols={cols}/>
+          <revogr-data slot='content' class='viewport-layer' rows={rows} cols={cols}/>
+          { !this.readonly || this.range ? <revogr-overlay-selection slot='content' range={this.range}/> : '' }
+          { !this.readonly ? <revogr-edit slot='content'/> : '' }
+      </revogr-viewport>,
+
+      <revogr-scroll-virtual ref={el => this.verticalScroll = el} onScrollVirtual={e => this.scrollingService.onScrollVirtual(e.detail)}/>
+    ];
   }
 }

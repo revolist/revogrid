@@ -15,7 +15,19 @@ export function generateFakeDataObject(rowsNumber, colsNumber) {
             headers[col] = {
                 name: generateHeader(col),
                 prop: col,
-                readonly: !!(col%2)
+                pin: j === 4 ? 'start' : undefined,
+                size: j === 5 ? 200 : undefined,
+                readonly: !!(col%2),
+                cellTemplate: (h, props) => {
+                    return h('div', {
+                        style: {
+                            // backgroundColor: j%2 ? 'red' : undefined
+                        },
+                        class: {
+                            'inner-cell': true
+                        }
+                    }, props.model[props.prop] || '');
+                }
             }
         }
     }
@@ -47,11 +59,13 @@ export function generateFakeData(rowsNumber, colsNumber) {
         rowData.push(j.toString());
         headers.push({
             prop: j,
+            pin: j === 4 ? 'start' : undefined,
+            size: j === 5 ? 200 : undefined,
             name: generateHeader(j),
             cellTemplate: (h, props) => {
                 return h('div', {
                     style: {
-                        backgroundColor: j%2 ? 'red' : undefined
+                        // backgroundColor: j%2 ? 'red' : undefined
                     },
                     class: {
                         'inner-cell': true

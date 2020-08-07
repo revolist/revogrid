@@ -5,12 +5,11 @@
  * It contains typing information for all components that exist in this project.
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
-import { ColumnData, ColumnDataSchemaRegular, DataType, DimensionSettingsState, Edition, MultiDimensionAction } from "./interfaces";
+import { ColumnData, ColumnDataSchemaRegular, DataType, DimensionType, Edition, ViewPortScrollEvent, VirtualPositionItem } from "./interfaces";
 export namespace Components {
     interface RevoGrid {
         "colSize": number;
         "columns": ColumnData;
-        "dimensions": Partial<MultiDimensionAction>;
         "frameSize": number;
         "range": boolean;
         "readonly": boolean;
@@ -19,21 +18,28 @@ export namespace Components {
         "source": DataType[];
     }
     interface RevogrData {
+        "cols": VirtualPositionItem[];
+        "rows": VirtualPositionItem[];
     }
     interface RevogrEdit {
     }
     interface RevogrHeader {
+        "cols": VirtualPositionItem[];
         "resize": boolean;
     }
     interface RevogrOverlaySelection {
         "range": boolean;
     }
+    interface RevogrScrollVirtual {
+        "dimension": DimensionType;
+        "setScroll": (e: ViewPortScrollEvent) => Promise<void>;
+    }
     interface RevogrTextEditor {
         "value": string;
     }
-    interface RevogrViewportScrollable {
-        "scrollX": (x?: number) => Promise<void>;
-        "scrollY": (y?: number) => Promise<void>;
+    interface RevogrViewport {
+        "getScroll": (dimension: DimensionType) => Promise<number>;
+        "setScroll": (e: ViewPortScrollEvent) => Promise<void>;
     }
 }
 declare global {
@@ -67,17 +73,23 @@ declare global {
         prototype: HTMLRevogrOverlaySelectionElement;
         new (): HTMLRevogrOverlaySelectionElement;
     };
+    interface HTMLRevogrScrollVirtualElement extends Components.RevogrScrollVirtual, HTMLStencilElement {
+    }
+    var HTMLRevogrScrollVirtualElement: {
+        prototype: HTMLRevogrScrollVirtualElement;
+        new (): HTMLRevogrScrollVirtualElement;
+    };
     interface HTMLRevogrTextEditorElement extends Components.RevogrTextEditor, HTMLStencilElement {
     }
     var HTMLRevogrTextEditorElement: {
         prototype: HTMLRevogrTextEditorElement;
         new (): HTMLRevogrTextEditorElement;
     };
-    interface HTMLRevogrViewportScrollableElement extends Components.RevogrViewportScrollable, HTMLStencilElement {
+    interface HTMLRevogrViewportElement extends Components.RevogrViewport, HTMLStencilElement {
     }
-    var HTMLRevogrViewportScrollableElement: {
-        prototype: HTMLRevogrViewportScrollableElement;
-        new (): HTMLRevogrViewportScrollableElement;
+    var HTMLRevogrViewportElement: {
+        prototype: HTMLRevogrViewportElement;
+        new (): HTMLRevogrViewportElement;
     };
     interface HTMLElementTagNameMap {
         "revo-grid": HTMLRevoGridElement;
@@ -85,15 +97,15 @@ declare global {
         "revogr-edit": HTMLRevogrEditElement;
         "revogr-header": HTMLRevogrHeaderElement;
         "revogr-overlay-selection": HTMLRevogrOverlaySelectionElement;
+        "revogr-scroll-virtual": HTMLRevogrScrollVirtualElement;
         "revogr-text-editor": HTMLRevogrTextEditorElement;
-        "revogr-viewport-scrollable": HTMLRevogrViewportScrollableElement;
+        "revogr-viewport": HTMLRevogrViewportElement;
     }
 }
 declare namespace LocalJSX {
     interface RevoGrid {
         "colSize"?: number;
         "columns"?: ColumnData;
-        "dimensions"?: Partial<MultiDimensionAction>;
         "frameSize"?: number;
         "range"?: boolean;
         "readonly"?: boolean;
@@ -102,22 +114,30 @@ declare namespace LocalJSX {
         "source"?: DataType[];
     }
     interface RevogrData {
+        "cols"?: VirtualPositionItem[];
+        "rows"?: VirtualPositionItem[];
     }
     interface RevogrEdit {
         "onBeforeEdit"?: (event: CustomEvent<Edition.SaveDataDetails>) => void;
     }
     interface RevogrHeader {
+        "cols"?: VirtualPositionItem[];
         "onHeaderClick"?: (event: CustomEvent<ColumnDataSchemaRegular>) => void;
         "resize"?: boolean;
     }
     interface RevogrOverlaySelection {
         "range"?: boolean;
     }
+    interface RevogrScrollVirtual {
+        "dimension"?: DimensionType;
+        "onScrollVirtual"?: (event: CustomEvent<ViewPortScrollEvent>) => void;
+    }
     interface RevogrTextEditor {
         "onEdit"?: (event: CustomEvent<Edition.SaveData>) => void;
         "value"?: string;
     }
-    interface RevogrViewportScrollable {
+    interface RevogrViewport {
+        "onScrollViewport"?: (event: CustomEvent<ViewPortScrollEvent>) => void;
     }
     interface IntrinsicElements {
         "revo-grid": RevoGrid;
@@ -125,8 +145,9 @@ declare namespace LocalJSX {
         "revogr-edit": RevogrEdit;
         "revogr-header": RevogrHeader;
         "revogr-overlay-selection": RevogrOverlaySelection;
+        "revogr-scroll-virtual": RevogrScrollVirtual;
         "revogr-text-editor": RevogrTextEditor;
-        "revogr-viewport-scrollable": RevogrViewportScrollable;
+        "revogr-viewport": RevogrViewport;
     }
 }
 export { LocalJSX as JSX };
@@ -138,8 +159,9 @@ declare module "@stencil/core" {
             "revogr-edit": LocalJSX.RevogrEdit & JSXBase.HTMLAttributes<HTMLRevogrEditElement>;
             "revogr-header": LocalJSX.RevogrHeader & JSXBase.HTMLAttributes<HTMLRevogrHeaderElement>;
             "revogr-overlay-selection": LocalJSX.RevogrOverlaySelection & JSXBase.HTMLAttributes<HTMLRevogrOverlaySelectionElement>;
+            "revogr-scroll-virtual": LocalJSX.RevogrScrollVirtual & JSXBase.HTMLAttributes<HTMLRevogrScrollVirtualElement>;
             "revogr-text-editor": LocalJSX.RevogrTextEditor & JSXBase.HTMLAttributes<HTMLRevogrTextEditorElement>;
-            "revogr-viewport-scrollable": LocalJSX.RevogrViewportScrollable & JSXBase.HTMLAttributes<HTMLRevogrViewportScrollableElement>;
+            "revogr-viewport": LocalJSX.RevogrViewport & JSXBase.HTMLAttributes<HTMLRevogrViewportElement>;
         }
     }
 }

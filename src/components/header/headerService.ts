@@ -1,5 +1,5 @@
 import interact from 'interactjs';
-import {DATA_COL} from '../../utils/consts';
+import {DATA_COL, MIN_COL_SIZE} from '../../utils/consts';
 import {Module} from '../../services/module.interfaces';
 import dimensionProvider from '../../services/dimension.provider';
 import {getCell} from '../../services/cell.helpers';
@@ -19,7 +19,13 @@ export default class HeaderService implements Module {
                 edges: { bottom: false, right: true },
                 onend: event => {
                     const index: number = parseInt(event.target.getAttribute(DATA_COL), 10);
-                    dimensionProvider.setSize({ [index]: event.rect.width }, 'col');
+                    const col: ColumnDataSchemaRegular = dataProvider.column(index);
+                    let width: number = event.rect.width;
+                    const minSize: number = col.minSize || MIN_COL_SIZE;
+                    if (width < minSize) {
+                        width = minSize;
+                    }
+                    dimensionProvider.setSize({ [index]: width }, 'col');
                 }
             });
         }

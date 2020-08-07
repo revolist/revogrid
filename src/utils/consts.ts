@@ -1,3 +1,4 @@
+export const MIN_COL_SIZE: number = 5;
 export const DATA_COL: string = 'data-col';
 export const DATA_ROW: string = 'data-row';
 
