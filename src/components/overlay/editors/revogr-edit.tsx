@@ -2,7 +2,7 @@ import {Component, Event, EventEmitter, h} from '@stencil/core';
 
 import selectionStore from '../../../store/selection/selection.strore';
 import {getItemByIndex} from '../../../store/dimension/dimension.helpers';
-import {colsStore, rowsStore} from '../../../store/dimension/dimension.store';
+import dimensionStore from '../../../store/dimension/dimension.store';
 import dataProvider from '../../../services/data.provider';
 import moduleRegister from '../../../services/moduleRegister';
 import CellEditService from './cellEditService';
@@ -48,8 +48,8 @@ export class Edit {
         }
         const x: number = this.editCell.x;
         const y: number = this.editCell.y;
-        const col: PositionItem = getItemByIndex(colsStore.state, x);
-        const row: PositionItem = getItemByIndex(rowsStore.state, y);
+        const col: PositionItem = getItemByIndex(dimensionStore.col.state, x);
+        const row: PositionItem = getItemByIndex(dimensionStore.row.state, y);
         const style: Selection.RangeAreaCss = {
             left: `${col.start}px`,
             top: `${row.start}px`,

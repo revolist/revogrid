@@ -4,21 +4,18 @@
 
 import {createStore, ObservableMap} from '@stencil/store';
 
-import {
-  ColumnData, ColumnDataSchemaRegular,
-  DataSourceState,
-  DataType
-} from '../../interfaces';
+import {ColumnDataSchemaRegular, DataSourceState, DataType, DimensionColPin} from '../../interfaces';
 import {setStore} from '../../utils/store.utils';
 
 const dataStore: ObservableMap<DataSourceState> = createStore({
   data: [],
-  columns: [],
-  columnsFlat: []
+  columnsFlat: [],
+  colPinStart: [],
+  colPinEnd: []
 });
 
-function setDataColumn(columns: ColumnData, columnsFlat: ColumnDataSchemaRegular[]): void {
-  setStore(dataStore, { columns, columnsFlat });
+function setDataColumn(columnsFlat: ColumnDataSchemaRegular[], pins: {[T in DimensionColPin]: ColumnDataSchemaRegular[]}): void {
+  setStore(dataStore, { columnsFlat, ...pins });
 }
 
 function updateData(data: DataType[]): void {

@@ -1,5 +1,4 @@
 import {Component, Element, Event, EventEmitter, h, Host, Method, Prop} from "@stencil/core";
-import {rowsStore as rowDimension} from "../../store/dimension/dimension.store";
 import {DimensionType, ViewPortScrollEvent} from "../../interfaces";
 import {getScrollbarWidth} from "../../utils/utils";
 
@@ -8,12 +7,15 @@ import {getScrollbarWidth} from "../../utils/utils";
 })
 export class RevogrScrollVirtual {
     private scrollSize: number = 0;
+    private preventArtificialScroll: {[T in DimensionType]: boolean} = { row: false, col: false };
     @Element() element: HTMLElement;
     @Prop() dimension: DimensionType = 'row';
+    @Prop() contentSize: number = 0;
     @Event() scrollVirtual: EventEmitter<ViewPortScrollEvent>;
 
     @Method()
     async setScroll(e: ViewPortScrollEvent): Promise<void> {
+        this.preventArtificialScroll[e.dimension] = true;
         switch (e.dimension) {
             case 'row':
                 this.element.scrollTop = e.coordinate;
@@ -22,6 +24,10 @@ export class RevogrScrollVirtual {
     }
 
     private scroll(): void {
+        if (this.preventArtificialScroll[this.dimension]) {
+            this.preventArtificialScroll[this.dimension] = false;
+            return;
+        }
         const target: HTMLElement|undefined = this.element;
         const top: number = target?.scrollTop || 0;
         this.scrollVirtual.emit({
@@ -57,8 +63,8 @@ export class RevogrScrollVirtual {
     }
 
     render() {
-        return <Host class='vertical-scroll' onScroll={() => this.scroll()}>
-            <div style={{height: `${rowDimension.get('realSize')}px`}}/>
+        return <Host onScroll={() => this.scroll()}>
+            <div style={{height: `${this.contentSize}px`}}/>
         </Host>;
     }
 }

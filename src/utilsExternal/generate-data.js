@@ -15,8 +15,8 @@ export function generateFakeDataObject(rowsNumber, colsNumber) {
             headers[col] = {
                 name: generateHeader(col),
                 prop: col,
-                pin: j === 4 ? 'start' : undefined,
-                size: j === 5 ? 200 : undefined,
+                pin: j === 4 || j === 10 ? 'pinStart' : undefined,
+                size: j === 5 ? 200 : j === 4 ? 100 : undefined,
                 readonly: !!(col%2),
                 cellTemplate: (h, props) => {
                     return h('div', {

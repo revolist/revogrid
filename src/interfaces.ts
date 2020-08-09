@@ -1,11 +1,18 @@
 /* Note: using `.d.ts` file extension will exclude it from the output build */
-// import {EventEmitter} from "@stencil/core";
 
 export type DimensionType = 'col'|'row';
+export type DimensionColPin = 'colPinStart'|'colPinEnd';
+export type DimensionRowPin = 'rowPinStart'|'rowPinEnd';
+export type MultiDimensionType = DimensionType|DimensionColPin|DimensionRowPin;
 
 export type ViewPortScrollEvent = {
   dimension: DimensionType;
   coordinate: number;
+};
+
+export type ViewPortResizeEvent = {
+  dimension: DimensionType;
+  size: number;
 };
 
 export type ColumnDataSchemaModel = {
@@ -27,9 +34,12 @@ export interface ColumnDataSchemaGrouping {
   name: DataFormat;
 }
 
+export type ColumnPin = 'pinStart'|'pinEnd';
+export type Pin = 'pinStart'|'pinEnd';
+
 export interface ColumnDataSchemaRegular extends ColumnDataSchemaBase {
   prop: ColumnProp;
-  pin: 'start'|'end';
+  pin: ColumnPin;
 }
 
 export type ColumnDataSchema = ColumnDataSchemaGrouping | ColumnDataSchemaRegular;
@@ -41,11 +51,11 @@ export type ColumnData = ColumnDataSchema[];
 
 export type DataType = {[T in ColumnProp]: DataFormat};
 export type DataSource = DataType[];
-export interface DataSourceState {
+export type DataSourceColumnPins = {[T in ColumnPin]: ColumnDataSchemaRegular[];};
+export type DataSourceState = {
   data: DataType[];
-  columns: ColumnDataSchema[];
   columnsFlat: ColumnDataSchemaRegular[];
-}
+}&{[T in DimensionColPin]: ColumnDataSchemaRegular[]};
 
 export interface ViewportStateItems {
   items: VirtualPositionItem[];
@@ -54,7 +64,6 @@ export interface ViewportStateItems {
 }
 export interface ViewportState extends ViewportStateItems {
   realCount: number;
-  frameOffset: number;
   virtualSize: number;
 }
 
@@ -75,6 +84,7 @@ export interface DimensionSettingsState {
   positionIndexToItem: {[position: number]: PositionItem};
   indexToItem: {[index: number]: PositionItem};
   sizes: ViewSettingSizeProp;
+  frameOffset: number;
   realSize: number;
   originItemSize: number;
 }

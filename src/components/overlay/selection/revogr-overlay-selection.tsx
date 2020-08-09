@@ -1,6 +1,6 @@
 import {Component, h, Prop} from '@stencil/core';
 import selectionStore from '../../../store/selection/selection.strore';
-import {rowsStore, colsStore} from '../../../store/dimension/dimension.store';
+import dimensionStore from '../../../store/dimension/dimension.store';
 import {getItemByIndex} from '../../../store/dimension/dimension.helpers';
 import {
     SELECTION_BORDER_CLASS,
@@ -59,10 +59,10 @@ export class OverlaySelection {
     }
 
     private static getElStyle(range: RangeArea): RangeAreaCss {
-        const y: number = getItemByIndex(rowsStore.state, range.y).start;
-        const x: number = getItemByIndex(colsStore.state, range.x).start;
-        const y1: number = getItemByIndex(rowsStore.state, range.y1).end;
-        const x1: number = getItemByIndex(colsStore.state, range.x1).end;
+        const y: number = getItemByIndex(dimensionStore.row.state, range.y).start;
+        const x: number = getItemByIndex(dimensionStore.col.state, range.x).start;
+        const y1: number = getItemByIndex(dimensionStore.row.state, range.y1).end;
+        const x1: number = getItemByIndex(dimensionStore.col.state, range.x1).end;
         return  {
             left: `${x}px`,
             top: `${y}px`,

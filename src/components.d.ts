@@ -5,7 +5,7 @@
  * It contains typing information for all components that exist in this project.
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
-import { ColumnData, ColumnDataSchemaRegular, DataType, DimensionType, Edition, ViewPortScrollEvent, VirtualPositionItem } from "./interfaces";
+import { ColumnData, ColumnDataSchemaRegular, DataType, DimensionType, Edition, Pin, ViewPortResizeEvent, ViewPortScrollEvent, VirtualPositionItem } from "./interfaces";
 export namespace Components {
     interface RevoGrid {
         "colSize": number;
@@ -19,18 +19,21 @@ export namespace Components {
     }
     interface RevogrData {
         "cols": VirtualPositionItem[];
+        "pinned": Pin;
         "rows": VirtualPositionItem[];
     }
     interface RevogrEdit {
     }
     interface RevogrHeader {
         "cols": VirtualPositionItem[];
+        "pinned": Pin;
         "resize": boolean;
     }
     interface RevogrOverlaySelection {
         "range": boolean;
     }
     interface RevogrScrollVirtual {
+        "contentSize": number;
         "dimension": DimensionType;
         "setScroll": (e: ViewPortScrollEvent) => Promise<void>;
     }
@@ -38,7 +41,8 @@ export namespace Components {
         "value": string;
     }
     interface RevogrViewport {
-        "getScroll": (dimension: DimensionType) => Promise<number>;
+        "contentHeight": number;
+        "contentWidth": number;
         "setScroll": (e: ViewPortScrollEvent) => Promise<void>;
     }
 }
@@ -115,6 +119,7 @@ declare namespace LocalJSX {
     }
     interface RevogrData {
         "cols"?: VirtualPositionItem[];
+        "pinned"?: Pin;
         "rows"?: VirtualPositionItem[];
     }
     interface RevogrEdit {
@@ -123,12 +128,14 @@ declare namespace LocalJSX {
     interface RevogrHeader {
         "cols"?: VirtualPositionItem[];
         "onHeaderClick"?: (event: CustomEvent<ColumnDataSchemaRegular>) => void;
+        "pinned"?: Pin;
         "resize"?: boolean;
     }
     interface RevogrOverlaySelection {
         "range"?: boolean;
     }
     interface RevogrScrollVirtual {
+        "contentSize"?: number;
         "dimension"?: DimensionType;
         "onScrollVirtual"?: (event: CustomEvent<ViewPortScrollEvent>) => void;
     }
@@ -137,6 +144,9 @@ declare namespace LocalJSX {
         "value"?: string;
     }
     interface RevogrViewport {
+        "contentHeight"?: number;
+        "contentWidth"?: number;
+        "onResizeViewport"?: (event: CustomEvent<ViewPortResizeEvent>) => void;
         "onScrollViewport"?: (event: CustomEvent<ViewPortScrollEvent>) => void;
     }
     interface IntrinsicElements {

@@ -3,7 +3,7 @@ import {Module} from '../../../services/module.interfaces';
 import selectionStore, {setFocus, setRange, setTempRange} from '../../../store/selection/selection.strore';
 import {getCell} from '../../../services/cell.helpers';
 import {codesLetter} from '../../../utils/keyCodes';
-import {rowsStore as viewportRows, colsStore as viewportCols} from '../../../store/viewPort/viewport.store';
+import viewportStore from '../../../store/viewPort/viewport.store';
 import {Selection} from '../../../interfaces';
 import Cell = Selection.Cell;
 
@@ -92,7 +92,7 @@ export default class CellSelectionService implements Module {
                 break;
             case codesLetter.ARROW_DOWN:
                 point = end.y > focus.y ? end : start;
-                if (point.y < viewportRows.get('realCount')) {
+                if (point.y < viewportStore.row.get('realCount')) {
                     point.y++;
                     doUpdate(start, end, isMulti);
                 }
@@ -106,7 +106,7 @@ export default class CellSelectionService implements Module {
                 break;
             case codesLetter.ARROW_RIGHT:
                 point = end.x > focus.x ? end : start;
-                if (point.x < viewportCols.get('realCount')) {
+                if (point.x < viewportStore.col.get('realCount')) {
                     point.x++;
                     doUpdate(start, end, isMulti);
                 }

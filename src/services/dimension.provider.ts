@@ -1,9 +1,12 @@
 import {setViewPortDimension} from '../store/viewPort/viewport.store';
-import {DimensionType, ViewSettingSizeProp} from '../interfaces';
 import {setDimensionSize} from '../store/dimension/dimension.store';
+import {
+    MultiDimensionType,
+    ViewSettingSizeProp
+} from '../interfaces';
 
 class DimensionProvider {
-    setSize(sizes: ViewSettingSizeProp, dimensionType: DimensionType): void {
+    setSize(dimensionType: MultiDimensionType, sizes: ViewSettingSizeProp): void {
         setDimensionSize(sizes, dimensionType);
         setViewPortDimension(sizes, dimensionType);
     }

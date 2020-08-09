@@ -1,0 +1,12 @@
+$cell-border-color: #e0e0e0;
+$header-border-color: $cell-border-color;
+
+$header-shadow: 0 1px 10px rgba(0,0,0,.2);
+$header-shadow-cell: 0 -1px 0 0 $header-border-color inset, -1px 0 0 0 $cell-border-color inset;
+
+$cell-disabled-bg: #f7f7f7;
+$cell-shadow-cell: 0 -1px 0 0 $cell-border-color inset, -1px 0 0 0 $cell-border-color inset;
+
+$selection-border: #0d63e8;
+$selection-bg: rgba($selection-border, .1);
+$tmp-selection-bg: $selection-bg;

@@ -5,7 +5,7 @@ import dimensionProvider from '../../services/dimension.provider';
 import {getCell} from '../../services/cell.helpers';
 import {ColumnDataSchemaRegular, Selection} from '../../interfaces';
 import Cell = Selection.Cell;
-import dataProvider from "../../services/data.provider";
+import columnProvider from "../../services/column.data.provider";
 
 interface Config {
     resize?: boolean;
@@ -19,19 +19,19 @@ export default class HeaderService implements Module {
                 edges: { bottom: false, right: true },
                 onend: event => {
                     const index: number = parseInt(event.target.getAttribute(DATA_COL), 10);
-                    const col: ColumnDataSchemaRegular = dataProvider.column(index);
+                    const col: ColumnDataSchemaRegular = columnProvider.getColumn(index);
                     let width: number = event.rect.width;
                     const minSize: number = col.minSize || MIN_COL_SIZE;
                     if (width < minSize) {
                         width = minSize;
                     }
-                    dimensionProvider.setSize({ [index]: width }, 'col');
+                    dimensionProvider.setSize('col', { [index]: width });
                 }
             });
         }
         interact(target).on('tap', event => {
             const cell: Cell = getCell(event.currentTarget);
-            const col: ColumnDataSchemaRegular = dataProvider.column(cell.x);
+            const col: ColumnDataSchemaRegular = columnProvider.getColumn(cell.x);
             col && config?.headerClick(col);
         });
     }

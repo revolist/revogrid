@@ -36,8 +36,8 @@
 
         const grid = document.querySelector('revo-grid');
 
-        grid.frameSize = 10;
-        const data = generateFakeDataObject(1000, 50);
+        grid.frameSize = 1;
+        const data = generateFakeDataObject(200, 300);
         grid.columns = data.headers;
         grid.source = data.rows;
         grid.readonly = false;
