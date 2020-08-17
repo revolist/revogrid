@@ -1,34 +1,43 @@
-import {Component, Element, Event, EventEmitter, h, Prop} from '@stencil/core';
+import {Component, Element, Event, EventEmitter, h, Prop, Watch} from '@stencil/core';
 import {HTMLStencilElement} from '@stencil/core/internal';
 
 import {DATA_COL, HEADER_CLASS} from '../../utils/consts';
-import moduleRegister from '../../services/moduleRegister';
 import HeaderService from './headerService';
-import {ColumnDataSchemaRegular, Pin, VirtualPositionItem} from "../../interfaces";
-import columnProvider from "../../services/column.data.provider";
+import {ColumnDataSchemaRegular, ViewSettingSizeProp, VirtualPositionItem} from '../../interfaces';
 
 @Component({
   tag: 'revogr-header'
 })
 export class RevogrHeaderComponent {
   @Element() element!: HTMLStencilElement;
-  @Prop() resize: boolean;
+  @Prop() canResize: boolean;
   @Prop() cols: VirtualPositionItem[];
-  @Prop() pinned: Pin;
+  @Prop() parent: string = '';
+
   @Event() headerClick: EventEmitter<ColumnDataSchemaRegular>;
+  @Event() headerResize: EventEmitter<ViewSettingSizeProp>;
+
+
+  @Prop() colData: ColumnDataSchemaRegular[];
+  @Watch('colData') colChanged(newData: ColumnDataSchemaRegular[]): void {
+    this.headerService.columns = newData;
+  }
+  private headerService: HeaderService;
 
   connectedCallback(): void {
-    const service: HeaderService = new HeaderService(`${moduleRegister.baseClass} .${HEADER_CLASS}`, {
-      resize: this.resize,
-      headerClick: (col: ColumnDataSchemaRegular): void => {
-        this.headerClick.emit(col);
-      }
-    });
-    moduleRegister.register('headResize', service);
+    this.headerService = new HeaderService(
+        `${this.parent} .${HEADER_CLASS}`,
+        this.colData,
+        {
+          canResize: this.canResize,
+          resize: (sizes: ViewSettingSizeProp) => this.headerResize.emit(sizes),
+          click: (col: ColumnDataSchemaRegular) => this.headerClick.emit(col)
+        }
+    );
   }
 
   disconnectedCallback(): void {
-    moduleRegister.unregister('headResize');
+    this.headerService?.destroy();
   }
 
   render() {
@@ -39,7 +48,7 @@ export class RevogrHeaderComponent {
         class: HEADER_CLASS,
         style: { width:  `${col.size}px`, transform: `translateX(${col.start}px)` }
       };
-      cells.push(<div {...dataProps}>{columnProvider.data(col.itemIndex, this.pinned)}</div>);
+      cells.push(<div {...dataProps}>{this.colData[col.itemIndex].name}</div>);
     }
     return cells;
   }

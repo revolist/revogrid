@@ -2,16 +2,7 @@ import {Module} from "./module.interfaces";
 
 class ModuleRegister {
     private modules: {[key: string]: Module} = {};
-    private componentBaseClass: string = '';
     constructor() {}
-
-    get baseClass(): string {
-        return this.componentBaseClass;
-    }
-
-    set baseClass(c: string) {
-        this.componentBaseClass = c;
-    }
 
     register(name: string, module: Module): void {
         this.modules[name] = module;

@@ -34,24 +34,26 @@ export interface ColumnDataSchemaGrouping {
   name: DataFormat;
 }
 
-export type ColumnPin = 'pinStart'|'pinEnd';
 export type Pin = 'pinStart'|'pinEnd';
 
 export interface ColumnDataSchemaRegular extends ColumnDataSchemaBase {
   prop: ColumnProp;
-  pin: ColumnPin;
+  pin: Pin;
 }
 
 export type ColumnDataSchema = ColumnDataSchemaGrouping | ColumnDataSchemaRegular;
 
 export type ColumnProp = string|number;
 export type DataFormat = string;
-export type CellTemplateFunc<T> = (h: (sel: string, data?: object, text?: string) => T, props: ColumnDataSchemaModel) => T;
+export interface HyperFunc<T> {
+  (sel: string, data?: object, text?: string): T;
+}
+export type CellTemplateFunc<T> = (h: HyperFunc<T>, props: ColumnDataSchemaModel) => T;
 export type ColumnData = ColumnDataSchema[];
 
 export type DataType = {[T in ColumnProp]: DataFormat};
 export type DataSource = DataType[];
-export type DataSourceColumnPins = {[T in ColumnPin]: ColumnDataSchemaRegular[];};
+export type DataSourceColumnPins = {[T in Pin]: ColumnDataSchemaRegular[];};
 export type DataSourceState = {
   data: DataType[];
   columnsFlat: ColumnDataSchemaRegular[];

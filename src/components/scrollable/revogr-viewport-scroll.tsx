@@ -1,13 +1,12 @@
-import {Component, Event, EventEmitter, h, Method, Host, Element, Prop} from '@stencil/core';
+import {Component, Event, EventEmitter, h, Method, Element, Prop} from '@stencil/core';
 
 import {DimensionType, ViewPortResizeEvent, ViewPortScrollEvent} from '../../interfaces';
-import moduleRegister from '../../services/moduleRegister';
 import GridResizeService from './gridResizeService';
 
 @Component({
-  tag: 'revogr-viewport'
+  tag: 'revogr-viewport-scroll'
 })
-export class RevogrViewport {
+export class RevogrViewportScroll {
   @Element() horizontalScroll: HTMLElement;
   @Event() scrollViewport: EventEmitter<ViewPortScrollEvent>;
   @Event() resizeViewport: EventEmitter<ViewPortResizeEvent>;
@@ -21,6 +20,11 @@ export class RevogrViewport {
   private oldValY: number = this.contentHeight;
   private oldValX: number = this.contentWidth;
   private verticalScroll: HTMLDivElement;
+
+  private horizontalMouseWheel: (e: WheelEvent) => void;
+  private verticalMouseWheel: (e: WheelEvent) => void;
+
+  private gridResizeService: GridResizeService;
 
   @Method()
   async setScroll(e: ViewPortScrollEvent): Promise<void> {
@@ -54,20 +58,28 @@ export class RevogrViewport {
   }
 
   componentDidLoad(): void {
-    moduleRegister.register('resize', new GridResizeService(this.horizontalScroll, {
+    this.verticalMouseWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      this.scroll('row', this.verticalScroll.scrollTop + e.deltaY);
+    };
+    this.horizontalMouseWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      this.scroll('col', this.horizontalScroll.scrollLeft + e.deltaX);
+    };
+    this.gridResizeService = new GridResizeService(this.horizontalScroll, {
       resize: (dimension: DimensionType, size: number) => {
         this.resizeViewport.emit({ dimension, size });
         this.scroll(dimension);
       }
-    }));
-    this.verticalScroll.addEventListener('mousewheel', (e: WheelEvent) => {
-      e.preventDefault();
-      this.scroll('row', this.verticalScroll.scrollTop + e.deltaY);
     });
-    this.horizontalScroll.addEventListener('mousewheel', (e: WheelEvent) => {
-      e.preventDefault();
-      this.scroll('col', this.horizontalScroll.scrollLeft + e.deltaX);
-    });
+    this.verticalScroll.addEventListener('mousewheel', this.verticalMouseWheel);
+    this.horizontalScroll.addEventListener('mousewheel', this.horizontalMouseWheel);
+  }
+
+  disconnectedCallback(): void {
+    this.verticalScroll.removeEventListener('mousewheel', this.verticalMouseWheel);
+    this.horizontalScroll.removeEventListener('mousewheel', this.horizontalMouseWheel);
+    this.gridResizeService.destroy();
   }
 
   async componentDidRender(): Promise<void> {
@@ -85,17 +97,15 @@ export class RevogrViewport {
   }
 
   render() {
-    return <Host>
-        <div class='inner-content-table'>
-          <div class='header-wrapper'><slot name='header'/></div>
-          <div class='vertical-wrapper'>
-            <div class='vertical-inner' ref={el => {this.verticalScroll = el;}}>
-              <div style={{ height: `${this.contentHeight}px`, width: `${this.contentWidth}px` }}>
-                <slot name='content'/>
+    return <div class='inner-content-table'>
+            <div class='header-wrapper'><slot name='header'/></div>
+            <div class='vertical-wrapper'>
+              <div class='vertical-inner' ref={el => {this.verticalScroll = el;}}>
+                <div style={{ height: `${this.contentHeight}px`, width: `${this.contentWidth}px` }}>
+                  <slot name='content'/>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-      </Host>;
+    </div>;
   }
 }

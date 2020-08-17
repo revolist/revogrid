@@ -37,8 +37,8 @@ Type: `Promise<void>`
 ### Graph
 ```mermaid
 graph TD;
-  revo-grid --> revogr-viewport-scrollable
-  style revogr-viewport-scrollable fill:#f9f,stroke:#333,stroke-width:4px
+  revo-grid --> revogr-viewport-scroll-scrollable
+  style revogr-viewport-scroll-scrollable fill:#f9f,stroke:#333,stroke-width:4px
 ```
 
 ----------------------------------------------

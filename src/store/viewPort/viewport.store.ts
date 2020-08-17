@@ -104,7 +104,6 @@ function setViewPortCoordinate(
       virtualSize,
       dimension
     );
-    console.log(toUpdate, dimensionType);
     setStore(store, toUpdate);
     // right position changed
   } else if (firstItem && (store.get('virtualSize') + pos) > lastItem?.end) {

@@ -15,7 +15,7 @@
 
     .grid-component {
       display: block;
-      width: 660px;
+      width: 100%;
       height: 500px;
     }
 
@@ -37,7 +37,7 @@
         const grid = document.querySelector('revo-grid');
 
         grid.frameSize = 1;
-        const data = generateFakeDataObject(200, 300);
+        const data = generateFakeDataObject(1000, 300);
         grid.columns = data.headers;
         grid.source = data.rows;
         grid.readonly = false;

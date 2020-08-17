@@ -1,5 +1,4 @@
 import {
-    CellTemplateFunc,
     ColumnData,
     ColumnDataSchema,
     ColumnDataSchemaGrouping,
@@ -11,14 +10,13 @@ import {
     ReadOnlyFormat,
     ViewSettingSizeProp
 } from '../interfaces';
-import {VNode} from '@stencil/core';
 import reduce from 'lodash/reduce';
 import dataStore, {setDataColumn} from '../store/dataSource/data.store';
 import dimensionProvider from './dimension.provider';
 import {setViewport, setViewPortCoordinate} from '../store/viewPort/viewport.store';
 import {getCurrentState, setDimensionSize, setRealSize} from '../store/dimension/dimension.store';
+import {pinToColPin} from "../utils/pins";
 
-type PossibleCellFunc = CellTemplateFunc<VNode>|undefined;
 type ColumnCollection = {
     flat: ColumnDataSchemaRegular[];
     sizes: ViewSettingSizeProp;
@@ -43,20 +41,16 @@ class ColumnDataProvider {
         return readOnly;
     }
 
-    template(c: number, pin?: Pin): PossibleCellFunc {
+    column(c: number, pin?: Pin): ColumnDataSchemaRegular|undefined {
         if (pin) {
-            return this.getPin(c, pin)?.cellTemplate as PossibleCellFunc;
+            return this.getPin(c, pin);
         }
-        return this.getColumn(c)?.cellTemplate as PossibleCellFunc;
+        return this.getColumn(c);
     }
 
     getPin(c: number, pin: Pin): ColumnDataSchemaRegular|undefined {
-        switch (pin) {
-            case 'pinEnd':
-                return dataStore.get('colPinEnd')[c];
-            case 'pinStart':
-                return dataStore.get('colPinStart')[c];
-        }
+        let type: DimensionColPin = pinToColPin(pin);
+        return dataStore.get(type)[c];
     }
 
     getColumn(c: number): ColumnDataSchemaRegular|undefined {

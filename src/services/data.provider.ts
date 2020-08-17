@@ -1,9 +1,6 @@
 import {ObservableMap} from '@stencil/store';
-import {h, VNode} from '@stencil/core';
 
-import {HyperFunc} from '../store/index.stencil';
 import {
-  CellTemplateFunc,
   ColumnDataSchemaModel, ColumnProp,
   DataSource, DataSourceState, DataType, Pin,
 } from '../interfaces';
@@ -14,14 +11,6 @@ import columnProvider from "./column.data.provider";
 
 class DataProvider {
   constructor(private dataSourceStore:  ObservableMap<DataSourceState>) {
-  }
-
-  cellRenderer(r: number, c: number, pin?: Pin): string|VNode {
-    const tpl: CellTemplateFunc<VNode>|undefined = columnProvider.template(c, pin);
-    if (tpl) {
-      return tpl(h as unknown as HyperFunc, this.rowDataModel(r, c, pin));
-    }
-    return this.getCellData(r, c, pin);
   }
 
   setData(data: DataType[]): void {
