@@ -84,23 +84,18 @@ revogr-viewport-scroll {
   }
 
   .inner-content-table {
-    display: table;
+    display: flex;
+    flex-direction: column;
     height: 100%;
     width: 100%;
     position: relative;
     z-index: 0;
   }
 
-  .vertical-wrapper {
-    display: table-row;
-    position: relative;
-  }
-
-
   .vertical-inner {
     overflow-y: auto;
-    height: 100%;
     position: relative;
+    flex-grow: 1;
 
     /* Hide scrollbar for IE and Edge */
     -ms-overflow-style: none;
@@ -111,21 +106,16 @@ revogr-viewport-scroll {
       -webkit-appearance: none;
     }
   }
-
-  .header-wrapper {
-    height: 0;
-    display: table-row;
-  }
 }
 
 revogr-header {
   position: relative;
   height: $header-size;
   line-height: $header-size;
-  display: table-cell;
   box-shadow: $header-shadow;
   font-weight: 600;
   z-index: 1;
+  display: block;
 
   .data-header-cell {
     position: absolute;

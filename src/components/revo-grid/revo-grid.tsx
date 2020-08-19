@@ -1,10 +1,9 @@
-import {Component, Prop, h, Watch, Element, Listen} from '@stencil/core';
+import {Component, Prop, h, Watch, Element} from '@stencil/core';
 
 import {setSettings} from '../../store/dimension/dimension.store';
 import {
   ColumnData,
-  DataType,
-  Edition
+  DataType
 } from '../../interfaces';
 import moduleRegister from '../../services/moduleRegister';
 import dataProvider from '../../services/data.provider';
@@ -40,15 +39,6 @@ export class RevoGrid {
   @Watch('columns')
   columnChanged(newVal: ColumnData) {
     columnProvider.setColumns(newVal);
-  }
-
-  @Listen('beforeEdit')
-  beforeSave(e: CustomEvent<Edition.SaveDataDetails>): void {
-    setTimeout(() => {
-      if (!e.defaultPrevented) {
-        dataProvider.setCellData(e.detail.row, e.detail.col, e.detail.val);
-      }
-    }, 0);
   }
 
   connectedCallback(): void {

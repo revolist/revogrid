@@ -26,13 +26,6 @@ class DataProvider {
     return model[prop as number] || '';
   }
 
-  setCellData(r: number, c: number, val: string): void {
-    const {data, model, prop} = this.rowDataModel(r, c);
-    model[prop as number] = val;
-    updateData({...data});
-  }
-
-
   rowDataModel(r: number, c: number, pin?: Pin): ColumnDataSchemaModel {
     const prop: ColumnProp = pin ? columnProvider.getPin(c, pin)?.prop : columnProvider.getColumn(c)?.prop;
     const data: DataSource = this.dataSourceStore.get('data');

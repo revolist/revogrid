@@ -1,8 +1,8 @@
 import {Component, Event, EventEmitter, Prop, h} from '@stencil/core';
+import {ObservableMap} from '@stencil/store';
 
 import CellEditService from './cellEditService';
 import {DimensionSettingsState, Edition, Selection} from '../../../interfaces';
-import {ObservableMap} from '@stencil/store';
 import { getItemByIndex } from '../../../store/dimension/dimension.helpers';
 import dataProvider from '../../../services/data.provider';
 import {CELL_CLASS} from '../../../utils/consts';
@@ -20,14 +20,14 @@ export class Edit {
     @Event() beforeEdit: EventEmitter<Edition.SaveDataDetails>;
     onSave(e: CustomEvent<Edition.SaveData>): void {
         e.stopPropagation();
+        if (this.editCell) {
+            this.beforeEdit.emit({
+                col: this.editCell.x,
+                row: this.editCell.y,
+                val: e.detail
+            });
+        }
         setTimeout(() => {
-            if (this.editCell) {
-                this.beforeEdit.emit({
-                    col: this.editCell.x,
-                    row: this.editCell.y,
-                    val: e.detail
-                });
-            }
             this.cellEditModule.close();
         }, 0);
     }

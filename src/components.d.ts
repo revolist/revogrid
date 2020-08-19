@@ -21,6 +21,13 @@ export namespace Components {
     interface RevogrData {
         "colData": ColumnDataSchemaRegular[];
         "cols": VirtualPositionItem[];
+        "dimensionCol": ObservableMap<DimensionSettingsState>;
+        "dimensionRow": ObservableMap<DimensionSettingsState>;
+        "lastCell": Selection.Cell;
+        "parent": string;
+        "position": Selection.Cell;
+        "range": boolean;
+        "readonly": boolean;
         "rows": VirtualPositionItem[];
     }
     interface RevogrEdit {
@@ -144,6 +151,13 @@ declare namespace LocalJSX {
     interface RevogrData {
         "colData"?: ColumnDataSchemaRegular[];
         "cols"?: VirtualPositionItem[];
+        "dimensionCol"?: ObservableMap<DimensionSettingsState>;
+        "dimensionRow"?: ObservableMap<DimensionSettingsState>;
+        "lastCell"?: Selection.Cell;
+        "parent"?: string;
+        "position"?: Selection.Cell;
+        "range"?: boolean;
+        "readonly"?: boolean;
         "rows"?: VirtualPositionItem[];
     }
     interface RevogrEdit {

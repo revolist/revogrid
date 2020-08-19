@@ -98,12 +98,10 @@ export class RevogrViewportScroll {
 
   render() {
     return <div class='inner-content-table'>
-            <div class='header-wrapper'><slot name='header'/></div>
-            <div class='vertical-wrapper'>
-              <div class='vertical-inner' ref={el => {this.verticalScroll = el;}}>
-                <div style={{ height: `${this.contentHeight}px`, width: `${this.contentWidth}px` }}>
-                  <slot name='content'/>
-                </div>
+            <div class='header-wrapper' style={{ width: `${this.contentWidth}px` }}><slot name='header'/></div>
+            <div class='vertical-inner' ref={el => {this.verticalScroll = el;}} style={{ width: `${this.contentWidth}px` }}>
+              <div style={{ height: `${this.contentHeight}px`,  }}>
+                <slot name='content'/>
               </div>
             </div>
     </div>;

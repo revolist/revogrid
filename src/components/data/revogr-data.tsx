@@ -1,22 +1,48 @@
-import {Component, Element, h, Prop, Watch} from '@stencil/core';
+import {Component, Element, h, Listen, Prop, Watch} from '@stencil/core';
 import {HTMLStencilElement} from '@stencil/core/internal';
 
 import ColumnService from './columnService';
 import {CELL_CLASS, DATA_COL, DATA_ROW, DISABLED_CLASS} from '../../utils/consts';
-import {ColumnDataSchemaRegular, VirtualPositionItem} from '../../interfaces';
+import {
+  ColumnDataSchemaRegular,
+  DimensionSettingsState,
+  Edition,
+  Selection,
+  VirtualPositionItem
+} from '../../interfaces';
+import {ObservableMap} from "@stencil/store";
 
 @Component({
   tag: 'revogr-data'
 })
 export class RevogrData {
   @Element() element!: HTMLStencilElement;
+
+  @Prop() readonly: boolean;
+  @Prop() range: boolean;
+
   @Prop() rows: VirtualPositionItem[];
   @Prop() cols: VirtualPositionItem[];
+  @Prop() lastCell: Selection.Cell;
+  @Prop() position: Selection.Cell;
+  @Prop() parent: string = '';
+
+  @Prop() dimensionRow: ObservableMap<DimensionSettingsState>;
+  @Prop() dimensionCol: ObservableMap<DimensionSettingsState>;
 
   @Prop() colData: ColumnDataSchemaRegular[];
   @Watch('colData') colChanged(newData: ColumnDataSchemaRegular[]): void {
     this.columnService.columns = newData;
   }
+
+
+  @Listen('beforeEdit')
+  onSave(e: CustomEvent<Edition.SaveDataDetails>): void {
+    if (!e.defaultPrevented) {
+      this.columnService.setCellData(e.detail.row, e.detail.col, e.detail.val);
+    }
+  }
+
   private columnService: ColumnService;
 
   connectedCallback(): void {
@@ -40,6 +66,19 @@ export class RevogrData {
         cells.push(<div {...dataProps}>{this.columnService.cellRenderer(row.itemIndex, col.itemIndex)}</div>);
       }
       rowsEls.push(<div class='row' style={{ height: `${row.size}px`, transform: `translateY(${row.start}px)` }}>{cells}</div>);
+    }
+
+    if (!this.readonly || this.range) {
+        rowsEls.push(
+            <revogr-overlay-selection
+              slot='content'
+              readonly={this.readonly}
+              dimensionCol={this.dimensionCol}
+              dimensionRow={this.dimensionRow}
+              lastCell={this.lastCell}
+              position={this.position}
+              parent={this.parent}/>
+        );
     }
     return rowsEls;
   }

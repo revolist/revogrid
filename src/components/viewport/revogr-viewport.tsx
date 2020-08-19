@@ -138,16 +138,15 @@ export class RevogrViewport {
                         slot='content'
                         rows={view.rows}
                         cols={view.cols}
-                        colData={view.colData}/>
-                    {!this.readonly || this.range ?
-                        <revogr-overlay-selection
-                            slot='content'
-                            readonly={this.readonly}
-                            dimensionCol={view.dimensionCol}
-                            dimensionRow={view.dimensionRow}
-                            lastCell={view.lastCell}
-                            position={view.position}
-                            parent={view.parent}/> : ''}
+                        colData={view.colData}
+                        readonly={this.readonly}
+                        range={this.range}
+                        dimensionCol={view.dimensionCol}
+                        dimensionRow={view.dimensionRow}
+                        lastCell={view.lastCell}
+                        position={view.position}
+                        parent={view.parent}
+                    />
                 </revogr-viewport-scroll>
             );
         }
