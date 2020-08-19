@@ -128,6 +128,9 @@ revogr-header {
 
 revogr-overlay-selection {
   display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
 
   .selection-border-range,
   .selection-bg-range,
@@ -156,6 +159,12 @@ revogr-overlay-selection {
 
   .temp-bg-range {
     background-color: $tmp-selection-bg;
+  }
+
+  .edit-focus-input {
+    position: absolute;
+    left: -1000px;
+    opacity: 0;
   }
 }
 

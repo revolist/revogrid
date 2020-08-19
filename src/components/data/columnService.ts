@@ -1,5 +1,6 @@
 import {h, VNode} from '@stencil/core';
 
+import dataStore, {updateData} from '../../store/dataSource/data.store';
 import {
     CellTemplateFunc,
     ColumnDataSchemaModel,
@@ -7,9 +8,15 @@ import {
     HyperFunc,
     ReadOnlyFormat
 } from '../../interfaces';
-import dataStore, {updateData} from '../../store/dataSource/data.store';
 
-export default class ColumnService {
+export interface ColumnServiceI {
+    columns: ColumnDataSchemaRegular[];
+    setCellData(r: number, c: number, val: string): void;
+    cellRenderer(r: number, c: number): string|VNode;
+    isReadOnly(r: number, c: number): boolean;
+    getCellData(r: number, c: number): string;
+}
+export default class ColumnService implements ColumnServiceI {
     private source: ColumnDataSchemaRegular[] = [];
     get columns(): ColumnDataSchemaRegular[] {
         return this.source;
@@ -55,3 +62,5 @@ export default class ColumnService {
         return { prop, model, data };
     }
 }
+
+

@@ -45,12 +45,7 @@ export class SelectionStoreConnector {
             for (let x in this.stores[y]) {
                 const s = this.stores[y][x];
                 if (s !== store) {
-                    setStore(s, {
-                        focus: null,
-                        range: null,
-                        edit: null,
-                        tempRange: null
-                    });
+                    this.clearFocus(s);
                 } else {
                     currentStorePointer = { x: parseInt(x, 10), y: parseInt(y, 10) };
                 }
@@ -108,6 +103,23 @@ export class SelectionStoreConnector {
         this.focusedStore = store;
     }
 
+    clearAll(): void {
+        for (let y in this.stores) {
+            for (let x in this.stores[y]) {
+                this.clearFocus(this.stores[y][x]);
+            }
+        }
+    }
+
+    clearFocus(s: ObservableMap<State>): void {
+        setStore(s, {
+            focus: null,
+            range: null,
+            edit: null,
+            tempRange: null
+        });
+    }
+
     setRange(store: ObservableMap<State>, start: Cell, end: Cell): void {
         const range = getRange(start, end);
         setStore(store, {
@@ -121,11 +133,24 @@ export class SelectionStoreConnector {
         return this.focusedStore?.get('edit');
     }
 
-    set edit(edit: EditCell|undefined) {
+    setEdit(val: string|boolean): void {
         if (!this.focusedStore) {
             return;
         }
-        setStore(this.focusedStore, { edit });
+
+        const focus: Cell|null = this.focused;
+        if (focus && typeof val === 'string') { // !dataProvider.isReadOnly(focus.y, focus.x)
+            setStore(this.focusedStore, {
+                edit: {
+                    x: focus.x,
+                    y: focus.y,
+                    val
+                }
+            });
+            return;
+        }
+        setStore(this.focusedStore, { edit: null });
+
     }
 
     get focused(): Cell|undefined {
@@ -190,9 +215,4 @@ export class SelectionStoreConnector {
 }
 
 const selectionStoreConnector: SelectionStoreConnector = new SelectionStoreConnector();
-
-export function selectionGlobalChange(area: { x?: number, y?: number }, isMulti?: boolean) {
-    selectionStoreConnector.change(area, isMulti);
-}
-
 export default selectionStoreConnector;

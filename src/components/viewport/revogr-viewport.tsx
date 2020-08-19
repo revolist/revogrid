@@ -1,11 +1,5 @@
-import {Component, Prop, h, Host, Watch} from '@stencil/core';
+import {Component, Prop, h, Host, Watch, Listen, Element} from '@stencil/core';
 import {ObservableMap} from '@stencil/store';
-import {
-    ColumnDataSchemaRegular, DimensionSettingsState, Selection,
-    ViewPortResizeEvent,
-    ViewSettingSizeProp,
-    VirtualPositionItem
-} from '../../interfaces';
 import viewportStore, {setViewport} from '../../store/viewPort/viewport.store';
 import dimensionStore from '../../store/dimension/dimension.store';
 import {UUID} from '../../utils/consts';
@@ -13,6 +7,13 @@ import GridScrollingService, {ElementScroll} from './gridScrollingService';
 import dataStore from '../../store/dataSource/data.store';
 import dimensionProvider from '../../services/dimension.provider';
 import CellSelectionService from '../overlay/selection/cellSelectionService';
+import selectionStoreConnector from '../../store/selection/selection.store.connector';
+import {
+    ColumnDataSchemaRegular, DimensionSettingsState, Selection,
+    ViewPortResizeEvent,
+    ViewSettingSizeProp,
+    VirtualPositionItem
+} from '../../interfaces';
 
 type Properties = {[key: string]: any};
 type ViewportProps = {
@@ -35,6 +36,7 @@ export class RevogrViewport {
     private elementToScroll: ElementScroll[] = [];
     private scrollingService: GridScrollingService;
 
+    @Element() element: Element;
     @Prop() uuid: string|null = null;
     @Prop() resize: boolean;
     @Prop() readonly: boolean;
@@ -43,15 +45,21 @@ export class RevogrViewport {
         CellSelectionService.canRange = canRange;
     }
 
+    @Listen('click', { target: 'document' })
+    handleOutsideClick(e: KeyboardEvent): void {
+        const target: HTMLElement|null = e.target as HTMLElement;
+        if (!target?.closest(`[${UUID}="${this.uuid}"]`)) {
+            selectionStoreConnector.clearAll();
+        }
+    }
+
     connectedCallback(): void {
         this.scrollingService = new GridScrollingService();
         CellSelectionService.canRange = this.range;
-        CellSelectionService.connect();
     }
 
     disconnectedCallback(): void {
         this.scrollingService.destroy();
-        CellSelectionService.disconnect();
     }
 
     componentDidRender(): void {
@@ -69,57 +77,74 @@ export class RevogrViewport {
         const pinStartSize = dimensionStore.colPinStart.get('realSize');
 
         const viewPorts: ViewportProps[] = [
-            ((uuid, rows, cols) => {
-                let parent: string = `[${UUID}="${uuid}"]`;
-                let key: string = 'pinned-left';
+            // left side
+            ((key, uuid, rows, cols) => {
+                const parent: string = `[${UUID}="${uuid}"]`;
+                const prop: Properties = {
+                    contentWidth: pinStartSize,
+                    style: { width: `${pinStartSize}px` },
+                    class: key,
+                    [`${UUID}`]: uuid,
+                    contentHeight,
+                    key,
+                };
+                const headerProp: Properties = {
+                    onHeaderResize: (e: CustomEvent<ViewSettingSizeProp>) =>
+                        dimensionProvider.setSize('colPinStart', e.detail),
+                    cols, parent
+                };
+
+                const lastCell = {
+                    x: viewportStore.colPinStart.get('realCount'),
+                    y: viewportStore.row.get('realCount')
+                };
 
                 return {
-                    prop: {
-                        contentWidth: pinStartSize,
-                        style: { width: `${pinStartSize}px` },
-                        class: key,
-                        [`${UUID}`]: uuid,
-                        contentHeight,
-                        key,
-                    },
-                    headerProp: {
-                        onHeaderResize: (e: CustomEvent<ViewSettingSizeProp>) => dimensionProvider.setSize('colPinStart', e.detail),
-                        cols, parent
-                    },
+                    prop,
+                    headerProp,
+                    lastCell,
                     colData: dataStore.get('colPinStart'),
                     dimensionRow: dimensionStore.row,
                     dimensionCol: dimensionStore.colPinStart,
-                    lastCell: {x: viewportStore.colPinStart.get('realCount'), y: viewportStore.row.get('realCount')},
                     position: {x: 0, y: 0},
-                    cols, rows, parent
+                    cols,
+                    rows,
+                    parent
                 };
-            })(`${this.uuid}-1`, rows, colPinStart),
+            })('pinned-left', `${this.uuid}-1`, rows, colPinStart),
 
-            ((uuid, rows, cols) => {
-                let parent = `[${UUID}="${uuid}"]`;
-                let key = 'data-view';
-
+            // center
+            ((key, uuid, rows, cols) => {
+                const parent = `[${UUID}="${uuid}"]`;
+                const prop: Properties = {
+                    contentWidth: dimensionStore.col.get('realSize'),
+                    class: key,
+                    [`${UUID}`]: uuid,
+                    onResizeViewport: (e: CustomEvent<ViewPortResizeEvent>) =>
+                        setViewport({ virtualSize:  e.detail.size}, e.detail.dimension),
+                    contentHeight,
+                    key
+                };
+                const headerProp: Properties = {
+                    onHeaderResize: (e: CustomEvent<ViewSettingSizeProp>) =>
+                        dimensionProvider.setSize('col', e.detail),
+                    cols, parent
+                };
+                const lastCell = {
+                    x: viewportStore.col.get('realCount'),
+                    y: viewportStore.row.get('realCount')
+                };
                 return {
-                    prop: {
-                        contentWidth: dimensionStore.col.get('realSize'),
-                        class: key,
-                        [`${UUID}`]: uuid,
-                        onResizeViewport: (e: CustomEvent<ViewPortResizeEvent>) => setViewport({ virtualSize:  e.detail.size}, e.detail.dimension),
-                        contentHeight,
-                        key
-                    },
-                    headerProp: {
-                        onHeaderResize: (e: CustomEvent<ViewSettingSizeProp>) => dimensionProvider.setSize('col', e.detail),
-                        cols, parent
-                    },
+                    prop,
+                    headerProp,
+                    lastCell,
                     colData: dataStore.get('columnsFlat'),
                     dimensionRow: dimensionStore.row,
                     dimensionCol: dimensionStore.col,
-                    lastCell: {x: viewportStore.col.get('realCount'), y: viewportStore.row.get('realCount')},
                     position: {x: 1, y: 0},
                     cols, rows, parent
                 };
-            })(`${this.uuid}-0`, rows, cols),
+            })('data-view', `${this.uuid}-0`, rows, cols),
         ];
 
         const viewPortHtml = [];

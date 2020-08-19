@@ -1,16 +1,10 @@
-import {ObservableMap} from '@stencil/store';
-
-import {
-  ColumnDataSchemaModel, ColumnProp,
-  DataSource, DataSourceState, DataType, Pin,
-} from '../interfaces';
-import dataStore, {updateData} from '../store/dataSource/data.store';
+import {DataType} from '../interfaces';
+import {updateData} from '../store/dataSource/data.store';
 import {setViewport} from '../store/viewPort/viewport.store';
 import {setRealSize} from '../store/dimension/dimension.store';
-import columnProvider from "./column.data.provider";
 
 class DataProvider {
-  constructor(private dataSourceStore:  ObservableMap<DataSourceState>) {
+  constructor() {
   }
 
   setData(data: DataType[]): void {
@@ -20,23 +14,7 @@ class DataProvider {
     setViewport({ realCount }, 'row');
     setRealSize(realCount, 'row' );
   }
-
-  getCellData(r: number, c: number, pin?: Pin): string {
-    const {prop, model} = this.rowDataModel(r, c, pin);
-    return model[prop as number] || '';
-  }
-
-  rowDataModel(r: number, c: number, pin?: Pin): ColumnDataSchemaModel {
-    const prop: ColumnProp = pin ? columnProvider.getPin(c, pin)?.prop : columnProvider.getColumn(c)?.prop;
-    const data: DataSource = this.dataSourceStore.get('data');
-    const model: DataType = data[r] || {};
-    return { prop, model, data };
-  }
-
-  isReadOnly(r: number, c: number, pin?: Pin): boolean {
-    return columnProvider.isReadOnly(r, c, pin);
-  }
 }
 
-const dataProvider: DataProvider = new DataProvider(dataStore);
+const dataProvider: DataProvider = new DataProvider();
 export default dataProvider;

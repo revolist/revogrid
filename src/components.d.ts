@@ -7,6 +7,7 @@
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 import { ColumnData, ColumnDataSchemaRegular, DataType, DimensionSettingsState, DimensionType, Edition, Selection, ViewPortResizeEvent, ViewPortScrollEvent, ViewSettingSizeProp, VirtualPositionItem } from "./interfaces";
 import { ObservableMap } from "@stencil/store";
+import { ColumnServiceI } from "./components/data/columnService";
 export namespace Components {
     interface RevoGrid {
         "colSize": number;
@@ -33,8 +34,8 @@ export namespace Components {
     interface RevogrEdit {
         "dimensionCol": ObservableMap<DimensionSettingsState>;
         "dimensionRow": ObservableMap<DimensionSettingsState>;
+        "doEdit": (val?: string | boolean) => Promise<void>;
         "editCell": Edition.EditCell|null;
-        "parent": string;
     }
     interface RevogrHeader {
         "canResize": boolean;
@@ -43,6 +44,7 @@ export namespace Components {
         "parent": string;
     }
     interface RevogrOverlaySelection {
+        "columnService": ColumnServiceI;
         "dimensionCol": ObservableMap<DimensionSettingsState>;
         "dimensionRow": ObservableMap<DimensionSettingsState>;
         "lastCell": Selection.Cell;
@@ -165,7 +167,6 @@ declare namespace LocalJSX {
         "dimensionRow"?: ObservableMap<DimensionSettingsState>;
         "editCell"?: Edition.EditCell|null;
         "onBeforeEdit"?: (event: CustomEvent<Edition.SaveDataDetails>) => void;
-        "parent"?: string;
     }
     interface RevogrHeader {
         "canResize"?: boolean;
@@ -176,6 +177,7 @@ declare namespace LocalJSX {
         "parent"?: string;
     }
     interface RevogrOverlaySelection {
+        "columnService"?: ColumnServiceI;
         "dimensionCol"?: ObservableMap<DimensionSettingsState>;
         "dimensionRow"?: ObservableMap<DimensionSettingsState>;
         "lastCell"?: Selection.Cell;

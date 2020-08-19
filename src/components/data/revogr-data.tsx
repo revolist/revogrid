@@ -1,7 +1,8 @@
-import {Component, Element, h, Listen, Prop, Watch} from '@stencil/core';
+import {Component, Element, h, Listen, Prop, State, Watch} from '@stencil/core';
 import {HTMLStencilElement} from '@stencil/core/internal';
+import {ObservableMap} from '@stencil/store';
 
-import ColumnService from './columnService';
+import ColumnService, {ColumnServiceI} from './columnService';
 import {CELL_CLASS, DATA_COL, DATA_ROW, DISABLED_CLASS} from '../../utils/consts';
 import {
   ColumnDataSchemaRegular,
@@ -10,7 +11,6 @@ import {
   Selection,
   VirtualPositionItem
 } from '../../interfaces';
-import {ObservableMap} from "@stencil/store";
 
 @Component({
   tag: 'revogr-data'
@@ -35,7 +35,6 @@ export class RevogrData {
     this.columnService.columns = newData;
   }
 
-
   @Listen('beforeEdit')
   onSave(e: CustomEvent<Edition.SaveDataDetails>): void {
     if (!e.defaultPrevented) {
@@ -43,7 +42,7 @@ export class RevogrData {
     }
   }
 
-  private columnService: ColumnService;
+  @State() columnService: ColumnServiceI;
 
   connectedCallback(): void {
     this.columnService = new ColumnService(this.colData);
@@ -73,6 +72,7 @@ export class RevogrData {
             <revogr-overlay-selection
               slot='content'
               readonly={this.readonly}
+              columnService={this.columnService}
               dimensionCol={this.dimensionCol}
               dimensionRow={this.dimensionRow}
               lastCell={this.lastCell}

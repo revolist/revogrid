@@ -1,17 +1,14 @@
-import {Component, Event, EventEmitter, Prop, h} from '@stencil/core';
+import {Component, Event, EventEmitter, Prop, h, Method} from '@stencil/core';
 import {ObservableMap} from '@stencil/store';
 
 import CellEditService from './cellEditService';
 import {DimensionSettingsState, Edition, Selection} from '../../../interfaces';
 import { getItemByIndex } from '../../../store/dimension/dimension.helpers';
-import dataProvider from '../../../services/data.provider';
-import {CELL_CLASS} from '../../../utils/consts';
 
 @Component({
     tag: 'revogr-edit'
 })
 export class Edit {
-    @Prop() parent: string = '';
     @Prop() dimensionRow: ObservableMap<DimensionSettingsState>;
     @Prop() dimensionCol: ObservableMap<DimensionSettingsState>;
     @Prop() editCell: Edition.EditCell|null = null;
@@ -32,8 +29,13 @@ export class Edit {
         }, 0);
     }
 
+    @Method()
+    async doEdit(val: string|boolean = ''): Promise<void> {
+        this.cellEditModule?.edit(val);
+    }
+
     connectedCallback(): void {
-        this.cellEditModule = new CellEditService(`${this.parent} .${CELL_CLASS}`);
+        this.cellEditModule = new CellEditService();
     }
 
     disconnectedCallback(): void {
@@ -55,9 +57,7 @@ export class Edit {
             height: `${row.end - row.start}px`
         };
         return <div style={style} class='edit-input-wrapper'>
-            <revogr-text-editor
-                value={this.editCell.val ? this.editCell.val : dataProvider.getCellData(y, x)}
-                onEdit={(e) => this.onSave(e)}/>
+            <revogr-text-editor value={this.editCell.val} onEdit={(e) => this.onSave(e)}/>
         </div>;
     }
 }
