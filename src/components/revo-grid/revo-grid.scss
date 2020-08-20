@@ -79,10 +79,14 @@ revogr-viewport-scroll {
 
   &.colPinStart {
     float: left;
+    box-shadow: 4px 0 4px rgba(black, .05);
+    z-index: 2;
   }
 
   &.colPinEnd {
     float: right;
+    box-shadow: -4px 0 4px rgba(black, .05);
+    z-index: 2;
   }
 
   .content-wrapper {
@@ -125,7 +129,7 @@ revogr-header {
   line-height: $header-size;
   box-shadow: $header-shadow;
   font-weight: 600;
-  z-index: 1;
+  z-index: 5;
   display: block;
 
   .data-header-cell {
@@ -134,6 +138,20 @@ revogr-header {
     box-shadow: $header-shadow-cell;
     height: 100%;
     text-align: center;
+  }
+}
+
+.header-wrapper {
+  revogr-data {
+    box-shadow: 0 4px 4px rgba(black, .05);
+    z-index: 3;
+  }
+}
+
+.footer-wrapper {
+  revogr-data {
+    box-shadow: 0 -4px 4px rgba(black, .05);
+    z-index: 3;
   }
 }
 
