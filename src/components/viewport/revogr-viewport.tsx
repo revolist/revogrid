@@ -1,32 +1,36 @@
 import {Component, Prop, h, Host, Watch, Listen, Element} from '@stencil/core';
 import {ObservableMap} from '@stencil/store';
-import viewportStore, {setViewport} from '../../store/viewPort/viewport.store';
-import dimensionStore from '../../store/dimension/dimension.store';
 import {UUID} from '../../utils/consts';
-import GridScrollingService, {ElementScroll} from './gridScrollingService';
 import dataStore from '../../store/dataSource/data.store';
 import dimensionProvider from '../../services/dimension.provider';
-import CellSelectionService from '../overlay/selection/cellSelectionService';
 import selectionStoreConnector from '../../store/selection/selection.store.connector';
+import viewportStore, {setViewport} from '../../store/viewPort/viewport.store';
+import dimensionStore from '../../store/dimension/dimension.store';
+import GridScrollingService, {ElementScroll} from './gridScrollingService';
+import CellSelectionService from '../overlay/selection/cellSelectionService';
 import {
-    ColumnDataSchemaRegular, DimensionSettingsState, Selection,
+    ColumnDataSchemaRegular, DimensionColPin, DimensionSettingsState, MultiDimensionType, Selection,
     ViewPortResizeEvent,
     ViewSettingSizeProp,
     VirtualPositionItem
 } from '../../interfaces';
 
 type Properties = {[key: string]: any};
-type ViewportProps = {
-    prop: Properties;
-    headerProp: Properties;
-    cols: VirtualPositionItem[];
-    rows: VirtualPositionItem[];
+type ViewportData = {
+    lastCell: Selection.Cell;
+    dataPosition: Selection.Cell;
     colData: ColumnDataSchemaRegular[];
     dimensionRow: ObservableMap<DimensionSettingsState>;
     dimensionCol: ObservableMap<DimensionSettingsState>;
+    cols: VirtualPositionItem[];
+    rows: VirtualPositionItem[];
+};
+type ViewportProps = {
+    prop: Properties;
+    headerProp: Properties;
     parent: string;
-    lastCell: Selection.Cell;
-    position: Selection.Cell;
+    dataPart: ViewportData;
+    dataPartTop: ViewportData;
 };
 
 @Component({
@@ -70,106 +74,149 @@ export class RevogrViewport {
         this.elementToScroll.length = 0;
         const rows: VirtualPositionItem[] = viewportStore.row.get('items');
         const cols: VirtualPositionItem[] = viewportStore.col.get('items');
-        const colPinStart: VirtualPositionItem[] = viewportStore.colPinStart.get('items');
 
         const contentHeight = dimensionStore.row.get('realSize');
         const hostProp = { [`${UUID}`]: this.uuid };
-        const pinStartSize = dimensionStore.colPinStart.get('realSize');
 
-        const viewPorts: ViewportProps[] = [
+        const pinnedColumn = (
+            key: MultiDimensionType,
+            uuid: string,
+            rows: VirtualPositionItem[],
+            colType: DimensionColPin,
+            dataPosition: Selection.Cell
+        ) => {
+            const cols: VirtualPositionItem[] = viewportStore[colType].get('items');
+            const pinSize = dimensionStore[colType].get('realSize');
+            const parent: string = `[${UUID}="${uuid}"]`;
+            const prop: Properties = {
+                contentWidth: pinSize,
+                style: { width: `${pinSize}px` },
+                class: key,
+                [`${UUID}`]: uuid,
+                contentHeight,
+                key,
+            };
+            const headerProp: Properties = {
+                onHeaderResize: (e: CustomEvent<ViewSettingSizeProp>) =>
+                    dimensionProvider.setSize(colType, e.detail),
+                cols,
+                parent
+            };
+
+            const lastCell = {
+                x: viewportStore[colType].get('realCount'),
+                y: viewportStore.row.get('realCount')
+            };
+
+            const dataPart = {
+                colData: dataStore.get(colType),
+                dimensionCol: dimensionStore[colType],
+                dataPosition,
+                cols,
+                rows,
+                dimensionRow: dimensionStore.row,
+                lastCell,
+            };
+            return {
+                prop,
+                headerProp,
+                parent,
+                dataPart,
+                dataPartTop: {
+                    ...dataPart,
+                    rows: [dataPart.rows[0]],
+                    // dimensionRow: dimensionStore['rowPinStart'],
+                    lastCell: { x: lastCell.x, y: 1 },
+                    dataPosition: { x: dataPosition.x, y: 0 }
+                }
+            };
+        };
+
+        const centerData = (
+            key: string,
+            uuid: string,
+            rows: VirtualPositionItem[],
+            cols: VirtualPositionItem[],
+            dataPosition: Selection.Cell
+        ) => {
+            const parent = `[${UUID}="${uuid}"]`;
+            const prop: Properties = {
+                contentWidth: dimensionStore['col'].get('realSize'),
+                class: key,
+                [`${UUID}`]: uuid,
+                onResizeViewport: (e: CustomEvent<ViewPortResizeEvent>) =>
+                    setViewport({ virtualSize:  e.detail.size}, e.detail.dimension),
+                contentHeight,
+                key
+            };
+            const headerProp: Properties = {
+                onHeaderResize: (e: CustomEvent<ViewSettingSizeProp>) =>
+                    dimensionProvider.setSize('col', e.detail),
+                cols, parent
+            };
+            const lastCell = {
+                x: viewportStore['col'].get('realCount'),
+                y: viewportStore['row'].get('realCount')
+            };
+
+            const dataPart = {
+                colData: dataStore.get('columnsFlat'),
+                dimensionRow: dimensionStore['row'],
+                dimensionCol: dimensionStore['col'],
+                lastCell,
+                dataPosition,
+                cols,
+                rows
+            };
+            return {
+                prop,
+                headerProp,
+                parent,
+                dataPart,
+                dataPartTop: {
+                    ...dataPart,
+                    rows: [dataPart.rows[0]],
+                    // dimensionRow: dimensionStore['rowPinStart'],
+                    lastCell: { x: lastCell.x, y: 1 },
+                    dataPosition: { x: dataPosition.x, y: 0 }
+                }
+            };
+        };
+
+        const viewVerticalPorts: ViewportProps[] = [
             // left side
-            ((key, uuid, rows, cols) => {
-                const parent: string = `[${UUID}="${uuid}"]`;
-                const prop: Properties = {
-                    contentWidth: pinStartSize,
-                    style: { width: `${pinStartSize}px` },
-                    class: key,
-                    [`${UUID}`]: uuid,
-                    contentHeight,
-                    key,
-                };
-                const headerProp: Properties = {
-                    onHeaderResize: (e: CustomEvent<ViewSettingSizeProp>) =>
-                        dimensionProvider.setSize('colPinStart', e.detail),
-                    cols, parent
-                };
+            pinnedColumn('colPinStart', `${this.uuid}-1`, rows, 'colPinStart', {x: 0, y: 1}),
 
-                const lastCell = {
-                    x: viewportStore.colPinStart.get('realCount'),
-                    y: viewportStore.row.get('realCount')
-                };
-
-                return {
-                    prop,
-                    headerProp,
-                    lastCell,
-                    colData: dataStore.get('colPinStart'),
-                    dimensionRow: dimensionStore.row,
-                    dimensionCol: dimensionStore.colPinStart,
-                    position: {x: 0, y: 0},
-                    cols,
-                    rows,
-                    parent
-                };
-            })('pinned-left', `${this.uuid}-1`, rows, colPinStart),
+            // right side
+            pinnedColumn('colPinEnd', `${this.uuid}-2`, rows, 'colPinEnd', {x: 2, y: 1}),
 
             // center
-            ((key, uuid, rows, cols) => {
-                const parent = `[${UUID}="${uuid}"]`;
-                const prop: Properties = {
-                    contentWidth: dimensionStore.col.get('realSize'),
-                    class: key,
-                    [`${UUID}`]: uuid,
-                    onResizeViewport: (e: CustomEvent<ViewPortResizeEvent>) =>
-                        setViewport({ virtualSize:  e.detail.size}, e.detail.dimension),
-                    contentHeight,
-                    key
-                };
-                const headerProp: Properties = {
-                    onHeaderResize: (e: CustomEvent<ViewSettingSizeProp>) =>
-                        dimensionProvider.setSize('col', e.detail),
-                    cols, parent
-                };
-                const lastCell = {
-                    x: viewportStore.col.get('realCount'),
-                    y: viewportStore.row.get('realCount')
-                };
-                return {
-                    prop,
-                    headerProp,
-                    lastCell,
-                    colData: dataStore.get('columnsFlat'),
-                    dimensionRow: dimensionStore.row,
-                    dimensionCol: dimensionStore.col,
-                    position: {x: 1, y: 0},
-                    cols, rows, parent
-                };
-            })('data-view', `${this.uuid}-0`, rows, cols),
+            centerData('data-view', `${this.uuid}-0`, rows, cols, {x: 1, y: 1}),
         ];
 
         const viewPortHtml = [];
-        for (let view of viewPorts) {
+        for (let view of viewVerticalPorts) {
             viewPortHtml.push(
                 <revogr-viewport-scroll {...view.prop}
                     ref={el => this.elementToScroll.push(el)}
-                    onScrollViewport={e => this.scrollingService.onScroll(e.detail)}>
+                    onScrollViewport={e => this.scrollingService.onScroll(e.detail, view.prop.key)}>
+
                     <revogr-header
                         {...view.headerProp}
                         slot='header'
-                        class='header'
                         canResize={this.resize}
-                        colData={view.colData}/>
+                        colData={view.dataPart.colData}/>
                     <revogr-data
                         slot='content'
-                        rows={view.rows}
-                        cols={view.cols}
-                        colData={view.colData}
+                        rows={view.dataPart.rows}
+                        cols={view.dataPart.cols}
+                        colData={view.dataPart.colData}
                         readonly={this.readonly}
                         range={this.range}
-                        dimensionCol={view.dimensionCol}
-                        dimensionRow={view.dimensionRow}
-                        lastCell={view.lastCell}
-                        position={view.position}
+                        dimensionCol={view.dataPart.dimensionCol}
+                        dimensionRow={view.dataPart.dimensionRow}
+                        lastCell={view.dataPart.lastCell}
+                        position={view.dataPart.dataPosition}
                         parent={view.parent}
                     />
                 </revogr-viewport-scroll>

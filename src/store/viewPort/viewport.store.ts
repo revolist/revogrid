@@ -11,7 +11,7 @@ import {
   getFirstItem,
   getLastItem,
   getUpdatedItemsByPosition,
-  isActiveRange
+  isActiveRange, updateMissing
 } from './viewport.helpers';
 
 import {setStore} from '../../utils/store.utils';
@@ -123,12 +123,7 @@ function setViewPortCoordinate(
         start: store.get('start'),
         end: store.get('end')
       };
-      items.splice(range.end + 1, 0, ...missing);
-      range.end += missing.length;
-
-      if (range.start >= range.end) {
-        range.start += missing.length;
-      }
+      updateMissing(items, missing, range);
       setStore(store, {
         items: [...items],
         ...range

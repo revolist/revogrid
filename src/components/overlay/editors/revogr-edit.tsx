@@ -1,4 +1,4 @@
-import {Component, Event, EventEmitter, Prop, h, Method} from '@stencil/core';
+import {Component, Event, EventEmitter, Prop, h, Method, Listen} from '@stencil/core';
 import {ObservableMap} from '@stencil/store';
 
 import CellEditService from './cellEditService';
@@ -27,6 +27,11 @@ export class Edit {
         setTimeout(() => {
             this.cellEditModule.close();
         }, 0);
+    }
+
+    @Listen('focus', { target: 'parent' })
+    onFocus(e: FocusEvent): void {
+        console.log(e);
     }
 
     @Method()

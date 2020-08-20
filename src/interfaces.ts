@@ -59,11 +59,14 @@ export type DataSourceState = {
   columnsFlat: ColumnDataSchemaRegular[];
 }&{[T in DimensionColPin]: ColumnDataSchemaRegular[]};
 
-export interface ViewportStateItems {
-  items: VirtualPositionItem[];
+export type Range = {
   start: number;
   end: number;
-}
+};
+
+export type ViewportStateItems = {
+  items: VirtualPositionItem[];
+} & Range;
 export interface ViewportState extends ViewportStateItems {
   realCount: number;
   virtualSize: number;

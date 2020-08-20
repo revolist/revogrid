@@ -87,8 +87,8 @@ export class OverlaySelection {
 
 
     componentDidRender(): void {
-        if (this.selectionStore?.focused) {
-            this.focusSection?.focus({preventScroll: true});
+        if (this.selectionStore?.focused && document.activeElement !== this.focusSection) {
+            this.focusSection?.focus({ preventScroll: true });
         }
     }
 
@@ -108,16 +108,17 @@ export class OverlaySelection {
             const style: RangeAreaCss = this.getElStyle(tempRange);
             els.push(<div class={TMP_SELECTION_BG_CLASS} style={style}/>);
         }
+        let focusStyle: Partial<RangeAreaCss> = {};
         if (selectionFocus) {
-            const style: RangeAreaCss = this.getElStyle({
+            focusStyle = this.getElStyle({
                 x: selectionFocus.x,
                 y: selectionFocus.y,
                 x1: selectionFocus.x,
                 y1: selectionFocus.y
             });
-            els.push(<div class={FOCUS_CLASS} style={style}/>);
+            els.push(<div class={FOCUS_CLASS} style={focusStyle}/>);
         }
-        els.push(<input type='text' class='edit-focus-input' ref={el => this.focusSection = el}/>);
+        els.push(<input type='text' class='edit-focus-input' style={focusStyle} ref={el => this.focusSection = el}/>);
         if (!this.readonly) {
             const editCell = this.selectionStore.store.get('edit');
             els.push(<revogr-edit

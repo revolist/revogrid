@@ -4,9 +4,6 @@ import {setViewport} from '../store/viewPort/viewport.store';
 import {setRealSize} from '../store/dimension/dimension.store';
 
 class DataProvider {
-  constructor() {
-  }
-
   setData(data: DataType[]): void {
     updateData({...data});
 

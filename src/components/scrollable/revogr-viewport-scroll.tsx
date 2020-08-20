@@ -15,7 +15,7 @@ export class RevogrViewportScroll {
   @Prop() contentWidth: number = 0;
   @Prop() contentHeight: number = 0;
 
-  private preventArtificialScroll: {[T in DimensionType]: boolean} = { row: false, col: false };
+  private preventArtificialScroll: {[T in DimensionType]: number} = { row: 0, col: 0 };
   private scrollCoordinates: {[T in DimensionType]: number} = {row: 0, col: 0};
   private oldValY: number = this.contentHeight;
   private oldValX: number = this.contentWidth;
@@ -28,7 +28,8 @@ export class RevogrViewportScroll {
 
   @Method()
   async setScroll(e: ViewPortScrollEvent): Promise<void> {
-    window.requestAnimationFrame(() => {
+    this.preventArtificialScroll[e.dimension] = window.requestAnimationFrame(() => {
+      console.log('scroll');
       switch (e.dimension) {
         case 'col':
           if (typeof e.coordinate === 'number') {
@@ -41,15 +42,14 @@ export class RevogrViewportScroll {
           }
           break;
       }
-      this.preventArtificialScroll[e.dimension] = true;
+      this.preventArtificialScroll[e.dimension] = 0;
     });
   }
 
   scroll(dimension: DimensionType, coordinate: number = 0): void {
     this.scrollCoordinates[dimension] = coordinate;
     if (this.preventArtificialScroll[dimension]) {
-      this.preventArtificialScroll[dimension] = false;
-      return;
+      window.cancelAnimationFrame(this.preventArtificialScroll[dimension]);
     }
     this.scrollViewport.emit({
       dimension: dimension,

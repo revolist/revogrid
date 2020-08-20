@@ -75,11 +75,11 @@ revogr-viewport-scroll {
     -webkit-appearance: none;
   }
 
-  &.pinned-left {
+  &.colPinStart {
     float: left;
   }
 
-  &.pinned-right {
+  &.colPinEnd {
     float: right;
   }
 
@@ -165,6 +165,8 @@ revogr-overlay-selection {
     position: absolute;
     left: -1000px;
     opacity: 0;
+    width: 0;
+    height: 0;
   }
 }
 
