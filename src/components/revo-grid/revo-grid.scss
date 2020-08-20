@@ -1,6 +1,8 @@
 @import "src/assets/scss/_colors";
 $header-size: 30px;
 
+
+
 revo-grid {
   display: block;
   height: 100%;
@@ -36,7 +38,6 @@ revo-grid {
 
 revogr-data {
   display: block;
-  height: 100%;
   width: 100%;
   position: relative;
 
@@ -66,6 +67,7 @@ revogr-viewport-scroll {
   overflow-x: auto;
   overflow-y: hidden;
   position: relative;
+
   /* Hide scrollbar for IE and Edge */
   -ms-overflow-style: none;
 
@@ -81,6 +83,10 @@ revogr-viewport-scroll {
 
   &.colPinEnd {
     float: right;
+  }
+
+  .content-wrapper {
+    overflow: hidden;
   }
 
   .inner-content-table {
@@ -104,6 +110,11 @@ revogr-viewport-scroll {
     &::-webkit-scrollbar {
       display: none;
       -webkit-appearance: none;
+    }
+
+
+    revogr-data {
+      height: 100%;
     }
   }
 }

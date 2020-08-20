@@ -1,11 +1,12 @@
-import {Component, Element, h, Listen, Prop, State, Watch} from '@stencil/core';
+import {Component, Element, h, Host, Listen, Prop, State, Watch} from '@stencil/core';
 import {HTMLStencilElement} from '@stencil/core/internal';
 import {ObservableMap} from '@stencil/store';
 
 import ColumnService, {ColumnServiceI} from './columnService';
-import {CELL_CLASS, DATA_COL, DATA_ROW, DISABLED_CLASS} from '../../utils/consts';
+import {CELL_CLASS, DATA_COL, DATA_ROW, DISABLED_CLASS, UUID} from '../../utils/consts';
 import {
   ColumnDataSchemaRegular,
+  DimensionRows,
   DimensionSettingsState,
   Edition,
   Selection,
@@ -25,7 +26,8 @@ export class RevogrData {
   @Prop() cols: VirtualPositionItem[];
   @Prop() lastCell: Selection.Cell;
   @Prop() position: Selection.Cell;
-  @Prop() parent: string = '';
+  @Prop() uuid: string = '';
+  @Prop() rowType: DimensionRows;
 
   @Prop() dimensionRow: ObservableMap<DimensionSettingsState>;
   @Prop() dimensionCol: ObservableMap<DimensionSettingsState>;
@@ -45,11 +47,11 @@ export class RevogrData {
   @State() columnService: ColumnServiceI;
 
   connectedCallback(): void {
-    this.columnService = new ColumnService(this.colData);
+    this.columnService = new ColumnService(this.colData, this.rowType);
   }
 
   render() {
-    if (!this.colData) {
+    if (!this.colData || !this.rows.length || !this.cols.length) {
       return '';
     }
     const rowsEls: HTMLElement[] = [];
@@ -66,7 +68,9 @@ export class RevogrData {
       }
       rowsEls.push(<div class='row' style={{ height: `${row.size}px`, transform: `translateY(${row.start}px)` }}>{cells}</div>);
     }
-
+    const uuid = `${this.uuid}-${this.position.x}-${this.position.y}`;
+    const parent: string = `[${UUID}="${uuid}"]`;
+    const hostProp = { [`${UUID}`]: uuid };
     if (!this.readonly || this.range) {
         rowsEls.push(
             <revogr-overlay-selection
@@ -77,9 +81,9 @@ export class RevogrData {
               dimensionRow={this.dimensionRow}
               lastCell={this.lastCell}
               position={this.position}
-              parent={this.parent}/>
+              parent={parent}/>
         );
     }
-    return rowsEls;
+    return <Host {...hostProp}>{rowsEls}</Host>;
   }
 }

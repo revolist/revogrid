@@ -15,7 +15,7 @@ export function generateFakeDataObject(rowsNumber, colsNumber) {
             headers[col] = {
                 name: generateHeader(col),
                 prop: col,
-                pin: j === 4 || j === 10 ? 'pinStart' : j === 6 || j === 9 ? 'pinEnd' : undefined,
+                pin: j === 4 || j === 10 ? 'colPinStart' : j === 6 || j === 9 ? 'colPinEnd' : undefined,
                 size: j === 5 ? 200 : undefined,
                 readonly: !!(col%2),
                 cellTemplate: (h, props) => {
@@ -31,9 +31,13 @@ export function generateFakeDataObject(rowsNumber, colsNumber) {
             }
         }
     }
+    const pinnedTopRows = [result[10]];
+    const pinnedBottomRows = [result[1]];
     return {
         rows: result,
-        headers: headers
+        pinnedTopRows,
+        pinnedBottomRows,
+        headers
     };
 }
 

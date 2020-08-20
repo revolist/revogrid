@@ -1,3 +1,7 @@
+import reduce from 'lodash/reduce';
+import dataStore, {setDataColumn} from '../store/dataSource/data.store';
+import dimensionProvider from './dimension.provider';
+
 import {
     ColumnData,
     ColumnDataSchema,
@@ -5,17 +9,8 @@ import {
     ColumnDataSchemaRegular,
     DataSourceColumnPins,
     DimensionColPin,
-    DimensionSettingsState,
-    Pin,
-    ReadOnlyFormat,
     ViewSettingSizeProp
 } from '../interfaces';
-import reduce from 'lodash/reduce';
-import dataStore, {setDataColumn} from '../store/dataSource/data.store';
-import dimensionProvider from './dimension.provider';
-import {setViewport, setViewPortCoordinate} from '../store/viewPort/viewport.store';
-import {getCurrentState, setDimensionSize, setRealSize} from '../store/dimension/dimension.store';
-import {pinToColPin} from "../utils/pins";
 
 type ColumnCollection = {
     flat: ColumnDataSchemaRegular[];
@@ -24,33 +19,15 @@ type ColumnCollection = {
 
 
 class ColumnDataProvider {
-    constructor() {}
-
-    data(c: number, pin?: Pin): string {
-        if (pin) {
-            return this.getPin(c, pin)?.name || '';
-        }
-        return this.getColumn(c)?.name || '';
-    }
-
-    isReadOnly(r: number, c: number, _pin?: Pin): boolean {
-        const readOnly: ReadOnlyFormat = this.getColumn(c)?.readonly;
-        if (typeof readOnly === 'function') {
-            return readOnly(r, c);
-        }
-        return readOnly;
-    }
-
-    column(c: number, pin?: Pin): ColumnDataSchemaRegular|undefined {
+    column(c: number, pin?: DimensionColPin): ColumnDataSchemaRegular|undefined {
         if (pin) {
             return this.getPin(c, pin);
         }
         return this.getColumn(c);
     }
 
-    getPin(c: number, pin: Pin): ColumnDataSchemaRegular|undefined {
-        let type: DimensionColPin = pinToColPin(pin);
-        return dataStore.get(type)[c];
+    getPin(c: number, pin: DimensionColPin): ColumnDataSchemaRegular|undefined {
+        return dataStore.get(pin)[c];
     }
 
     getColumn(c: number): ColumnDataSchemaRegular|undefined {
@@ -58,40 +35,28 @@ class ColumnDataProvider {
     }
 
     setColumns(columns: ColumnData): void {
-        const {flat, pinStart, pinEnd, sizes} = ColumnDataProvider.getColumns(columns);
-        setDataColumn(flat, {colPinStart: pinStart, colPinEnd: pinEnd});
+        const {flat, colPinStart, colPinEnd, sizes} = ColumnDataProvider.getColumns(columns);
+        setDataColumn(flat, {colPinStart, colPinEnd});
 
-        const realCount = flat.length;
-        dimensionProvider.setSize('col', sizes);
-        setViewport({ realCount }, 'col');
-        setRealSize(realCount, 'col' );
-
-        ColumnDataProvider.setPins(pinStart, 'colPinStart');
-        ColumnDataProvider.setPins(pinEnd, 'colPinEnd');
+        dimensionProvider.setDimensionSize('col', sizes);
+        dimensionProvider.setRealSize(flat, 'col');
+        dimensionProvider.setPins(colPinStart, 'colPinStart', ColumnDataProvider.getPinSizes(colPinStart));
+        dimensionProvider.setPins(colPinEnd, 'colPinEnd', ColumnDataProvider.getPinSizes(colPinEnd));
     }
 
-    private static setPins(cols: ColumnDataSchemaRegular[], type: DimensionColPin): void {
-        const pinSizes: ViewSettingSizeProp = reduce(cols, (res: ViewSettingSizeProp, c: ColumnDataSchemaRegular, i: number) => {
+    private static getPinSizes(cols: ColumnDataSchemaRegular[]): ViewSettingSizeProp {
+        return reduce(cols, (res: ViewSettingSizeProp, c: ColumnDataSchemaRegular, i: number) => {
             if (c.size) {
                 res[i] = c.size;
             }
             return res;
         }, {});
-        const realCount = cols.length;
-        setRealSize(realCount, type);
-        setDimensionSize(pinSizes, type);
-        const dimension: DimensionSettingsState = getCurrentState(type);
-        setViewport({
-            realCount,
-            virtualSize: dimension.realSize
-        }, type);
-        setViewPortCoordinate(0, type, dimension);
+
     }
 
     private static isColGrouping(colData: ColumnDataSchemaGrouping | ColumnDataSchemaRegular): colData is ColumnDataSchemaGrouping {
         return !!(colData as ColumnDataSchemaGrouping).children;
     }
-
 
     // columns processing
     private static getColumns(columns: ColumnData): ColumnCollection {
@@ -115,8 +80,8 @@ class ColumnDataProvider {
             return res;
         }, {
             flat: [],
-            pinStart: [],
-            pinEnd: [],
+            colPinStart: [],
+            colPinEnd: [],
             sizes: {}
         });
     }

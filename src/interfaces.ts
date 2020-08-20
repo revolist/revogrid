@@ -1,8 +1,11 @@
 /* Note: using `.d.ts` file extension will exclude it from the output build */
 
-export type DimensionType = 'col'|'row';
+export type DimensionTypeRow = 'row';
+export type DimensionTypeCol = 'col';
+export type DimensionType = DimensionTypeCol|DimensionTypeRow;
 export type DimensionColPin = 'colPinStart'|'colPinEnd';
 export type DimensionRowPin = 'rowPinStart'|'rowPinEnd';
+export type DimensionRows = DimensionTypeRow|DimensionRowPin;
 export type MultiDimensionType = DimensionType|DimensionColPin|DimensionRowPin;
 
 export type ViewPortScrollEvent = {
@@ -34,30 +37,23 @@ export interface ColumnDataSchemaGrouping {
   name: DataFormat;
 }
 
-export type Pin = 'pinStart'|'pinEnd';
 
 export interface ColumnDataSchemaRegular extends ColumnDataSchemaBase {
   prop: ColumnProp;
-  pin: Pin;
+  pin: DimensionColPin;
 }
 
 export type ColumnDataSchema = ColumnDataSchemaGrouping | ColumnDataSchemaRegular;
 
 export type ColumnProp = string|number;
 export type DataFormat = string;
-export interface HyperFunc<T> {
-  (sel: string, data?: object, text?: string): T;
-}
+export interface HyperFunc<T> { (sel: string, data?: object, text?: string): T; }
 export type CellTemplateFunc<T> = (h: HyperFunc<T>, props: ColumnDataSchemaModel) => T;
 export type ColumnData = ColumnDataSchema[];
 
 export type DataType = {[T in ColumnProp]: DataFormat};
 export type DataSource = DataType[];
-export type DataSourceColumnPins = {[T in Pin]: ColumnDataSchemaRegular[];};
-export type DataSourceState = {
-  data: DataType[];
-  columnsFlat: ColumnDataSchemaRegular[];
-}&{[T in DimensionColPin]: ColumnDataSchemaRegular[]};
+export type DataSourceColumnPins = {[T in DimensionColPin]: ColumnDataSchemaRegular[];};
 
 export type Range = {
   start: number;

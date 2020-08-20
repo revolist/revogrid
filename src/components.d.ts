@@ -5,7 +5,7 @@
  * It contains typing information for all components that exist in this project.
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
-import { ColumnData, ColumnDataSchemaRegular, DataType, DimensionSettingsState, DimensionType, Edition, Selection, ViewPortResizeEvent, ViewPortScrollEvent, ViewSettingSizeProp, VirtualPositionItem } from "./interfaces";
+import { ColumnData, ColumnDataSchemaRegular, DataType, DimensionRows, DimensionSettingsState, DimensionType, Edition, Selection, ViewPortResizeEvent, ViewPortScrollEvent, ViewSettingSizeProp, VirtualPositionItem } from "./interfaces";
 import { ObservableMap } from "@stencil/store";
 import { ColumnServiceI } from "./components/data/columnService";
 export namespace Components {
@@ -13,6 +13,8 @@ export namespace Components {
         "colSize": number;
         "columns": ColumnData;
         "frameSize": number;
+        "pinnedBottomSource": DataType[];
+        "pinnedTopSource": DataType[];
         "range": boolean;
         "readonly": boolean;
         "resize": boolean;
@@ -25,11 +27,12 @@ export namespace Components {
         "dimensionCol": ObservableMap<DimensionSettingsState>;
         "dimensionRow": ObservableMap<DimensionSettingsState>;
         "lastCell": Selection.Cell;
-        "parent": string;
         "position": Selection.Cell;
         "range": boolean;
         "readonly": boolean;
+        "rowType": DimensionRows;
         "rows": VirtualPositionItem[];
+        "uuid": string;
     }
     interface RevogrEdit {
         "dimensionCol": ObservableMap<DimensionSettingsState>;
@@ -144,6 +147,8 @@ declare namespace LocalJSX {
         "colSize"?: number;
         "columns"?: ColumnData;
         "frameSize"?: number;
+        "pinnedBottomSource"?: DataType[];
+        "pinnedTopSource"?: DataType[];
         "range"?: boolean;
         "readonly"?: boolean;
         "resize"?: boolean;
@@ -156,11 +161,12 @@ declare namespace LocalJSX {
         "dimensionCol"?: ObservableMap<DimensionSettingsState>;
         "dimensionRow"?: ObservableMap<DimensionSettingsState>;
         "lastCell"?: Selection.Cell;
-        "parent"?: string;
         "position"?: Selection.Cell;
         "range"?: boolean;
         "readonly"?: boolean;
+        "rowType"?: DimensionRows;
         "rows"?: VirtualPositionItem[];
+        "uuid"?: string;
     }
     interface RevogrEdit {
         "dimensionCol"?: ObservableMap<DimensionSettingsState>;

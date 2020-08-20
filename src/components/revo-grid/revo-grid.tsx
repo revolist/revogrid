@@ -31,10 +31,21 @@ export class RevoGrid {
   @Prop() source: DataType[] = [];
   @Watch('source')
   dataChanged(newVal: DataType[]): void {
-    dataProvider.setData(newVal);
+    dataProvider.setData(newVal, 'row');
   }
 
-  // if source provided as object header 'prop' will link to the object field
+  @Prop() pinnedTopSource: DataType[] = [];
+  @Watch('pinnedTopSource')
+  dataTopChanged(newVal: DataType[]) {
+    dataProvider.setData(newVal, 'rowPinStart');
+  }
+
+  @Prop() pinnedBottomSource: DataType[] = [];
+  @Watch('pinnedBottomSource')
+  dataBottomChanged(newVal: DataType[]) {
+    dataProvider.setData(newVal, 'rowPinEnd');
+  }
+
   @Prop() columns: ColumnData = [];
   @Watch('columns')
   columnChanged(newVal: ColumnData) {
@@ -53,7 +64,10 @@ export class RevoGrid {
     }, 'col');
 
     this.columnChanged(this.columns);
+
     this.dataChanged(this.source);
+    this.dataTopChanged(this.pinnedTopSource);
+    this.dataBottomChanged(this.pinnedBottomSource);
   }
 
   disconnectedCallback(): void {

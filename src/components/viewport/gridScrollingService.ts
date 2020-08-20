@@ -2,7 +2,10 @@ import {Module} from '../../services/module.interfaces';
 import {DimensionColPin, DimensionSettingsState, ViewPortScrollEvent} from '../../interfaces';
 import {getCurrentState} from '../../store/dimension/dimension.store';
 import {setViewPortCoordinate} from '../../store/viewPort/viewport.store';
-export type ElementScroll = HTMLRevogrViewportScrollElement|HTMLRevogrScrollVirtualElement;
+
+export interface ElementScroll {
+    setScroll: (e: ViewPortScrollEvent) => Promise<void>;
+}
 
 export default class GridScrollingService implements Module {
     private elements: ElementScroll[] = [];

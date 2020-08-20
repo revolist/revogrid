@@ -40,6 +40,10 @@
         const data = generateFakeDataObject(50, 50);
         grid.columns = data.headers;
         grid.source = data.rows;
+
+        grid.pinnedTopSource = data.pinnedTopRows;
+        grid.pinnedBottomSource = data.pinnedBottomRows;
+
         grid.readonly = false;
         grid.range = true;
         grid.resize = true;

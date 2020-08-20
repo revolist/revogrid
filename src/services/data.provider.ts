@@ -1,15 +1,15 @@
-import {DataType} from '../interfaces';
+import {DataType, DimensionRowPin, DimensionTypeRow} from '../interfaces';
 import {updateData} from '../store/dataSource/data.store';
-import {setViewport} from '../store/viewPort/viewport.store';
-import {setRealSize} from '../store/dimension/dimension.store';
+import dimensionProvider from "./dimension.provider";
 
 class DataProvider {
-  setData(data: DataType[]): void {
-    updateData({...data});
-
-    const realCount: number = data.length;
-    setViewport({ realCount }, 'row');
-    setRealSize(realCount, 'row' );
+  setData(data: DataType[], type: DimensionTypeRow|DimensionRowPin): void {
+    updateData({...data}, type);
+    if (type === 'row') {
+      dimensionProvider.setRealSize(data, type);
+    } else {
+      dimensionProvider.setPins(data, type);
+    }
   }
 }
 

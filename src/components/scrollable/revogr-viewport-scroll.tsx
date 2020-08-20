@@ -29,7 +29,6 @@ export class RevogrViewportScroll {
   @Method()
   async setScroll(e: ViewPortScrollEvent): Promise<void> {
     this.preventArtificialScroll[e.dimension] = window.requestAnimationFrame(() => {
-      console.log('scroll');
       switch (e.dimension) {
         case 'col':
           if (typeof e.coordinate === 'number') {
@@ -100,10 +99,14 @@ export class RevogrViewportScroll {
     return <div class='inner-content-table'>
             <div class='header-wrapper' style={{ width: `${this.contentWidth}px` }}><slot name='header'/></div>
             <div class='vertical-inner' ref={el => {this.verticalScroll = el;}} style={{ width: `${this.contentWidth}px` }}>
-              <div style={{ height: `${this.contentHeight}px`,  }}>
+              <div class='content-wrapper' style={{ height: `${this.contentHeight}px`,  }}>
                 <slot name='content'/>
               </div>
             </div>
+            <div class='footer-wrapper' style={{ width: `${this.contentWidth}px` }}>
+              <slot name='footer'/>
+            </div>
+
     </div>;
   }
 }

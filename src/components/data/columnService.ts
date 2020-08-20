@@ -4,7 +4,7 @@ import dataStore, {updateData} from '../../store/dataSource/data.store';
 import {
     CellTemplateFunc,
     ColumnDataSchemaModel,
-    ColumnDataSchemaRegular, ColumnProp, DataSource, DataType,
+    ColumnDataSchemaRegular, ColumnProp, DataSource, DataType, DimensionRows,
     HyperFunc,
     ReadOnlyFormat
 } from '../../interfaces';
@@ -24,7 +24,7 @@ export default class ColumnService implements ColumnServiceI {
     set columns(source: ColumnDataSchemaRegular[]) {
         this.source = source;
     }
-    constructor(columns: ColumnDataSchemaRegular[]) {
+    constructor(columns: ColumnDataSchemaRegular[], private rowType: DimensionRows) {
         this.source = columns;
     }
 
@@ -47,7 +47,7 @@ export default class ColumnService implements ColumnServiceI {
     setCellData(r: number, c: number, val: string): void {
         const {data, model, prop} = this.rowDataModel(r, c);
         model[prop as number] = val;
-        updateData({...data});
+        updateData({...data}, this.rowType);
     }
 
     getCellData(r: number, c: number): string {
@@ -57,7 +57,7 @@ export default class ColumnService implements ColumnServiceI {
 
     rowDataModel(r: number, c: number): ColumnDataSchemaModel {
         const prop: ColumnProp|undefined = this.columns[c]?.prop;
-        const data: DataSource = dataStore.get('data');
+        const data: DataSource = dataStore.get(this.rowType);
         const model: DataType = data[r] || {};
         return { prop, model, data };
     }
