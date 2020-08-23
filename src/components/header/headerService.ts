@@ -1,13 +1,10 @@
 import interact from 'interactjs';
 import {DATA_COL, MIN_COL_SIZE} from '../../utils/consts';
-import {getCell} from '../../services/cell.helpers';
-import {ColumnDataSchemaRegular, Selection, ViewSettingSizeProp} from '../../interfaces';
-import Cell = Selection.Cell;
+import {ColumnDataSchemaRegular, ViewSettingSizeProp} from '../../interfaces';
 
 interface Config {
     canResize?: boolean;
     resize(sizes: ViewSettingSizeProp): void;
-    click(col: ColumnDataSchemaRegular): void;
 }
 
 export default class HeaderService {
@@ -35,11 +32,6 @@ export default class HeaderService {
                 }
             });
         }
-        interact(target).on('tap', event => {
-            const cell: Cell = getCell(event.currentTarget);
-            const col: ColumnDataSchemaRegular = this.columns[cell.x];
-            col && config.click(col);
-        });
     }
 
     destroy(): void {

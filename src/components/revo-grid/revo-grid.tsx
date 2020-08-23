@@ -5,7 +5,6 @@ import {
   ColumnData,
   DataType
 } from '../../interfaces';
-import moduleRegister from '../../services/moduleRegister';
 import dataProvider from '../../services/data.provider';
 import initialSettings from '../../utils/initialSettings';
 import columnProvider from '../../services/column.data.provider';
@@ -68,10 +67,6 @@ export class RevoGrid {
     this.dataChanged(this.source);
     this.dataTopChanged(this.pinnedTopSource);
     this.dataBottomChanged(this.pinnedBottomSource);
-  }
-
-  disconnectedCallback(): void {
-    moduleRegister.destroy();
   }
 
   render() {

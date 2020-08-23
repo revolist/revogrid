@@ -1,70 +1,81 @@
-import {Component, Element, Event, EventEmitter, h, Host, Method, Prop} from "@stencil/core";
-import {DimensionType, ViewPortScrollEvent} from "../../interfaces";
-import {getScrollbarWidth} from "../../utils/utils";
+import {Component, Element, Event, EventEmitter, h, Host, Method, Prop} from '@stencil/core';
+import {DimensionType, ViewPortScrollEvent} from '../../interfaces';
+import {getScrollbarWidth} from '../../utils/utils';
+import LocalScrollService from '../../services/localScrollService';
 
 @Component({
     tag: 'revogr-scroll-virtual'
 })
 export class RevogrScrollVirtual {
     private scrollSize: number = 0;
-    private preventArtificialScroll: {[T in DimensionType]: boolean} = { row: false, col: false };
+    private scrollService: LocalScrollService;
+
     @Element() element: HTMLElement;
     @Prop() dimension: DimensionType = 'row';
     @Prop() contentSize: number = 0;
+    @Prop() virtualSize: number = 0;
+
     @Event() scrollVirtual: EventEmitter<ViewPortScrollEvent>;
 
     @Method()
     async setScroll(e: ViewPortScrollEvent): Promise<void> {
-        this.preventArtificialScroll[e.dimension] = true;
-        switch (e.dimension) {
-            case 'row':
-                this.element.scrollTop = e.coordinate;
-                break;
-        }
-    }
-
-    private scroll(): void {
-        if (this.preventArtificialScroll[this.dimension]) {
-            this.preventArtificialScroll[this.dimension] = false;
+        if (this.dimension !== e.dimension) {
             return;
         }
-        const target: HTMLElement|undefined = this.element;
-        const top: number = target?.scrollTop || 0;
-        this.scrollVirtual.emit({
-            dimension: this.dimension,
-            coordinate: top
-        });
-    };
+        this.scrollService?.setScroll(this.element, e);
+    }
 
+    get extContentSize(): number {
+        return LocalScrollService.getVirtualContentSize(this.contentSize, this.size, this.virtualSize);
+    }
+
+    set size(s: number) {
+        if (this.dimension === 'row') {
+            this.element.style.minWidth = `${s}px`;
+            return;
+        }
+        this.element.style.minHeight = `${s}px`;
+    }
+
+    get size(): number {
+        if (this.dimension === 'row') {
+            return this.element.clientHeight;
+        }
+        return this.element.clientWidth;
+    }
+
+    connectedCallback(): void {
+        this.scrollService = new LocalScrollService({
+            scroll: e => this.scrollVirtual.emit(e)
+        });
+    }
 
     componentWillLoad(): void {
         this.scrollSize = getScrollbarWidth(document);
     }
 
     componentDidRender(): void {
-        // has vertical scroll
-        if (this.element.scrollHeight > this.element.clientHeight) {
-            const scrollSize: number = this.scrollSize; // || 20
-            // this.element.style.top = `${this.header.clientHeight}px`;
-            this.element.style.width = `${scrollSize}px`;
-            // this.verticalScroll.style.marginRight = `${scrollSize}px`;
+        const type = this.dimension === 'row' ? 'scrollHeight' : 'scrollWidth';
+        if (this.element[type] > this.size) {
+            this.size = this.scrollSize;
         } else {
-            this.element.style.width = '0';
-            // this.verticalScroll.style.marginRight = '0';
+            this.size = 0;
         }
-
-        // has horizontal scroll
-        /*
-        if (this.horizontalScroll.scrollWidth > this.horizontalScroll.clientWidth) {
-            this.element.style.bottom = `${this.scrollSize}px`;
-        } else {
-            this.element.style.bottom = '0';
-        } */
+        this.scrollService.setParams({
+            contentSize: this.contentSize,
+            clientSize: this.size,
+            virtualSize: this.virtualSize
+        }, this.dimension);
     }
 
     render() {
-        return <Host onScroll={() => this.scroll()}>
-            <div style={{height: `${this.contentSize}px`}}/>
+        const sizeType = this.dimension === 'row' ? 'height' : 'width';
+        return <Host onScroll={(e: Event) => {
+                const type = this.dimension === 'row' ? 'scrollTop' : 'scrollLeft';
+                const target: HTMLElement = (e.target as HTMLElement);
+                this.scrollService?.scroll(target[type] || 0, this.dimension);
+            }}>
+            <div style={{[sizeType]: `${this.extContentSize}px`}}/>
         </Host>;
     }
 }

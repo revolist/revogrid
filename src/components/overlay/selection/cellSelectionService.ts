@@ -1,5 +1,4 @@
 import interact from 'interactjs';
-import {Module} from '../../../services/module.interfaces';
 import {getCell} from '../../../services/cell.helpers';
 import {codesLetter} from '../../../utils/keyCodes';
 import {Selection} from '../../../interfaces';
@@ -12,7 +11,7 @@ interface Config {
     change(area: Partial<Cell>, isMulti?: boolean): void;
 }
 
-export default class CellSelectionService implements Module {
+export default class CellSelectionService {
     static canRange: boolean = false;
 
     constructor(private target: string, private config: Config) {

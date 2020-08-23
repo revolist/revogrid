@@ -37,7 +37,7 @@
         const grid = document.querySelector('revo-grid');
 
         grid.frameSize = 1;
-        const data = generateFakeDataObject(50, 50);
+        const data = generateFakeDataObject(1500, 150);
         grid.columns = data.headers;
         grid.source = data.rows;
 
@@ -48,13 +48,15 @@
         grid.range = true;
         grid.resize = true;
         grid.addEventListener('headerClick', e => {
-            alert('Header number:' + e.prop);
+            alert('Header number ' + e.detail.prop);
+            console.log(e.detail);
         });
         grid.addEventListener('beforeEdit', e => {
+            console.log(e.detail);
             if (e.detail.row % 3) {
                 // cancel changes on edit
-                // e.preventDefault();
-                // alert('edit cancelled');
+                e.preventDefault();
+                alert('edit cancelled');
             }
         });
     </script>

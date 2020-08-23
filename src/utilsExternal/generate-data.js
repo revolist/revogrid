@@ -31,8 +31,8 @@ export function generateFakeDataObject(rowsNumber, colsNumber) {
             }
         }
     }
-    const pinnedTopRows = [result[10]];
-    const pinnedBottomRows = [result[1]];
+    const pinnedTopRows = result[10] && [result[10]] || [];
+    const pinnedBottomRows = result[1] && [result[1]] || [];
     return {
         rows: result,
         pinnedTopRows,

@@ -86,17 +86,18 @@ export class RevogrViewport {
         const cols: VirtualPositionItem[] = viewportStore.col.get('items');
 
         const contentHeight = dimensionStore.row.get('realSize');
+        const contentWidth = dimensionStore.col.get('realSize');
         const hostProp = { [`${UUID}`]: this.uuid };
 
         const viewVerticalPorts: ViewportProps[] = [
             // left side
             this.pinnedColumn('colPinStart', `${this.uuid}-1`, rows, 'colPinStart', {x: 0, y: 1}, contentHeight),
 
-            // right side
-            this.pinnedColumn('colPinEnd', `${this.uuid}-2`, rows, 'colPinEnd', {x: 2, y: 1}, contentHeight),
-
             // center
             this.centerData('data-view', `${this.uuid}-0`, rows, cols, {x: 1, y: 1}, contentHeight),
+
+            // right side
+            this.pinnedColumn('colPinEnd', `${this.uuid}-2`, rows, 'colPinEnd', {x: 2, y: 1}, contentHeight)
         ];
 
         const viewPortHtml = [];
@@ -123,12 +124,25 @@ export class RevogrViewport {
             );
         }
         return <Host{...hostProp}>
+            <div class='main-viewport'>
+                <div class='viewports'>
+                    {viewPortHtml}
+
+                    <revogr-scroll-virtual
+                        class='vertical'
+                        contentSize={contentHeight}
+                        ref={el => this.elementToScroll.push(el)}
+                        virtualSize={viewportStore.row.get('virtualSize')}
+                        onScrollVirtual={e => this.scrollingService.onScroll(e.detail)}/>
+                </div>
+            </div>
             <revogr-scroll-virtual
-                class='vertical-scroll'
-                contentSize={contentHeight}
+                class='horizontal'
+                dimension='col'
+                contentSize={contentWidth}
                 ref={el => this.elementToScroll.push(el)}
+                virtualSize={viewportStore.col.get('virtualSize')}
                 onScrollVirtual={e => this.scrollingService.onScroll(e.detail)}/>
-            <div class='main-viewport'>{viewPortHtml}</div>
         </Host>;
     }
 
@@ -145,7 +159,7 @@ export class RevogrViewport {
         const parent: string = `[${UUID}="${uuid}"]`;
         const prop: Properties = {
             contentWidth: pinSize,
-            style: { width: `${pinSize}px` },
+            style: { minWidth: `${pinSize}px` },
             class: key,
             [`${UUID}`]: uuid,
             contentHeight,

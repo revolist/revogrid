@@ -30,8 +30,7 @@ export class RevogrHeaderComponent {
         this.colData,
         {
           canResize: this.canResize,
-          resize: (sizes: ViewSettingSizeProp) => this.headerResize.emit(sizes),
-          click: (col: ColumnDataSchemaRegular) => this.headerClick.emit(col)
+          resize: (sizes: ViewSettingSizeProp) => this.headerResize.emit(sizes)
         }
     );
   }
@@ -46,7 +45,8 @@ export class RevogrHeaderComponent {
       const dataProps = {
         [DATA_COL]: col.itemIndex,
         class: HEADER_CLASS,
-        style: { width:  `${col.size}px`, transform: `translateX(${col.start}px)` }
+        style: { width: `${col.size}px`, transform: `translateX(${col.start}px)` },
+        onClick: () => this.headerClick.emit(this.colData[col.itemIndex])
       };
       cells.push(<div {...dataProps}>{this.colData[col.itemIndex].name}</div>);
     }

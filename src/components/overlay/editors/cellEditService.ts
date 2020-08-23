@@ -1,7 +1,6 @@
-import {Module} from '../../../services/module.interfaces';
 import selectionStoreConnector from '../../../store/selection/selection.store.connector';
 
-export default class CellEditService implements Module {
+export default class CellEditService {
     edit(val: string|boolean): void {
         selectionStoreConnector.setEdit(val);
     }

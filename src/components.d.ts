@@ -59,6 +59,7 @@ export namespace Components {
         "contentSize": number;
         "dimension": DimensionType;
         "setScroll": (e: ViewPortScrollEvent) => Promise<void>;
+        "virtualSize": number;
     }
     interface RevogrTextEditor {
         "value": string;
@@ -195,6 +196,7 @@ declare namespace LocalJSX {
         "contentSize"?: number;
         "dimension"?: DimensionType;
         "onScrollVirtual"?: (event: CustomEvent<ViewPortScrollEvent>) => void;
+        "virtualSize"?: number;
     }
     interface RevogrTextEditor {
         "onEdit"?: (event: CustomEvent<Edition.SaveData>) => void;
