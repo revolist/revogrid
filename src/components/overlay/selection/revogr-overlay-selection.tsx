@@ -120,7 +120,7 @@ export class OverlaySelection {
             });
             els.push(<div class={FOCUS_CLASS} style={focusStyle}/>);
         }
-        els.push(<input type='text' class='edit-focus-input' ref={el => this.focusSection = el}/>);
+        els.push(<input type='text' class='edit-focus-input' ref={el => this.focusSection = el} style={focusStyle}/>);
         if (!this.readonly) {
             const editCell = this.selectionStore.store.get('edit');
             els.push(<revogr-edit
