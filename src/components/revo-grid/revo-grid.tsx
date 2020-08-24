@@ -1,33 +1,21 @@
-import {Component, Prop, h, Watch, Element, Listen} from '@stencil/core';
-
+import {Component, Prop, h, Watch, Element} from '@stencil/core';
 
 import {setSettings} from '../../store/dimension/dimension.store';
-import {setViewport} from '../../store/viewPort/viewport.store';
-import {ColumnData, DataType, Edition, InitialSettings, MultiDimensionAction} from '../../interfaces';
-import GridResizeService from './gridResizeService';
-import moduleRegister from '../../services/moduleRegister';
-import {UUID, VIEWPORT_CLASS} from '../../utils/consts';
-import dimensionProvider from '../../services/dimension.provider';
+import {
+  ColumnData,
+  DataType
+} from '../../interfaces';
 import dataProvider from '../../services/data.provider';
+import initialSettings from '../../utils/initialSettings';
+import columnProvider from '../../services/column.data.provider';
 
-
-const initialSettings: InitialSettings = {
-  defaultColumnSize: 80,
-  defaultRowSize: 30,
-  frameSize: 0,
-  dimensions: undefined,
-  readonly: false,
-  range: false,
-  resize: false
-};
 
 @Component({
   tag: 'revo-grid',
   styleUrl: 'revo-grid.scss'
 })
 export class RevoGrid {
-  private viewport: HTMLRevogrViewportScrollableElement;
-  private uuid: number|null = null;
+  private uuid: string|null = null;
 
   @Element() element: HTMLElement;
 
@@ -37,69 +25,51 @@ export class RevoGrid {
   @Prop() range: boolean = initialSettings.range;
   @Prop() readonly: boolean = initialSettings.readonly;
   @Prop() resize: boolean = initialSettings.resize;
-  @Prop() dimensions: Partial<MultiDimensionAction> = {};
 
   // data is array of objects
   @Prop() source: DataType[] = [];
   @Watch('source')
   dataChanged(newVal: DataType[]): void {
-    dataProvider.setData(newVal);
+    dataProvider.setData(newVal, 'row');
   }
 
-  // if source provided as object header 'prop' will link to the object field
+  @Prop() pinnedTopSource: DataType[] = [];
+  @Watch('pinnedTopSource')
+  dataTopChanged(newVal: DataType[]) {
+    dataProvider.setData(newVal, 'rowPinStart');
+  }
+
+  @Prop() pinnedBottomSource: DataType[] = [];
+  @Watch('pinnedBottomSource')
+  dataBottomChanged(newVal: DataType[]) {
+    dataProvider.setData(newVal, 'rowPinEnd');
+  }
+
   @Prop() columns: ColumnData = [];
   @Watch('columns')
   columnChanged(newVal: ColumnData) {
-    dataProvider.setColumns(newVal);
-  }
-
-  @Listen('beforeEdit')
-  beforeSave(e: CustomEvent<Edition.SaveDataDetails>): void {
-    setTimeout(() => {
-      if (!e.defaultPrevented) {
-        dataProvider.setCellData(e.detail.row, e.detail.col, e.detail.val);
-      }
-    }, 0);
+    columnProvider.setColumns(newVal);
   }
 
   connectedCallback(): void {
-    this.uuid = (new Date()).getTime();
-    moduleRegister.baseClass = `.${VIEWPORT_CLASS}[${UUID}='${this.uuid}']`;
+    this.uuid = (new Date()).getTime().toString();
+    setSettings({
+      originItemSize: this.rowSize,
+      frameOffset: this.frameSize || initialSettings.frameSize
+    }, 'row');
+    setSettings({
+      originItemSize: this.colSize,
+      frameOffset: this.frameSize || initialSettings.frameSize
+    }, 'col');
 
-    setViewport({ frameOffset: this.frameSize || 0 }, 'row');
-    setViewport({ frameOffset: this.frameSize || 0 }, 'col');
-    setSettings(this.rowSize, 'row');
-    setSettings(this.colSize, 'col');
-
-    dimensionProvider.setSize(this.dimensions.row, 'row');
-    dimensionProvider.setSize(this.dimensions.col, 'col');
     this.columnChanged(this.columns);
+
     this.dataChanged(this.source);
-  }
-
-  async componentDidLoad(): Promise<void> {
-    moduleRegister.register('resize', new GridResizeService(this.element, this.viewport));
-  }
-
-  disconnectedCallback(): void {
-    moduleRegister.destroy();
+    this.dataTopChanged(this.pinnedTopSource);
+    this.dataBottomChanged(this.pinnedBottomSource);
   }
 
   render() {
-    const viewportProp = {
-      class: `viewport ${VIEWPORT_CLASS}`,
-      [`${UUID}`]: this.uuid,
-      ref: (el: HTMLRevogrViewportScrollableElement) => { this.viewport = el; }
-    };
-    return <revogr-viewport-scrollable{...viewportProp}>
-      <revogr-header slot='header' class='header' resize={this.resize}/>
-      <revogr-data slot='content' class='viewport-layer'/>
-      {
-        !this.readonly || this.range ? <revogr-overlay-selection slot='content' range={this.range}/> : ''
-      }
-      {
-        !this.readonly ? <revogr-edit slot='content'/> : ''
-      }
-    </revogr-viewport-scrollable>;
+    return <revogr-viewport uuid={this.uuid} resize={this.resize} readonly={this.readonly} range={this.range}/>;
   }
 }

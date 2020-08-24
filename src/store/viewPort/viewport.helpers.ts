@@ -1,14 +1,14 @@
 import {getItemByPosition} from '../dimension/dimension.helpers';
 import {
   DimensionSettingsState,
-  PositionItem,
+  PositionItem, Range,
   ViewportStateItems,
   ViewSettingSizeProp,
   VirtualPositionItem
 } from '../../interfaces';
 
 export type DimensionDataViewport =
-    Pick<DimensionSettingsState, 'indexes'|'positionIndexes'|'positionIndexToItem'|'sizes'|'originItemSize'|'realSize'>;
+    Pick<DimensionSettingsState, 'indexes'|'positionIndexes'|'positionIndexToItem'|'sizes'|'originItemSize'|'realSize'|'frameOffset'>;
 
 type ItemsToUpdate = Pick<ViewportStateItems, 'items'|'start'|'end'>;
 /**
@@ -46,8 +46,7 @@ export function getUpdatedItemsByPosition<T extends ItemsToUpdate>(
       if (toUpdate) {
         const extra = addMissingItems(activeItem, realCount, virtualSize, toUpdate, dimension);
         if (extra.length) {
-          toUpdate.items.push(...extra);
-          toUpdate.end = toUpdate.items.length - 1;
+          updateMissing(toUpdate.items, extra, toUpdate);
         }
       }
     }
@@ -65,11 +64,19 @@ export function getUpdatedItemsByPosition<T extends ItemsToUpdate>(
     });
     toUpdate = {
       items,
-      start: items[0].itemIndex,
-      end: items[items.length - 1].itemIndex
+      start: items[0]?.itemIndex || 0,
+      end: items[items.length - 1]?.itemIndex || 0
     };
   }
   return toUpdate;
+}
+
+export function updateMissing(items: VirtualPositionItem[], missing: VirtualPositionItem[], range: Range) {
+  items.splice(range.end + 1, 0, ...missing);
+  if (range.start >= range.end) {
+    range.start += missing.length;
+  }
+  range.end += missing.length;
 }
 
 // if partial replacement add items if revo-viewport has some space left

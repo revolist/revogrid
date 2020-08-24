@@ -3,51 +3,42 @@
 */
 
 import {createStore, ObservableMap} from '@stencil/store';
-import reduce from 'lodash/reduce';
 
 import {
-  ColumnData,
-  ColumnDataSchema,
-  ColumnDataSchemaGrouping,
   ColumnDataSchemaRegular,
-  DataSourceState,
-  DataType
+  DataType,
+  DimensionColPin,
+  DimensionRows
 } from '../../interfaces';
 import {setStore} from '../../utils/store.utils';
 
+export type DataSourceState = {
+      columnsFlat: ColumnDataSchemaRegular[];
+    }
+    &{[T in DimensionColPin]: ColumnDataSchemaRegular[]}
+    &{[T in DimensionRows]: DataType[]};
+
 const dataStore: ObservableMap<DataSourceState> = createStore({
-  data: [],
-  columns: [],
-  columnsFlat: []
+  row: [],
+  rowPinStart: [],
+  rowPinEnd: [],
+
+  columnsFlat: [],
+  colPinStart: [],
+  colPinEnd: []
 });
 
-function getColumns(columns: ColumnData): ColumnDataSchemaRegular[] {
-  return reduce(columns, (res: ColumnDataSchemaRegular[], colData: ColumnDataSchema) => {
-    if (isColGrouping(colData)) {
-      res.push(...getColumns(colData.children));
-    } else {
-      res.push(colData);
-    }
-    return res;
-  }, []);
+function setDataColumn(
+    columnsFlat: ColumnDataSchemaRegular[],
+    pins: {[T in DimensionColPin]: ColumnDataSchemaRegular[]}
+): void {
+  setStore(dataStore, { columnsFlat, ...pins });
 }
 
-function isColGrouping(colData: ColumnDataSchemaGrouping | ColumnDataSchemaRegular): colData is ColumnDataSchemaGrouping {
-  return !!(colData as ColumnDataSchemaGrouping).children;
-}
-
-function setDataColumn(columns: ColumnData): number {
-  const columnsFlat: ColumnDataSchemaRegular[] = getColumns(columns);
-  setStore(dataStore, {
-    columns,
-    columnsFlat
-  });
-  return columnsFlat.length;
-}
-
-function updateData(data: DataType[]): void {
-  setStore(dataStore, { data });
+function updateData(data: DataType[], type: DimensionRows): void {
+  setStore(dataStore, { [type]: data });
 }
 
 export {setDataColumn, updateData};
 export default dataStore;
+

@@ -1,117 +1,40 @@
 import interact from 'interactjs';
-import {Module} from '../../../services/module.interfaces';
-import selectionStore, {setFocus, setRange, setTempRange} from '../../../store/selection/selection.strore';
 import {getCell} from '../../../services/cell.helpers';
 import {codesLetter} from '../../../utils/keyCodes';
-import {rowsStore as viewportRows, colsStore as viewportCols} from '../../../store/viewPort/viewport.store';
 import {Selection} from '../../../interfaces';
 import Cell = Selection.Cell;
 
-export default class CellSelectionService implements Module {
-    private readonly keyDownFunc: ((e: KeyboardEvent) => void);
-    constructor(private target: string, range: boolean = false) {
-        if (range) {
-            interact(target)
-                .draggable({
-                    listeners: {
-                        start: event => {
-                            const cell: Cell = getCell(event.currentTarget);
-                            setFocus(cell);
-                            setRange(cell, cell);
-                        }
-                    },
-                    cursorChecker: () => 'default'
-                })
-                .dropzone({
-                    ondrop: event => {
-                        const finalCell: Cell = getCell(event.currentTarget);
-                        const first: Cell = getCell(event.relatedTarget);
-                        setRange(first, finalCell);
-                        setTempRange();
-                    },
-                    ondragenter: event => {
-                        const finalCell: Cell = getCell(event.currentTarget);
-                        const first: Cell = getCell(event.relatedTarget);
-                        setTempRange(first, finalCell);
-                    }
-                })
-        }
-        interact(target).on('tap', event => {
-            const cell: Cell = getCell(event.currentTarget);
-            let prevCell: Cell = cell;
-            if (range && event.shiftKey) {
-                prevCell = selectionStore.get('focus') || cell;
-            }
-            setRange(prevCell, cell);
-            setFocus(prevCell);
-        });
+interface Config {
+    focus(cell: Cell, isMulti?: boolean): void;
+    range(start: Cell, end: Cell): void;
+    tempRange(start: Cell, end: Cell): void;
+    change(area: Partial<Cell>, isMulti?: boolean): void;
+}
 
-        this.keyDownFunc = (e: KeyboardEvent) => CellSelectionService.handleKeyDown(e, range);
-        document.addEventListener('keydown', this.keyDownFunc);
+export default class CellSelectionService {
+    static canRange: boolean = false;
+
+    constructor(private target: string, private config: Config) {
+        interact(target)
+            .draggable({
+                listeners: {
+                    start: event => {
+                        CellSelectionService.canRange &&
+                        config.focus(getCell(event.currentTarget));
+                    }
+                },
+                cursorChecker: () => 'default'
+            })
+            .dropzone({
+                ondrop: e => CellSelectionService.canRange &&
+                    config.range(getCell(e.currentTarget), getCell(e.relatedTarget)),
+                ondragenter: e => CellSelectionService.canRange && config.tempRange(getCell(e.relatedTarget), getCell(e.currentTarget))
+            })
+            .on('tap', e => config.focus(getCell(e.currentTarget), CellSelectionService.canRange && e.shiftKey));
     }
 
-    private static handleKeyDown(e: KeyboardEvent, canRange: boolean): void {
-        const range: typeof selectionStore.state.range = selectionStore.get('range');
-        const focus: typeof selectionStore.state.focus = selectionStore.get('focus');
-        if (!range || !focus) {
-            return;
-        }
-
-        let start: Cell = {
-            x: range.x,
-            y: range.y
-        };
-        let end: Cell = start;
-        let isMulti: boolean = canRange && e.shiftKey;
-
-        // continue selection
-        if (isMulti) {
-            end = {
-                x: range.x1,
-                y: range.y1
-            };
-        }
-
-        function doUpdate(start: Cell, end: Cell, isMulti: boolean = false) {
-            if (isMulti) {
-                setRange(start, end);
-            } else {
-                setRange(start, end);
-                setFocus(end);
-            }
-        }
-
-        let point: Cell;
-        switch (e.code) {
-            case codesLetter.ARROW_UP:
-                point = end.y > focus.y ? end : start;
-                if (point.y > 0) {
-                    point.y--;
-                    doUpdate(start, end, isMulti);
-                }
-                break;
-            case codesLetter.ARROW_DOWN:
-                point = end.y > focus.y ? end : start;
-                if (point.y < viewportRows.get('realCount')) {
-                    point.y++;
-                    doUpdate(start, end, isMulti);
-                }
-                break;
-            case codesLetter.ARROW_LEFT:
-                point = end.x > focus.x ? end : start;
-                if (point.x > 0) {
-                    point.x--;
-                    doUpdate(start, end, isMulti);
-                }
-                break;
-            case codesLetter.ARROW_RIGHT:
-                point = end.x > focus.x ? end : start;
-                if (point.x < viewportCols.get('realCount')) {
-                    point.x++;
-                    doUpdate(start, end, isMulti);
-                }
-                break;
-        }
+    public keyDown(e: KeyboardEvent): void {
+        const isMulti: boolean = CellSelectionService.canRange && e.shiftKey;
         switch (e.code) {
             case codesLetter.ARROW_UP:
             case codesLetter.ARROW_DOWN:
@@ -120,10 +43,23 @@ export default class CellSelectionService implements Module {
                 e.preventDefault();
                 break;
         }
+        switch (e.code) {
+            case codesLetter.ARROW_UP:
+                this.config.change({ y: -1 }, isMulti);
+                break;
+            case codesLetter.ARROW_DOWN:
+                this.config.change({ y: 1 }, isMulti);
+                break;
+            case codesLetter.ARROW_LEFT:
+                this.config.change({ x: -1 }, isMulti);
+                break;
+            case codesLetter.ARROW_RIGHT:
+                this.config.change({ x: 1 }, isMulti);
+                break;
+        }
     }
 
     destroy(): void {
         interact(this.target).unset();
-        document.removeEventListener('keydown', this.keyDownFunc);
     }
 }

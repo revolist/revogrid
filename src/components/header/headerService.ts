@@ -1,33 +1,37 @@
 import interact from 'interactjs';
-import {DATA_COL} from '../../utils/consts';
-import {Module} from '../../services/module.interfaces';
-import dimensionProvider from '../../services/dimension.provider';
-import {getCell} from '../../services/cell.helpers';
-import {ColumnDataSchemaRegular, Selection} from '../../interfaces';
-import Cell = Selection.Cell;
-import dataProvider from "../../services/data.provider";
+import {DATA_COL, MIN_COL_SIZE} from '../../utils/consts';
+import {ColumnDataSchemaRegular, ViewSettingSizeProp} from '../../interfaces';
 
 interface Config {
-    resize?: boolean;
-    headerClick?(col: ColumnDataSchemaRegular): void;
+    canResize?: boolean;
+    resize(sizes: ViewSettingSizeProp): void;
 }
 
-export default class HeaderService implements Module {
-    constructor(private target: string, config: Config) {
-        if (config.resize) {
+export default class HeaderService {
+    private source: ColumnDataSchemaRegular[] = [];
+    get columns(): ColumnDataSchemaRegular[] {
+        return this.source;
+    }
+    set columns(source: ColumnDataSchemaRegular[]) {
+        this.source = source;
+    }
+    constructor(private target: string, columns: ColumnDataSchemaRegular[], config: Config) {
+        this.columns = columns;
+        if (config.canResize) {
             interact(target).resizable({
                 edges: { bottom: false, right: true },
                 onend: event => {
                     const index: number = parseInt(event.target.getAttribute(DATA_COL), 10);
-                    dimensionProvider.setSize({ [index]: event.rect.width }, 'col');
+                    const col: ColumnDataSchemaRegular = this.columns[index];
+                    let width: number = event.rect.width;
+                    const minSize: number = col.minSize || MIN_COL_SIZE;
+                    if (width < minSize) {
+                        width = minSize;
+                    }
+                    config.resize({ [index]: width });
                 }
             });
         }
-        interact(target).on('tap', event => {
-            const cell: Cell = getCell(event.currentTarget);
-            const col: ColumnDataSchemaRegular = dataProvider.column(cell.x);
-            col && config?.headerClick(col);
-        });
     }
 
     destroy(): void {

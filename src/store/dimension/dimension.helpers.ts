@@ -33,7 +33,7 @@ export function calculateDimensionData(
   each(newSizes, (size: number, index: string) => {
     // if first introduced custom size
     if (!state.sizes[index]) {
-      newTotal += size - state.originItemSize;
+      newTotal += size - (state.realSize ? state.originItemSize : 0);
       newIndexes.splice(sortedIndex(newIndexes, parseInt(index, 10)), 0, parseInt(index, 10));
     } else {
       newTotal += size - state.sizes[index];

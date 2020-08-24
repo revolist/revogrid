@@ -11,16 +11,18 @@ import {
   getFirstItem,
   getLastItem,
   getUpdatedItemsByPosition,
-  isActiveRange
+  isActiveRange, updateMissing
 } from './viewport.helpers';
 
 import {setStore} from '../../utils/store.utils';
 import {
-  DimensionType,
+  MultiDimensionType,
   ViewportState,
   ViewportStateItems, ViewSettingSizeProp,
   VirtualPositionItem
 } from '../../interfaces';
+
+type ViewportStore = {[T in MultiDimensionType]: ObservableMap<ViewportState>};
 
 function initialState(): ViewportState {
   return {
@@ -31,9 +33,6 @@ function initialState(): ViewportState {
 
     end: 0,
 
-    // space rendered outside of viewport
-    frameOffset: 0,
-
     // size of viewport in px
     virtualSize: 0,
 
@@ -42,17 +41,17 @@ function initialState(): ViewportState {
   };
 }
 
-const rowsStore: ObservableMap<ViewportState> = createStore(initialState());
-const colsStore: ObservableMap<ViewportState> = createStore(initialState());
+const viewportStore: ViewportStore = {
+  col: createStore(initialState()),
+  colPinStart: createStore(initialState()),
+  colPinEnd: createStore(initialState()),
+  row: createStore(initialState()),
+  rowPinStart: createStore(initialState()),
+  rowPinEnd: createStore(initialState())
+};
 
-
-function getStoreByType(type: DimensionType): ObservableMap<ViewportState> {
-  switch (type) {
-    case 'col':
-      return colsStore;
-    case 'row':
-      return rowsStore;
-  }
+function getStoreByType(type: MultiDimensionType): ObservableMap<ViewportState> {
+  return viewportStore[type];
 }
 
 function getItems(store: ObservableMap<ViewportState>): Pick<ViewportStateItems, 'items'|'start'|'end'> {
@@ -63,14 +62,14 @@ function getItems(store: ObservableMap<ViewportState>): Pick<ViewportStateItems,
   };
 }
 
-function setViewport(data: Partial<ViewportState>, dimensionType: DimensionType): void {
+function setViewport(data: Partial<ViewportState>, dimensionType: MultiDimensionType): void {
   const store: ObservableMap<ViewportState> = getStoreByType(dimensionType);
   setStore(store, data);
 }
 
 function setViewPortCoordinate(
     position: number,
-    dimensionType: DimensionType,
+    dimensionType: MultiDimensionType,
     dimension: DimensionDataViewport
 ): void {
   const store: ObservableMap<ViewportState> = getStoreByType(dimensionType);
@@ -80,11 +79,11 @@ function setViewPortCoordinate(
     return;
   }
 
-  const frameOffset: number = store.get('frameOffset');
+  const frameOffset: number = dimension.frameOffset;
   const outsize: number = frameOffset * 2 * dimension.originItemSize;
   const virtualSize = store.get('virtualSize') + outsize;
 
-  let maxCoordinate: number = 0;
+  let maxCoordinate: number = virtualSize;
   if (dimension.realSize > virtualSize) {
     maxCoordinate = dimension.realSize - virtualSize;
   }
@@ -124,12 +123,7 @@ function setViewPortCoordinate(
         start: store.get('start'),
         end: store.get('end')
       };
-      items.splice(range.end + 1, 0, ...missing);
-      range.end += missing.length;
-
-      if (range.start >= range.end) {
-        range.start += missing.length;
-      }
+      updateMissing(items, missing, range);
       setStore(store, {
         items: [...items],
         ...range
@@ -138,7 +132,7 @@ function setViewPortCoordinate(
   }
 }
 
-function setViewPortDimension(sizes: ViewSettingSizeProp, dimensionType: DimensionType): void {
+function setViewPortDimension(sizes: ViewSettingSizeProp, dimensionType: MultiDimensionType): void {
   const store: ObservableMap<ViewportState> = getStoreByType(dimensionType);
 
   // viewport not inited
@@ -169,11 +163,10 @@ function setViewPortDimension(sizes: ViewSettingSizeProp, dimensionType: Dimensi
   setStore(store, { items: [...items] });
 }
 
+export default viewportStore;
+
 export {
   setViewport,
   setViewPortCoordinate,
   setViewPortDimension,
-
-  rowsStore,
-  colsStore
 };

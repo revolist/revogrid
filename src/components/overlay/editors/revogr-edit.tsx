@@ -1,55 +1,55 @@
-import {Component, Event, EventEmitter, h} from '@stencil/core';
+import {Component, Event, EventEmitter, Prop, h, Method} from '@stencil/core';
+import {ObservableMap} from '@stencil/store';
 
-import selectionStore from '../../../store/selection/selection.strore';
-import {getItemByIndex} from '../../../store/dimension/dimension.helpers';
-import {colsStore, rowsStore} from '../../../store/dimension/dimension.store';
-import dataProvider from '../../../services/data.provider';
-import moduleRegister from '../../../services/moduleRegister';
 import CellEditService from './cellEditService';
-import {CELL_CLASS} from '../../../utils/consts';
-import {Edition, PositionItem, Selection} from '../../../interfaces';
+import {DimensionSettingsState, Edition, Selection} from '../../../interfaces';
+import { getItemByIndex } from '../../../store/dimension/dimension.helpers';
 
 @Component({
     tag: 'revogr-edit'
 })
 export class Edit {
-    private editCell: typeof selectionStore.state.edit = null;
+    @Prop() dimensionRow: ObservableMap<DimensionSettingsState>;
+    @Prop() dimensionCol: ObservableMap<DimensionSettingsState>;
+    @Prop() editCell: Edition.EditCell|null = null;
     private cellEditModule!: CellEditService;
 
     @Event() beforeEdit: EventEmitter<Edition.SaveDataDetails>;
     onSave(e: CustomEvent<Edition.SaveData>): void {
         e.stopPropagation();
+        if (this.editCell) {
+            this.beforeEdit.emit({
+                col: this.editCell.x,
+                row: this.editCell.y,
+                val: e.detail
+            });
+        }
         setTimeout(() => {
-            this.editCell = selectionStore.get('edit');
-            if (this.editCell) {
-                this.beforeEdit.emit({
-                    col: this.editCell.x,
-                    row: this.editCell.y,
-                    val: e.detail
-                });
-            }
             this.cellEditModule.close();
         }, 0);
     }
 
+    @Method()
+    async doEdit(val: string|boolean = ''): Promise<void> {
+        this.cellEditModule?.edit(val);
+    }
+
     connectedCallback(): void {
-        this.cellEditModule = new CellEditService(`${moduleRegister.baseClass} .${CELL_CLASS}`);
-        moduleRegister.register('cellEdit', this.cellEditModule);
+        this.cellEditModule = new CellEditService();
     }
 
     disconnectedCallback(): void {
-        moduleRegister.unregister('cellEdit');
+        this.cellEditModule.destroy();
     }
 
     render() {
-        this.editCell = selectionStore.get('edit');
         if (!this.editCell) {
-            return;
+            return '';
         }
         const x: number = this.editCell.x;
         const y: number = this.editCell.y;
-        const col: PositionItem = getItemByIndex(colsStore.state, x);
-        const row: PositionItem = getItemByIndex(rowsStore.state, y);
+        const col = getItemByIndex(this.dimensionCol.state, x);
+        const row = getItemByIndex(this.dimensionRow.state, y);
         const style: Selection.RangeAreaCss = {
             left: `${col.start}px`,
             top: `${row.start}px`,
@@ -57,9 +57,7 @@ export class Edit {
             height: `${row.end - row.start}px`
         };
         return <div style={style} class='edit-input-wrapper'>
-            <revogr-text-editor
-                value={this.editCell.val ? this.editCell.val : dataProvider.getCellData(y, x)}
-                onEdit={(e) => this.onSave(e)}/>
+            <revogr-text-editor value={this.editCell.val} onEdit={(e) => this.onSave(e)}/>
         </div>;
     }
 }

@@ -1,3 +1,9 @@
+interface CSSStyleDeclarationExtended extends CSSStyleDeclaration {
+  msOverflowStyle: string;
+}
+
+/* Generate range on size
+*/
 export function range(size: number, startAt: number = 0): number[] {
   const res: number[] = [];
   const end = startAt + size;
@@ -7,6 +13,7 @@ export function range(size: number, startAt: number = 0): number[] {
   return res;
 }
 
+/* Find index position in array */
 export function findPositionInArray<T>(this: T[], el: T, compareFn: (el: T, el2: T) => number): number {
   return (function(arr): number {
     let m: number = 0;
@@ -63,9 +70,8 @@ export function mergeSortedArray<T>(arr1: T[], arr2: T[], compareFn: (el: T, el2
   return merged;
 }
 
-interface CSSStyleDeclarationExtended extends CSSStyleDeclaration {
-  msOverflowStyle: string;
-}
+
+/* Calculate system scrollbar width */
 export function getScrollbarWidth(doc: Document): number {
   // Creating invisible container
   const outer: HTMLElement = doc.createElement('div');
@@ -86,5 +92,21 @@ export function getScrollbarWidth(doc: Document): number {
   outer.parentNode.removeChild(outer);
 
   return scrollbarWidth;
+}
+
+/* Scale a value between 2 ranges
+*
+* Sample:
+* // 55 from a 0-100 range to a 0-1000 range (Ranges don't have to be positive)
+* const n = scaleValue(55, [0,100], [0,1000]);
+*
+* Ranges of two values
+* @from
+* @to
+*
+* ~~ return value does the equivalent of Math.floor but faster.
+*/
+export function scaleValue(value: number, from: [number, number], to: [number, number]): number {
+  return ((to[1] - to[0]) * (value - from[0]) / (from[1] - from[0])) + to[0];
 }
 

@@ -23,7 +23,7 @@
 
 ### Depends on
 
-- [revogr-viewport-scrollable](../scrollable)
+- [revogr-viewport-scroll-scrollable](../scrollable)
 - [revogr-header](../header)
 - [revogr-data](../data)
 - [revogr-overlay-selection](../overlay)
@@ -32,7 +32,7 @@
 ### Graph
 ```mermaid
 graph TD;
-  revo-grid --> revogr-viewport-scrollable
+  revo-grid --> revogr-viewport-scroll-scrollable
   revo-grid --> revogr-header
   revo-grid --> revogr-data
   revo-grid --> revogr-overlay-selection

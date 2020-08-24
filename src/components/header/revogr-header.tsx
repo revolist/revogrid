@@ -1,44 +1,54 @@
-import {Component, Element, Event, EventEmitter, h, Prop} from '@stencil/core';
+import {Component, Element, Event, EventEmitter, h, Prop, Watch} from '@stencil/core';
 import {HTMLStencilElement} from '@stencil/core/internal';
 
-import {colsStore as viewportCols} from '../../store/viewPort/viewport.store';
-import dataProvider from '../../services/data.provider';
 import {DATA_COL, HEADER_CLASS} from '../../utils/consts';
-import moduleRegister from '../../services/moduleRegister';
 import HeaderService from './headerService';
-import {ColumnDataSchemaRegular} from "../../interfaces";
+import {ColumnDataSchemaRegular, ViewSettingSizeProp, VirtualPositionItem} from '../../interfaces';
 
 @Component({
   tag: 'revogr-header'
 })
 export class RevogrHeaderComponent {
   @Element() element!: HTMLStencilElement;
-  @Prop() resize: boolean;
+  @Prop() canResize: boolean;
+  @Prop() cols: VirtualPositionItem[];
+  @Prop() parent: string = '';
+
   @Event() headerClick: EventEmitter<ColumnDataSchemaRegular>;
+  @Event() headerResize: EventEmitter<ViewSettingSizeProp>;
+
+
+  @Prop() colData: ColumnDataSchemaRegular[];
+  @Watch('colData') colChanged(newData: ColumnDataSchemaRegular[]): void {
+    this.headerService.columns = newData;
+  }
+  private headerService: HeaderService;
 
   connectedCallback(): void {
-    const service: HeaderService = new HeaderService(`${moduleRegister.baseClass} .${HEADER_CLASS}`, {
-      resize: this.resize,
-      headerClick: (col: ColumnDataSchemaRegular): void => {
-        this.headerClick.emit(col);
-      }
-    });
-    moduleRegister.register('headResize', service);
+    this.headerService = new HeaderService(
+        `${this.parent} .${HEADER_CLASS}`,
+        this.colData,
+        {
+          canResize: this.canResize,
+          resize: (sizes: ViewSettingSizeProp) => this.headerResize.emit(sizes)
+        }
+    );
   }
 
   disconnectedCallback(): void {
-    moduleRegister.unregister('headResize');
+    this.headerService?.destroy();
   }
 
   render() {
     const cells:HTMLElement[] = [];
-    for (let col of viewportCols.get('items')) {
+    for (let col of this.cols) {
       const dataProps = {
         [DATA_COL]: col.itemIndex,
         class: HEADER_CLASS,
-        style: { width:  `${col.size}px`, transform: `translateX(${col.start}px)` }
+        style: { width: `${col.size}px`, transform: `translateX(${col.start}px)` },
+        onClick: () => this.headerClick.emit(this.colData[col.itemIndex])
       };
-      cells.push(<div {...dataProps}>{dataProvider.header(col.itemIndex)}</div>);
+      cells.push(<div {...dataProps}>{this.colData[col.itemIndex].name}</div>);
     }
     return cells;
   }
