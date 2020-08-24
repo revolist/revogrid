@@ -40,7 +40,7 @@ export interface ColumnDataSchemaGrouping {
 
 export interface ColumnDataSchemaRegular extends ColumnDataSchemaBase {
   prop: ColumnProp;
-  pin: DimensionColPin;
+  pin?: DimensionColPin;
 }
 
 export type ColumnDataSchema = ColumnDataSchemaGrouping | ColumnDataSchemaRegular;

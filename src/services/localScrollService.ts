@@ -2,7 +2,8 @@ import {scaleValue} from '../utils/utils';
 import {DimensionType, ViewPortScrollEvent} from '../interfaces';
 
 interface Config {
-    scroll(e: ViewPortScrollEvent): void;
+    beforeScroll(e: ViewPortScrollEvent): void;
+    afterScroll(e: ViewPortScrollEvent): void;
 }
 
 type Params = {
@@ -46,15 +47,17 @@ export default class LocalScrollService {
     }
 
     // apply scroll values after scroll done
-    setScroll(target: HTMLElement, e: ViewPortScrollEvent): void {
+    setScroll(e: ViewPortScrollEvent): void {
         this.cancelScroll(e.dimension);
         this.preventArtificialScroll[e.dimension] = window.requestAnimationFrame(() => {
             const params = this.getParams(e.dimension);
             e.coordinate = Math.ceil(e.coordinate);
             this.previousScroll[e.dimension] = this.wrapCoordinate(e.coordinate, params);
             this.preventArtificialScroll[e.dimension] = null;
-            const type = e.dimension === 'row' ? 'scrollTop' : 'scrollLeft';
-            target[type] = params.virtualSize ? this.convert(e.coordinate, params, false) : e.coordinate;
+            this.cfg.afterScroll({
+                ...e,
+                coordinate: params.virtualSize ? this.convert(e.coordinate, params, false) : e.coordinate
+            });
         });
     }
 
@@ -67,7 +70,7 @@ export default class LocalScrollService {
         }
 
         const param: Params = this.getParams(dimension);
-        this.cfg.scroll({
+        this.cfg.beforeScroll({
             dimension: dimension,
             coordinate: param.virtualSize ? this.convert(coordinate, param) : coordinate
         });

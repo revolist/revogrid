@@ -22,7 +22,7 @@ export class RevogrScrollVirtual {
         if (this.dimension !== e.dimension) {
             return;
         }
-        this.scrollService?.setScroll(this.element, e);
+        this.scrollService?.setScroll(e);
     }
 
     get extContentSize(): number {
@@ -46,7 +46,11 @@ export class RevogrScrollVirtual {
 
     connectedCallback(): void {
         this.scrollService = new LocalScrollService({
-            scroll: e => this.scrollVirtual.emit(e)
+            beforeScroll: e => this.scrollVirtual.emit(e),
+            afterScroll: e => {
+                const type = e.dimension === 'row' ? 'scrollTop' : 'scrollLeft';
+                this.element[type] = e.coordinate;
+            }
         });
     }
 

@@ -29,20 +29,23 @@ export class RevogrViewportScroll {
 
   @Method()
   async setScroll(e: ViewPortScrollEvent): Promise<void> {
-    switch (e.dimension) {
-      case 'col':
-        this.scrollService?.setScroll(this.horizontalScroll, e);
-        break;
-      case 'row':
-        this.scrollService?.setScroll(this.verticalScroll, e);
-        break;
-    }
+    this.scrollService?.setScroll(e);
   }
 
 
   connectedCallback(): void {
     this.scrollService = new LocalScrollService({
-      scroll: e => this.scrollViewport.emit(e)
+      beforeScroll: e => this.scrollViewport.emit(e),
+      afterScroll: e => {
+        switch (e.dimension) {
+          case 'col':
+            this.horizontalScroll.scrollLeft = e.coordinate;
+            break;
+          case 'row':
+            this.verticalScroll.scrollTop = e.coordinate;
+            break;
+        }
+      }
     });
   }
 
