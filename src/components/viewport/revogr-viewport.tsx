@@ -1,5 +1,6 @@
 import {Component, Prop, h, Host, Watch, Listen, Element} from '@stencil/core';
-import {ObservableMap} from '@stencil/store';
+import '../../utils/closestPolifill';
+
 import {UUID} from '../../utils/consts';
 import dataStore from '../../store/dataSource/data.store';
 import dimensionProvider from '../../services/dimension.provider';
@@ -12,37 +13,27 @@ import {
     ColumnDataSchemaRegular,
     DimensionColPin,
     DimensionRowPin,
-    DimensionRows,
-    DimensionSettingsState,
     MultiDimensionType,
     Selection,
     ViewPortResizeEvent,
     ViewSettingSizeProp,
     VirtualPositionItem
 } from '../../interfaces';
+import ViewportSpace from './viewport.interfaces';
+import ViewportProps = ViewportSpace.ViewportProps;
+import ViewportData = ViewportSpace.ViewportData;
+import SlotType = ViewportSpace.SlotType;
+import Properties = ViewportSpace.Properties;
 
-type Properties = {[key: string]: any};
-type SlotType = 'content'|'header'|'footer';
-type ViewportData = {
-    lastCell: Selection.Cell;
-    position: Selection.Cell;
-    colData: ColumnDataSchemaRegular[];
-    dimensionRow: ObservableMap<DimensionSettingsState>;
-    dimensionCol: ObservableMap<DimensionSettingsState>;
-    cols: VirtualPositionItem[];
-    rows: VirtualPositionItem[];
-    rowType: DimensionRows;
-    slot: SlotType;
-    uuid: string;
-    style?: {[key: string]: string};
-};
-type ViewportProps = {
-    prop: Properties;
-    headerProp: Properties;
-    parent: string;
-    dataPorts: ViewportData[];
-};
 
+/**
+ * Renders viewport
+ * @Component
+ * @Prop uuid - grid id
+ * @Prop resize - can resize grid
+ * @Prop readonly - can edit grid
+ * @Prop range - can change range
+ * */
 @Component({
     tag: 'revogr-viewport'
 })
@@ -51,6 +42,7 @@ export class RevogrViewport {
     private scrollingService: GridScrollingService;
 
     @Element() element: Element;
+
     @Prop() uuid: string|null = null;
     @Prop() resize: boolean;
     @Prop() readonly: boolean;
@@ -59,6 +51,7 @@ export class RevogrViewport {
         CellSelectionService.canRange = canRange;
     }
 
+    /** Clear data which is outside of grid container */
     @Listen('click', { target: 'document' })
     handleOutsideClick(e: KeyboardEvent): void {
         const target: HTMLElement|null = e.target as HTMLElement;
@@ -85,25 +78,45 @@ export class RevogrViewport {
         const rows: VirtualPositionItem[] = viewportStore.row.get('items');
         const cols: VirtualPositionItem[] = viewportStore.col.get('items');
 
-        const contentHeight = dimensionStore.row.get('realSize');
-        const contentWidth = dimensionStore.col.get('realSize');
-        const hostProp = { [`${UUID}`]: this.uuid };
+        const contentHeight: number = dimensionStore.row.get('realSize');
 
-        const viewVerticalPorts: ViewportProps[] = [
+        const viewports: ViewportProps[] = [
             // left side
-            this.pinnedColumn('colPinStart', `${this.uuid}-1`, rows, 'colPinStart', {x: 0, y: 1}, contentHeight),
+            this.pinnedColumnData(
+                'colPinStart',
+                `${this.uuid}-1`,
+                rows,
+                'colPinStart', {x: 0, y: 1},
+                contentHeight
+            ),
 
             // center
-            this.centerData('data-view', `${this.uuid}-0`, rows, cols, {x: 1, y: 1}, contentHeight),
+            this.centerData(
+                'data-view',
+                `${this.uuid}-0`,
+                rows,
+                cols,
+                {x: 1, y: 1},
+                contentHeight
+            ),
 
             // right side
-            this.pinnedColumn('colPinEnd', `${this.uuid}-2`, rows, 'colPinEnd', {x: 2, y: 1}, contentHeight)
+            this.pinnedColumnData(
+                'colPinEnd',
+                `${this.uuid}-2`, rows,
+                'colPinEnd', {x: 2, y: 1},
+                contentHeight
+            )
         ];
 
-        const viewPortHtml = [];
-        for (let view of viewVerticalPorts) {
-            const dataViews = [];
+        const viewPortHtml: HTMLElement[] = [];
+
+        /** render viewports columns */
+        for (let view of viewports) {
+            const dataViews: HTMLElement[] = [];
             let j: number = 0;
+
+            /** render viewports rows */
             for (let data of view.dataPorts) {
                 dataViews.push(
                     <revogr-data
@@ -123,7 +136,7 @@ export class RevogrViewport {
                 </revogr-viewport-scroll>
             );
         }
-        return <Host{...hostProp}>
+        return <Host{...{[`${UUID}`]: this.uuid}}>
             <div class='main-viewport'>
                 <div class='viewports'>
                     {viewPortHtml}
@@ -139,14 +152,15 @@ export class RevogrViewport {
             <revogr-scroll-virtual
                 class='horizontal'
                 dimension='col'
-                contentSize={contentWidth}
+                contentSize={dimensionStore.col.get('realSize')}
                 ref={el => this.elementToScroll.push(el)}
                 virtualSize={viewportStore.col.get('virtualSize')}
                 onScrollVirtual={e => this.scrollingService.onScroll(e.detail)}/>
         </Host>;
     }
 
-    private pinnedColumn(
+    /** Collect data for pinned columns in required @ViewportProps format */
+    private pinnedColumnData(
         key: MultiDimensionType,
         uuid: string,
         rows: VirtualPositionItem[],
@@ -183,6 +197,7 @@ export class RevogrViewport {
     };
 
 
+    /** Collect data for central(core) part */
     private centerData (
         key: string,
         uuid: string,
@@ -215,15 +230,9 @@ export class RevogrViewport {
             parent,
             dataPorts: this.dataViewPort(rows, cols, colData, 'col', position, uuid)
         };
-    };
-
-    private getLastCell(colType: MultiDimensionType, rowType: MultiDimensionType): Selection.Cell {
-        return {
-            x: viewportStore[colType].get('realCount'),
-            y: viewportStore[rowType].get('realCount')
-        };
     }
 
+    /** Collect Row data */
     private dataViewPort(
         rows: VirtualPositionItem[],
         cols: VirtualPositionItem[],
@@ -263,6 +272,14 @@ export class RevogrViewport {
             dataPart,
             pinned('rowPinEnd', 'footer', dataPart.position.y + 1)
         ];
-    };
+    }
 
+
+    /** Receive last visible in viewport by required type */
+    private getLastCell(colType: MultiDimensionType, rowType: MultiDimensionType): Selection.Cell {
+        return {
+            x: viewportStore[colType].get('realCount'),
+            y: viewportStore[rowType].get('realCount')
+        };
+    }
 }

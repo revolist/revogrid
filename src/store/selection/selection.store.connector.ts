@@ -1,7 +1,7 @@
 import {Edition, Selection} from '../../interfaces';
 import {createStore, ObservableMap} from '@stencil/store';
 import {setStore} from '../../utils/store.utils';
-import {cropCellToMax, getRange, nextCell} from "./selection.helpers";
+import {cropCellToMax, getRange, nextCell} from './selection.helpers';
 
 import RangeArea = Selection.RangeArea;
 import Cell = Selection.Cell;
