@@ -18,8 +18,10 @@ export default class CellSelectionService {
         interact(target)
             .draggable({
                 listeners: {
-                    start: event => CellSelectionService.canRange &&
-                        config.focus(getCell(event.currentTarget))
+                    start: event => {
+                        CellSelectionService.canRange &&
+                        config.focus(getCell(event.currentTarget));
+                    }
                 },
                 cursorChecker: () => 'default'
             })

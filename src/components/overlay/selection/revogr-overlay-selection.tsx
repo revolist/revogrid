@@ -34,6 +34,7 @@ export class OverlaySelection {
     @Prop() dimensionRow: ObservableMap<DimensionSettingsState>;
     @Prop() dimensionCol: ObservableMap<DimensionSettingsState>;
     @Prop() columnService: ColumnServiceI;
+
     @Prop() lastCell: Selection.Cell;
     @Watch('lastCell') lastCellChanged(cell: Selection.Cell): void {
         this.selectionStore?.setLastCell(cell);
@@ -48,8 +49,6 @@ export class OverlaySelection {
     @Listen('keydown', { target: 'parent' })
     handleKeyDown(e: KeyboardEvent){
         this.selectionService.keyDown(e);
-
-
         if (this.selectionStore.edited) {
             switch (e.code) {
                 case codesLetter.ESCAPE:
@@ -74,12 +73,15 @@ export class OverlaySelection {
         this.selectionService = new CellSelectionService(
             `${this.parent} .${CELL_CLASS}`,
             {
-                focus: (cell, isMulti?) => this.selectionStore.focus(cell, isMulti),
+                focus: (cell, isMulti?) => {
+                    this.selectionStore.focus(cell, isMulti)
+                },
                 range: (start, end) => this.selectionStore.setRange(start, end),
                 tempRange: (start, end) => this.selectionStore.setTempRange(start, end),
                 change: (area, isMulti?) => this.selectionStore.change(area, isMulti)
             });
     }
+
     disconnectedCallback(): void {
         this.selectionService.destroy();
         this.selectionStore.destroy();
@@ -118,7 +120,7 @@ export class OverlaySelection {
             });
             els.push(<div class={FOCUS_CLASS} style={focusStyle}/>);
         }
-        els.push(<input type='text' class='edit-focus-input' style={focusStyle} ref={el => this.focusSection = el}/>);
+        els.push(<input type='text' class='edit-focus-input' ref={el => this.focusSection = el}/>);
         if (!this.readonly) {
             const editCell = this.selectionStore.store.get('edit');
             els.push(<revogr-edit

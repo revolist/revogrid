@@ -39,9 +39,12 @@ export class RevogrData {
 
   @Listen('beforeEdit')
   onSave(e: CustomEvent<Edition.SaveDataDetails>): void {
-    if (!e.defaultPrevented) {
-      this.columnService.setCellData(e.detail.row, e.detail.col, e.detail.val);
-    }
+    // apply data
+    setTimeout(() => {
+      if (!e.defaultPrevented) {
+        this.columnService.setCellData(e.detail.row, e.detail.col, e.detail.val);
+      }
+    });
   }
 
   @State() columnService: ColumnServiceI;
