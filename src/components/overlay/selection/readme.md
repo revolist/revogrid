@@ -7,15 +7,16 @@
 
 ## Properties
 
-| Property        | Attribute  | Description | Type                                    | Default     |
-| --------------- | ---------- | ----------- | --------------------------------------- | ----------- |
-| `columnService` | --         |             | `ColumnServiceI`                        | `undefined` |
-| `dimensionCol`  | --         |             | `ObservableMap<DimensionSettingsState>` | `undefined` |
-| `dimensionRow`  | --         |             | `ObservableMap<DimensionSettingsState>` | `undefined` |
-| `lastCell`      | --         |             | `Cell`                                  | `undefined` |
-| `parent`        | `parent`   |             | `string`                                | `''`        |
-| `position`      | --         |             | `Cell`                                  | `undefined` |
-| `readonly`      | `readonly` |             | `boolean`                               | `undefined` |
+| Property                  | Attribute  | Description | Type                                    | Default     |
+| ------------------------- | ---------- | ----------- | --------------------------------------- | ----------- |
+| `columnService`           | --         |             | `ColumnServiceI`                        | `undefined` |
+| `dimensionCol`            | --         |             | `ObservableMap<DimensionSettingsState>` | `undefined` |
+| `dimensionRow`            | --         |             | `ObservableMap<DimensionSettingsState>` | `undefined` |
+| `lastCell`                | --         |             | `Cell`                                  | `undefined` |
+| `parent`                  | `parent`   |             | `string`                                | `''`        |
+| `position`                | --         |             | `Cell`                                  | `undefined` |
+| `readonly`                | `readonly` |             | `boolean`                               | `undefined` |
+| `selectionStoreConnector` | --         |             | `SelectionStoreConnectorI`              | `undefined` |
 
 
 ## Dependencies

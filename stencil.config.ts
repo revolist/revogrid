@@ -7,7 +7,8 @@ export const config: Config = {
   plugins: [sass()],
   outputTargets: [
     {
-      type: 'dist'
+      type: 'dist',
+      esmLoaderPath: '../loader'
     },
     {
       type: 'docs-readme'
