@@ -1,13 +1,15 @@
 import {h, VNode} from '@stencil/core';
 
-import dataStore, {updateData} from '../../store/dataSource/data.store';
 import {
     CellTemplateFunc,
     ColumnDataSchemaModel,
-    ColumnDataSchemaRegular, ColumnProp, DataSource, DataType, DimensionRows,
+    ColumnDataSchemaRegular, ColumnProp, DataSource, DataType, Edition,
     HyperFunc,
     ReadOnlyFormat
 } from '../../interfaces';
+import {DataSourceState} from "../../store/dataSource/data.store";
+import {ObservableMap} from "@stencil/store";
+import BeforeSaveDataDetails = Edition.BeforeSaveDataDetails;
 
 export interface ColumnServiceI {
     columns: ColumnDataSchemaRegular[];
@@ -24,7 +26,7 @@ export default class ColumnService implements ColumnServiceI {
     set columns(source: ColumnDataSchemaRegular[]) {
         this.source = source;
     }
-    constructor(columns: ColumnDataSchemaRegular[], private rowType: DimensionRows) {
+    constructor(private dataStore: ObservableMap<DataSourceState<DataType>>, columns: ColumnDataSchemaRegular[]) {
         this.source = columns;
     }
 
@@ -47,7 +49,7 @@ export default class ColumnService implements ColumnServiceI {
     setCellData(r: number, c: number, val: string): void {
         const {data, model, prop} = this.rowDataModel(r, c);
         model[prop as number] = val;
-        updateData({...data}, this.rowType);
+        this.dataStore.set('items', [...data]);
     }
 
     getCellData(r: number, c: number): string {
@@ -55,9 +57,18 @@ export default class ColumnService implements ColumnServiceI {
         return model[prop as number] || '';
     }
 
+    getSaveData(r: number, c: number, val: string): BeforeSaveDataDetails {
+        const { prop, model } = this.rowDataModel(r, c);
+        return {
+            prop,
+            model,
+            val
+        }
+    }
+
     rowDataModel(r: number, c: number): ColumnDataSchemaModel {
         const prop: ColumnProp|undefined = this.columns[c]?.prop;
-        const data: DataSource = dataStore.get(this.rowType);
+        const data: DataSource = this.dataStore.get('items');
         const model: DataType = data[r] || {};
         return { prop, model, data };
     }

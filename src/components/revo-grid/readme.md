@@ -7,36 +7,36 @@
 
 ## Properties
 
-| Property     | Attribute    | Description | Type                                                        | Default                             |
-| ------------ | ------------ | ----------- | ----------------------------------------------------------- | ----------------------------------- |
-| `colSize`    | `col-size`   |             | `number`                                                    | `initialSettings.defaultColumnSize` |
-| `columns`    | --           |             | `ColumnDataSchema[]`                                        | `[]`                                |
-| `dimensions` | --           |             | `{ col?: ViewSettingSizeProp; row?: ViewSettingSizeProp; }` | `{}`                                |
-| `frameSize`  | `frame-size` |             | `number`                                                    | `initialSettings.frameSize`         |
-| `range`      | `range`      |             | `boolean`                                                   | `initialSettings.range`             |
-| `readonly`   | `readonly`   |             | `boolean`                                                   | `initialSettings.readonly`          |
-| `rowSize`    | `row-size`   |             | `number`                                                    | `initialSettings.defaultRowSize`    |
-| `source`     | --           |             | `DataType[]`                                                | `[]`                                |
+| Property             | Attribute    | Description | Type                 | Default                             |
+| -------------------- | ------------ | ----------- | -------------------- | ----------------------------------- |
+| `colSize`            | `col-size`   |             | `number`             | `initialSettings.defaultColumnSize` |
+| `columns`            | --           |             | `ColumnDataSchema[]` | `[]`                                |
+| `frameSize`          | `frame-size` |             | `number`             | `initialSettings.frameSize`         |
+| `pinnedBottomSource` | --           |             | `DataType[]`         | `[]`                                |
+| `pinnedTopSource`    | --           |             | `DataType[]`         | `[]`                                |
+| `range`              | `range`      |             | `boolean`            | `initialSettings.range`             |
+| `readonly`           | `readonly`   |             | `boolean`            | `initialSettings.readonly`          |
+| `resize`             | `resize`     |             | `boolean`            | `initialSettings.resize`            |
+| `rowSize`            | `row-size`   |             | `number`             | `initialSettings.defaultRowSize`    |
+| `source`             | --           |             | `DataType[]`         | `[]`                                |
 
 
 ## Dependencies
 
 ### Depends on
 
-- [revogr-viewport-scroll-scrollable](../scrollable)
-- [revogr-header](../header)
-- [revogr-data](../data)
-- [revogr-overlay-selection](../overlay)
-- [revogr-edit](../overlay)
+- [revogr-viewport](../viewport)
 
 ### Graph
 ```mermaid
 graph TD;
-  revo-grid --> revogr-viewport-scroll-scrollable
-  revo-grid --> revogr-header
-  revo-grid --> revogr-data
-  revo-grid --> revogr-overlay-selection
-  revo-grid --> revogr-edit
+  revo-grid --> revogr-viewport
+  revogr-viewport --> revogr-data
+  revogr-viewport --> revogr-viewport-scroll
+  revogr-viewport --> revogr-header
+  revogr-viewport --> revogr-scroll-virtual
+  revogr-data --> revogr-overlay-selection
+  revogr-overlay-selection --> revogr-edit
   revogr-edit --> revogr-text-editor
   style revo-grid fill:#f9f,stroke:#333,stroke-width:4px
 ```

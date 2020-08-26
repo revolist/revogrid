@@ -1,7 +1,6 @@
-import {Component, Event, EventEmitter, Prop, h, Method} from '@stencil/core';
+import {Component, Event, EventEmitter, Prop, h} from '@stencil/core';
 import {ObservableMap} from '@stencil/store';
 
-import CellEditService from './cellEditService';
 import {DimensionSettingsState, Edition, Selection} from '../../../interfaces';
 import { getItemByIndex } from '../../../store/dimension/dimension.helpers';
 
@@ -12,34 +11,19 @@ export class Edit {
     @Prop() dimensionRow: ObservableMap<DimensionSettingsState>;
     @Prop() dimensionCol: ObservableMap<DimensionSettingsState>;
     @Prop() editCell: Edition.EditCell|null = null;
-    private cellEditModule!: CellEditService;
 
-    @Event() beforeEdit: EventEmitter<Edition.SaveDataDetails>;
+    @Event({ cancelable: true }) cellEdit: EventEmitter<Edition.SaveDataDetails>;
+    @Event() closeEdit: EventEmitter;
     onSave(e: CustomEvent<Edition.SaveData>): void {
         e.stopPropagation();
         if (this.editCell) {
-            this.beforeEdit.emit({
+            this.cellEdit.emit({
                 col: this.editCell.x,
                 row: this.editCell.y,
                 val: e.detail
             });
         }
-        setTimeout(() => {
-            this.cellEditModule.close();
-        }, 0);
-    }
-
-    @Method()
-    async doEdit(val: string|boolean = ''): Promise<void> {
-        this.cellEditModule?.edit(val);
-    }
-
-    connectedCallback(): void {
-        this.cellEditModule = new CellEditService();
-    }
-
-    disconnectedCallback(): void {
-        this.cellEditModule.destroy();
+        setTimeout(() => this.closeEdit.emit(), 0);
     }
 
     render() {

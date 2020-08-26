@@ -16,8 +16,14 @@
     .grid-component {
       display: block;
       width: 100%;
-      height: 500px;
+      height: 300px;
     }
+    .grid-component2 {
+        display: block;
+        width: 100%;
+        height: 300px;
+    }
+
 
     .inner-cell {
       width: 100%;
@@ -30,14 +36,17 @@
 </head>
 <body>
     <revo-grid class="grid-component"></revo-grid>
+    <revo-grid class="grid-component2"></revo-grid>
+
+    <br>
 
     <script type="module">
         import {generateFakeDataObject} from "/utilsExternal/generate-data.js";
 
-        const grid = document.querySelector('revo-grid');
-
-        grid.frameSize = 1;
         const data = generateFakeDataObject(100, 100);
+        const grid2 = document.querySelector('.grid-component2');
+        const grid = document.querySelector('.grid-component');
+
         grid.columns = data.headers;
         grid.source = data.rows;
 
@@ -47,18 +56,20 @@
         grid.readonly = false;
         grid.range = true;
         grid.resize = true;
-        grid.addEventListener('headerClick', e => {
-            alert('Header number ' + e.detail.prop);
-            console.log(e.detail);
+        grid.addEventListener('afterEdit', (e) => {
+            grid2.source = [...grid.source];
         });
-        grid.addEventListener('beforeEdit', e => {
-            console.log(e.detail);
-            if (e.detail.row % 3) {
-                // cancel changes on edit
-                e.preventDefault();
-                alert('edit cancelled');
-            }
-        });
+
+
+        grid2.columns = data.headers;
+        grid2.source = data.rows;
+
+        grid2.pinnedTopSource = data.pinnedTopRows;
+        grid2.pinnedBottomSource = data.pinnedBottomRows;
+
+        grid2.readonly = false;
+        grid2.range = true;
+        grid2.resize = true;
     </script>
 </body>
 </html>

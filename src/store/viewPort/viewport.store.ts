@@ -16,13 +16,11 @@ import {
 
 import {setStore} from '../../utils/store.utils';
 import {
-  MultiDimensionType,
   ViewportState,
   ViewportStateItems, ViewSettingSizeProp,
   VirtualPositionItem
 } from '../../interfaces';
 
-type ViewportStore = {[T in MultiDimensionType]: ObservableMap<ViewportState>};
 
 function initialState(): ViewportState {
   return {
@@ -41,132 +39,112 @@ function initialState(): ViewportState {
   };
 }
 
-const viewportStore: ViewportStore = {
-  col: createStore(initialState()),
-  colPinStart: createStore(initialState()),
-  colPinEnd: createStore(initialState()),
-  row: createStore(initialState()),
-  rowPinStart: createStore(initialState()),
-  rowPinEnd: createStore(initialState())
-};
-
-function getStoreByType(type: MultiDimensionType): ObservableMap<ViewportState> {
-  return viewportStore[type];
-}
-
-function getItems(store: ObservableMap<ViewportState>): Pick<ViewportStateItems, 'items'|'start'|'end'> {
-  return {
-    items: store.get('items'),
-    start: store.get('start'),
-    end: store.get('end')
-  };
-}
-
-function setViewport(data: Partial<ViewportState>, dimensionType: MultiDimensionType): void {
-  const store: ObservableMap<ViewportState> = getStoreByType(dimensionType);
-  setStore(store, data);
-}
-
-function setViewPortCoordinate(
-    position: number,
-    dimensionType: MultiDimensionType,
-    dimension: DimensionDataViewport
-): void {
-  const store: ObservableMap<ViewportState> = getStoreByType(dimensionType);
-
-  // no visible data to calculate
-  if (!store.get('virtualSize')) {
-    return;
+export default class ViewportStore {
+  readonly store: ObservableMap<ViewportState>;
+  constructor() {
+    this.store = createStore(initialState());
   }
 
-  const frameOffset: number = dimension.frameOffset;
-  const outsize: number = frameOffset * 2 * dimension.originItemSize;
-  const virtualSize = store.get('virtualSize') + outsize;
-
-  let maxCoordinate: number = virtualSize;
-  if (dimension.realSize > virtualSize) {
-    maxCoordinate = dimension.realSize - virtualSize;
+  getItems(): Pick<ViewportStateItems, 'items'|'start'|'end'> {
+    return {
+      items: this.store.get('items'),
+      start: this.store.get('start'),
+      end: this.store.get('end')
+    };
   }
-  let pos: number = position;
-  pos -= frameOffset * dimension.originItemSize;
-  pos = pos < 0 ? 0 : pos < maxCoordinate  ? pos : maxCoordinate;
 
+  setViewport(data: Partial<ViewportState>): void {
+    setStore(this.store, data);
+  }
 
-  const firstItem: VirtualPositionItem|undefined = getFirstItem(getItems(store));
-  const lastItem: VirtualPositionItem|undefined = getLastItem(getItems(store));
-
-  // left position changed
-  if (!isActiveRange(pos, firstItem)) {
-    const toUpdate = getUpdatedItemsByPosition(
-      pos,
-      getItems(store),
-      store.get('realCount'),
-      virtualSize,
-      dimension
-    );
-    setStore(store, toUpdate);
-    // right position changed
-  } else if (firstItem && (store.get('virtualSize') + pos) > lastItem?.end) {
-    // check is any item missing for full fill content
-    const missing = addMissingItems(
-        firstItem,
-        store.get('realCount'),
-        virtualSize + pos - firstItem.start,
-        getItems(store),
-        dimension
-    );
-
-
-    if (missing.length) {
-      const items = [...store.get('items')];
-      const range = {
-        start: store.get('start'),
-        end: store.get('end')
-      };
-      updateMissing(items, missing, range);
-      setStore(store, {
-        items: [...items],
-        ...range
-      });
+  setViewPortCoordinate(
+      position: number,
+      dimension: DimensionDataViewport
+  ): void {
+    // no visible data to calculate
+    if (!this.store.get('virtualSize')) {
+      return;
     }
-  }
-}
 
-function setViewPortDimension(sizes: ViewSettingSizeProp, dimensionType: MultiDimensionType): void {
-  const store: ObservableMap<ViewportState> = getStoreByType(dimensionType);
+    const frameOffset: number = dimension.frameOffset;
+    const outsize: number = frameOffset * 2 * dimension.originItemSize;
+    const virtualSize = this.store.get('virtualSize') + outsize;
 
-  // viewport not inited
-  if (!store.get('items').length) {
-    return;
-  }
-
-  const items = store.get('items');
-  let changedCoordinate: number = 0;
-
-  for (let item of items) {
-    let changedSize: number = 0;
-    // change pos if size change present before
-    if (changedCoordinate) {
-      item.start += changedCoordinate;
-      item.end += changedCoordinate;
+    let maxCoordinate: number = virtualSize;
+    if (dimension.realSize > virtualSize) {
+      maxCoordinate = dimension.realSize - virtualSize;
     }
-    // change size
-    const size: number = sizes[item.itemIndex] || 0;
-    if (size) {
-      changedSize = size - item.size;
-      changedCoordinate += changedSize;
-      item.size = size;
-      item.end = item.start + size;
+    let pos: number = position;
+    pos -= frameOffset * dimension.originItemSize;
+    pos = pos < 0 ? 0 : pos < maxCoordinate  ? pos : maxCoordinate;
+
+
+    const firstItem: VirtualPositionItem|undefined = getFirstItem(this.getItems());
+    const lastItem: VirtualPositionItem|undefined = getLastItem(this.getItems());
+
+    // left position changed
+    if (!isActiveRange(pos, firstItem)) {
+      const toUpdate = getUpdatedItemsByPosition(
+          pos,
+          this.getItems(),
+          this.store.get('realCount'),
+          virtualSize,
+          dimension
+      );
+      setStore(this.store, toUpdate);
+      // right position changed
+    } else if (firstItem && (this.store.get('virtualSize') + pos) > lastItem?.end) {
+      // check is any item missing for full fill content
+      const missing = addMissingItems(
+          firstItem,
+          this.store.get('realCount'),
+          virtualSize + pos - firstItem.start,
+          this.getItems(),
+          dimension
+      );
+
+
+      if (missing.length) {
+        const items = [...this.store.get('items')];
+        const range = {
+          start: this.store.get('start'),
+          end: this.store.get('end')
+        };
+        updateMissing(items, missing, range);
+        setStore(this.store, {
+          items: [...items],
+          ...range
+        });
+      }
     }
   }
 
-  setStore(store, { items: [...items] });
+  setViewPortDimension(sizes: ViewSettingSizeProp): void {
+    // viewport not inited
+    if (!this.store.get('items').length) {
+      return;
+    }
+
+    const items = this.store.get('items');
+    let changedCoordinate: number = 0;
+
+    for (let item of items) {
+      let changedSize: number = 0;
+      // change pos if size change present before
+      if (changedCoordinate) {
+        item.start += changedCoordinate;
+        item.end += changedCoordinate;
+      }
+      // change size
+      const size: number = sizes[item.itemIndex] || 0;
+      if (size) {
+        changedSize = size - item.size;
+        changedCoordinate += changedSize;
+        item.size = size;
+        item.end = item.start + size;
+      }
+    }
+
+    setStore(this.store, { items: [...items] });
+  }
 }
-
-export default viewportStore;
-
-export {
-  setViewport,
-  setViewPortCoordinate,
-  setViewPortDimension,
-};

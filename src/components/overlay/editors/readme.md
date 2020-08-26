@@ -23,7 +23,7 @@
 
 ### Used by
 
- - [revogr-edit](..)
+ - [revogr-edit](.)
 
 ### Graph
 ```mermaid

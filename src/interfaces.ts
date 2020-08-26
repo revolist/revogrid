@@ -4,6 +4,7 @@ export type DimensionTypeRow = 'row';
 export type DimensionTypeCol = 'col';
 export type DimensionType = DimensionTypeCol|DimensionTypeRow;
 export type DimensionColPin = 'colPinStart'|'colPinEnd';
+export type DimensionCols = DimensionColPin|DimensionTypeCol;
 export type DimensionRowPin = 'rowPinStart'|'rowPinEnd';
 export type DimensionRows = DimensionTypeRow|DimensionRowPin;
 export type MultiDimensionType = DimensionType|DimensionColPin|DimensionRowPin;
@@ -53,7 +54,6 @@ export type ColumnData = ColumnDataSchema[];
 
 export type DataType = {[T in ColumnProp]: DataFormat};
 export type DataSource = DataType[];
-export type DataSourceColumnPins = {[T in DimensionColPin]: ColumnDataSchemaRegular[];};
 
 export type Range = {
   start: number;
@@ -122,6 +122,15 @@ export declare namespace Selection  {
     width: string;
     height: string;
   };
+  
+  interface SelectionStoreConnectorI {
+    setEdit(val: string|boolean): void;
+    register(y: number, x: number): Object;
+    clearFocus(s: Object): void;
+    change(changes: Partial<Cell>, isMulti?: boolean): void;
+    unregister(store: Object): void;
+    focus(store: Object, focus: Selection.Cell, end: Selection.Cell): void;
+  }
 }
 
 export declare namespace Edition {
@@ -131,10 +140,13 @@ export declare namespace Edition {
     col: Selection.ColIndex;
     val: SaveData;
   };
+  type BeforeSaveDataDetails = {
+    model: DataType;
+    prop: ColumnProp;
+    val: SaveData;
+  };
   interface EditCell extends Selection.Cell {
     val?: SaveData;
   }
-  interface EditorBase {
-    // save: EventEmitter<SaveData>
-  }
+  interface EditorBase {}
 }

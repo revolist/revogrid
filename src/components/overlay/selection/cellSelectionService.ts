@@ -33,7 +33,7 @@ export default class CellSelectionService {
             .on('tap', e => config.focus(getCell(e.currentTarget), CellSelectionService.canRange && e.shiftKey));
     }
 
-    public keyDown(e: KeyboardEvent): void {
+    keyDown(e: KeyboardEvent): void {
         const isMulti: boolean = CellSelectionService.canRange && e.shiftKey;
         switch (e.code) {
             case codesLetter.ARROW_UP:

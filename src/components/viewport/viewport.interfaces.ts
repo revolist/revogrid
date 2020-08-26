@@ -1,12 +1,12 @@
 import {ObservableMap} from '@stencil/store';
 
 import {
-    ColumnDataSchemaRegular,
-    DimensionRows,
+    ColumnDataSchemaRegular, DataType,
     DimensionSettingsState,
     Selection,
     VirtualPositionItem
 } from '../../interfaces';
+import {DataSourceState} from "../../store/dataSource/data.store";
 
 declare namespace ViewportSpace {
     type Properties = {[key: string]: any};
@@ -20,6 +20,7 @@ declare namespace ViewportSpace {
         /** Viewport data position. Position provides connection between independent data stores and Selection store. */
         position: Selection.Cell;
         colData: ColumnDataSchemaRegular[];
+        dataStore: ObservableMap<DataSourceState<DataType>>;
 
         /** Stores to pass dimension data for render */
         dimensionRow: ObservableMap<DimensionSettingsState>;
@@ -29,7 +30,6 @@ declare namespace ViewportSpace {
         /** Rows dataset */
         rows: VirtualPositionItem[];
 
-        rowType: DimensionRows;
         /** Slot to put data */
         slot: SlotType;
 

@@ -1,23 +1,31 @@
-import {Component, Element, h, Host, Listen, Prop, State, Watch} from '@stencil/core';
+import {Component, Element, Event, EventEmitter, h, Host, Listen, Prop, State, Watch} from '@stencil/core';
 import {HTMLStencilElement} from '@stencil/core/internal';
 import {ObservableMap} from '@stencil/store';
 
-import ColumnService, {ColumnServiceI} from './columnService';
+import ColumnService from './columnService';
 import {CELL_CLASS, DATA_COL, DATA_ROW, DISABLED_CLASS, UUID} from '../../utils/consts';
 import {
   ColumnDataSchemaRegular,
-  DimensionRows,
+  DataType,
   DimensionSettingsState,
   Edition,
   Selection,
   VirtualPositionItem
 } from '../../interfaces';
+import {DataSourceState} from '../../store/dataSource/data.store';
 
 @Component({
   tag: 'revogr-data'
 })
 export class RevogrData {
   @Element() element!: HTMLStencilElement;
+
+  @State() columnService: ColumnService;
+  @Prop() dataStore: ObservableMap<DataSourceState<DataType>>;
+  @Prop() selectionStoreConnector: Selection.SelectionStoreConnectorI;
+
+  @Prop() dimensionRow: ObservableMap<DimensionSettingsState>;
+  @Prop() dimensionCol: ObservableMap<DimensionSettingsState>;
 
   @Prop() readonly: boolean;
   @Prop() range: boolean;
@@ -27,30 +35,30 @@ export class RevogrData {
   @Prop() lastCell: Selection.Cell;
   @Prop() position: Selection.Cell;
   @Prop() uuid: string = '';
-  @Prop() rowType: DimensionRows;
-
-  @Prop() dimensionRow: ObservableMap<DimensionSettingsState>;
-  @Prop() dimensionCol: ObservableMap<DimensionSettingsState>;
 
   @Prop() colData: ColumnDataSchemaRegular[];
   @Watch('colData') colChanged(newData: ColumnDataSchemaRegular[]): void {
     this.columnService.columns = newData;
   }
 
-  @Listen('beforeEdit')
+  @Event() afterEdit: EventEmitter<Edition.BeforeSaveDataDetails>;
+  @Event() beforeEdit: EventEmitter<Edition.BeforeSaveDataDetails>;
+  @Listen('cellEdit')
   onSave(e: CustomEvent<Edition.SaveDataDetails>): void {
+    e.cancelBubble = true;
+    const dataToSave = this.columnService.getSaveData(e.detail.row, e.detail.col, e.detail.val);
+    const beforeEdit: CustomEvent<Edition.BeforeSaveDataDetails> = this.beforeEdit.emit(dataToSave);
     // apply data
     setTimeout(() => {
-      if (!e.defaultPrevented) {
+      if (!beforeEdit.defaultPrevented) {
         this.columnService.setCellData(e.detail.row, e.detail.col, e.detail.val);
+        this.afterEdit.emit(dataToSave);
       }
     });
   }
 
-  @State() columnService: ColumnServiceI;
-
   connectedCallback(): void {
-    this.columnService = new ColumnService(this.colData, this.rowType);
+    this.columnService = new ColumnService(this.dataStore, this.colData);
   }
 
   render() {
@@ -78,6 +86,7 @@ export class RevogrData {
         rowsEls.push(
             <revogr-overlay-selection
               slot='content'
+              selectionStoreConnector={this.selectionStoreConnector}
               readonly={this.readonly}
               columnService={this.columnService}
               dimensionCol={this.dimensionCol}

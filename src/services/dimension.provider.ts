@@ -1,33 +1,62 @@
-import {setViewport, setViewPortCoordinate, setViewPortDimension} from '../store/viewPort/viewport.store';
-import {getCurrentState, setDimensionSize, setRealSize} from '../store/dimension/dimension.store';
 import {
-    ColumnDataSchemaRegular, DataType, DimensionSettingsState,
-    MultiDimensionType,
+    ColumnDataSchemaRegular, DataType,
+    DimensionSettingsState, DimensionType,
+    MultiDimensionType, ViewPortScrollEvent,
     ViewSettingSizeProp
 } from '../interfaces';
+import reduce from 'lodash/reduce';
+import {columnTypes, rowTypes} from '../store/storeTypes';
+import DimensionStore from '../store/dimension/dimension.store';
+import ViewportProvider from "./viewport.provider";
 
-class DimensionProvider {
+type DimensionStores = {[T in MultiDimensionType]: DimensionStore};
+export default class DimensionProvider {
+    public readonly stores: DimensionStores;
+    constructor(private viewports: ViewportProvider) {
+        this.stores = reduce([...rowTypes, ...columnTypes], (sources: Partial<DimensionStores>, k: MultiDimensionType) => {
+            sources[k] = new DimensionStore();
+            return sources;
+        }, {}) as DimensionStores;
+    }
+
     setDimensionSize(dimensionType: MultiDimensionType, sizes: ViewSettingSizeProp): void {
-        setDimensionSize(sizes, dimensionType);
-        setViewPortDimension(sizes, dimensionType);
+        this.stores[dimensionType].setDimensionSize(sizes);
+        this.viewports.stores[dimensionType].setViewPortDimension(sizes);
     }
 
-    setRealSize(items: ColumnDataSchemaRegular[]|DataType[], type: MultiDimensionType): void {
+    setRealSize(items: ColumnDataSchemaRegular[]|DataType[], dimensionType: MultiDimensionType): void {
         const realCount: number = items.length;
-        setViewport({ realCount }, type);
-        setRealSize(realCount, type );
+        this.viewports.stores[dimensionType].setViewport({ realCount });
+        this.stores[dimensionType].setRealSize(realCount);
     }
 
-    setPins(items: ColumnDataSchemaRegular[]|DataType[], type: MultiDimensionType, pinSizes?: ViewSettingSizeProp): void {
+    setPins(items: ColumnDataSchemaRegular[]|DataType[], dimensionType: MultiDimensionType, pinSizes?: ViewSettingSizeProp): void {
         const realCount = items.length;
-        setRealSize(realCount, type);
-        setDimensionSize(pinSizes, type);
+        this.stores[dimensionType].setRealSize(realCount);
+        this.stores[dimensionType].setDimensionSize(pinSizes);
 
-        const dimension: DimensionSettingsState = getCurrentState(type);
-        setViewport({ realCount, virtualSize: dimension.realSize }, type);
-        setViewPortCoordinate(0, type, dimension);
+        const dimension: DimensionSettingsState = this.stores[dimensionType].getCurrentState();
+        this.viewports.stores[dimensionType].setViewport({ realCount, virtualSize: dimension.realSize });
+        this.viewports.stores[dimensionType].setViewPortCoordinate(0, dimension);
+    }
+
+    setViewPortCoordinate(e: ViewPortScrollEvent): void {
+        const dimension: DimensionSettingsState = this.stores[e.dimension].getCurrentState();
+        this.viewports.stores[e.dimension].setViewPortCoordinate(e.coordinate, dimension);
+    }
+
+    setSettings(data: Partial<DimensionSettingsState>, dimensionType: DimensionType): void {
+        let stores: MultiDimensionType[] = [];
+        switch (dimensionType) {
+            case 'col':
+                stores = ['col', 'colPinEnd', 'colPinStart'];
+                break;
+            case 'row':
+                stores = ['row', 'rowPinEnd', 'rowPinStart'];
+                break;
+        }
+        for (let s of stores) {
+            this.stores[s].setStore(data);
+        }
     }
 }
-
-const dimensionProvider: DimensionProvider = new DimensionProvider();
-export default dimensionProvider;
