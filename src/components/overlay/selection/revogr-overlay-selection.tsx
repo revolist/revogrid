@@ -1,6 +1,6 @@
 import {Component, h, Listen, Prop, Watch} from '@stencil/core';
 import {ObservableMap} from '@stencil/store';
-import {DimensionSettingsState, Selection} from '../../../interfaces';
+import {RevoGrid, Selection} from '../../../interfaces';
 import {ColumnServiceI} from '../../data/columnService';
 import {getItemByIndex} from '../../../store/dimension/dimension.helpers';
 import CellSelectionService from './cellSelectionService';
@@ -29,8 +29,8 @@ export class OverlaySelection {
     @Prop() readonly: boolean;
     @Prop() parent: string = '';
 
-    @Prop() dimensionRow: ObservableMap<DimensionSettingsState>;
-    @Prop() dimensionCol: ObservableMap<DimensionSettingsState>;
+    @Prop() dimensionRow: ObservableMap<RevoGrid.DimensionSettingsState>;
+    @Prop() dimensionCol: ObservableMap<RevoGrid.DimensionSettingsState>;
     @Prop() columnService: ColumnServiceI;
 
     @Prop() lastCell: Selection.Cell;

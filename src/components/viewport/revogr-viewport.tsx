@@ -4,16 +4,6 @@ import '../../utils/closestPolifill';
 import {UUID} from '../../utils/consts';
 import GridScrollingService, {ElementScroll} from './gridScrollingService';
 import CellSelectionService from '../overlay/selection/cellSelectionService';
-import {
-    ColumnDataSchemaRegular, DataType,
-    DimensionColPin, DimensionCols,
-    DimensionRowPin, DimensionRows, DimensionSettingsState,
-    MultiDimensionType,
-    Selection,
-    ViewPortResizeEvent, ViewPortScrollEvent, ViewportState,
-    ViewSettingSizeProp,
-    VirtualPositionItem
-} from '../../interfaces';
 import ViewportSpace from './viewport.interfaces';
 import {DataProvider} from '../../services/data.provider';
 import {DataSourceState} from '../../store/dataSource/data.store';
@@ -23,6 +13,7 @@ import ViewportData = ViewportSpace.ViewportData;
 import SlotType = ViewportSpace.SlotType;
 import Properties = ViewportSpace.Properties;
 import SelectionStoreConnector from "../../services/selection.store.connector";
+import {RevoGrid, Selection} from "../../interfaces";
 
 
 /**
@@ -42,15 +33,15 @@ export class RevogrViewport {
     private scrollingService: GridScrollingService;
     private selectionStoreConnector: SelectionStoreConnector;
 
-    @Event() setDimensionSize: EventEmitter<{type: MultiDimensionType, sizes: ViewSettingSizeProp}>;
-    @Event() setViewportCoordinate: EventEmitter<ViewPortScrollEvent>;
-    @Event() setViewportSize: EventEmitter<ViewPortResizeEvent>;
+    @Event() setDimensionSize: EventEmitter<{type: RevoGrid.MultiDimensionType, sizes: RevoGrid.ViewSettingSizeProp}>;
+    @Event() setViewportCoordinate: EventEmitter<RevoGrid.ViewPortScrollEvent>;
+    @Event() setViewportSize: EventEmitter<RevoGrid.ViewPortResizeEvent>;
 
     @Element() element: Element;
-    @Prop() columnStores: {[T in DimensionCols]: ObservableMap<DataSourceState<ColumnDataSchemaRegular>>};
-    @Prop() rowStores: {[T in DimensionRows]: ObservableMap<DataSourceState<DataType>>};
-    @Prop() dimensions: {[T in MultiDimensionType]: ObservableMap<DimensionSettingsState>};
-    @Prop() viewports: {[T in MultiDimensionType]: ObservableMap<ViewportState>};
+    @Prop() columnStores: {[T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnDataSchemaRegular>>};
+    @Prop() rowStores: {[T in RevoGrid.DimensionRows]: ObservableMap<DataSourceState<RevoGrid.DataType>>};
+    @Prop() dimensions: {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.DimensionSettingsState>};
+    @Prop() viewports: {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.ViewportState>};
 
     @Prop() dataProvider: DataProvider;
 
@@ -74,7 +65,7 @@ export class RevogrViewport {
     connectedCallback(): void {
         this.selectionStoreConnector = new SelectionStoreConnector();
         this.scrollingService = new GridScrollingService({
-            setViewport: (e: ViewPortScrollEvent) => this.setViewportCoordinate.emit(e)
+            setViewport: (e: RevoGrid.ViewPortScrollEvent) => this.setViewportCoordinate.emit(e)
         });
         CellSelectionService.canRange = this.range;
     }
@@ -89,8 +80,8 @@ export class RevogrViewport {
 
     render() {
         this.elementToScroll.length = 0;
-        const rows: VirtualPositionItem[] = this.viewports['row'].get('items');
-        const cols: VirtualPositionItem[] = this.viewports['col'].get('items');
+        const rows: RevoGrid.VirtualPositionItem[] = this.viewports['row'].get('items');
+        const cols: RevoGrid.VirtualPositionItem[] = this.viewports['col'].get('items');
 
         const contentHeight: number = this.dimensions['row'].get('realSize');
 
@@ -176,14 +167,14 @@ export class RevogrViewport {
 
     /** Collect data for pinned columns in required @ViewportProps format */
     private pinnedColumnData(
-        key: MultiDimensionType,
+        key: RevoGrid.MultiDimensionType,
         uuid: string,
-        rows: VirtualPositionItem[],
-        colType: DimensionColPin,
+        rows: RevoGrid.VirtualPositionItem[],
+        colType: RevoGrid.DimensionColPin,
         position: Selection.Cell,
         contentHeight: number
     ): ViewportProps {
-        const cols: VirtualPositionItem[] = this.viewports[colType].get('items');
+        const cols: RevoGrid.VirtualPositionItem[] = this.viewports[colType].get('items');
         const pinSize = this.dimensions[colType].get('realSize');
         const parent: string = `[${UUID}="${uuid}"]`;
         const prop: Properties = {
@@ -199,7 +190,7 @@ export class RevogrViewport {
             cols,
             parent,
             colData,
-            onHeaderResize: (e: CustomEvent<ViewSettingSizeProp>) => this.setDimensionSize.emit({
+            onHeaderResize: (e: CustomEvent<RevoGrid.ViewSettingSizeProp>) => this.setDimensionSize.emit({
                 type: colType,
                 sizes: e.detail
             })
@@ -218,18 +209,18 @@ export class RevogrViewport {
     private centerData (
         key: string,
         uuid: string,
-        rows: VirtualPositionItem[],
-        cols: VirtualPositionItem[],
+        rows: RevoGrid.VirtualPositionItem[],
+        cols: RevoGrid.VirtualPositionItem[],
         position: Selection.Cell,
         contentHeight: number,
-        colType: DimensionCols = 'col'
+        colType: RevoGrid.DimensionCols = 'col'
     ): ViewportProps {
         const parent = `[${UUID}="${uuid}"]`;
         const prop: Properties = {
             contentWidth: this.dimensions[colType].get('realSize'),
             class: key,
             [`${UUID}`]: uuid,
-            onResizeViewport: (e: CustomEvent<ViewPortResizeEvent>) => this.setViewportSize.emit(e.detail),
+            onResizeViewport: (e: CustomEvent<RevoGrid.ViewPortResizeEvent>) => this.setViewportSize.emit(e.detail),
             contentHeight,
             key
         };
@@ -238,7 +229,7 @@ export class RevogrViewport {
             colData,
             cols,
             parent,
-            onHeaderResize: (e: CustomEvent<ViewSettingSizeProp>) =>
+            onHeaderResize: (e: CustomEvent<RevoGrid.ViewSettingSizeProp>) =>
                 this.setDimensionSize.emit({ type: colType, sizes: e.detail })
         };
         return {
@@ -251,10 +242,10 @@ export class RevogrViewport {
 
     /** Collect Row data */
     private dataViewPort(
-        rows: VirtualPositionItem[],
-        cols: VirtualPositionItem[],
-        colData: ColumnDataSchemaRegular[],
-        colType: MultiDimensionType,
+        rows: RevoGrid.VirtualPositionItem[],
+        cols: RevoGrid.VirtualPositionItem[],
+        colData: RevoGrid.ColumnDataSchemaRegular[],
+        colType: RevoGrid.MultiDimensionType,
         position: Selection.Cell,
         uuid: string
     ): ViewportData[] {
@@ -271,7 +262,7 @@ export class RevogrViewport {
             dimensionCol: this.dimensions[colType],
             dimensionRow: this.dimensions['row']
         };
-        const pinned = (type: DimensionRowPin, slot: SlotType, y: number): ViewportData => {
+        const pinned = (type: RevoGrid.DimensionRowPin, slot: SlotType, y: number): ViewportData => {
             return {
                 ...dataPart,
                 slot,
@@ -292,7 +283,7 @@ export class RevogrViewport {
 
 
     /** Receive last visible in viewport by required type */
-    private getLastCell(colType: MultiDimensionType, rowType: MultiDimensionType): Selection.Cell {
+    private getLastCell(colType: RevoGrid.MultiDimensionType, rowType: RevoGrid.MultiDimensionType): Selection.Cell {
         return {
             x: this.viewports[colType].get('realCount'),
             y: this.viewports[rowType].get('realCount')

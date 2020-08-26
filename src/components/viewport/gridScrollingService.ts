@@ -1,16 +1,16 @@
-import {DimensionColPin, ViewPortScrollEvent} from '../../interfaces';
+import {RevoGrid} from "../../interfaces";
 
 export interface ElementScroll {
-    setScroll(e: ViewPortScrollEvent): Promise<void>;
+    setScroll(e: RevoGrid.ViewPortScrollEvent): Promise<void>;
 }
 interface Config {
-    setViewport(e: ViewPortScrollEvent): void;
+    setViewport(e: RevoGrid.ViewPortScrollEvent): void;
 }
 export default class GridScrollingService {
     private elements: ElementScroll[] = [];
     constructor(private cfg: Config) {}
 
-    onScroll(e: ViewPortScrollEvent, key?: DimensionColPin|string): void {
+    onScroll(e: RevoGrid.ViewPortScrollEvent, key?: RevoGrid.DimensionColPin|string): void {
         if (this.isPinnedColumn(key) && e.dimension === 'col') {
             return;
         }
@@ -20,7 +20,7 @@ export default class GridScrollingService {
         }
     }
 
-    private isPinnedColumn(key?: DimensionColPin|string): key is DimensionColPin {
+    private isPinnedColumn(key?: RevoGrid.DimensionColPin|string): key is RevoGrid.DimensionColPin {
         return ['colPinStart', 'colPinEnd'].indexOf(key) > -1;
     }
 

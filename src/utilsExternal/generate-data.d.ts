@@ -1,8 +1,8 @@
-import {ColumnDataSchemaRegular} from "../interfaces";
+import {RevoGrid} from "../interfaces";
 
 type FakeData<T> = {
     rows: T[],
-    headers: ColumnDataSchemaRegular[]
+    headers: RevoGrid.ColumnDataSchemaRegular[]
 };
 type Data = {[key: string]: string}[];
 declare var generateFakeDataObject: { (rowsNumber:number, colsNumber: number): FakeData<{[key: string]: string}>};

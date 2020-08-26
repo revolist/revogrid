@@ -8,14 +8,11 @@ import reduce from 'lodash/reduce';
 
 import {setStore} from '../../utils/store.utils';
 import {calculateDimensionData} from './dimension.helpers';
-import {
-  DimensionSettingsState,
-  ViewSettingSizeProp
-} from '../../interfaces';
+import {RevoGrid} from "../../interfaces";
 
-type Item = keyof DimensionSettingsState;
+type Item = keyof RevoGrid.DimensionSettingsState;
 
-function initialState(): DimensionSettingsState {
+function initialState(): RevoGrid.DimensionSettingsState {
   return {
     indexes: [],
 
@@ -39,16 +36,16 @@ function initialState(): DimensionSettingsState {
 }
 
 export default class DimensionStore {
-  readonly store: ObservableMap<DimensionSettingsState>;
+  readonly store: ObservableMap<RevoGrid.DimensionSettingsState>;
   constructor() {
     this.store = createStore(initialState());
   }
 
 
-  getCurrentState(): DimensionSettingsState {
+  getCurrentState(): RevoGrid.DimensionSettingsState {
     const state = initialState();
     const keys: Item[] = Object.keys(state) as Item[];
-    return reduce(keys, (r: DimensionSettingsState, k: Item) => {
+    return reduce(keys, (r: RevoGrid.DimensionSettingsState, k: Item) => {
       const data = this.store.get(k);
       r[k] = data as never;
       return r;
@@ -67,7 +64,7 @@ export default class DimensionStore {
     setStore(this.store, data);
   }
 
-  setDimensionSize(sizes: ViewSettingSizeProp): void {
+  setDimensionSize(sizes: RevoGrid.ViewSettingSizeProp): void {
     const dimensionData = calculateDimensionData(this.getCurrentState(), sizes);
     setStore(this.store, dimensionData);
   }

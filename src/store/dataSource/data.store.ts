@@ -4,16 +4,13 @@
 
 import {createStore, ObservableMap} from '@stencil/store';
 
-import {
-  ColumnDataSchemaRegular,
-  DataType
-} from '../../interfaces';
 import {setStore} from '../../utils/store.utils';
+import {RevoGrid} from "../../interfaces";
 
-export type DataSourceState<T extends (DataType|ColumnDataSchemaRegular)> = {
+export type DataSourceState<T extends (RevoGrid.DataType|RevoGrid.ColumnDataSchemaRegular)> = {
   items: T[];
 };
-export default class DataStore<T extends DataType|ColumnDataSchemaRegular> {
+export default class DataStore<T extends RevoGrid.DataType|RevoGrid.ColumnDataSchemaRegular> {
   private readonly dataStore: ObservableMap<DataSourceState<T>>;
   get store(): ObservableMap<DataSourceState<T>> {
     return this.dataStore;

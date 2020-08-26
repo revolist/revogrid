@@ -1,4 +1,4 @@
-import {DimensionCols, DimensionRows} from "../interfaces";
+import {RevoGrid} from "../interfaces";
 
-export const rowTypes: DimensionRows[] = ['row', 'rowPinStart', 'rowPinEnd'];
-export const columnTypes: DimensionCols[] = ['col', 'colPinStart', 'colPinEnd'];
+export const rowTypes: RevoGrid.DimensionRows[] = ['row', 'rowPinStart', 'rowPinEnd'];
+export const columnTypes: RevoGrid.DimensionCols[] = ['col', 'colPinStart', 'colPinEnd'];
