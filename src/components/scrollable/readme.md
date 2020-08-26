@@ -5,19 +5,25 @@
 <!-- Auto Generated Below -->
 
 
+## Properties
+
+| Property      | Attribute      | Description | Type             | Default |
+| ------------- | -------------- | ----------- | ---------------- | ------- |
+| `contentSize` | `content-size` |             | `number`         | `0`     |
+| `dimension`   | `dimension`    |             | `"col" \| "row"` | `'row'` |
+| `virtualSize` | `virtual-size` |             | `number`         | `0`     |
+
+
+## Events
+
+| Event           | Description | Type                                                             |
+| --------------- | ----------- | ---------------------------------------------------------------- |
+| `scrollVirtual` |             | `CustomEvent<{ dimension: DimensionType; coordinate: number; }>` |
+
+
 ## Methods
 
-### `scrollX(x?: number) => Promise<void>`
-
-
-
-#### Returns
-
-Type: `Promise<void>`
-
-
-
-### `scrollY(y?: number) => Promise<void>`
+### `setScroll(e: ViewPortScrollEvent) => Promise<void>`
 
 
 
@@ -32,13 +38,13 @@ Type: `Promise<void>`
 
 ### Used by
 
- - [revo-grid](../revo-grid)
+ - [revogr-viewport](../viewport)
 
 ### Graph
 ```mermaid
 graph TD;
-  revo-grid --> revogr-viewport-scroll-scrollable
-  style revogr-viewport-scroll-scrollable fill:#f9f,stroke:#333,stroke-width:4px
+  revogr-viewport --> revogr-scroll-virtual
+  style revogr-scroll-virtual fill:#f9f,stroke:#333,stroke-width:4px
 ```
 
 ----------------------------------------------

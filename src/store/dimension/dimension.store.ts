@@ -10,13 +10,10 @@ import {setStore} from '../../utils/store.utils';
 import {calculateDimensionData} from './dimension.helpers';
 import {
   DimensionSettingsState,
-  DimensionType,
-  MultiDimensionType,
   ViewSettingSizeProp
 } from '../../interfaces';
 
 type Item = keyof DimensionSettingsState;
-type DimensionStore = {[T in MultiDimensionType]: ObservableMap<DimensionSettingsState>};
 
 function initialState(): DimensionSettingsState {
   return {
@@ -41,66 +38,37 @@ function initialState(): DimensionSettingsState {
   };
 }
 
-const dimensionStore: DimensionStore = {
-  col: createStore(initialState()),
-  colPinStart: createStore(initialState()),
-  colPinEnd: createStore(initialState()),
-  row: createStore(initialState()),
-  rowPinStart: createStore(initialState()),
-  rowPinEnd: createStore(initialState())
-};
-
-function getCurrentState(type: MultiDimensionType): DimensionSettingsState {
-  const state = initialState();
-  const keys: Item[] = Object.keys(state) as Item[];
-  let store = getStoreByType(type);
-  return reduce(keys, (r: DimensionSettingsState, k: Item) => {
-    const data = store.get(k);
-    r[k] = data as never;
-    return r;
-  }, state);
-}
-
-function getStoreByType(type: MultiDimensionType): ObservableMap<DimensionSettingsState> {
-  return dimensionStore[type];
-}
-
-function setSettings(data: Partial<DimensionSettingsState>, dimensionType: DimensionType): void {
-  let stores: MultiDimensionType[] = [];
-  switch (dimensionType) {
-    case 'col':
-      stores = ['col', 'colPinEnd', 'colPinStart'];
-      break;
-    case 'row':
-      stores = ['row', 'rowPinEnd', 'rowPinStart'];
-      break;
+export default class DimensionStore {
+  readonly store: ObservableMap<DimensionSettingsState>;
+  constructor() {
+    this.store = createStore(initialState());
   }
-  for (let s of stores) {
-    const store = getStoreByType(s);
-    setStore(store, data);
+
+
+  getCurrentState(): DimensionSettingsState {
+    const state = initialState();
+    const keys: Item[] = Object.keys(state) as Item[];
+    return reduce(keys, (r: DimensionSettingsState, k: Item) => {
+      const data = this.store.get(k);
+      r[k] = data as never;
+      return r;
+    }, state);
+  }
+
+  setRealSize(count: number): void {
+    let realSize: number = 0;
+    for (let i: number = 0; i < count; i++) {
+      realSize += this.store.get('sizes')[i] || this.store.get('originItemSize');
+    }
+    setStore(this.store, { realSize });
+  }
+
+  setStore<T extends {[key: string]: any}>(data: Partial<T>){
+    setStore(this.store, data);
+  }
+
+  setDimensionSize(sizes: ViewSettingSizeProp): void {
+    const dimensionData = calculateDimensionData(this.getCurrentState(), sizes);
+    setStore(this.store, dimensionData);
   }
 }
-
-function setRealSize(count: number, dimensionType: MultiDimensionType): void {
-  const store = getStoreByType(dimensionType);
-  let realSize: number = 0;
-  for (let i: number = 0; i < count; i++) {
-    realSize += store.get('sizes')[i] || store.get('originItemSize');
-  }
-  setStore(store, { realSize });
-}
-
-function setDimensionSize(sizes: ViewSettingSizeProp, dimensionType: MultiDimensionType): void {
-  const store: ObservableMap<DimensionSettingsState> = getStoreByType(dimensionType);
-  const dimensionData = calculateDimensionData(getCurrentState(dimensionType), sizes);
-  setStore(store, dimensionData);
-}
-
-export default dimensionStore;
-
-export {
-  setDimensionSize,
-  setRealSize,
-  setSettings,
-  getCurrentState
-};

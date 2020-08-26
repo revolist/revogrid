@@ -5,9 +5,11 @@
  * It contains typing information for all components that exist in this project.
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
-import { ColumnData, ColumnDataSchemaRegular, DataType, DimensionRows, DimensionSettingsState, DimensionType, Edition, Selection, ViewPortResizeEvent, ViewPortScrollEvent, ViewSettingSizeProp, VirtualPositionItem } from "./interfaces";
+import { ColumnData, ColumnDataSchemaRegular, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, Edition, MultiDimensionType, Selection, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp, VirtualPositionItem } from "./interfaces";
 import { ObservableMap } from "@stencil/store";
+import { DataSourceState } from "./store/dataSource/data.store";
 import { ColumnServiceI } from "./components/data/columnService";
+import { DataProvider } from "./services/data.provider";
 export namespace Components {
     interface RevoGrid {
         "colSize": number;
@@ -24,20 +26,20 @@ export namespace Components {
     interface RevogrData {
         "colData": ColumnDataSchemaRegular[];
         "cols": VirtualPositionItem[];
+        "dataStore": ObservableMap<DataSourceState<DataType>>;
         "dimensionCol": ObservableMap<DimensionSettingsState>;
         "dimensionRow": ObservableMap<DimensionSettingsState>;
         "lastCell": Selection.Cell;
         "position": Selection.Cell;
         "range": boolean;
         "readonly": boolean;
-        "rowType": DimensionRows;
         "rows": VirtualPositionItem[];
+        "selectionStoreConnector": Selection.SelectionStoreConnectorI;
         "uuid": string;
     }
     interface RevogrEdit {
         "dimensionCol": ObservableMap<DimensionSettingsState>;
         "dimensionRow": ObservableMap<DimensionSettingsState>;
-        "doEdit": (val?: string | boolean) => Promise<void>;
         "editCell": Edition.EditCell|null;
     }
     interface RevogrHeader {
@@ -54,6 +56,7 @@ export namespace Components {
         "parent": string;
         "position": Selection.Cell;
         "readonly": boolean;
+        "selectionStoreConnector": Selection.SelectionStoreConnectorI;
     }
     interface RevogrScrollVirtual {
         "contentSize": number;
@@ -65,10 +68,15 @@ export namespace Components {
         "value": string;
     }
     interface RevogrViewport {
+        "columnStores": {[T in DimensionCols]: ObservableMap<DataSourceState<ColumnDataSchemaRegular>>};
+        "dataProvider": DataProvider;
+        "dimensions": {[T in MultiDimensionType]: ObservableMap<DimensionSettingsState>};
         "range": boolean;
         "readonly": boolean;
         "resize": boolean;
+        "rowStores": {[T in DimensionRows]: ObservableMap<DataSourceState<DataType>>};
         "uuid": string|null;
+        "viewports": {[T in MultiDimensionType]: ObservableMap<ViewportState>};
     }
     interface RevogrViewportScroll {
         "contentHeight": number;
@@ -159,21 +167,25 @@ declare namespace LocalJSX {
     interface RevogrData {
         "colData"?: ColumnDataSchemaRegular[];
         "cols"?: VirtualPositionItem[];
+        "dataStore"?: ObservableMap<DataSourceState<DataType>>;
         "dimensionCol"?: ObservableMap<DimensionSettingsState>;
         "dimensionRow"?: ObservableMap<DimensionSettingsState>;
         "lastCell"?: Selection.Cell;
+        "onAfterEdit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
+        "onBeforeEdit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
         "position"?: Selection.Cell;
         "range"?: boolean;
         "readonly"?: boolean;
-        "rowType"?: DimensionRows;
         "rows"?: VirtualPositionItem[];
+        "selectionStoreConnector"?: Selection.SelectionStoreConnectorI;
         "uuid"?: string;
     }
     interface RevogrEdit {
         "dimensionCol"?: ObservableMap<DimensionSettingsState>;
         "dimensionRow"?: ObservableMap<DimensionSettingsState>;
         "editCell"?: Edition.EditCell|null;
-        "onBeforeEdit"?: (event: CustomEvent<Edition.SaveDataDetails>) => void;
+        "onCellEdit"?: (event: CustomEvent<Edition.SaveDataDetails>) => void;
+        "onCloseEdit"?: (event: CustomEvent<any>) => void;
     }
     interface RevogrHeader {
         "canResize"?: boolean;
@@ -191,6 +203,7 @@ declare namespace LocalJSX {
         "parent"?: string;
         "position"?: Selection.Cell;
         "readonly"?: boolean;
+        "selectionStoreConnector"?: Selection.SelectionStoreConnectorI;
     }
     interface RevogrScrollVirtual {
         "contentSize"?: number;
@@ -203,10 +216,18 @@ declare namespace LocalJSX {
         "value"?: string;
     }
     interface RevogrViewport {
+        "columnStores"?: {[T in DimensionCols]: ObservableMap<DataSourceState<ColumnDataSchemaRegular>>};
+        "dataProvider"?: DataProvider;
+        "dimensions"?: {[T in MultiDimensionType]: ObservableMap<DimensionSettingsState>};
+        "onSetDimensionSize"?: (event: CustomEvent<{type: MultiDimensionType, sizes: ViewSettingSizeProp}>) => void;
+        "onSetViewportCoordinate"?: (event: CustomEvent<ViewPortScrollEvent>) => void;
+        "onSetViewportSize"?: (event: CustomEvent<ViewPortResizeEvent>) => void;
         "range"?: boolean;
         "readonly"?: boolean;
         "resize"?: boolean;
+        "rowStores"?: {[T in DimensionRows]: ObservableMap<DataSourceState<DataType>>};
         "uuid"?: string|null;
+        "viewports"?: {[T in MultiDimensionType]: ObservableMap<ViewportState>};
     }
     interface RevogrViewportScroll {
         "contentHeight"?: number;

@@ -1,29 +1,28 @@
-import {Component, Prop, h, Host, Watch, Listen, Element} from '@stencil/core';
+import {Component, Prop, h, Host, Watch, Listen, Element, Event, EventEmitter} from '@stencil/core';
 import '../../utils/closestPolifill';
 
 import {UUID} from '../../utils/consts';
-import dataStore from '../../store/dataSource/data.store';
-import dimensionProvider from '../../services/dimension.provider';
-import selectionStoreConnector from '../../store/selection/selection.store.connector';
-import viewportStore, {setViewport} from '../../store/viewPort/viewport.store';
-import dimensionStore from '../../store/dimension/dimension.store';
 import GridScrollingService, {ElementScroll} from './gridScrollingService';
 import CellSelectionService from '../overlay/selection/cellSelectionService';
 import {
-    ColumnDataSchemaRegular,
-    DimensionColPin,
-    DimensionRowPin,
+    ColumnDataSchemaRegular, DataType,
+    DimensionColPin, DimensionCols,
+    DimensionRowPin, DimensionRows, DimensionSettingsState,
     MultiDimensionType,
     Selection,
-    ViewPortResizeEvent,
+    ViewPortResizeEvent, ViewPortScrollEvent, ViewportState,
     ViewSettingSizeProp,
     VirtualPositionItem
 } from '../../interfaces';
 import ViewportSpace from './viewport.interfaces';
+import {DataProvider} from '../../services/data.provider';
+import {DataSourceState} from '../../store/dataSource/data.store';
+import {ObservableMap} from '@stencil/store';
 import ViewportProps = ViewportSpace.ViewportProps;
 import ViewportData = ViewportSpace.ViewportData;
 import SlotType = ViewportSpace.SlotType;
 import Properties = ViewportSpace.Properties;
+import SelectionStoreConnector from "../../services/selection.store.connector";
 
 
 /**
@@ -34,14 +33,26 @@ import Properties = ViewportSpace.Properties;
  * @Prop readonly - can edit grid
  * @Prop range - can change range
  * */
+
 @Component({
     tag: 'revogr-viewport'
 })
 export class RevogrViewport {
     private elementToScroll: ElementScroll[] = [];
     private scrollingService: GridScrollingService;
+    private selectionStoreConnector: SelectionStoreConnector;
+
+    @Event() setDimensionSize: EventEmitter<{type: MultiDimensionType, sizes: ViewSettingSizeProp}>;
+    @Event() setViewportCoordinate: EventEmitter<ViewPortScrollEvent>;
+    @Event() setViewportSize: EventEmitter<ViewPortResizeEvent>;
 
     @Element() element: Element;
+    @Prop() columnStores: {[T in DimensionCols]: ObservableMap<DataSourceState<ColumnDataSchemaRegular>>};
+    @Prop() rowStores: {[T in DimensionRows]: ObservableMap<DataSourceState<DataType>>};
+    @Prop() dimensions: {[T in MultiDimensionType]: ObservableMap<DimensionSettingsState>};
+    @Prop() viewports: {[T in MultiDimensionType]: ObservableMap<ViewportState>};
+
+    @Prop() dataProvider: DataProvider;
 
     @Prop() uuid: string|null = null;
     @Prop() resize: boolean;
@@ -56,12 +67,15 @@ export class RevogrViewport {
     handleOutsideClick(e: KeyboardEvent): void {
         const target: HTMLElement|null = e.target as HTMLElement;
         if (!target?.closest(`[${UUID}="${this.uuid}"]`)) {
-            selectionStoreConnector.clearAll();
+            this.selectionStoreConnector.clearAll();
         }
     }
 
     connectedCallback(): void {
-        this.scrollingService = new GridScrollingService();
+        this.selectionStoreConnector = new SelectionStoreConnector();
+        this.scrollingService = new GridScrollingService({
+            setViewport: (e: ViewPortScrollEvent) => this.setViewportCoordinate.emit(e)
+        });
         CellSelectionService.canRange = this.range;
     }
 
@@ -75,10 +89,10 @@ export class RevogrViewport {
 
     render() {
         this.elementToScroll.length = 0;
-        const rows: VirtualPositionItem[] = viewportStore.row.get('items');
-        const cols: VirtualPositionItem[] = viewportStore.col.get('items');
+        const rows: VirtualPositionItem[] = this.viewports['row'].get('items');
+        const cols: VirtualPositionItem[] = this.viewports['col'].get('items');
 
-        const contentHeight: number = dimensionStore.row.get('realSize');
+        const contentHeight: number = this.dimensions['row'].get('realSize');
 
         const viewports: ViewportProps[] = [
             // left side
@@ -121,6 +135,7 @@ export class RevogrViewport {
                 dataViews.push(
                     <revogr-data
                         {...data}
+                        selectionStoreConnector={this.selectionStoreConnector}
                         key={view.prop.key + (++j)}
                         readonly={this.readonly}
                         range={this.range}
@@ -145,16 +160,16 @@ export class RevogrViewport {
                         class='vertical'
                         contentSize={contentHeight}
                         ref={el => this.elementToScroll.push(el)}
-                        virtualSize={viewportStore.row.get('virtualSize')}
+                        virtualSize={this.viewports['row'].get('virtualSize')}
                         onScrollVirtual={e => this.scrollingService.onScroll(e.detail)}/>
                 </div>
             </div>
             <revogr-scroll-virtual
                 class='horizontal'
                 dimension='col'
-                contentSize={dimensionStore.col.get('realSize')}
+                contentSize={this.dimensions['col'].get('realSize')}
                 ref={el => this.elementToScroll.push(el)}
-                virtualSize={viewportStore.col.get('virtualSize')}
+                virtualSize={this.viewports['col'].get('virtualSize')}
                 onScrollVirtual={e => this.scrollingService.onScroll(e.detail)}/>
         </Host>;
     }
@@ -168,8 +183,8 @@ export class RevogrViewport {
         position: Selection.Cell,
         contentHeight: number
     ): ViewportProps {
-        const cols: VirtualPositionItem[] = viewportStore[colType].get('items');
-        const pinSize = dimensionStore[colType].get('realSize');
+        const cols: VirtualPositionItem[] = this.viewports[colType].get('items');
+        const pinSize = this.dimensions[colType].get('realSize');
         const parent: string = `[${UUID}="${uuid}"]`;
         const prop: Properties = {
             contentWidth: pinSize,
@@ -179,13 +194,15 @@ export class RevogrViewport {
             contentHeight,
             key,
         };
-        const colData = dataStore.get(colType);
+        const colData = this.columnStores[colType].get('items');
         const headerProp: Properties = {
             cols,
             parent,
             colData,
-            onHeaderResize: (e: CustomEvent<ViewSettingSizeProp>) =>
-                dimensionProvider.setDimensionSize(colType, e.detail)
+            onHeaderResize: (e: CustomEvent<ViewSettingSizeProp>) => this.setDimensionSize.emit({
+                type: colType,
+                sizes: e.detail
+            })
         };
 
         return {
@@ -204,31 +221,31 @@ export class RevogrViewport {
         rows: VirtualPositionItem[],
         cols: VirtualPositionItem[],
         position: Selection.Cell,
-        contentHeight: number
+        contentHeight: number,
+        colType: DimensionCols = 'col'
     ): ViewportProps {
         const parent = `[${UUID}="${uuid}"]`;
         const prop: Properties = {
-            contentWidth: dimensionStore['col'].get('realSize'),
+            contentWidth: this.dimensions[colType].get('realSize'),
             class: key,
             [`${UUID}`]: uuid,
-            onResizeViewport: (e: CustomEvent<ViewPortResizeEvent>) =>
-                setViewport({ virtualSize:  e.detail.size}, e.detail.dimension),
+            onResizeViewport: (e: CustomEvent<ViewPortResizeEvent>) => this.setViewportSize.emit(e.detail),
             contentHeight,
             key
         };
-        const colData = dataStore.get('columnsFlat');
+        const colData = this.columnStores[colType].get('items');
         const headerProp: Properties = {
             colData,
             cols,
             parent,
             onHeaderResize: (e: CustomEvent<ViewSettingSizeProp>) =>
-                dimensionProvider.setDimensionSize('col', e.detail)
+                this.setDimensionSize.emit({ type: colType, sizes: e.detail })
         };
         return {
             prop,
             headerProp,
             parent,
-            dataPorts: this.dataViewPort(rows, cols, colData, 'col', position, uuid)
+            dataPorts: this.dataViewPort(rows, cols, colData, colType, position, uuid)
         };
     }
 
@@ -241,7 +258,6 @@ export class RevogrViewport {
         position: Selection.Cell,
         uuid: string
     ): ViewportData[] {
-
         const dataPart: ViewportData = {
             colData,
             position,
@@ -249,22 +265,22 @@ export class RevogrViewport {
             rows,
             uuid,
             lastCell: this.getLastCell(colType, 'row'),
-            rowType: 'row',
+            dataStore: this.rowStores['row'],
 
             slot: 'content',
-            dimensionCol: dimensionStore[colType],
-            dimensionRow: dimensionStore['row']
+            dimensionCol: this.dimensions[colType],
+            dimensionRow: this.dimensions['row']
         };
         const pinned = (type: DimensionRowPin, slot: SlotType, y: number): ViewportData => {
             return {
                 ...dataPart,
-                slot: slot,
-                rowType: type,
-                rows: viewportStore[type].get('items'),
-                dimensionRow: dimensionStore[type],
+                slot,
+                dataStore: this.rowStores[type],
+                rows: this.viewports[type].get('items'),
+                dimensionRow: this.dimensions[type],
                 lastCell: this.getLastCell(colType, type),
                 position: { ...position, y },
-                style: { height: `${dimensionStore[type].get('realSize')}px` }
+                style: { height: `${this.dimensions[type].get('realSize')}px` }
             };
         };
         return [
@@ -278,8 +294,8 @@ export class RevogrViewport {
     /** Receive last visible in viewport by required type */
     private getLastCell(colType: MultiDimensionType, rowType: MultiDimensionType): Selection.Cell {
         return {
-            x: viewportStore[colType].get('realCount'),
-            y: viewportStore[rowType].get('realCount')
+            x: this.viewports[colType].get('realCount'),
+            y: this.viewports[rowType].get('realCount')
         };
     }
 }

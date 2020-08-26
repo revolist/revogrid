@@ -1,17 +1,29 @@
-import {DataType, DimensionRowPin, DimensionTypeRow} from '../interfaces';
-import {updateData} from '../store/dataSource/data.store';
-import dimensionProvider from "./dimension.provider";
+import {
+  DataType,
+  DimensionRowPin,
+  DimensionRows,
+  DimensionTypeRow
+} from '../interfaces';
+import DataStore from '../store/dataSource/data.store';
+import reduce from "lodash/reduce";
+import {rowTypes} from "../store/storeTypes";
+import DimensionProvider from "./dimension.provider";
 
-class DataProvider {
+type RowDataSources = {[T in DimensionRows]: DataStore<DataType>};
+export class DataProvider {
+  public readonly stores: RowDataSources;
+  constructor(private dimensionProvider: DimensionProvider) {
+    this.stores = reduce(rowTypes, (sources: Partial<RowDataSources>, k: DimensionRows) => {
+      sources[k] = new DataStore();
+      return sources;
+    }, {}) as RowDataSources;
+  }
   setData(data: DataType[], type: DimensionTypeRow|DimensionRowPin): void {
-    updateData({...data}, type);
+    this.stores[type].updateData([...data]);
     if (type === 'row') {
-      dimensionProvider.setRealSize(data, type);
+      this.dimensionProvider.setRealSize(data, type);
     } else {
-      dimensionProvider.setPins(data, type);
+      this.dimensionProvider.setPins(data, type);
     }
   }
 }
-
-const dataProvider: DataProvider = new DataProvider();
-export default dataProvider;

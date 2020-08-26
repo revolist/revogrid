@@ -1,11 +1,12 @@
-import {Edition, Selection} from '../../interfaces';
+import {Edition, Selection} from '../interfaces';
 import {createStore, ObservableMap} from '@stencil/store';
-import {setStore} from '../../utils/store.utils';
-import {cropCellToMax, getRange, nextCell} from './selection.helpers';
+import {setStore} from '../utils/store.utils';
+import {cropCellToMax, getRange, nextCell} from '../store/selection/selection.helpers';
 
 import RangeArea = Selection.RangeArea;
 import Cell = Selection.Cell;
 import EditCell = Edition.EditCell;
+import SelectionStoreConnectorI = Selection.SelectionStoreConnectorI;
 
 export type State = {
     range: RangeArea|null;
@@ -22,7 +23,7 @@ const state: State = {
     edit: null,
     lastCell: null
 };
-export class SelectionStoreConnector {
+export default class SelectionStoreConnector implements SelectionStoreConnectorI {
     private readonly stores: StoresMatrix = {};
     private focusedStore: ObservableMap<State>|null = null;
 
@@ -214,5 +215,3 @@ export class SelectionStoreConnector {
     }
 }
 
-const selectionStoreConnector: SelectionStoreConnector = new SelectionStoreConnector();
-export default selectionStoreConnector;

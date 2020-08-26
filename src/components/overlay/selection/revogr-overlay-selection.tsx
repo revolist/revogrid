@@ -5,7 +5,6 @@ import {ColumnServiceI} from '../../data/columnService';
 import {getItemByIndex} from '../../../store/dimension/dimension.helpers';
 import CellSelectionService from './cellSelectionService';
 import SelectionStore from '../../../store/selection/selection.store';
-import {Components} from '../../../components';
 import {codesLetter} from '../../../utils/keyCodes';
 import {isLetterKey} from '../../../utils/keyCodes.utils';
 import {
@@ -16,7 +15,6 @@ import {
     TMP_SELECTION_BG_CLASS
 } from '../../../utils/consts';
 import RangeAreaCss = Selection.RangeAreaCss;
-import RevogrEdit = Components.RevogrEdit;
 
 
 @Component({
@@ -25,8 +23,8 @@ import RevogrEdit = Components.RevogrEdit;
 export class OverlaySelection {
     private selectionService: CellSelectionService;
     private selectionStore: SelectionStore;
-    private editSection: RevogrEdit|undefined;
     private focusSection: HTMLInputElement;
+    @Prop() selectionStoreConnector: Selection.SelectionStoreConnectorI;
 
     @Prop() readonly: boolean;
     @Prop() parent: string = '';
@@ -43,7 +41,7 @@ export class OverlaySelection {
 
     @Listen('dblclick', { target: 'parent' })
     onDoubleClick(): void {
-        this.canEdit() && this.editSection?.doEdit();
+        this.canEdit() && this.selectionStoreConnector.setEdit('');
     }
 
     @Listen('keydown', { target: 'parent' })
@@ -52,14 +50,14 @@ export class OverlaySelection {
         if (this.selectionStore.edited) {
             switch (e.code) {
                 case codesLetter.ESCAPE:
-                    this.canEdit() && this.editSection?.doEdit(false);
+                    this.canEdit() && this.selectionStoreConnector.setEdit(false);
                     break;
             }
             return;
         }
         const isEnter: boolean = codesLetter.ENTER === e.code;
         if (isLetterKey(e.keyCode) || isEnter) {
-            this.canEdit() && this.editSection?.doEdit(!isEnter ? e.key : '');
+            this.canEdit() &&  this.selectionStoreConnector.setEdit(!isEnter ? e.key : '');
         }
     }
 
@@ -69,7 +67,7 @@ export class OverlaySelection {
     }
 
     connectedCallback(): void {
-        this.selectionStore = new SelectionStore(this.lastCell, this.position);
+        this.selectionStore = new SelectionStore(this.lastCell, this.position, this.selectionStoreConnector);
         this.selectionService = new CellSelectionService(
             `${this.parent} .${CELL_CLASS}`,
             {
@@ -124,7 +122,7 @@ export class OverlaySelection {
         if (!this.readonly) {
             const editCell = this.selectionStore.store.get('edit');
             els.push(<revogr-edit
-                ref={el => this.editSection = el}
+                onCloseEdit={() => this.selectionStoreConnector.setEdit(false)}
                 editCell={editCell && {...editCell, val: editCell.val || this.columnService.getCellData(editCell.y, editCell.x)}}
                 dimensionRow={this.dimensionRow}
                 dimensionCol={this.dimensionCol}

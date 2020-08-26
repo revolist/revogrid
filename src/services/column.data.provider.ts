@@ -1,47 +1,55 @@
 import reduce from 'lodash/reduce';
-import dataStore, {setDataColumn} from '../store/dataSource/data.store';
-import dimensionProvider from './dimension.provider';
+import each from 'lodash/each';
 
 import {
     ColumnData,
     ColumnDataSchema,
     ColumnDataSchemaGrouping,
     ColumnDataSchemaRegular,
-    DataSourceColumnPins,
-    DimensionColPin,
+    DimensionColPin, DimensionCols,
     ViewSettingSizeProp
 } from '../interfaces';
+import DataStore from "../store/dataSource/data.store";
+import {columnTypes} from "../store/storeTypes";
+import DimensionProvider from "./dimension.provider";
 
 type ColumnCollection = {
-    flat: ColumnDataSchemaRegular[];
     sizes: ViewSettingSizeProp;
-} & DataSourceColumnPins;
+} & {[T in DimensionCols]: ColumnDataSchemaRegular[];};
 
+type ColumnDataSources = {[T in DimensionCols]: DataStore<ColumnDataSchemaRegular>};
 
-class ColumnDataProvider {
+export default class ColumnDataProvider {
+    private readonly dataSources: ColumnDataSources;
+    get stores(): ColumnDataSources {
+        return this.dataSources;
+    }
+    constructor(private dimensionProvider: DimensionProvider) {
+        this.dataSources = reduce(columnTypes, (sources: Partial<ColumnDataSources>, k: DimensionCols) => {
+            sources[k] = new DataStore();
+            return sources;
+        }, {}) as ColumnDataSources;
+    }
+
     column(c: number, pin?: DimensionColPin): ColumnDataSchemaRegular|undefined {
-        if (pin) {
-            return this.getPin(c, pin);
-        }
-        return this.getColumn(c);
+        return this.getColumn(c, pin || 'col');
     }
 
-    getPin(c: number, pin: DimensionColPin): ColumnDataSchemaRegular|undefined {
-        return dataStore.get(pin)[c];
-    }
-
-    getColumn(c: number): ColumnDataSchemaRegular|undefined {
-        return dataStore.get('columnsFlat')[c];
+    getColumn(c: number, type: DimensionCols): ColumnDataSchemaRegular|undefined {
+        return this.dataSources[type].store.get('items')[c];
     }
 
     setColumns(columns: ColumnData): void {
-        const {flat, colPinStart, colPinEnd, sizes} = ColumnDataProvider.getColumns(columns);
-        setDataColumn(flat, {colPinStart, colPinEnd});
+        const data: ColumnCollection = ColumnDataProvider.getColumns(columns);
 
-        dimensionProvider.setDimensionSize('col', sizes);
-        dimensionProvider.setRealSize(flat, 'col');
-        dimensionProvider.setPins(colPinStart, 'colPinStart', ColumnDataProvider.getPinSizes(colPinStart));
-        dimensionProvider.setPins(colPinEnd, 'colPinEnd', ColumnDataProvider.getPinSizes(colPinEnd));
+        each(columnTypes, (k: DimensionCols) => {
+            this.dataSources[k].updateData(data[k])
+        });
+
+        this.dimensionProvider.setDimensionSize('col', data.sizes);
+        this.dimensionProvider.setRealSize(data.col, 'col');
+        this.dimensionProvider.setPins(data.colPinStart, 'colPinStart', ColumnDataProvider.getPinSizes(data.colPinStart));
+        this.dimensionProvider.setPins(data.colPinEnd, 'colPinEnd', ColumnDataProvider.getPinSizes(data.colPinEnd));
     }
 
     private static getPinSizes(cols: ColumnDataSchemaRegular[]): ViewSettingSizeProp {
@@ -69,9 +77,9 @@ class ColumnDataProvider {
                 }
             } else {
                 if (!colData.pin) {
-                    res.flat.push(colData);
+                    res.col.push(colData);
                     if (colData.size) {
-                        res.sizes[res.flat.length - 1] = colData.size;
+                        res.sizes[res.col.length - 1] = colData.size;
                     }
                 } else {
                     res[colData.pin].push(colData);
@@ -79,7 +87,7 @@ class ColumnDataProvider {
             }
             return res;
         }, {
-            flat: [],
+            col: [],
             colPinStart: [],
             colPinEnd: [],
             sizes: {}
@@ -87,5 +95,3 @@ class ColumnDataProvider {
     }
 }
 
-const columnProvider = new ColumnDataProvider();
-export default columnProvider;

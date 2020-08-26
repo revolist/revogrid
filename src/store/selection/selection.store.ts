@@ -1,17 +1,18 @@
 import {ObservableMap} from '@stencil/store';
 import {setStore} from '../../utils/store.utils';
 import {Edition, Selection} from '../../interfaces';
-import selectionStoreConnector, {State} from './selection.store.connector';
+import {State} from '../../services/selection.store.connector';
 import {getRange} from './selection.helpers';
 import Cell = Selection.Cell;
 import EditCell = Edition.EditCell;
+import SelectionStoreConnectorI = Selection.SelectionStoreConnectorI;
 
 
 
 export default class SelectionStore {
     public readonly store: ObservableMap<State>;
-    constructor(lastCell: Cell, storePosition: Cell) {
-        this.store = selectionStoreConnector.register(storePosition.y, storePosition.x);
+    constructor(lastCell: Cell, storePosition: Cell, private selectionStoreConnector: SelectionStoreConnectorI) {
+        this.store = selectionStoreConnector.register(storePosition.y, storePosition.x) as ObservableMap<State>;;
         this.setLastCell(lastCell);
     }
 
@@ -43,12 +44,12 @@ export default class SelectionStore {
     }
 
     change(area: Partial<Cell>, isMulti: boolean = false): void {
-        selectionStoreConnector.change(area, isMulti);
+        this.selectionStoreConnector.change(area, isMulti);
     }
 
     focus(cell?: Cell, isMulti: boolean = false): void {
         if (!cell) {
-            selectionStoreConnector.clearFocus(this.store);
+            this.selectionStoreConnector.clearFocus(this.store);
             return;
         }
         let end: Cell = cell;
@@ -61,10 +62,10 @@ export default class SelectionStore {
             }
         }
 
-        selectionStoreConnector.focus(this.store, cell, end);
+        this.selectionStoreConnector.focus(this.store, cell, end);
     }
 
     destroy(): void {
-        selectionStoreConnector.unregister(this.store);
+        this.selectionStoreConnector.unregister(this.store);
     }
 }

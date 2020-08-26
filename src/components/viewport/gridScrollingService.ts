@@ -1,21 +1,20 @@
-import {DimensionColPin, DimensionSettingsState, ViewPortScrollEvent} from '../../interfaces';
-import {getCurrentState} from '../../store/dimension/dimension.store';
-import {setViewPortCoordinate} from '../../store/viewPort/viewport.store';
+import {DimensionColPin, ViewPortScrollEvent} from '../../interfaces';
 
 export interface ElementScroll {
-    setScroll: (e: ViewPortScrollEvent) => Promise<void>;
+    setScroll(e: ViewPortScrollEvent): Promise<void>;
 }
-
+interface Config {
+    setViewport(e: ViewPortScrollEvent): void;
+}
 export default class GridScrollingService {
     private elements: ElementScroll[] = [];
-    constructor() {}
+    constructor(private cfg: Config) {}
 
     onScroll(e: ViewPortScrollEvent, key?: DimensionColPin|string): void {
         if (this.isPinnedColumn(key) && e.dimension === 'col') {
             return;
         }
-        const dimension: DimensionSettingsState = getCurrentState(e.dimension);
-        setViewPortCoordinate(e.coordinate, e.dimension, dimension);
+        this.cfg.setViewport(e);
         for (let el of this.elements) {
             el?.setScroll(e);
         }

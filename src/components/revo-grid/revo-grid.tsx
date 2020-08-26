@@ -1,21 +1,34 @@
-import {Component, Prop, h, Watch, Element} from '@stencil/core';
+import {Component, Prop, h, Watch, Element, State} from '@stencil/core';
+import {ObservableMap} from '@stencil/store';
+import reduce from 'lodash/reduce';
 
-import {setSettings} from '../../store/dimension/dimension.store';
 import {
-  ColumnData,
-  DataType
+  ColumnData, ColumnDataSchemaRegular,
+  DataType, DimensionCols, DimensionRows, DimensionSettingsState, MultiDimensionType, ViewportState
 } from '../../interfaces';
-import dataProvider from '../../services/data.provider';
 import initialSettings from '../../utils/initialSettings';
-import columnProvider from '../../services/column.data.provider';
+import ColumnDataProvider from '../../services/column.data.provider';
+import {DataProvider} from '../../services/data.provider';
+import {DataSourceState} from '../../store/dataSource/data.store';
+import DimensionProvider from '../../services/dimension.provider';
+import ViewportProvider from "../../services/viewport.provider";
 
+
+type ColumnStores = {[T in DimensionCols]: ObservableMap<DataSourceState<ColumnDataSchemaRegular>>};
+type RowStores = {[T in DimensionRows]: ObservableMap<DataSourceState<DataType>>};
+type DimensionStores = {[T in MultiDimensionType]: ObservableMap<DimensionSettingsState>};
+type ViewportStores = {[T in MultiDimensionType]: ObservableMap<ViewportState>};
 
 @Component({
   tag: 'revo-grid',
   styleUrl: 'revo-grid.scss'
 })
 export class RevoGrid {
-  private uuid: string|null = null;
+  @State() uuid: string|null = null;
+  @State() columnProvider: ColumnDataProvider;
+  @State() dataProvider: DataProvider;
+  @State() dimensionProvider: DimensionProvider;
+  @State() viewportProvider: ViewportProvider;
 
   @Element() element: HTMLElement;
 
@@ -30,34 +43,66 @@ export class RevoGrid {
   @Prop() source: DataType[] = [];
   @Watch('source')
   dataChanged(newVal: DataType[]): void {
-    dataProvider.setData(newVal, 'row');
+    this.dataProvider.setData(newVal, 'row');
   }
 
   @Prop() pinnedTopSource: DataType[] = [];
   @Watch('pinnedTopSource')
   dataTopChanged(newVal: DataType[]) {
-    dataProvider.setData(newVal, 'rowPinStart');
+    this.dataProvider.setData(newVal, 'rowPinStart');
   }
 
   @Prop() pinnedBottomSource: DataType[] = [];
   @Watch('pinnedBottomSource')
   dataBottomChanged(newVal: DataType[]) {
-    dataProvider.setData(newVal, 'rowPinEnd');
+    this.dataProvider.setData(newVal, 'rowPinEnd');
   }
 
   @Prop() columns: ColumnData = [];
   @Watch('columns')
   columnChanged(newVal: ColumnData) {
-    columnProvider.setColumns(newVal);
+    this.columnProvider.setColumns(newVal);
+  }
+
+  get columnStores(): ColumnStores {
+    return reduce(this.columnProvider.stores, (res: Partial<ColumnStores>, dataSource, k: DimensionCols) => {
+      res[k] = dataSource.store;
+      return res;
+    }, {}) as ColumnStores;
+  }
+
+  get rowStores(): RowStores {
+    return reduce(this.dataProvider.stores, (res: Partial<RowStores>, dataSource, k: DimensionRows) => {
+      res[k] = dataSource.store;
+      return res;
+    }, {}) as RowStores;
+  }
+
+  get dimensionStores(): DimensionStores {
+    return reduce(this.dimensionProvider.stores, (res: Partial<DimensionStores>, dataSource, k: MultiDimensionType) => {
+      res[k] = dataSource.store;
+      return res;
+    }, {}) as DimensionStores;
+  }
+
+  get viewportStores(): ViewportStores {
+    return reduce(this.viewportProvider.stores, (res: Partial<ViewportStores>, dataSource, k: MultiDimensionType) => {
+      res[k] = dataSource.store;
+      return res;
+    }, {}) as ViewportStores;
   }
 
   connectedCallback(): void {
+    this.viewportProvider = new ViewportProvider();
+    this.dimensionProvider = new DimensionProvider(this.viewportProvider);
+    this.columnProvider = new ColumnDataProvider(this.dimensionProvider);
+    this.dataProvider = new DataProvider(this.dimensionProvider);
     this.uuid = (new Date()).getTime().toString();
-    setSettings({
+    this.dimensionProvider.setSettings({
       originItemSize: this.rowSize,
       frameOffset: this.frameSize || initialSettings.frameSize
     }, 'row');
-    setSettings({
+    this.dimensionProvider.setSettings({
       originItemSize: this.colSize,
       frameOffset: this.frameSize || initialSettings.frameSize
     }, 'col');
@@ -70,6 +115,18 @@ export class RevoGrid {
   }
 
   render() {
-    return <revogr-viewport uuid={this.uuid} resize={this.resize} readonly={this.readonly} range={this.range}/>;
+    return <revogr-viewport
+        onSetDimensionSize={e => this.dimensionProvider.setDimensionSize(e.detail.type, e.detail.sizes)}
+        onSetViewportCoordinate={e => this.dimensionProvider.setViewPortCoordinate(e.detail)}
+        onSetViewportSize={e => this.viewportProvider.setViewport(e.detail.dimension, { virtualSize:  e.detail.size})}
+        columnStores={this.columnStores}
+        dimensions={this.dimensionStores}
+        viewports={this.viewportStores}
+        rowStores={this.rowStores}
+        dataProvider={this.dataProvider}
+        uuid={this.uuid}
+        resize={this.resize}
+        readonly={this.readonly}
+        range={this.range}/>;
   }
 }
