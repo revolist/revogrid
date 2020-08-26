@@ -5,7 +5,7 @@
  * It contains typing information for all components that exist in this project.
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
-import { ColumnData, ColumnDataSchemaRegular, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, Edition, MultiDimensionType, Selection, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp, VirtualPositionItem } from "./interfaces";
+import { Edition, RevoGrid, Selection } from "./interfaces";
 import { ObservableMap } from "@stencil/store";
 import { DataSourceState } from "./store/dataSource/data.store";
 import { ColumnServiceI } from "./components/data/columnService";
@@ -13,45 +13,45 @@ import { DataProvider } from "./services/data.provider";
 export namespace Components {
     interface RevoGrid {
         "colSize": number;
-        "columns": ColumnData;
+        "columns": RevoGrid.ColumnData;
         "frameSize": number;
-        "pinnedBottomSource": DataType[];
-        "pinnedTopSource": DataType[];
+        "pinnedBottomSource": RevoGrid.DataType[];
+        "pinnedTopSource": RevoGrid.DataType[];
         "range": boolean;
         "readonly": boolean;
         "resize": boolean;
         "rowSize": number;
-        "source": DataType[];
+        "source": RevoGrid.DataType[];
     }
     interface RevogrData {
-        "colData": ColumnDataSchemaRegular[];
-        "cols": VirtualPositionItem[];
-        "dataStore": ObservableMap<DataSourceState<DataType>>;
-        "dimensionCol": ObservableMap<DimensionSettingsState>;
-        "dimensionRow": ObservableMap<DimensionSettingsState>;
+        "colData": RevoGrid.ColumnDataSchemaRegular[];
+        "cols": RevoGrid.VirtualPositionItem[];
+        "dataStore": ObservableMap<DataSourceState<RevoGrid.DataType>>;
+        "dimensionCol": ObservableMap<RevoGrid.DimensionSettingsState>;
+        "dimensionRow": ObservableMap<RevoGrid.DimensionSettingsState>;
         "lastCell": Selection.Cell;
         "position": Selection.Cell;
         "range": boolean;
         "readonly": boolean;
-        "rows": VirtualPositionItem[];
+        "rows": RevoGrid.VirtualPositionItem[];
         "selectionStoreConnector": Selection.SelectionStoreConnectorI;
         "uuid": string;
     }
     interface RevogrEdit {
-        "dimensionCol": ObservableMap<DimensionSettingsState>;
-        "dimensionRow": ObservableMap<DimensionSettingsState>;
+        "dimensionCol": ObservableMap<RevoGrid.DimensionSettingsState>;
+        "dimensionRow": ObservableMap<RevoGrid.DimensionSettingsState>;
         "editCell": Edition.EditCell|null;
     }
     interface RevogrHeader {
         "canResize": boolean;
-        "colData": ColumnDataSchemaRegular[];
-        "cols": VirtualPositionItem[];
+        "colData": RevoGrid.ColumnDataSchemaRegular[];
+        "cols": RevoGrid.VirtualPositionItem[];
         "parent": string;
     }
     interface RevogrOverlaySelection {
         "columnService": ColumnServiceI;
-        "dimensionCol": ObservableMap<DimensionSettingsState>;
-        "dimensionRow": ObservableMap<DimensionSettingsState>;
+        "dimensionCol": ObservableMap<RevoGrid.DimensionSettingsState>;
+        "dimensionRow": ObservableMap<RevoGrid.DimensionSettingsState>;
         "lastCell": Selection.Cell;
         "parent": string;
         "position": Selection.Cell;
@@ -60,28 +60,28 @@ export namespace Components {
     }
     interface RevogrScrollVirtual {
         "contentSize": number;
-        "dimension": DimensionType;
-        "setScroll": (e: ViewPortScrollEvent) => Promise<void>;
+        "dimension": RevoGrid.DimensionType;
+        "setScroll": (e: RevoGrid.ViewPortScrollEvent) => Promise<void>;
         "virtualSize": number;
     }
     interface RevogrTextEditor {
         "value": string;
     }
     interface RevogrViewport {
-        "columnStores": {[T in DimensionCols]: ObservableMap<DataSourceState<ColumnDataSchemaRegular>>};
+        "columnStores": {[T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnDataSchemaRegular>>};
         "dataProvider": DataProvider;
-        "dimensions": {[T in MultiDimensionType]: ObservableMap<DimensionSettingsState>};
+        "dimensions": {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.DimensionSettingsState>};
         "range": boolean;
         "readonly": boolean;
         "resize": boolean;
-        "rowStores": {[T in DimensionRows]: ObservableMap<DataSourceState<DataType>>};
+        "rowStores": {[T in RevoGrid.DimensionRows]: ObservableMap<DataSourceState<RevoGrid.DataType>>};
         "uuid": string|null;
-        "viewports": {[T in MultiDimensionType]: ObservableMap<ViewportState>};
+        "viewports": {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.ViewportState>};
     }
     interface RevogrViewportScroll {
         "contentHeight": number;
         "contentWidth": number;
-        "setScroll": (e: ViewPortScrollEvent) => Promise<void>;
+        "setScroll": (e: RevoGrid.ViewPortScrollEvent) => Promise<void>;
     }
 }
 declare global {
@@ -154,51 +154,51 @@ declare global {
 declare namespace LocalJSX {
     interface RevoGrid {
         "colSize"?: number;
-        "columns"?: ColumnData;
+        "columns"?: RevoGrid.ColumnData;
         "frameSize"?: number;
-        "pinnedBottomSource"?: DataType[];
-        "pinnedTopSource"?: DataType[];
+        "pinnedBottomSource"?: RevoGrid.DataType[];
+        "pinnedTopSource"?: RevoGrid.DataType[];
         "range"?: boolean;
         "readonly"?: boolean;
         "resize"?: boolean;
         "rowSize"?: number;
-        "source"?: DataType[];
+        "source"?: RevoGrid.DataType[];
     }
     interface RevogrData {
-        "colData"?: ColumnDataSchemaRegular[];
-        "cols"?: VirtualPositionItem[];
-        "dataStore"?: ObservableMap<DataSourceState<DataType>>;
-        "dimensionCol"?: ObservableMap<DimensionSettingsState>;
-        "dimensionRow"?: ObservableMap<DimensionSettingsState>;
+        "colData"?: RevoGrid.ColumnDataSchemaRegular[];
+        "cols"?: RevoGrid.VirtualPositionItem[];
+        "dataStore"?: ObservableMap<DataSourceState<RevoGrid.DataType>>;
+        "dimensionCol"?: ObservableMap<RevoGrid.DimensionSettingsState>;
+        "dimensionRow"?: ObservableMap<RevoGrid.DimensionSettingsState>;
         "lastCell"?: Selection.Cell;
         "onAfterEdit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
         "onBeforeEdit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
         "position"?: Selection.Cell;
         "range"?: boolean;
         "readonly"?: boolean;
-        "rows"?: VirtualPositionItem[];
+        "rows"?: RevoGrid.VirtualPositionItem[];
         "selectionStoreConnector"?: Selection.SelectionStoreConnectorI;
         "uuid"?: string;
     }
     interface RevogrEdit {
-        "dimensionCol"?: ObservableMap<DimensionSettingsState>;
-        "dimensionRow"?: ObservableMap<DimensionSettingsState>;
+        "dimensionCol"?: ObservableMap<RevoGrid.DimensionSettingsState>;
+        "dimensionRow"?: ObservableMap<RevoGrid.DimensionSettingsState>;
         "editCell"?: Edition.EditCell|null;
         "onCellEdit"?: (event: CustomEvent<Edition.SaveDataDetails>) => void;
         "onCloseEdit"?: (event: CustomEvent<any>) => void;
     }
     interface RevogrHeader {
         "canResize"?: boolean;
-        "colData"?: ColumnDataSchemaRegular[];
-        "cols"?: VirtualPositionItem[];
-        "onHeaderClick"?: (event: CustomEvent<ColumnDataSchemaRegular>) => void;
-        "onHeaderResize"?: (event: CustomEvent<ViewSettingSizeProp>) => void;
+        "colData"?: RevoGrid.ColumnDataSchemaRegular[];
+        "cols"?: RevoGrid.VirtualPositionItem[];
+        "onHeaderClick"?: (event: CustomEvent<RevoGrid.ColumnDataSchemaRegular>) => void;
+        "onHeaderResize"?: (event: CustomEvent<RevoGrid.ViewSettingSizeProp>) => void;
         "parent"?: string;
     }
     interface RevogrOverlaySelection {
         "columnService"?: ColumnServiceI;
-        "dimensionCol"?: ObservableMap<DimensionSettingsState>;
-        "dimensionRow"?: ObservableMap<DimensionSettingsState>;
+        "dimensionCol"?: ObservableMap<RevoGrid.DimensionSettingsState>;
+        "dimensionRow"?: ObservableMap<RevoGrid.DimensionSettingsState>;
         "lastCell"?: Selection.Cell;
         "parent"?: string;
         "position"?: Selection.Cell;
@@ -207,8 +207,8 @@ declare namespace LocalJSX {
     }
     interface RevogrScrollVirtual {
         "contentSize"?: number;
-        "dimension"?: DimensionType;
-        "onScrollVirtual"?: (event: CustomEvent<ViewPortScrollEvent>) => void;
+        "dimension"?: RevoGrid.DimensionType;
+        "onScrollVirtual"?: (event: CustomEvent<RevoGrid.ViewPortScrollEvent>) => void;
         "virtualSize"?: number;
     }
     interface RevogrTextEditor {
@@ -216,24 +216,24 @@ declare namespace LocalJSX {
         "value"?: string;
     }
     interface RevogrViewport {
-        "columnStores"?: {[T in DimensionCols]: ObservableMap<DataSourceState<ColumnDataSchemaRegular>>};
+        "columnStores"?: {[T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnDataSchemaRegular>>};
         "dataProvider"?: DataProvider;
-        "dimensions"?: {[T in MultiDimensionType]: ObservableMap<DimensionSettingsState>};
-        "onSetDimensionSize"?: (event: CustomEvent<{type: MultiDimensionType, sizes: ViewSettingSizeProp}>) => void;
-        "onSetViewportCoordinate"?: (event: CustomEvent<ViewPortScrollEvent>) => void;
-        "onSetViewportSize"?: (event: CustomEvent<ViewPortResizeEvent>) => void;
+        "dimensions"?: {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.DimensionSettingsState>};
+        "onSetDimensionSize"?: (event: CustomEvent<{type: RevoGrid.MultiDimensionType, sizes: RevoGrid.ViewSettingSizeProp}>) => void;
+        "onSetViewportCoordinate"?: (event: CustomEvent<RevoGrid.ViewPortScrollEvent>) => void;
+        "onSetViewportSize"?: (event: CustomEvent<RevoGrid.ViewPortResizeEvent>) => void;
         "range"?: boolean;
         "readonly"?: boolean;
         "resize"?: boolean;
-        "rowStores"?: {[T in DimensionRows]: ObservableMap<DataSourceState<DataType>>};
+        "rowStores"?: {[T in RevoGrid.DimensionRows]: ObservableMap<DataSourceState<RevoGrid.DataType>>};
         "uuid"?: string|null;
-        "viewports"?: {[T in MultiDimensionType]: ObservableMap<ViewportState>};
+        "viewports"?: {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.ViewportState>};
     }
     interface RevogrViewportScroll {
         "contentHeight"?: number;
         "contentWidth"?: number;
-        "onResizeViewport"?: (event: CustomEvent<ViewPortResizeEvent>) => void;
-        "onScrollViewport"?: (event: CustomEvent<ViewPortScrollEvent>) => void;
+        "onResizeViewport"?: (event: CustomEvent<RevoGrid.ViewPortResizeEvent>) => void;
+        "onScrollViewport"?: (event: CustomEvent<RevoGrid.ViewPortScrollEvent>) => void;
     }
     interface IntrinsicElements {
         "revo-grid": RevoGrid;

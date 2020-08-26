@@ -1,103 +1,106 @@
 /* Note: using `.d.ts` file extension will exclude it from the output build */
 
-export type DimensionTypeRow = 'row';
-export type DimensionTypeCol = 'col';
-export type DimensionType = DimensionTypeCol|DimensionTypeRow;
-export type DimensionColPin = 'colPinStart'|'colPinEnd';
-export type DimensionCols = DimensionColPin|DimensionTypeCol;
-export type DimensionRowPin = 'rowPinStart'|'rowPinEnd';
-export type DimensionRows = DimensionTypeRow|DimensionRowPin;
-export type MultiDimensionType = DimensionType|DimensionColPin|DimensionRowPin;
+export declare namespace RevoGrid {
 
-export type ViewPortScrollEvent = {
-  dimension: DimensionType;
-  coordinate: number;
-};
+  type DimensionTypeRow = 'row';
+  type DimensionTypeCol = 'col';
+  type DimensionType = DimensionTypeCol|DimensionTypeRow;
+  type DimensionColPin = 'colPinStart'|'colPinEnd';
+  type DimensionCols = DimensionColPin|DimensionTypeCol;
+  type DimensionRowPin = 'rowPinStart'|'rowPinEnd';
+  type DimensionRows = DimensionTypeRow|DimensionRowPin;
+  type MultiDimensionType = DimensionType|DimensionColPin|DimensionRowPin;
 
-export type ViewPortResizeEvent = {
-  dimension: DimensionType;
-  size: number;
-};
+  type ViewPortScrollEvent = {
+    dimension: DimensionType;
+    coordinate: number;
+  };
 
-export type ColumnDataSchemaModel = {
-  prop: ColumnProp;
-  model: DataType;
-  data: DataSource;
-};
+  type ViewPortResizeEvent = {
+    dimension: DimensionType;
+    size: number;
+  };
 
-export type ReadOnlyFormat = boolean | ((row: number, col: number) => boolean);
-interface ColumnDataSchemaBase {
-  name?: DataFormat;
-  readonly?: ReadOnlyFormat;
-  size?: number;
-  minSize?: number;
-  cellTemplate?: Function;
+  type ColumnDataSchemaModel = {
+    prop: ColumnProp;
+    model: DataType;
+    data: DataSource;
+  };
+
+  type ReadOnlyFormat = boolean | ((row: number, col: number) => boolean);
+  interface ColumnDataSchemaBase {
+    name?: DataFormat;
+    readonly?: ReadOnlyFormat;
+    size?: number;
+    minSize?: number;
+    cellTemplate?: Function;
+  }
+  interface ColumnDataSchemaGrouping {
+    children: ColumnDataSchema[];
+    name: DataFormat;
+  }
+
+
+  interface ColumnDataSchemaRegular extends ColumnDataSchemaBase {
+    prop: ColumnProp;
+    pin?: DimensionColPin;
+  }
+
+  type ColumnDataSchema = ColumnDataSchemaGrouping | ColumnDataSchemaRegular;
+
+  type ColumnProp = string|number;
+  type DataFormat = string;
+  interface HyperFunc<T> { (sel: string, data?: object, text?: string): T; }
+  type CellTemplateFunc<T> = (h: HyperFunc<T>, props: ColumnDataSchemaModel) => T;
+  type ColumnData = ColumnDataSchema[];
+
+  type DataType = {[T in ColumnProp]: DataFormat};
+  type DataSource = DataType[];
+
+  type Range = {
+    start: number;
+    end: number;
+  };
+
+  type ViewportStateItems = {
+    items: VirtualPositionItem[];
+  } & Range;
+  interface ViewportState extends ViewportStateItems {
+    realCount: number;
+    virtualSize: number;
+  }
+
+  type ViewSettingSizeProp = {[index: string]: number};
+  interface VirtualPositionItem extends PositionItem {
+    size: number;
+  }
+
+  interface PositionItem {
+    itemIndex: number;
+    start: number;
+    end: number;
+  }
+
+  interface DimensionSettingsState {
+    indexes: number[];
+    positionIndexes: number[];
+    positionIndexToItem: {[position: number]: PositionItem};
+    indexToItem: {[index: number]: PositionItem};
+    sizes: ViewSettingSizeProp;
+    frameOffset: number;
+    realSize: number;
+    originItemSize: number;
+  }
+
+  type InitialSettings = {
+    defaultColumnSize: number;
+    defaultRowSize: number;
+    frameSize: number;
+    readonly: boolean;
+    range: boolean;
+    resize: boolean;
+  };
 }
-export interface ColumnDataSchemaGrouping {
-  children: ColumnDataSchema[];
-  name: DataFormat;
-}
-
-
-export interface ColumnDataSchemaRegular extends ColumnDataSchemaBase {
-  prop: ColumnProp;
-  pin?: DimensionColPin;
-}
-
-export type ColumnDataSchema = ColumnDataSchemaGrouping | ColumnDataSchemaRegular;
-
-export type ColumnProp = string|number;
-export type DataFormat = string;
-export interface HyperFunc<T> { (sel: string, data?: object, text?: string): T; }
-export type CellTemplateFunc<T> = (h: HyperFunc<T>, props: ColumnDataSchemaModel) => T;
-export type ColumnData = ColumnDataSchema[];
-
-export type DataType = {[T in ColumnProp]: DataFormat};
-export type DataSource = DataType[];
-
-export type Range = {
-  start: number;
-  end: number;
-};
-
-export type ViewportStateItems = {
-  items: VirtualPositionItem[];
-} & Range;
-export interface ViewportState extends ViewportStateItems {
-  realCount: number;
-  virtualSize: number;
-}
-
-export type ViewSettingSizeProp = {[index: string]: number};
-export interface VirtualPositionItem extends PositionItem {
-  size: number;
-}
-
-export interface PositionItem {
-  itemIndex: number;
-  start: number;
-  end: number;
-}
-
-export interface DimensionSettingsState {
-  indexes: number[];
-  positionIndexes: number[];
-  positionIndexToItem: {[position: number]: PositionItem};
-  indexToItem: {[index: number]: PositionItem};
-  sizes: ViewSettingSizeProp;
-  frameOffset: number;
-  realSize: number;
-  originItemSize: number;
-}
-
-export type InitialSettings = {
-  defaultColumnSize: number;
-  defaultRowSize: number;
-  frameSize: number;
-  readonly: boolean;
-  range: boolean;
-  resize: boolean;
-};
 
 
 export declare namespace Selection  {
@@ -122,7 +125,7 @@ export declare namespace Selection  {
     width: string;
     height: string;
   };
-  
+
   interface SelectionStoreConnectorI {
     setEdit(val: string|boolean): void;
     register(y: number, x: number): Object;
@@ -141,8 +144,8 @@ export declare namespace Edition {
     val: SaveData;
   };
   type BeforeSaveDataDetails = {
-    model: DataType;
-    prop: ColumnProp;
+    model: RevoGrid.DataType;
+    prop: RevoGrid.ColumnProp;
     val: SaveData;
   };
   interface EditCell extends Selection.Cell {

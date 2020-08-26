@@ -3,7 +3,7 @@ import {HTMLStencilElement} from '@stencil/core/internal';
 
 import {DATA_COL, HEADER_CLASS} from '../../utils/consts';
 import HeaderService from './headerService';
-import {ColumnDataSchemaRegular, ViewSettingSizeProp, VirtualPositionItem} from '../../interfaces';
+import {RevoGrid} from "../../interfaces";
 
 @Component({
   tag: 'revogr-header'
@@ -11,15 +11,15 @@ import {ColumnDataSchemaRegular, ViewSettingSizeProp, VirtualPositionItem} from 
 export class RevogrHeaderComponent {
   @Element() element!: HTMLStencilElement;
   @Prop() canResize: boolean;
-  @Prop() cols: VirtualPositionItem[];
+  @Prop() cols: RevoGrid.VirtualPositionItem[];
   @Prop() parent: string = '';
 
-  @Event() headerClick: EventEmitter<ColumnDataSchemaRegular>;
-  @Event() headerResize: EventEmitter<ViewSettingSizeProp>;
+  @Event() headerClick: EventEmitter<RevoGrid.ColumnDataSchemaRegular>;
+  @Event() headerResize: EventEmitter<RevoGrid.ViewSettingSizeProp>;
 
 
-  @Prop() colData: ColumnDataSchemaRegular[];
-  @Watch('colData') colChanged(newData: ColumnDataSchemaRegular[]): void {
+  @Prop() colData: RevoGrid.ColumnDataSchemaRegular[];
+  @Watch('colData') colChanged(newData: RevoGrid.ColumnDataSchemaRegular[]): void {
     this.headerService.columns = newData;
   }
   private headerService: HeaderService;
@@ -30,7 +30,7 @@ export class RevogrHeaderComponent {
         this.colData,
         {
           canResize: this.canResize,
-          resize: (sizes: ViewSettingSizeProp) => this.headerResize.emit(sizes)
+          resize: (sizes: RevoGrid.ViewSettingSizeProp) => this.headerResize.emit(sizes)
         }
     );
   }

@@ -1,16 +1,11 @@
 import {getItemByPosition} from '../dimension/dimension.helpers';
-import {
-  DimensionSettingsState,
-  PositionItem, Range,
-  ViewportStateItems,
-  ViewSettingSizeProp,
-  VirtualPositionItem
-} from '../../interfaces';
+import {RevoGrid} from "../../interfaces";
+
 
 export type DimensionDataViewport =
-    Pick<DimensionSettingsState, 'indexes'|'positionIndexes'|'positionIndexToItem'|'sizes'|'originItemSize'|'realSize'|'frameOffset'>;
+    Pick<RevoGrid.DimensionSettingsState, 'indexes'|'positionIndexes'|'positionIndexToItem'|'sizes'|'originItemSize'|'realSize'|'frameOffset'>;
 
-type ItemsToUpdate = Pick<ViewportStateItems, 'items'|'start'|'end'>;
+type ItemsToUpdate = Pick<RevoGrid.ViewportStateItems, 'items'|'start'|'end'>;
 /**
 * Update items based on new scroll position
 * If viewport wasn't changed fully simple recombination of positions
@@ -23,8 +18,8 @@ export function getUpdatedItemsByPosition<T extends ItemsToUpdate>(
   virtualSize: number,
   dimension: DimensionDataViewport
 ): ItemsToUpdate {
-  const activeItem: PositionItem = getItemByPosition(dimension, pos);
-  const firstItem: VirtualPositionItem = getFirstItem(items);
+  const activeItem: RevoGrid.PositionItem = getItemByPosition(dimension, pos);
+  const firstItem: RevoGrid.VirtualPositionItem = getFirstItem(items);
   let toUpdate: ItemsToUpdate;
 
   // do simple position replacement if items already present in viewport
@@ -71,7 +66,7 @@ export function getUpdatedItemsByPosition<T extends ItemsToUpdate>(
   return toUpdate;
 }
 
-export function updateMissing(items: VirtualPositionItem[], missing: VirtualPositionItem[], range: Range) {
+export function updateMissing(items: RevoGrid.VirtualPositionItem[], missing: RevoGrid.VirtualPositionItem[], range: RevoGrid.Range) {
   items.splice(range.end + 1, 0, ...missing);
   if (range.start >= range.end) {
     range.start += missing.length;
@@ -81,13 +76,13 @@ export function updateMissing(items: VirtualPositionItem[], missing: VirtualPosi
 
 // if partial replacement add items if revo-viewport has some space left
 export function addMissingItems<T extends ItemsToUpdate> (
-  firstItem: PositionItem,
+  firstItem: RevoGrid.PositionItem,
   realCount: number,
   virtualSize: number,
   existingCollection: T,
-  dimension: Pick<DimensionSettingsState, 'sizes'|'originItemSize'>
-): VirtualPositionItem[] {
-  const lastItem: VirtualPositionItem = getLastItem(existingCollection);
+  dimension: Pick<RevoGrid.DimensionSettingsState, 'sizes'|'originItemSize'>
+): RevoGrid.VirtualPositionItem[] {
+  const lastItem: RevoGrid.VirtualPositionItem = getLastItem(existingCollection);
   const items = getItems({
     sizes: dimension.sizes,
     start: lastItem.end,
@@ -106,9 +101,9 @@ export function getItems(opt: {
   origSize: number,
   maxSize: number,
   maxCount: number,
-  sizes?: ViewSettingSizeProp,
-}, currentSize: number = 0): VirtualPositionItem[] {
-  const items: VirtualPositionItem[] = [];
+  sizes?: RevoGrid.ViewSettingSizeProp,
+}, currentSize: number = 0): RevoGrid.VirtualPositionItem[] {
+  const items: RevoGrid.VirtualPositionItem[] = [];
   let index: number = opt.startIndex;
   let size: number = currentSize;
   let i: number = 0;
@@ -137,7 +132,7 @@ export function recombineByOffset(
     data: {
       positiveDirection: boolean,
     } &ItemsToUpdate
-      &Pick<DimensionSettingsState, 'sizes'|'realSize'|'originItemSize'>
+      &Pick<RevoGrid.DimensionSettingsState, 'sizes'|'realSize'|'originItemSize'>
 ): ItemsToUpdate|null {
   const newItems = [...data.items];
   const itemsCount = newItems.length;
@@ -154,7 +149,7 @@ export function recombineByOffset(
   // is direction of scroll positive
   if (data.positiveDirection) {
     // push item to the end
-    let lastItem: VirtualPositionItem = getLastItem(data);
+    let lastItem: RevoGrid.VirtualPositionItem = getLastItem(data);
 
     let i: number = newRange.start;
     const length = i + offset;
@@ -190,7 +185,7 @@ export function recombineByOffset(
   // direction is negative
   } else {
     // push item to the start
-    let firstItem: VirtualPositionItem = getFirstItem(data);
+    let firstItem: RevoGrid.VirtualPositionItem = getFirstItem(data);
 
     const end = newRange.end;
     for (let i = 0; i < offset; i++) {
@@ -229,22 +224,22 @@ export function recombineByOffset(
 }
 
 
-function getItemSize(index: number, sizes?: ViewSettingSizeProp, origSize: number = 0): number {
+function getItemSize(index: number, sizes?: RevoGrid.ViewSettingSizeProp, origSize: number = 0): number {
   if (sizes && sizes[index]) {
     return sizes[index];
   }
   return origSize;
 }
 
-export function isActiveRange(pos: number, item: PositionItem|undefined): boolean {
+export function isActiveRange(pos: number, item: RevoGrid.PositionItem|undefined): boolean {
   return item && pos >= item.start && pos <= item.end;
 }
 
-export function getFirstItem(s: ItemsToUpdate): VirtualPositionItem|undefined {
+export function getFirstItem(s: ItemsToUpdate): RevoGrid.VirtualPositionItem|undefined {
   return s.items[s.start];
 }
 
-export function getLastItem(s: ItemsToUpdate): VirtualPositionItem {
+export function getLastItem(s: ItemsToUpdate): RevoGrid.VirtualPositionItem {
   return s.items[s.end];
 }
 

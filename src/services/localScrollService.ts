@@ -1,9 +1,9 @@
 import {scaleValue} from '../utils/utils';
-import {DimensionType, ViewPortScrollEvent} from '../interfaces';
+import {RevoGrid} from "../interfaces";
 
 interface Config {
-    beforeScroll(e: ViewPortScrollEvent): void;
-    afterScroll(e: ViewPortScrollEvent): void;
+    beforeScroll(e: RevoGrid.ViewPortScrollEvent): void;
+    afterScroll(e: RevoGrid.ViewPortScrollEvent): void;
 }
 
 type Params = {
@@ -22,10 +22,10 @@ const initialParams: Params = {
 };
 
 export default class LocalScrollService {
-    private preventArtificialScroll: {[T in DimensionType]: number|null} = { row: null, col: null };
+    private preventArtificialScroll: {[T in RevoGrid.DimensionType]: number|null} = { row: null, col: null };
     // to check if scroll changed
-    private previousScroll: {[T in DimensionType]: number} = { row: 0, col: 0 };
-    private params: {[T in DimensionType]: Params} = { row: {...initialParams}, col: {...initialParams} };
+    private previousScroll: {[T in RevoGrid.DimensionType]: number} = { row: 0, col: 0 };
+    private params: {[T in RevoGrid.DimensionType]: Params} = { row: {...initialParams}, col: {...initialParams} };
 
     constructor(private cfg: Config) {}
 
@@ -33,7 +33,7 @@ export default class LocalScrollService {
         return contentSize + (virtualSize ? (clientSize - virtualSize) : 0);
     }
 
-    setParams(params: Params, dimension: DimensionType): void {
+    setParams(params: Params, dimension: RevoGrid.DimensionType): void {
         const virtualContentSize = LocalScrollService.getVirtualContentSize(
             params.contentSize,
             params.clientSize,
@@ -47,7 +47,7 @@ export default class LocalScrollService {
     }
 
     // apply scroll values after scroll done
-    setScroll(e: ViewPortScrollEvent): void {
+    setScroll(e: RevoGrid.ViewPortScrollEvent): void {
         this.cancelScroll(e.dimension);
         this.preventArtificialScroll[e.dimension] = window.requestAnimationFrame(() => {
             const params = this.getParams(e.dimension);
@@ -62,7 +62,7 @@ export default class LocalScrollService {
     }
 
     // initiate scrolling event
-    scroll(coordinate: number, dimension: DimensionType, force: boolean = false): void {
+    scroll(coordinate: number, dimension: RevoGrid.DimensionType, force: boolean = false): void {
         this.cancelScroll(dimension);
         if (!force && this.previousScroll[dimension] === coordinate) {
             this.previousScroll[dimension] = 0;
@@ -76,7 +76,7 @@ export default class LocalScrollService {
         });
     }
 
-    private getParams(dimension: DimensionType): Params {
+    private getParams(dimension: RevoGrid.DimensionType): Params {
         return this.params[dimension];
     }
 
@@ -93,7 +93,7 @@ export default class LocalScrollService {
     }
 
     // prevent already started scroll, performance optimization
-    private cancelScroll(dimension: DimensionType): boolean {
+    private cancelScroll(dimension: RevoGrid.DimensionType): boolean {
         if (typeof this.preventArtificialScroll[dimension] === 'number') {
             window.cancelAnimationFrame(this.preventArtificialScroll[dimension]);
             this.preventArtificialScroll[dimension] = null;

@@ -15,14 +15,10 @@ import {
 } from './viewport.helpers';
 
 import {setStore} from '../../utils/store.utils';
-import {
-  ViewportState,
-  ViewportStateItems, ViewSettingSizeProp,
-  VirtualPositionItem
-} from '../../interfaces';
+import {RevoGrid} from "../../interfaces";
 
 
-function initialState(): ViewportState {
+function initialState(): RevoGrid.ViewportState {
   return {
     // virtual item information per rendered item
     items: [],
@@ -40,12 +36,12 @@ function initialState(): ViewportState {
 }
 
 export default class ViewportStore {
-  readonly store: ObservableMap<ViewportState>;
+  readonly store: ObservableMap<RevoGrid.ViewportState>;
   constructor() {
     this.store = createStore(initialState());
   }
 
-  getItems(): Pick<ViewportStateItems, 'items'|'start'|'end'> {
+  getItems(): Pick<RevoGrid.ViewportStateItems, 'items'|'start'|'end'> {
     return {
       items: this.store.get('items'),
       start: this.store.get('start'),
@@ -53,7 +49,7 @@ export default class ViewportStore {
     };
   }
 
-  setViewport(data: Partial<ViewportState>): void {
+  setViewport(data: Partial<RevoGrid.ViewportState>): void {
     setStore(this.store, data);
   }
 
@@ -79,8 +75,8 @@ export default class ViewportStore {
     pos = pos < 0 ? 0 : pos < maxCoordinate  ? pos : maxCoordinate;
 
 
-    const firstItem: VirtualPositionItem|undefined = getFirstItem(this.getItems());
-    const lastItem: VirtualPositionItem|undefined = getLastItem(this.getItems());
+    const firstItem: RevoGrid.VirtualPositionItem|undefined = getFirstItem(this.getItems());
+    const lastItem: RevoGrid.VirtualPositionItem|undefined = getLastItem(this.getItems());
 
     // left position changed
     if (!isActiveRange(pos, firstItem)) {
@@ -119,7 +115,7 @@ export default class ViewportStore {
     }
   }
 
-  setViewPortDimension(sizes: ViewSettingSizeProp): void {
+  setViewPortDimension(sizes: RevoGrid.ViewSettingSizeProp): void {
     // viewport not inited
     if (!this.store.get('items').length) {
       return;

@@ -1,16 +1,16 @@
 import {Component, Event, EventEmitter, h, Method, Element, Prop} from '@stencil/core';
 import each from 'lodash/each';
 
-import {DimensionType, ViewPortResizeEvent, ViewPortScrollEvent} from '../../interfaces';
 import GridResizeService from './gridResizeService';
 import LocalScrollService from "../../services/localScrollService";
+import {RevoGrid} from "../../interfaces";
 
 @Component({
   tag: 'revogr-viewport-scroll'
 })
 export class RevogrViewportScroll {
-  @Event() scrollViewport: EventEmitter<ViewPortScrollEvent>;
-  @Event() resizeViewport: EventEmitter<ViewPortResizeEvent>;
+  @Event() scrollViewport: EventEmitter<RevoGrid.ViewPortScrollEvent>;
+  @Event() resizeViewport: EventEmitter<RevoGrid.ViewPortResizeEvent>;
 
 
   @Prop() contentWidth: number = 0;
@@ -28,7 +28,7 @@ export class RevogrViewportScroll {
   private scrollService: LocalScrollService;
 
   @Method()
-  async setScroll(e: ViewPortScrollEvent): Promise<void> {
+  async setScroll(e: RevoGrid.ViewPortScrollEvent): Promise<void> {
     this.scrollService?.setScroll(e);
   }
 
@@ -63,7 +63,7 @@ export class RevogrViewportScroll {
         {
           resize: () => {
             const els = {row: this.verticalScroll.clientHeight, col: this.horizontalScroll.clientWidth};
-            each(els, (size: number, dimension: DimensionType) => {
+            each(els, (size: number, dimension: RevoGrid.DimensionType) => {
               this.resizeViewport.emit({ dimension, size });
               this.scrollService?.scroll(0, dimension, true);
             });

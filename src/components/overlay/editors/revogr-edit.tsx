@@ -1,15 +1,15 @@
 import {Component, Event, EventEmitter, Prop, h} from '@stencil/core';
 import {ObservableMap} from '@stencil/store';
 
-import {DimensionSettingsState, Edition, Selection} from '../../../interfaces';
+import {Edition, RevoGrid, Selection} from '../../../interfaces';
 import { getItemByIndex } from '../../../store/dimension/dimension.helpers';
 
 @Component({
     tag: 'revogr-edit'
 })
 export class Edit {
-    @Prop() dimensionRow: ObservableMap<DimensionSettingsState>;
-    @Prop() dimensionCol: ObservableMap<DimensionSettingsState>;
+    @Prop() dimensionRow: ObservableMap<RevoGrid.DimensionSettingsState>;
+    @Prop() dimensionCol: ObservableMap<RevoGrid.DimensionSettingsState>;
     @Prop() editCell: Edition.EditCell|null = null;
 
     @Event({ cancelable: true }) cellEdit: EventEmitter<Edition.SaveDataDetails>;

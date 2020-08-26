@@ -23,7 +23,7 @@
 
 ## Methods
 
-### `setScroll(e: ViewPortScrollEvent) => Promise<void>`
+### `setScroll(e: RevoGrid.ViewPortScrollEvent) => Promise<void>`
 
 
 

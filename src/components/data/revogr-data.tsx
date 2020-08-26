@@ -4,15 +4,9 @@ import {ObservableMap} from '@stencil/store';
 
 import ColumnService from './columnService';
 import {CELL_CLASS, DATA_COL, DATA_ROW, DISABLED_CLASS, UUID} from '../../utils/consts';
-import {
-  ColumnDataSchemaRegular,
-  DataType,
-  DimensionSettingsState,
-  Edition,
-  Selection,
-  VirtualPositionItem
-} from '../../interfaces';
+
 import {DataSourceState} from '../../store/dataSource/data.store';
+import {Edition, RevoGrid, Selection} from "../../interfaces";
 
 @Component({
   tag: 'revogr-data'
@@ -21,23 +15,23 @@ export class RevogrData {
   @Element() element!: HTMLStencilElement;
 
   @State() columnService: ColumnService;
-  @Prop() dataStore: ObservableMap<DataSourceState<DataType>>;
+  @Prop() dataStore: ObservableMap<DataSourceState<RevoGrid.DataType>>;
   @Prop() selectionStoreConnector: Selection.SelectionStoreConnectorI;
 
-  @Prop() dimensionRow: ObservableMap<DimensionSettingsState>;
-  @Prop() dimensionCol: ObservableMap<DimensionSettingsState>;
+  @Prop() dimensionRow: ObservableMap<RevoGrid.DimensionSettingsState>;
+  @Prop() dimensionCol: ObservableMap<RevoGrid.DimensionSettingsState>;
 
   @Prop() readonly: boolean;
   @Prop() range: boolean;
 
-  @Prop() rows: VirtualPositionItem[];
-  @Prop() cols: VirtualPositionItem[];
+  @Prop() rows: RevoGrid.VirtualPositionItem[];
+  @Prop() cols: RevoGrid.VirtualPositionItem[];
   @Prop() lastCell: Selection.Cell;
   @Prop() position: Selection.Cell;
   @Prop() uuid: string = '';
 
-  @Prop() colData: ColumnDataSchemaRegular[];
-  @Watch('colData') colChanged(newData: ColumnDataSchemaRegular[]): void {
+  @Prop() colData: RevoGrid.ColumnDataSchemaRegular[];
+  @Watch('colData') colChanged(newData: RevoGrid.ColumnDataSchemaRegular[]): void {
     this.columnService.columns = newData;
   }
 

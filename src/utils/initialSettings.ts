@@ -1,6 +1,6 @@
-import {InitialSettings} from "../interfaces";
+import {RevoGrid} from "../interfaces";
 
-const initialSettings: InitialSettings = {
+const initialSettings: RevoGrid.InitialSettings = {
     defaultColumnSize: 80,
     defaultRowSize: 30,
     frameSize: 0,
