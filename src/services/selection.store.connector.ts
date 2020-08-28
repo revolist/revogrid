@@ -61,9 +61,8 @@ export default class SelectionStoreConnector implements SelectionStoreConnectorI
         // item in new store
         const nextItem: Partial<Cell>|null = nextCell(focus, lastCell);
 
-
+        let nextStore;
         if (nextItem) {
-            let nextStore;
             for (let i in nextItem) {
                 let type: keyof Cell= i as keyof Cell;
                 let stores;
@@ -85,15 +84,17 @@ export default class SelectionStoreConnector implements SelectionStoreConnectorI
                     }
                 }
             }
-
-            // if next store present - update
-            if (nextStore) {
-                let item = {...focus, ...nextItem};
-                this.focus(nextStore, item, item);
-                return;
-            }
         }
+
+        // if next store present - update
+        if (nextStore) {
+            let item = {...focus, ...nextItem};
+            this.focus(nextStore, item, item);
+            return;
+        }
+
         focus = cropCellToMax(focus, lastCell);
+        end = cropCellToMax(focus, lastCell);
 
         setStore(store, {
             focus,
