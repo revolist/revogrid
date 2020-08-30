@@ -12,6 +12,16 @@ $header-size: 30px;
   }
 }
 
+@mixin noSelect() {
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Safari */
+  -khtml-user-select: none; /* Konqueror HTML */
+  -moz-user-select: none; /* Old versions of Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome, Edge, Opera and Firefox */
+}
+
 
 revo-grid {
   display: block;
@@ -20,14 +30,10 @@ revo-grid {
   font-size: 14px;
   position: relative;
 
+  $shadow-top: 0 -1px 0 0 $header-border-color;
+  box-shadow: $shadow-top;
 
-  -webkit-touch-callout: none; /* iOS Safari */
-  -webkit-user-select: none; /* Safari */
-  -khtml-user-select: none; /* Konqueror HTML */
-  -moz-user-select: none; /* Old versions of Firefox */
-  -ms-user-select: none; /* Internet Explorer/Edge */
-  user-select: none; /* Non-prefixed version, currently
-                                  supported by Chrome, Edge, Opera and Firefox */
+  @include noSelect;
 }
 
 revogr-viewport {
@@ -157,19 +163,47 @@ revogr-viewport-scroll {
 
 revogr-header {
   position: relative;
-  height: $header-size;
   line-height: $header-size;
   box-shadow: $header-shadow;
   font-weight: 600;
   z-index: 5;
   display: block;
 
-  .data-header-cell {
+  .data-header-cell,
+  .grouped-cell {
     position: absolute;
     box-sizing: border-box;
-    box-shadow: $header-shadow-cell;
     height: 100%;
+    z-index: 1;
+  }
+
+  .data-header-cell {
+    $shadow-left: -1px 0 0 0 $cell-border-color;
+    $shadow-right: -1px 0 0 0 $cell-border-color inset;
+    $shadow-bottom: 0 -1px 0 0 $header-border-color inset;
+    $shadow-top: 0 -1px 0 0 $header-border-color;
+    box-shadow: $shadow-left, $shadow-right, $shadow-top, $shadow-bottom;
     text-align: center;
+  }
+
+  .header-row {
+
+    height: $header-size;
+    display: block;
+    position: relative;
+
+    &.group {
+      box-shadow: none;
+      z-index: 0;
+    }
+  }
+
+  .group-row {
+    position: relative;
+
+    .data-header-cell {
+      color: gray;
+    }
   }
 }
 

@@ -1,7 +1,4 @@
-/* Note: using `.d.ts` file extension will exclude it from the output build */
-
 export declare namespace RevoGrid {
-
   type DimensionTypeRow = 'row';
   type DimensionTypeCol = 'col';
   type DimensionType = DimensionTypeCol|DimensionTypeRow;

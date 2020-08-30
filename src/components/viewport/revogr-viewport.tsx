@@ -174,6 +174,7 @@ export class RevogrViewport {
         position: Selection.Cell,
         contentHeight: number
     ): ViewportProps {
+        const colStore = this.columnStores[colType];
         const cols: RevoGrid.VirtualPositionItem[] = this.viewports[colType].get('items');
         const pinSize = this.dimensions[colType].get('realSize');
         const parent: string = `[${UUID}="${uuid}"]`;
@@ -185,11 +186,14 @@ export class RevogrViewport {
             contentHeight,
             key,
         };
-        const colData = this.columnStores[colType].get('items');
+        const colData = colStore.get('items');
         const headerProp: Properties = {
             cols,
             parent,
             colData,
+            dimensionCol: this.dimensions[colType],
+            groups: colStore.get('groups'),
+            groupingDepth: colStore.get('groupingDepth'),
             onHeaderResize: (e: CustomEvent<RevoGrid.ViewSettingSizeProp>) => this.setDimensionSize.emit({
                 type: colType,
                 sizes: e.detail
@@ -216,6 +220,7 @@ export class RevogrViewport {
         colType: RevoGrid.DimensionCols = 'col'
     ): ViewportProps {
         const parent = `[${UUID}="${uuid}"]`;
+        const colStore = this.columnStores[colType];
         const prop: Properties = {
             contentWidth: this.dimensions[colType].get('realSize'),
             class: key,
@@ -224,11 +229,14 @@ export class RevogrViewport {
             contentHeight,
             key
         };
-        const colData = this.columnStores[colType].get('items');
+        const colData = colStore.get('items');
         const headerProp: Properties = {
             colData,
             cols,
             parent,
+            dimensionCol: this.dimensions[colType],
+            groups: colStore.get('groups'),
+            groupingDepth: colStore.get('groupingDepth'),
             onHeaderResize: (e: CustomEvent<RevoGrid.ViewSettingSizeProp>) =>
                 this.setDimensionSize.emit({ type: colType, sizes: e.detail })
         };
