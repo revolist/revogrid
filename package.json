@@ -51,8 +51,5 @@
   "directories": {
     "doc": "docs"
   },
-  "author": "revolist",
-  "publishConfig": {
-    "registry": "https://npm.pkg.github.com"
-  }
+  "author": "revolist"
 }
