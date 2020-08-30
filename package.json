@@ -1,6 +1,6 @@
 {
   "name": "@revolist/revogrid",
-  "version": "1.2",
+  "version": "1.2.0",
   "description": "Reactive grid component - RevoGrid.",
   "license": "MIT",
   "repository": {
