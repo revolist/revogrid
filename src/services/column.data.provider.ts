@@ -1,14 +1,29 @@
 import reduce from 'lodash/reduce';
 import each from 'lodash/each';
+import isArray from 'lodash/isArray';
+import map from 'lodash/map';
 
-import DataStore from "../store/dataSource/data.store";
-import {columnTypes} from "../store/storeTypes";
-import DimensionProvider from "./dimension.provider";
-import {RevoGrid} from "../interfaces";
-
-type ColumnCollection = {
+import DataStore, {Groups} from '../store/dataSource/data.store';
+import {columnTypes} from '../store/storeTypes';
+import DimensionProvider from './dimension.provider';
+import {RevoGrid} from '../interfaces';
+import DimensionColPin = RevoGrid.DimensionColPin;
+type Group = {
+    name: string;
+    level: number;
+    props: RevoGrid.ColumnProp[];
+};
+type ColumnGrouping = {
+    [T in RevoGrid.DimensionCols]: Group[];
+};
+type Columns = {
     sizes: RevoGrid.ViewSettingSizeProp;
 } & {[T in RevoGrid.DimensionCols]: RevoGrid.ColumnDataSchemaRegular[];};
+type ColumnCollection = {
+    columns: Columns;
+    columnGrouping: ColumnGrouping;
+    maxLevel: number;
+};
 
 type ColumnDataSources = {[T in RevoGrid.DimensionCols]: DataStore<RevoGrid.ColumnDataSchemaRegular>};
 
@@ -34,15 +49,28 @@ export default class ColumnDataProvider {
 
     setColumns(columns: RevoGrid.ColumnData): void {
         const data: ColumnCollection = ColumnDataProvider.getColumns(columns);
-
         each(columnTypes, (k: RevoGrid.DimensionCols) => {
-            this.dataSources[k].updateData(data[k])
+            this.dataSources[k].updateData(data.columns[k], {
+                depth: data.maxLevel,
+                groups: reduce(data.columnGrouping[k], (res: Groups, g: Group) => {
+                    if (!res[g.level]) {
+                        res[g.level] = [];
+                    }
+                    res[g.level].push({
+                      name: g.name,
+                      ids: g.props
+                    });
+                    return res;
+                }, {})
+            })
         });
 
-        this.dimensionProvider.setDimensionSize('col', data.sizes);
-        this.dimensionProvider.setRealSize(data.col, 'col');
-        this.dimensionProvider.setPins(data.colPinStart, 'colPinStart', ColumnDataProvider.getPinSizes(data.colPinStart));
-        this.dimensionProvider.setPins(data.colPinEnd, 'colPinEnd', ColumnDataProvider.getPinSizes(data.colPinEnd));
+        this.dimensionProvider.setDimensionSize('col', data.columns.sizes);
+        this.dimensionProvider.setRealSize(data.columns.col, 'col');
+        for (let p of ['colPinStart', 'colPinEnd']) {
+            let pin: DimensionColPin = p as DimensionColPin;
+            this.dimensionProvider.setPins(data.columns[pin], pin, ColumnDataProvider.getPinSizes(data.columns[pin]));
+        }
     }
 
     private static getPinSizes(cols: RevoGrid.ColumnDataSchemaRegular[]): RevoGrid.ViewSettingSizeProp {
@@ -60,30 +88,74 @@ export default class ColumnDataProvider {
     }
 
     // columns processing
-    private static getColumns(columns: RevoGrid.ColumnData): ColumnCollection {
+    private static getColumns(columns: RevoGrid.ColumnData, level: number = 0): ColumnCollection {
         return reduce(columns, (res: ColumnCollection, colData: RevoGrid.ColumnDataSchema) => {
+            // if grouped column
             if (ColumnDataProvider.isColGrouping(colData)) {
-                const collection: ColumnCollection = ColumnDataProvider.getColumns(colData.children);
-                for (let k in collection) {
-                    let key = k as keyof ColumnCollection;
-                    (res[key] as RevoGrid.ColumnDataSchemaRegular[]) = {...res[key], ...collection[key]} as RevoGrid.ColumnDataSchemaRegular[];
+                // receive parsed data up to single cell
+                const collection: ColumnCollection = ColumnDataProvider.getColumns(colData.children, level + 1);
+
+                // group template
+                const group: Group = {
+                  name: colData.name,
+                  level,
+                  props: []
+                };
+
+                // check columns for update
+                for (let k in collection.columns) {
+                    const key = k as keyof Columns;
+                    const resultItem = res.columns[key];
+                    const collectionItem = collection.columns[key];
+
+                    // if column data
+                    if (isArray(resultItem) && isArray(collectionItem)) {
+                        // fill columns
+                        resultItem.push(...collectionItem);
+
+                        // fill grouping
+                        if (key !== 'sizes' && collectionItem.length) {
+                            res.columnGrouping[key].push({
+                                ...group,
+                                props: map(collectionItem, 'prop')
+                            });
+                        }
+                    } else {
+                        // fill sizes
+                        (res.columns[key] as RevoGrid.ViewSettingSizeProp) = {...resultItem, ...collectionItem} as RevoGrid.ViewSettingSizeProp;
+                    }
                 }
+                // merge column groupings
+                for (let k in collection.columnGrouping) {
+                    const key = k as RevoGrid.DimensionCols;
+                    const collectionItem = collection.columnGrouping[key];
+                    res.columnGrouping[key].push(...collectionItem);
+                }
+                res.maxLevel = Math.max(res.maxLevel, collection.maxLevel);
             } else {
                 if (!colData.pin) {
-                    res.col.push(colData);
+                    res.columns.col.push(colData);
                     if (colData.size) {
-                        res.sizes[res.col.length - 1] = colData.size;
+                        res.columns.sizes[res.columns.col.length - 1] = colData.size;
                     }
                 } else {
-                    res[colData.pin].push(colData);
+                    res.columns[colData.pin].push(colData);
                 }
             }
             return res;
         }, {
-            col: [],
-            colPinStart: [],
-            colPinEnd: [],
-            sizes: {}
+            columns: {
+                col: [],
+                colPinStart: [],
+                colPinEnd: [],
+                sizes: {}
+            },
+            columnGrouping: {
+                col: [],
+                colPinStart: [],
+                colPinEnd: []
+            },
+            maxLevel: level
         });
     }
 }

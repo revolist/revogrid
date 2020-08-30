@@ -15,10 +15,16 @@ export default class HeaderService {
     set columns(source: RevoGrid.ColumnDataSchemaRegular[]) {
         this.source = source;
     }
-    constructor(private target: string, columns: RevoGrid.ColumnDataSchemaRegular[], config: Config) {
+    constructor(private target: string, columns: RevoGrid.ColumnDataSchemaRegular[], private config: Config) {
         this.columns = columns;
-        if (config.canResize) {
-            interact(target).resizable({
+        this.resizeChange(config.canResize);
+    }
+
+    resizeChange(canResize: boolean = false): void {
+        this.destroy();
+
+        if (canResize) {
+            interact(this.target).resizable({
                 edges: { bottom: false, right: true },
                 onend: event => {
                     const index: number = parseInt(event.target.getAttribute(DATA_COL), 10);
@@ -28,7 +34,7 @@ export default class HeaderService {
                     if (width < minSize) {
                         width = minSize;
                     }
-                    config.resize({ [index]: width });
+                    this.config.resize({ [index]: width });
                 }
             });
         }

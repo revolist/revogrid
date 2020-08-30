@@ -7,7 +7,7 @@
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 import { Edition, RevoGrid, Selection } from "./interfaces";
 import { ObservableMap } from "@stencil/store";
-import { DataSourceState } from "./store/dataSource/data.store";
+import { DataSourceState, Groups } from "./store/dataSource/data.store";
 import { ColumnServiceI } from "./components/data/columnService";
 import { DataProvider } from "./services/data.provider";
 export namespace Components {
@@ -46,6 +46,9 @@ export namespace Components {
         "canResize": boolean;
         "colData": RevoGrid.ColumnDataSchemaRegular[];
         "cols": RevoGrid.VirtualPositionItem[];
+        "dimensionCol": ObservableMap<RevoGrid.DimensionSettingsState>;
+        "groupingDepth": number;
+        "groups": Groups;
         "parent": string;
     }
     interface RevogrOverlaySelection {
@@ -191,6 +194,9 @@ declare namespace LocalJSX {
         "canResize"?: boolean;
         "colData"?: RevoGrid.ColumnDataSchemaRegular[];
         "cols"?: RevoGrid.VirtualPositionItem[];
+        "dimensionCol"?: ObservableMap<RevoGrid.DimensionSettingsState>;
+        "groupingDepth"?: number;
+        "groups"?: Groups;
         "onHeaderClick"?: (event: CustomEvent<RevoGrid.ColumnDataSchemaRegular>) => void;
         "onHeaderResize"?: (event: CustomEvent<RevoGrid.ViewSettingSizeProp>) => void;
         "parent"?: string;
