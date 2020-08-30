@@ -13,6 +13,8 @@ jobs:
         node-version: '10.x'
         registry-url: 'https://registry.npmjs.org'
     - run: npm install
+    # Build
+    - run: npm run build
     # Publish to npm
     - run: npm publish --access public
       env:
