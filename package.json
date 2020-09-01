@@ -1,6 +1,6 @@
 {
   "name": "@revolist/revogrid",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Reactive grid component - RevoGrid.",
   "license": "MIT",
   "repository": {
@@ -18,7 +18,8 @@
   "unpkg": "dist/revogrid/revogrid.js",
   "files": [
     "dist/",
-    "loader/"
+    "loader/",
+    "react/"
   ],
   "scripts": {
     "build": "stencil build --prod --docs",
