@@ -1,6 +1,7 @@
 dist/
 www/
 loader/
+revogrid-react/
 
 *~
 *.sw[mnpcod]

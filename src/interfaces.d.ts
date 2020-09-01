@@ -43,10 +43,10 @@ export declare namespace RevoGrid {
     pin?: DimensionColPin;
   }
 
-  type ColumnDataSchema = ColumnDataSchemaGrouping | ColumnDataSchemaRegular;
+  type ColumnDataSchema = ColumnDataSchemaGrouping|ColumnDataSchemaRegular;
 
   type ColumnProp = string|number;
-  type DataFormat = string;
+  type DataFormat = any;
   interface HyperFunc<T> { (sel: string, data?: object, text?: string): T; }
   type CellTemplateFunc<T> = (h: HyperFunc<T>, props: ColumnDataSchemaModel) => T;
   type ColumnData = ColumnDataSchema[];

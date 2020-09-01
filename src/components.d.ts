@@ -12,15 +12,45 @@ import { ColumnServiceI } from "./components/data/columnService";
 import { DataProvider } from "./services/data.provider";
 export namespace Components {
     interface RevoGrid {
+        /**
+          * Indicates default column size.
+         */
         "colSize": number;
-        "columns": RevoGrid.ColumnData;
+        /**
+          * Columns - defines an array of grid columns. Can be column or grouped column.
+         */
+        "columns": (RevoGrid.ColumnDataSchemaRegular|RevoGrid.ColumnDataSchemaGrouping)[];
+        /**
+          * Defines how many rows/columns should be rendered outside visible area.
+         */
         "frameSize": number;
+        /**
+          * Pinned bottom Source: {[T in ColumnProp]: any} - defines pinned bottom rows data source.
+         */
         "pinnedBottomSource": RevoGrid.DataType[];
+        /**
+          * Pinned top Source: {[T in ColumnProp]: any} - defines pinned top rows data source.
+         */
         "pinnedTopSource": RevoGrid.DataType[];
+        /**
+          * When true, user can range selection.
+         */
         "range": boolean;
+        /**
+          * When true, grid in read only mode.
+         */
         "readonly": boolean;
+        /**
+          * When true, columns are resizable.
+         */
         "resize": boolean;
+        /**
+          * Indicates default row size.
+         */
         "rowSize": number;
+        /**
+          * Source: {[T in ColumnProp]: any} - defines main data source. Can be an Object or 2 dimensional array([][]); ColumnProp - string|number. It is reference for column mapping.
+         */
         "source": RevoGrid.DataType[];
     }
     interface RevogrData {
@@ -156,15 +186,45 @@ declare global {
 }
 declare namespace LocalJSX {
     interface RevoGrid {
+        /**
+          * Indicates default column size.
+         */
         "colSize"?: number;
-        "columns"?: RevoGrid.ColumnData;
+        /**
+          * Columns - defines an array of grid columns. Can be column or grouped column.
+         */
+        "columns"?: (RevoGrid.ColumnDataSchemaRegular|RevoGrid.ColumnDataSchemaGrouping)[];
+        /**
+          * Defines how many rows/columns should be rendered outside visible area.
+         */
         "frameSize"?: number;
+        /**
+          * Pinned bottom Source: {[T in ColumnProp]: any} - defines pinned bottom rows data source.
+         */
         "pinnedBottomSource"?: RevoGrid.DataType[];
+        /**
+          * Pinned top Source: {[T in ColumnProp]: any} - defines pinned top rows data source.
+         */
         "pinnedTopSource"?: RevoGrid.DataType[];
+        /**
+          * When true, user can range selection.
+         */
         "range"?: boolean;
+        /**
+          * When true, grid in read only mode.
+         */
         "readonly"?: boolean;
+        /**
+          * When true, columns are resizable.
+         */
         "resize"?: boolean;
+        /**
+          * Indicates default row size.
+         */
         "rowSize"?: number;
+        /**
+          * Source: {[T in ColumnProp]: any} - defines main data source. Can be an Object or 2 dimensional array([][]); ColumnProp - string|number. It is reference for column mapping.
+         */
         "source"?: RevoGrid.DataType[];
     }
     interface RevogrData {
