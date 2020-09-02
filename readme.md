@@ -10,21 +10,24 @@ Works in any major framework or with no framework at all.
 
 ## Overview
 
-The Revo Grid component helps represent huge amount of data in a form of data table.
-Check Storybook minimalistic [RevoGrid Demo](https://revolist.github.io/revogrid.demo.js).
+The RevoGrid component helps represent a huge amount of data in a form of data table.
+Check Storybook for more details [RevoGrid Demo](https://revolist.github.io/revogrid.demo.js).
 
 Grid supports:
 
-- Column and Row custom sizes.
-- Column resizing.
-- Virtual scroll in-build by default.
-- Custom cell template.
+- Column and Row custom sizes;
+- Column resizing;
+- Pinned columns and rows;
+- Column grouping;
+- The virtual scroll with a powerful core is in-build by default;
+- Custom cell template;
+- Cell editing;
+- Multiple others useful features [RevoGrid Demo](https://revolist.github.io/revogrid.demo.js).
 
 ##Installation
 
-The library is published as a [scoped NPM package](https://docs.npmjs.com/misc/scope) in the [NPMJS Revolist account](https://www.npmjs.com/org/revolist).
-
-[Checkfor more information on demo side](https://revolist.github.io/revogrid.demo.js/?path=/docs/docs-installing--page).
+The library published as a [scoped NPM package](https://docs.npmjs.com/misc/scope) in the [NPMJS Revolist account](https://www.npmjs.com/org/revolist).
+[Check for more info on our demo side](https://revolist.github.io/revogrid.demo.js/?path=/docs/docs-installing--page).
 
 
 ```bash
@@ -33,9 +36,9 @@ npm install --save @revolist/revogrid;
 
 ##Framework
 
-- [JavaScript](docs/vanilajs.md) or [Storybook Demo](https://revolist.github.io/revogrid.demo.js/?path=/docs/docs-getting-started-javascript--page).
-- [VueJs](docs/vue.md) or [Storybook Demo](https://revolist.github.io/revogrid.demo.js/?path=/docs/docs-getting-started-vue--page).
-- [React](docs/react.md).
+- [JavaScript](docs/vanilajs.md) or [Storybook Demo](https://revolist.github.io/revogrid.demo.js);
+- [VueJs](docs/vue.md) or [Storybook Demo](https://revolist.github.io/revogrid.demo.js);
+- [React](docs/react.md) or [Storybook Demo](https://revolist.github.io/revogrid.demo.js);
 - [Angular](docs/angular.md).
 - [Ember](docs/ember.md).
 
@@ -51,7 +54,6 @@ All you have to do just to place component on the page and access it properties 
 <head>
     // node_modules path
     <script src="node_modules/@revolist/revogrid/dist/revo-grid.js"></script>
-    
     // or with unpkg
     <script src="https://unpkg.com/browse/@revolist/revogrid@latest/dist/revo-grid.js"></script>
     
@@ -98,16 +100,6 @@ const items = [{
 
 grid.columns = columns;
 grid.source = items;
-grid.dimensions = {
-    row: {
-        0: 70,
-        1: 50
-    },
-    col: {
-        0: 120,
-        1: 200
-    }
-};
 ```
 
 

@@ -21,7 +21,7 @@ export const config: Config = {
     },
     reactOutputTarget({
       componentCorePackage: '@revolist/revogrid',
-      proxiesFile: './react/src/revogrid.ts',
+      proxiesFile: '../revogrid-react/src/revogrid.ts',
     }),
     {
       type: 'www',

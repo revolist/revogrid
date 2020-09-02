@@ -1,10 +1,10 @@
 export declare namespace RevoGrid {
   type DimensionTypeRow = 'row';
   type DimensionTypeCol = 'col';
-  type DimensionType = DimensionTypeCol|DimensionTypeRow;
   type DimensionColPin = 'colPinStart'|'colPinEnd';
-  type DimensionCols = DimensionColPin|DimensionTypeCol;
   type DimensionRowPin = 'rowPinStart'|'rowPinEnd';
+  type DimensionType = DimensionTypeCol|DimensionTypeRow;
+  type DimensionCols = DimensionColPin|DimensionTypeCol;
   type DimensionRows = DimensionTypeRow|DimensionRowPin;
   type MultiDimensionType = DimensionType|DimensionColPin|DimensionRowPin;
 
@@ -25,6 +25,7 @@ export declare namespace RevoGrid {
   };
 
   type ReadOnlyFormat = boolean | ((row: number, col: number) => boolean);
+
   interface ColumnDataSchemaBase {
     name?: DataFormat;
     readonly?: ReadOnlyFormat;
@@ -32,6 +33,7 @@ export declare namespace RevoGrid {
     minSize?: number;
     cellTemplate?: Function;
   }
+
   interface ColumnDataSchemaGrouping {
     children: ColumnDataSchema[];
     name: DataFormat;
@@ -43,15 +45,19 @@ export declare namespace RevoGrid {
     pin?: DimensionColPin;
   }
 
-  type ColumnDataSchema = ColumnDataSchemaGrouping|ColumnDataSchemaRegular;
+  type ColumnDataSchema = ColumnDataSchemaGrouping | ColumnDataSchemaRegular;
 
   type ColumnProp = string|number;
   type DataFormat = any;
-  interface HyperFunc<T> { (sel: string, data?: object, text?: string): T; }
+
+  interface HyperFunc<T> {
+    (sel: string, data?: object, text?: string): T;
+  }
+
   type CellTemplateFunc<T> = (h: HyperFunc<T>, props: ColumnDataSchemaModel) => T;
   type ColumnData = ColumnDataSchema[];
 
-  type DataType = {[T in ColumnProp]: DataFormat};
+  type DataType = { [T in ColumnProp]: DataFormat };
   type DataSource = DataType[];
 
   type Range = {
@@ -62,12 +68,14 @@ export declare namespace RevoGrid {
   type ViewportStateItems = {
     items: VirtualPositionItem[];
   } & Range;
+
   interface ViewportState extends ViewportStateItems {
     realCount: number;
     virtualSize: number;
   }
 
-  type ViewSettingSizeProp = {[index: string]: number};
+  type ViewSettingSizeProp = { [index: string]: number };
+
   interface VirtualPositionItem extends PositionItem {
     size: number;
   }
@@ -81,8 +89,8 @@ export declare namespace RevoGrid {
   interface DimensionSettingsState {
     indexes: number[];
     positionIndexes: number[];
-    positionIndexToItem: {[position: number]: PositionItem};
-    indexToItem: {[index: number]: PositionItem};
+    positionIndexToItem: { [position: number]: PositionItem };
+    indexToItem: { [index: number]: PositionItem };
     sizes: ViewSettingSizeProp;
     frameOffset: number;
     realSize: number;
@@ -100,7 +108,7 @@ export declare namespace RevoGrid {
 }
 
 
-export declare namespace Selection  {
+export declare namespace Selection {
   type RowIndex = number;
   type ColIndex = number;
 
@@ -124,11 +132,16 @@ export declare namespace Selection  {
   };
 
   interface SelectionStoreConnectorI {
-    setEdit(val: string|boolean): void;
+    setEdit(val: string | boolean): void;
+
     register(y: number, x: number): Object;
+
     clearFocus(s: Object): void;
+
     change(changes: Partial<Cell>, isMulti?: boolean): void;
+
     unregister(store: Object): void;
+
     focus(store: Object, focus: Selection.Cell, end: Selection.Cell): void;
   }
 }
@@ -145,8 +158,11 @@ export declare namespace Edition {
     prop: RevoGrid.ColumnProp;
     val: SaveData;
   };
+
   interface EditCell extends Selection.Cell {
     val?: SaveData;
   }
-  interface EditorBase {}
+
+  interface EditorBase {
+  }
 }
