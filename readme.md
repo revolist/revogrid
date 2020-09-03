@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://github.com/revolist/revogrid">
+  <a href="https://revolist.github.io/revogrid.demo.js">
     <img src="./assets/logo.svg" alt="RevoGrid" height="150" />
   </a>
 </p>
@@ -21,11 +21,12 @@ Works in any major framework or with no framework at all.
 * [Installation](#installation)
 * [Framework integration](#framework)
 * [Basic Usage](#basic-usage)
+* [Demo and Api](https://revolist.github.io/revogrid.demo.js)
 
 ## Overview
 
 The RevoGrid component helps represent a huge amount of data in a form of data table.
-Check for more details [Demo](https://revolist.github.io/revogrid.demo.js).
+Check for more details [RevoGrid page](https://revolist.github.io/revogrid.demo.js).
 
 Grid supports:
 
@@ -36,7 +37,7 @@ Grid supports:
 - The virtual scroll with a powerful core is in-build by default;
 - Custom cell template;
 - Cell editing;
-- Multiple others useful features [Demo](https://revolist.github.io/revogrid.demo.js).
+- Multiple others useful features [RevoGrid](https://revolist.github.io/revogrid.demo.js).
 
 ## Installation
 
@@ -50,9 +51,9 @@ npm install --save @revolist/revogrid;
 
 ## Framework
 
-- [JavaScript](docs/vanilajs.md) or [Storybook Demo](https://revolist.github.io/revogrid.demo.js);
-- [VueJs](docs/vue.md) or [Storybook Demo](https://revolist.github.io/revogrid.demo.js);
-- [React](docs/react.md) or [Storybook Demo](https://revolist.github.io/revogrid.demo.js);
+- [JavaScript](docs/vanilajs.md) or [Storybook Demo and Api](https://revolist.github.io/revogrid.demo.js);
+- [VueJs](docs/vue.md) or [Storybook Demo and Api](https://revolist.github.io/revogrid.demo.js);
+- [React](docs/react.md) or [Storybook Demo and Api](https://revolist.github.io/revogrid.demo.js);
 - [Angular](docs/angular.md).
 - [Ember](docs/ember.md).
 
