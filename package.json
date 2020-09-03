@@ -15,7 +15,18 @@
     "type": "git",
     "url": "git+https://github.com/revolist/revogrid.git"
   },
-  "keywords": ["excel", "virtual-grid", "excel-grid"],
+  "keywords": [
+    "revo-grid",
+    "revolist",
+    "storybook",
+    "stenciljs",
+    "reactive",
+    "grid",
+    "datagrid",
+    "virtualgrid",
+    "virtual vue grid",
+    "excel"
+  ],
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "es2015": "dist/esm/index.mjs",

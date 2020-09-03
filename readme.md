@@ -1,7 +1,14 @@
-# RevoGrid
+<p align="center">
+  <a href="https://github.com/revolist/revogrid">
+    <img src="./assets/logo.svg" alt="RevoGrid" width="400" />
+  </a>
+</p>
 
-A repository for the virtual grid implementation based on Web Component using Stencil.
+<p align="center">
+A repository for the virtual grid implementation based on webcomponent using StencilJs.
 Works in any major framework or with no framework at all.
+</p>
+
 
 * [Overview](#overview)
 * [Installation](#installation)
