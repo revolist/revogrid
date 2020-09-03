@@ -1,12 +1,16 @@
 <p align="center">
   <a href="https://github.com/revolist/revogrid">
-    <img src="./assets/logo.svg" alt="RevoGrid" width="400" />
+    <img src="./assets/logo.svg" alt="RevoGrid" height="150" />
   </a>
 </p>
 
 <p align="center">
 A repository for the virtual grid implementation based on webcomponent using StencilJs.
 Works in any major framework or with no framework at all.
+</p>
+
+<p align="center">
+  <img src="./assets/grid-preview.gif" alt="RevoGrid" />
 </p>
 
 <br>
@@ -21,7 +25,7 @@ Works in any major framework or with no framework at all.
 ## Overview
 
 The RevoGrid component helps represent a huge amount of data in a form of data table.
-Check Storybook for more details [RevoGrid Demo](https://revolist.github.io/revogrid.demo.js).
+Check for more details [Demo](https://revolist.github.io/revogrid.demo.js).
 
 Grid supports:
 
@@ -32,7 +36,7 @@ Grid supports:
 - The virtual scroll with a powerful core is in-build by default;
 - Custom cell template;
 - Cell editing;
-- Multiple others useful features [RevoGrid Demo](https://revolist.github.io/revogrid.demo.js).
+- Multiple others useful features [Demo](https://revolist.github.io/revogrid.demo.js).
 
 ## Installation
 
