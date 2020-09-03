@@ -9,6 +9,9 @@ A repository for the virtual grid implementation based on webcomponent using Ste
 Works in any major framework or with no framework at all.
 </p>
 
+<br>
+
+## Content
 
 * [Overview](#overview)
 * [Installation](#installation)
@@ -31,7 +34,7 @@ Grid supports:
 - Cell editing;
 - Multiple others useful features [RevoGrid Demo](https://revolist.github.io/revogrid.demo.js).
 
-##Installation
+## Installation
 
 The library published as a [scoped NPM package](https://docs.npmjs.com/misc/scope) in the [NPMJS Revolist account](https://www.npmjs.com/org/revolist).
 [Check for more info on our demo side](https://revolist.github.io/revogrid.demo.js/?path=/docs/docs-installing--page).
@@ -41,7 +44,7 @@ The library published as a [scoped NPM package](https://docs.npmjs.com/misc/scop
 npm install --save @revolist/revogrid;
 ```
 
-##Framework
+## Framework
 
 - [JavaScript](docs/vanilajs.md) or [Storybook Demo](https://revolist.github.io/revogrid.demo.js);
 - [VueJs](docs/vue.md) or [Storybook Demo](https://revolist.github.io/revogrid.demo.js);
