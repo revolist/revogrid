@@ -50,7 +50,8 @@ export default class ColumnService implements ColumnServiceI {
 
     getCellData(r: number, c: number): string {
         const {prop, model} = this.rowDataModel(r, c);
-        return model[prop as number] || '';
+        const val = model[prop as number];
+        return typeof val !== 'undefined' ? val : '';
     }
 
     getSaveData(r: number, c: number, val: string): BeforeSaveDataDetails {
