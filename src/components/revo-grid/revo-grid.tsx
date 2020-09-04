@@ -21,6 +21,62 @@ type ViewportStores = {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGri
   styleUrl: 'revo-grid.scss'
 })
 export class RevoGridComponent {
+  // --------------------------------------------------------------------------
+  //
+  //  Properties
+  //
+  // --------------------------------------------------------------------------
+
+  /**
+   * Defines how many rows/columns should be rendered outside visible area.
+   */
+  @Prop() frameSize: number = initialSettings.frameSize;
+  /**
+   * Indicates default row size.
+   */
+  @Prop() rowSize: number = initialSettings.defaultRowSize;
+  /**
+   * Indicates default column size.
+   */
+  @Prop() colSize: number = initialSettings.defaultColumnSize;
+  /**
+   * When true, user can range selection.
+   */
+  @Prop() range: boolean = initialSettings.range;
+  /**
+   * When true, grid in read only mode.
+   */
+  @Prop() readonly: boolean = initialSettings.readonly;
+  /**
+   * When true, columns are resizable.
+   */
+  @Prop() resize: boolean = initialSettings.resize;
+  /**
+   * Columns - defines an array of grid columns. Can be column or grouped column.
+   */
+  @Prop() columns: (RevoGrid.ColumnDataSchemaRegular|RevoGrid.ColumnDataSchemaGrouping)[] = [];
+  /**
+   * Source: {[T in ColumnProp]: any} - defines main data source.
+   * Can be an Object or 2 dimensional array([][]);
+   * ColumnProp - string|number. It is reference for column mapping.
+   */
+  @Prop() source: RevoGrid.DataType[] = [];
+  /**
+   * Pinned top Source: {[T in ColumnProp]: any} - defines pinned top rows data source.
+   */
+  @Prop() pinnedTopSource: RevoGrid.DataType[] = [];
+  /**
+   * Pinned bottom Source: {[T in ColumnProp]: any} - defines pinned bottom rows data source.
+   */
+  @Prop() pinnedBottomSource: RevoGrid.DataType[] = [];
+
+
+  // --------------------------------------------------------------------------
+  //
+  //  Private Properties
+  //
+  // --------------------------------------------------------------------------
+
   @State() uuid: string|null = null;
   @State() columnProvider: ColumnDataProvider;
   @State() dataProvider: DataProvider;
@@ -29,36 +85,25 @@ export class RevoGridComponent {
 
   @Element() element: HTMLElement;
 
-  @Prop() frameSize: number = initialSettings.frameSize;
-  @Prop() rowSize: number = initialSettings.defaultRowSize;
-  @Prop() colSize: number = initialSettings.defaultColumnSize;
-  @Prop() range: boolean = initialSettings.range;
-  @Prop() readonly: boolean = initialSettings.readonly;
-  @Prop() resize: boolean = initialSettings.resize;
 
-  // data is array of objects
-  @Prop() source: RevoGrid.DataType[] = [];
+  @Watch('columns')
+  columnChanged(newVal: RevoGrid.ColumnData) {
+    this.columnProvider.setColumns(newVal);
+  }
+
   @Watch('source')
   dataChanged(newVal: RevoGrid.DataType[]): void {
     this.dataProvider.setData(newVal, 'row');
   }
 
-  @Prop() pinnedTopSource: RevoGrid.DataType[] = [];
-  @Watch('pinnedTopSource')
-  dataTopChanged(newVal: RevoGrid.DataType[]) {
-    this.dataProvider.setData(newVal, 'rowPinStart');
-  }
-
-  @Prop() pinnedBottomSource: RevoGrid.DataType[] = [];
   @Watch('pinnedBottomSource')
   dataBottomChanged(newVal: RevoGrid.DataType[]) {
     this.dataProvider.setData(newVal, 'rowPinEnd');
   }
 
-  @Prop() columns: RevoGrid.ColumnData = [];
-  @Watch('columns')
-  columnChanged(newVal: RevoGrid.ColumnData) {
-    this.columnProvider.setColumns(newVal);
+  @Watch('pinnedTopSource')
+  dataTopChanged(newVal: RevoGrid.DataType[]) {
+    this.dataProvider.setData(newVal, 'rowPinStart');
   }
 
   get columnStores(): ColumnStores {

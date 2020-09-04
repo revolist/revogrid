@@ -1,5 +1,18 @@
 # React
 
+## Package installation
+
+RevoGrid provide special wrapper for React. Just import it to your project and it can be used as part of react system.
+
+```jsx
+import {RevoGrid} from '@revolist/revogrid-react';
+
+// jsx
+<RevoGrid columns={this.state.columns} source={this.state.source} onAfterEdit={this.afterEdit}/>;
+```
+
+## Advanced manual installation
+
 With an application built using the `create-react-app` script the easiest way to include the component library is to call `defineCustomElements()` from the `index.js` file.
 Note that in this scenario `applyPolyfills` is needed if you are targeting Edge or IE11.
 

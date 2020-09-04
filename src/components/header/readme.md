@@ -7,12 +7,15 @@
 
 ## Properties
 
-| Property    | Attribute    | Description | Type                        | Default     |
-| ----------- | ------------ | ----------- | --------------------------- | ----------- |
-| `canResize` | `can-resize` |             | `boolean`                   | `undefined` |
-| `colData`   | --           |             | `ColumnDataSchemaRegular[]` | `undefined` |
-| `cols`      | --           |             | `VirtualPositionItem[]`     | `undefined` |
-| `parent`    | `parent`     |             | `string`                    | `''`        |
+| Property        | Attribute        | Description | Type                                    | Default     |
+| --------------- | ---------------- | ----------- | --------------------------------------- | ----------- |
+| `canResize`     | `can-resize`     |             | `boolean`                               | `undefined` |
+| `colData`       | --               |             | `ColumnDataSchemaRegular[]`             | `undefined` |
+| `cols`          | --               |             | `VirtualPositionItem[]`                 | `undefined` |
+| `dimensionCol`  | --               |             | `ObservableMap<DimensionSettingsState>` | `undefined` |
+| `groupingDepth` | `grouping-depth` |             | `number`                                | `0`         |
+| `groups`        | --               |             | `{ [level: number]: Group[]; }`         | `undefined` |
+| `parent`        | `parent`         |             | `string`                                | `''`        |
 
 
 ## Events

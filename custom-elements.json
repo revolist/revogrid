@@ -1,0 +1,189 @@
+{
+  "version": 1.1,
+  "tags": [
+    {
+      "name": "revo-grid",
+      "description": {
+        "kind": "markdown",
+        "value": ""
+      },
+      "attributes": [
+        {
+          "name": "col-size",
+          "description": "Indicates default column size."
+        },
+        {
+          "name": "frame-size",
+          "description": "Defines how many rows/columns should be rendered outside visible area."
+        },
+        {
+          "name": "range",
+          "description": "When true, user can range selection."
+        },
+        {
+          "name": "readonly",
+          "description": "When true, grid in read only mode."
+        },
+        {
+          "name": "resize",
+          "description": "When true, columns are resizable."
+        },
+        {
+          "name": "row-size",
+          "description": "Indicates default row size."
+        }
+      ]
+    },
+    {
+      "name": "revogr-data",
+      "description": {
+        "kind": "markdown",
+        "value": ""
+      },
+      "attributes": [
+        {
+          "name": "range",
+          "description": ""
+        },
+        {
+          "name": "readonly",
+          "description": ""
+        },
+        {
+          "name": "uuid",
+          "description": ""
+        }
+      ]
+    },
+    {
+      "name": "revogr-edit",
+      "description": {
+        "kind": "markdown",
+        "value": ""
+      },
+      "attributes": []
+    },
+    {
+      "name": "revogr-header",
+      "description": {
+        "kind": "markdown",
+        "value": ""
+      },
+      "attributes": [
+        {
+          "name": "can-resize",
+          "description": ""
+        },
+        {
+          "name": "grouping-depth",
+          "description": ""
+        },
+        {
+          "name": "parent",
+          "description": ""
+        }
+      ]
+    },
+    {
+      "name": "revogr-overlay-selection",
+      "description": {
+        "kind": "markdown",
+        "value": ""
+      },
+      "attributes": [
+        {
+          "name": "parent",
+          "description": ""
+        },
+        {
+          "name": "readonly",
+          "description": ""
+        }
+      ]
+    },
+    {
+      "name": "revogr-scroll-virtual",
+      "description": {
+        "kind": "markdown",
+        "value": ""
+      },
+      "attributes": [
+        {
+          "name": "content-size",
+          "description": ""
+        },
+        {
+          "name": "dimension",
+          "description": "",
+          "values": [
+            {
+              "name": "col"
+            },
+            {
+              "name": "row"
+            }
+          ]
+        },
+        {
+          "name": "virtual-size",
+          "description": ""
+        }
+      ]
+    },
+    {
+      "name": "revogr-text-editor",
+      "description": {
+        "kind": "markdown",
+        "value": ""
+      },
+      "attributes": [
+        {
+          "name": "value",
+          "description": ""
+        }
+      ]
+    },
+    {
+      "name": "revogr-viewport",
+      "description": {
+        "kind": "markdown",
+        "value": "Renders viewport"
+      },
+      "attributes": [
+        {
+          "name": "range",
+          "description": ""
+        },
+        {
+          "name": "readonly",
+          "description": ""
+        },
+        {
+          "name": "resize",
+          "description": ""
+        },
+        {
+          "name": "uuid",
+          "description": ""
+        }
+      ]
+    },
+    {
+      "name": "revogr-viewport-scroll",
+      "description": {
+        "kind": "markdown",
+        "value": ""
+      },
+      "attributes": [
+        {
+          "name": "content-height",
+          "description": ""
+        },
+        {
+          "name": "content-width",
+          "description": ""
+        }
+      ]
+    }
+  ]
+}
