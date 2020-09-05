@@ -11,6 +11,7 @@
 | -------------------- | ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------- | ----------------------------------- |
 | `colSize`            | `col-size`   | Indicates default column size.                                                                                                                                               | `number`                                                  | `initialSettings.defaultColumnSize` |
 | `columns`            | --           | Columns - defines an array of grid columns. Can be column or grouped column.                                                                                                 | `(ColumnDataSchemaRegular \| ColumnDataSchemaGrouping)[]` | `[]`                                |
+| `editors`            | --           | Custom editors register                                                                                                                                                      | `{ [name: string]: EditorCtr; }`                          | `{}`                                |
 | `frameSize`          | `frame-size` | Defines how many rows/columns should be rendered outside visible area.                                                                                                       | `number`                                                  | `initialSettings.frameSize`         |
 | `pinnedBottomSource` | --           | Pinned bottom Source: {[T in ColumnProp]: any} - defines pinned bottom rows data source.                                                                                     | `DataType[]`                                              | `[]`                                |
 | `pinnedTopSource`    | --           | Pinned top Source: {[T in ColumnProp]: any} - defines pinned top rows data source.                                                                                           | `DataType[]`                                              | `[]`                                |
@@ -32,12 +33,11 @@
 graph TD;
   revo-grid --> revogr-viewport
   revogr-viewport --> revogr-data
+  revogr-viewport --> revogr-overlay-selection
   revogr-viewport --> revogr-viewport-scroll
   revogr-viewport --> revogr-header
   revogr-viewport --> revogr-scroll-virtual
-  revogr-data --> revogr-overlay-selection
   revogr-overlay-selection --> revogr-edit
-  revogr-edit --> revogr-text-editor
   style revo-grid fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

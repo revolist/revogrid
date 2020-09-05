@@ -294,15 +294,12 @@ revogr-overlay-selection {
 
 revogr-edit {
   display: block;
+  position: absolute;
+  background-color: #fff;
 
-  .edit-input-wrapper {
-    position: absolute;
-    background-color: #fff;
-
-    input {
-      height: 100%;
-      width: 100%;
-      box-sizing: border-box;
-    }
+  input {
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
   }
 }

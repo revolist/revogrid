@@ -1,47 +1,64 @@
-import {Component, Event, EventEmitter, Prop, h} from '@stencil/core';
-import {ObservableMap} from '@stencil/store';
+import {Component, Event, EventEmitter, Prop, h, VNode, State, Element} from '@stencil/core';
 
-import {Edition, RevoGrid, Selection} from '../../../interfaces';
-import { getItemByIndex } from '../../../store/dimension/dimension.helpers';
+import {Edition, RevoGrid} from '../../../interfaces';
+import {TextEditor} from './text';
 
 @Component({
     tag: 'revogr-edit'
 })
 export class Edit {
-    @Prop() dimensionRow: ObservableMap<RevoGrid.DimensionSettingsState>;
-    @Prop() dimensionCol: ObservableMap<RevoGrid.DimensionSettingsState>;
-    @Prop() editCell: Edition.EditCell|null = null;
+    @Element() element: HTMLElement;
+    @State() currentEditor: Edition.EditorBase|null = null;
+    @Prop() editCell: Edition.EditCell;
+
+    @Prop() column: RevoGrid.ColumnDataSchemaRegular|null;
+    /**
+     * Custom editors register
+     */
+    @Prop() editor: Edition.EditorCtr|null;
 
     @Event({ cancelable: true }) cellEdit: EventEmitter<Edition.SaveDataDetails>;
     @Event() closeEdit: EventEmitter;
-    onSave(e: CustomEvent<Edition.SaveData>): void {
-        e.stopPropagation();
+    onSave(e: Edition.SaveData): void {
         if (this.editCell) {
             this.cellEdit.emit({
                 col: this.editCell.x,
                 row: this.editCell.y,
-                val: e.detail
+                val: e
             });
         }
         setTimeout(() => this.closeEdit.emit(), 0);
     }
 
-    render() {
-        if (!this.editCell) {
-            return '';
+    componentWillRender(): void {
+        if (!this.currentEditor) {
+            if (this.editor) {
+                this.currentEditor = new this.editor((e) => this.onSave(e));
+            } else {
+                this.currentEditor = new TextEditor((e) => this.onSave(e));
+            }
         }
-        const x: number = this.editCell.x;
-        const y: number = this.editCell.y;
-        const col = getItemByIndex(this.dimensionCol.state, x);
-        const row = getItemByIndex(this.dimensionRow.state, y);
-        const style: Selection.RangeAreaCss = {
-            left: `${col.start}px`,
-            top: `${row.start}px`,
-            width: `${col.end - col.start}px`,
-            height: `${row.end - row.start}px`
-        };
-        return <div style={style} class='edit-input-wrapper'>
-            <revogr-text-editor value={this.editCell.val} onEdit={(e) => this.onSave(e)}/>
-        </div>;
+    }
+
+    componentDidRender(): void {
+        if (!this.currentEditor) {
+            return;
+        }
+        this.currentEditor.element = this.element.firstElementChild;
+        this.currentEditor.componentDidRender && this.currentEditor.componentDidRender();
+    }
+
+    disconnectedCallback(): void {
+        if (!this.currentEditor) {
+            return;
+        }
+        this.currentEditor.disconnectedCallback && this.currentEditor.disconnectedCallback();
+        this.currentEditor.element = null;
+        this.currentEditor = null;
+    }
+
+    render() {
+        this.currentEditor.value = this.editCell.val;
+        return this.currentEditor.render(h as unknown as RevoGrid.HyperFunc<VNode>);
     }
 }

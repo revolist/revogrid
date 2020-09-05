@@ -1,14 +1,14 @@
-import {Component, EventEmitter, Event, h, Prop} from '@stencil/core';
+import {h, VNode} from '@stencil/core';
 import {codesLetter} from '../../../utils/keyCodes';
 import {Edition} from '../../../interfaces';
 
-@Component({
-    tag: 'revogr-text-editor'
-})
 export class TextEditor implements Edition.EditorBase {
     private editInput!: HTMLInputElement;
-    @Prop() value: string;
-    @Event() edit: EventEmitter<Edition.SaveData>;
+
+    public element: Element|null = null;
+
+    constructor(private editCallback?: (value: Edition.SaveData) => void, public value = '') {
+    }
 
     componentDidRender(): void {
         if (this.editInput) {
@@ -16,14 +16,22 @@ export class TextEditor implements Edition.EditorBase {
             setTimeout(() => this.editInput.focus(), 0);
         }
     }
-    render() {
-        return <input type='text' ref={(el) => {this.editInput = el}}  onKeyDown={(e) => this.onKeyDown(e)}/>
+
+    disconnectedCallback(): void {}
+
+    // required
+    render(): VNode {
+        return <input
+            type='text'
+            value={this.value}
+            ref={(el) => {this.editInput = el}}
+            onKeyDown={(e) => this.onKeyDown(e)}/>
     }
 
     private onKeyDown(e: KeyboardEvent): void {
         const isEnter: boolean = codesLetter.ENTER === e.code;
-        if (isEnter && e.target) {
-            this.edit.emit((e.target as HTMLInputElement).value);
+        if (isEnter && e.target && this.editCallback) {
+            this.editCallback((e.target as HTMLInputElement).value);
         }
     }
 }

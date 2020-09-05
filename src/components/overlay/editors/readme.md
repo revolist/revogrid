@@ -7,29 +7,32 @@
 
 ## Properties
 
-| Property | Attribute | Description | Type     | Default     |
-| -------- | --------- | ----------- | -------- | ----------- |
-| `value`  | `value`   |             | `string` | `undefined` |
+| Property   | Attribute | Description             | Type                      | Default     |
+| ---------- | --------- | ----------------------- | ------------------------- | ----------- |
+| `column`   | --        |                         | `ColumnDataSchemaRegular` | `undefined` |
+| `editCell` | --        |                         | `EditCell`                | `undefined` |
+| `editor`   | --        | Custom editors register | `EditorCtr`               | `undefined` |
 
 
 ## Events
 
-| Event  | Description | Type                  |
-| ------ | ----------- | --------------------- |
-| `edit` |             | `CustomEvent<string>` |
+| Event       | Description | Type                                                      |
+| ----------- | ----------- | --------------------------------------------------------- |
+| `cellEdit`  |             | `CustomEvent<{ row: number; col: number; val: string; }>` |
+| `closeEdit` |             | `CustomEvent<any>`                                        |
 
 
 ## Dependencies
 
 ### Used by
 
- - [revogr-edit](.)
+ - [revogr-overlay-selection](../selection)
 
 ### Graph
 ```mermaid
 graph TD;
-  revogr-edit --> revogr-text-editor
-  style revogr-text-editor fill:#f9f,stroke:#333,stroke-width:4px
+  revogr-overlay-selection --> revogr-edit
+  style revogr-edit fill:#f9f,stroke:#333,stroke-width:4px
 ```
 
 ----------------------------------------------

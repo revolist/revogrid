@@ -8,7 +8,7 @@ import {DataProvider} from '../../services/data.provider';
 import {DataSourceState} from '../../store/dataSource/data.store';
 import DimensionProvider from '../../services/dimension.provider';
 import ViewportProvider from "../../services/viewport.provider";
-import {RevoGrid} from "../../interfaces";
+import {Edition, RevoGrid} from "../../interfaces";
 
 
 type ColumnStores = {[T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnDataSchemaRegular>>};
@@ -69,6 +69,11 @@ export class RevoGridComponent {
    * Pinned bottom Source: {[T in ColumnProp]: any} - defines pinned bottom rows data source.
    */
   @Prop() pinnedBottomSource: RevoGrid.DataType[] = [];
+
+  /**
+   * Custom editors register
+   */
+  @Prop() editors: Edition.Editors = {};
 
 
   // --------------------------------------------------------------------------
@@ -169,6 +174,7 @@ export class RevoGridComponent {
         uuid={this.uuid}
         resize={this.resize}
         readonly={this.readonly}
-        range={this.range}/>;
+        range={this.range}
+        editors={this.editors}/>;
   }
 }

@@ -1,4 +1,5 @@
 import {Component, Prop, h, Host, Watch, Listen, Element, Event, EventEmitter} from '@stencil/core';
+import {ObservableMap} from '@stencil/store';
 import '../../utils/closestPolifill';
 
 import {UUID} from '../../utils/consts';
@@ -7,13 +8,12 @@ import CellSelectionService from '../overlay/selection/cellSelectionService';
 import ViewportSpace from './viewport.interfaces';
 import {DataProvider} from '../../services/data.provider';
 import {DataSourceState} from '../../store/dataSource/data.store';
-import {ObservableMap} from '@stencil/store';
+import SelectionStoreConnector from '../../services/selection.store.connector';
+import {Edition, RevoGrid, Selection} from '../../interfaces';
 import ViewportProps = ViewportSpace.ViewportProps;
 import ViewportData = ViewportSpace.ViewportData;
 import SlotType = ViewportSpace.SlotType;
 import Properties = ViewportSpace.Properties;
-import SelectionStoreConnector from "../../services/selection.store.connector";
-import {RevoGrid, Selection} from "../../interfaces";
 
 
 /**
@@ -42,6 +42,12 @@ export class RevogrViewport {
     @Prop() rowStores: {[T in RevoGrid.DimensionRows]: ObservableMap<DataSourceState<RevoGrid.DataType>>};
     @Prop() dimensions: {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.DimensionSettingsState>};
     @Prop() viewports: {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.ViewportState>};
+
+
+    /**
+     * Custom editors register
+     */
+    @Prop() editors: Edition.Editors = {};
 
     @Prop() dataProvider: DataProvider;
 
@@ -126,11 +132,19 @@ export class RevogrViewport {
                 dataViews.push(
                     <revogr-data
                         {...data}
-                        selectionStoreConnector={this.selectionStoreConnector}
+                        {...{[UUID]: data.uuid}}
                         key={view.prop.key + (++j)}
                         readonly={this.readonly}
                         range={this.range}
-                    />);
+                    >
+                        <revogr-overlay-selection
+                            {...data}
+                            slot='overlay'
+                            selectionStoreConnector={this.selectionStoreConnector}
+                            editors={this.editors}
+                            readonly={this.readonly}/>
+                    </revogr-data>
+                );
             }
             viewPortHtml.push(
                 <revogr-viewport-scroll {...view.prop}
@@ -254,16 +268,17 @@ export class RevogrViewport {
         cols: RevoGrid.VirtualPositionItem[],
         colData: RevoGrid.ColumnDataSchemaRegular[],
         colType: RevoGrid.MultiDimensionType,
-        position: Selection.Cell,
+        pos: Selection.Cell,
         uuid: string
     ): ViewportData[] {
+        let lastCell = this.getLastCell(colType, 'row');
         const dataPart: ViewportData = {
             colData,
-            position,
+            position: pos,
             cols,
             rows,
-            uuid,
-            lastCell: this.getLastCell(colType, 'row'),
+            uuid: `${uuid}-${pos.x}-${pos.y}`,
+            lastCell,
             dataStore: this.rowStores['row'],
 
             slot: 'content',
@@ -271,15 +286,18 @@ export class RevogrViewport {
             dimensionRow: this.dimensions['row']
         };
         const pinned = (type: RevoGrid.DimensionRowPin, slot: SlotType, y: number): ViewportData => {
+            lastCell = this.getLastCell(colType, type);
+            const position = { ...pos, y };
             return {
                 ...dataPart,
                 slot,
+                lastCell,
+                position,
+                uuid: `${uuid}-${position.x}-${position.y}`,
                 dataStore: this.rowStores[type],
                 rows: this.viewports[type].get('items'),
+                style: { height: `${this.dimensions[type].get('realSize')}px` },
                 dimensionRow: this.dimensions[type],
-                lastCell: this.getLastCell(colType, type),
-                position: { ...position, y },
-                style: { height: `${this.dimensions[type].get('realSize')}px` }
             };
         };
         return [

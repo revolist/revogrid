@@ -48,10 +48,6 @@
         {
           "name": "readonly",
           "description": ""
-        },
-        {
-          "name": "uuid",
-          "description": ""
         }
       ]
     },
@@ -92,11 +88,11 @@
       },
       "attributes": [
         {
-          "name": "parent",
+          "name": "readonly",
           "description": ""
         },
         {
-          "name": "readonly",
+          "name": "uuid",
           "description": ""
         }
       ]
@@ -126,19 +122,6 @@
         },
         {
           "name": "virtual-size",
-          "description": ""
-        }
-      ]
-    },
-    {
-      "name": "revogr-text-editor",
-      "description": {
-        "kind": "markdown",
-        "value": ""
-      },
-      "attributes": [
-        {
-          "name": "value",
           "description": ""
         }
       ]
