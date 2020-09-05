@@ -51,7 +51,10 @@ export default class ColumnService implements ColumnServiceI {
     getCellData(r: number, c: number): string {
         const {prop, model} = this.rowDataModel(r, c);
         const val = model[prop as number];
-        return typeof val !== 'undefined' ? val : '';
+        if (typeof val === 'undefined') {
+            return '';
+        }
+        return val.toString();
     }
 
     getSaveData(r: number, c: number, val: string): BeforeSaveDataDetails {
