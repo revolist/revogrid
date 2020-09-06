@@ -1,4 +1,4 @@
-import {Component, Prop, h, Watch, Element, State} from '@stencil/core';
+import {Component, Prop, h, Watch, Element} from '@stencil/core';
 import {ObservableMap} from '@stencil/store';
 import reduce from 'lodash/reduce';
 
@@ -82,11 +82,11 @@ export class RevoGridComponent {
   //
   // --------------------------------------------------------------------------
 
-  @State() uuid: string|null = null;
-  @State() columnProvider: ColumnDataProvider;
-  @State() dataProvider: DataProvider;
-  @State() dimensionProvider: DimensionProvider;
-  @State() viewportProvider: ViewportProvider;
+  private uuid: string|null = null;
+  private columnProvider: ColumnDataProvider;
+  private dataProvider: DataProvider;
+  private dimensionProvider: DimensionProvider;
+  private viewportProvider: ViewportProvider;
 
   @Element() element: HTMLElement;
 

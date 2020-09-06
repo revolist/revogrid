@@ -1,15 +1,15 @@
-import {Component, Event, EventEmitter, Prop, h, VNode, State, Element} from '@stencil/core';
+import {Component, Event, EventEmitter, Prop, h, VNode, Element} from '@stencil/core';
 
-import {Edition, RevoGrid} from '../../../interfaces';
-import {TextEditor} from './text';
+import {Edition, RevoGrid} from '../../interfaces';
+import {TextEditor} from './editors/text';
 
 @Component({
     tag: 'revogr-edit'
 })
 export class Edit {
     @Element() element: HTMLElement;
-    @State() currentEditor: Edition.EditorBase|null = null;
     @Prop() editCell: Edition.EditCell;
+    private currentEditor: Edition.EditorBase|null = null;
 
     @Prop() column: RevoGrid.ColumnDataSchemaRegular|null;
     /**
@@ -33,9 +33,9 @@ export class Edit {
     componentWillRender(): void {
         if (!this.currentEditor) {
             if (this.editor) {
-                this.currentEditor = new this.editor((e) => this.onSave(e));
+                this.currentEditor = new this.editor(this.column, (e) => this.onSave(e));
             } else {
-                this.currentEditor = new TextEditor((e) => this.onSave(e));
+                this.currentEditor = new TextEditor(this.column, (e) => this.onSave(e));
             }
         }
     }
@@ -52,13 +52,17 @@ export class Edit {
         if (!this.currentEditor) {
             return;
         }
+
         this.currentEditor.disconnectedCallback && this.currentEditor.disconnectedCallback();
         this.currentEditor.element = null;
         this.currentEditor = null;
     }
 
     render() {
-        this.currentEditor.value = this.editCell.val;
-        return this.currentEditor.render(h as unknown as RevoGrid.HyperFunc<VNode>);
+        if (this.currentEditor) {
+            this.currentEditor.editCell = this.editCell;
+            return this.currentEditor.render(h as unknown as RevoGrid.HyperFunc<VNode>);
+        }
+        return '';
     }
 }

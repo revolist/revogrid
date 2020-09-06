@@ -1,4 +1,4 @@
-import {Component, Element, h, Host, Prop, State, Watch} from '@stencil/core';
+import {Component, Element, h, Host, Prop, Watch} from '@stencil/core';
 import {HTMLStencilElement} from '@stencil/core/internal';
 import {ObservableMap} from '@stencil/store';
 
@@ -12,9 +12,9 @@ import {RevoGrid} from "../../interfaces";
   tag: 'revogr-data'
 })
 export class RevogrData {
-  @Element() element!: HTMLStencilElement;
+  private columnService: ColumnService;
 
-  @State() columnService: ColumnService;
+  @Element() element!: HTMLStencilElement;
   @Prop() dataStore: ObservableMap<DataSourceState<RevoGrid.DataType>>;
   @Prop() colData: RevoGrid.ColumnDataSchemaRegular[];
 

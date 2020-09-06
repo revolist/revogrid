@@ -4,7 +4,7 @@ import '../../utils/closestPolifill';
 
 import {UUID} from '../../utils/consts';
 import GridScrollingService, {ElementScroll} from './gridScrollingService';
-import CellSelectionService from '../overlay/selection/cellSelectionService';
+import CellSelectionService from '../overlay/cellSelectionService';
 import ViewportSpace from './viewport.interfaces';
 import {DataProvider} from '../../services/data.provider';
 import {DataSourceState} from '../../store/dataSource/data.store';

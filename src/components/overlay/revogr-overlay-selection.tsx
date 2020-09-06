@@ -1,12 +1,12 @@
 import {Component, Event, EventEmitter, h, Listen, Prop, VNode, Watch} from '@stencil/core';
 import {ObservableMap} from '@stencil/store';
-import {Edition, RevoGrid, Selection} from '../../../interfaces';
-import ColumnService from '../../data/columnService';
-import {getItemByIndex} from '../../../store/dimension/dimension.helpers';
+import {Edition, RevoGrid, Selection} from '../../interfaces';
+import ColumnService from '../data/columnService';
+import {getItemByIndex} from '../../store/dimension/dimension.helpers';
 import CellSelectionService from './cellSelectionService';
-import SelectionStore from '../../../store/selection/selection.store';
-import {codesLetter} from '../../../utils/keyCodes';
-import {isLetterKey} from '../../../utils/keyCodes.utils';
+import SelectionStore from '../../store/selection/selection.store';
+import {codesLetter} from '../../utils/keyCodes';
+import {isLetterKey} from '../../utils/keyCodes.utils';
 import {
     CELL_CLASS,
     FOCUS_CLASS,
@@ -14,8 +14,8 @@ import {
     SELECTION_BORDER_CLASS,
     TMP_SELECTION_BG_CLASS,
     UUID
-} from '../../../utils/consts';
-import {DataSourceState} from '../../../store/dataSource/data.store';
+} from '../../utils/consts';
+import {DataSourceState} from '../../store/dataSource/data.store';
 import RangeAreaCss = Selection.RangeAreaCss;
 
 
@@ -165,9 +165,10 @@ export class OverlaySelection {
         if (this.readonly || !editCell) {
             return;
         }
+        const val = editCell.val || this.columnService.getCellData(editCell.y, editCell.x);
         const editable = {
             ...editCell,
-            val: editCell.val || this.columnService.getCellData(editCell.y, editCell.x)
+            ...this.columnService.getSaveData(editCell.y, editCell.x, val)
         };
 
         const style = this.getElStyle({...editCell, x1: editCell.x, y1: editCell.y });

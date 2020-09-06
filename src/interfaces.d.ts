@@ -164,18 +164,22 @@ export declare namespace Edition {
   };
 
   interface EditCell extends Selection.Cell {
+    model?: RevoGrid.DataType;
     val?: SaveData;
   }
 
   type Editors = {[name: string]: EditorCtr};
 
   interface EditorCtr {
-    new (editCallback?: (value: Edition.SaveData) => void, value?: string): EditorBase;
+    new (
+        column: RevoGrid.ColumnDataSchemaRegular,
+        editCallback?: (value: Edition.SaveData) => void,
+    ): EditorBase;
   }
 
   interface EditorBase {
     element?: Element|null;
-    value?: string|number|null;
+    editCell?: EditCell;
     componentDidRender?(): void;
     disconnectedCallback?(): void;
     render(h?: HyperFunc<VNode>): VNode|HTMLElement;
