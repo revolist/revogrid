@@ -1,4 +1,4 @@
-import {Component, Prop, h, Watch, Element, State} from '@stencil/core';
+import {Component, Prop, h, Watch, Element} from '@stencil/core';
 import {ObservableMap} from '@stencil/store';
 import reduce from 'lodash/reduce';
 
@@ -8,7 +8,7 @@ import {DataProvider} from '../../services/data.provider';
 import {DataSourceState} from '../../store/dataSource/data.store';
 import DimensionProvider from '../../services/dimension.provider';
 import ViewportProvider from "../../services/viewport.provider";
-import {RevoGrid} from "../../interfaces";
+import {Edition, RevoGrid} from "../../interfaces";
 
 
 type ColumnStores = {[T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnDataSchemaRegular>>};
@@ -70,6 +70,11 @@ export class RevoGridComponent {
    */
   @Prop() pinnedBottomSource: RevoGrid.DataType[] = [];
 
+  /**
+   * Custom editors register
+   */
+  @Prop() editors: Edition.Editors = {};
+
 
   // --------------------------------------------------------------------------
   //
@@ -77,11 +82,11 @@ export class RevoGridComponent {
   //
   // --------------------------------------------------------------------------
 
-  @State() uuid: string|null = null;
-  @State() columnProvider: ColumnDataProvider;
-  @State() dataProvider: DataProvider;
-  @State() dimensionProvider: DimensionProvider;
-  @State() viewportProvider: ViewportProvider;
+  private uuid: string|null = null;
+  private columnProvider: ColumnDataProvider;
+  private dataProvider: DataProvider;
+  private dimensionProvider: DimensionProvider;
+  private viewportProvider: ViewportProvider;
 
   @Element() element: HTMLElement;
 
@@ -169,6 +174,7 @@ export class RevoGridComponent {
         uuid={this.uuid}
         resize={this.resize}
         readonly={this.readonly}
-        range={this.range}/>;
+        range={this.range}
+        editors={this.editors}/>;
   }
 }

@@ -62,6 +62,5 @@
     "interactjs": "1.8.4",
     "lodash": "^4.17.15"
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }

@@ -8,6 +8,8 @@ import {RevoGrid} from "../../interfaces";
 })
 export class RevogrScrollVirtual {
     private scrollSize: number = 0;
+    private isAutoHide: boolean = false;
+    private autoHideTimeout: number = 0;
     private scrollService: LocalScrollService;
 
     @Element() element: HTMLElement;
@@ -54,8 +56,13 @@ export class RevogrScrollVirtual {
         });
     }
 
+    disconnectedCallback(): void {
+        clearTimeout(this.autoHideTimeout);
+    }
+
     componentWillLoad(): void {
         this.scrollSize = getScrollbarWidth(document);
+        this.isAutoHide = !this.scrollSize;
     }
 
     componentDidRender(): void {
@@ -72,13 +79,29 @@ export class RevogrScrollVirtual {
         }, this.dimension);
     }
 
+    onScroll(e: MouseEvent): void {
+        let type: 'scrollLeft'|'scrollTop' = 'scrollLeft';
+        if (this.dimension === 'row') {
+            type = 'scrollTop';
+        }
+        if (this.isAutoHide) {
+            this.size = 20;
+            this.autoHideTimeout = this.autoHide(this.autoHideTimeout);
+        }
+        const target: HTMLElement = (e.target as HTMLElement);
+        this.scrollService?.scroll(target[type] || 0, this.dimension);
+    }
+
+    autoHide(timeout?: number): number {
+        clearTimeout(timeout);
+        return setTimeout(() => {
+            this.size = 0;
+        }, 6000) as unknown as number;
+    }
+
     render() {
         const sizeType = this.dimension === 'row' ? 'height' : 'width';
-        return <Host onScroll={(e: Event) => {
-                const type = this.dimension === 'row' ? 'scrollTop' : 'scrollLeft';
-                const target: HTMLElement = (e.target as HTMLElement);
-                this.scrollService?.scroll(target[type] || 0, this.dimension);
-            }}>
+        return <Host {...{'auto-hide' : this.isAutoHide }} onScroll={(e: MouseEvent) => this.onScroll(e)}>
             <div style={{[sizeType]: `${this.extContentSize}px`}}/>
         </Host>;
     }

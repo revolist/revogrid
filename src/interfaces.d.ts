@@ -1,3 +1,5 @@
+import {VNode} from "@stencil/core";
+
 export declare namespace RevoGrid {
   type DimensionTypeRow = 'row';
   type DimensionTypeCol = 'col';
@@ -42,6 +44,7 @@ export declare namespace RevoGrid {
 
   interface ColumnDataSchemaRegular extends ColumnDataSchemaBase {
     prop: ColumnProp;
+    editor?: string;
     pin?: DimensionColPin;
   }
 
@@ -147,6 +150,7 @@ export declare namespace Selection {
 }
 
 export declare namespace Edition {
+  import HyperFunc = RevoGrid.HyperFunc;
   type SaveData = string;
   type SaveDataDetails = {
     row: Selection.RowIndex;
@@ -160,9 +164,24 @@ export declare namespace Edition {
   };
 
   interface EditCell extends Selection.Cell {
+    model?: RevoGrid.DataType;
     val?: SaveData;
   }
 
+  type Editors = {[name: string]: EditorCtr};
+
+  interface EditorCtr {
+    new (
+        column: RevoGrid.ColumnDataSchemaRegular,
+        editCallback?: (value: Edition.SaveData) => void,
+    ): EditorBase;
+  }
+
   interface EditorBase {
+    element?: Element|null;
+    editCell?: EditCell;
+    componentDidRender?(): void;
+    disconnectedCallback?(): void;
+    render(h?: HyperFunc<VNode>): VNode|HTMLElement;
   }
 }

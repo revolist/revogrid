@@ -1,9 +1,9 @@
 import {h, VNode} from '@stencil/core';
+import {ObservableMap} from '@stencil/store';
+import {DataSourceState} from '../../store/dataSource/data.store';
+import {Edition, RevoGrid} from '../../interfaces';
 
-import {DataSourceState} from "../../store/dataSource/data.store";
-import {ObservableMap} from "@stencil/store";
 import BeforeSaveDataDetails = Edition.BeforeSaveDataDetails;
-import {Edition, RevoGrid} from "../../interfaces";
 
 export interface ColumnServiceI {
     columns: RevoGrid.ColumnDataSchemaRegular[];
@@ -50,7 +50,11 @@ export default class ColumnService implements ColumnServiceI {
 
     getCellData(r: number, c: number): string {
         const {prop, model} = this.rowDataModel(r, c);
-        return model[prop as number] || '';
+        const val = model[prop as number];
+        if (typeof val === 'undefined') {
+            return '';
+        }
+        return val.toString();
     }
 
     getSaveData(r: number, c: number, val: string): BeforeSaveDataDetails {
@@ -60,6 +64,10 @@ export default class ColumnService implements ColumnServiceI {
             model,
             val
         }
+    }
+
+    getCellEditor(_r: number, c: number): string|undefined {
+        return this.columns[c]?.editor;
     }
 
     rowDataModel(r: number, c: number): RevoGrid.ColumnDataSchemaModel {

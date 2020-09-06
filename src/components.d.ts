@@ -8,7 +8,6 @@ import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 import { Edition, RevoGrid, Selection } from "./interfaces";
 import { ObservableMap } from "@stencil/store";
 import { DataSourceState, Groups } from "./store/dataSource/data.store";
-import { ColumnServiceI } from "./components/data/columnService";
 import { DataProvider } from "./services/data.provider";
 export namespace Components {
     interface RevoGrid {
@@ -20,6 +19,10 @@ export namespace Components {
           * Columns - defines an array of grid columns. Can be column or grouped column.
          */
         "columns": (RevoGrid.ColumnDataSchemaRegular|RevoGrid.ColumnDataSchemaGrouping)[];
+        /**
+          * Custom editors register
+         */
+        "editors": Edition.Editors;
         /**
           * Defines how many rows/columns should be rendered outside visible area.
          */
@@ -57,20 +60,17 @@ export namespace Components {
         "colData": RevoGrid.ColumnDataSchemaRegular[];
         "cols": RevoGrid.VirtualPositionItem[];
         "dataStore": ObservableMap<DataSourceState<RevoGrid.DataType>>;
-        "dimensionCol": ObservableMap<RevoGrid.DimensionSettingsState>;
-        "dimensionRow": ObservableMap<RevoGrid.DimensionSettingsState>;
-        "lastCell": Selection.Cell;
-        "position": Selection.Cell;
         "range": boolean;
         "readonly": boolean;
         "rows": RevoGrid.VirtualPositionItem[];
-        "selectionStoreConnector": Selection.SelectionStoreConnectorI;
-        "uuid": string;
     }
     interface RevogrEdit {
-        "dimensionCol": ObservableMap<RevoGrid.DimensionSettingsState>;
-        "dimensionRow": ObservableMap<RevoGrid.DimensionSettingsState>;
-        "editCell": Edition.EditCell|null;
+        "column": RevoGrid.ColumnDataSchemaRegular|null;
+        "editCell": Edition.EditCell;
+        /**
+          * Custom editors register
+         */
+        "editor": Edition.EditorCtr|null;
     }
     interface RevogrHeader {
         "canResize": boolean;
@@ -82,14 +82,19 @@ export namespace Components {
         "parent": string;
     }
     interface RevogrOverlaySelection {
-        "columnService": ColumnServiceI;
+        "colData": RevoGrid.ColumnDataSchemaRegular[];
+        "dataStore": ObservableMap<DataSourceState<RevoGrid.DataType>>;
         "dimensionCol": ObservableMap<RevoGrid.DimensionSettingsState>;
         "dimensionRow": ObservableMap<RevoGrid.DimensionSettingsState>;
+        /**
+          * Custom editors register
+         */
+        "editors": Edition.Editors;
         "lastCell": Selection.Cell;
-        "parent": string;
         "position": Selection.Cell;
         "readonly": boolean;
         "selectionStoreConnector": Selection.SelectionStoreConnectorI;
+        "uuid": string;
     }
     interface RevogrScrollVirtual {
         "contentSize": number;
@@ -97,13 +102,14 @@ export namespace Components {
         "setScroll": (e: RevoGrid.ViewPortScrollEvent) => Promise<void>;
         "virtualSize": number;
     }
-    interface RevogrTextEditor {
-        "value": string;
-    }
     interface RevogrViewport {
         "columnStores": {[T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnDataSchemaRegular>>};
         "dataProvider": DataProvider;
         "dimensions": {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.DimensionSettingsState>};
+        /**
+          * Custom editors register
+         */
+        "editors": Edition.Editors;
         "range": boolean;
         "readonly": boolean;
         "resize": boolean;
@@ -154,12 +160,6 @@ declare global {
         prototype: HTMLRevogrScrollVirtualElement;
         new (): HTMLRevogrScrollVirtualElement;
     };
-    interface HTMLRevogrTextEditorElement extends Components.RevogrTextEditor, HTMLStencilElement {
-    }
-    var HTMLRevogrTextEditorElement: {
-        prototype: HTMLRevogrTextEditorElement;
-        new (): HTMLRevogrTextEditorElement;
-    };
     interface HTMLRevogrViewportElement extends Components.RevogrViewport, HTMLStencilElement {
     }
     var HTMLRevogrViewportElement: {
@@ -179,7 +179,6 @@ declare global {
         "revogr-header": HTMLRevogrHeaderElement;
         "revogr-overlay-selection": HTMLRevogrOverlaySelectionElement;
         "revogr-scroll-virtual": HTMLRevogrScrollVirtualElement;
-        "revogr-text-editor": HTMLRevogrTextEditorElement;
         "revogr-viewport": HTMLRevogrViewportElement;
         "revogr-viewport-scroll": HTMLRevogrViewportScrollElement;
     }
@@ -194,6 +193,10 @@ declare namespace LocalJSX {
           * Columns - defines an array of grid columns. Can be column or grouped column.
          */
         "columns"?: (RevoGrid.ColumnDataSchemaRegular|RevoGrid.ColumnDataSchemaGrouping)[];
+        /**
+          * Custom editors register
+         */
+        "editors"?: Edition.Editors;
         /**
           * Defines how many rows/columns should be rendered outside visible area.
          */
@@ -231,22 +234,17 @@ declare namespace LocalJSX {
         "colData"?: RevoGrid.ColumnDataSchemaRegular[];
         "cols"?: RevoGrid.VirtualPositionItem[];
         "dataStore"?: ObservableMap<DataSourceState<RevoGrid.DataType>>;
-        "dimensionCol"?: ObservableMap<RevoGrid.DimensionSettingsState>;
-        "dimensionRow"?: ObservableMap<RevoGrid.DimensionSettingsState>;
-        "lastCell"?: Selection.Cell;
-        "onAfterEdit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
-        "onBeforeEdit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
-        "position"?: Selection.Cell;
         "range"?: boolean;
         "readonly"?: boolean;
         "rows"?: RevoGrid.VirtualPositionItem[];
-        "selectionStoreConnector"?: Selection.SelectionStoreConnectorI;
-        "uuid"?: string;
     }
     interface RevogrEdit {
-        "dimensionCol"?: ObservableMap<RevoGrid.DimensionSettingsState>;
-        "dimensionRow"?: ObservableMap<RevoGrid.DimensionSettingsState>;
-        "editCell"?: Edition.EditCell|null;
+        "column"?: RevoGrid.ColumnDataSchemaRegular|null;
+        "editCell"?: Edition.EditCell;
+        /**
+          * Custom editors register
+         */
+        "editor"?: Edition.EditorCtr|null;
         "onCellEdit"?: (event: CustomEvent<Edition.SaveDataDetails>) => void;
         "onCloseEdit"?: (event: CustomEvent<any>) => void;
     }
@@ -262,14 +260,21 @@ declare namespace LocalJSX {
         "parent"?: string;
     }
     interface RevogrOverlaySelection {
-        "columnService"?: ColumnServiceI;
+        "colData"?: RevoGrid.ColumnDataSchemaRegular[];
+        "dataStore"?: ObservableMap<DataSourceState<RevoGrid.DataType>>;
         "dimensionCol"?: ObservableMap<RevoGrid.DimensionSettingsState>;
         "dimensionRow"?: ObservableMap<RevoGrid.DimensionSettingsState>;
+        /**
+          * Custom editors register
+         */
+        "editors"?: Edition.Editors;
         "lastCell"?: Selection.Cell;
-        "parent"?: string;
+        "onAfterEdit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
+        "onBeforeEdit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
         "position"?: Selection.Cell;
         "readonly"?: boolean;
         "selectionStoreConnector"?: Selection.SelectionStoreConnectorI;
+        "uuid"?: string;
     }
     interface RevogrScrollVirtual {
         "contentSize"?: number;
@@ -277,14 +282,14 @@ declare namespace LocalJSX {
         "onScrollVirtual"?: (event: CustomEvent<RevoGrid.ViewPortScrollEvent>) => void;
         "virtualSize"?: number;
     }
-    interface RevogrTextEditor {
-        "onEdit"?: (event: CustomEvent<Edition.SaveData>) => void;
-        "value"?: string;
-    }
     interface RevogrViewport {
         "columnStores"?: {[T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnDataSchemaRegular>>};
         "dataProvider"?: DataProvider;
         "dimensions"?: {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.DimensionSettingsState>};
+        /**
+          * Custom editors register
+         */
+        "editors"?: Edition.Editors;
         "onSetDimensionSize"?: (event: CustomEvent<{type: RevoGrid.MultiDimensionType, sizes: RevoGrid.ViewSettingSizeProp}>) => void;
         "onSetViewportCoordinate"?: (event: CustomEvent<RevoGrid.ViewPortScrollEvent>) => void;
         "onSetViewportSize"?: (event: CustomEvent<RevoGrid.ViewPortResizeEvent>) => void;
@@ -308,7 +313,6 @@ declare namespace LocalJSX {
         "revogr-header": RevogrHeader;
         "revogr-overlay-selection": RevogrOverlaySelection;
         "revogr-scroll-virtual": RevogrScrollVirtual;
-        "revogr-text-editor": RevogrTextEditor;
         "revogr-viewport": RevogrViewport;
         "revogr-viewport-scroll": RevogrViewportScroll;
     }
@@ -323,7 +327,6 @@ declare module "@stencil/core" {
             "revogr-header": LocalJSX.RevogrHeader & JSXBase.HTMLAttributes<HTMLRevogrHeaderElement>;
             "revogr-overlay-selection": LocalJSX.RevogrOverlaySelection & JSXBase.HTMLAttributes<HTMLRevogrOverlaySelectionElement>;
             "revogr-scroll-virtual": LocalJSX.RevogrScrollVirtual & JSXBase.HTMLAttributes<HTMLRevogrScrollVirtualElement>;
-            "revogr-text-editor": LocalJSX.RevogrTextEditor & JSXBase.HTMLAttributes<HTMLRevogrTextEditorElement>;
             "revogr-viewport": LocalJSX.RevogrViewport & JSXBase.HTMLAttributes<HTMLRevogrViewportElement>;
             "revogr-viewport-scroll": LocalJSX.RevogrViewportScroll & JSXBase.HTMLAttributes<HTMLRevogrViewportScrollElement>;
         }

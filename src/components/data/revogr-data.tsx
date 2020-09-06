@@ -1,54 +1,31 @@
-import {Component, Element, Event, EventEmitter, h, Host, Listen, Prop, State, Watch} from '@stencil/core';
+import {Component, Element, h, Host, Prop, Watch} from '@stencil/core';
 import {HTMLStencilElement} from '@stencil/core/internal';
 import {ObservableMap} from '@stencil/store';
 
 import ColumnService from './columnService';
-import {CELL_CLASS, DATA_COL, DATA_ROW, DISABLED_CLASS, UUID} from '../../utils/consts';
+import {CELL_CLASS, DATA_COL, DATA_ROW, DISABLED_CLASS} from '../../utils/consts';
 
 import {DataSourceState} from '../../store/dataSource/data.store';
-import {Edition, RevoGrid, Selection} from "../../interfaces";
+import {RevoGrid} from "../../interfaces";
 
 @Component({
   tag: 'revogr-data'
 })
 export class RevogrData {
+  private columnService: ColumnService;
+
   @Element() element!: HTMLStencilElement;
-
-  @State() columnService: ColumnService;
   @Prop() dataStore: ObservableMap<DataSourceState<RevoGrid.DataType>>;
-  @Prop() selectionStoreConnector: Selection.SelectionStoreConnectorI;
-
-  @Prop() dimensionRow: ObservableMap<RevoGrid.DimensionSettingsState>;
-  @Prop() dimensionCol: ObservableMap<RevoGrid.DimensionSettingsState>;
+  @Prop() colData: RevoGrid.ColumnDataSchemaRegular[];
 
   @Prop() readonly: boolean;
   @Prop() range: boolean;
 
   @Prop() rows: RevoGrid.VirtualPositionItem[];
   @Prop() cols: RevoGrid.VirtualPositionItem[];
-  @Prop() lastCell: Selection.Cell;
-  @Prop() position: Selection.Cell;
-  @Prop() uuid: string = '';
 
-  @Prop() colData: RevoGrid.ColumnDataSchemaRegular[];
   @Watch('colData') colChanged(newData: RevoGrid.ColumnDataSchemaRegular[]): void {
     this.columnService.columns = newData;
-  }
-
-  @Event() afterEdit: EventEmitter<Edition.BeforeSaveDataDetails>;
-  @Event() beforeEdit: EventEmitter<Edition.BeforeSaveDataDetails>;
-  @Listen('cellEdit')
-  onSave(e: CustomEvent<Edition.SaveDataDetails>): void {
-    e.cancelBubble = true;
-    const dataToSave = this.columnService.getSaveData(e.detail.row, e.detail.col, e.detail.val);
-    const beforeEdit: CustomEvent<Edition.BeforeSaveDataDetails> = this.beforeEdit.emit(dataToSave);
-    // apply data
-    setTimeout(() => {
-      if (!beforeEdit.defaultPrevented) {
-        this.columnService.setCellData(e.detail.row, e.detail.col, e.detail.val);
-        this.afterEdit.emit(dataToSave);
-      }
-    });
   }
 
   connectedCallback(): void {
@@ -73,23 +50,9 @@ export class RevogrData {
       }
       rowsEls.push(<div class='row' style={{ height: `${row.size}px`, transform: `translateY(${row.start}px)` }}>{cells}</div>);
     }
-    const uuid = `${this.uuid}-${this.position.x}-${this.position.y}`;
-    const parent: string = `[${UUID}="${uuid}"]`;
-    const hostProp = { [`${UUID}`]: uuid };
     if (!this.readonly || this.range) {
-        rowsEls.push(
-            <revogr-overlay-selection
-              slot='content'
-              selectionStoreConnector={this.selectionStoreConnector}
-              readonly={this.readonly}
-              columnService={this.columnService}
-              dimensionCol={this.dimensionCol}
-              dimensionRow={this.dimensionRow}
-              lastCell={this.lastCell}
-              position={this.position}
-              parent={parent}/>
-        );
+        rowsEls.push(<slot name='overlay'/>);
     }
-    return <Host {...hostProp}>{rowsEls}</Host>;
+    return <Host>{rowsEls}</Host>;
   }
 }

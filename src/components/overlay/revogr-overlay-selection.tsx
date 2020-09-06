@@ -1,19 +1,21 @@
-import {Component, h, Listen, Prop, Watch} from '@stencil/core';
+import {Component, Event, EventEmitter, h, Listen, Prop, VNode, Watch} from '@stencil/core';
 import {ObservableMap} from '@stencil/store';
-import {RevoGrid, Selection} from '../../../interfaces';
-import {ColumnServiceI} from '../../data/columnService';
-import {getItemByIndex} from '../../../store/dimension/dimension.helpers';
+import {Edition, RevoGrid, Selection} from '../../interfaces';
+import ColumnService from '../data/columnService';
+import {getItemByIndex} from '../../store/dimension/dimension.helpers';
 import CellSelectionService from './cellSelectionService';
-import SelectionStore from '../../../store/selection/selection.store';
-import {codesLetter} from '../../../utils/keyCodes';
-import {isLetterKey} from '../../../utils/keyCodes.utils';
+import SelectionStore from '../../store/selection/selection.store';
+import {codesLetter} from '../../utils/keyCodes';
+import {isLetterKey} from '../../utils/keyCodes.utils';
 import {
     CELL_CLASS,
     FOCUS_CLASS,
     SELECTION_BG_CLASS,
     SELECTION_BORDER_CLASS,
-    TMP_SELECTION_BG_CLASS
-} from '../../../utils/consts';
+    TMP_SELECTION_BG_CLASS,
+    UUID
+} from '../../utils/consts';
+import {DataSourceState} from '../../store/dataSource/data.store';
 import RangeAreaCss = Selection.RangeAreaCss;
 
 
@@ -22,22 +24,51 @@ import RangeAreaCss = Selection.RangeAreaCss;
 })
 export class OverlaySelection {
     private selectionService: CellSelectionService;
+    private columnService: ColumnService;
+
     private selectionStore: SelectionStore;
     private focusSection: HTMLInputElement;
+
     @Prop() selectionStoreConnector: Selection.SelectionStoreConnectorI;
 
+    @Prop() dataStore: ObservableMap<DataSourceState<RevoGrid.DataType>>;
+    @Prop() colData: RevoGrid.ColumnDataSchemaRegular[];
     @Prop() readonly: boolean;
-    @Prop() parent: string = '';
+    @Prop() uuid: string;
 
     @Prop() dimensionRow: ObservableMap<RevoGrid.DimensionSettingsState>;
     @Prop() dimensionCol: ObservableMap<RevoGrid.DimensionSettingsState>;
-    @Prop() columnService: ColumnServiceI;
 
     @Prop() lastCell: Selection.Cell;
+    @Prop() position: Selection.Cell;
+
+    /**
+     * Custom editors register
+     */
+    @Prop() editors: Edition.Editors = {};
+
+    @Watch('colData') colChanged(newData: RevoGrid.ColumnDataSchemaRegular[]): void {
+        this.columnService.columns = newData;
+    }
     @Watch('lastCell') lastCellChanged(cell: Selection.Cell): void {
         this.selectionStore?.setLastCell(cell);
     }
-    @Prop() position: Selection.Cell;
+
+    @Event() afterEdit: EventEmitter<Edition.BeforeSaveDataDetails>;
+    @Event() beforeEdit: EventEmitter<Edition.BeforeSaveDataDetails>;
+    @Listen('cellEdit')
+    onSave(e: CustomEvent<Edition.SaveDataDetails>): void {
+        e.cancelBubble = true;
+        const dataToSave = this.columnService.getSaveData(e.detail.row, e.detail.col, e.detail.val);
+        const beforeEdit: CustomEvent<Edition.BeforeSaveDataDetails> = this.beforeEdit.emit(dataToSave);
+        // apply data
+        setTimeout(() => {
+            if (!beforeEdit.defaultPrevented) {
+                this.columnService.setCellData(e.detail.row, e.detail.col, e.detail.val);
+                this.afterEdit.emit(dataToSave);
+            }
+        });
+    }
 
     @Listen('dblclick', { target: 'parent' })
     onDoubleClick(): void {
@@ -67,9 +98,10 @@ export class OverlaySelection {
     }
 
     connectedCallback(): void {
+        this.columnService = new ColumnService(this.dataStore, this.colData);
         this.selectionStore = new SelectionStore(this.lastCell, this.position, this.selectionStoreConnector);
         this.selectionService = new CellSelectionService(
-            `${this.parent} .${CELL_CLASS}`,
+            `[${UUID}="${this.uuid}"] .${CELL_CLASS}`,
             {
                 focus: (cell, isMulti?) => {
                     this.selectionStore.focus(cell, isMulti)
@@ -96,7 +128,7 @@ export class OverlaySelection {
         const range = this.selectionStore.store.get('range');
         const selectionFocus = this.selectionStore.store.get('focus');
         const tempRange = this.selectionStore.store.get('tempRange');
-        const els: HTMLElement[] = [];
+        const els: (HTMLElement|VNode)[] = [];
         if (range) {
             const style: RangeAreaCss = this.getElStyle(range);
             els.push(
@@ -119,16 +151,36 @@ export class OverlaySelection {
             els.push(<div class={FOCUS_CLASS} style={focusStyle}/>);
         }
         els.push(<input type='text' class='edit-focus-input' ref={el => this.focusSection = el} style={focusStyle}/>);
-        if (!this.readonly) {
-            const editCell = this.selectionStore.store.get('edit');
-            els.push(<revogr-edit
-                onCloseEdit={() => this.selectionStoreConnector.setEdit(false)}
-                editCell={editCell && {...editCell, val: editCell.val || this.columnService.getCellData(editCell.y, editCell.x)}}
-                dimensionRow={this.dimensionRow}
-                dimensionCol={this.dimensionCol}
-            />);
+        const editCell = this.getEditCell();
+        if (editCell) {
+            els.push(editCell);
         }
+
         return els;
+    }
+
+    private getEditCell(): VNode|void {
+        // if can edit
+        const editCell = this.selectionStore.store.get('edit');
+        if (this.readonly || !editCell) {
+            return;
+        }
+        const val = editCell.val || this.columnService.getCellData(editCell.y, editCell.x);
+        const editable = {
+            ...editCell,
+            ...this.columnService.getSaveData(editCell.y, editCell.x, val)
+        };
+
+        const style = this.getElStyle({...editCell, x1: editCell.x, y1: editCell.y });
+
+        return <revogr-edit
+            class='edit-input-wrapper'
+            onCloseEdit={() => this.selectionStoreConnector.setEdit(false)}
+            editCell={editable}
+            column={this.columnService.columns[editCell.x]}
+            editor={this.editors[this.columnService.getCellEditor(editCell.y, editCell.x)]}
+            style={style}
+        />
     }
 
     private getElStyle(range: Selection.RangeArea): RangeAreaCss {

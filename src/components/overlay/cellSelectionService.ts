@@ -1,7 +1,7 @@
 import interact from 'interactjs';
-import {getCell} from '../../../services/cell.helpers';
-import {codesLetter} from '../../../utils/keyCodes';
-import {Selection} from '../../../interfaces';
+import {getCell} from '../../services/cell.helpers';
+import {codesLetter} from '../../utils/keyCodes';
+import {Selection} from '../../interfaces';
 import Cell = Selection.Cell;
 
 interface Config {

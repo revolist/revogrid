@@ -12,7 +12,7 @@ import SelectionStoreConnectorI = Selection.SelectionStoreConnectorI;
 export default class SelectionStore {
     public readonly store: ObservableMap<State>;
     constructor(lastCell: Cell, storePosition: Cell, private selectionStoreConnector: SelectionStoreConnectorI) {
-        this.store = selectionStoreConnector.register(storePosition.y, storePosition.x) as ObservableMap<State>;;
+        this.store = selectionStoreConnector.register(storePosition.y, storePosition.x) as ObservableMap<State>;
         this.setLastCell(lastCell);
     }
 
