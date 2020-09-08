@@ -3,7 +3,7 @@ import {ObservableMap} from '@stencil/store';
 import '../../utils/closestPolifill';
 
 import {UUID} from '../../utils/consts';
-import {gatherColumnData} from "./viewport.helpers";
+import {gatherColumnData, ViewportColumn} from "./viewport.helpers";
 import GridScrollingService, {ElementScroll} from './gridScrollingService';
 import CellSelectionService from '../overlay/cellSelectionService';
 import ViewportSpace from './viewport.interfaces';
@@ -87,65 +87,38 @@ export class RevogrViewport {
         const rows: RevoGrid.VirtualPositionItem[] = this.viewports['row'].get('items');
         const contentHeight: number = this.dimensions['row'].get('realSize');
 
-        const viewports: ViewportProps[] = [
-            // left side
-            gatherColumnData({
-                colType: 'colPinStart',
-                position: { x: 0, y: 1 },
+        const viewports: ViewportProps[] = [];
+        const cols: RevoGrid.DimensionCols[] = ['colPinStart', 'col', 'colPinEnd'];
+        let index: number = 0;
+        cols.forEach((val) => {
+            const colStore = this.columnStores[val];
+            if (colStore.get('items').length) {
+                const column: ViewportColumn = {
+                    colType: val,
+                    position: { x: index, y: 1 },
 
 
-                contentHeight: contentHeight,
-                fixWidth: true,
-                uuid: `${this.uuid}-0`,
-                rows: rows,
+                    contentHeight: contentHeight,
+                    fixWidth: val !== 'col',
+                    uuid: `${this.uuid}-${index}`,
+                    rows: rows,
 
-                viewports: this.viewports,
-                dimensions: this.dimensions,
-                rowStores: this.rowStores,
-                colStore: this.columnStores['colPinStart'],
-                onHeaderResize: (e: CustomEvent<RevoGrid.ViewSettingSizeProp>) =>
-                    this.setDimensionSize.emit({ type: 'colPinStart', sizes: e.detail })
-            }),
+                    viewports: this.viewports,
+                    dimensions: this.dimensions,
+                    rowStores: this.rowStores,
 
-            // center
-            gatherColumnData({
-                colType: 'col',
-                position: {x: 1, y: 1},
-
-
-                contentHeight: contentHeight,
-                uuid: `${this.uuid}-1`,
-                rows: rows,
-
-                viewports: this.viewports,
-                dimensions: this.dimensions,
-                rowStores: this.rowStores,
-                colStore: this.columnStores['col'],
-                onHeaderResize: (e: CustomEvent<RevoGrid.ViewSettingSizeProp>) =>
-                    this.setDimensionSize.emit({ type: 'col', sizes: e.detail }),
-                onResizeViewport: (e: CustomEvent<RevoGrid.ViewPortResizeEvent>) =>
-                    this.setViewportSize.emit(e.detail)
-            }),
-
-            // right side
-            gatherColumnData({
-                colType: 'colPinEnd',
-                position: { x: 2, y: 1 },
-
-
-                contentHeight: contentHeight,
-                fixWidth: true,
-                uuid: `${this.uuid}-2`,
-                rows: rows,
-
-                viewports: this.viewports,
-                dimensions: this.dimensions,
-                rowStores: this.rowStores,
-                colStore: this.columnStores['colPinEnd'],
-                onHeaderResize: (e: CustomEvent<RevoGrid.ViewSettingSizeProp>) =>
-                    this.setDimensionSize.emit({ type: 'colPinEnd', sizes: e.detail })
-            }),
-        ];
+                    colStore,
+                    onHeaderResize: (e: CustomEvent<RevoGrid.ViewSettingSizeProp>) =>
+                        this.setDimensionSize.emit({ type: val, sizes: e.detail })
+                };
+                if (val === 'col') {
+                    column.onResizeViewport = (e: CustomEvent<RevoGrid.ViewPortResizeEvent>) =>
+                        this.setViewportSize.emit(e.detail);
+                }
+                viewports.push(gatherColumnData(column));
+                index++;
+            }
+        });
 
         const viewPortHtml: HTMLElement[] = [];
 

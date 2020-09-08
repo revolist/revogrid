@@ -9,7 +9,7 @@ import Properties = ViewportSpace.Properties;
 import {ObservableMap} from "@stencil/store";
 import {DataSourceState} from "../../store/dataSource/data.store";
 
-interface ViewportColumn {
+export interface ViewportColumn {
     colType: RevoGrid.DimensionCols;
     position: Selection.Cell;
 
@@ -86,10 +86,23 @@ function dataPartition(data: ViewportColumn, type: RevoGrid.DimensionRows, slot:
 
 /** Collect Row data */
 function dataViewPort(data: ViewportColumn): ViewportData[] {
-    const start = dataPartition({ ...data, position: { x: data.position.x, y: 0 } }, 'rowPinStart', 'header', true);
-    const middle = dataPartition({ ...data, position: { x: data.position.x, y: 1 } }, 'row', 'content');
-    const end = dataPartition({ ...data, position: { x: data.position.x, y: 2 } }, 'rowPinEnd', 'footer', true);
-    return [start, middle, end];
+    const viewports: ViewportData[] = [];
+    const types: RevoGrid.DimensionRows[] = ['rowPinStart', 'row', 'rowPinEnd'];
+    const slots: {[key in RevoGrid.DimensionRows]: SlotType} = {
+        'rowPinStart': 'header',
+        'row': 'content',
+        'rowPinEnd': 'footer'
+    };
+    let y: number = 0;
+    types.forEach(type => {
+        if (data.viewports[type].get('items').length || type === 'row') {
+            viewports.push(
+                dataPartition({ ...data, position: { ...data.position, y } }, type, slots[type], type !== 'row')
+            );
+            y++;
+        }
+    });
+    return viewports;
 }
 
 /** Receive last visible in viewport by required type */
