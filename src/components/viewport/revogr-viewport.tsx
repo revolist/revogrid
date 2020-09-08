@@ -3,17 +3,15 @@ import {ObservableMap} from '@stencil/store';
 import '../../utils/closestPolifill';
 
 import {UUID} from '../../utils/consts';
+import {gatherColumnData, ViewportColumn} from "./viewport.helpers";
 import GridScrollingService, {ElementScroll} from './gridScrollingService';
 import CellSelectionService from '../overlay/cellSelectionService';
 import ViewportSpace from './viewport.interfaces';
 import {DataProvider} from '../../services/data.provider';
 import {DataSourceState} from '../../store/dataSource/data.store';
 import SelectionStoreConnector from '../../services/selection.store.connector';
-import {Edition, RevoGrid, Selection} from '../../interfaces';
+import {Edition, RevoGrid} from '../../interfaces';
 import ViewportProps = ViewportSpace.ViewportProps;
-import ViewportData = ViewportSpace.ViewportData;
-import SlotType = ViewportSpace.SlotType;
-import Properties = ViewportSpace.Properties;
 
 
 /**
@@ -87,38 +85,40 @@ export class RevogrViewport {
     render() {
         this.elementToScroll.length = 0;
         const rows: RevoGrid.VirtualPositionItem[] = this.viewports['row'].get('items');
-        const cols: RevoGrid.VirtualPositionItem[] = this.viewports['col'].get('items');
-
         const contentHeight: number = this.dimensions['row'].get('realSize');
 
-        const viewports: ViewportProps[] = [
-            // left side
-            this.pinnedColumnData(
-                'colPinStart',
-                `${this.uuid}-1`,
-                rows,
-                'colPinStart', {x: 0, y: 1},
-                contentHeight
-            ),
+        const viewports: ViewportProps[] = [];
+        const cols: RevoGrid.DimensionCols[] = ['colPinStart', 'col', 'colPinEnd'];
+        let index: number = 0;
+        cols.forEach((val) => {
+            const colStore = this.columnStores[val];
+            if (colStore.get('items').length) {
+                const column: ViewportColumn = {
+                    colType: val,
+                    position: { x: index, y: 1 },
 
-            // center
-            this.centerData(
-                'data-view',
-                `${this.uuid}-0`,
-                rows,
-                cols,
-                {x: 1, y: 1},
-                contentHeight
-            ),
 
-            // right side
-            this.pinnedColumnData(
-                'colPinEnd',
-                `${this.uuid}-2`, rows,
-                'colPinEnd', {x: 2, y: 1},
-                contentHeight
-            )
-        ];
+                    contentHeight: contentHeight,
+                    fixWidth: val !== 'col',
+                    uuid: `${this.uuid}-${index}`,
+                    rows: rows,
+
+                    viewports: this.viewports,
+                    dimensions: this.dimensions,
+                    rowStores: this.rowStores,
+
+                    colStore,
+                    onHeaderResize: (e: CustomEvent<RevoGrid.ViewSettingSizeProp>) =>
+                        this.setDimensionSize.emit({ type: val, sizes: e.detail })
+                };
+                if (val === 'col') {
+                    column.onResizeViewport = (e: CustomEvent<RevoGrid.ViewPortResizeEvent>) =>
+                        this.setViewportSize.emit(e.detail);
+                }
+                viewports.push(gatherColumnData(column));
+                index++;
+            }
+        });
 
         const viewPortHtml: HTMLElement[] = [];
 
@@ -177,142 +177,5 @@ export class RevogrViewport {
                 virtualSize={this.viewports['col'].get('virtualSize')}
                 onScrollVirtual={e => this.scrollingService.onScroll(e.detail)}/>
         </Host>;
-    }
-
-    /** Collect data for pinned columns in required @ViewportProps format */
-    private pinnedColumnData(
-        key: RevoGrid.MultiDimensionType,
-        uuid: string,
-        rows: RevoGrid.VirtualPositionItem[],
-        colType: RevoGrid.DimensionColPin,
-        position: Selection.Cell,
-        contentHeight: number
-    ): ViewportProps {
-        const colStore = this.columnStores[colType];
-        const cols: RevoGrid.VirtualPositionItem[] = this.viewports[colType].get('items');
-        const pinSize = this.dimensions[colType].get('realSize');
-        const parent: string = `[${UUID}="${uuid}"]`;
-        const prop: Properties = {
-            contentWidth: pinSize,
-            style: { minWidth: `${pinSize}px` },
-            class: key,
-            [`${UUID}`]: uuid,
-            contentHeight,
-            key,
-        };
-        const colData = colStore.get('items');
-        const headerProp: Properties = {
-            cols,
-            parent,
-            colData,
-            dimensionCol: this.dimensions[colType],
-            groups: colStore.get('groups'),
-            groupingDepth: colStore.get('groupingDepth'),
-            onHeaderResize: (e: CustomEvent<RevoGrid.ViewSettingSizeProp>) => this.setDimensionSize.emit({
-                type: colType,
-                sizes: e.detail
-            })
-        };
-
-        return {
-            prop,
-            headerProp,
-            parent,
-            dataPorts: this.dataViewPort(rows, cols, colData, colType, position, uuid)
-        };
-    };
-
-
-    /** Collect data for central(core) part */
-    private centerData (
-        key: string,
-        uuid: string,
-        rows: RevoGrid.VirtualPositionItem[],
-        cols: RevoGrid.VirtualPositionItem[],
-        position: Selection.Cell,
-        contentHeight: number,
-        colType: RevoGrid.DimensionCols = 'col'
-    ): ViewportProps {
-        const parent = `[${UUID}="${uuid}"]`;
-        const colStore = this.columnStores[colType];
-        const prop: Properties = {
-            contentWidth: this.dimensions[colType].get('realSize'),
-            class: key,
-            [`${UUID}`]: uuid,
-            onResizeViewport: (e: CustomEvent<RevoGrid.ViewPortResizeEvent>) => this.setViewportSize.emit(e.detail),
-            contentHeight,
-            key
-        };
-        const colData = colStore.get('items');
-        const headerProp: Properties = {
-            colData,
-            cols,
-            parent,
-            dimensionCol: this.dimensions[colType],
-            groups: colStore.get('groups'),
-            groupingDepth: colStore.get('groupingDepth'),
-            onHeaderResize: (e: CustomEvent<RevoGrid.ViewSettingSizeProp>) =>
-                this.setDimensionSize.emit({ type: colType, sizes: e.detail })
-        };
-        return {
-            prop,
-            headerProp,
-            parent,
-            dataPorts: this.dataViewPort(rows, cols, colData, colType, position, uuid)
-        };
-    }
-
-    /** Collect Row data */
-    private dataViewPort(
-        rows: RevoGrid.VirtualPositionItem[],
-        cols: RevoGrid.VirtualPositionItem[],
-        colData: RevoGrid.ColumnDataSchemaRegular[],
-        colType: RevoGrid.MultiDimensionType,
-        pos: Selection.Cell,
-        uuid: string
-    ): ViewportData[] {
-        let lastCell = this.getLastCell(colType, 'row');
-        const dataPart: ViewportData = {
-            colData,
-            position: pos,
-            cols,
-            rows,
-            uuid: `${uuid}-${pos.x}-${pos.y}`,
-            lastCell,
-            dataStore: this.rowStores['row'],
-
-            slot: 'content',
-            dimensionCol: this.dimensions[colType],
-            dimensionRow: this.dimensions['row']
-        };
-        const pinned = (type: RevoGrid.DimensionRowPin, slot: SlotType, y: number): ViewportData => {
-            lastCell = this.getLastCell(colType, type);
-            const position = { ...pos, y };
-            return {
-                ...dataPart,
-                slot,
-                lastCell,
-                position,
-                uuid: `${uuid}-${position.x}-${position.y}`,
-                dataStore: this.rowStores[type],
-                rows: this.viewports[type].get('items'),
-                style: { height: `${this.dimensions[type].get('realSize')}px` },
-                dimensionRow: this.dimensions[type],
-            };
-        };
-        return [
-            pinned('rowPinStart', 'header', 0),
-            dataPart,
-            pinned('rowPinEnd', 'footer', dataPart.position.y + 1)
-        ];
-    }
-
-
-    /** Receive last visible in viewport by required type */
-    private getLastCell(colType: RevoGrid.MultiDimensionType, rowType: RevoGrid.MultiDimensionType): Selection.Cell {
-        return {
-            x: this.viewports[colType].get('realCount'),
-            y: this.viewports[rowType].get('realCount')
-        };
     }
 }
