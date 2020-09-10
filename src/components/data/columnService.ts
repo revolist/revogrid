@@ -6,76 +6,84 @@ import {Edition, RevoGrid} from '../../interfaces';
 import BeforeSaveDataDetails = Edition.BeforeSaveDataDetails;
 
 export interface ColumnServiceI {
-    columns: RevoGrid.ColumnDataSchemaRegular[];
-    setCellData(r: number, c: number, val: string): void;
-    cellRenderer(r: number, c: number): string|VNode;
-    isReadOnly(r: number, c: number): boolean;
-    getCellData(r: number, c: number): string;
+  columns: RevoGrid.ColumnDataSchemaRegular[];
+
+  setCellData(r: number, c: number, val: string): void;
+
+  cellRenderer(r: number, c: number): string | VNode;
+
+  isReadOnly(r: number, c: number): boolean;
+
+  getCellData(r: number, c: number): string;
 }
+
 export default class ColumnService implements ColumnServiceI {
-    private source: RevoGrid.ColumnDataSchemaRegular[] = [];
-    get columns(): RevoGrid.ColumnDataSchemaRegular[] {
-        return this.source;
-    }
-    set columns(source: RevoGrid.ColumnDataSchemaRegular[]) {
-        this.source = source;
-    }
-    constructor(
-        private dataStore: ObservableMap<DataSourceState<RevoGrid.DataType>>,
-        columns: RevoGrid.ColumnDataSchemaRegular[]) {
-        this.source = columns;
-    }
+  private source: RevoGrid.ColumnDataSchemaRegular[] = [];
 
-    isReadOnly(r: number, c: number): boolean {
-        const readOnly: RevoGrid.ReadOnlyFormat = this.columns[c]?.readonly;
-        if (typeof readOnly === 'function') {
-            return readOnly(r, c);
-        }
-        return readOnly;
-    }
+  get columns(): RevoGrid.ColumnDataSchemaRegular[] {
+    return this.source;
+  }
 
-    cellRenderer(r: number, c: number): string|VNode {
-        const tpl: RevoGrid.CellTemplateFunc<VNode> = this.columns[c]?.cellTemplate as RevoGrid.CellTemplateFunc<VNode>;
-        if (tpl) {
-            return tpl(h as unknown as RevoGrid.HyperFunc<VNode>, this.rowDataModel(r, c));
-        }
-        return this.getCellData(r, c);
-    }
+  set columns(source: RevoGrid.ColumnDataSchemaRegular[]) {
+    this.source = source;
+  }
 
-    setCellData(r: number, c: number, val: string): void {
-        const {data, model, prop} = this.rowDataModel(r, c);
-        model[prop as number] = val;
-        this.dataStore.set('items', [...data]);
-    }
+  constructor(
+    private dataStore: ObservableMap<DataSourceState<RevoGrid.DataType>>,
+    columns: RevoGrid.ColumnDataSchemaRegular[]) {
+    this.source = columns;
+  }
 
-    getCellData(r: number, c: number): string {
-        const {prop, model} = this.rowDataModel(r, c);
-        const val = model[prop as number];
-        if (typeof val === 'undefined') {
-            return '';
-        }
-        return val.toString();
+  isReadOnly(r: number, c: number): boolean {
+    const readOnly: RevoGrid.ReadOnlyFormat = this.columns[c]?.readonly;
+    if (typeof readOnly === 'function') {
+      return readOnly(r, c);
     }
+    return readOnly;
+  }
 
-    getSaveData(r: number, c: number, val: string): BeforeSaveDataDetails {
-        const { prop, model } = this.rowDataModel(r, c);
-        return {
-            prop,
-            model,
-            val
-        }
+  cellRenderer(r: number, c: number): string | VNode {
+    const tpl: RevoGrid.CellTemplateFunc<VNode> = this.columns[c]?.cellTemplate as RevoGrid.CellTemplateFunc<VNode>;
+    if (tpl) {
+      return tpl(h as unknown as RevoGrid.HyperFunc<VNode>, this.rowDataModel(r, c));
     }
+    return this.getCellData(r, c);
+  }
 
-    getCellEditor(_r: number, c: number): string|undefined {
-        return this.columns[c]?.editor;
-    }
+  setCellData(r: number, c: number, val: string): void {
+    const {data, model, prop} = this.rowDataModel(r, c);
+    model[prop as number] = val;
+    this.dataStore.set('items', [...data]);
+  }
 
-    rowDataModel(r: number, c: number): RevoGrid.ColumnDataSchemaModel {
-        const prop: RevoGrid.ColumnProp|undefined = this.columns[c]?.prop;
-        const data: RevoGrid.DataSource = this.dataStore.get('items');
-        const model: RevoGrid.DataType = data[r] || {};
-        return { prop, model, data };
+  getCellData(r: number, c: number): string {
+    const {prop, model} = this.rowDataModel(r, c);
+    const val = model[prop as number];
+    if (typeof val === 'undefined') {
+      return '';
     }
+    return val.toString();
+  }
+
+  getSaveData(r: number, c: number, val: string): BeforeSaveDataDetails {
+    const {prop, model} = this.rowDataModel(r, c);
+    return {
+      prop,
+      model,
+      val
+    }
+  }
+
+  getCellEditor(_r: number, c: number): string | undefined {
+    return this.columns[c]?.editor;
+  }
+
+  rowDataModel(r: number, c: number): RevoGrid.ColumnDataSchemaModel {
+    const prop: RevoGrid.ColumnProp | undefined = this.columns[c]?.prop;
+    const data: RevoGrid.DataSource = this.dataStore.get('items');
+    const model: RevoGrid.DataType = data[r] || {};
+    return {prop, model, data};
+  }
 }
 
 

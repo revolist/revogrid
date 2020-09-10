@@ -96,7 +96,6 @@ export namespace Components {
         "range": boolean;
         "readonly": boolean;
         "selectionStore": ObservableMap<Selection.SelectionStoreState>;
-        "uuid": string;
     }
     interface RevogrScrollVirtual {
         "contentSize": number;
@@ -282,7 +281,6 @@ declare namespace LocalJSX {
         "range"?: boolean;
         "readonly"?: boolean;
         "selectionStore"?: ObservableMap<Selection.SelectionStoreState>;
-        "uuid"?: string;
     }
     interface RevogrScrollVirtual {
         "contentSize"?: number;
