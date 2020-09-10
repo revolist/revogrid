@@ -1,4 +1,4 @@
-import {Component, Event, EventEmitter, h, Listen, Prop, VNode, Watch} from '@stencil/core';
+import {Component, Event, EventEmitter, h, Host, Listen, Prop, VNode, Watch, Element, State} from '@stencil/core';
 import {ObservableMap} from '@stencil/store';
 
 import {Edition, RevoGrid, Selection} from '../../interfaces';
@@ -9,7 +9,6 @@ import SelectionStore from '../../store/selection/selection.store';
 import {codesLetter} from '../../utils/keyCodes';
 import {isLetterKey} from '../../utils/keyCodes.utils';
 import {
-    CELL_CLASS,
     FOCUS_CLASS,
     SELECTION_BG_CLASS,
     SELECTION_BORDER_CLASS,
@@ -30,6 +29,10 @@ export class OverlaySelection {
 
     private selectionStoreService: SelectionStore;
     private focusSection: HTMLInputElement;
+
+    @State() autoFill: boolean = false;
+
+    @Element() element: HTMLElement;
 
     @Prop() selectionStore: ObservableMap<Selection.SelectionStoreState>;
 
@@ -84,7 +87,7 @@ export class OverlaySelection {
     }
 
     @Listen('keydown', { target: 'parent' })
-    handleKeyDown(e: KeyboardEvent){
+    handleKeyDown(e: KeyboardEvent): void {
         this.selectionService.keyDown(e);
         if (this.selectionStoreService.edited) {
             switch (e.code) {
@@ -99,6 +102,7 @@ export class OverlaySelection {
             this.canEdit() &&  this.setEdit?.emit(!isEnter ? e.key : '');
         }
     }
+
 
     @Watch('range') onRange(canRange: boolean): void {
         this.selectionService.canRange = canRange;
@@ -119,13 +123,21 @@ export class OverlaySelection {
 
         });
         this.selectionService = new CellSelectionService(
-            `[${UUID}="${this.uuid}"] .${CELL_CLASS}`,
+            `[${UUID}="${this.uuid}"]`,
             {
                 canRange: this.range,
                 focus: (cell, isMulti?) => this.selectionStoreService.focus(cell, isMulti),
                 range: (start, end) => this.selectionStoreService.setRange(start, end),
                 tempRange: (start, end) => this.selectionStoreService.setTempRange(start, end),
-                change: (area, isMulti?) => this.selectionStoreService.change(area, isMulti)
+                change: (area, isMulti?) => this.selectionStoreService.change(area, isMulti),
+                autoFill: (isAutofill) => {
+                    const focus = this.selectionStore.get('focus');
+                    if (!focus) {
+                        return null;
+                    }
+                    this.autoFill = isAutofill;
+                    return focus;
+                }
             });
     }
 
@@ -164,12 +176,26 @@ export class OverlaySelection {
         let focusStyle: Partial<RangeAreaCss> = {};
         if (selectionFocus) {
             focusStyle = this.getElStyle({
-                x: selectionFocus.x,
-                y: selectionFocus.y,
+                ...selectionFocus,
                 x1: selectionFocus.x,
                 y1: selectionFocus.y
             });
             els.push(<div class={FOCUS_CLASS} style={focusStyle}/>);
+        }
+
+        if (selectionFocus && !this.readonly) {
+            let handlerStyle;
+            if (range) {
+                handlerStyle = this.getCell(range);
+            } else {
+                handlerStyle = this.getCell({
+                    ...selectionFocus,
+                    x1: selectionFocus.x,
+                    y1: selectionFocus.y
+                });
+            }
+            els.push(<div class='autofill-handle'
+              style={{ left: `${handlerStyle.right}px`, top: `${handlerStyle.bottom}px`, }}/>);
         }
 
         els.push(<input
@@ -184,7 +210,29 @@ export class OverlaySelection {
             els.push(editCell);
         }
 
-        return els;
+        const hostProps: {
+            onDblClick(): void;
+            onMouseDown(e: MouseEvent): void;
+            onMouseUp(e: MouseEvent): void;
+            onMouseMove?(e: MouseEvent): void;
+        } = {
+            onDblClick: () => this.onDoubleClick(),
+            onMouseDown: (e: MouseEvent) => this.selectionService.onMouseDown(e, this.getData()),
+            onMouseUp: (e: MouseEvent) => this.selectionService.onMouseUp(e, this.getData()),
+        };
+        if (this.autoFill && selectionFocus) {
+            hostProps.onMouseMove = (e: MouseEvent) => this.selectionService.onMouseMove(e, this.getData())
+        }
+
+        return <Host {...hostProps}>{els}</Host>;
+    }
+
+    private getData() {
+        return {
+            el: this.element,
+            rows: this.dimensionRow.state,
+            cols: this.dimensionCol.state
+        }
     }
 
     private getEditCell(): VNode|void {
@@ -211,16 +259,29 @@ export class OverlaySelection {
         />
     }
 
-    private getElStyle(range: Selection.RangeArea): RangeAreaCss {
-        const y: number = getItemByIndex(this.dimensionRow.state, range.y).start;
-        const x: number = getItemByIndex(this.dimensionCol.state, range.x).start;
-        const y1: number = getItemByIndex(this.dimensionRow.state, range.y1).end;
-        const x1: number = getItemByIndex(this.dimensionCol.state, range.x1).end;
+    private getCell({x, y, x1, y1}: Selection.RangeArea) {
+        const top: number = getItemByIndex(this.dimensionRow.state, y).start;
+        const left: number = getItemByIndex(this.dimensionCol.state, x).start;
+        const bottom: number = getItemByIndex(this.dimensionRow.state, y1).end;
+        const right: number = getItemByIndex(this.dimensionCol.state, x1).end;
+
         return  {
-            left: `${x}px`,
-            top: `${y}px`,
-            width: `${x1-x}px`,
-            height: `${y1-y}px`
+            left,
+            right,
+            top,
+            bottom,
+            width: right-left,
+            height: bottom-top
+        };
+    }
+
+    private getElStyle(range: Selection.RangeArea): RangeAreaCss {
+        const styles = this.getCell(range);
+        return  {
+            left: `${styles.left}px`,
+            top: `${styles.top}px`,
+            width: `${styles.width}px`,
+            height: `${styles.height}px`
         };
     }
 }

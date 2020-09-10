@@ -253,13 +253,29 @@ revogr-overlay-selection {
   position: absolute;
   top: 0;
   left: 0;
+  height: 100%;
+  width: 100%;
+
+  .autofill-handle {
+    $handler-size: 10px;
+    position: absolute;
+    width: $handler-size;
+    height: $handler-size;
+    background: red;
+    margin-left: -$handler-size + 4;
+    margin-top: -$handler-size/2;
+    border: 1px solid white;
+    cursor: crosshair;
+    box-sizing: border-box;
+    z-index: 10;
+  }
 
   .selection-border-range,
   .selection-bg-range,
   .temp-bg-range,
   .focused-cell {
     position: absolute;
-    pointer-events:none;
+    // pointer-events:none;
   }
 
   @mixin selection($s: 1px, $c: $selection-border) {
