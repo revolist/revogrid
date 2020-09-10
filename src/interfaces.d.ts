@@ -182,6 +182,6 @@ export declare namespace Edition {
     editCell?: EditCell;
     componentDidRender?(): void;
     disconnectedCallback?(): void;
-    render(h?: HyperFunc<VNode>): VNode|HTMLElement;
+    render(createElement?: HyperFunc<VNode>): VNode;
   }
 }

@@ -19,11 +19,10 @@ export class TextEditor implements Edition.EditorBase {
         }
     }
 
-    disconnectedCallback(): void {
-    }
+    disconnectedCallback(): void {}
 
     // required
-    render(): VNode {
+    render(_createComponent: RevoGrid.HyperFunc<VNode>): VNode {
         return <input
             type='text'
             value={this.editCell?.val || ''}
