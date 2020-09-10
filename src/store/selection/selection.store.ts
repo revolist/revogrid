@@ -1,19 +1,23 @@
 import {ObservableMap} from '@stencil/store';
 import {setStore} from '../../utils/store.utils';
 import {Edition, Selection} from '../../interfaces';
-import {State} from '../../services/selection.store.connector';
 import {getRange} from './selection.helpers';
 import Cell = Selection.Cell;
 import EditCell = Edition.EditCell;
-import SelectionStoreConnectorI = Selection.SelectionStoreConnectorI;
 
 
+interface Config {
+    lastCell: Cell;
+    change(changes: Partial<Cell>, isMulti?: boolean): void;
+    unregister(): void;
+    focus(focus: Cell, end: Cell): void;
+}
 
 export default class SelectionStore {
-    public readonly store: ObservableMap<State>;
-    constructor(lastCell: Cell, storePosition: Cell, private selectionStoreConnector: SelectionStoreConnectorI) {
-        this.store = selectionStoreConnector.register(storePosition.y, storePosition.x) as ObservableMap<State>;
-        this.setLastCell(lastCell);
+    constructor(public store: ObservableMap<Selection.SelectionStoreState>, private config: Config) {
+        // this.store = selectionStoreConnector.register(storePosition.y, storePosition.x) as ObservableMap<State>;
+        this.store = store;
+        this.setLastCell(config.lastCell);
     }
 
     get focused(): Cell|null {
@@ -44,12 +48,17 @@ export default class SelectionStore {
     }
 
     change(area: Partial<Cell>, isMulti: boolean = false): void {
-        this.selectionStoreConnector.change(area, isMulti);
+        this.config.change(area, isMulti);
     }
 
     focus(cell?: Cell, isMulti: boolean = false): void {
         if (!cell) {
-            this.selectionStoreConnector.clearFocus(this.store);
+            setStore(this.store, {
+                focus: null,
+                range: null,
+                edit: null,
+                tempRange: null
+            });
             return;
         }
         let end: Cell = cell;
@@ -62,10 +71,10 @@ export default class SelectionStore {
             }
         }
 
-        this.selectionStoreConnector.focus(this.store, cell, end);
+        this.config.focus(cell, end);
     }
 
     destroy(): void {
-        this.selectionStoreConnector.unregister(this.store);
+        this.config.unregister();
     }
 }

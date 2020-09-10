@@ -8,7 +8,6 @@ import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 import { Edition, RevoGrid, Selection } from "./interfaces";
 import { ObservableMap } from "@stencil/store";
 import { DataSourceState, Groups } from "./store/dataSource/data.store";
-import { DataProvider } from "./services/data.provider";
 export namespace Components {
     interface RevoGrid {
         /**
@@ -90,10 +89,13 @@ export namespace Components {
           * Custom editors register
          */
         "editors": Edition.Editors;
+        /**
+          * last cell position
+         */
         "lastCell": Selection.Cell;
-        "position": Selection.Cell;
+        "range": boolean;
         "readonly": boolean;
-        "selectionStoreConnector": Selection.SelectionStoreConnectorI;
+        "selectionStore": ObservableMap<Selection.SelectionStoreState>;
         "uuid": string;
     }
     interface RevogrScrollVirtual {
@@ -104,7 +106,6 @@ export namespace Components {
     }
     interface RevogrViewport {
         "columnStores": {[T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnDataSchemaRegular>>};
-        "dataProvider": DataProvider;
         "dimensions": {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.DimensionSettingsState>};
         /**
           * Custom editors register
@@ -268,12 +269,19 @@ declare namespace LocalJSX {
           * Custom editors register
          */
         "editors"?: Edition.Editors;
+        /**
+          * last cell position
+         */
         "lastCell"?: Selection.Cell;
         "onAfterEdit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
         "onBeforeEdit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
-        "position"?: Selection.Cell;
+        "onChangeSelection"?: (event: CustomEvent<{changes: Partial<Selection.Cell>; isMulti?: boolean; }>) => void;
+        "onFocusCell"?: (event: CustomEvent<{focus: Selection.Cell; end: Selection.Cell; }>) => void;
+        "onSetEdit"?: (event: CustomEvent<string|boolean>) => void;
+        "onUnregister"?: (event: CustomEvent<any>) => void;
+        "range"?: boolean;
         "readonly"?: boolean;
-        "selectionStoreConnector"?: Selection.SelectionStoreConnectorI;
+        "selectionStore"?: ObservableMap<Selection.SelectionStoreState>;
         "uuid"?: string;
     }
     interface RevogrScrollVirtual {
@@ -284,7 +292,6 @@ declare namespace LocalJSX {
     }
     interface RevogrViewport {
         "columnStores"?: {[T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnDataSchemaRegular>>};
-        "dataProvider"?: DataProvider;
         "dimensions"?: {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.DimensionSettingsState>};
         /**
           * Custom editors register

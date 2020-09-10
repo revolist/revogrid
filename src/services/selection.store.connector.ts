@@ -3,43 +3,35 @@ import {createStore, ObservableMap} from '@stencil/store';
 import {setStore} from '../utils/store.utils';
 import {cropCellToMax, getRange, nextCell} from '../store/selection/selection.helpers';
 
-import RangeArea = Selection.RangeArea;
 import Cell = Selection.Cell;
 import EditCell = Edition.EditCell;
-import SelectionStoreConnectorI = Selection.SelectionStoreConnectorI;
 
-export type State = {
-    range: RangeArea|null;
-    tempRange: RangeArea|null;
-    focus: Cell|null;
-    edit: EditCell|null;
-    lastCell: Cell|null;
-};
-type StoresMatrix = {[y: number]: {[x: number]:  ObservableMap<State>}};
-const state: State = {
+type StoresMatrix = {[y: number]: {[x: number]:  ObservableMap<Selection.SelectionStoreState>}};
+const state: Selection.SelectionStoreState = {
     range: null,
     tempRange: null,
     focus: null,
     edit: null,
     lastCell: null
 };
-export default class SelectionStoreConnector implements SelectionStoreConnectorI {
+export default class SelectionStoreConnector {
     private readonly stores: StoresMatrix = {};
-    private focusedStore: ObservableMap<State>|null = null;
+    private focusedStore: ObservableMap<Selection.SelectionStoreState>|null = null;
 
-    register(y: number, x: number): ObservableMap<State> {
-        const store: ObservableMap<State> = createStore({ ...state });
+    register({x, y}: Selection.Cell): ObservableMap<Selection.SelectionStoreState> {
+        const store: ObservableMap<Selection.SelectionStoreState> = createStore({ ...state });
         if (!this.stores[y]) {
             this.stores[y] = {};
         }
         if (this.stores[y][x]) {
-            throw new Error('Store already registered.');
+            // Store already registered. Do not register twice
+            return this.stores[y][x];
         }
         this.stores[y][x] = store;
         return store;
     }
 
-    focus(store: ObservableMap<State>, focus: Selection.Cell, end: Selection.Cell): void {
+    focus(store: ObservableMap<Selection.SelectionStoreState>, {focus, end}: {focus: Cell; end: Cell}): void {
         let currentStorePointer: Selection.Cell;
         // clear all stores focus leave only active one
         for (let y in this.stores) {
@@ -89,7 +81,7 @@ export default class SelectionStoreConnector implements SelectionStoreConnectorI
         // if next store present - update
         if (nextStore) {
             let item = {...focus, ...nextItem};
-            this.focus(nextStore, item, item);
+            this.focus(nextStore, { focus: item, end: item });
             return;
         }
 
@@ -113,7 +105,7 @@ export default class SelectionStoreConnector implements SelectionStoreConnectorI
         }
     }
 
-    clearFocus(s: ObservableMap<State>): void {
+    clearFocus(s: ObservableMap<Selection.SelectionStoreState>): void {
         setStore(s, {
             focus: null,
             range: null,
@@ -122,7 +114,7 @@ export default class SelectionStoreConnector implements SelectionStoreConnectorI
         });
     }
 
-    setRange(store: ObservableMap<State>, start: Cell, end: Cell): void {
+    setRange(store: ObservableMap<Selection.SelectionStoreState>, start: Cell, end: Cell): void {
         const range = getRange(start, end);
         setStore(store, {
             range,
@@ -159,7 +151,7 @@ export default class SelectionStoreConnector implements SelectionStoreConnectorI
         return this.focusedStore?.get('focus');
     }
 
-    change(changes: Partial<Cell>, isMulti: boolean = false): void {
+    change({changes, isMulti}: {changes: Partial<Cell>, isMulti?: boolean}): void {
         if (!this.focusedStore) {
             return;
         }
@@ -187,11 +179,11 @@ export default class SelectionStoreConnector implements SelectionStoreConnectorI
         if (isMulti) {
             this.setRange(this.focusedStore, start, end);
         } else {
-            this.focus(this.focusedStore, start, start);
+            this.focus(this.focusedStore, {focus: start, end: start});
         }
     }
 
-    unregister(store: ObservableMap<State>): void {
+    unregister(store: ObservableMap<Selection.SelectionStoreState>): void {
         for (let y in this.stores) {
             for (let x in this.stores[y]) {
                 if (this.stores[y][x] === store) {
@@ -203,12 +195,12 @@ export default class SelectionStoreConnector implements SelectionStoreConnectorI
         store.dispose();
     }
 
-    private getXStores(y: number): { [p: number]: ObservableMap<State> } {
+    private getXStores(y: number): { [p: number]: ObservableMap<Selection.SelectionStoreState> } {
         return this.stores[y];
     }
 
-    private getYStores(x: number): { [p: number]: ObservableMap<State> } {
-        const stores: { [p: number]: ObservableMap<State> } = {};
+    private getYStores(x: number): { [p: number]: ObservableMap<Selection.SelectionStoreState> } {
+        const stores: { [p: number]: ObservableMap<Selection.SelectionStoreState> } = {};
         for (let i in this.stores) {
             stores[i] = this.stores[i][x];
         }

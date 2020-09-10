@@ -2,13 +2,12 @@ import {Component, Prop, h, Watch, Element} from '@stencil/core';
 import {ObservableMap} from '@stencil/store';
 import reduce from 'lodash/reduce';
 
-import initialSettings from '../../utils/initialSettings';
 import ColumnDataProvider from '../../services/column.data.provider';
 import {DataProvider} from '../../services/data.provider';
 import {DataSourceState} from '../../store/dataSource/data.store';
 import DimensionProvider from '../../services/dimension.provider';
-import ViewportProvider from "../../services/viewport.provider";
-import {Edition, RevoGrid} from "../../interfaces";
+import ViewportProvider from '../../services/viewport.provider';
+import {Edition, RevoGrid} from '../../interfaces';
 
 
 type ColumnStores = {[T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnDataSchemaRegular>>};
@@ -30,27 +29,27 @@ export class RevoGridComponent {
   /**
    * Defines how many rows/columns should be rendered outside visible area.
    */
-  @Prop() frameSize: number = initialSettings.frameSize;
+  @Prop() frameSize: number = 0;
   /**
    * Indicates default row size.
    */
-  @Prop() rowSize: number = initialSettings.defaultRowSize;
+  @Prop() rowSize: number = 30;
   /**
    * Indicates default column size.
    */
-  @Prop() colSize: number = initialSettings.defaultColumnSize;
+  @Prop() colSize: number = 80;
   /**
    * When true, user can range selection.
    */
-  @Prop() range: boolean = initialSettings.range;
+  @Prop() range: boolean = false;
   /**
    * When true, grid in read only mode.
    */
-  @Prop() readonly: boolean = initialSettings.readonly;
+  @Prop() readonly: boolean = false;
   /**
    * When true, columns are resizable.
    */
-  @Prop() resize: boolean = initialSettings.resize;
+  @Prop() resize: boolean = false;
   /**
    * Columns - defines an array of grid columns. Can be column or grouped column.
    */
@@ -147,15 +146,14 @@ export class RevoGridComponent {
     this.uuid = (new Date()).getTime().toString();
     this.dimensionProvider.setSettings({
       originItemSize: this.rowSize,
-      frameOffset: this.frameSize || initialSettings.frameSize
+      frameOffset: this.frameSize || 0
     }, 'row');
     this.dimensionProvider.setSettings({
       originItemSize: this.colSize,
-      frameOffset: this.frameSize || initialSettings.frameSize
+      frameOffset: this.frameSize || 0
     }, 'col');
 
     this.columnChanged(this.columns);
-
     this.dataChanged(this.source);
     this.dataTopChanged(this.pinnedTopSource);
     this.dataBottomChanged(this.pinnedBottomSource);
@@ -170,7 +168,6 @@ export class RevoGridComponent {
         dimensions={this.dimensionStores}
         viewports={this.viewportStores}
         rowStores={this.rowStores}
-        dataProvider={this.dataProvider}
         uuid={this.uuid}
         resize={this.resize}
         readonly={this.readonly}
