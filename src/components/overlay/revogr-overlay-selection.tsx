@@ -202,7 +202,7 @@ export class OverlaySelection {
       els.push(editCell);
     }
 
-    if (selectionFocus && !this.readonly && !editCell) {
+    if (selectionFocus && !this.readonly && !editCell && this.range) {
       let handlerStyle;
       if (range) {
         handlerStyle = this.getCell(range);
@@ -213,8 +213,11 @@ export class OverlaySelection {
           y1: selectionFocus.y
         });
       }
-      els.push(<div class={CELL_HANDLER_CLASS}
-                    style={{ left: `${handlerStyle.right}px`, top: `${handlerStyle.bottom}px`, }}/>);
+      els.push(
+        <div
+          class={CELL_HANDLER_CLASS}
+          style={{ left: `${handlerStyle.right}px`, top: `${handlerStyle.bottom}px`, }}/>
+      );
     }
 
     const hostProps: {
