@@ -1,4 +1,4 @@
-import {Component, Element, h, Host, Prop, Watch} from '@stencil/core';
+import {Component, Element, h, Host, Prop, VNode, Watch} from '@stencil/core';
 import {HTMLStencilElement} from '@stencil/core/internal';
 import {ObservableMap} from '@stencil/store';
 
@@ -7,6 +7,7 @@ import {CELL_CLASS, DATA_COL, DATA_ROW, DISABLED_CLASS} from '../../utils/consts
 
 import {DataSourceState} from '../../store/dataSource/data.store';
 import {RevoGrid} from "../../interfaces";
+import CellRenderer from "./cellRenderer";
 
 @Component({
   tag: 'revogr-data'
@@ -46,7 +47,7 @@ export class RevogrData {
           class: `${CELL_CLASS} ${this.columnService.isReadOnly(row.itemIndex, col.itemIndex) ? DISABLED_CLASS : ''}`,
           style: {width: `${col.size}px`, transform: `translateX(${col.start}px)`}
         };
-        cells.push(<div {...dataProps}>{this.columnService.cellRenderer(row.itemIndex, col.itemIndex)}</div>);
+        cells.push(<div {...dataProps}>{this.getCellRenderer(row.itemIndex, col.itemIndex)}</div>);
       }
       rowsEls.push(<div class='row' style={{ height: `${row.size}px`, transform: `translateY(${row.start}px)` }}>{cells}</div>);
     }
@@ -54,5 +55,13 @@ export class RevogrData {
         rowsEls.push(<slot name='overlay'/>);
     }
     return <Host>{rowsEls}</Host>;
+  }
+
+  private getCellRenderer(row: number, col: number): VNode {
+    const custom = this.columnService.customRenderer(row, col);
+    if (custom) {
+      return custom;
+    }
+    return <CellRenderer model={this.columnService.rowDataModel(row, col)}/>
   }
 }

@@ -7,6 +7,8 @@ export const UUID: string = 'grid-uuid';
 export const DISABLED_CLASS: string = 'disabled';
 export const CELL_CLASS: string = 'data-cell';
 export const HEADER_CLASS: string = 'data-header-cell';
+export const DRAG_ICON_CLASS: string = 'revo-drag-icon';
+export const DRAGGABLE_CLASS: string = 'revo-draggable';
 
 export const FOCUS_CLASS: string = 'focused-cell';
 export const SELECTION_BORDER_CLASS: string = 'selection-border-range';

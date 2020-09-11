@@ -1,4 +1,6 @@
 @import "src/assets/scss/_colors";
+@import "src/assets/scss/_icons";
+
 $header-size: 30px;
 
 @mixin noScroll {
@@ -120,6 +122,21 @@ revogr-data {
     box-shadow: $cell-shadow-cell;
     height: 100%;
     text-align: center;
+
+    .revo-draggable {
+      float: left;
+      width: 24px;
+      height: 100%;
+      text-align: center;
+      line-height: 24px;
+      cursor: pointer;
+
+      > .revo-drag-icon {
+        vertical-align: middle;
+        display: inline-block;
+        background-color: gray;
+      }
+    }
 
     &.disabled {
       background-color: $cell-disabled-bg;

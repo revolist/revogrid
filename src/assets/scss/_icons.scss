@@ -1,0 +1,9 @@
+.revo-drag-icon {
+  $path: "./assets/icons/ellipsis-v.svg";
+
+  -webkit-mask-image: url($path);
+  mask-image: url($path);
+  width: 4px;
+  height: 11px;
+  background-size: cover;
+}

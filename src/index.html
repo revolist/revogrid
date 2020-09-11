@@ -29,6 +29,10 @@
       width: 100%;
       height: 100%;
     }
+    revogr-overlay-selection .edit-focus-input {
+        width: 0 !important;
+        height: 0 !important;
+    }
   </style>
 
   <script type="module" src="/build/revo-grid.esm.js"></script>
@@ -36,9 +40,6 @@
 </head>
 <body>
     <revo-grid class="grid-component"></revo-grid>
-
-    <br>
-    <revo-grid class="grid-component2"></revo-grid>
 
     <script type="module">
         import {generateFakeDataObject} from "/utilsExternal/generate-data.js";
@@ -56,20 +57,7 @@
         grid.readonly = false;
         grid.range = true;
         grid.resize = true;
-        grid.addEventListener('afterEdit', (e) => {
-            grid2.source = [...grid.source];
-        });
 
-
-        grid2.columns = data.headers;
-        grid2.source = data.rows;
-
-        grid2.pinnedTopSource = data.pinnedTopRows;
-        grid2.pinnedBottomSource = data.pinnedBottomRows;
-
-        grid2.readonly = false;
-        grid2.range = true;
-        grid2.resize = true;
     </script>
 </body>
 </html>
