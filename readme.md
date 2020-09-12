@@ -5,8 +5,9 @@
 </p>
 
 <p align="center">
-A repository for the virtual grid implementation based on webcomponent using StencilJs.
-Works in any major framework or with no framework at all.
+Virtual grid implementation based on webcomponent using StencilJs.
+Handles millions of rows and columns fast and efficiently.
+Works in any major framework (VueJs, React, Ember, Angular) or with no framework at all.
 </p>
 
 <p align="center">

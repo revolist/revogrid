@@ -16,7 +16,7 @@
     .grid-component {
       display: block;
       width: 100%;
-      height: 300px;
+      height: 500px;
     }
     .grid-component2 {
         display: block;
@@ -37,14 +37,11 @@
 <body>
     <revo-grid class="grid-component"></revo-grid>
 
-    <br>
-    <revo-grid class="grid-component2"></revo-grid>
-
     <script type="module">
         import {generateFakeDataObject} from "/utilsExternal/generate-data.js";
 
-        const data = generateFakeDataObject(100, 100);
-        const grid2 = document.querySelector('.grid-component2');
+        const data = generateFakeDataObject(1000, 100);
+        // const grid2 = document.querySelector('.grid-component2');
         const grid = document.querySelector('.grid-component');
 
         grid.columns = data.headers;
@@ -54,12 +51,13 @@
         grid.pinnedBottomSource = data.pinnedBottomRows;
 
         grid.readonly = false;
-        grid.range = true;
+        // grid.range = true;
         grid.resize = true;
         grid.addEventListener('afterEdit', (e) => {
-            grid2.source = [...grid.source];
+            // grid2.source = [...grid.source];
         });
 
+        /*
 
         grid2.columns = data.headers;
         grid2.source = data.rows;
@@ -69,7 +67,7 @@
 
         grid2.readonly = false;
         grid2.range = true;
-        grid2.resize = true;
+        grid2.resize = true; */
     </script>
 </body>
 </html>

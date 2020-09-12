@@ -242,7 +242,8 @@ revogr-header {
     position: relative;
 
     .data-header-cell {
-      color: gray;
+      color: #9493a2;
+      font-weight: normal;
     }
   }
 }
@@ -267,9 +268,22 @@ revogr-header {
 
 revogr-overlay-selection {
   display: block;
-  position: absolute;
-  top: 0;
-  left: 0;
+  position: relative;
+  width: 100%;
+
+  .autofill-handle {
+    $handler-size: 10px;
+    position: absolute;
+    width: $handler-size;
+    height: $handler-size;
+    background: red;
+    margin-left: -$handler-size + 4;
+    margin-top: -$handler-size/2;
+    border: 1px solid white;
+    cursor: crosshair;
+    box-sizing: border-box;
+    z-index: 10;
+  }
 
   .selection-border-range,
   .selection-bg-range,
@@ -277,6 +291,7 @@ revogr-overlay-selection {
   .focused-cell {
     position: absolute;
     pointer-events:none;
+    z-index: 9;
   }
 
   @mixin selection($s: 1px, $c: $selection-border) {
@@ -292,12 +307,13 @@ revogr-overlay-selection {
   }
 
   .selection-bg-range {
-    background: $selection-bg;
-    z-index: -1;
+    // background: $selection-bg;
+    // z-index: -1;
   }
 
   .temp-bg-range {
-    background-color: $tmp-selection-bg;
+    // background-color: $tmp-selection-bg;
+    border: 1px solid red;
   }
 
   .edit-focus-input {
@@ -306,6 +322,10 @@ revogr-overlay-selection {
     opacity: 0;
     width: 0;
     height: 0;
+  }
+
+  revogr-edit {
+    z-index: 10;
   }
 }
 

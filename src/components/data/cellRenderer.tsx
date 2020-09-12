@@ -3,12 +3,23 @@ import {RevoGrid} from '../../interfaces';
 import ColumnService from './columnService';
 import {DRAG_ICON_CLASS, DRAGGABLE_CLASS} from "../../utils/consts";
 
-type Props = {model: RevoGrid.ColumnDataSchemaModel;}
+type Props = {
+    model: RevoGrid.ColumnDataSchemaModel;
+    canDrag?: boolean;
+    onDragStart?(e: DragEvent): void;
+}
 
-const CellRenderer = ({model}: Props, _children: VNode[]): (VNode|string)[] => {
+const CellRenderer = ({model, canDrag, onDragStart}: Props, _children: VNode[]): (VNode|string)[] => {
     const els: (VNode|string)[] = [];
-    if (model.column.rowDrag && isRowDragService(model.column.rowDrag, model)) {
-        els.push(<span draggable={true} onClick={(e) => console.log(e)}  onDragStart={(e) => console.log(e)} class={DRAGGABLE_CLASS}><span class={DRAG_ICON_CLASS}/></span>);
+    if (canDrag && model.column.rowDrag && isRowDragService(model.column.rowDrag, model)) {
+        els.push(
+          <span
+            class={DRAGGABLE_CLASS}
+            draggable={true}
+            onDragStart={onDragStart}>
+              <span class={DRAG_ICON_CLASS}/>
+          </span>
+        );
     }
     els.push(`${ColumnService.getData(model.model[model.prop])}`);
     return els;

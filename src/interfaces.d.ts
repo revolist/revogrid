@@ -101,21 +101,20 @@ export declare namespace RevoGrid {
     realSize: number;
     originItemSize: number;
   }
-
-  type InitialSettings = {
-    defaultColumnSize: number;
-    defaultRowSize: number;
-    frameSize: number;
-    readonly: boolean;
-    range: boolean;
-    resize: boolean;
-  };
 }
 
 
 export declare namespace Selection {
   type RowIndex = number;
   type ColIndex = number;
+
+  type SelectionStoreState = {
+    range: RangeArea|null;
+    tempRange: RangeArea|null;
+    focus: Cell|null;
+    edit: Edition.EditCell|null;
+    lastCell: Cell|null;
+  };
 
   type RangeArea = {
     x: ColIndex;
@@ -135,20 +134,6 @@ export declare namespace Selection {
     width: string;
     height: string;
   };
-
-  interface SelectionStoreConnectorI {
-    setEdit(val: string | boolean): void;
-
-    register(y: number, x: number): Object;
-
-    clearFocus(s: Object): void;
-
-    change(changes: Partial<Cell>, isMulti?: boolean): void;
-
-    unregister(store: Object): void;
-
-    focus(store: Object, focus: Selection.Cell, end: Selection.Cell): void;
-  }
 }
 
 export declare namespace Edition {
@@ -184,6 +169,6 @@ export declare namespace Edition {
     editCell?: EditCell;
     componentDidRender?(): void;
     disconnectedCallback?(): void;
-    render(h?: HyperFunc<VNode>): VNode|HTMLElement;
+    render(createElement?: HyperFunc<VNode>): VNode;
   }
 }
