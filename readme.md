@@ -20,8 +20,9 @@ Works in any major framework (VueJs, React, Ember, Angular) or with no framework
 - Column resizing;
 - Pinned columns and rows;
 - Column grouping;
-- Custom cell renderer and editor templates;
 - Cell editing;
+- Custom cell renderer templates (build your own cell view);
+- Custom cell editor (apply your own editors and cell types);
 - Range selection;
 - Multiple others useful features [RevoGrid](https://revolist.github.io/revogrid.demo.js).
 
