@@ -12,6 +12,19 @@ Works in any major framework (VueJs, React, Ember, Angular) or with no framework
 
 <br>
 
+
+## Features
+
+- Millions of cells virtual viewport scroll with a powerful core is in-build by default. Light and intelligent Virtual Dom; 
+- Column and Row custom sizes;
+- Column resizing;
+- Pinned columns and rows;
+- Column grouping;
+- Custom cell renderer and editor templates;
+- Cell editing;
+- Range selection;
+- Multiple others useful features [RevoGrid](https://revolist.github.io/revogrid.demo.js).
+
 ## Content
 
 * [Overview](#overview)
@@ -24,17 +37,6 @@ Works in any major framework (VueJs, React, Ember, Angular) or with no framework
 
 The RevoGrid component helps represent a huge amount of data in a form of data table.
 Check for more details [RevoGrid page](https://revolist.github.io/revogrid.demo.js).
-
-Grid supports:
-
-- Column and Row custom sizes;
-- Column resizing;
-- Pinned columns and rows;
-- Column grouping;
-- The virtual scroll with a powerful core is in-build by default;
-- Custom cell template;
-- Cell editing;
-- Multiple others useful features [RevoGrid](https://revolist.github.io/revogrid.demo.js).
 
 ## Installation
 
