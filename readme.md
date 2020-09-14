@@ -10,10 +10,6 @@ Handles millions of rows and columns fast and efficiently.
 Works in any major framework (VueJs, React, Ember, Angular) or with no framework at all.
 </p>
 
-<p align="center">
-  <img src="./assets/grid-preview.gif" alt="RevoGrid" />
-</p>
-
 <br>
 
 ## Content
