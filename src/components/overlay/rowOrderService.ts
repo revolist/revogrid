@@ -1,5 +1,5 @@
-import {RevoGrid} from "../../interfaces";
-import {getItemByPosition} from "../../store/dimension/dimension.helpers";
+import {RevoGrid} from '../../interfaces';
+import {getItemByPosition} from '../../store/dimension/dimension.helpers';
 
 export type DragEventData = {
   el: HTMLElement;
@@ -12,7 +12,7 @@ interface Config {
 
 let lastKnownId: number = 0;
 export default class RowOrderService {
-  private id: string = `${new Date().getTime()}-${lastKnownId}`;
+  private id: string = `${new Date().getTime()}-${lastKnownId++}`;
   private currentRow: number|null = null;
 
   constructor(private config: Config) {}

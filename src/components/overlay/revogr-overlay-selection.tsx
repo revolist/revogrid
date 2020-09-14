@@ -16,6 +16,7 @@ import {
   TMP_SELECTION_BG_CLASS
 } from '../../utils/consts';
 import {DataSourceState} from '../../store/dataSource/data.store';
+import RowOrderService from "./rowOrderService";
 
 import RangeAreaCss = Selection.RangeAreaCss;
 import Cell = Selection.Cell;
@@ -27,6 +28,7 @@ import Cell = Selection.Cell;
 export class OverlaySelection {
   private selectionService: CellSelectionService;
   private columnService: ColumnService;
+  private rowOrderService: RowOrderService;
 
   private selectionStoreService: SelectionStore;
   private focusSection: HTMLInputElement;
@@ -37,6 +39,7 @@ export class OverlaySelection {
 
   @Prop() readonly: boolean;
   @Prop() range: boolean;
+  @Prop() canDrag: boolean;
 
   /** Dynamic stores */
   @Prop() selectionStore: ObservableMap<Selection.SelectionStoreState>;
@@ -68,6 +71,8 @@ export class OverlaySelection {
   @Event({ bubbles: false }) focusCell: EventEmitter<{focus: Selection.Cell; end: Selection.Cell; }>;
   @Event({ bubbles: false }) unregister: EventEmitter;
 
+  @Event() rowDropped: EventEmitter<{from: number; to: number;}>;
+
   @Listen('cellEdit')
   onSave(e: CustomEvent<Edition.SaveDataDetails>): void {
     e.cancelBubble = true;
@@ -84,15 +89,20 @@ export class OverlaySelection {
 
   @Listen('mouseleave', { target: 'document' })
   onMouseOut(): void {
-    this.selectionService.onMouseUp();
+    this.selectionService.clearSelection();
   }
 
   @Listen('mouseup', { target: 'document' })
   onMouseUp(): void {
-    this.selectionService.onMouseUp();
+    this.selectionService.clearSelection();
   }
 
-  @Listen('keydown', { target: 'parent' })
+  @Listen('dragStartCell')
+  onCellDrag(e: CustomEvent<DragEvent>): void {
+    this.rowOrderService.startOrder(e.detail, this.getData());
+  }
+
+  @Listen('keydown')
   handleKeyDown(e: KeyboardEvent): void {
     this.selectionService.keyDown(e);
     if (this.selectionStoreService.edited) {
@@ -109,17 +119,11 @@ export class OverlaySelection {
     }
   }
 
-
   @Watch('range') onRange(canRange: boolean): void {
     this.selectionService.canRange = canRange;
   }
   onDoubleClick(): void {
     this.canEdit() && this.setEdit?.emit('');
-  }
-
-  private canEdit(): boolean {
-    const editCell = this.selectionStoreService.focused;
-    return editCell && !this.columnService?.isReadOnly(editCell.y, editCell.x);
   }
 
   connectedCallback(): void {
@@ -139,7 +143,7 @@ export class OverlaySelection {
         this.selectionStoreService.applyRange(start, end);
       },
       tempRange: (start, end) => this.selectionStoreService.setTempRange(start, end),
-      change: (area, isMulti?) => this.selectionStoreService.change(area, isMulti),
+      change: (changes, isMulti?) => this.changeSelection?.emit({ changes, isMulti }),
       autoFill: (isAutofill) => {
         const focus = this.selectionStore.get('focus');
         if (!focus) {
@@ -149,12 +153,24 @@ export class OverlaySelection {
         return focus;
       }
     });
+
+    this.rowOrderService = new RowOrderService({
+      positionChanged: (from, to) => {
+        const dropEvent = this.rowDropped.emit({from, to});
+        if (dropEvent.defaultPrevented) {
+          return;
+        }
+        const items = this.dataStore.get('items');
+        const toMove = items.splice(from, 1);
+        items.splice(to, 0, ...toMove);
+        this.dataStore.set('items', [...items]);
+      }
+    });
   }
 
   disconnectedCallback(): void {
     this.selectionStoreService.destroy();
   }
-
 
   componentDidRender(): void {
     if (this.selectionStoreService?.focused && document.activeElement !== this.focusSection) {
@@ -225,16 +241,29 @@ export class OverlaySelection {
     const hostProps: {
       onDblClick(): void;
       onMouseDown(e: MouseEvent): void;
+      onMouseUp(e: MouseEvent): void;
       onMouseMove?(e: MouseEvent): void;
+      onDrop?(e: DragEvent): void;
+      onDragOver?(e: DragEvent): void;
     } = {
       onDblClick: () => this.onDoubleClick(),
+      onMouseUp: (e) => this.selectionService.doSelection(e, this.getData()),
       onMouseDown: (e: MouseEvent) => this.selectionService.onMouseDown(e, this.getData()),
     };
     if (this.autoFill && selectionFocus) {
       hostProps.onMouseMove = (e: MouseEvent) => this.selectionService.onMouseMove(e, this.getData())
     }
 
+    if (this.canDrag) {
+      hostProps.onDrop = (e: DragEvent) => this.rowOrderService.endOrder(e, this.getData());
+      hostProps.onDragOver = (e: DragEvent) => e.preventDefault();
+    }
     return <Host {...hostProps}>{els}<slot name='data'/></Host>;
+  }
+
+  private canEdit(): boolean {
+    const editCell = this.selectionStoreService.focused;
+    return editCell && !this.columnService?.isReadOnly(editCell.y, editCell.x);
   }
 
   private getData() {

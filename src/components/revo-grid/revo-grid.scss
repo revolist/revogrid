@@ -276,7 +276,7 @@ revogr-overlay-selection {
     position: absolute;
     width: $handler-size;
     height: $handler-size;
-    background: red;
+    background: $selection-border;
     margin-left: -$handler-size + 4;
     margin-top: -$handler-size/2;
     border: 1px solid white;
@@ -303,7 +303,7 @@ revogr-overlay-selection {
     @include selection();
   }
   .focused-cell {
-    @include selection(2px);
+    @include selection(1px);
   }
 
   .selection-bg-range {
@@ -314,6 +314,7 @@ revogr-overlay-selection {
   .temp-bg-range {
     // background-color: $tmp-selection-bg;
     border: 1px solid red;
+    box-sizing: border-box;
   }
 
   .edit-focus-input {

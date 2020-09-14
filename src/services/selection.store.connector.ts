@@ -164,7 +164,6 @@ export default class SelectionStoreConnector {
     }
     const start: Cell = { x: range.x, y: range.y };
     const end: Cell = isMulti ? { x: range.x1, y: range.y1 } : start;
-
     const updateCoordinate = (c: keyof Cell) => {
       const point: Cell = end[c] > focus[c]  ? end : start;
       point[c] += changes[c];

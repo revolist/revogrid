@@ -117,13 +117,14 @@ export class RevogrViewport {
             onChangeSelection={(e) => this.selectionStoreConnector.change(e.detail)}
             onFocusCell={(e) => this.selectionStoreConnector.focus(selectionStore, e.detail)}
             onUnregister={() => this.selectionStoreConnector.unregister(selectionStore)}>
+
             <revogr-data
               {...data}
               {...{[UUID]: data.uuid}}
               key={view.prop.key + (++j)}
               readonly={this.readonly}
               range={this.range}
-              slot="data"/>
+              slot='data'/>
           </revogr-overlay-selection>
         );
       }

@@ -86,6 +86,7 @@ export namespace Components {
         "parent": string;
     }
     interface RevogrOverlaySelection {
+        "canDrag": boolean;
         "colData": RevoGrid.ColumnDataSchemaRegular[];
         /**
           * Static stores, not expected to change during component lifetime
@@ -250,6 +251,7 @@ declare namespace LocalJSX {
          */
         "dataStore"?: ObservableMap<DataSourceState<RevoGrid.DataType>>;
         "dimensionRow"?: ObservableMap<RevoGrid.DimensionSettingsState>;
+        "onDragStartCell"?: (event: CustomEvent<DragEvent>) => void;
         "range"?: boolean;
         "readonly"?: boolean;
         "rows"?: RevoGrid.VirtualPositionItem[];
@@ -276,6 +278,7 @@ declare namespace LocalJSX {
         "parent"?: string;
     }
     interface RevogrOverlaySelection {
+        "canDrag"?: boolean;
         "colData"?: RevoGrid.ColumnDataSchemaRegular[];
         /**
           * Static stores, not expected to change during component lifetime
@@ -295,6 +298,7 @@ declare namespace LocalJSX {
         "onBeforeEdit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
         "onChangeSelection"?: (event: CustomEvent<{changes: Partial<Selection.Cell>; isMulti?: boolean; }>) => void;
         "onFocusCell"?: (event: CustomEvent<{focus: Selection.Cell; end: Selection.Cell; }>) => void;
+        "onRowDropped"?: (event: CustomEvent<{from: number; to: number;}>) => void;
         "onSetEdit"?: (event: CustomEvent<string|boolean>) => void;
         "onUnregister"?: (event: CustomEvent<any>) => void;
         "range"?: boolean;
