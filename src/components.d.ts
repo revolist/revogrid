@@ -298,7 +298,17 @@ declare namespace LocalJSX {
         "onBeforeEdit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
         "onChangeSelection"?: (event: CustomEvent<{changes: Partial<Selection.Cell>; isMulti?: boolean; }>) => void;
         "onFocusCell"?: (event: CustomEvent<{focus: Selection.Cell; end: Selection.Cell; }>) => void;
+        /**
+          * Row dragged, new range ready to be applied
+         */
         "onRowDropped"?: (event: CustomEvent<{from: number; to: number;}>) => void;
+        /**
+          * Selection range changed
+         */
+        "onSelectionChanged"?: (event: CustomEvent<{
+    newRange: {start: Selection.Cell; end: Selection.Cell;};
+    oldRange: {start: Selection.Cell; end: Selection.Cell;};
+  }>) => void;
         "onSetEdit"?: (event: CustomEvent<string|boolean>) => void;
         "onUnregister"?: (event: CustomEvent<any>) => void;
         "range"?: boolean;

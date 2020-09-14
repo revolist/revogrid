@@ -71,7 +71,13 @@ export class OverlaySelection {
   @Event({ bubbles: false }) focusCell: EventEmitter<{focus: Selection.Cell; end: Selection.Cell; }>;
   @Event({ bubbles: false }) unregister: EventEmitter;
 
+  /** Row dragged, new range ready to be applied */
   @Event() rowDropped: EventEmitter<{from: number; to: number;}>;
+  /** Selection range changed */
+  @Event() selectionChanged: EventEmitter<{
+    newRange: {start: Selection.Cell; end: Selection.Cell;};
+    oldRange: {start: Selection.Cell; end: Selection.Cell;};
+  }>;
 
   @Listen('cellEdit')
   onSave(e: CustomEvent<Edition.SaveDataDetails>): void {
@@ -139,8 +145,19 @@ export class OverlaySelection {
       canRange: this.range,
       focus: (cell, isMulti?) => this.selectionStoreService.focus(cell, isMulti),
       applyRange: (start, end) => {
-        // todo: apply new range
+        const old = this.selectionStore.get('range');
+        const selectionEndEvent = this.selectionChanged.emit({
+          newRange: {start, end},
+          oldRange: {
+            start: {x: old.x, y: old.y},
+            end: {x: old.x1, y: old.y1}
+          }
+        });
         this.selectionStoreService.applyRange(start, end);
+        if (selectionEndEvent.defaultPrevented) {
+          return;
+        }
+        // todo: apply new range
       },
       tempRange: (start, end) => this.selectionStoreService.setTempRange(start, end),
       change: (changes, isMulti?) => this.changeSelection?.emit({ changes, isMulti }),
