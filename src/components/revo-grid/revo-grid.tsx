@@ -17,7 +17,7 @@ type ViewportStores = {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGri
 
 @Component({
   tag: 'revo-grid',
-  styleUrl: 'revo-grid.scss'
+  styleUrl: 'revo-grid.scss',
 })
 export class RevoGridComponent {
   // --------------------------------------------------------------------------
