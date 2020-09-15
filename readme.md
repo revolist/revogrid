@@ -15,7 +15,7 @@ Works in any major framework (VueJs, React, Ember, Angular) or with no framework
 
 ## Features
 
-- Millions of cells virtual viewport scroll with a powerful core is in-build by default. Light and intelligent Virtual Dom; 
+- Millions of cells virtual viewport scroll with a powerful core is in-build by default. Intelligent Virtual Dom; 
 - Column and Row custom sizes;
 - Column resizing;
 - Pinned columns and rows;
