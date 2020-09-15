@@ -104,26 +104,28 @@ export class RevogrViewport {
       for (let data of view.dataPorts) {
         const selectionStore = this.selectionStoreConnector.register(data.position);
         dataViews.push(
-          <revogr-data
+
+          <revogr-overlay-selection
             {...data}
-            {...{[UUID]: data.uuid}}
-            key={view.prop.key + (++j)}
+            slot={data.slot}
+            selectionStore={selectionStore}
+            editors={this.editors}
             readonly={this.readonly}
-            range={this.range}>
-            <revogr-overlay-selection
+            range={this.range}
+
+            onSetEdit={(e) => this.selectionStoreConnector.setEdit(e.detail)}
+            onChangeSelection={(e) => this.selectionStoreConnector.change(e.detail)}
+            onFocusCell={(e) => this.selectionStoreConnector.focus(selectionStore, e.detail)}
+            onUnregister={() => this.selectionStoreConnector.unregister(selectionStore)}>
+
+            <revogr-data
               {...data}
-              slot='overlay'
-              selectionStore={selectionStore}
-              editors={this.editors}
+              {...{[UUID]: data.uuid}}
+              key={view.prop.key + (++j)}
               readonly={this.readonly}
               range={this.range}
-
-              onSetEdit={(e) => this.selectionStoreConnector.setEdit(e.detail)}
-              onChangeSelection={(e) => this.selectionStoreConnector.change(e.detail)}
-              onFocusCell={(e) => this.selectionStoreConnector.focus(selectionStore, e.detail)}
-              onUnregister={() => this.selectionStoreConnector.unregister(selectionStore)}
-            />
-          </revogr-data>
+              slot='data'/>
+          </revogr-overlay-selection>
         );
       }
       viewPortHtml.push(

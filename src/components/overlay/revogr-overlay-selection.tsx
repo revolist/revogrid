@@ -16,6 +16,7 @@ import {
   TMP_SELECTION_BG_CLASS
 } from '../../utils/consts';
 import {DataSourceState} from '../../store/dataSource/data.store';
+
 import RangeAreaCss = Selection.RangeAreaCss;
 import Cell = Selection.Cell;
 
@@ -33,21 +34,23 @@ export class OverlaySelection {
   @State() autoFill: boolean = false;
 
   @Element() element: HTMLElement;
-
-  @Prop() selectionStore: ObservableMap<Selection.SelectionStoreState>;
+  private orderEditor: HTMLRevogrOrderEditorElement;
 
   @Prop() readonly: boolean;
-
   @Prop() range: boolean;
+  @Prop() canDrag: boolean;
 
-  @Prop() dataStore: ObservableMap<DataSourceState<RevoGrid.DataType>>;
-  @Prop() colData: RevoGrid.ColumnDataSchemaRegular[];
+  /** Dynamic stores */
+  @Prop() selectionStore: ObservableMap<Selection.SelectionStoreState>;
   @Prop() dimensionRow: ObservableMap<RevoGrid.DimensionSettingsState>;
   @Prop() dimensionCol: ObservableMap<RevoGrid.DimensionSettingsState>;
 
-  /** last cell position */
-  @Prop() lastCell: Selection.Cell;
+  /** Static stores, not expected to change during component lifetime */
+  @Prop() dataStore: ObservableMap<DataSourceState<RevoGrid.DataType>>;
 
+  @Prop() colData: RevoGrid.ColumnDataSchemaRegular[];
+  /** Last cell position */
+  @Prop() lastCell: Selection.Cell;
   /** Custom editors register */
   @Prop() editors: Edition.Editors;
 
@@ -66,6 +69,12 @@ export class OverlaySelection {
   @Event({ bubbles: false }) focusCell: EventEmitter<{focus: Selection.Cell; end: Selection.Cell; }>;
   @Event({ bubbles: false }) unregister: EventEmitter;
 
+  /** Selection range changed */
+  @Event() selectionChanged: EventEmitter<{
+    newRange: {start: Selection.Cell; end: Selection.Cell;};
+    oldRange: {start: Selection.Cell; end: Selection.Cell;};
+  }>;
+
   @Listen('cellEdit')
   onSave(e: CustomEvent<Edition.SaveDataDetails>): void {
     e.cancelBubble = true;
@@ -82,15 +91,22 @@ export class OverlaySelection {
 
   @Listen('mouseleave', { target: 'document' })
   onMouseOut(): void {
-    this.selectionService.onMouseUp();
+    this.selectionService.clearSelection();
+    this.orderEditor?.clearOrder();
   }
 
   @Listen('mouseup', { target: 'document' })
-  onMouseUp(): void {
-    this.selectionService.onMouseUp();
+  onMouseUp(e: MouseEvent): void {
+    this.selectionService.clearSelection();
+    this.orderEditor?.endOrder(e, this.getData());
   }
 
-  @Listen('keydown', { target: 'parent' })
+  @Listen('dragStartCell')
+  onCellDrag(e: CustomEvent<MouseEvent>): void {
+    this.orderEditor?.dragStart(e.detail, this.getData());
+  }
+
+  @Listen('keydown')
   handleKeyDown(e: KeyboardEvent): void {
     this.selectionService.keyDown(e);
     if (this.selectionStoreService.edited) {
@@ -107,17 +123,11 @@ export class OverlaySelection {
     }
   }
 
-
   @Watch('range') onRange(canRange: boolean): void {
     this.selectionService.canRange = canRange;
   }
   onDoubleClick(): void {
     this.canEdit() && this.setEdit?.emit('');
-  }
-
-  private canEdit(): boolean {
-    const editCell = this.selectionStoreService.focused;
-    return editCell && !this.columnService?.isReadOnly(editCell.y, editCell.x);
   }
 
   connectedCallback(): void {
@@ -133,11 +143,22 @@ export class OverlaySelection {
       canRange: this.range,
       focus: (cell, isMulti?) => this.selectionStoreService.focus(cell, isMulti),
       applyRange: (start, end) => {
-        // todo: apply new range
+        const old = this.selectionStore.get('range');
+        const selectionEndEvent = this.selectionChanged.emit({
+          newRange: {start, end},
+          oldRange: {
+            start: {x: old.x, y: old.y},
+            end: {x: old.x1, y: old.y1}
+          }
+        });
         this.selectionStoreService.applyRange(start, end);
+        if (selectionEndEvent.defaultPrevented) {
+          return;
+        }
+        // todo: apply new range
       },
       tempRange: (start, end) => this.selectionStoreService.setTempRange(start, end),
-      change: (area, isMulti?) => this.selectionStoreService.change(area, isMulti),
+      change: (changes, isMulti?) => this.changeSelection?.emit({ changes, isMulti }),
       autoFill: (isAutofill) => {
         const focus = this.selectionStore.get('focus');
         if (!focus) {
@@ -152,7 +173,6 @@ export class OverlaySelection {
   disconnectedCallback(): void {
     this.selectionStoreService.destroy();
   }
-
 
   componentDidRender(): void {
     if (this.selectionStoreService?.focused && document.activeElement !== this.focusSection) {
@@ -216,6 +236,7 @@ export class OverlaySelection {
       els.push(
         <div
           class={CELL_HANDLER_CLASS}
+          onMouseDown={e => this.selectionService.onAutoFillStart(e, this.getData())}
           style={{ left: `${handlerStyle.right}px`, top: `${handlerStyle.bottom}px`, }}/>
       );
     }
@@ -226,13 +247,33 @@ export class OverlaySelection {
       onMouseMove?(e: MouseEvent): void;
     } = {
       onDblClick: () => this.onDoubleClick(),
-      onMouseDown: (e: MouseEvent) => this.selectionService.onMouseDown(e, this.getData()),
+      onMouseDown: (e: MouseEvent) => this.selectionService.onCellDown(e, this.getData()),
     };
     if (this.autoFill && selectionFocus) {
       hostProps.onMouseMove = (e: MouseEvent) => this.selectionService.onMouseMove(e, this.getData())
     }
 
-    return <Host {...hostProps}>{els}</Host>;
+    if (this.canDrag) {
+      els.push(<revogr-order-editor ref={(e) => this.orderEditor = e}
+        dataStore={this.dataStore}
+        onRowDragStart={(e) => this.onRowDragStart(e)}
+        onRowDragEnd={() => this.onRowDragEnd()}/>);
+    }
+    return <Host {...hostProps}>{els}<slot name='data'/></Host>;
+  }
+
+  onRowDragEnd(): void {
+    this.element.classList.remove('drag-active');
+  }
+  
+  onRowDragStart({detail}: CustomEvent<{cell: Selection.Cell, text: string}>): void {
+    detail.text = this.columnService.getCellData(detail.cell.y, detail.cell.x);
+    this.element.classList.add('drag-active');
+  }
+
+  private canEdit(): boolean {
+    const editCell = this.selectionStoreService.focused;
+    return editCell && !this.columnService?.isReadOnly(editCell.y, editCell.x);
   }
 
   private getData() {

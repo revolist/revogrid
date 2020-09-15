@@ -24,16 +24,21 @@ export declare namespace RevoGrid {
     prop: ColumnProp;
     model: DataType;
     data: DataSource;
+    column: ColumnDataSchemaRegular;
   };
 
   type ReadOnlyFormat = boolean | ((row: number, col: number) => boolean);
+
+  type RowDrag = boolean| {(params: ColumnDataSchemaModel): boolean};
 
   interface ColumnDataSchemaBase {
     name?: DataFormat;
     readonly?: ReadOnlyFormat;
     size?: number;
     minSize?: number;
-    cellTemplate?: Function;
+    cellTemplate?: CellTemplateFunc<VNode>;
+    rowDrag?: RowDrag;
+    columnTemplate?: ColumnTemplateFunc<VNode>;
   }
 
   interface ColumnDataSchemaGrouping {
@@ -48,16 +53,15 @@ export declare namespace RevoGrid {
     pin?: DimensionColPin;
   }
 
-  type ColumnDataSchema = ColumnDataSchemaGrouping | ColumnDataSchemaRegular;
+  type ColumnDataSchema = ColumnDataSchemaGrouping|ColumnDataSchemaRegular;
 
   type ColumnProp = string|number;
   type DataFormat = any;
 
-  interface HyperFunc<T> {
-    (sel: string, data?: object, text?: string): T;
-  }
+  interface HyperFunc<T> { (tag: string, props?: object, value?: string): T; }
 
-  type CellTemplateFunc<T> = (h: HyperFunc<T>, props: ColumnDataSchemaModel) => T;
+  type CellTemplateFunc<T> = (createElement: HyperFunc<T>, props: ColumnDataSchemaModel) => T;
+  type ColumnTemplateFunc<T> = (createElement: HyperFunc<T>, props: ColumnDataSchemaRegular) => T;
   type ColumnData = ColumnDataSchema[];
 
   type DataType = { [T in ColumnProp]: DataFormat };

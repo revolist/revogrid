@@ -15,19 +15,19 @@ export function generateFakeDataObject(rowsNumber, colsNumber) {
             columns[col] = {
                 name: generateHeader(col),
                 prop: col,
-                // pin: j === 2 ? 'colPinStart' : j === 20 ? 'colPinEnd' : undefined,
-                size: j === 5 ? 200 : undefined,
-                readonly: !!(col%2),
+                pin: j === 2 ? 'colPinStart' : j === 20 ? 'colPinEnd' : undefined,
+                // size: j === 5 ? 200 : undefined,
+                // readonly: !!(col%2),
+                rowDrag: j === 2
+                /*
                 cellTemplate: (h, props) => {
                     return h('div', {
-                        style: {
-                            // backgroundColor: j%2 ? 'red' : undefined
-                        },
+                        style: {},
                         class: {
                             'inner-cell': true
                         }
                     }, props.model[props.prop] || '');
-                }
+                } */
             }
         }
     }

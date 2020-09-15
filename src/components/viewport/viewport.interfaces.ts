@@ -31,6 +31,8 @@ declare namespace ViewportSpace {
 
         /** Current grid uniq Id */
         uuid: string;
+
+        canDrag?: boolean;
         style?: {[key: string]: string};
     };
     type ViewportProps = {

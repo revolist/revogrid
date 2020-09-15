@@ -7,7 +7,7 @@ import {createStore, ObservableMap} from '@stencil/store';
 import {setStore} from '../../utils/store.utils';
 import {RevoGrid} from "../../interfaces";
 
-type Group = {
+export type Group = {
   name: string;
   ids: (string|number)[];
 }

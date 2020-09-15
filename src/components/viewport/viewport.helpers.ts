@@ -69,6 +69,7 @@ function dataPartition(data: ViewportColumn, type: RevoGrid.DimensionRows, slot:
         cols,
         lastCell,
         slot,
+        canDrag: !fixed,
         position: data.position,
         rows: data.viewports[type].get('items'),
         uuid: `${data.uuid}-${data.position.x}-${data.position.y}`,
@@ -97,7 +98,14 @@ function dataViewPort(data: ViewportColumn): ViewportData[] {
     types.forEach(type => {
         if (data.viewports[type].get('items').length || type === 'row') {
             viewports.push(
-                dataPartition({ ...data, position: { ...data.position, y } }, type, slots[type], type !== 'row')
+                dataPartition({
+                        ...data,
+                        position: { ...data.position, y }
+                    },
+                    type,
+                  slots[type],
+                  type !== 'row'
+                )
             );
             y++;
         }

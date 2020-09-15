@@ -40,7 +40,7 @@
     <script type="module">
         import {generateFakeDataObject} from "/utilsExternal/generate-data.js";
 
-        const data = generateFakeDataObject(100, 100);
+        const data = generateFakeDataObject(1000, 100);
         // const grid2 = document.querySelector('.grid-component2');
         const grid = document.querySelector('.grid-component');
 
@@ -51,10 +51,13 @@
         grid.pinnedBottomSource = data.pinnedBottomRows;
 
         grid.readonly = false;
-        // grid.range = true;
+        grid.range = true;
         grid.resize = true;
         grid.addEventListener('afterEdit', (e) => {
             // grid2.source = [...grid.source];
+        });
+        grid.addEventListener('selectionChanged', (e) => {
+            e.preventDefault();
         });
 
         /*

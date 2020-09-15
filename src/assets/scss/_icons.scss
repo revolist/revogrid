@@ -1,0 +1,21 @@
+.revo-drag-icon {
+  $path: "./assets/icons/drag.svg";
+
+  -webkit-mask-image: url($path);
+  mask-image: url($path);
+  width: 11px;
+  height: 9px;
+  background-size: cover;
+  background-repeat: no-repeat;
+}
+
+.revo-alt-icon {
+  $path: "./assets/icons/alt.svg";
+
+  -webkit-mask-image: url($path);
+  mask-image: url($path);
+  width: 11px;
+  height: 11px;
+  background-size: cover;
+  background-repeat: no-repeat;
+}

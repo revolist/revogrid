@@ -4,13 +4,17 @@ import {DataSourceState} from '../../store/dataSource/data.store';
 import {Edition, RevoGrid} from '../../interfaces';
 
 import BeforeSaveDataDetails = Edition.BeforeSaveDataDetails;
+import ColumnDataSchemaModel = RevoGrid.ColumnDataSchemaModel;
+import ColumnProp = RevoGrid.ColumnProp;
+import DataSource = RevoGrid.DataSource;
+import DataType = RevoGrid.DataType;
 
 export interface ColumnServiceI {
   columns: RevoGrid.ColumnDataSchemaRegular[];
 
   setCellData(r: number, c: number, val: string): void;
 
-  cellRenderer(r: number, c: number): string | VNode;
+  customRenderer(r: number, c: number): VNode | void;
 
   isReadOnly(r: number, c: number): boolean;
 
@@ -42,12 +46,12 @@ export default class ColumnService implements ColumnServiceI {
     return readOnly;
   }
 
-  cellRenderer(r: number, c: number): string | VNode {
-    const tpl: RevoGrid.CellTemplateFunc<VNode> = this.columns[c]?.cellTemplate as RevoGrid.CellTemplateFunc<VNode>;
+  customRenderer(r: number, c: number): VNode | void {
+    const tpl = this.columns[c]?.cellTemplate;
     if (tpl) {
       return tpl(h as unknown as RevoGrid.HyperFunc<VNode>, this.rowDataModel(r, c));
     }
-    return this.getCellData(r, c);
+    return;
   }
 
   setCellData(r: number, c: number, val: string): void {
@@ -58,11 +62,7 @@ export default class ColumnService implements ColumnServiceI {
 
   getCellData(r: number, c: number): string {
     const {prop, model} = this.rowDataModel(r, c);
-    const val = model[prop as number];
-    if (typeof val === 'undefined') {
-      return '';
-    }
-    return val.toString();
+    return ColumnService.getData(model[prop as number]);
   }
 
   getSaveData(r: number, c: number, val: string): BeforeSaveDataDetails {
@@ -78,11 +78,19 @@ export default class ColumnService implements ColumnServiceI {
     return this.columns[c]?.editor;
   }
 
-  rowDataModel(r: number, c: number): RevoGrid.ColumnDataSchemaModel {
-    const prop: RevoGrid.ColumnProp | undefined = this.columns[c]?.prop;
-    const data: RevoGrid.DataSource = this.dataStore.get('items');
-    const model: RevoGrid.DataType = data[r] || {};
-    return {prop, model, data};
+  rowDataModel(r: number, c: number): ColumnDataSchemaModel {
+    const column = this.columns[c];
+    const prop: ColumnProp | undefined = column?.prop;
+    const data: DataSource = this.dataStore.get('items');
+    const model: DataType = data[r] || {};
+    return {prop, model, data, column};
+  }
+
+  static getData(val: any): string {
+    if (typeof val === 'undefined') {
+      return '';
+    }
+    return val.toString();
   }
 }
 

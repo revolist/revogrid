@@ -1,4 +1,4 @@
-import {Component, Element, h, Host, Prop, Watch} from '@stencil/core';
+import {Component, Element, Event, Prop, Watch, VNode, EventEmitter, h, Host} from '@stencil/core';
 import {HTMLStencilElement} from '@stencil/core/internal';
 import {ObservableMap} from '@stencil/store';
 
@@ -6,7 +6,8 @@ import ColumnService from './columnService';
 import {CELL_CLASS, DATA_COL, DATA_ROW, DISABLED_CLASS} from '../../utils/consts';
 
 import {DataSourceState} from '../../store/dataSource/data.store';
-import {RevoGrid} from "../../interfaces";
+import {RevoGrid} from '../../interfaces';
+import CellRenderer from './cellRenderer';
 
 @Component({
   tag: 'revogr-data'
@@ -15,14 +16,21 @@ export class RevogrData {
   private columnService: ColumnService;
 
   @Element() element!: HTMLStencilElement;
-  @Prop() dataStore: ObservableMap<DataSourceState<RevoGrid.DataType>>;
   @Prop() colData: RevoGrid.ColumnDataSchemaRegular[];
 
   @Prop() readonly: boolean;
   @Prop() range: boolean;
+  @Prop() canDrag: boolean;
 
   @Prop() rows: RevoGrid.VirtualPositionItem[];
   @Prop() cols: RevoGrid.VirtualPositionItem[];
+
+  @Prop() dimensionRow: ObservableMap<RevoGrid.DimensionSettingsState>;
+
+  /** Static stores, not expected to change during component lifetime */
+  @Prop() dataStore: ObservableMap<DataSourceState<RevoGrid.DataType>>;
+
+  @Event() dragStartCell: EventEmitter<MouseEvent>;
 
   @Watch('colData') colChanged(newData: RevoGrid.ColumnDataSchemaRegular[]): void {
     this.columnService.columns = newData;
@@ -46,13 +54,21 @@ export class RevogrData {
           class: `${CELL_CLASS} ${this.columnService.isReadOnly(row.itemIndex, col.itemIndex) ? DISABLED_CLASS : ''}`,
           style: {width: `${col.size}px`, transform: `translateX(${col.start}px)`}
         };
-        cells.push(<div {...dataProps}>{this.columnService.cellRenderer(row.itemIndex, col.itemIndex)}</div>);
+        cells.push(<div {...dataProps}>{this.getCellRenderer(row.itemIndex, col.itemIndex)}</div>);
       }
       rowsEls.push(<div class='row' style={{ height: `${row.size}px`, transform: `translateY(${row.start}px)` }}>{cells}</div>);
     }
-    if (!this.readonly || this.range) {
-        rowsEls.push(<slot name='overlay'/>);
-    }
     return <Host>{rowsEls}</Host>;
+  }
+
+  private getCellRenderer(row: number, col: number): VNode {
+    const custom = this.columnService.customRenderer(row, col);
+    if (custom) {
+      return custom;
+    }
+    return <CellRenderer
+      model={this.columnService.rowDataModel(row, col)}
+      canDrag={this.canDrag}
+      onDragStart={(e) => this.dragStartCell.emit(e)}/>
   }
 }
