@@ -134,5 +134,5 @@ grid.source = items;
 
 ## Contributing
 
-If you have any idea, feel free to open an issue to discuss a new feature, or fork Splitpanes and submit your changes back to me.
+If you have any idea, feel free to open an issue to discuss a new feature, or fork RevoGrid and submit your changes back to me.
 
