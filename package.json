@@ -1,7 +1,7 @@
 {
   "name": "@revolist/revogrid",
-  "version": "1.4.0",
-  "description": "Reactive grid component - RevoGrid.",
+  "version": "1.4.1",
+  "description": "Virtual reactive data grid component - RevoGrid.",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/revolist/revogrid/issues"
