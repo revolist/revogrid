@@ -1,20 +1,40 @@
-<p align="center">
+<p>
   <a href="https://revolist.github.io/revogrid.demo.js">
     <img src="./assets/logo.svg" alt="RevoGrid" height="150" />
   </a>
+  
+
+[![Latest Version on NPM](https://img.shields.io/npm/v/@revolist/revogrid)](https://www.npmjs.com/package/@revolist/revogrid)
+[![Software License](https://img.shields.io/npm/l/@revolist/revogrid)](https://github.com/revolist/revogrid/blob/master/LICENSE)
 </p>
 
-<p align="center">
+<p>
 Virtual grid implementation based on webcomponent using StencilJs.
 Handles millions of rows and columns fast and efficiently.
 Works in any major framework (VueJs, React, Ember, Angular) or with no framework at all.
+  
 </p>
 
-<p align="center">
-  <img src="./assets/grid-preview.gif" alt="RevoGrid" />
-</p>
 
 <br>
+
+
+## Features
+
+- Millions of cells virtual viewport scroll with a powerful core is in-build by default. Intelligent Virtual Dom; 
+- Column and Row custom sizes;
+- Column resizing;
+- Pinned columns and rows;
+- Column grouping;
+- Cell editing;
+- Custom cell renderer templates (build your own cell view);
+- Custom cell editor (apply your own editors and cell types);
+- Custom header renderer;
+- Drag and drop rows;
+- Range selection;
+- Multiple others useful features [RevoGrid](https://revolist.github.io/revogrid.demo.js).
+
+
 
 ## Content
 
@@ -24,21 +44,17 @@ Works in any major framework (VueJs, React, Ember, Angular) or with no framework
 * [Basic Usage](#basic-usage)
 * [Demo and Api](https://revolist.github.io/revogrid.demo.js)
 
+
 ## Overview
 
 The RevoGrid component helps represent a huge amount of data in a form of data table.
 Check for more details [RevoGrid page](https://revolist.github.io/revogrid.demo.js).
 
-Grid supports:
 
-- Column and Row custom sizes;
-- Column resizing;
-- Pinned columns and rows;
-- Column grouping;
-- The virtual scroll with a powerful core is in-build by default;
-- Custom cell template;
-- Cell editing;
-- Multiple others useful features [RevoGrid](https://revolist.github.io/revogrid.demo.js).
+![Chrome](https://raw.github.com/alrra/browser-logos/master/src/chrome/chrome_48x48.png) | ![Firefox](https://raw.github.com/alrra/browser-logos/master/src/firefox/firefox_48x48.png) | ![Safari](https://raw.github.com/alrra/browser-logos/master/src/safari/safari_48x48.png) | ![Opera](https://raw.github.com/alrra/browser-logos/master/src/opera/opera_48x48.png) | ![Edge](https://raw.github.com/alrra/browser-logos/master/src/edge/edge_48x48.png) |
+--- | --- | --- | --- | --- |
+Latest ✔ | Latest ✔ | Latest ✔ | Latest ✔ | Latest ✔ |
+
 
 ## Installation
 
@@ -118,4 +134,8 @@ grid.columns = columns;
 grid.source = items;
 ```
 
+
+## Contributing
+
+If you have any idea, feel free to open an issue to discuss a new feature, or fork RevoGrid and submit your changes back to me.
 
