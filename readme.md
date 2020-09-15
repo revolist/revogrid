@@ -10,6 +10,12 @@ Handles millions of rows and columns fast and efficiently.
 Works in any major framework (VueJs, React, Ember, Angular) or with no framework at all.
 </p>
 
+<p align="center">
+
+[![Latest Version on NPM](https://img.shields.io/npm/v/@revolist/revogrid)](https://www.npmjs.com/package/@revolist/revogrid)
+[![Software License](https://img.shields.io/npm/l/@revolist/revogrid)](LICENSE.md)
+</p>
+
 <br>
 
 
