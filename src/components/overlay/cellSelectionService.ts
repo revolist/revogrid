@@ -4,7 +4,6 @@ import each from 'lodash/each';
 import {codesLetter} from '../../utils/keyCodes';
 import {Selection, RevoGrid} from '../../interfaces';
 import {getItemByPosition} from '../../store/dimension/dimension.helpers';
-import {CELL_HANDLER_CLASS} from '../../utils/consts';
 import Cell = Selection.Cell;
 
 interface Config {
@@ -31,14 +30,21 @@ export default class CellSelectionService {
     this.canRange = config.canRange;
   }
 
-  onMouseDown({target}: MouseEvent, data: EventData): void {
-    const autoFill = this.isAutoFillHandler({target: target as HTMLElement});
-    if (autoFill) {
-      /** Get cell by autofill element */
-      const {top, left} = (target as HTMLElement).getBoundingClientRect();
-      this.autoFillInitial = this.config.autoFill(true);
-      this.autoFillStart = this.getCurrentCell({x: left, y: top}, data);
+  onCellDown({shiftKey, x, y, defaultPrevented}: MouseEvent, data: EventData): void {
+    if (defaultPrevented) {
+      return;
     }
+    /** Regular cell click */
+    const focusCell: Cell = this.getCurrentCell({x, y}, data);
+    this.config.focus(focusCell, this.canRange && shiftKey);
+  }
+
+  onAutoFillStart(e: MouseEvent, data: EventData): void {
+    /** Get cell by autofill element */
+    const {top, left} = (e.target as HTMLElement).getBoundingClientRect();
+    this.autoFillInitial = this.config.autoFill(true);
+    this.autoFillStart = this.getCurrentCell({x: left, y: top}, data);
+    e.preventDefault();
   }
 
   clearSelection(): void {
@@ -51,15 +57,6 @@ export default class CellSelectionService {
       this.autoFillLast = null;
       this.autoFillStart = null;
     }
-  }
-
-  doSelection({x, y, shiftKey}: MouseEvent, data: EventData): void {
-    if (this.autoFillInitial) {
-      return;
-    }
-    /** Regular cell click */
-    const focusCell: Cell = this.getCurrentCell({x, y}, data);
-    this.config.focus(focusCell, this.canRange && shiftKey);
   }
 
   /** Autofill logic: on mouse move apply based on previous direction (if present) */
@@ -141,11 +138,6 @@ export default class CellSelectionService {
     const row = getItemByPosition(rows, y - top);
     const col = getItemByPosition(cols, x - left);
     return { x: col.itemIndex, y: row.itemIndex };
-  }
-
-  /** Test if handler class present */
-  private isAutoFillHandler({target}: {target?: HTMLElement}): boolean {
-    return target?.classList.contains(CELL_HANDLER_CLASS);
   }
 
   /** Compare cells, only 1 coordinate difference is possible */

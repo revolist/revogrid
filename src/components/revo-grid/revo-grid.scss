@@ -116,27 +116,36 @@ revogr-data {
     left: 0;
   }
 
+  .revo-draggable {
+    $drag-icon-color: #d4d4d4;
+
+    float: left;
+    width: 24px;
+    height: 100%;
+    text-align: center;
+    line-height: 24px;
+    cursor: pointer;
+
+    &:hover {
+      > .revo-drag-icon {
+        background-color: black;
+      }
+    }
+
+    > .revo-drag-icon {
+      background-color: $drag-icon-color;
+      vertical-align: middle;
+      display: inline-block;
+      pointer-events: none;
+    }
+  }
+
   .data-cell {
     position: absolute;
     box-sizing: border-box;
     box-shadow: $cell-shadow-cell;
     height: 100%;
     text-align: center;
-
-    .revo-draggable {
-      float: left;
-      width: 24px;
-      height: 100%;
-      text-align: center;
-      line-height: 24px;
-      cursor: pointer;
-
-      > .revo-drag-icon {
-        vertical-align: middle;
-        display: inline-block;
-        background-color: gray;
-      }
-    }
 
     &.disabled {
       background-color: $cell-disabled-bg;
@@ -328,6 +337,21 @@ revogr-overlay-selection {
   revogr-edit {
     z-index: 10;
   }
+
+  &.drag-active {
+    revogr-data {
+      .row {
+        &:hover {
+          box-shadow: 0 1px 0 red;
+          z-index: 10;
+
+          .revo-draggable > .revo-drag-icon {
+            background-color: gray;
+          }
+        }
+      }
+    }
+  }
 }
 
 revogr-edit {
@@ -339,5 +363,36 @@ revogr-edit {
     height: 100%;
     width: 100%;
     box-sizing: border-box;
+  }
+}
+
+
+revogr-order-editor {
+  .draggable {
+    $s: 30px;
+    position: fixed;
+    height: $s;
+    line-height: $s;
+    background: #fff;
+    border-radius: 3px;
+    display: block;
+    z-index: 100;
+    margin-top: 5px;
+    margin-right: -20px;
+    box-shadow: 0 4px 20px 0 rgba(black, .15);
+    padding-left: 20px;
+    padding-right: 5px;
+  
+    &.hidden {
+      display: none;
+    }
+  
+    .revo-alt-icon {
+      $alt-icon-color: black;
+      background-color: $alt-icon-color;
+      position: absolute;
+      left: 5px;
+      top: 10px;
+    }
   }
 }

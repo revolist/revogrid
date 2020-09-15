@@ -1,36 +1,41 @@
-import {RevoGrid} from '../../interfaces';
+import {RevoGrid, Selection} from '../../interfaces';
 import {getItemByPosition} from '../../store/dimension/dimension.helpers';
 
-export type DragEventData = {
-  el: HTMLElement;
-  rows: RevoGrid.DimensionSettingsState;
-};
+
+type EventData = {el: HTMLElement, rows: RevoGrid.DimensionSettingsState, cols: RevoGrid.DimensionSettingsState};
 
 interface Config {
   positionChanged(from: number, to: number): void;
 }
 
-let lastKnownId: number = 0;
 export default class RowOrderService {
-  private id: string = `${new Date().getTime()}-${lastKnownId++}`;
-  private currentRow: number|null = null;
+  private currentCell: Selection.Cell|null = null;
+
+  get current(): Selection.Cell {
+    return this.currentCell;
+  }
 
   constructor(private config: Config) {}
 
-  endOrder(e: DragEvent, data: DragEventData): void {
-    if (e.dataTransfer.getData('text') === this.id) {
-      const newRow = this.getRow(e.clientY, data);
-      this.config.positionChanged(this.currentRow, newRow);
+  endOrder(e: MouseEvent, data: EventData): void {
+    if (this.currentCell === null) {
+      return;
     }
+    const newRow = this.getCurrentCell(e, data);
+    this.config.positionChanged(this.currentCell.y, newRow.y);
+    this.currentCell = null;
   }
-  startOrder(e: DragEvent, data: DragEventData): void {
-    e.dataTransfer.setData('text', this.id);
-    this.currentRow = this.getRow(e.clientY, data);
+  startOrder(e: MouseEvent, data: EventData): void {
+    this.currentCell = this.getCurrentCell(e, data);
   }
-
-  private getRow(y: number, {el, rows}: DragEventData): number {
-    const {top} = el.getBoundingClientRect();
+  clear(): void {
+    this.currentCell = null;
+  }
+   /** Calculate cell based on x, y position */
+   private getCurrentCell({x, y}: Selection.Cell, {el, rows, cols}: EventData): Selection.Cell {
+    const {top, left} = el.getBoundingClientRect();
     const row = getItemByPosition(rows, y - top);
-    return row.itemIndex;
+    const col = getItemByPosition(cols, x - left);
+    return { x: col.itemIndex, y: row.itemIndex };
   }
 }

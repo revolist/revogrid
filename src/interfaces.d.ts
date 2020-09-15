@@ -38,6 +38,7 @@ export declare namespace RevoGrid {
     minSize?: number;
     cellTemplate?: CellTemplateFunc<VNode>;
     rowDrag?: RowDrag;
+    columnTemplate?: ColumnTemplateFunc<VNode>;
   }
 
   interface ColumnDataSchemaGrouping {
@@ -60,6 +61,7 @@ export declare namespace RevoGrid {
   interface HyperFunc<T> { (tag: string, props?: object, value?: string): T; }
 
   type CellTemplateFunc<T> = (createElement: HyperFunc<T>, props: ColumnDataSchemaModel) => T;
+  type ColumnTemplateFunc<T> = (createElement: HyperFunc<T>, props: ColumnDataSchemaRegular) => T;
   type ColumnData = ColumnDataSchema[];
 
   type DataType = { [T in ColumnProp]: DataFormat };

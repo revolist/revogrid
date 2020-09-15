@@ -30,7 +30,7 @@ export class RevogrData {
   /** Static stores, not expected to change during component lifetime */
   @Prop() dataStore: ObservableMap<DataSourceState<RevoGrid.DataType>>;
 
-  @Event() dragStartCell: EventEmitter<DragEvent>;
+  @Event() dragStartCell: EventEmitter<MouseEvent>;
 
   @Watch('colData') colChanged(newData: RevoGrid.ColumnDataSchemaRegular[]): void {
     this.columnService.columns = newData;

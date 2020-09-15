@@ -16,7 +16,6 @@ import {
   TMP_SELECTION_BG_CLASS
 } from '../../utils/consts';
 import {DataSourceState} from '../../store/dataSource/data.store';
-import RowOrderService from "./rowOrderService";
 
 import RangeAreaCss = Selection.RangeAreaCss;
 import Cell = Selection.Cell;
@@ -28,7 +27,6 @@ import Cell = Selection.Cell;
 export class OverlaySelection {
   private selectionService: CellSelectionService;
   private columnService: ColumnService;
-  private rowOrderService: RowOrderService;
 
   private selectionStoreService: SelectionStore;
   private focusSection: HTMLInputElement;
@@ -36,6 +34,7 @@ export class OverlaySelection {
   @State() autoFill: boolean = false;
 
   @Element() element: HTMLElement;
+  private orderEditor: HTMLRevogrOrderEditorElement;
 
   @Prop() readonly: boolean;
   @Prop() range: boolean;
@@ -52,7 +51,6 @@ export class OverlaySelection {
   @Prop() colData: RevoGrid.ColumnDataSchemaRegular[];
   /** Last cell position */
   @Prop() lastCell: Selection.Cell;
-
   /** Custom editors register */
   @Prop() editors: Edition.Editors;
 
@@ -71,8 +69,6 @@ export class OverlaySelection {
   @Event({ bubbles: false }) focusCell: EventEmitter<{focus: Selection.Cell; end: Selection.Cell; }>;
   @Event({ bubbles: false }) unregister: EventEmitter;
 
-  /** Row dragged, new range ready to be applied */
-  @Event() rowDropped: EventEmitter<{from: number; to: number;}>;
   /** Selection range changed */
   @Event() selectionChanged: EventEmitter<{
     newRange: {start: Selection.Cell; end: Selection.Cell;};
@@ -96,16 +92,18 @@ export class OverlaySelection {
   @Listen('mouseleave', { target: 'document' })
   onMouseOut(): void {
     this.selectionService.clearSelection();
+    this.orderEditor?.clearOrder();
   }
 
   @Listen('mouseup', { target: 'document' })
-  onMouseUp(): void {
+  onMouseUp(e: MouseEvent): void {
     this.selectionService.clearSelection();
+    this.orderEditor?.endOrder(e, this.getData());
   }
 
   @Listen('dragStartCell')
-  onCellDrag(e: CustomEvent<DragEvent>): void {
-    this.rowOrderService.startOrder(e.detail, this.getData());
+  onCellDrag(e: CustomEvent<MouseEvent>): void {
+    this.orderEditor?.dragStart(e.detail, this.getData());
   }
 
   @Listen('keydown')
@@ -168,19 +166,6 @@ export class OverlaySelection {
         }
         this.autoFill = isAutofill;
         return focus;
-      }
-    });
-
-    this.rowOrderService = new RowOrderService({
-      positionChanged: (from, to) => {
-        const dropEvent = this.rowDropped.emit({from, to});
-        if (dropEvent.defaultPrevented) {
-          return;
-        }
-        const items = this.dataStore.get('items');
-        const toMove = items.splice(from, 1);
-        items.splice(to, 0, ...toMove);
-        this.dataStore.set('items', [...items]);
       }
     });
   }
@@ -251,6 +236,7 @@ export class OverlaySelection {
       els.push(
         <div
           class={CELL_HANDLER_CLASS}
+          onMouseDown={e => this.selectionService.onAutoFillStart(e, this.getData())}
           style={{ left: `${handlerStyle.right}px`, top: `${handlerStyle.bottom}px`, }}/>
       );
     }
@@ -258,24 +244,31 @@ export class OverlaySelection {
     const hostProps: {
       onDblClick(): void;
       onMouseDown(e: MouseEvent): void;
-      onMouseUp(e: MouseEvent): void;
       onMouseMove?(e: MouseEvent): void;
-      onDrop?(e: DragEvent): void;
-      onDragOver?(e: DragEvent): void;
     } = {
       onDblClick: () => this.onDoubleClick(),
-      onMouseUp: (e) => this.selectionService.doSelection(e, this.getData()),
-      onMouseDown: (e: MouseEvent) => this.selectionService.onMouseDown(e, this.getData()),
+      onMouseDown: (e: MouseEvent) => this.selectionService.onCellDown(e, this.getData()),
     };
     if (this.autoFill && selectionFocus) {
       hostProps.onMouseMove = (e: MouseEvent) => this.selectionService.onMouseMove(e, this.getData())
     }
 
     if (this.canDrag) {
-      hostProps.onDrop = (e: DragEvent) => this.rowOrderService.endOrder(e, this.getData());
-      hostProps.onDragOver = (e: DragEvent) => e.preventDefault();
+      els.push(<revogr-order-editor ref={(e) => this.orderEditor = e}
+        dataStore={this.dataStore}
+        onRowDragStart={(e) => this.onRowDragStart(e)}
+        onRowDragEnd={() => this.onRowDragEnd()}/>);
     }
     return <Host {...hostProps}>{els}<slot name='data'/></Host>;
+  }
+
+  onRowDragEnd(): void {
+    this.element.classList.remove('drag-active');
+  }
+  
+  onRowDragStart({detail}: CustomEvent<{cell: Selection.Cell, text: string}>): void {
+    detail.text = this.columnService.getCellData(detail.cell.y, detail.cell.x);
+    this.element.classList.add('drag-active');
   }
 
   private canEdit(): boolean {

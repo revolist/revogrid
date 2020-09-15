@@ -85,6 +85,15 @@ export namespace Components {
         "groups": Groups;
         "parent": string;
     }
+    interface RevogrOrderEditor {
+        "clearOrder": () => Promise<void>;
+        /**
+          * Static stores, not expected to change during component lifetime
+         */
+        "dataStore": ObservableMap<DataSourceState<RevoGrid.DataType>>;
+        "dragStart": (e: MouseEvent, data: { el: HTMLElement; rows: RevoGrid.DimensionSettingsState; cols: RevoGrid.DimensionSettingsState; }) => Promise<void>;
+        "endOrder": (e: MouseEvent, data: { el: HTMLElement; rows: RevoGrid.DimensionSettingsState; cols: RevoGrid.DimensionSettingsState; }) => Promise<void>;
+    }
     interface RevogrOverlaySelection {
         "canDrag": boolean;
         "colData": RevoGrid.ColumnDataSchemaRegular[];
@@ -160,6 +169,12 @@ declare global {
         prototype: HTMLRevogrHeaderElement;
         new (): HTMLRevogrHeaderElement;
     };
+    interface HTMLRevogrOrderEditorElement extends Components.RevogrOrderEditor, HTMLStencilElement {
+    }
+    var HTMLRevogrOrderEditorElement: {
+        prototype: HTMLRevogrOrderEditorElement;
+        new (): HTMLRevogrOrderEditorElement;
+    };
     interface HTMLRevogrOverlaySelectionElement extends Components.RevogrOverlaySelection, HTMLStencilElement {
     }
     var HTMLRevogrOverlaySelectionElement: {
@@ -189,6 +204,7 @@ declare global {
         "revogr-data": HTMLRevogrDataElement;
         "revogr-edit": HTMLRevogrEditElement;
         "revogr-header": HTMLRevogrHeaderElement;
+        "revogr-order-editor": HTMLRevogrOrderEditorElement;
         "revogr-overlay-selection": HTMLRevogrOverlaySelectionElement;
         "revogr-scroll-virtual": HTMLRevogrScrollVirtualElement;
         "revogr-viewport": HTMLRevogrViewportElement;
@@ -251,7 +267,7 @@ declare namespace LocalJSX {
          */
         "dataStore"?: ObservableMap<DataSourceState<RevoGrid.DataType>>;
         "dimensionRow"?: ObservableMap<RevoGrid.DimensionSettingsState>;
-        "onDragStartCell"?: (event: CustomEvent<DragEvent>) => void;
+        "onDragStartCell"?: (event: CustomEvent<MouseEvent>) => void;
         "range"?: boolean;
         "readonly"?: boolean;
         "rows"?: RevoGrid.VirtualPositionItem[];
@@ -277,6 +293,24 @@ declare namespace LocalJSX {
         "onHeaderResize"?: (event: CustomEvent<RevoGrid.ViewSettingSizeProp>) => void;
         "parent"?: string;
     }
+    interface RevogrOrderEditor {
+        /**
+          * Static stores, not expected to change during component lifetime
+         */
+        "dataStore"?: ObservableMap<DataSourceState<RevoGrid.DataType>>;
+        /**
+          * Row drag started
+         */
+        "onRowDragEnd"?: (event: CustomEvent<any>) => void;
+        /**
+          * Row drag started
+         */
+        "onRowDragStart"?: (event: CustomEvent<{cell: Selection.Cell, text: string}>) => void;
+        /**
+          * Row dragged, new range ready to be applied
+         */
+        "onRowDropped"?: (event: CustomEvent<{from: number; to: number;}>) => void;
+    }
     interface RevogrOverlaySelection {
         "canDrag"?: boolean;
         "colData"?: RevoGrid.ColumnDataSchemaRegular[];
@@ -298,10 +332,6 @@ declare namespace LocalJSX {
         "onBeforeEdit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
         "onChangeSelection"?: (event: CustomEvent<{changes: Partial<Selection.Cell>; isMulti?: boolean; }>) => void;
         "onFocusCell"?: (event: CustomEvent<{focus: Selection.Cell; end: Selection.Cell; }>) => void;
-        /**
-          * Row dragged, new range ready to be applied
-         */
-        "onRowDropped"?: (event: CustomEvent<{from: number; to: number;}>) => void;
         /**
           * Selection range changed
          */
@@ -352,6 +382,7 @@ declare namespace LocalJSX {
         "revogr-data": RevogrData;
         "revogr-edit": RevogrEdit;
         "revogr-header": RevogrHeader;
+        "revogr-order-editor": RevogrOrderEditor;
         "revogr-overlay-selection": RevogrOverlaySelection;
         "revogr-scroll-virtual": RevogrScrollVirtual;
         "revogr-viewport": RevogrViewport;
@@ -366,6 +397,7 @@ declare module "@stencil/core" {
             "revogr-data": LocalJSX.RevogrData & JSXBase.HTMLAttributes<HTMLRevogrDataElement>;
             "revogr-edit": LocalJSX.RevogrEdit & JSXBase.HTMLAttributes<HTMLRevogrEditElement>;
             "revogr-header": LocalJSX.RevogrHeader & JSXBase.HTMLAttributes<HTMLRevogrHeaderElement>;
+            "revogr-order-editor": LocalJSX.RevogrOrderEditor & JSXBase.HTMLAttributes<HTMLRevogrOrderEditorElement>;
             "revogr-overlay-selection": LocalJSX.RevogrOverlaySelection & JSXBase.HTMLAttributes<HTMLRevogrOverlaySelectionElement>;
             "revogr-scroll-virtual": LocalJSX.RevogrScrollVirtual & JSXBase.HTMLAttributes<HTMLRevogrScrollVirtualElement>;
             "revogr-viewport": LocalJSX.RevogrViewport & JSXBase.HTMLAttributes<HTMLRevogrViewportElement>;

@@ -1,13 +1,15 @@
 import {Component, Element, Event, EventEmitter, h, Prop, Watch} from '@stencil/core';
-import {HTMLStencilElement} from '@stencil/core/internal';
+import {HTMLStencilElement, VNode} from '@stencil/core/internal';
 import {ObservableMap} from "@stencil/store";
 import findIndex from 'lodash/findIndex';
 
-import {DATA_COL, HEADER_CLASS} from '../../utils/consts';
+import {HEADER_ACTUAL_ROW_CLASS, HEADER_CLASS, HEADER_ROW_CLASS} from '../../utils/consts';
 import HeaderService from './headerService';
 import {RevoGrid} from '../../interfaces';
 import {Groups} from '../../store/dataSource/data.store';
 import {getItemByIndex} from '../../store/dimension/dimension.helpers';
+import HeaderRenderer from './headerRenderer';
+import GroupHeaderRenderer from './headerGroupRenderer';
 
 @Component({
   tag: 'revogr-header'
@@ -36,7 +38,7 @@ export class RevogrHeaderComponent {
 
   connectedCallback(): void {
     this.headerService = new HeaderService(
-        `${this.parent} .${HEADER_CLASS}`,
+        `${this.parent} .${HEADER_ACTUAL_ROW_CLASS} .${HEADER_CLASS}`,
         this.colData,
         {
           canResize: this.canResize,
@@ -49,25 +51,27 @@ export class RevogrHeaderComponent {
     this.headerService?.destroy();
   }
 
-  render() {
-    const cells: HTMLElement[] = [];
+  render(): VNode[] {
+    const cells: VNode[] = [];
     const visibleProps: {[prop: string]: number} = {};
 
     // render header columns
     for (let col of this.cols) {
       const colData = this.colData[col.itemIndex];
-      const dataProps = {
-        [DATA_COL]: col.itemIndex,
-        class: HEADER_CLASS,
-        style: { width: `${col.size}px`, transform: `translateX(${col.start}px)` },
-        onClick: () => this.headerClick.emit(this.colData[col.itemIndex])
-      };
-      cells.push(<div {...dataProps}>{colData.name}</div>);
+      cells.push(<HeaderRenderer column={col} data={colData} onClick={(e) => this.headerClick.emit(e)}/>);
       visibleProps[colData.prop] = col.itemIndex;
     }
 
+    const groupRow = this.renderGroups(visibleProps);
+    return [
+      <div class='group-row'>{groupRow}</div>,
+      <div class={`${HEADER_ROW_CLASS} ${HEADER_ACTUAL_ROW_CLASS}`}>{cells}</div>
+    ];
+  }
+
+  renderGroups(visibleProps: {[prop: string]: number}): VNode[] {
     // render group columns
-    const groupRow: HTMLElement[] = [];
+    const groupRow: VNode[] = [];
     for (let i = 0; i < this.groupingDepth; i++) {
       if (this.groups[i]) {
         for (let group of this.groups[i]) {
@@ -83,22 +87,13 @@ export class RevogrHeaderComponent {
             // coordinates
             const groupStart = getItemByIndex(this.dimensionCol.state, groupStartIndex).start;
             const groupEnd = getItemByIndex(this.dimensionCol.state, groupEndIndex).end;
-            const groupProps = {
-              class: HEADER_CLASS,
-              style: {
-                transform: `translateX(${groupStart}px)`,
-                width: `${groupEnd - groupStart}px`
-              }
-            };
-            groupRow.push(<div {...groupProps}>{group.name}</div>);
+            
+            groupRow.push(<GroupHeaderRenderer start={groupStart} end={groupEnd} group={group}/>);
           }
         }
       }
-      groupRow.push(<div class='header-row group'/>);
+      groupRow.push(<div class={`${HEADER_ROW_CLASS} group`}/>);
     }
-    return [
-      <div class='group-row'>{groupRow}</div>,
-      <div class='header-row'>{cells}</div>
-    ];
+    return groupRow;
   }
 }
