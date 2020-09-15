@@ -5,7 +5,7 @@
   
 
 [![Latest Version on NPM](https://img.shields.io/npm/v/@revolist/revogrid)](https://www.npmjs.com/package/@revolist/revogrid)
-[![Software License](https://img.shields.io/npm/l/@revolist/revogrid)](LICENSE.md)
+[![Software License](https://img.shields.io/npm/l/@revolist/revogrid)](https://github.com/revolist/revogrid/blob/master/LICENSE)
 </p>
 
 <p>
