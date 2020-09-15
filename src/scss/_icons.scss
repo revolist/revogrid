@@ -1,5 +1,5 @@
 .revo-drag-icon {
-  $path: "./icons/drag.svg";
+  $path: "icons/drag.svg";
 
   -webkit-mask-image: url($path);
   mask-image: url($path);
@@ -10,7 +10,7 @@
 }
 
 .revo-alt-icon {
-  $path: "./icons/alt.svg";
+  $path: "icons/alt.svg";
 
   -webkit-mask-image: url($path);
   mask-image: url($path);
