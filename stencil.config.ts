@@ -10,7 +10,8 @@ export const config: Config = {
   outputTargets: [
     {
       type: 'dist',
-      esmLoaderPath: '../loader'
+      esmLoaderPath: '../loader',
+      copy: [{ src: 'icons' }],
     },
     {
       type: 'docs-readme'
@@ -26,7 +27,7 @@ export const config: Config = {
     {
       type: 'www',
       copy: [
-        { src: 'utilsExternal' }
+        { src: 'utilsExternal' }, { src: 'icons' }
       ],
       serviceWorker: null // disable service workers
     }
