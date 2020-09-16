@@ -6,7 +6,8 @@ import { DRAGG_TEXT } from '../../utils/consts';
 import RowOrderService from './rowOrderService';
 
 @Component({
-    tag: 'revogr-order-editor'
+    tag: 'revogr-order-editor',
+    styleUrl: 'revogr-order-style.scss'
 })
 export class OrderEditor {
     private rowOrderService: RowOrderService;

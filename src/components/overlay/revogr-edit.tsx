@@ -4,7 +4,8 @@ import {Edition, RevoGrid} from '../../interfaces';
 import {TextEditor} from './editors/text';
 
 @Component({
-    tag: 'revogr-edit'
+    tag: 'revogr-edit',
+    styleUrl: 'revogr-edit-style.scss'
 })
 export class Edit {
     @Element() element: HTMLElement;

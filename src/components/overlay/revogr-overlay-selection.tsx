@@ -22,7 +22,8 @@ import Cell = Selection.Cell;
 
 
 @Component({
-  tag: 'revogr-overlay-selection'
+  tag: 'revogr-overlay-selection',
+  styleUrl: 'revogr-overlay-style.scss'
 })
 export class OverlaySelection {
   private selectionService: CellSelectionService;
@@ -30,11 +31,11 @@ export class OverlaySelection {
 
   private selectionStoreService: SelectionStore;
   private focusSection: HTMLInputElement;
-
-  @State() autoFill: boolean = false;
+  private orderEditor: HTMLRevogrOrderEditorElement;
 
   @Element() element: HTMLElement;
-  private orderEditor: HTMLRevogrOrderEditorElement;
+
+  @State() autoFill: boolean = false;
 
   @Prop() readonly: boolean;
   @Prop() range: boolean;
@@ -89,23 +90,27 @@ export class OverlaySelection {
     });
   }
 
+  /** Pointer left document, clear any active operation */
   @Listen('mouseleave', { target: 'document' })
   onMouseOut(): void {
     this.selectionService.clearSelection();
     this.orderEditor?.clearOrder();
   }
 
+  /** Action finished inside of the document */
   @Listen('mouseup', { target: 'document' })
   onMouseUp(e: MouseEvent): void {
     this.selectionService.clearSelection();
     this.orderEditor?.endOrder(e, this.getData());
   }
 
+  /** Row drag started */
   @Listen('dragStartCell')
   onCellDrag(e: CustomEvent<MouseEvent>): void {
     this.orderEditor?.dragStart(e.detail, this.getData());
   }
 
+  /** Recived keyboard down from element */
   @Listen('keydown')
   handleKeyDown(e: KeyboardEvent): void {
     this.selectionService.keyDown(e);
@@ -125,9 +130,6 @@ export class OverlaySelection {
 
   @Watch('range') onRange(canRange: boolean): void {
     this.selectionService.canRange = canRange;
-  }
-  onDoubleClick(): void {
-    this.canEdit() && this.setEdit?.emit('');
   }
 
   connectedCallback(): void {
@@ -180,18 +182,63 @@ export class OverlaySelection {
     }
   }
 
+  renderRange(range: Selection.RangeArea): VNode[] {
+    const style: RangeAreaCss = this.getElStyle(range);
+    return [<div class={SELECTION_BORDER_CLASS} style={style}/>,
+      <div class={SELECTION_BG_CLASS} style={style}/>];
+  }
+
+  renderAutofill(range: Selection.RangeArea, selectionFocus: Selection.Cell): VNode {
+    let handlerStyle;
+    if (range) {
+      handlerStyle = this.getCell(range);
+    } else {
+      handlerStyle = this.getCell({
+        ...selectionFocus,
+        x1: selectionFocus.x,
+        y1: selectionFocus.y
+      });
+    }
+    const props = {
+      class: CELL_HANDLER_CLASS,
+      onMouseDown: (e: MouseEvent) => this.selectionService.onAutoFillStart(e, this.getData()),
+      style: { left: `${handlerStyle.right}px`, top: `${handlerStyle.bottom}px`, }
+    };
+    return <div {...props}/>;
+  }
+
+  private renderEditCell(): VNode|void {
+    // if can edit
+    const editCell = this.selectionStore.get('edit');
+    if (this.readonly || !editCell) {
+      return;
+    }
+    const val = editCell.val || this.columnService.getCellData(editCell.y, editCell.x);
+    const editable = {
+      ...editCell,
+      ...this.columnService.getSaveData(editCell.y, editCell.x, val)
+    };
+
+    const style = this.getElStyle({...editCell, x1: editCell.x, y1: editCell.y });
+
+    return <revogr-edit
+      class='edit-input-wrapper'
+      onCloseEdit={() => this.setEdit?.emit(false)}
+      editCell={editable}
+      column={this.columnService.columns[editCell.x]}
+      editor={this.editors[this.columnService.getCellEditor(editCell.y, editCell.x)]}
+      style={style}
+    />
+  }
+
   render() {
     const range = this.selectionStore.get('range');
     const selectionFocus = this.selectionStore.get('focus');
     const tempRange = this.selectionStore.get('tempRange');
-    const els: (HTMLElement|VNode)[] = [];
+    const els: VNode[] = [];
 
     if (range) {
-      const style: RangeAreaCss = this.getElStyle(range);
-      els.push(
-        <div class={SELECTION_BORDER_CLASS} style={style}/>,
-        <div class={SELECTION_BG_CLASS} style={style}/>
-      );
+      els.push(...this.renderRange(range));
     }
 
     if (tempRange) {
@@ -217,28 +264,13 @@ export class OverlaySelection {
       style={{...focusStyle, width: '0', height: '0'}}/>);
 
 
-    const editCell = this.getEditCell();
+    const editCell = this.renderEditCell();
     if (editCell) {
       els.push(editCell);
     }
 
     if (selectionFocus && !this.readonly && !editCell && this.range) {
-      let handlerStyle;
-      if (range) {
-        handlerStyle = this.getCell(range);
-      } else {
-        handlerStyle = this.getCell({
-          ...selectionFocus,
-          x1: selectionFocus.x,
-          y1: selectionFocus.y
-        });
-      }
-      els.push(
-        <div
-          class={CELL_HANDLER_CLASS}
-          onMouseDown={e => this.selectionService.onAutoFillStart(e, this.getData())}
-          style={{ left: `${handlerStyle.right}px`, top: `${handlerStyle.bottom}px`, }}/>
-      );
+      els.push(this.renderAutofill(range, selectionFocus));
     }
 
     const hostProps: {
@@ -261,6 +293,10 @@ export class OverlaySelection {
     }
     return <Host {...hostProps}>{els}<slot name='data'/></Host>;
   }
+  
+  onDoubleClick(): void {
+    this.canEdit() && this.setEdit?.emit('');
+  }
 
   onRowDragEnd(): void {
     this.element.classList.remove('drag-active');
@@ -282,30 +318,6 @@ export class OverlaySelection {
       rows: this.dimensionRow.state,
       cols: this.dimensionCol.state
     }
-  }
-
-  private getEditCell(): VNode|void {
-    // if can edit
-    const editCell = this.selectionStore.get('edit');
-    if (this.readonly || !editCell) {
-      return;
-    }
-    const val = editCell.val || this.columnService.getCellData(editCell.y, editCell.x);
-    const editable = {
-      ...editCell,
-      ...this.columnService.getSaveData(editCell.y, editCell.x, val)
-    };
-
-    const style = this.getElStyle({...editCell, x1: editCell.x, y1: editCell.y });
-
-    return <revogr-edit
-      class='edit-input-wrapper'
-      onCloseEdit={() => this.setEdit?.emit(false)}
-      editCell={editable}
-      column={this.columnService.columns[editCell.x]}
-      editor={this.editors[this.columnService.getCellEditor(editCell.y, editCell.x)]}
-      style={style}
-    />
   }
 
   private getCell({x, y, x1, y1}: Selection.RangeArea) {

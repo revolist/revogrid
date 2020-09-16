@@ -10,7 +10,8 @@ import {RevoGrid} from '../../interfaces';
 import CellRenderer from './cellRenderer';
 
 @Component({
-  tag: 'revogr-data'
+  tag: 'revogr-data',
+  styleUrl: 'revogr-data-style.scss'
 })
 export class RevogrData {
   private columnService: ColumnService;

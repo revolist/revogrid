@@ -4,7 +4,8 @@ import LocalScrollService from '../../services/localScrollService';
 import {RevoGrid} from "../../interfaces";
 
 @Component({
-    tag: 'revogr-scroll-virtual'
+    tag: 'revogr-scroll-virtual',
+    styleUrl: 'revogr-scroll-style.scss'
 })
 export class RevogrScrollVirtual {
     private scrollSize: number = 0;

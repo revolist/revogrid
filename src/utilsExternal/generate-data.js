@@ -15,10 +15,10 @@ export function generateFakeDataObject(rowsNumber, colsNumber) {
             columns[col] = {
                 name: generateHeader(col),
                 prop: col,
-                pin: j === 2 ? 'colPinStart' : j === 20 ? 'colPinEnd' : undefined,
+                // pin: j === 2 ? 'colPinStart' : j === 20 ? 'colPinEnd' : undefined,
                 // size: j === 5 ? 200 : undefined,
                 // readonly: !!(col%2),
-                rowDrag: j === 2
+                rowDrag: j === 0
                 /*
                 cellTemplate: (h, props) => {
                     return h('div', {
@@ -34,6 +34,7 @@ export function generateFakeDataObject(rowsNumber, colsNumber) {
     const pinnedTopRows = result[10] && [result[10]] || [];
     const pinnedBottomRows = result[1] && [result[1]] || [];
     let headers = Object.keys(columns).map((k) => columns[k]);
+    /*
     const grouped = headers.splice(6, 4);
     const grouped2 = grouped.splice(0, 2);
     grouped.push({
@@ -51,11 +52,11 @@ export function generateFakeDataObject(rowsNumber, colsNumber) {
     headers.splice(1, 0, ...[{
         name: 'Grouped3',
         children: grouped4
-    }]);
+    }]); */
     return {
         rows: result,
-        pinnedTopRows,
-        pinnedBottomRows,
+        // pinnedTopRows,
+        // pinnedBottomRows,
         headers
     };
 }

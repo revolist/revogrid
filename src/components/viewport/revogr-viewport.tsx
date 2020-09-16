@@ -12,7 +12,8 @@ import {Edition, RevoGrid} from '../../interfaces';
 import ViewportProps = ViewportSpace.ViewportProps;
 
 @Component({
-  tag: 'revogr-viewport'
+  tag: 'revogr-viewport',
+  styleUrl: 'revogr-viewport-style.scss'
 })
 export class RevogrViewport {
   private elementToScroll: ElementScroll[] = [];

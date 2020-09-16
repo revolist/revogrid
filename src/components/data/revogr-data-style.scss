@@ -1,0 +1,49 @@
+@import "../../global/colors";
+
+revogr-data {
+	display: block;
+	width: 100%;
+	position: relative;
+
+	.row {
+		position: absolute;
+		width: 100%;
+		left: 0;
+	}
+
+	.revo-draggable {
+		$drag-icon-color: #d4d4d4;
+
+		float: left;
+		width: 24px;
+		height: 100%;
+		text-align: center;
+		line-height: 24px;
+		cursor: pointer;
+
+		&:hover {
+			> .revo-drag-icon {
+				background-color: black;
+			}
+		}
+
+		> .revo-drag-icon {
+			background-color: $drag-icon-color;
+			vertical-align: middle;
+			display: inline-block;
+			pointer-events: none;
+		}
+	}
+
+	.data-cell {
+		position: absolute;
+		box-sizing: border-box;
+		box-shadow: $cell-shadow-cell;
+		height: 100%;
+		text-align: center;
+
+		&.disabled {
+			background-color: $cell-disabled-bg;
+		}
+	}
+}
