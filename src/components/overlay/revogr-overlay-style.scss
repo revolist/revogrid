@@ -1,0 +1,80 @@
+@import "../../global/colors";
+
+revogr-overlay-selection {
+	display: block;
+	position: relative;
+	width: 100%;
+
+	.autofill-handle {
+		$handler-size: 10px;
+		position: absolute;
+		width: $handler-size;
+		height: $handler-size;
+		background: $selection-border;
+		margin-left: -$handler-size + 4;
+		margin-top: -$handler-size/2;
+		border: 1px solid white;
+		cursor: crosshair;
+		box-sizing: border-box;
+		z-index: 10;
+	}
+
+	.selection-border-range,
+	.selection-bg-range,
+	.temp-bg-range,
+	.focused-cell {
+		position: absolute;
+		pointer-events:none;
+		z-index: 9;
+	}
+
+	@mixin selection($s: 1px, $c: $selection-border) {
+		box-shadow: (-$s) 0 0 $c inset, $s 0 0 $c inset, 0 (-$s) 0 $c inset, 0 $s 0 $c inset;
+		padding: 1px 1px 0 0;
+	}
+
+	.selection-border-range {
+		@include selection();
+	}
+	.focused-cell {
+		@include selection(1px);
+	}
+
+	.selection-bg-range {
+		// background: $selection-bg;
+		// z-index: -1;
+	}
+
+	.temp-bg-range {
+		// background-color: $tmp-selection-bg;
+		border: 1px solid red;
+		box-sizing: border-box;
+	}
+
+	.edit-focus-input {
+		position: absolute;
+		left: -1000px;
+		opacity: 0;
+		width: 0;
+		height: 0;
+	}
+
+	revogr-edit {
+		z-index: 10;
+	}
+
+	&.drag-active {
+		revogr-data {
+			.row {
+				&:hover {
+					box-shadow: 0 1px 0 red;
+					z-index: 10;
+
+					.revo-draggable > .revo-drag-icon {
+						background-color: gray;
+					}
+				}
+			}
+		}
+	}
+}

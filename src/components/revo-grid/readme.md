@@ -37,8 +37,8 @@ graph TD;
   revogr-viewport --> revogr-viewport-scroll
   revogr-viewport --> revogr-header
   revogr-viewport --> revogr-scroll-virtual
-  revogr-overlay-selection --> revogr-order-editor
   revogr-overlay-selection --> revogr-edit
+  revogr-overlay-selection --> revogr-order-editor
   style revo-grid fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

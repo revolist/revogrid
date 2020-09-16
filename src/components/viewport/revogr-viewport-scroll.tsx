@@ -6,7 +6,8 @@ import LocalScrollService from "../../services/localScrollService";
 import {RevoGrid} from "../../interfaces";
 
 @Component({
-  tag: 'revogr-viewport-scroll'
+  tag: 'revogr-viewport-scroll',
+  styleUrl: 'revogr-viewport-scroll-style.scss'
 })
 export class RevogrViewportScroll {
   @Event() scrollViewport: EventEmitter<RevoGrid.ViewPortScrollEvent>;

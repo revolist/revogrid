@@ -1,0 +1,50 @@
+@import "../../global/colors";
+
+$header-size: 30px;
+
+revogr-header {
+	position: relative;
+	line-height: $header-size;
+	box-shadow: $header-shadow;
+	font-weight: 600;
+	z-index: 5;
+	display: block;
+
+	.data-header-cell,
+	.grouped-cell {
+		position: absolute;
+		box-sizing: border-box;
+		height: 100%;
+		z-index: 1;
+	}
+
+	.data-header-cell {
+		$shadow-left: -1px 0 0 0 $cell-border-color;
+		$shadow-right: -1px 0 0 0 $cell-border-color inset;
+		$shadow-bottom: 0 -1px 0 0 $header-border-color inset;
+		$shadow-top: 0 -1px 0 0 $header-border-color;
+		box-shadow: $shadow-left, $shadow-right, $shadow-top, $shadow-bottom;
+		text-align: center;
+	}
+
+	.header-row {
+
+		height: $header-size;
+		display: block;
+		position: relative;
+
+		&.group {
+			box-shadow: none;
+			z-index: 0;
+		}
+	}
+
+	.group-row {
+		position: relative;
+
+		.data-header-cell {
+			color: #9493a2;
+			font-weight: normal;
+		}
+	}
+}

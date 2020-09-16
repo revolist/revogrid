@@ -12,7 +12,8 @@ import HeaderRenderer from './headerRenderer';
 import GroupHeaderRenderer from './headerGroupRenderer';
 
 @Component({
-  tag: 'revogr-header'
+  tag: 'revogr-header',
+  styleUrl: 'revogr-header-style.scss'
 })
 export class RevogrHeaderComponent {
   @Element() element!: HTMLStencilElement;
