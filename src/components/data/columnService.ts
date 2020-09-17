@@ -87,7 +87,7 @@ export default class ColumnService implements ColumnServiceI {
   }
 
   static getData(val: any): string {
-    if (typeof val === 'undefined') {
+    if (typeof val === 'undefined' || val === 'null') {
       return '';
     }
     return val.toString();
