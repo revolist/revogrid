@@ -5,6 +5,9 @@ import DimensionStore from '../store/dimension/dimension.store';
 import ViewportProvider from "./viewport.provider";
 import {RevoGrid} from "../interfaces";
 
+type Columns = {
+    sizes: RevoGrid.ViewSettingSizeProp;
+} & {[T in RevoGrid.DimensionCols]: RevoGrid.ColumnDataSchemaRegular[];};
 type DimensionStores = {[T in RevoGrid.MultiDimensionType]: DimensionStore};
 export default class DimensionProvider {
     public readonly stores: DimensionStores;
@@ -34,6 +37,12 @@ export default class DimensionProvider {
         const dimension: RevoGrid.DimensionSettingsState = this.stores[dimensionType].getCurrentState();
         this.viewports.stores[dimensionType].setViewport({ realCount, virtualSize: dimension.realSize });
         this.viewports.stores[dimensionType].setViewPortCoordinate(0, dimension);
+    }
+
+    setMainArea(dimension: RevoGrid.DimensionType, columns: Columns): void {
+        this.setRealSize(columns.col, dimension);
+        const coordinate = this.viewports.stores[dimension].store.get('lastCoordinate');
+        this.setViewPortCoordinate({ coordinate, dimension });
     }
 
     setViewPortCoordinate(e: RevoGrid.ViewPortScrollEvent): void {

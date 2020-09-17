@@ -17,13 +17,7 @@ revogr-viewport-scroll {
   position: relative;
   height: 100%;
 
-  &.colPinStart {
-    box-shadow: -4px 0 0 rgba(black, .05) inset;
-    z-index: 2;
-  }
-
-  &.colPinEnd {
-    box-shadow: 4px 0 0 rgba(black, .05) inset;
+  &.colPinStart, &.colPinEnd {
     z-index: 2;
   }
 

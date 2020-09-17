@@ -8,20 +8,22 @@
   	body, html {
   	  height: 100%;
       width: 100%;
-      padding: 0;
+      padding: 20px;
       margin: 0;
       overflow: hidden;
+      background-color: #f7f9fc;
+      text-align: center;
 	  }
 
     .grid-component {
       display: block;
       width: 100%;
-      height: 500px;
+      height: 100%;
     }
     .grid-component2 {
         display: block;
         width: 100%;
-        height: 300px;
+        height: 100%;
     }
 
 
@@ -29,13 +31,37 @@
       width: 100%;
       height: 100%;
     }
+
+    .tile {
+      background-color: #fff;
+      display: flex;
+      margin: 0 auto;
+      padding: 20px 0;
+      box-shadow: 0 0 14px 0 rgba(53,64,82,.05);
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .tile > div {
+      display: flex;
+      width: 100%;
+    }
+
+    .tile.large {
+      width: 800px;
+      height: 500px;
+    }
   </style>
 
   <script type="module" src="/build/revo-grid.esm.js"></script>
   <script nomodule src="/build/revo-grid.js"></script>
 </head>
 <body>
-    <revo-grid class="grid-component"></revo-grid>
+    <div class="tile large">
+      <div>
+        <revo-grid class="grid-component" theme="material"></revo-grid>
+      </div>
+    </div>
 
     <script type="module">
         import {generateFakeDataObject} from "/utilsExternal/generate-data.js";

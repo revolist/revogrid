@@ -54,6 +54,10 @@ export namespace Components {
           * Source: {[T in ColumnProp]: any} - defines main data source. Can be an Object or 2 dimensional array([][]); ColumnProp - string|number. It is reference for column mapping.
          */
         "source": RevoGrid.DataType[];
+        /**
+          * Theme name
+         */
+        "theme": string;
     }
     interface RevogrData {
         "canDrag": boolean;
@@ -257,6 +261,10 @@ declare namespace LocalJSX {
           * Source: {[T in ColumnProp]: any} - defines main data source. Can be an Object or 2 dimensional array([][]); ColumnProp - string|number. It is reference for column mapping.
          */
         "source"?: RevoGrid.DataType[];
+        /**
+          * Theme name
+         */
+        "theme"?: string;
     }
     interface RevogrData {
         "canDrag"?: boolean;

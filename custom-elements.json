@@ -31,6 +31,10 @@
         {
           "name": "row-size",
           "description": "Indicates default row size."
+        },
+        {
+          "name": "theme",
+          "description": "Theme name"
         }
       ]
     },

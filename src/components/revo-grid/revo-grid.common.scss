@@ -1,7 +1,3 @@
-@import "../../global/colors";
-@import "../../global/_icons";
-
-
 @mixin noSelect() {
   -webkit-touch-callout: none; /* iOS Safari */
   -webkit-user-select: none; /* Safari */
@@ -19,25 +15,12 @@ revo-grid {
   font-size: 14px;
   position: relative;
 
-  $shadow-top: 0 -1px 0 0 $header-border-color;
-  box-shadow: $shadow-top;
-
   @include noSelect;
 
-	.header-wrapper {
+	.footer-wrapper, .header-wrapper {
 		width: 100%;
 
 		revogr-data {
-			box-shadow: 0 4px 4px rgba(black, .05);
-			z-index: 3;
-		}
-	}
-
-	.footer-wrapper {
-		width: 100%;
-
-		revogr-data {
-			box-shadow: 0 -4px 4px rgba(black, .05);
 			z-index: 3;
 		}
   }
@@ -50,3 +33,5 @@ revo-grid {
     max-width: 100%;
   }
 }
+
+

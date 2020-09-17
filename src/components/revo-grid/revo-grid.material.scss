@@ -1,0 +1,93 @@
+@import './revo-grid.common.scss';
+
+$header-height: 50px;
+$default-rows-size: 42px;
+
+
+$cell-shadow-cell: 0 -1px 0 0 $cell-border-color inset;
+
+$font-path: 'assets/fonts/nunito-font';
+
+@font-face {
+	font-family: 'Nunito';
+	src: url('#{$font-path}/Nunito-Regular.ttf') format('truetype');
+	font-weight: normal;
+	font-style: normal;
+	font-display: fallback;
+}
+
+@font-face {
+	font-family: 'Nunito';
+	src: url('#{$font-path}/Nunito-SemiBold.ttf') format('truetype');
+	font-weight: 600;
+	font-style: normal;
+	font-display: fallback;
+}
+
+@font-face {
+	font-family: 'Nunito';
+	src: url('#{$font-path}/Nunito-Bold.ttf') format('truetype');
+	font-weight: 800;
+	font-style: normal;
+	font-display: fallback;
+}
+
+
+revo-grid {
+	font-family: Nunito,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
+}
+
+revogr-viewport {
+
+	revogr-header {
+		line-height: $header-height;
+		font-weight: 600;
+		.data-header-cell {
+				$shadow-bottom: 0 -1px 0 0 $header-border-color inset;
+				$shadow-top: 0 -1px 0 0 $header-border-color;
+				box-shadow: $shadow-top, $shadow-bottom;
+				text-align: center;
+		}
+
+
+		.header-row {
+				height: $header-height;
+
+				&.group {
+						$shadow-bottom: 0 -1px 0 0 $header-border-color inset;
+						box-shadow: $shadow-bottom;
+				}
+		}
+	}
+
+
+	.footer-wrapper revogr-data {
+		box-shadow: 0 -1px 0 $cell-border-color;
+	}
+
+	revogr-viewport-scroll {
+		&.colPinStart {
+			box-shadow: 1px 0 0 $cell-border-color;
+		}
+
+		&.colPinEnd {
+			box-shadow: -1px 0 0 $cell-border-color;
+		}
+	}
+
+	revogr-data {
+		.row {
+			line-height: $default-rows-size;
+		}
+
+		.data-cell {
+			box-shadow: $cell-shadow-cell;
+			text-align: center;
+			color: rgba(black, .87);
+	
+			&.disabled {
+				background-color: $cell-disabled-bg;
+			}
+		}
+	}
+}
