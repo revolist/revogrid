@@ -41,6 +41,7 @@ export default class DimensionProvider {
 
     setMainArea(dimension: RevoGrid.DimensionType, columns: Columns): void {
         this.setRealSize(columns.col, dimension);
+        this.stores[dimension].setDimensionSize(columns.sizes);
         const coordinate = this.viewports.stores[dimension].store.get('lastCoordinate');
         this.setViewPortCoordinate({ coordinate, dimension });
     }
