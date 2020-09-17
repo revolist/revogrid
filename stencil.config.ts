@@ -6,11 +6,20 @@ import { reactOutputTarget } from '@stencil/react-output-target';
 export const config: Config = {
   namespace: 'revo-grid',
   taskQueue: 'async',
-  plugins: [sass()],
+  globalScript: './src/global/global.ts',
+  plugins: [sass({
+    injectGlobalPaths: [
+      'src/global/_colors.scss',
+      'src/global/_icons.scss'
+    ]
+  })],
   outputTargets: [
     {
       type: 'dist',
-      esmLoaderPath: '../loader'
+      esmLoaderPath: '../loader',
+      copy: [
+        { src: 'assets' }
+      ],
     },
     {
       type: 'docs-readme'
@@ -26,7 +35,8 @@ export const config: Config = {
     {
       type: 'www',
       copy: [
-        { src: 'utilsExternal' }
+        { src: 'utilsExternal' },
+        { src: 'assets' }
       ],
       serviceWorker: null // disable service workers
     }

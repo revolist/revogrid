@@ -64,9 +64,7 @@ export default class ColumnDataProvider {
                 }, {})
             })
         });
-
-        this.dimensionProvider.setDimensionSize('col', data.columns.sizes);
-        this.dimensionProvider.setRealSize(data.columns.col, 'col');
+        this.dimensionProvider.setMainArea('col', data.columns);
         for (let p of ['colPinStart', 'colPinEnd']) {
             let pin: DimensionColPin = p as DimensionColPin;
             this.dimensionProvider.setPins(data.columns[pin], pin, ColumnDataProvider.getPinSizes(data.columns[pin]));

@@ -1,0 +1,54 @@
+@import './revo-grid.common.scss';
+
+$header-shadow: 0 1px 10px rgba(0,0,0,.2);
+
+revogr-viewport {
+	$shadow-top: 0 -1px 0 0 $header-border-color;
+	box-shadow: $shadow-top;
+
+	revogr-header {
+			box-shadow: $header-shadow;
+			font-weight: 600;
+	
+			.data-header-cell {
+				$shadow-left: -1px 0 0 0 $cell-border-color;
+				$shadow-right: -1px 0 0 0 $cell-border-color inset;
+				$shadow-bottom: 0 -1px 0 0 $header-border-color inset;
+				$shadow-top: 0 -1px 0 0 $header-border-color;
+				box-shadow: $shadow-left, $shadow-right, $shadow-top, $shadow-bottom;
+				text-align: center;
+			}
+	}
+
+	revogr-viewport-scroll {
+		&.colPinStart {
+			box-shadow: -4px 0 0 rgba(black, .05) inset;
+		}
+
+		&.colPinEnd {
+			box-shadow: 4px 0 0 rgba(black, .05) inset;
+		}
+	}
+
+	.header-wrapper revogr-data {
+		box-shadow: 0 4px 4px rgba(black, .05);
+	}
+
+	.footer-wrapper revogr-data {
+		box-shadow: 0 -4px 4px rgba(black, .05);
+	}
+
+
+	revogr-data {
+		$cell-shadow-cell: 0 -1px 0 0 $cell-border-color inset, -1px 0 0 0 $cell-border-color inset;
+
+		.data-cell {
+			box-shadow: $cell-shadow-cell;
+			text-align: center;
+	
+			&.disabled {
+				background-color: $cell-disabled-bg;
+			}
+		}
+	}
+}

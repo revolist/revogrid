@@ -27,15 +27,16 @@ export class RevogrHeaderComponent {
   @Event() headerClick: EventEmitter<RevoGrid.ColumnDataSchemaRegular>;
   @Event() headerResize: EventEmitter<RevoGrid.ViewSettingSizeProp>;
   @Prop() canResize: boolean;
+
+  @Prop() colData: RevoGrid.ColumnDataSchemaRegular[];
+  private headerService: HeaderService;
+
+  @Watch('colData') colChanged(newVal: RevoGrid.ColumnDataSchemaRegular[]): void {
+    this.headerService.columns = newVal;
+  }
   @Watch('canResize') onResizeChanged(newVal: boolean) {
     this.headerService.resizeChange(newVal);
   }
-
-  @Prop() colData: RevoGrid.ColumnDataSchemaRegular[];
-  @Watch('colData') colChanged(newData: RevoGrid.ColumnDataSchemaRegular[]): void {
-    this.headerService.columns = newData;
-  }
-  private headerService: HeaderService;
 
   connectedCallback(): void {
     this.headerService = new HeaderService(

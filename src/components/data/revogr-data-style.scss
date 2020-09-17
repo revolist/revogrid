@@ -1,5 +1,3 @@
-@import "../../global/colors";
-
 revogr-data {
 	display: block;
 	width: 100%;
@@ -38,12 +36,6 @@ revogr-data {
 	.data-cell {
 		position: absolute;
 		box-sizing: border-box;
-		box-shadow: $cell-shadow-cell;
 		height: 100%;
-		text-align: center;
-
-		&.disabled {
-			background-color: $cell-disabled-bg;
-		}
 	}
 }

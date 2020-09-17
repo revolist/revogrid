@@ -8,7 +8,7 @@ type Props = {
     group: Group;
 }
 
-const GroupHeaderRenderer = ({start, end, group}: Props, _children: VNode[]): VNode[] => {
+const GroupHeaderRenderer = ({start, end, group}: Props): VNode[] => {
     const groupProps = {
         class: HEADER_CLASS,
         style: {

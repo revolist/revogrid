@@ -15,7 +15,7 @@ import {
 } from './viewport.helpers';
 
 import {setStore} from '../../utils/store.utils';
-import {RevoGrid} from "../../interfaces";
+import {RevoGrid} from '../../interfaces';
 
 
 function initialState(): RevoGrid.ViewportState {
@@ -31,7 +31,10 @@ function initialState(): RevoGrid.ViewportState {
     virtualSize: 0,
 
     // total number of items
-    realCount: 0
+    realCount: 0,
+
+    // last coordinate for store position restore
+    lastCoordinate: 0
   };
 }
 
@@ -39,32 +42,25 @@ export default class ViewportStore {
   readonly store: ObservableMap<RevoGrid.ViewportState>;
   constructor() {
     this.store = createStore(initialState());
+    this.store.onChange('realCount', () => {
+      this.store.set('items', []);
+    });
   }
 
-  getItems(): Pick<RevoGrid.ViewportStateItems, 'items'|'start'|'end'> {
-    return {
-      items: this.store.get('items'),
-      start: this.store.get('start'),
-      end: this.store.get('end')
-    };
-  }
-
-  setViewport(data: Partial<RevoGrid.ViewportState>): void {
-    setStore(this.store, data);
-  }
-
+  /** Render viewport based on coordinate, this is main method for draw */
   setViewPortCoordinate(
       position: number,
       dimension: DimensionDataViewport
   ): void {
+    let virtualSize = this.store.get('virtualSize');
     // no visible data to calculate
-    if (!this.store.get('virtualSize')) {
+    if (!virtualSize) {
       return;
     }
 
     const frameOffset: number = dimension.frameOffset;
     const outsize: number = frameOffset * 2 * dimension.originItemSize;
-    const virtualSize = this.store.get('virtualSize') + outsize;
+    virtualSize += outsize;
 
     let maxCoordinate: number = virtualSize;
     if (dimension.realSize > virtualSize) {
@@ -87,7 +83,7 @@ export default class ViewportStore {
           virtualSize,
           dimension
       );
-      setStore(this.store, toUpdate);
+      setStore(this.store, { ...toUpdate, lastCoordinate: pos });
       // right position changed
     } else if (firstItem && (this.store.get('virtualSize') + pos) > lastItem?.end) {
       // check is any item missing for full fill content
@@ -109,12 +105,14 @@ export default class ViewportStore {
         updateMissing(items, missing, range);
         setStore(this.store, {
           items: [...items],
+          lastCoordinate: pos,
           ...range
         });
       }
     }
   }
 
+  /** Update viewport sizes */
   setViewPortDimension(sizes: RevoGrid.ViewSettingSizeProp): void {
     // viewport not inited
     if (!this.store.get('items').length) {
@@ -142,5 +140,17 @@ export default class ViewportStore {
     }
 
     setStore(this.store, { items: [...items] });
+  }
+
+  getItems(): Pick<RevoGrid.ViewportStateItems, 'items'|'start'|'end'> {
+    return {
+      items: this.store.get('items'),
+      start: this.store.get('start'),
+      end: this.store.get('end')
+    };
+  }
+
+  setViewport(data: Partial<RevoGrid.ViewportState>): void {
+    setStore(this.store, data);
   }
 }

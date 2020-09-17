@@ -9,7 +9,7 @@ export function generateHeader(index) {
         label = String.fromCharCode(asciiFirstLetter + pos) + label;
         div = parseInt(((div - pos) / lettersCount).toString(), 10);
     }
-    return label;
+    return label.toLowerCase();
 }
 
 export function generateHeaderByCount(colsNumber) {

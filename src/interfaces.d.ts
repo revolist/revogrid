@@ -79,6 +79,7 @@ export declare namespace RevoGrid {
   interface ViewportState extends ViewportStateItems {
     realCount: number;
     virtualSize: number;
+    lastCoordinate: number;
   }
 
   type ViewSettingSizeProp = { [index: string]: number };

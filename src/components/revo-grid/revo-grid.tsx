@@ -17,7 +17,12 @@ type ViewportStores = {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGri
 
 @Component({
   tag: 'revo-grid',
-  styleUrl: 'revo-grid.scss',
+  styleUrl: 'revo-grid.common.scss',
+  styleUrls: {
+    default: 'revo-grid.default.scss',
+    material: 'revo-grid.material.scss',
+  },
+  assetsDirs: ['./nunito-font']
 })
 export class RevoGridComponent {
   // --------------------------------------------------------------------------
@@ -30,17 +35,11 @@ export class RevoGridComponent {
    * Defines how many rows/columns should be rendered outside visible area.
    */
   @Prop() frameSize: number = 0;
-  /**
-   * Indicates default row size.
-   */
-  @Prop() rowSize: number = 30;
-  /**
-   * Indicates default column size.
-   */
-  @Prop() colSize: number = 80;
-  /**
-   * When true, user can range selection.
-   */
+  /** Indicates default row size. */
+  @Prop() rowSize: number = 42;
+  /** Indicates default column size. */
+  @Prop() colSize: number = 100;
+  /** When true, user can range selection. */
   @Prop() range: boolean = false;
   /**
    * When true, grid in read only mode.
@@ -73,6 +72,12 @@ export class RevoGridComponent {
    * Custom editors register
    */
   @Prop() editors: Edition.Editors = {};
+
+
+  /**
+   * Theme name
+   */
+  @Prop() theme: string = 'default';
 
 
   // --------------------------------------------------------------------------
