@@ -16,7 +16,7 @@ declare namespace ViewportSpace {
         position: Selection.Cell;
         colData: RevoGrid.ColumnDataSchemaRegular[];
 
-        dataStore: ObservableMap<DataSourceState<RevoGrid.DataType>>;
+        dataStore: ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
 
         /** Stores to pass dimension data for render */
         dimensionRow: ObservableMap<RevoGrid.DimensionSettingsState>;

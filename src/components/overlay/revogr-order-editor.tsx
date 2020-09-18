@@ -17,13 +17,15 @@ export class OrderEditor {
 
 
     /** Static stores, not expected to change during component lifetime */
-    @Prop() dataStore: ObservableMap<DataSourceState<RevoGrid.DataType>>;
+    @Prop() dataStore: ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
     /** Row drag started */
     @Event() rowDragStart: EventEmitter<{cell: Selection.Cell, text: string}>;
+
     /** Row drag started */
     @Event() rowDragEnd: EventEmitter;
+
     /** Row dragged, new range ready to be applied */
-    @Event() rowDropped: EventEmitter<{from: number; to: number;}>;
+    @Event() initialRowDropped: EventEmitter<{from: number; to: number;}>;
 
     private moveFunc: ((e: Selection.Cell) => void)|null;
     
@@ -76,7 +78,7 @@ export class OrderEditor {
     connectedCallback(): void {
         this.rowOrderService = new RowOrderService({
             positionChanged: (from, to) => {
-                const dropEvent = this.rowDropped.emit({from, to});
+                const dropEvent = this.initialRowDropped.emit({from, to});
                 if (dropEvent.defaultPrevented) {
                     return;
                 }

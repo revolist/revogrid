@@ -13,21 +13,25 @@ export class Edit {
     private currentEditor: Edition.EditorBase|null = null;
 
     @Prop() column: RevoGrid.ColumnDataSchemaRegular|null;
-    /**
-     * Custom editors register
-     */
+    /** Custom editors register */
     @Prop() editor: Edition.EditorCtr|null;
 
-    @Event({ cancelable: true }) cellEdit: EventEmitter<Edition.SaveDataDetails>;
-    @Event() closeEdit: EventEmitter;
-    onSave(e: Edition.SaveData): void {
+    @Event({ bubbles: false  }) cellEdit: EventEmitter<Edition.SaveDataDetails>;
+
+    /** Close editor event */
+    @Event({ bubbles: false }) closeEdit: EventEmitter;
+
+
+    /** Callback triggered on cell editor save */
+    onSave(val: Edition.SaveData): void {
         if (this.editCell) {
             this.cellEdit.emit({
                 col: this.editCell.x,
                 row: this.editCell.y,
-                val: e
+                val
             });
         }
+        /** Close editor in next thread */
         setTimeout(() => this.closeEdit.emit(), 0);
     }
 

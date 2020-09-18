@@ -66,7 +66,7 @@ export namespace Components {
         /**
           * Static stores, not expected to change during component lifetime
          */
-        "dataStore": ObservableMap<DataSourceState<RevoGrid.DataType>>;
+        "dataStore": ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
         "dimensionRow": ObservableMap<RevoGrid.DimensionSettingsState>;
         "range": boolean;
         "readonly": boolean;
@@ -94,7 +94,7 @@ export namespace Components {
         /**
           * Static stores, not expected to change during component lifetime
          */
-        "dataStore": ObservableMap<DataSourceState<RevoGrid.DataType>>;
+        "dataStore": ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
         "dragStart": (e: MouseEvent, data: { el: HTMLElement; rows: RevoGrid.DimensionSettingsState; cols: RevoGrid.DimensionSettingsState; }) => Promise<void>;
         "endOrder": (e: MouseEvent, data: { el: HTMLElement; rows: RevoGrid.DimensionSettingsState; cols: RevoGrid.DimensionSettingsState; }) => Promise<void>;
     }
@@ -104,7 +104,7 @@ export namespace Components {
         /**
           * Static stores, not expected to change during component lifetime
          */
-        "dataStore": ObservableMap<DataSourceState<RevoGrid.DataType>>;
+        "dataStore": ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
         "dimensionCol": ObservableMap<RevoGrid.DimensionSettingsState>;
         "dimensionRow": ObservableMap<RevoGrid.DimensionSettingsState>;
         /**
@@ -129,7 +129,7 @@ export namespace Components {
         "virtualSize": number;
     }
     interface RevogrViewport {
-        "columnStores": {[T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnDataSchemaRegular>>};
+        "columnStores": {[T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnDataSchemaRegular, RevoGrid.DimensionCols>>};
         "dimensions": {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.DimensionSettingsState>};
         /**
           * Custom editors register
@@ -138,7 +138,7 @@ export namespace Components {
         "range": boolean;
         "readonly": boolean;
         "resize": boolean;
-        "rowStores": {[T in RevoGrid.DimensionRows]: ObservableMap<DataSourceState<RevoGrid.DataType>>};
+        "rowStores": {[T in RevoGrid.DimensionRows]: ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>};
         "uuid": string|null;
         "viewports": {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.ViewportState>};
     }
@@ -234,6 +234,32 @@ declare namespace LocalJSX {
          */
         "frameSize"?: number;
         /**
+          * After edit. Triggered when after data applied.
+         */
+        "onAfterEdit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
+        /**
+          * Before autofill. Triggered before autofill applied. Use e.preventDefault() to prevent edit data apply.
+         */
+        "onBeforeAutofill"?: (event: CustomEvent<{
+    newRange: {start: Selection.Cell; end: Selection.Cell;};
+    oldRange: {start: Selection.Cell; end: Selection.Cell;};
+  }>) => void;
+        /**
+          * Before edit event. Triggered before edit data applied. Use e.preventDefault() to prevent edit data set and use you own.  Use e.val = {your value} to replace edit result with your own.
+         */
+        "onBeforeEdit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
+        /**
+          * Before range apply. Triggered before range applied. Use e.preventDefault() to prevent range.
+         */
+        "onBeforeRange"?: (event: CustomEvent<{
+    newRange: {start: Selection.Cell; end: Selection.Cell;};
+    oldRange: {start: Selection.Cell; end: Selection.Cell;};
+  }>) => void;
+        /**
+          * Before row order apply. Use e.preventDefault() to prevent row order change.
+         */
+        "onRowOrderChanged"?: (event: CustomEvent<{from: number; to: number;}>) => void;
+        /**
           * Pinned bottom Source: {[T in ColumnProp]: any} - defines pinned bottom rows data source.
          */
         "pinnedBottomSource"?: RevoGrid.DataType[];
@@ -273,7 +299,7 @@ declare namespace LocalJSX {
         /**
           * Static stores, not expected to change during component lifetime
          */
-        "dataStore"?: ObservableMap<DataSourceState<RevoGrid.DataType>>;
+        "dataStore"?: ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
         "dimensionRow"?: ObservableMap<RevoGrid.DimensionSettingsState>;
         "onDragStartCell"?: (event: CustomEvent<MouseEvent>) => void;
         "range"?: boolean;
@@ -288,6 +314,9 @@ declare namespace LocalJSX {
          */
         "editor"?: Edition.EditorCtr|null;
         "onCellEdit"?: (event: CustomEvent<Edition.SaveDataDetails>) => void;
+        /**
+          * Close editor event
+         */
         "onCloseEdit"?: (event: CustomEvent<any>) => void;
     }
     interface RevogrHeader {
@@ -305,7 +334,11 @@ declare namespace LocalJSX {
         /**
           * Static stores, not expected to change during component lifetime
          */
-        "dataStore"?: ObservableMap<DataSourceState<RevoGrid.DataType>>;
+        "dataStore"?: ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
+        /**
+          * Row dragged, new range ready to be applied
+         */
+        "onInitialRowDropped"?: (event: CustomEvent<{from: number; to: number;}>) => void;
         /**
           * Row drag started
          */
@@ -314,10 +347,6 @@ declare namespace LocalJSX {
           * Row drag started
          */
         "onRowDragStart"?: (event: CustomEvent<{cell: Selection.Cell, text: string}>) => void;
-        /**
-          * Row dragged, new range ready to be applied
-         */
-        "onRowDropped"?: (event: CustomEvent<{from: number; to: number;}>) => void;
     }
     interface RevogrOverlaySelection {
         "canDrag"?: boolean;
@@ -325,7 +354,7 @@ declare namespace LocalJSX {
         /**
           * Static stores, not expected to change during component lifetime
          */
-        "dataStore"?: ObservableMap<DataSourceState<RevoGrid.DataType>>;
+        "dataStore"?: ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
         "dimensionCol"?: ObservableMap<RevoGrid.DimensionSettingsState>;
         "dimensionRow"?: ObservableMap<RevoGrid.DimensionSettingsState>;
         /**
@@ -336,14 +365,13 @@ declare namespace LocalJSX {
           * Last cell position
          */
         "lastCell"?: Selection.Cell;
-        "onAfterEdit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
-        "onBeforeEdit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
+        "onCellEditInitiate"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
         "onChangeSelection"?: (event: CustomEvent<{changes: Partial<Selection.Cell>; isMulti?: boolean; }>) => void;
         "onFocusCell"?: (event: CustomEvent<{focus: Selection.Cell; end: Selection.Cell; }>) => void;
         /**
           * Selection range changed
          */
-        "onSelectionChanged"?: (event: CustomEvent<{
+        "onInitialSelectionChanged"?: (event: CustomEvent<{
     newRange: {start: Selection.Cell; end: Selection.Cell;};
     oldRange: {start: Selection.Cell; end: Selection.Cell;};
   }>) => void;
@@ -363,7 +391,7 @@ declare namespace LocalJSX {
         "virtualSize"?: number;
     }
     interface RevogrViewport {
-        "columnStores"?: {[T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnDataSchemaRegular>>};
+        "columnStores"?: {[T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnDataSchemaRegular, RevoGrid.DimensionCols>>};
         "dimensions"?: {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.DimensionSettingsState>};
         /**
           * Custom editors register
@@ -375,7 +403,7 @@ declare namespace LocalJSX {
         "range"?: boolean;
         "readonly"?: boolean;
         "resize"?: boolean;
-        "rowStores"?: {[T in RevoGrid.DimensionRows]: ObservableMap<DataSourceState<RevoGrid.DataType>>};
+        "rowStores"?: {[T in RevoGrid.DimensionRows]: ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>};
         "uuid"?: string|null;
         "viewports"?: {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.ViewportState>};
     }

@@ -47,7 +47,7 @@ export class OverlaySelection {
   @Prop() dimensionCol: ObservableMap<RevoGrid.DimensionSettingsState>;
 
   /** Static stores, not expected to change during component lifetime */
-  @Prop() dataStore: ObservableMap<DataSourceState<RevoGrid.DataType>>;
+  @Prop() dataStore: ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
 
   @Prop() colData: RevoGrid.ColumnDataSchemaRegular[];
   /** Last cell position */
@@ -62,8 +62,7 @@ export class OverlaySelection {
     this.selectionStoreService?.setLastCell(cell);
   }
 
-  @Event() afterEdit: EventEmitter<Edition.BeforeSaveDataDetails>;
-  @Event() beforeEdit: EventEmitter<Edition.BeforeSaveDataDetails>;
+  @Event({ cancelable: true }) cellEditInitiate: EventEmitter<Edition.BeforeSaveDataDetails>;
 
   @Event({ bubbles: false }) setEdit: EventEmitter<string|boolean>;
   @Event({ bubbles: false }) changeSelection: EventEmitter<{changes: Partial<Selection.Cell>; isMulti?: boolean; }>;
@@ -71,24 +70,10 @@ export class OverlaySelection {
   @Event({ bubbles: false }) unregister: EventEmitter;
 
   /** Selection range changed */
-  @Event() selectionChanged: EventEmitter<{
+  @Event({ cancelable: true }) initialSelectionChanged: EventEmitter<{
     newRange: {start: Selection.Cell; end: Selection.Cell;};
     oldRange: {start: Selection.Cell; end: Selection.Cell;};
   }>;
-
-  @Listen('cellEdit')
-  onSave(e: CustomEvent<Edition.SaveDataDetails>): void {
-    e.cancelBubble = true;
-    const dataToSave = this.columnService.getSaveData(e.detail.row, e.detail.col, e.detail.val);
-    const beforeEdit: CustomEvent<Edition.BeforeSaveDataDetails> = this.beforeEdit.emit(dataToSave);
-    // apply data
-    setTimeout(() => {
-      if (!beforeEdit.defaultPrevented) {
-        this.columnService.setCellData(e.detail.row, e.detail.col, e.detail.val);
-        this.afterEdit.emit(dataToSave);
-      }
-    });
-  }
 
   /** Pointer left document, clear any active operation */
   @Listen('mouseleave', { target: 'document' })
@@ -146,18 +131,18 @@ export class OverlaySelection {
       focus: (cell, isMulti?) => this.selectionStoreService.focus(cell, isMulti),
       applyRange: (start, end) => {
         const old = this.selectionStore.get('range');
-        const selectionEndEvent = this.selectionChanged.emit({
+        const selectionEndEvent = this.initialSelectionChanged.emit({
           newRange: {start, end},
           oldRange: {
             start: {x: old.x, y: old.y},
             end: {x: old.x1, y: old.y1}
           }
         });
-        this.selectionStoreService.applyRange(start, end);
         if (selectionEndEvent.defaultPrevented) {
+          this.selectionStoreService.clearTemp();
           return;
         }
-        // todo: apply new range
+        this.selectionStoreService.applyRange(start, end);
       },
       tempRange: (start, end) => this.selectionStoreService.setTempRange(start, end),
       change: (changes, isMulti?) => this.changeSelection?.emit({ changes, isMulti }),
@@ -182,13 +167,13 @@ export class OverlaySelection {
     }
   }
 
-  renderRange(range: Selection.RangeArea): VNode[] {
+  private renderRange(range: Selection.RangeArea): VNode[] {
     const style: RangeAreaCss = this.getElStyle(range);
     return [<div class={SELECTION_BORDER_CLASS} style={style}/>,
       <div class={SELECTION_BG_CLASS} style={style}/>];
   }
 
-  renderAutofill(range: Selection.RangeArea, selectionFocus: Selection.Cell): VNode {
+  private renderAutofill(range: Selection.RangeArea, selectionFocus: Selection.Cell): VNode {
     let handlerStyle;
     if (range) {
       handlerStyle = this.getCell(range);
@@ -223,6 +208,7 @@ export class OverlaySelection {
 
     return <revogr-edit
       class='edit-input-wrapper'
+      onCellEdit={(e: CustomEvent<Edition.SaveDataDetails>) => this.onCellEdit(e.detail)}
       onCloseEdit={() => this.setEdit?.emit(false)}
       editCell={editable}
       column={this.columnService.columns[editCell.x]}
@@ -293,16 +279,21 @@ export class OverlaySelection {
     }
     return <Host {...hostProps}>{els}<slot name='data'/></Host>;
   }
+
+  private onCellEdit(e: Edition.SaveDataDetails): void {
+    const dataToSave = this.columnService.getSaveData(e.row, e.col, e.val);
+    this.cellEditInitiate.emit(dataToSave);
+  }
   
-  onDoubleClick(): void {
+  private onDoubleClick(): void {
     this.canEdit() && this.setEdit?.emit('');
   }
 
-  onRowDragEnd(): void {
+  private onRowDragEnd(): void {
     this.element.classList.remove('drag-active');
   }
   
-  onRowDragStart({detail}: CustomEvent<{cell: Selection.Cell, text: string}>): void {
+  private onRowDragStart({detail}: CustomEvent<{cell: Selection.Cell, text: string}>): void {
     detail.text = this.columnService.getCellData(detail.cell.y, detail.cell.x);
     this.element.classList.add('drag-active');
   }

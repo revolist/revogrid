@@ -1,4 +1,4 @@
-import {Component, Prop, h, Watch, Element} from '@stencil/core';
+import {Component, Prop, h, Watch, Element, Listen, Event, EventEmitter} from '@stencil/core';
 import {ObservableMap} from '@stencil/store';
 import reduce from 'lodash/reduce';
 
@@ -7,13 +7,21 @@ import {DataProvider} from '../../services/data.provider';
 import {DataSourceState} from '../../store/dataSource/data.store';
 import DimensionProvider from '../../services/dimension.provider';
 import ViewportProvider from '../../services/viewport.provider';
-import {Edition, RevoGrid} from '../../interfaces';
+import {Edition, Selection, RevoGrid} from '../../interfaces';
 
 
-type ColumnStores = {[T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnDataSchemaRegular>>};
-type RowStores = {[T in RevoGrid.DimensionRows]: ObservableMap<DataSourceState<RevoGrid.DataType>>};
-type DimensionStores = {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.DimensionSettingsState>};
-type ViewportStores = {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.ViewportState>};
+type ColumnStores = {
+  [T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnDataSchemaRegular, RevoGrid.DimensionCols>>;
+};
+type RowStores = {
+  [T in RevoGrid.DimensionRows]: ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
+};
+type DimensionStores = {
+  [T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.DimensionSettingsState>
+};
+type ViewportStores = {
+  [T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.ViewportState>
+};
 
 @Component({
   tag: 'revo-grid',
@@ -41,13 +49,9 @@ export class RevoGridComponent {
   @Prop() colSize: number = 100;
   /** When true, user can range selection. */
   @Prop() range: boolean = false;
-  /**
-   * When true, grid in read only mode.
-   */
+  /** When true, grid in read only mode. */
   @Prop() readonly: boolean = false;
-  /**
-   * When true, columns are resizable.
-   */
+  /** When true, columns are resizable. */
   @Prop() resize: boolean = false;
   /**
    * Columns - defines an array of grid columns. Can be column or grouped column.
@@ -59,27 +63,109 @@ export class RevoGridComponent {
    * ColumnProp - string|number. It is reference for column mapping.
    */
   @Prop() source: RevoGrid.DataType[] = [];
-  /**
-   * Pinned top Source: {[T in ColumnProp]: any} - defines pinned top rows data source.
-   */
+  /** Pinned top Source: {[T in ColumnProp]: any} - defines pinned top rows data source. */
   @Prop() pinnedTopSource: RevoGrid.DataType[] = [];
-  /**
-   * Pinned bottom Source: {[T in ColumnProp]: any} - defines pinned bottom rows data source.
-   */
+  /** Pinned bottom Source: {[T in ColumnProp]: any} - defines pinned bottom rows data source. */
   @Prop() pinnedBottomSource: RevoGrid.DataType[] = [];
 
-  /**
-   * Custom editors register
-   */
+  /** Custom editors register */
   @Prop() editors: Edition.Editors = {};
 
 
-  /**
-   * Theme name
-   */
+  /** Theme name */
   @Prop() theme: string = 'default';
 
 
+  // --------------------------------------------------------------------------
+  //
+  //  Events
+  //
+  // --------------------------------------------------------------------------
+
+  /** 
+   * Before edit event.
+   * Triggered before edit data applied.
+   * Use e.preventDefault() to prevent edit data set and use you own. 
+   * Use e.val = {your value} to replace edit result with your own. 
+   */
+  @Event() beforeEdit: EventEmitter<Edition.BeforeSaveDataDetails>;
+
+  /** 
+   * After edit.
+   * Triggered when after data applied.
+   */
+  @Event() afterEdit: EventEmitter<Edition.BeforeSaveDataDetails>;
+
+
+  /** 
+   * Before autofill.
+   * Triggered before autofill applied.
+   * Use e.preventDefault() to prevent edit data apply. 
+   */
+  @Event() beforeAutofill: EventEmitter<{
+    newRange: {start: Selection.Cell; end: Selection.Cell;};
+    oldRange: {start: Selection.Cell; end: Selection.Cell;};
+  }>;
+
+
+  /** 
+   * Before range apply.
+   * Triggered before range applied.
+   * Use e.preventDefault() to prevent range. 
+   */
+  @Event() beforeRange: EventEmitter<{
+    newRange: {start: Selection.Cell; end: Selection.Cell;};
+    oldRange: {start: Selection.Cell; end: Selection.Cell;};
+  }>;
+
+   /** 
+   * Before row order apply.
+   * Use e.preventDefault() to prevent row order change. 
+   */
+  @Event() rowOrderChanged: EventEmitter<{from: number; to: number;}>;
+  
+  // --------------------------------------------------------------------------
+  //
+  //  Listeners
+  //
+  // --------------------------------------------------------------------------
+  @Listen('cellEditInitiate')
+  onBeforeEdit(e: CustomEvent<Edition.BeforeSaveDataDetails>): void {
+    e.cancelBubble = true;
+    const {defaultPrevented, detail } = this.beforeEdit.emit(e.detail);
+    // apply data
+    setTimeout(() => {
+      if (!defaultPrevented) {
+        this.dataProvider.setCellData(detail);
+        this.afterEdit.emit(detail);
+      }
+    }, 0);
+  }
+
+  @Listen('initialSelectionChanged')
+  onRangeChanged(e: CustomEvent<{
+    newRange: {start: Selection.Cell; end: Selection.Cell;};
+    oldRange: {start: Selection.Cell; end: Selection.Cell;};
+  }>): void {
+    e.cancelBubble = true;
+    const beforeRange = this.beforeRange.emit(e.detail);
+    if (beforeRange.defaultPrevented) {
+      e.preventDefault();
+    }
+    const beforeFill = this.beforeAutofill.emit(e.detail);
+    if (!beforeFill.defaultPrevented) {
+      // todo: apply new range to dataSource
+    }
+  }
+
+  @Listen('initialRowDropped')
+  onRowDropped(e: CustomEvent<{from: number; to: number;}>): void {
+    const {defaultPrevented} = this.rowOrderChanged.emit(e.detail);
+    if (defaultPrevented) {
+      e.preventDefault();
+    }
+  }
+  
   // --------------------------------------------------------------------------
   //
   //  Private Properties

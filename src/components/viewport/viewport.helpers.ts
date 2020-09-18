@@ -21,8 +21,8 @@ export interface ViewportColumn {
 
     viewports: {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.ViewportState>};
     dimensions: {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.DimensionSettingsState>};
-    rowStores: {[T in RevoGrid.DimensionRows]: ObservableMap<DataSourceState<RevoGrid.DataType>>};
-    colStore: ObservableMap<DataSourceState<RevoGrid.ColumnDataSchemaRegular>>;
+    rowStores: {[T in RevoGrid.DimensionRows]: ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>};
+    colStore: ObservableMap<DataSourceState<RevoGrid.ColumnDataSchemaRegular, RevoGrid.DimensionCols>>;
     onHeaderResize?(e: CustomEvent<RevoGrid.ViewSettingSizeProp>): void;
     onResizeViewport?(e: CustomEvent<RevoGrid.ViewPortResizeEvent>): void;
 }

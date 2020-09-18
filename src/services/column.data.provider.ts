@@ -25,7 +25,7 @@ type ColumnCollection = {
     maxLevel: number;
 };
 
-type ColumnDataSources = {[T in RevoGrid.DimensionCols]: DataStore<RevoGrid.ColumnDataSchemaRegular>};
+type ColumnDataSources = {[T in RevoGrid.DimensionCols]: DataStore<RevoGrid.ColumnDataSchemaRegular, RevoGrid.DimensionCols>};
 
 export default class ColumnDataProvider {
     private readonly dataSources: ColumnDataSources;
@@ -34,7 +34,7 @@ export default class ColumnDataProvider {
     }
     constructor(private dimensionProvider: DimensionProvider) {
         this.dataSources = reduce(columnTypes, (sources: Partial<ColumnDataSources>, k: RevoGrid.DimensionCols) => {
-            sources[k] = new DataStore();
+            sources[k] = new DataStore(k);
             return sources;
         }, {}) as ColumnDataSources;
     }

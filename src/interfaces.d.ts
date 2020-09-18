@@ -148,9 +148,10 @@ export declare namespace Edition {
     val: SaveData;
   };
   type BeforeSaveDataDetails = {
-    model: RevoGrid.DataType;
     prop: RevoGrid.ColumnProp;
     val: SaveData;
+    rowIndex: number;
+    type: RevoGrid.DimensionRows;
   };
 
   interface EditCell extends Selection.Cell {

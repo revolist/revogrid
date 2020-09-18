@@ -144,7 +144,6 @@ export default class SelectionStoreConnector {
       return;
     }
     setStore(this.focusedStore, { edit: null });
-
   }
 
   get focused(): Cell|undefined {

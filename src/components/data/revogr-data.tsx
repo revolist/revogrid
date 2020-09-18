@@ -29,7 +29,7 @@ export class RevogrData {
   @Prop() dimensionRow: ObservableMap<RevoGrid.DimensionSettingsState>;
 
   /** Static stores, not expected to change during component lifetime */
-  @Prop() dataStore: ObservableMap<DataSourceState<RevoGrid.DataType>>;
+  @Prop() dataStore: ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
 
   @Event() dragStartCell: EventEmitter<MouseEvent>;
 

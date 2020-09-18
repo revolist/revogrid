@@ -12,8 +12,6 @@ import DataType = RevoGrid.DataType;
 export interface ColumnServiceI {
   columns: RevoGrid.ColumnDataSchemaRegular[];
 
-  setCellData(r: number, c: number, val: string): void;
-
   customRenderer(r: number, c: number): VNode | void;
 
   isReadOnly(r: number, c: number): boolean;
@@ -33,7 +31,7 @@ export default class ColumnService implements ColumnServiceI {
   }
 
   constructor(
-    private dataStore: ObservableMap<DataSourceState<RevoGrid.DataType>>,
+    private dataStore: ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>,
     columns: RevoGrid.ColumnDataSchemaRegular[]) {
     this.source = columns;
   }
@@ -54,24 +52,14 @@ export default class ColumnService implements ColumnServiceI {
     return;
   }
 
-  setCellData(r: number, c: number, val: string): void {
-    const {data, model, prop} = this.rowDataModel(r, c);
-    model[prop as number] = val;
-    this.dataStore.set('items', [...data]);
-  }
-
   getCellData(r: number, c: number): string {
     const {prop, model} = this.rowDataModel(r, c);
     return ColumnService.getData(model[prop as number]);
   }
 
-  getSaveData(r: number, c: number, val: string): BeforeSaveDataDetails {
-    const {prop, model} = this.rowDataModel(r, c);
-    return {
-      prop,
-      model,
-      val
-    }
+  getSaveData(rowIndex: number, c: number, val: string): BeforeSaveDataDetails {
+    const {prop} = this.rowDataModel(rowIndex, c);
+    return { prop, rowIndex, val, type: this.dataStore.get('type')};
   }
 
   getCellEditor(_r: number, c: number): string | undefined {
@@ -81,6 +69,7 @@ export default class ColumnService implements ColumnServiceI {
   rowDataModel(r: number, c: number): ColumnDataSchemaModel {
     const column = this.columns[c];
     const prop: ColumnProp | undefined = column?.prop;
+
     const data: DataSource = this.dataStore.get('items');
     const model: DataType = data[r] || {};
     return {prop, model, data, column};

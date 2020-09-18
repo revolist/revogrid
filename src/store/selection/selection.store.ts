@@ -43,6 +43,10 @@ export default class SelectionStore {
     setStore(this.store, { edit: null });
   }
 
+  clearTemp(): void {
+    setStore(this.store, { tempRange: null });
+  }
+
   change(area: Partial<Cell>, isMulti: boolean = false): void {
     this.config.change(area, isMulti);
   }

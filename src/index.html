@@ -79,25 +79,12 @@
         grid.readonly = false;
         grid.range = true;
         grid.resize = true;
-        grid.addEventListener('afterEdit', (e) => {
+        grid.addEventListener('beforeEdit', (e) => {
           console.log('after edit');
-            // grid2.source = [...grid.source];
         });
-        grid.addEventListener('selectionChanged', (e) => {
-            e.preventDefault();
+        grid.addEventListener('rowOrderChanged', (e) => {
+          console.log(e.detail);
         });
-
-        /*
-
-        grid2.columns = data.headers;
-        grid2.source = data.rows;
-
-        grid2.pinnedTopSource = data.pinnedTopRows;
-        grid2.pinnedBottomSource = data.pinnedBottomRows;
-
-        grid2.readonly = false;
-        grid2.range = true;
-        grid2.resize = true; */
     </script>
 </body>
 </html>
