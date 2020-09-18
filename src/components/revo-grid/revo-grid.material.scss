@@ -6,33 +6,6 @@ $default-rows-size: 42px;
 
 $cell-shadow-cell: 0 -1px 0 0 $cell-border-color inset;
 
-$font-path: 'assets/fonts/nunito-font';
-
-@font-face {
-	font-family: 'Nunito';
-	src: url('#{$font-path}/Nunito-Regular.ttf') format('truetype');
-	font-weight: normal;
-	font-style: normal;
-	font-display: fallback;
-}
-
-@font-face {
-	font-family: 'Nunito';
-	src: url('#{$font-path}/Nunito-SemiBold.ttf') format('truetype');
-	font-weight: 600;
-	font-style: normal;
-	font-display: fallback;
-}
-
-@font-face {
-	font-family: 'Nunito';
-	src: url('#{$font-path}/Nunito-Bold.ttf') format('truetype');
-	font-weight: 800;
-	font-style: normal;
-	font-display: fallback;
-}
-
-
 revo-grid {
 	font-family: Nunito,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
 }

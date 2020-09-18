@@ -17,9 +17,6 @@ export const config: Config = {
     {
       type: 'dist',
       esmLoaderPath: '../loader',
-      copy: [
-        { src: 'assets' }
-      ],
     },
     {
       type: 'docs-readme'
@@ -36,9 +33,8 @@ export const config: Config = {
       type: 'www',
       copy: [
         { src: 'utilsExternal' },
-        { src: 'assets' }
       ],
       serviceWorker: null // disable service workers
-    }
+    },
   ]
 };
