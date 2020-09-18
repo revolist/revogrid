@@ -2,7 +2,8 @@
 
 $header-height: 50px;
 $default-rows-size: 42px;
-
+$cell-border-color: #f1f1f1;
+$header-border-color: $cell-border-color;
 
 $cell-shadow-cell: 0 -1px 0 0 $cell-border-color inset;
 
@@ -15,22 +16,25 @@ revogr-viewport {
 	revogr-header {
 		line-height: $header-height;
 		font-weight: 600;
+		text-align: left;
 
 		.data-header-cell {
-				$shadow-bottom: 0 -1px 0 0 $header-border-color inset;
-				$shadow-top: 0 -1px 0 0 $header-border-color;
-				box-shadow: $shadow-top, $shadow-bottom;
-				text-align: center;
+			$shadow-bottom: 0 -1px 0 0 $header-border-color inset;
+			$shadow-top: 0 -1px 0 0 $header-border-color;
+			box-shadow: $shadow-top, $shadow-bottom;
+			padding: 0 15px;
+			overflow: hidden;
+			text-overflow: ellipsis;
 		}
 
 
 		.header-row {
-				height: $header-height;
+			height: $header-height;
 
-				&.group {
-						$shadow-bottom: 0 -1px 0 0 $header-border-color inset;
-						box-shadow: $shadow-bottom;
-				}
+			&.group {
+				$shadow-bottom: 0 -1px 0 0 $header-border-color inset;
+				box-shadow: $shadow-bottom;
+			}
 		}
 	}
 
@@ -50,13 +54,17 @@ revogr-viewport {
 	}
 
 	revogr-data {
+		text-align: left;
+
 		.row {
 			line-height: $default-rows-size;
 		}
 
 		.data-cell {
 			box-shadow: $cell-shadow-cell;
-			text-align: center;
+			padding: 0 15px;
+			overflow: hidden;
+			text-overflow: ellipsis;
 			color: rgba(black, .87);
 	
 			&.disabled {
