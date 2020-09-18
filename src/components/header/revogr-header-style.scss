@@ -1,8 +1,6 @@
-$header-size: 30px;
 
 revogr-header {
 	position: relative;
-	line-height: $header-size;
 	z-index: 5;
 	display: block;
 
@@ -15,22 +13,15 @@ revogr-header {
 	}
 
 	.header-row {
-		height: $header-size;
 		display: block;
 		position: relative;
 
 		&.group {
-			box-shadow: none;
 			z-index: 0;
 		}
 	}
 
 	.group-row {
 		position: relative;
-
-		.data-header-cell {
-			color: #9493a2;
-			font-weight: normal;
-		}
 	}
 }

@@ -42,6 +42,7 @@ revogr-viewport {
 	revogr-header {
 		line-height: $header-height;
 		font-weight: 600;
+
 		.data-header-cell {
 				$shadow-bottom: 0 -1px 0 0 $header-border-color inset;
 				$shadow-top: 0 -1px 0 0 $header-border-color;

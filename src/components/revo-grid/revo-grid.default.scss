@@ -1,6 +1,8 @@
 @import './revo-grid.common.scss';
 
-$header-shadow: 0 1px 10px rgba(0,0,0,.2);
+$header-size: 30px;
+$header-shadow: 0 1px 10px rgba(black, .2);
+$default-rows-size: 42px;
 
 revogr-viewport {
 	$shadow-top: 0 -1px 0 0 $header-border-color;
@@ -8,7 +10,22 @@ revogr-viewport {
 
 	revogr-header {
 			box-shadow: $header-shadow;
-			font-weight: 600;
+			line-height: $header-size;
+			
+			.group-row {
+				box-shadow: none;
+
+				.data-header-cell {
+					color: #9493a2;
+				}
+			}
+			.header-row {
+				height: $header-size;
+
+				&:not(.group) {
+					font-weight: 600;
+				}
+			}
 	
 			.data-header-cell {
 				$shadow-left: -1px 0 0 0 $cell-border-color;
@@ -41,7 +58,9 @@ revogr-viewport {
 
 	revogr-data {
 		$cell-shadow-cell: 0 -1px 0 0 $cell-border-color inset, -1px 0 0 0 $cell-border-color inset;
-
+		.row {
+			line-height: $default-rows-size;
+		}
 		.data-cell {
 			box-shadow: $cell-shadow-cell;
 			text-align: center;

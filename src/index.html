@@ -59,7 +59,7 @@
 <body>
     <div class="tile large">
       <div>
-        <revo-grid class="grid-component" theme="material"></revo-grid>
+        <revo-grid class="grid-component" theme="material2"></revo-grid>
       </div>
     </div>
 
@@ -80,6 +80,7 @@
         grid.range = true;
         grid.resize = true;
         grid.addEventListener('afterEdit', (e) => {
+          console.log('after edit');
             // grid2.source = [...grid.source];
         });
         grid.addEventListener('selectionChanged', (e) => {
