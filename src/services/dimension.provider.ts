@@ -7,7 +7,7 @@ import {RevoGrid} from "../interfaces";
 
 type Columns = {
     sizes: RevoGrid.ViewSettingSizeProp;
-} & {[T in RevoGrid.DimensionCols]: RevoGrid.ColumnDataSchemaRegular[];};
+} & {[T in RevoGrid.DimensionCols]: RevoGrid.ColumnRegular[];};
 type DimensionStores = {[T in RevoGrid.MultiDimensionType]: DimensionStore};
 export default class DimensionProvider {
     public readonly stores: DimensionStores;
@@ -23,13 +23,13 @@ export default class DimensionProvider {
         this.viewports.stores[dimensionType].setViewPortDimension(sizes);
     }
 
-    setRealSize(items: RevoGrid.ColumnDataSchemaRegular[]|RevoGrid.DataType[], dimensionType: RevoGrid.MultiDimensionType): void {
+    setRealSize(items: RevoGrid.ColumnRegular[]|RevoGrid.DataType[], dimensionType: RevoGrid.MultiDimensionType): void {
         const realCount: number = items.length;
         this.viewports.stores[dimensionType].setViewport({ realCount });
         this.stores[dimensionType].setRealSize(realCount);
     }
 
-    setPins(items: RevoGrid.ColumnDataSchemaRegular[]|RevoGrid.DataType[], dimensionType: RevoGrid.MultiDimensionType, pinSizes?: RevoGrid.ViewSettingSizeProp): void {
+    setPins(items: RevoGrid.ColumnRegular[]|RevoGrid.DataType[], dimensionType: RevoGrid.MultiDimensionType, pinSizes?: RevoGrid.ViewSettingSizeProp): void {
         const realCount = items.length;
         this.stores[dimensionType].setRealSize(realCount);
         this.stores[dimensionType].setDimensionSize(pinSizes);

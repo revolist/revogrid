@@ -14,7 +14,7 @@ declare namespace ViewportSpace {
 
         /** Viewport data position. Position provides connection between independent data stores and Selection store. */
         position: Selection.Cell;
-        colData: RevoGrid.ColumnDataSchemaRegular[];
+        colData: RevoGrid.ColumnRegular[];
 
         dataStore: ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
 
@@ -35,6 +35,7 @@ declare namespace ViewportSpace {
         canDrag?: boolean;
         style?: {[key: string]: string};
     };
+    
     type ViewportProps = {
         prop: Properties;
 

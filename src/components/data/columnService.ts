@@ -10,7 +10,7 @@ import DataSource = RevoGrid.DataSource;
 import DataType = RevoGrid.DataType;
 
 export interface ColumnServiceI {
-  columns: RevoGrid.ColumnDataSchemaRegular[];
+  columns: RevoGrid.ColumnRegular[];
 
   customRenderer(r: number, c: number): VNode | void;
 
@@ -20,19 +20,19 @@ export interface ColumnServiceI {
 }
 
 export default class ColumnService implements ColumnServiceI {
-  private source: RevoGrid.ColumnDataSchemaRegular[] = [];
+  private source: RevoGrid.ColumnRegular[] = [];
 
-  get columns(): RevoGrid.ColumnDataSchemaRegular[] {
+  get columns(): RevoGrid.ColumnRegular[] {
     return this.source;
   }
 
-  set columns(source: RevoGrid.ColumnDataSchemaRegular[]) {
+  set columns(source: RevoGrid.ColumnRegular[]) {
     this.source = source;
   }
 
   constructor(
     private dataStore: ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>,
-    columns: RevoGrid.ColumnDataSchemaRegular[]) {
+    columns: RevoGrid.ColumnRegular[]) {
     this.source = columns;
   }
 

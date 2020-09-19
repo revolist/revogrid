@@ -34,7 +34,15 @@
         },
         {
           "name": "theme",
-          "description": "Theme name"
+          "description": "Theme name",
+          "values": [
+            {
+              "name": "default"
+            },
+            {
+              "name": "material"
+            }
+          ]
         }
       ]
     },

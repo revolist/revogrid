@@ -3,9 +3,9 @@ import { RevoGrid } from '../../interfaces';
 import { DATA_COL, HEADER_CLASS } from '../../utils/consts';
 
 type Props = {
-    data: RevoGrid.ColumnDataSchemaRegular;
+    data: RevoGrid.ColumnRegular;
     column: RevoGrid.VirtualPositionItem;
-    onClick(data: RevoGrid.ColumnDataSchemaRegular): void;
+    onClick(data: RevoGrid.ColumnRegular): void;
 }
 
 const HeaderRenderer = ({column, data, onClick}: Props, _children: VNode[]): VNode[] => {

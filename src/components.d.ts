@@ -17,7 +17,7 @@ export namespace Components {
         /**
           * Columns - defines an array of grid columns. Can be column or grouped column.
          */
-        "columns": (RevoGrid.ColumnDataSchemaRegular|RevoGrid.ColumnDataSchemaGrouping)[];
+        "columns": (RevoGrid.ColumnRegular|RevoGrid.ColumnGrouping)[];
         /**
           * Custom editors register
          */
@@ -51,17 +51,17 @@ export namespace Components {
          */
         "rowSize": number;
         /**
-          * Source: {[T in ColumnProp]: any} - defines main data source. Can be an Object or 2 dimensional array([][]); ColumnProp - string|number. It is reference for column mapping.
+          * Source - defines main data source. Can be an Object or 2 dimensional array([][]); Keys/indexes referenced from columns Prop
          */
         "source": RevoGrid.DataType[];
         /**
           * Theme name
          */
-        "theme": string;
+        "theme": 'default'|'material';
     }
     interface RevogrData {
         "canDrag": boolean;
-        "colData": RevoGrid.ColumnDataSchemaRegular[];
+        "colData": RevoGrid.ColumnRegular[];
         "cols": RevoGrid.VirtualPositionItem[];
         /**
           * Static stores, not expected to change during component lifetime
@@ -73,7 +73,7 @@ export namespace Components {
         "rows": RevoGrid.VirtualPositionItem[];
     }
     interface RevogrEdit {
-        "column": RevoGrid.ColumnDataSchemaRegular|null;
+        "column": RevoGrid.ColumnRegular|null;
         "editCell": Edition.EditCell;
         /**
           * Custom editors register
@@ -82,7 +82,7 @@ export namespace Components {
     }
     interface RevogrHeader {
         "canResize": boolean;
-        "colData": RevoGrid.ColumnDataSchemaRegular[];
+        "colData": RevoGrid.ColumnRegular[];
         "cols": RevoGrid.VirtualPositionItem[];
         "dimensionCol": ObservableMap<RevoGrid.DimensionSettingsState>;
         "groupingDepth": number;
@@ -100,7 +100,7 @@ export namespace Components {
     }
     interface RevogrOverlaySelection {
         "canDrag": boolean;
-        "colData": RevoGrid.ColumnDataSchemaRegular[];
+        "colData": RevoGrid.ColumnRegular[];
         /**
           * Static stores, not expected to change during component lifetime
          */
@@ -129,7 +129,7 @@ export namespace Components {
         "virtualSize": number;
     }
     interface RevogrViewport {
-        "columnStores": {[T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnDataSchemaRegular, RevoGrid.DimensionCols>>};
+        "columnStores": {[T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>};
         "dimensions": {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.DimensionSettingsState>};
         /**
           * Custom editors register
@@ -224,7 +224,7 @@ declare namespace LocalJSX {
         /**
           * Columns - defines an array of grid columns. Can be column or grouped column.
          */
-        "columns"?: (RevoGrid.ColumnDataSchemaRegular|RevoGrid.ColumnDataSchemaGrouping)[];
+        "columns"?: (RevoGrid.ColumnRegular|RevoGrid.ColumnGrouping)[];
         /**
           * Custom editors register
          */
@@ -284,17 +284,17 @@ declare namespace LocalJSX {
          */
         "rowSize"?: number;
         /**
-          * Source: {[T in ColumnProp]: any} - defines main data source. Can be an Object or 2 dimensional array([][]); ColumnProp - string|number. It is reference for column mapping.
+          * Source - defines main data source. Can be an Object or 2 dimensional array([][]); Keys/indexes referenced from columns Prop
          */
         "source"?: RevoGrid.DataType[];
         /**
           * Theme name
          */
-        "theme"?: string;
+        "theme"?: 'default'|'material';
     }
     interface RevogrData {
         "canDrag"?: boolean;
-        "colData"?: RevoGrid.ColumnDataSchemaRegular[];
+        "colData"?: RevoGrid.ColumnRegular[];
         "cols"?: RevoGrid.VirtualPositionItem[];
         /**
           * Static stores, not expected to change during component lifetime
@@ -307,7 +307,7 @@ declare namespace LocalJSX {
         "rows"?: RevoGrid.VirtualPositionItem[];
     }
     interface RevogrEdit {
-        "column"?: RevoGrid.ColumnDataSchemaRegular|null;
+        "column"?: RevoGrid.ColumnRegular|null;
         "editCell"?: Edition.EditCell;
         /**
           * Custom editors register
@@ -321,12 +321,12 @@ declare namespace LocalJSX {
     }
     interface RevogrHeader {
         "canResize"?: boolean;
-        "colData"?: RevoGrid.ColumnDataSchemaRegular[];
+        "colData"?: RevoGrid.ColumnRegular[];
         "cols"?: RevoGrid.VirtualPositionItem[];
         "dimensionCol"?: ObservableMap<RevoGrid.DimensionSettingsState>;
         "groupingDepth"?: number;
         "groups"?: Groups;
-        "onHeaderClick"?: (event: CustomEvent<RevoGrid.ColumnDataSchemaRegular>) => void;
+        "onHeaderClick"?: (event: CustomEvent<RevoGrid.ColumnRegular>) => void;
         "onHeaderResize"?: (event: CustomEvent<RevoGrid.ViewSettingSizeProp>) => void;
         "parent"?: string;
     }
@@ -350,7 +350,7 @@ declare namespace LocalJSX {
     }
     interface RevogrOverlaySelection {
         "canDrag"?: boolean;
-        "colData"?: RevoGrid.ColumnDataSchemaRegular[];
+        "colData"?: RevoGrid.ColumnRegular[];
         /**
           * Static stores, not expected to change during component lifetime
          */
@@ -371,10 +371,7 @@ declare namespace LocalJSX {
         /**
           * Selection range changed
          */
-        "onInitialSelectionChanged"?: (event: CustomEvent<{
-    newRange: {start: Selection.Cell; end: Selection.Cell;};
-    oldRange: {start: Selection.Cell; end: Selection.Cell;};
-  }>) => void;
+        "onInitialSelectionChanged"?: (event: CustomEvent<Selection.ChangedRange>) => void;
         "onSetEdit"?: (event: CustomEvent<string|boolean>) => void;
         "onUnregister"?: (event: CustomEvent<any>) => void;
         "range"?: boolean;
@@ -391,7 +388,7 @@ declare namespace LocalJSX {
         "virtualSize"?: number;
     }
     interface RevogrViewport {
-        "columnStores"?: {[T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnDataSchemaRegular, RevoGrid.DimensionCols>>};
+        "columnStores"?: {[T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>};
         "dimensions"?: {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.DimensionSettingsState>};
         /**
           * Custom editors register

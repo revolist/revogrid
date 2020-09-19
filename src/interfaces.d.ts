@@ -1,71 +1,114 @@
 import {VNode} from "@stencil/core";
 
 export declare namespace RevoGrid {
+
+  // --------------------------------------------------------------------------
+  //
+  //  Dimensions
+  //
+  // --------------------------------------------------------------------------
+
   type DimensionTypeRow = 'row';
   type DimensionTypeCol = 'col';
+
   type DimensionColPin = 'colPinStart'|'colPinEnd';
   type DimensionRowPin = 'rowPinStart'|'rowPinEnd';
+
   type DimensionType = DimensionTypeCol|DimensionTypeRow;
+
   type DimensionCols = DimensionColPin|DimensionTypeCol;
   type DimensionRows = DimensionTypeRow|DimensionRowPin;
-  type MultiDimensionType = DimensionType|DimensionColPin|DimensionRowPin;
 
-  type ViewPortScrollEvent = {
-    dimension: DimensionType;
-    coordinate: number;
+  type MultiDimensionType = DimensionCols|DimensionRows;
+
+
+  // --------------------------------------------------------------------------
+  //
+  //  Columns
+  //
+  // --------------------------------------------------------------------------
+
+  type ColumnDataSchemaModel = {
+    prop: ColumnProp;
+    model: DataType;
+    data: DataSource;
+    column: ColumnRegular;
   };
+
+  type ReadOnlyFormat = boolean | ((row: number, col: number) => boolean);
+  type RowDrag = boolean| {(params: ColumnDataSchemaModel): boolean};
+
+
+  interface ColumnGrouping {
+    children: ColumnDataSchema[];
+    name: DataFormat;
+  }
+
+
+  interface ColumnRegular {
+    prop: ColumnProp;
+    editor?: string;
+    pin?: DimensionColPin;
+    name?: DataFormat;
+    readonly?: ReadOnlyFormat;
+    size?: number;
+    minSize?: number;
+
+    rowDrag?: RowDrag;
+    cellTemplate?: CellTemplateFunc<VNode>;
+    columnTemplate?: ColumnTemplateFunc<VNode>;
+  }
+
+  type ColumnDataSchema = ColumnGrouping|ColumnRegular;
+  type ColumnData = ColumnDataSchema[];
+
+  type ColumnProp = string|number;
+  type DataFormat = any;
+
+
+  // --------------------------------------------------------------------------
+  //
+  //  Create Element function description
+  //
+  // --------------------------------------------------------------------------
+
+  interface HyperFunc<T> { (tag: string, props?: object, value?: string): T; }
+  type CellTemplateFunc<T> = (createElement: HyperFunc<T>, props: ColumnDataSchemaModel) => T;
+  type ColumnTemplateFunc<T> = (createElement: HyperFunc<T>, props: ColumnRegular) => T;
+
+
+  // --------------------------------------------------------------------------
+  //
+  //  Row data source
+  //
+  // --------------------------------------------------------------------------
+
+  type DataType = { [T in ColumnProp]: DataFormat };
+  type DataSource = DataType[];
+
+
+  // --------------------------------------------------------------------------
+  //
+  //  Events
+  //
+  // --------------------------------------------------------------------------
 
   type ViewPortResizeEvent = {
     dimension: DimensionType;
     size: number;
   };
 
-  type ColumnDataSchemaModel = {
-    prop: ColumnProp;
-    model: DataType;
-    data: DataSource;
-    column: ColumnDataSchemaRegular;
+  type ViewPortScrollEvent = {
+    dimension: DimensionType;
+    coordinate: number;
   };
 
-  type ReadOnlyFormat = boolean | ((row: number, col: number) => boolean);
 
-  type RowDrag = boolean| {(params: ColumnDataSchemaModel): boolean};
-
-  interface ColumnDataSchemaBase {
-    name?: DataFormat;
-    readonly?: ReadOnlyFormat;
-    size?: number;
-    minSize?: number;
-    cellTemplate?: CellTemplateFunc<VNode>;
-    rowDrag?: RowDrag;
-    columnTemplate?: ColumnTemplateFunc<VNode>;
-  }
-
-  interface ColumnDataSchemaGrouping {
-    children: ColumnDataSchema[];
-    name: DataFormat;
-  }
-
-
-  interface ColumnDataSchemaRegular extends ColumnDataSchemaBase {
-    prop: ColumnProp;
-    editor?: string;
-    pin?: DimensionColPin;
-  }
-
-  type ColumnDataSchema = ColumnDataSchemaGrouping|ColumnDataSchemaRegular;
-
-  type ColumnProp = string|number;
-  type DataFormat = any;
-
-  interface HyperFunc<T> { (tag: string, props?: object, value?: string): T; }
-
-  type CellTemplateFunc<T> = (createElement: HyperFunc<T>, props: ColumnDataSchemaModel) => T;
-  type ColumnTemplateFunc<T> = (createElement: HyperFunc<T>, props: ColumnDataSchemaRegular) => T;
-  type ColumnData = ColumnDataSchema[];
-
-  type DataType = { [T in ColumnProp]: DataFormat };
-  type DataSource = DataType[];
+  // --------------------------------------------------------------------------
+  //
+  //  Viewport store
+  //
+  // --------------------------------------------------------------------------
 
   type Range = {
     start: number;
@@ -94,6 +137,13 @@ export declare namespace RevoGrid {
     end: number;
   }
 
+
+  // --------------------------------------------------------------------------
+  //
+  //  Dimension store
+  //
+  // --------------------------------------------------------------------------
+
   interface DimensionSettingsState {
     indexes: number[];
     positionIndexes: number[];
@@ -106,6 +156,13 @@ export declare namespace RevoGrid {
   }
 }
 
+
+
+// --------------------------------------------------------------------------
+//
+//  Selection space
+//
+// --------------------------------------------------------------------------
 
 export declare namespace Selection {
   type RowIndex = number;
@@ -126,6 +183,11 @@ export declare namespace Selection {
     y1: RowIndex;
   };
 
+  type ChangedRange = {
+    newRange: { start: Selection.Cell; end: Selection.Cell; };
+    oldRange: { start: Selection.Cell; end: Selection.Cell; };
+  };
+
   interface Cell {
     x: ColIndex;
     y: RowIndex;
@@ -138,6 +200,14 @@ export declare namespace Selection {
     height: string;
   };
 }
+
+
+
+// --------------------------------------------------------------------------
+//
+//  Edition space
+//
+// --------------------------------------------------------------------------
 
 export declare namespace Edition {
   import HyperFunc = RevoGrid.HyperFunc;
@@ -163,7 +233,7 @@ export declare namespace Edition {
 
   interface EditorCtr {
     new (
-        column: RevoGrid.ColumnDataSchemaRegular,
+        column: RevoGrid.ColumnRegular,
         editCallback?: (value: Edition.SaveData) => void,
     ): EditorBase;
   }

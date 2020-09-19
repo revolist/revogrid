@@ -12,7 +12,7 @@ export class Edit {
     @Prop() editCell: Edition.EditCell;
     private currentEditor: Edition.EditorBase|null = null;
 
-    @Prop() column: RevoGrid.ColumnDataSchemaRegular|null;
+    @Prop() column: RevoGrid.ColumnRegular|null;
     /** Custom editors register */
     @Prop() editor: Edition.EditorCtr|null;
 

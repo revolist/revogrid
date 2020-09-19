@@ -11,7 +11,7 @@ import {Edition, Selection, RevoGrid} from '../../interfaces';
 
 
 type ColumnStores = {
-  [T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnDataSchemaRegular, RevoGrid.DimensionCols>>;
+  [T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
 };
 type RowStores = {
   [T in RevoGrid.DimensionRows]: ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
@@ -30,7 +30,6 @@ type ViewportStores = {
     default: 'revo-grid.default.scss',
     material: 'revo-grid.material.scss',
   },
-  assetsDirs: ['./nunito-font']
 })
 export class RevoGridComponent {
   // --------------------------------------------------------------------------
@@ -54,13 +53,14 @@ export class RevoGridComponent {
   /** When true, columns are resizable. */
   @Prop() resize: boolean = false;
   /**
-   * Columns - defines an array of grid columns. Can be column or grouped column.
+   * Columns - defines an array of grid columns.
+   * Can be column or grouped column.
    */
-  @Prop() columns: (RevoGrid.ColumnDataSchemaRegular|RevoGrid.ColumnDataSchemaGrouping)[] = [];
+  @Prop() columns: (RevoGrid.ColumnRegular|RevoGrid.ColumnGrouping)[] = [];
   /**
-   * Source: {[T in ColumnProp]: any} - defines main data source.
+   * Source - defines main data source.
    * Can be an Object or 2 dimensional array([][]);
-   * ColumnProp - string|number. It is reference for column mapping.
+   * Keys/indexes referenced from columns Prop
    */
   @Prop() source: RevoGrid.DataType[] = [];
   /** Pinned top Source: {[T in ColumnProp]: any} - defines pinned top rows data source. */
@@ -73,7 +73,7 @@ export class RevoGridComponent {
 
 
   /** Theme name */
-  @Prop() theme: string = 'default';
+  @Prop() theme: 'default'|'material' = 'default';
 
 
   // --------------------------------------------------------------------------
@@ -143,10 +143,7 @@ export class RevoGridComponent {
   }
 
   @Listen('initialSelectionChanged')
-  onRangeChanged(e: CustomEvent<{
-    newRange: {start: Selection.Cell; end: Selection.Cell;};
-    oldRange: {start: Selection.Cell; end: Selection.Cell;};
-  }>): void {
+  onRangeChanged(e: CustomEvent<Selection.ChangedRange>): void {
     e.cancelBubble = true;
     const beforeRange = this.beforeRange.emit(e.detail);
     if (beforeRange.defaultPrevented) {

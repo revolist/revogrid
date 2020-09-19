@@ -17,7 +17,7 @@ export class RevogrData {
   private columnService: ColumnService;
 
   @Element() element!: HTMLStencilElement;
-  @Prop() colData: RevoGrid.ColumnDataSchemaRegular[];
+  @Prop() colData: RevoGrid.ColumnRegular[];
 
   @Prop() readonly: boolean;
   @Prop() range: boolean;
@@ -33,7 +33,7 @@ export class RevogrData {
 
   @Event() dragStartCell: EventEmitter<MouseEvent>;
 
-  @Watch('colData') colChanged(newData: RevoGrid.ColumnDataSchemaRegular[]): void {
+  @Watch('colData') colChanged(newData: RevoGrid.ColumnRegular[]): void {
     this.columnService.columns = newData;
   }
 

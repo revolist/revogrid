@@ -9,7 +9,7 @@ export class TextEditor implements Edition.EditorBase {
     public editCell: Edition.EditCell|null = null;
 
     constructor(
-        public column: RevoGrid.ColumnDataSchemaRegular,
+        public column: RevoGrid.ColumnRegular,
         private editCallback?: (value: Edition.SaveData) => void
     ) {}
 

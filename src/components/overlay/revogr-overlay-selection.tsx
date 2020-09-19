@@ -49,13 +49,13 @@ export class OverlaySelection {
   /** Static stores, not expected to change during component lifetime */
   @Prop() dataStore: ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
 
-  @Prop() colData: RevoGrid.ColumnDataSchemaRegular[];
+  @Prop() colData: RevoGrid.ColumnRegular[];
   /** Last cell position */
   @Prop() lastCell: Selection.Cell;
   /** Custom editors register */
   @Prop() editors: Edition.Editors;
 
-  @Watch('colData') colChanged(newData: RevoGrid.ColumnDataSchemaRegular[]): void {
+  @Watch('colData') colChanged(newData: RevoGrid.ColumnRegular[]): void {
     this.columnService.columns = newData;
   }
   @Watch('lastCell') lastCellChanged(cell: Cell): void {
@@ -70,10 +70,7 @@ export class OverlaySelection {
   @Event({ bubbles: false }) unregister: EventEmitter;
 
   /** Selection range changed */
-  @Event({ cancelable: true }) initialSelectionChanged: EventEmitter<{
-    newRange: {start: Selection.Cell; end: Selection.Cell;};
-    oldRange: {start: Selection.Cell; end: Selection.Cell;};
-  }>;
+  @Event({ cancelable: true }) initialSelectionChanged: EventEmitter<Selection.ChangedRange>;
 
   /** Pointer left document, clear any active operation */
   @Listen('mouseleave', { target: 'document' })

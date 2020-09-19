@@ -18,14 +18,14 @@ type ColumnGrouping = {
 };
 type Columns = {
     sizes: RevoGrid.ViewSettingSizeProp;
-} & {[T in RevoGrid.DimensionCols]: RevoGrid.ColumnDataSchemaRegular[];};
+} & {[T in RevoGrid.DimensionCols]: RevoGrid.ColumnRegular[];};
 type ColumnCollection = {
     columns: Columns;
     columnGrouping: ColumnGrouping;
     maxLevel: number;
 };
 
-type ColumnDataSources = {[T in RevoGrid.DimensionCols]: DataStore<RevoGrid.ColumnDataSchemaRegular, RevoGrid.DimensionCols>};
+type ColumnDataSources = {[T in RevoGrid.DimensionCols]: DataStore<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>};
 
 export default class ColumnDataProvider {
     private readonly dataSources: ColumnDataSources;
@@ -39,11 +39,11 @@ export default class ColumnDataProvider {
         }, {}) as ColumnDataSources;
     }
 
-    column(c: number, pin?: RevoGrid.DimensionColPin): RevoGrid.ColumnDataSchemaRegular|undefined {
+    column(c: number, pin?: RevoGrid.DimensionColPin): RevoGrid.ColumnRegular|undefined {
         return this.getColumn(c, pin || 'col');
     }
 
-    getColumn(c: number, type: RevoGrid.DimensionCols): RevoGrid.ColumnDataSchemaRegular|undefined {
+    getColumn(c: number, type: RevoGrid.DimensionCols): RevoGrid.ColumnRegular|undefined {
         return this.dataSources[type].store.get('items')[c];
     }
 
@@ -71,8 +71,8 @@ export default class ColumnDataProvider {
         }
     }
 
-    private static getPinSizes(cols: RevoGrid.ColumnDataSchemaRegular[]): RevoGrid.ViewSettingSizeProp {
-        return reduce(cols, (res: RevoGrid.ViewSettingSizeProp, c: RevoGrid.ColumnDataSchemaRegular, i: number) => {
+    private static getPinSizes(cols: RevoGrid.ColumnRegular[]): RevoGrid.ViewSettingSizeProp {
+        return reduce(cols, (res: RevoGrid.ViewSettingSizeProp, c: RevoGrid.ColumnRegular, i: number) => {
             if (c.size) {
                 res[i] = c.size;
             }
@@ -81,8 +81,8 @@ export default class ColumnDataProvider {
 
     }
 
-    private static isColGrouping(colData: RevoGrid.ColumnDataSchemaGrouping | RevoGrid.ColumnDataSchemaRegular): colData is RevoGrid.ColumnDataSchemaGrouping {
-        return !!(colData as RevoGrid.ColumnDataSchemaGrouping).children;
+    private static isColGrouping(colData: RevoGrid.ColumnGrouping | RevoGrid.ColumnRegular): colData is RevoGrid.ColumnGrouping {
+        return !!(colData as RevoGrid.ColumnGrouping).children;
     }
 
     // columns processing

@@ -7,7 +7,7 @@ import {createStore, ObservableMap} from '@stencil/store';
 import {setStore} from '../../utils/store.utils';
 import {RevoGrid} from "../../interfaces";
 import DataType = RevoGrid.DataType;
-import ColumnDataSchemaRegular = RevoGrid.ColumnDataSchemaRegular;
+import ColumnRegular = RevoGrid.ColumnRegular;
 import DimensionRows = RevoGrid.DimensionRows;
 import DimensionCols = RevoGrid.DimensionCols;
 
@@ -16,7 +16,7 @@ export type Group = {
   ids: (string|number)[];
 }
 export type Groups = {[level: number]: Group[]};
-export type GDataType = DataType|ColumnDataSchemaRegular;
+export type GDataType = DataType|ColumnRegular;
 export type GDimension = DimensionRows|DimensionCols;
 export type DataSourceState<T extends GDataType, ST extends GDimension> = {
   items: T[];

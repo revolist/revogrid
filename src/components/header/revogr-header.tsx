@@ -24,14 +24,14 @@ export class RevogrHeaderComponent {
   @Prop() groups: Groups;
   @Prop() groupingDepth: number = 0;
 
-  @Event() headerClick: EventEmitter<RevoGrid.ColumnDataSchemaRegular>;
+  @Event() headerClick: EventEmitter<RevoGrid.ColumnRegular>;
   @Event() headerResize: EventEmitter<RevoGrid.ViewSettingSizeProp>;
   @Prop() canResize: boolean;
 
-  @Prop() colData: RevoGrid.ColumnDataSchemaRegular[];
+  @Prop() colData: RevoGrid.ColumnRegular[];
   private headerService: HeaderService;
 
-  @Watch('colData') colChanged(newVal: RevoGrid.ColumnDataSchemaRegular[]): void {
+  @Watch('colData') colChanged(newVal: RevoGrid.ColumnRegular[]): void {
     this.headerService.columns = newVal;
   }
   @Watch('canResize') onResizeChanged(newVal: boolean) {

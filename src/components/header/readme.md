@@ -10,7 +10,7 @@
 | Property        | Attribute        | Description | Type                                    | Default     |
 | --------------- | ---------------- | ----------- | --------------------------------------- | ----------- |
 | `canResize`     | `can-resize`     |             | `boolean`                               | `undefined` |
-| `colData`       | --               |             | `ColumnDataSchemaRegular[]`             | `undefined` |
+| `colData`       | --               |             | `ColumnRegular[]`                       | `undefined` |
 | `cols`          | --               |             | `VirtualPositionItem[]`                 | `undefined` |
 | `dimensionCol`  | --               |             | `ObservableMap<DimensionSettingsState>` | `undefined` |
 | `groupingDepth` | `grouping-depth` |             | `number`                                | `0`         |
@@ -22,7 +22,7 @@
 
 | Event          | Description | Type                                        |
 | -------------- | ----------- | ------------------------------------------- |
-| `headerClick`  |             | `CustomEvent<ColumnDataSchemaRegular>`      |
+| `headerClick`  |             | `CustomEvent<ColumnRegular>`                |
 | `headerResize` |             | `CustomEvent<{ [index: string]: number; }>` |
 
 
