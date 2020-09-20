@@ -10,10 +10,8 @@ setMode(elm => {
     }
 
     const isAllowed = allowedThemes.indexOf(theme) > -1;
-    console.log('set', isAllowed);
     if (!isAllowed) {
         elm.setAttribute('theme', DEFAULT_THEME);
-        console.log('set', DEFAULT_THEME);
     }
     return  isAllowed ? theme : DEFAULT_THEME;
 });
