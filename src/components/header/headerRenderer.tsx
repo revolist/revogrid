@@ -15,7 +15,8 @@ const HeaderRenderer = ({column, data, onClick}: Props, _children: VNode[]): VNo
         style: { width: `${column.size}px`, transform: `translateX(${column.start}px)` },
         onClick: () => onClick(data)
     };
-    const headerChildren: VNode|string = data.columnTemplate ? data.columnTemplate(h.h, data) : data.name;
+    const headerChildren: VNode|string = data.columnTemplate ?
+        data.columnTemplate(h as unknown as RevoGrid.HyperFunc<VNode>, data) : data.name;
     return <div {...dataProps}>{headerChildren}</div>;
 };
 

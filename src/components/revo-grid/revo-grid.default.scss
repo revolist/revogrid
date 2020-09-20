@@ -4,9 +4,11 @@ $header-size: 30px;
 $header-shadow: 0 1px 10px rgba(black, .2);
 $default-rows-size: 42px;
 
-revogr-viewport {
-	$shadow-top: 0 -1px 0 0 $header-border-color;
-	box-shadow: $shadow-top;
+revo-grid[theme="default"] {
+	revogr-viewport {
+		$shadow-top: 0 -1px 0 0 $header-border-color;
+		box-shadow: $shadow-top;
+	}
 
 	revogr-header {
 		text-align: center;

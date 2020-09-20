@@ -8,5 +8,12 @@ setMode(elm => {
     if (typeof theme === 'string') {
         theme = theme.trim();
     }
-    return  allowedThemes.indexOf(theme) > -1 ? theme : DEFAULT_THEME;
+
+    const isAllowed = allowedThemes.indexOf(theme) > -1;
+    console.log('set', isAllowed);
+    if (!isAllowed) {
+        elm.setAttribute('theme', DEFAULT_THEME);
+        console.log('set', DEFAULT_THEME);
+    }
+    return  isAllowed ? theme : DEFAULT_THEME;
 });
