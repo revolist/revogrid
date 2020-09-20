@@ -1,4 +1,4 @@
-import {Component, Event, EventEmitter, h, Method, Element, Prop} from '@stencil/core';
+import {Component, Event, EventEmitter, h, Method, Element, Prop, Host} from '@stencil/core';
 import each from 'lodash/each';
 
 import GridResizeService from './gridResizeService';
@@ -28,8 +28,15 @@ export class RevogrViewportScroll {
   private gridResizeService: GridResizeService;
   private scrollService: LocalScrollService;
 
+  /**
+   * Last mw event time for trigger scroll function below
+   * If mousewheel function was ignored we still need to trigger render
+   */
+  private mouseWheelScroll: {[T in RevoGrid.DimensionType]: number} = {col: 0, row: 0};
+
   @Method()
   async setScroll(e: RevoGrid.ViewPortScrollEvent): Promise<void> {
+    this.latestScrollUpdate(e.dimension);
     this.scrollService?.setScroll(e);
   }
 
@@ -53,11 +60,15 @@ export class RevogrViewportScroll {
   componentDidLoad(): void {
     this.verticalMouseWheel = (e: WheelEvent) => {
       e.preventDefault();
-      this.scrollService?.scroll(this.verticalScroll.scrollTop + e.deltaY, 'row');
+      const y = this.verticalScroll.scrollTop + e.deltaY;
+      this.scrollService?.scroll(y, 'row');
+      this.latestScrollUpdate('row');
     };
     this.horizontalMouseWheel = (e: WheelEvent) => {
       e.preventDefault();
-      this.scrollService?.scroll(this.horizontalScroll.scrollLeft + e.deltaX, 'col');
+      const x = this.horizontalScroll.scrollLeft + e.deltaX;
+      this.scrollService?.scroll(x, 'col');
+      this.latestScrollUpdate('col');
     };
     this.gridResizeService = new GridResizeService(
         this.horizontalScroll,
@@ -108,18 +119,48 @@ export class RevogrViewportScroll {
   }
 
   render() {
-    return <div class='inner-content-table' style={{ width: `${this.contentWidth}px` }}>
-            <div class='header-wrapper'>
-              <slot name='header'/>
-            </div>
-            <div class='vertical-inner' ref={el => {this.verticalScroll = el;}}>
-              <div class='content-wrapper' style={{ height: `${this.contentHeight}px`,  }}>
-                <slot name='content'/>
-              </div>
-            </div>
-            <div class='footer-wrapper'>
-              <slot name='footer'/>
-            </div>
-    </div>;
+    return <Host onScroll={(e: MouseEvent) => this.onScroll('col', e)}>
+      <div class='inner-content-table' style={{ width: `${this.contentWidth}px` }}>
+        <div class='header-wrapper'>
+          <slot name='header'/>
+        </div>
+        <div class='vertical-inner'
+          ref={el => {this.verticalScroll = el;}}
+          onScroll={(e: MouseEvent) => this.onScroll('row', e)}>
+          <div class='content-wrapper' style={{ height: `${this.contentHeight}px`,  }}>
+            <slot name='content'/>
+          </div>
+        </div>
+        <div class='footer-wrapper'>
+          <slot name='footer'/>
+        </div>
+      </div>
+    </Host>;
+  }
+
+  /**
+   * Extra layer for scroll event monitoring, where MouseWheel event is not passing
+   * We need to trigger scroll event in case there is no mousewheel event
+   */
+  private onScroll(dimension: RevoGrid.DimensionType, e: MouseEvent): void {
+    const target = e.target as HTMLElement|undefined;
+    let scroll = 0;
+    switch(dimension) {
+      case 'col':
+        scroll = target?.scrollLeft;
+        break;
+      case 'row':
+        scroll = target?.scrollTop;
+        break;
+    }
+    const change = (new Date()).getTime() - this.mouseWheelScroll[dimension];
+    if (change > 30) {
+      this.scrollService?.scroll(scroll, dimension);
+    }
+  }
+
+  /** remember last mw event time */
+  private latestScrollUpdate(dimension: RevoGrid.DimensionType): void {
+   this.mouseWheelScroll[dimension] = (new Date()).getTime();
   }
 }

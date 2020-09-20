@@ -248,7 +248,6 @@ export class RevoGridComponent {
   }
 
   render() {
-    console.log(this.theme);
     return <revogr-viewport
         onSetDimensionSize={e => this.dimensionProvider.setDimensionSize(e.detail.type, e.detail.sizes)}
         onSetViewportCoordinate={e => this.dimensionProvider.setViewPortCoordinate(e.detail)}
