@@ -63,7 +63,7 @@ The library published as a [scoped NPM package](https://docs.npmjs.com/misc/scop
 
 
 ```bash
-npm install --save @revolist/revogrid;
+npm i @revolist/revogrid --save;
 ```
 
 ## Framework
