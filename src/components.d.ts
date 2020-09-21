@@ -95,8 +95,11 @@ export namespace Components {
           * Static stores, not expected to change during component lifetime
          */
         "dataStore": ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
-        "dragStart": (e: MouseEvent, data: { el: HTMLElement; rows: RevoGrid.DimensionSettingsState; cols: RevoGrid.DimensionSettingsState; }) => Promise<void>;
-        "endOrder": (e: MouseEvent, data: { el: HTMLElement; rows: RevoGrid.DimensionSettingsState; cols: RevoGrid.DimensionSettingsState; }) => Promise<void>;
+        "dimensionCol": ObservableMap<RevoGrid.DimensionSettingsState>;
+        "dimensionRow": ObservableMap<RevoGrid.DimensionSettingsState>;
+        "dragStart": (e: MouseEvent) => Promise<void>;
+        "endOrder": (e: MouseEvent) => Promise<void>;
+        "parent": HTMLElement;
     }
     interface RevogrOverlaySelection {
         "canDrag": boolean;
@@ -256,6 +259,10 @@ declare namespace LocalJSX {
     oldRange: {start: Selection.Cell; end: Selection.Cell;};
   }>) => void;
         /**
+          * On header click.
+         */
+        "onHeaderClick"?: (event: CustomEvent<RevoGrid.ColumnRegular>) => void;
+        /**
           * Before row order apply. Use e.preventDefault() to prevent row order change.
          */
         "onRowOrderChanged"?: (event: CustomEvent<{from: number; to: number;}>) => void;
@@ -326,8 +333,8 @@ declare namespace LocalJSX {
         "dimensionCol"?: ObservableMap<RevoGrid.DimensionSettingsState>;
         "groupingDepth"?: number;
         "groups"?: Groups;
-        "onHeaderClick"?: (event: CustomEvent<RevoGrid.ColumnRegular>) => void;
         "onHeaderResize"?: (event: CustomEvent<RevoGrid.ViewSettingSizeProp>) => void;
+        "onInitialHeaderClick"?: (event: CustomEvent<{column: RevoGrid.ColumnRegular, index: number}>) => void;
         "parent"?: string;
     }
     interface RevogrOrderEditor {
@@ -335,10 +342,16 @@ declare namespace LocalJSX {
           * Static stores, not expected to change during component lifetime
          */
         "dataStore"?: ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
+        "dimensionCol"?: ObservableMap<RevoGrid.DimensionSettingsState>;
+        "dimensionRow"?: ObservableMap<RevoGrid.DimensionSettingsState>;
         /**
           * Row dragged, new range ready to be applied
          */
         "onInitialRowDropped"?: (event: CustomEvent<{from: number; to: number;}>) => void;
+        /**
+          * Row move
+         */
+        "onRowDrag"?: (event: CustomEvent<RevoGrid.PositionItem>) => void;
         /**
           * Row drag started
          */
@@ -347,6 +360,7 @@ declare namespace LocalJSX {
           * Row drag started
          */
         "onRowDragStart"?: (event: CustomEvent<{cell: Selection.Cell, text: string}>) => void;
+        "parent"?: HTMLElement;
     }
     interface RevogrOverlaySelection {
         "canDrag"?: boolean;

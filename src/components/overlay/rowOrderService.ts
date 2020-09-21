@@ -47,8 +47,15 @@ export default class RowOrderService {
     this.currentCell = null;
   }
 
+  /** Calculate cell based on x, y position */
+  getCurrentRow(y: number, {el, rows}: EventData): RevoGrid.PositionItem {
+    const {top} = el.getBoundingClientRect();
+    const row = getItemByPosition(rows, y - top);
+    return row;
+  }
+
    /** Calculate cell based on x, y position */
-   private getCurrentCell({x, y}: Selection.Cell, {el, rows, cols}: EventData): Selection.Cell {
+   getCurrentCell({x, y}: Selection.Cell, {el, rows, cols}: EventData): Selection.Cell {
     const {top, left} = el.getBoundingClientRect();
     const row = getItemByPosition(rows, y - top);
     const col = getItemByPosition(cols, x - left);

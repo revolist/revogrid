@@ -7,6 +7,7 @@ export const UUID = 'grid-uuid';
 export const DISABLED_CLASS = 'disabled';
 export const CELL_CLASS = 'data-cell';
 export const HEADER_CLASS = 'data-header-cell';
+export const HEADER_SORTABLE_CLASS = 'sortable';
 export const HEADER_ROW_CLASS = 'header-row';
 export const HEADER_ACTUAL_ROW_CLASS = 'actual-row';
 

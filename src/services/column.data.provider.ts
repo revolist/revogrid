@@ -8,6 +8,7 @@ import {columnTypes} from '../store/storeTypes';
 import DimensionProvider from './dimension.provider';
 import {RevoGrid} from '../interfaces';
 import DimensionColPin = RevoGrid.DimensionColPin;
+
 type Group = {
     name: string;
     level: number;
@@ -69,6 +70,15 @@ export default class ColumnDataProvider {
             let pin: DimensionColPin = p as DimensionColPin;
             this.dimensionProvider.setPins(data.columns[pin], pin, ColumnDataProvider.getPinSizes(data.columns[pin]));
         }
+    }
+
+    updateColumn(column: RevoGrid.ColumnRegular, index: number): void {
+        const type: RevoGrid.DimensionCols = column.pin || 'col';
+        const cols = this.dataSources[type].store.get('items');
+        cols[index] = column;
+        this.dataSources[type].setData({
+            items: [...cols]
+        });
     }
 
     private static getPinSizes(cols: RevoGrid.ColumnRegular[]): RevoGrid.ViewSettingSizeProp {

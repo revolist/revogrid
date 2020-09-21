@@ -24,7 +24,7 @@ export class RevogrHeaderComponent {
   @Prop() groups: Groups;
   @Prop() groupingDepth: number = 0;
 
-  @Event() headerClick: EventEmitter<RevoGrid.ColumnRegular>;
+  @Event() initialHeaderClick: EventEmitter<{column: RevoGrid.ColumnRegular, index: number}>;
   @Event() headerResize: EventEmitter<RevoGrid.ViewSettingSizeProp>;
   @Prop() canResize: boolean;
 
@@ -60,7 +60,12 @@ export class RevogrHeaderComponent {
     // render header columns
     for (let col of this.cols) {
       const colData = this.colData[col.itemIndex];
-      cells.push(<HeaderRenderer column={col} data={colData} onClick={(e) => this.headerClick.emit(e)}/>);
+      cells.push(
+        <HeaderRenderer
+          column={col}
+          data={colData}
+          onClick={(e) => this.initialHeaderClick.emit(e)}/>
+      );
       visibleProps[colData.prop] = col.itemIndex;
     }
 

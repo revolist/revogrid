@@ -4,6 +4,35 @@ revogr-header {
 	z-index: 5;
 	display: block;
 
+	.data-header-cell {
+		&.sortable {
+			cursor: pointer;
+
+			&:hover {
+				background-color: #f1f1f1;
+			}
+		}
+		&.asc {
+			&:after {
+				content: '↑';
+			}
+		}
+		&.desc {
+			&:after {
+				content: '↓';
+			}
+		}
+
+		&.asc, &.desc {
+			padding-right: 30px;
+			&:after {
+				position: absolute;
+				right: 10px;
+				font-size: 13px;
+			}
+		}
+	}
+
 	.data-header-cell,
 	.grouped-cell {
 		position: absolute;

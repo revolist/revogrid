@@ -82,13 +82,13 @@ export class OverlaySelection {
   @Listen('mouseup', { target: 'document' })
   onMouseUp(e: MouseEvent): void {
     this.selectionService.clearSelection();
-    this.orderEditor?.endOrder(e, this.getData());
+    this.orderEditor?.endOrder(e);
   }
 
   /** Row drag started */
   @Listen('dragStartCell')
   onCellDrag(e: CustomEvent<MouseEvent>): void {
-    this.orderEditor?.dragStart(e.detail, this.getData());
+    this.orderEditor?.dragStart(e.detail);
   }
 
   /** Recived keyboard down from element */
@@ -278,8 +278,12 @@ export class OverlaySelection {
     }
 
     if (this.canDrag) {
-      els.push(<revogr-order-editor ref={(e) => this.orderEditor = e}
+      els.push(<revogr-order-editor
+        ref={(e) => this.orderEditor = e}
         dataStore={this.dataStore}
+        dimensionRow={this.dimensionRow}
+        dimensionCol={this.dimensionCol}
+        parent={this.element}
         onRowDragStart={(e) => this.onRowDragStart(e)}
         onRowDragEnd={() => this.onRowDragEnd()}/>);
     }
