@@ -13,7 +13,6 @@ interface Config {
   applyRange(start: Cell, end: Cell): void;
   tempRange(start: Cell, end: Cell): void;
   autoFill(isAutofill: boolean): Cell|null;
-  change(area: Partial<Cell>, isMulti?: boolean): void;
 }
 
 type EventData = {el: HTMLElement, rows: RevoGrid.DimensionSettingsState, cols: RevoGrid.DimensionSettingsState};
@@ -106,7 +105,7 @@ export default class CellSelectionService {
     return null;
   }
 
-  keyDown(e: KeyboardEvent): void {
+  chaneKeyDown(e: KeyboardEvent): {changes: Partial<Cell>; isMulti?: boolean}|void {
     const isMulti: boolean = this.canRange && e.shiftKey;
     switch (e.code) {
       case codesLetter.ARROW_UP:
@@ -118,17 +117,13 @@ export default class CellSelectionService {
     }
     switch (e.code) {
       case codesLetter.ARROW_UP:
-        this.config.change({ y: -1 }, isMulti);
-        break;
+        return {changes: { y: -1 }, isMulti};
       case codesLetter.ARROW_DOWN:
-        this.config.change({ y: 1 }, isMulti);
-        break;
+        return { changes: { y: 1 }, isMulti};
       case codesLetter.ARROW_LEFT:
-        this.config.change({ x: -1 }, isMulti);
-        break;
+        return { changes: { x: -1 }, isMulti };
       case codesLetter.ARROW_RIGHT:
-        this.config.change({ x: 1 }, isMulti);
-        break;
+        return { changes: { x: 1 }, isMulti };
     }
   }
 

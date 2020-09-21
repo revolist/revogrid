@@ -49,14 +49,6 @@ revogr-overlay-selection {
 		box-sizing: border-box;
 	}
 
-	.edit-focus-input {
-		position: absolute;
-		left: -1000px;
-		opacity: 0;
-		width: 0;
-		height: 0;
-	}
-
 	revogr-edit {
 		z-index: 10;
 	}

@@ -30,7 +30,6 @@ export class OverlaySelection {
   private columnService: ColumnService;
 
   private selectionStoreService: SelectionStore;
-  private focusSection: HTMLInputElement;
   private orderEditor: HTMLRevogrOrderEditorElement;
 
   @Element() element: HTMLElement;
@@ -93,9 +92,14 @@ export class OverlaySelection {
   }
 
   /** Recived keyboard down from element */
-  @Listen('keydown')
-  handleKeyDown(e: KeyboardEvent): void {
-    this.selectionService.keyDown(e);
+  @Listen('keydown', { target: 'document' })
+  async handleKeyDown(e: KeyboardEvent): Promise<void> {
+    if (!this.selectionStoreService.focused) {
+      return;
+    }
+
+
+
     if (this.selectionStoreService.edited) {
       switch (e.code) {
         case codesLetter.ESCAPE:
@@ -104,9 +108,28 @@ export class OverlaySelection {
       }
       return;
     }
-    const isEnter: boolean = codesLetter.ENTER === e.code;
-    if (isLetterKey(e.keyCode) || isEnter) {
-      this.canEdit() &&  this.setEdit?.emit(!isEnter ? e.key : '');
+    // pressed enter
+    if (codesLetter.ENTER === e.code) {
+      if (this.canEdit()) {
+        this.setEdit?.emit('');
+      }
+      return;
+    }
+
+    // pressed letter key
+    if (isLetterKey(e.keyCode)) {
+      if (this.canEdit()) {
+        this.setEdit?.emit(e.key);
+      }
+      return;
+    }
+
+    // pressed arrow, change selection position
+    const changes = this.selectionService.chaneKeyDown(e);
+    if (changes) {
+      await new Promise((r) => { setTimeout(() => r(), 0); });
+      this.changeSelection?.emit(changes);
+      return;
     }
   }
 
@@ -142,7 +165,6 @@ export class OverlaySelection {
         this.selectionStoreService.applyRange(start, end);
       },
       tempRange: (start, end) => this.selectionStoreService.setTempRange(start, end),
-      change: (changes, isMulti?) => this.changeSelection?.emit({ changes, isMulti }),
       autoFill: (isAutofill) => {
         const focus = this.selectionStore.get('focus');
         if (!focus) {
@@ -156,12 +178,6 @@ export class OverlaySelection {
 
   disconnectedCallback(): void {
     this.selectionStoreService.destroy();
-  }
-
-  componentDidRender(): void {
-    if (this.selectionStoreService?.focused && document.activeElement !== this.focusSection) {
-      this.focusSection?.focus({ preventScroll: true });
-    }
   }
 
   private renderRange(range: Selection.RangeArea): VNode[] {
@@ -240,13 +256,6 @@ export class OverlaySelection {
       els.push(<div class={FOCUS_CLASS} style={focusStyle}/>);
     }
 
-    els.push(<input
-      type='text'
-      class='edit-focus-input'
-      ref={el => this.focusSection = el}
-      style={{...focusStyle, width: '0', height: '0'}}/>);
-
-
     const editCell = this.renderEditCell();
     if (editCell) {
       els.push(editCell);
@@ -296,6 +305,9 @@ export class OverlaySelection {
   }
 
   private canEdit(): boolean {
+    if (this.readonly) {
+      return false;
+    }
     const editCell = this.selectionStoreService.focused;
     return editCell && !this.columnService?.isReadOnly(editCell.y, editCell.x);
   }
