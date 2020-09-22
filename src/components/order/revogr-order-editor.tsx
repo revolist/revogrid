@@ -1,4 +1,4 @@
-import {Component, Method, Event, EventEmitter, Prop, Element, State, h} from '@stencil/core';
+import {Component, Method, Event, EventEmitter, Prop, Element, State, h, Listen} from '@stencil/core';
 import { ObservableMap } from '@stencil/store';
 import debounce from 'lodash/debounce';
 import { RevoGrid, Selection } from '../../interfaces';
@@ -13,44 +13,87 @@ import RowOrderService from './rowOrderService';
 export class OrderEditor {
 	private rowOrderService: RowOrderService;
 	private dragElement: HTMLElement|null;
+	private moveFunc: ((e: Selection.Cell) => void)|null;
+	private rowMoveFunc = debounce((y: number) => {
+		const row = this.rowOrderService.move(y, this.getData());
+		if (row !== null) {
+			this.internalRowDrag.emit(row);
+		}
+	}, 10);
+
 	@Element() element: HTMLElement;
 	@State() activeDrag: {cell: Selection.Cell, text: string}|null = null;
 
+  // --------------------------------------------------------------------------
+  //
+  //  Properties
+  //
+	// --------------------------------------------------------------------------
 	@Prop() parent: HTMLElement;
 	@Prop() dimensionRow: ObservableMap<RevoGrid.DimensionSettingsState>;
 	@Prop() dimensionCol: ObservableMap<RevoGrid.DimensionSettingsState>;
 
-
 	/** Static stores, not expected to change during component lifetime */
 	@Prop() dataStore: ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
-	/** Row drag started */
-	@Event() rowDragStart: EventEmitter<{cell: Selection.Cell, text: string}>;
 
+
+  // --------------------------------------------------------------------------
+  //
+  //  Events
+  //
+	// --------------------------------------------------------------------------
+	
 	/** Row drag started */
-	@Event() rowDragEnd: EventEmitter;
+	@Event({ cancelable: true }) internalRowDragStart: EventEmitter<{
+		cell: Selection.Cell, text: string, pos: RevoGrid.PositionItem}>;
+
+	/** Row drag ended */
+	@Event({ cancelable: true }) internalRowDragEnd: EventEmitter;
 
 	/** Row move */
-	@Event() rowDrag: EventEmitter<RevoGrid.PositionItem>;
+	@Event({ cancelable: true }) internalRowDrag: EventEmitter<RevoGrid.PositionItem>;
 
 	/** Row dragged, new range ready to be applied */
-	@Event() initialRowDropped: EventEmitter<{from: number; to: number;}>;
+	@Event({ cancelable: true }) initialRowDropped: EventEmitter<{from: number; to: number;}>;
 
-	private moveFunc: ((e: Selection.Cell) => void)|null;
-	private rowMoveFunc = debounce((y: number) => {
-		this.rowDrag.emit(this.rowOrderService.getCurrentRow(y, this.getData()));
-	}, 30);
+
+  // --------------------------------------------------------------------------
+  //
+  //  Listeners
+  //
+	// --------------------------------------------------------------------------
 	
+	@Listen('mouseleave', { target: 'document' })
+	onMouseOut(): void {
+		this.clearOrder();
+	}
 
+
+  /** Action finished inside of the document */
+  @Listen('mouseup', { target: 'document' })
+  onMouseUp(e: MouseEvent): void {
+    this.endOrder(e);
+	}
+
+
+  // --------------------------------------------------------------------------
+  //
+  //  Methods
+  //
+	// --------------------------------------------------------------------------
+	
 	@Method() async dragStart(e: MouseEvent): Promise<void> {
 			e.preventDefault();
 
+			// extra check if previous ended
 			if (this.moveFunc) {
 					this.clearOrder();
 			}
 
-
-			this.rowOrderService.startOrder(e, this.getData());
-			const dragStartEvent = this.rowDragStart.emit({ cell: this.rowOrderService.current, text: DRAGG_TEXT });
+			const data = this.getData();
+			const cell = this.rowOrderService.startOrder(e, data);
+			const pos = this.rowOrderService.getRow(e.y, data);
+			const dragStartEvent = this.internalRowDragStart.emit({ cell, text: DRAGG_TEXT, pos });
 			if (dragStartEvent.defaultPrevented) {
 					return;
 			}
@@ -76,9 +119,15 @@ export class OrderEditor {
 			this.activeDrag = null;
 			document.removeEventListener('mousemove', this.moveFunc);
 			this.moveFunc = null;
-			this.rowDragEnd.emit();
+			this.internalRowDragEnd.emit();
 	}
 
+  // --------------------------------------------------------------------------
+  //
+  //  Component methods
+  //
+	// --------------------------------------------------------------------------
+	
 	move({x, y}: {x: number; y: number}, el?: HTMLElement): void {
 			if (!el) {
 					return;

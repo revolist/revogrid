@@ -9,16 +9,15 @@ revogr-overlay-selection {
 		width: $handler-size;
 		height: $handler-size;
 		background: $selection-border;
-		margin-left: -$handler-size + 4;
-		margin-top: -$handler-size/2;
+		margin-left: -$handler-size + 2;
+		margin-top: -$handler-size/2 + 1;
 		border: 1px solid white;
-		cursor: crosshair;
 		box-sizing: border-box;
 		z-index: 10;
+		cursor: crosshair;
 	}
 
 	.selection-border-range,
-	.selection-bg-range,
 	.temp-bg-range,
 	.focused-cell {
 		position: absolute;
@@ -28,7 +27,6 @@ revogr-overlay-selection {
 
 	@mixin selection($s: 1px, $c: $selection-border) {
 		box-shadow: (-$s) 0 0 $c inset, $s 0 0 $c inset, 0 (-$s) 0 $c inset, 0 $s 0 $c inset;
-		padding: 1px 1px 0 0;
 	}
 
 	.selection-border-range {
@@ -38,33 +36,12 @@ revogr-overlay-selection {
 		@include selection(1px);
 	}
 
-	.selection-bg-range {
-		// background: $selection-bg;
-		// z-index: -1;
-	}
-
 	.temp-bg-range {
-		// background-color: $tmp-selection-bg;
 		border: 1px solid red;
 		box-sizing: border-box;
 	}
 
 	revogr-edit {
 		z-index: 10;
-	}
-
-	&.drag-active {
-		revogr-data {
-			.row {
-				&:hover {
-					box-shadow: 0 1px 0 red;
-					z-index: 10;
-
-					.revo-draggable > .revo-drag-icon {
-						background-color: gray;
-					}
-				}
-			}
-		}
 	}
 }

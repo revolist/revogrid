@@ -7,10 +7,7 @@ interface Config { positionChanged(from: number, to: number): void; }
 
 export default class RowOrderService {
   private currentCell: Selection.Cell|null = null;
-
-  get current(): Selection.Cell {
-    return this.currentCell;
-  }
+  private previousRow: number|null = null;
 
   constructor(private config: Config) {}
 
@@ -19,7 +16,7 @@ export default class RowOrderService {
     if (this.currentCell === null) {
       return;
     }
-    const newRow = this.getCurrentCell(e, data);
+    const newRow = this.getCell(e, data);
 
     // if position changed
     if (newRow.y !== this.currentCell.y) {
@@ -34,31 +31,51 @@ export default class RowOrderService {
       }
       this.config.positionChanged(this.currentCell.y, newRow.y);
     }
-    this.currentCell = null;
+    this.clear();
   }
 
   /** Drag started, reserve initial cell for farther use */
-  startOrder(e: MouseEvent, data: EventData): void {
-    this.currentCell = this.getCurrentCell(e, data);
+  startOrder(e: MouseEvent, data: EventData): Selection.Cell {
+    this.currentCell = this.getCell(e, data);
+    return this.currentCell;
+  }
+
+  move(y: number, data: EventData): RevoGrid.PositionItem|null {
+    const row = this.getRow(y, data);
+    // if row same as previous or below range (-1 = 0) do nothing
+    if (this.previousRow === row.itemIndex || row.itemIndex < -1) {
+      return null;
+    }
+    this.previousRow = row.itemIndex;
+    return row;
   }
 
   /** Drag stopped, probably cursor outside of document area */
   clear(): void {
     this.currentCell = null;
+    this.previousRow = null;
   }
 
   /** Calculate cell based on x, y position */
-  getCurrentRow(y: number, {el, rows}: EventData): RevoGrid.PositionItem {
+  getRow(y: number, {el, rows}: EventData): RevoGrid.PositionItem {
     const {top} = el.getBoundingClientRect();
-    const row = getItemByPosition(rows, y - top);
-    return row;
+    const topRelative = y - top;
+    const row = getItemByPosition(rows, topRelative);
+    const absolutePosition = {
+      itemIndex: row.itemIndex,
+      start: row.start + top,
+      end: row.end + top
+    };
+    return absolutePosition;
   }
 
    /** Calculate cell based on x, y position */
-   getCurrentCell({x, y}: Selection.Cell, {el, rows, cols}: EventData): Selection.Cell {
+   getCell({x, y}: Selection.Cell, {el, rows, cols}: EventData): Selection.Cell {
     const {top, left} = el.getBoundingClientRect();
-    const row = getItemByPosition(rows, y - top);
-    const col = getItemByPosition(cols, x - left);
+    const topRelative = y - top;
+    const leftRelative = x - left;
+    const row = getItemByPosition(rows, topRelative);
+    const col = getItemByPosition(cols, leftRelative);
     return { x: col.itemIndex, y: row.itemIndex };
   }
 }

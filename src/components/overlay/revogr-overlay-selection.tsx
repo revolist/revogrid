@@ -11,7 +11,6 @@ import {isLetterKey} from '../../utils/keyCodes.utils';
 import {
   CELL_HANDLER_CLASS,
   FOCUS_CLASS,
-  SELECTION_BG_CLASS,
   SELECTION_BORDER_CLASS,
   TMP_SELECTION_BG_CLASS
 } from '../../utils/consts';
@@ -75,14 +74,12 @@ export class OverlaySelection {
   @Listen('mouseleave', { target: 'document' })
   onMouseOut(): void {
     this.selectionService.clearSelection();
-    this.orderEditor?.clearOrder();
   }
 
   /** Action finished inside of the document */
   @Listen('mouseup', { target: 'document' })
-  onMouseUp(e: MouseEvent): void {
+  onMouseUp(): void {
     this.selectionService.clearSelection();
-    this.orderEditor?.endOrder(e);
   }
 
   /** Row drag started */
@@ -182,8 +179,7 @@ export class OverlaySelection {
 
   private renderRange(range: Selection.RangeArea): VNode[] {
     const style: RangeAreaCss = this.getElStyle(range);
-    return [<div class={SELECTION_BORDER_CLASS} style={style}/>,
-      <div class={SELECTION_BG_CLASS} style={style}/>];
+    return [<div class={SELECTION_BORDER_CLASS} style={style}/>];
   }
 
   private renderAutofill(range: Selection.RangeArea, selectionFocus: Selection.Cell): VNode {
@@ -284,8 +280,7 @@ export class OverlaySelection {
         dimensionRow={this.dimensionRow}
         dimensionCol={this.dimensionCol}
         parent={this.element}
-        onRowDragStart={(e) => this.onRowDragStart(e)}
-        onRowDragEnd={() => this.onRowDragEnd()}/>);
+        onInternalRowDragStart={(e) => this.onRowDragStart(e)}/>);
     }
     return <Host {...hostProps}>{els}<slot name='data'/></Host>;
   }
@@ -299,13 +294,8 @@ export class OverlaySelection {
     this.canEdit() && this.setEdit?.emit('');
   }
 
-  private onRowDragEnd(): void {
-    this.element.classList.remove('drag-active');
-  }
-  
   private onRowDragStart({detail}: CustomEvent<{cell: Selection.Cell, text: string}>): void {
     detail.text = this.columnService.getCellData(detail.cell.y, detail.cell.x);
-    this.element.classList.add('drag-active');
   }
 
   private canEdit(): boolean {

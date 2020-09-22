@@ -351,15 +351,16 @@ declare namespace LocalJSX {
         /**
           * Row move
          */
-        "onRowDrag"?: (event: CustomEvent<RevoGrid.PositionItem>) => void;
+        "onInternalRowDrag"?: (event: CustomEvent<RevoGrid.PositionItem>) => void;
+        /**
+          * Row drag ended
+         */
+        "onInternalRowDragEnd"?: (event: CustomEvent<any>) => void;
         /**
           * Row drag started
          */
-        "onRowDragEnd"?: (event: CustomEvent<any>) => void;
-        /**
-          * Row drag started
-         */
-        "onRowDragStart"?: (event: CustomEvent<{cell: Selection.Cell, text: string}>) => void;
+        "onInternalRowDragStart"?: (event: CustomEvent<{
+		cell: Selection.Cell, text: string, pos: RevoGrid.PositionItem}>) => void;
         "parent"?: HTMLElement;
     }
     interface RevogrOverlaySelection {

@@ -16,7 +16,6 @@ export const DRAGGABLE_CLASS = 'revo-draggable';
 
 export const FOCUS_CLASS = 'focused-cell';
 export const SELECTION_BORDER_CLASS = 'selection-border-range';
-export const SELECTION_BG_CLASS = 'selection-bg-range';
 export const TMP_SELECTION_BG_CLASS = 'temp-bg-range';
 
 export const CELL_HANDLER_CLASS = 'autofill-handle';
