@@ -1,4 +1,3 @@
-
 revogr-viewport {
 	display: flex;
 	flex-direction: column;
@@ -10,5 +9,17 @@ revogr-viewport {
 		height: 0;
 		display: flex;
 		flex-direction: row;
+	}
+
+	.drag-position {
+		position: absolute;
+		left: 0;
+		right: 0;
+		height: 1px;
+		background: red;
+
+		&.hidden {
+			display: none;
+		}
 	}
 }

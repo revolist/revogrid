@@ -9,6 +9,8 @@ import ViewportSpace from './viewport.interfaces';
 import {DataSourceState} from '../../store/dataSource/data.store';
 import SelectionStoreConnector from '../../services/selection.store.connector';
 import {Edition, RevoGrid} from '../../interfaces';
+import OrderRenderer, { OrdererService } from './orderRenderer';
+
 import ViewportProps = ViewportSpace.ViewportProps;
 
 @Component({
@@ -20,11 +22,13 @@ export class RevogrViewport {
   private scrollingService: GridScrollingService;
   private selectionStoreConnector: SelectionStoreConnector;
 
+  private orderService: OrdererService;
+
   @Event() setDimensionSize: EventEmitter<{type: RevoGrid.MultiDimensionType, sizes: RevoGrid.ViewSettingSizeProp}>;
   @Event() setViewportCoordinate: EventEmitter<RevoGrid.ViewPortScrollEvent>;
   @Event() setViewportSize: EventEmitter<RevoGrid.ViewPortResizeEvent>;
 
-  @Element() element: Element;
+  @Element() element: HTMLElement;
   @Prop() columnStores: {[T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>};
   @Prop() rowStores: {[T in RevoGrid.DimensionRows]: ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>};
   @Prop() dimensions: {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.DimensionSettingsState>};
@@ -46,6 +50,21 @@ export class RevogrViewport {
     if (!target?.closest(`[${UUID}="${this.uuid}"]`)) {
       this.selectionStoreConnector.clearAll();
     }
+  }
+
+  @Listen('internalRowDragStart')
+  onRowDragStarted({detail: {pos}}: CustomEvent<{pos: RevoGrid.PositionItem}>): void {
+    this.orderService?.start(pos, this.element);
+  }
+
+  @Listen('internalRowDragEnd')
+  onRowDragEnd(): void {
+    this.orderService?.end();
+  }
+
+  @Listen('internalRowDrag')
+  onRowDrag({detail}: CustomEvent<RevoGrid.PositionItem>): void {
+    this.orderService?.move(detail);
   }
 
   connectedCallback(): void {
@@ -156,6 +175,7 @@ export class RevogrViewport {
             ref={el => this.elementToScroll.push(el)}
             virtualSize={this.viewports['row'].get('virtualSize')}
             onScrollVirtual={e => this.scrollingService.onScroll(e.detail)}/>
+          <OrderRenderer ref={e => this.orderService = e}/>
         </div>
       </div>
       <revogr-scroll-virtual

@@ -53,6 +53,8 @@ export declare namespace RevoGrid {
     readonly?: ReadOnlyFormat;
     size?: number;
     minSize?: number;
+    sortable?: boolean;
+    order?: 'asc'|'desc';
 
     rowDrag?: RowDrag;
     cellTemplate?: CellTemplateFunc<VNode>;

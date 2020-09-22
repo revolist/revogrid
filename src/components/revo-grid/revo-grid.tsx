@@ -123,6 +123,11 @@ export class RevoGridComponent {
    * Use e.preventDefault() to prevent row order change. 
    */
   @Event() rowOrderChanged: EventEmitter<{from: number; to: number;}>;
+
+  /** 
+   * On header click.
+   */
+  @Event() headerClick: EventEmitter<RevoGrid.ColumnRegular>;
   
   // --------------------------------------------------------------------------
   //
@@ -160,6 +165,20 @@ export class RevoGridComponent {
     const {defaultPrevented} = this.rowOrderChanged.emit(e.detail);
     if (defaultPrevented) {
       e.preventDefault();
+    }
+  }
+
+  @Listen('initialHeaderClick')
+  onHeaderClick({detail: {column, index}}: CustomEvent<{column: RevoGrid.ColumnRegular, index: number}>): void {
+    const {defaultPrevented} = this.headerClick.emit(column);
+    if (defaultPrevented) {
+      return;
+    }
+    if (column.sortable) {
+      const order = column.order && column.order === 'asc' ? 'desc' : 'asc';
+      this.dataProvider.sort(order, column.prop);
+      column.order = order;
+      this.columnProvider.updateColumn(column, index);
     }
   }
   

@@ -1,4 +1,5 @@
 import reduce from 'lodash/reduce';
+import orderBy from 'lodash/orderBy';
 
 import DataStore from '../store/dataSource/data.store';
 import {rowTypes} from '../store/storeTypes';
@@ -28,5 +29,11 @@ export class DataProvider {
     const items = this.stores[data.type].store.get('items');
     items[data.rowIndex][data.prop] = data.val;
     this.stores[data.type].setData({ items: [...items]  });
+  }
+
+  sort(order: 'asc'|'desc', prop: RevoGrid.ColumnProp): void {
+    let items = this.stores['row'].store.get('items');
+    items = orderBy(items, [prop], [order]);
+    this.stores['row'].setData({ items: [...items]  });
   }
 }
