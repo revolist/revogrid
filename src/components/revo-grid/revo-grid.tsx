@@ -52,6 +52,8 @@ export class RevoGridComponent {
   @Prop() readonly: boolean = false;
   /** When true, columns are resizable. */
   @Prop() resize: boolean = false;
+  /** When true cell focus appear. */
+  @Prop() canFocus: boolean = true;
   /**
    * Columns - defines an array of grid columns.
    * Can be column or grouped column.
@@ -102,10 +104,7 @@ export class RevoGridComponent {
    * Triggered before autofill applied.
    * Use e.preventDefault() to prevent edit data apply. 
    */
-  @Event() beforeAutofill: EventEmitter<{
-    newRange: {start: Selection.Cell; end: Selection.Cell;};
-    oldRange: {start: Selection.Cell; end: Selection.Cell;};
-  }>;
+  @Event() beforeAutofill: EventEmitter<Selection.ChangedRange>;
 
 
   /** 
@@ -113,10 +112,7 @@ export class RevoGridComponent {
    * Triggered before range applied.
    * Use e.preventDefault() to prevent range. 
    */
-  @Event() beforeRange: EventEmitter<{
-    newRange: {start: Selection.Cell; end: Selection.Cell;};
-    oldRange: {start: Selection.Cell; end: Selection.Cell;};
-  }>;
+  @Event() beforeRange: EventEmitter<Selection.ChangedRange>;
 
    /** 
    * Before row order apply.
@@ -128,13 +124,19 @@ export class RevoGridComponent {
    * On header click.
    */
   @Event() headerClick: EventEmitter<RevoGrid.ColumnRegular>;
+
+  /** 
+   * Before cell focus changed.
+   * Use e.preventDefault() to prevent cell focus change. 
+   */
+  @Event() beforeCellFocus: EventEmitter<Selection.FocusedCells>;
   
   // --------------------------------------------------------------------------
   //
   //  Listeners
   //
   // --------------------------------------------------------------------------
-  @Listen('cellEditInitiate')
+  @Listen('internalCellEdit')
   onBeforeEdit(e: CustomEvent<Edition.BeforeSaveDataDetails>): void {
     e.cancelBubble = true;
     const {defaultPrevented, detail } = this.beforeEdit.emit(e.detail);
@@ -147,7 +149,7 @@ export class RevoGridComponent {
     }, 0);
   }
 
-  @Listen('initialSelectionChanged')
+  @Listen('internalSelectionChanged')
   onRangeChanged(e: CustomEvent<Selection.ChangedRange>): void {
     e.cancelBubble = true;
     const beforeRange = this.beforeRange.emit(e.detail);
@@ -155,13 +157,14 @@ export class RevoGridComponent {
       e.preventDefault();
     }
     const beforeFill = this.beforeAutofill.emit(e.detail);
-    if (!beforeFill.defaultPrevented) {
-      // todo: apply new range to dataSource
+    if (beforeFill.defaultPrevented) {
+      return;
     }
   }
 
   @Listen('initialRowDropped')
   onRowDropped(e: CustomEvent<{from: number; to: number;}>): void {
+    e.cancelBubble = true;
     const {defaultPrevented} = this.rowOrderChanged.emit(e.detail);
     if (defaultPrevented) {
       e.preventDefault();
@@ -178,6 +181,15 @@ export class RevoGridComponent {
       const order = column.order && column.order === 'asc' ? 'desc' : 'asc';
       this.columnProvider.updateColumnSorting(column, index, order);
       this.dataProvider.sort({[column.prop]: order});
+    }
+  }
+
+  @Listen('internalFocusCell')
+  onCellFocus(e: CustomEvent<Selection.FocusedCells>): void {
+    e.cancelBubble = true;
+    const {defaultPrevented} = this.beforeCellFocus.emit(e.detail);
+    if (!this.canFocus || defaultPrevented) {
+      e.preventDefault();
     }
   }
   

@@ -211,8 +211,11 @@ export declare namespace Selection {
   };
 
   type ChangedRange = {
-    newRange: { start: Selection.Cell; end: Selection.Cell; };
-    oldRange: { start: Selection.Cell; end: Selection.Cell; };
+    type: RevoGrid.DimensionRows;
+    newRange: RangeArea;
+    oldRange: RangeArea;
+    newProps: RevoGrid.ColumnProp[];
+    oldProps: RevoGrid.ColumnProp[];
   };
 
   interface Cell {
@@ -220,7 +223,12 @@ export declare namespace Selection {
     y: RowIndex;
   }
 
-  export type RangeAreaCss = {
+  type FocusedCells = {
+    focus: Selection.Cell;
+    end: Selection.Cell;
+  };
+
+  type RangeAreaCss = {
     left: string;
     top: string;
     width: string;

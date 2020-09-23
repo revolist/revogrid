@@ -1,14 +1,14 @@
 import {h, VNode} from '@stencil/core';
 import {ObservableMap} from '@stencil/store';
 import {DataSourceState} from '../../store/dataSource/data.store';
-import {Edition, RevoGrid} from '../../interfaces';
+import { CELL_CLASS, DISABLED_CLASS } from '../../utils/consts';
+import {Edition, RevoGrid, Selection} from '../../interfaces';
 
 import BeforeSaveDataDetails = Edition.BeforeSaveDataDetails;
 import ColumnDataSchemaModel = RevoGrid.ColumnDataSchemaModel;
 import ColumnProp = RevoGrid.ColumnProp;
 import DataSource = RevoGrid.DataSource;
 import DataType = RevoGrid.DataType;
-import { CELL_CLASS, DISABLED_CLASS } from '../../utils/consts';
 
 export interface ColumnServiceI {
   columns: RevoGrid.ColumnRegular[];
@@ -94,6 +94,65 @@ export default class ColumnService implements ColumnServiceI {
     const data: DataSource = this.dataStore.get('items');
     const model: DataType = data[r] || {};
     return {prop, model, data, column};
+  }
+
+  applyRangeData(d: Selection.ChangedRange): {
+    changedData: {[key: number]: DataType}
+  } {
+    const items: DataSource = this.dataStore.get('items');
+    const changed: {[rowIndex: number]: DataType} = {};
+    
+    // get original length sizes
+    const copyRowLength = d.oldRange.y1 - d.oldRange.y + 1;
+    const copyColLength = d.oldProps.length;
+    const copyFrom = this.copyRange(d.oldRange, d.oldProps, items);
+
+    // rows
+    for (let rowIndex = d.newRange.y, i = 0; rowIndex < d.newRange.y1 + 1; rowIndex++, i++) {
+      const row = items[rowIndex];
+
+      // copy original data link
+      const copyRow = copyFrom[i % copyRowLength];
+
+      // columns
+      for (let colIndex = d.newRange.x, j = 0; colIndex < d.newRange.x1 + 1; colIndex++, j++) {
+        // check if old range area
+        if ((rowIndex >= d.oldRange.y && rowIndex <= d.oldRange.y1) && (colIndex >= d.oldRange.x && colIndex <= d.oldRange.x1)) {
+          continue;
+        }
+
+        const p = this.columns[colIndex].prop;
+        const oldP = d.oldProps[j%copyColLength];
+
+        /** if can write */
+        if (!this.isReadOnly(rowIndex, colIndex)) {
+          row[p] = copyRow[oldP];
+          
+
+          /** to show before save */
+          if (!changed[rowIndex]) {
+            changed[rowIndex] = {};
+          }
+          changed[rowIndex][p] = copyRow[oldP];
+        }
+      }
+    }
+    this.dataStore.set('items', [...items]);
+    return {
+      changedData: changed
+    };
+  }
+
+  private copyRange(range: Selection.RangeArea, rangeProps: RevoGrid.ColumnProp[], items: DataSource): DataType[] {
+    const toCopy: DataType[] = [];
+    for (let i = range.y; i < range.y1 + 1; i++) {
+      const row: DataType = {};
+      for (let prop of rangeProps) {
+        row[prop] = items[i][prop];
+      }
+      toCopy.push(row);
+    }
+    return toCopy;
   }
 
   static getData(val: any): string {

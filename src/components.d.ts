@@ -11,6 +11,10 @@ import { DataSourceState, Groups } from "./store/dataSource/data.store";
 export namespace Components {
     interface RevoGrid {
         /**
+          * When true cell focus appear.
+         */
+        "canFocus": boolean;
+        /**
           * Indicates default column size.
          */
         "colSize": number;
@@ -221,6 +225,10 @@ declare global {
 declare namespace LocalJSX {
     interface RevoGrid {
         /**
+          * When true cell focus appear.
+         */
+        "canFocus"?: boolean;
+        /**
           * Indicates default column size.
          */
         "colSize"?: number;
@@ -243,10 +251,11 @@ declare namespace LocalJSX {
         /**
           * Before autofill. Triggered before autofill applied. Use e.preventDefault() to prevent edit data apply.
          */
-        "onBeforeAutofill"?: (event: CustomEvent<{
-    newRange: {start: Selection.Cell; end: Selection.Cell;};
-    oldRange: {start: Selection.Cell; end: Selection.Cell;};
-  }>) => void;
+        "onBeforeAutofill"?: (event: CustomEvent<Selection.ChangedRange>) => void;
+        /**
+          * Before cell focus changed. Use e.preventDefault() to prevent cell focus change.
+         */
+        "onBeforeCellFocus"?: (event: CustomEvent<Selection.FocusedCells>) => void;
         /**
           * Before edit event. Triggered before edit data applied. Use e.preventDefault() to prevent edit data set and use you own.  Use e.val = {your value} to replace edit result with your own.
          */
@@ -254,10 +263,7 @@ declare namespace LocalJSX {
         /**
           * Before range apply. Triggered before range applied. Use e.preventDefault() to prevent range.
          */
-        "onBeforeRange"?: (event: CustomEvent<{
-    newRange: {start: Selection.Cell; end: Selection.Cell;};
-    oldRange: {start: Selection.Cell; end: Selection.Cell;};
-  }>) => void;
+        "onBeforeRange"?: (event: CustomEvent<Selection.ChangedRange>) => void;
         /**
           * On header click.
          */
@@ -380,13 +386,14 @@ declare namespace LocalJSX {
           * Last cell position
          */
         "lastCell"?: Selection.Cell;
-        "onCellEditInitiate"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
         "onChangeSelection"?: (event: CustomEvent<{changes: Partial<Selection.Cell>; isMulti?: boolean; }>) => void;
-        "onFocusCell"?: (event: CustomEvent<{focus: Selection.Cell; end: Selection.Cell; }>) => void;
+        "onFocusCell"?: (event: CustomEvent<Selection.FocusedCells>) => void;
+        "onInternalCellEdit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
+        "onInternalFocusCell"?: (event: CustomEvent<Selection.FocusedCells>) => void;
         /**
           * Selection range changed
          */
-        "onInitialSelectionChanged"?: (event: CustomEvent<Selection.ChangedRange>) => void;
+        "onInternalSelectionChanged"?: (event: CustomEvent<Selection.ChangedRange>) => void;
         "onSetEdit"?: (event: CustomEvent<string|boolean>) => void;
         "onUnregister"?: (event: CustomEvent<any>) => void;
         "range"?: boolean;

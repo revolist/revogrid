@@ -18,15 +18,8 @@ export function generateFakeDataObject(rowsNumber, colsNumber) {
                 pin: j === 2 ? 'colPinStart' : j === 20 ? 'colPinEnd' : undefined,
                 sortable: true,
                 size: j === 5 ? 200 : undefined,
-                // readonly: !!(col%2),
+                readonly: !!(col%2),
                 rowDrag: j === 2,
-                cellProperties: j === 2 ? (props) => {
-                    return {
-                        style: {
-                            backgroundColor: 'red'
-                        }
-                    };
-                } : undefined
                 /*
                 cellTemplate: (h, props) => {
                     return h('div', {
