@@ -18,6 +18,8 @@ import {DataSourceState} from '../../store/dataSource/data.store';
 
 import RangeAreaCss = Selection.RangeAreaCss;
 import Cell = Selection.Cell;
+import { slice } from 'lodash';
+import { getRange } from '../../store/selection/selection.helpers';
 
 
 @Component({
@@ -60,15 +62,17 @@ export class OverlaySelection {
     this.selectionStoreService?.setLastCell(cell);
   }
 
-  @Event({ cancelable: true }) cellEditInitiate: EventEmitter<Edition.BeforeSaveDataDetails>;
+  @Event({ cancelable: true }) internalCellEdit: EventEmitter<Edition.BeforeSaveDataDetails>;
+  @Event({ cancelable: true }) internalFocusCell: EventEmitter<Selection.FocusedCells>;
 
   @Event({ bubbles: false }) setEdit: EventEmitter<string|boolean>;
   @Event({ bubbles: false }) changeSelection: EventEmitter<{changes: Partial<Selection.Cell>; isMulti?: boolean; }>;
-  @Event({ bubbles: false }) focusCell: EventEmitter<{focus: Selection.Cell; end: Selection.Cell; }>;
+  @Event({ bubbles: false }) focusCell: EventEmitter<Selection.FocusedCells>;
   @Event({ bubbles: false }) unregister: EventEmitter;
 
   /** Selection range changed */
-  @Event({ cancelable: true }) initialSelectionChanged: EventEmitter<Selection.ChangedRange>;
+  @Event({ cancelable: true }) internalSelectionChanged: EventEmitter<Selection.ChangedRange>;
+  
 
   /** Pointer left document, clear any active operation */
   @Listen('mouseleave', { target: 'document' })
@@ -139,27 +143,42 @@ export class OverlaySelection {
     this.selectionStoreService = new SelectionStore(this.selectionStore, {
       lastCell: this.lastCell,
       change: (changes, isMulti?) => this.changeSelection?.emit({ changes, isMulti }),
-      focus: (focus, end) => this.focusCell?.emit({ focus, end }),
+      focus: (focus, end) => {
+        const focused = { focus, end };
+        const {defaultPrevented} = this.internalFocusCell.emit();
+        if (defaultPrevented) {
+          return;
+        }
+        this.focusCell.emit(focused);
+      },
       unregister: () => this.unregister?.emit()
 
     });
     this.selectionService = new CellSelectionService({
       canRange: this.range,
       focus: (cell, isMulti?) => this.selectionStoreService.focus(cell, isMulti),
-      applyRange: (start, end) => {
-        const old = this.selectionStore.get('range');
-        const selectionEndEvent = this.initialSelectionChanged.emit({
-          newRange: {start, end},
-          oldRange: {
-            start: {x: old.x, y: old.y},
-            end: {x: old.x1, y: old.y1}
-          }
-        });
+      applyRange: (start?, end?) => {
+        // no changes to apply
+        if (!start || !end) {
+          return;
+        }
+        
+        const oldRange = this.selectionStore.get('range');
+        const newRange = getRange(start, end);
+        const rangeData: Selection.ChangedRange = {
+          type: this.dataStore.get('type'),
+          newRange,
+          oldRange,
+          newProps: slice(this.colData, newRange.x, newRange.x1 + 1).map(v => v.prop),
+          oldProps: slice(this.colData, oldRange.x, oldRange.x1 + 1).map(v => v.prop),
+        };
+        const selectionEndEvent = this.internalSelectionChanged.emit(rangeData);
         if (selectionEndEvent.defaultPrevented) {
           this.selectionStoreService.clearTemp();
           return;
         }
-        this.selectionStoreService.applyRange(start, end);
+        this.selectionStoreService.applyRange(newRange);
+        this.columnService.applyRangeData(rangeData);
       },
       tempRange: (start, end) => this.selectionStoreService.setTempRange(start, end),
       autoFill: (isAutofill) => {
@@ -287,7 +306,7 @@ export class OverlaySelection {
 
   private onCellEdit(e: Edition.SaveDataDetails): void {
     const dataToSave = this.columnService.getSaveData(e.row, e.col, e.val);
-    this.cellEditInitiate.emit(dataToSave);
+    this.internalCellEdit.emit(dataToSave);
   }
   
   private onDoubleClick(): void {

@@ -49,3 +49,26 @@ export function getRange(start?: Cell, end?: Cell): RangeArea|null {
         y1: Math.max(start.y, end.y)
     } : null;
 }
+
+/**
+ * 
+ * @param a start, x1 and y1 should not be equal 'b' in other case range will be empty
+ * @param b end
+ */
+export function substractRange(a: RangeArea, b: RangeArea): RangeArea {
+    let range =  {...b};
+    if (a.x1 === b.x1) {
+        range.x = a.x1;
+        range.x1 = a.x1;
+    } else {
+        range.x = a.x1 + 1;
+    }
+    if (a.y1 === b.y1) {
+        range.y = a.y1;
+        range.y1 = a.y1;
+    } else {
+        range.y = a.y1 + 1;
+    }
+    return range;
+}
+

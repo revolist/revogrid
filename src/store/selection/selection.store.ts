@@ -33,8 +33,7 @@ export default class SelectionStore {
   }
 
   /** Can be applied from selection change or from simple keyboard change clicks */
-  applyRange(start: Cell, end: Cell): void {
-    const range = getRange(start, end);
+  applyRange(range: Selection.RangeArea): void {
     setStore(this.store, { range, edit: null, tempRange: null });
   }
 
@@ -66,7 +65,8 @@ export default class SelectionStore {
     if (isMulti) {
       let start: Cell|null = this.store.get('focus');
       if (start) {
-        this.applyRange(start, end);
+        const range = getRange(start, end);
+        this.applyRange(range);
         return;
       }
     }
