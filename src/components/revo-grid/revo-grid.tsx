@@ -176,9 +176,8 @@ export class RevoGridComponent {
     }
     if (column.sortable) {
       const order = column.order && column.order === 'asc' ? 'desc' : 'asc';
-      this.dataProvider.sort(order, column.prop);
-      column.order = order;
-      this.columnProvider.updateColumn(column, index);
+      this.columnProvider.updateColumnSorting(column, index, order);
+      this.dataProvider.sort({[column.prop]: order});
     }
   }
   
@@ -200,6 +199,7 @@ export class RevoGridComponent {
   @Watch('columns')
   columnChanged(newVal: RevoGrid.ColumnData) {
     this.columnProvider.setColumns(newVal);
+    this.dataProvider.sort(this.columnProvider.order);
   }
 
   @Watch('source')

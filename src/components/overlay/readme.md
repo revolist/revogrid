@@ -42,7 +42,7 @@
 ### Depends on
 
 - [revogr-edit](.)
-- [revogr-order-editor](.)
+- [revogr-order-editor](../order)
 
 ### Graph
 ```mermaid

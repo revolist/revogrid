@@ -20,10 +20,10 @@
 
 ## Events
 
-| Event          | Description | Type                                        |
-| -------------- | ----------- | ------------------------------------------- |
-| `headerClick`  |             | `CustomEvent<ColumnRegular>`                |
-| `headerResize` |             | `CustomEvent<{ [index: string]: number; }>` |
+| Event                | Description | Type                                                     |
+| -------------------- | ----------- | -------------------------------------------------------- |
+| `headerResize`       |             | `CustomEvent<{ [index: string]: number; }>`              |
+| `initialHeaderClick` |             | `CustomEvent<{ column: ColumnRegular; index: number; }>` |
 
 
 ## Dependencies

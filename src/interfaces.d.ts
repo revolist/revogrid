@@ -46,19 +46,37 @@ export declare namespace RevoGrid {
 
 
   interface ColumnRegular {
+    /** mapping to data */
     prop: ColumnProp;
-    editor?: string;
+    /** column pin 'colPinStart'|'colPinEnd' */
     pin?: DimensionColPin;
+    /** column header */
     name?: DataFormat;
+    /** is column or cell readonly */
     readonly?: ReadOnlyFormat;
+    /** default column size */
     size?: number;
+    /** minimal column size */
     minSize?: number;
+    /** is column can be sorted */
     sortable?: boolean;
     order?: 'asc'|'desc';
 
+
+    /** custom editor key if present */
+    editor?: string;
+
+    /** is cell in column or individual can be dragged */
     rowDrag?: RowDrag;
+
+    /** cell properties */
+    cellProperties?: PropertiesFunc;
+    /** cell inner template */
     cellTemplate?: CellTemplateFunc<VNode>;
+    /** column inner template */
     columnTemplate?: ColumnTemplateFunc<VNode>;
+    /** cell properties */
+    columnProperties?: PropertiesFunc;
   }
 
   type ColumnDataSchema = ColumnGrouping|ColumnRegular;
@@ -66,6 +84,12 @@ export declare namespace RevoGrid {
 
   type ColumnProp = string|number;
   type DataFormat = any;
+
+  type CellProps = {
+    style?: {[key: string]: string | undefined};
+    class?: string;
+    [attr: string]: string|number|object;
+  };
 
 
   // --------------------------------------------------------------------------
@@ -77,6 +101,7 @@ export declare namespace RevoGrid {
   interface HyperFunc<T> { (tag: string, props?: object, value?: string): T; }
   type CellTemplateFunc<T> = (createElement: HyperFunc<T>, props: ColumnDataSchemaModel) => T;
   type ColumnTemplateFunc<T> = (createElement: HyperFunc<T>, props: ColumnRegular) => T;
+  type PropertiesFunc = (props: ColumnDataSchemaModel) => CellProps;
 
 
   // --------------------------------------------------------------------------
