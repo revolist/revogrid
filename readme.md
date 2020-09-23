@@ -91,18 +91,16 @@ All you have to do just to place component on the page and access it properties 
 <html>
 <head>
     // node_modules path
-    <script src="node_modules/@revolist/revogrid/dist/revo-grid.js"></script>
+    <script src="node_modules/@revolist/revogrid/dist/revo-grid/revo-grid.js"></script>
     // or with unpkg
-    <script src="https://unpkg.com/browse/@revolist/revogrid@latest/dist/revo-grid.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@revolist/revogrid@latest/dist/revo-grid/revo-grid.js"></script>
     
 
     // Alternatively, if you wanted to take advantage of ES Modules, you could include the components using an import statement. Note that in this scenario applyPolyfills is needed if you are targeting Edge or IE11.
     <script type="module">
-        import { applyPolyfills, defineCustomElements } from 'https://unpkg.com/browse/@revolist/revogrid@latest/loader';
-        applyPolyfills().then(() => {
-          defineCustomElements();
-        });
-     </script>
+      import { defineCustomElements } from 'https://unpkg.com/@revolist/revogrid@latest/loader/index.es2017.js';
+      defineCustomElements();
+    </script>
 </head>
 <body>
     <revo-grid class="grid-component"/>
