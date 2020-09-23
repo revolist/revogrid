@@ -24,14 +24,20 @@ Works in any major framework (VueJs, React, Ember, Angular) or with no framework
 - Millions of cells virtual viewport scroll with a powerful core is in-build by default. Intelligent Virtual Dom; 
 - Column and Row custom sizes;
 - Column resizing;
-- Pinned columns and rows;
+- Pinned columns (columns are always on the left or on the right of the screen);
+- Pinned row (rows are always at the top or at the bottom);
 - Column grouping;
-- Cell editing;
-- Custom cell renderer templates (build your own cell view);
-- Custom cell editor (apply your own editors and cell types);
 - Custom header renderer;
+- Custom cell renderer templates (build your own cell view);
+- Cell editing;
+- Custom cell editor (apply your own editors and cell types);
+- Custom cell properties;
 - Drag and drop rows;
+- Column sorting;
 - Range selection;
+- Theme packages;
+- Range edit(experimental new feature);
+- Easy extenation and support with modern VNode features and tsx support;
 - Multiple others useful features [RevoGrid](https://revolist.github.io/revogrid.demo.js).
 
 
