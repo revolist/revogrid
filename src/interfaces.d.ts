@@ -35,7 +35,7 @@ export declare namespace RevoGrid {
     column: ColumnRegular;
   };
 
-  type ReadOnlyFormat = boolean | ((row: number, col: number) => boolean);
+  type ReadOnlyFormat = boolean | ((params: ColumnDataSchemaModel) => boolean);
   type RowDrag = boolean| {(params: ColumnDataSchemaModel): boolean};
 
 
@@ -52,8 +52,6 @@ export declare namespace RevoGrid {
     pin?: DimensionColPin;
     /** column header */
     name?: DataFormat;
-    /** is column or cell readonly */
-    readonly?: ReadOnlyFormat;
     /** default column size */
     size?: number;
     /** minimal column size */
@@ -69,6 +67,8 @@ export declare namespace RevoGrid {
     /** is cell in column or individual can be dragged */
     rowDrag?: RowDrag;
 
+    /** is column or cell readonly */
+    readonly?: ReadOnlyFormat;
     /** cell properties */
     cellProperties?: PropertiesFunc;
     /** cell inner template */

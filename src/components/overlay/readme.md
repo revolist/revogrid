@@ -23,14 +23,15 @@
 
 ## Events
 
-| Event                     | Description             | Type                                                                                             |
-| ------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------ |
-| `cellEditInitiate`        |                         | `CustomEvent<{ prop: ColumnProp; val: string; rowIndex: number; type: DimensionRows; }>`         |
-| `changeSelection`         |                         | `CustomEvent<{ changes: Partial<Cell>; isMulti?: boolean; }>`                                    |
-| `focusCell`               |                         | `CustomEvent<{ focus: Cell; end: Cell; }>`                                                       |
-| `initialSelectionChanged` | Selection range changed | `CustomEvent<{ newRange: { start: Cell; end: Cell; }; oldRange: { start: Cell; end: Cell; }; }>` |
-| `setEdit`                 |                         | `CustomEvent<boolean \| string>`                                                                 |
-| `unregister`              |                         | `CustomEvent<any>`                                                                               |
+| Event                      | Description             | Type                                                                                                                              |
+| -------------------------- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `changeSelection`          |                         | `CustomEvent<{ changes: Partial<Cell>; isMulti?: boolean; }>`                                                                     |
+| `focusCell`                |                         | `CustomEvent<{ focus: Cell; end: Cell; }>`                                                                                        |
+| `internalCellEdit`         |                         | `CustomEvent<{ prop: ColumnProp; val: string; rowIndex: number; type: DimensionRows; }>`                                          |
+| `internalFocusCell`        |                         | `CustomEvent<{ focus: Cell; end: Cell; }>`                                                                                        |
+| `internalSelectionChanged` | Selection range changed | `CustomEvent<{ type: DimensionRows; newRange: RangeArea; oldRange: RangeArea; newProps: ColumnProp[]; oldProps: ColumnProp[]; }>` |
+| `setEdit`                  |                         | `CustomEvent<boolean \| string>`                                                                                                  |
+| `unregister`               |                         | `CustomEvent<any>`                                                                                                                |
 
 
 ## Dependencies

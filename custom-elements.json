@@ -9,6 +9,10 @@
       },
       "attributes": [
         {
+          "name": "can-focus",
+          "description": "When true cell focus appear."
+        },
+        {
           "name": "col-size",
           "description": "Indicates default column size."
         },
