@@ -1,9 +1,9 @@
-import {Component, Element, Event, Prop, Watch, VNode, EventEmitter, h, Host} from '@stencil/core';
+import {Component, Element, Event, Prop, Watch, VNode, EventEmitter, h} from '@stencil/core';
 import {HTMLStencilElement} from '@stencil/core/internal';
 import {ObservableMap} from '@stencil/store';
 
 import ColumnService from './columnService';
-import {CELL_CLASS, DATA_COL, DATA_ROW, DISABLED_CLASS} from '../../utils/consts';
+import {DATA_COL, DATA_ROW} from '../../utils/consts';
 
 import {DataSourceState} from '../../store/dataSource/data.store';
 import {RevoGrid} from '../../interfaces';
@@ -45,31 +45,36 @@ export class RevogrData {
     if (!this.colData || !this.rows.length || !this.cols.length) {
       return '';
     }
-    const rowsEls: HTMLElement[] = [];
+    const rowsEls: VNode[] = [];
     for (let row of this.rows) {
-      const cells: HTMLElement[] = [];
+      const cells: VNode[] = [];
       for (let col of this.cols) {
-        const dataProps = {
-          [DATA_COL]: col.itemIndex,
-          [DATA_ROW]: row.itemIndex,
-          class: `${CELL_CLASS} ${this.columnService.isReadOnly(row.itemIndex, col.itemIndex) ? DISABLED_CLASS : ''}`,
-          style: {width: `${col.size}px`, transform: `translateX(${col.start}px)`}
-        };
-        cells.push(<div {...dataProps}>{this.getCellRenderer(row.itemIndex, col.itemIndex)}</div>);
+        cells.push(this.getCellRenderer(row, col));
       }
       rowsEls.push(<div class='row' style={{ height: `${row.size}px`, transform: `translateY(${row.start}px)` }}>{cells}</div>);
     }
-    return <Host>{rowsEls}</Host>;
+    return rowsEls;
   }
 
-  private getCellRenderer(row: number, col: number): VNode {
-    const custom = this.columnService.customRenderer(row, col);
+  private getCellRenderer(row: RevoGrid.VirtualPositionItem, col: RevoGrid.VirtualPositionItem): VNode {
+    const defaultProps: RevoGrid.CellProps = {
+      [DATA_COL]: col.itemIndex,
+      [DATA_ROW]: row.itemIndex,
+      style: {
+        width: `${col.size}px`,
+        transform: `translateX(${col.start}px)`
+      }
+    };
+    const props = this.columnService.cellProperties(row.itemIndex, col.itemIndex, defaultProps);
+    const custom = this.columnService.customRenderer(row.itemIndex, col.itemIndex);
     if (custom) {
-      return custom;
+      return <div {...props}>{custom}</div>;
     }
-    return <CellRenderer
-      model={this.columnService.rowDataModel(row, col)}
+    return <div {...props}>
+      <CellRenderer
+      model={this.columnService.rowDataModel(row.itemIndex, col.itemIndex)}
       canDrag={this.canDrag}
       onDragStart={(e) => this.dragStartCell.emit(e)}/>
+    </div>;
   }
 }

@@ -8,6 +8,7 @@ import ColumnDataSchemaModel = RevoGrid.ColumnDataSchemaModel;
 import ColumnProp = RevoGrid.ColumnProp;
 import DataSource = RevoGrid.DataSource;
 import DataType = RevoGrid.DataType;
+import { CELL_CLASS, DISABLED_CLASS } from '../../utils/consts';
 
 export interface ColumnServiceI {
   columns: RevoGrid.ColumnRegular[];
@@ -31,7 +32,7 @@ export default class ColumnService implements ColumnServiceI {
   }
 
   constructor(
-    private dataStore: ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>,
+    private dataStore: ObservableMap<DataSourceState<DataType, RevoGrid.DimensionRows>>,
     columns: RevoGrid.ColumnRegular[]) {
     this.source = columns;
   }
@@ -42,6 +43,26 @@ export default class ColumnService implements ColumnServiceI {
       return readOnly(r, c);
     }
     return readOnly;
+  }
+
+  cellProperties(r: number, c: number, defaultProps: RevoGrid.CellProps): RevoGrid.CellProps{
+    let props: RevoGrid.CellProps = {
+      ...defaultProps,
+      class: `${CELL_CLASS} ${this.isReadOnly(r, c) ? DISABLED_CLASS : ''}`,
+    };
+    const extraPropsFunc = this.columns[c]?.cellProperties;
+    if (extraPropsFunc) {
+      const extra = extraPropsFunc(this.rowDataModel(r, c));
+      props = {...extra, ...props};
+      // extend existing props
+      if (extra.class) {
+        props.class = `${extra.class} ${props.class}`;
+      }
+      if (extra.style) {
+        props.style = {...extra.style, ...props.style};
+      }
+    }
+    return props;
   }
 
   customRenderer(r: number, c: number): VNode | void {
