@@ -5,7 +5,7 @@
  * It contains typing information for all components that exist in this project.
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
-import { Edition, RevoGrid, Selection } from "./interfaces";
+import { Edition, RevoGrid, Selection, ThemeSpace } from "./interfaces";
 import { ObservableMap } from "@stencil/store";
 import { DataSourceState, Groups } from "./store/dataSource/data.store";
 export namespace Components {
@@ -51,7 +51,7 @@ export namespace Components {
          */
         "resize": boolean;
         /**
-          * Indicates default row size.
+          * Indicates default row size. By default 0, means theme package size will be applied
          */
         "rowSize": number;
         /**
@@ -61,7 +61,7 @@ export namespace Components {
         /**
           * Theme name
          */
-        "theme": 'default'|'material';
+        "theme": ThemeSpace.Theme;
     }
     interface RevogrData {
         "canDrag": boolean;
@@ -293,7 +293,7 @@ declare namespace LocalJSX {
          */
         "resize"?: boolean;
         /**
-          * Indicates default row size.
+          * Indicates default row size. By default 0, means theme package size will be applied
          */
         "rowSize"?: number;
         /**
@@ -303,7 +303,7 @@ declare namespace LocalJSX {
         /**
           * Theme name
          */
-        "theme"?: 'default'|'material';
+        "theme"?: ThemeSpace.Theme;
     }
     interface RevogrData {
         "canDrag"?: boolean;

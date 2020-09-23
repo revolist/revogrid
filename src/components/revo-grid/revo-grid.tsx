@@ -7,7 +7,8 @@ import {DataProvider} from '../../services/data.provider';
 import {DataSourceState} from '../../store/dataSource/data.store';
 import DimensionProvider from '../../services/dimension.provider';
 import ViewportProvider from '../../services/viewport.provider';
-import {Edition, Selection, RevoGrid} from '../../interfaces';
+import {Edition, Selection, RevoGrid, ThemeSpace} from '../../interfaces';
+import ThemeService from '../../themeManager/themeService';
 
 
 type ColumnStores = {
@@ -29,6 +30,7 @@ type ViewportStores = {
   styleUrls: {
     default: 'revo-grid.default.scss',
     material: 'revo-grid.material.scss',
+    compact: 'revo-grid.compact.scss'
   },
 })
 export class RevoGridComponent {
@@ -42,8 +44,11 @@ export class RevoGridComponent {
    * Defines how many rows/columns should be rendered outside visible area.
    */
   @Prop() frameSize: number = 0;
-  /** Indicates default row size. */
-  @Prop() rowSize: number = 42;
+  /**
+   * Indicates default row size.
+   * By default 0, means theme package size will be applied
+   */
+  @Prop() rowSize: number = 0;
   /** Indicates default column size. */
   @Prop() colSize: number = 100;
   /** When true, user can range selection. */
@@ -75,7 +80,7 @@ export class RevoGridComponent {
 
 
   /** Theme name */
-  @Prop({ reflect: true }) theme: 'default'|'material' = 'default';
+  @Prop({ reflect: true }) theme: ThemeSpace.Theme = 'default';
 
 
   // --------------------------------------------------------------------------
@@ -204,6 +209,7 @@ export class RevoGridComponent {
   private dataProvider: DataProvider;
   private dimensionProvider: DimensionProvider;
   private viewportProvider: ViewportProvider;
+  private themeService: ThemeService;
 
   @Element() element: HTMLElement;
 
@@ -212,6 +218,14 @@ export class RevoGridComponent {
   columnChanged(newVal: RevoGrid.ColumnData) {
     this.columnProvider.setColumns(newVal);
     this.dataProvider.sort(this.columnProvider.order);
+  }
+
+  @Watch('theme')
+  themeChanged(t: ThemeSpace.Theme) {
+    this.themeService.register(t);
+
+    this.dimensionProvider.setSettings({ originItemSize: this.themeService.rowSize, frameOffset: this.frameSize || 0 }, 'row');
+    this.dimensionProvider.setSettings({ originItemSize: this.colSize, frameOffset: this.frameSize || 0 }, 'col');
   }
 
   @Watch('source')
@@ -259,18 +273,14 @@ export class RevoGridComponent {
 
   connectedCallback(): void {
     this.viewportProvider = new ViewportProvider();
+    this.themeService = new ThemeService({
+      rowSize: this.rowSize
+    });
     this.dimensionProvider = new DimensionProvider(this.viewportProvider);
     this.columnProvider = new ColumnDataProvider(this.dimensionProvider);
     this.dataProvider = new DataProvider(this.dimensionProvider);
     this.uuid = (new Date()).getTime().toString();
-    this.dimensionProvider.setSettings({
-      originItemSize: this.rowSize,
-      frameOffset: this.frameSize || 0
-    }, 'row');
-    this.dimensionProvider.setSettings({
-      originItemSize: this.colSize,
-      frameOffset: this.frameSize || 0
-    }, 'col');
+    this.themeChanged(this.theme);
 
     this.columnChanged(this.columns);
     this.dataChanged(this.source);

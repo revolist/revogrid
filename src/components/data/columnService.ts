@@ -79,8 +79,8 @@ export default class ColumnService implements ColumnServiceI {
   }
 
   getSaveData(rowIndex: number, c: number, val: string): BeforeSaveDataDetails {
-    const {prop} = this.rowDataModel(rowIndex, c);
-    return { prop, rowIndex, val, type: this.dataStore.get('type')};
+    const {prop, model } = this.rowDataModel(rowIndex, c);
+    return { prop, rowIndex, val, model, type: this.dataStore.get('type')};
   }
 
   getCellEditor(_r: number, c: number): string | undefined {
