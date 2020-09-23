@@ -40,7 +40,7 @@ export default class ColumnService implements ColumnServiceI {
   isReadOnly(r: number, c: number): boolean {
     const readOnly: RevoGrid.ReadOnlyFormat = this.columns[c]?.readonly;
     if (typeof readOnly === 'function') {
-      return readOnly(r, c);
+      return readOnly(this.rowDataModel(r, c));
     }
     return readOnly;
   }
