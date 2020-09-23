@@ -4,6 +4,7 @@ import { reactOutputTarget } from '@stencil/react-output-target';
 
 
 export const config: Config = {
+  buildEs5: 'prod',
   namespace: 'revo-grid',
   taskQueue: 'async',
   globalScript: './src/global/global.ts',
