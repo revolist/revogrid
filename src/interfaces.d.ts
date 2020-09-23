@@ -254,6 +254,7 @@ export declare namespace Edition {
   };
   type BeforeSaveDataDetails = {
     prop: RevoGrid.ColumnProp;
+    model: RevoGrid.DataType;
     val: SaveData;
     rowIndex: number;
     type: RevoGrid.DimensionRows;
@@ -280,4 +281,16 @@ export declare namespace Edition {
     disconnectedCallback?(): void;
     render(createElement?: HyperFunc<VNode>): VNode;
   }
+}
+
+export declare namespace ThemeSpace {
+  interface ThemePackage {
+      defaultRowSize: number;
+  }
+
+  type ThemeConfig = {
+      rowSize: number;
+  };
+
+  type Theme = 'default'|'material'|'compact';
 }

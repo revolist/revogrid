@@ -42,9 +42,7 @@ export default class ViewportStore {
   readonly store: ObservableMap<RevoGrid.ViewportState>;
   constructor() {
     this.store = createStore(initialState());
-    this.store.onChange('realCount', () => {
-      this.store.set('items', []);
-    });
+    this.store.onChange('realCount', () => this.clear());
   }
 
   /** Render viewport based on coordinate, this is main method for draw */
@@ -152,5 +150,9 @@ export default class ViewportStore {
 
   setViewport(data: Partial<RevoGrid.ViewportState>): void {
     setStore(this.store, data);
+  }
+
+  clear(): void {
+    this.store.set('items', []);
   }
 }

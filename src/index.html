@@ -53,7 +53,7 @@
 <body>
     <div class="tile large">
       <div>
-        <revo-grid theme="default"></revo-grid>
+        <revo-grid theme="compact"></revo-grid>
       </div>
     </div>
 
@@ -73,7 +73,7 @@
         grid.range = true;
         grid.resize = true;
         grid.addEventListener('beforeEdit', (e) => {
-          console.log('after edit');
+          console.log('after edit', e);
         });
         grid.addEventListener('rowOrderChanged', (e) => {
           console.log(e.detail);
