@@ -37,6 +37,7 @@ export class RevogrViewport {
 
   /** Custom editors register  */
   @Prop() editors: Edition.Editors;
+  @Prop() rowClass: string;
 
   @Prop() uuid: string|null = null;
   @Prop() resize: boolean;
@@ -144,6 +145,7 @@ export class RevogrViewport {
               key={view.prop.key + (++j)}
               readonly={this.readonly}
               range={this.range}
+              rowClass={this.rowClass}
               slot='data'/>
           </revogr-overlay-selection>
         );

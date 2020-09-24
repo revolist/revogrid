@@ -51,6 +51,10 @@ export namespace Components {
          */
         "resize": boolean;
         /**
+          * Row class property Define this property in row object and this will be mapped as row class
+         */
+        "rowClass": string;
+        /**
           * Indicates default row size. By default 0, means theme package size will be applied
          */
         "rowSize": number;
@@ -74,6 +78,7 @@ export namespace Components {
         "dimensionRow": ObservableMap<RevoGrid.DimensionSettingsState>;
         "range": boolean;
         "readonly": boolean;
+        "rowClass": string;
         "rows": RevoGrid.VirtualPositionItem[];
     }
     interface RevogrEdit {
@@ -145,6 +150,7 @@ export namespace Components {
         "range": boolean;
         "readonly": boolean;
         "resize": boolean;
+        "rowClass": string;
         "rowStores": {[T in RevoGrid.DimensionRows]: ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>};
         "uuid": string|null;
         "viewports": {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.ViewportState>};
@@ -293,6 +299,10 @@ declare namespace LocalJSX {
          */
         "resize"?: boolean;
         /**
+          * Row class property Define this property in row object and this will be mapped as row class
+         */
+        "rowClass"?: string;
+        /**
           * Indicates default row size. By default 0, means theme package size will be applied
          */
         "rowSize"?: number;
@@ -317,6 +327,7 @@ declare namespace LocalJSX {
         "onDragStartCell"?: (event: CustomEvent<MouseEvent>) => void;
         "range"?: boolean;
         "readonly"?: boolean;
+        "rowClass"?: string;
         "rows"?: RevoGrid.VirtualPositionItem[];
     }
     interface RevogrEdit {
@@ -422,6 +433,7 @@ declare namespace LocalJSX {
         "range"?: boolean;
         "readonly"?: boolean;
         "resize"?: boolean;
+        "rowClass"?: string;
         "rowStores"?: {[T in RevoGrid.DimensionRows]: ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>};
         "uuid"?: string|null;
         "viewports"?: {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.ViewportState>};

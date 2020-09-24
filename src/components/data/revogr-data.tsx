@@ -23,6 +23,8 @@ export class RevogrData {
   @Prop() range: boolean;
   @Prop() canDrag: boolean;
 
+  @Prop() rowClass: string;
+
   @Prop() rows: RevoGrid.VirtualPositionItem[];
   @Prop() cols: RevoGrid.VirtualPositionItem[];
 
@@ -48,10 +50,11 @@ export class RevogrData {
     const rowsEls: VNode[] = [];
     for (let row of this.rows) {
       const cells: VNode[] = [];
+      const rowClass = this.rowClass ? this.columnService.getRowClass(row.itemIndex, this.rowClass) : '';
       for (let col of this.cols) {
         cells.push(this.getCellRenderer(row, col));
       }
-      rowsEls.push(<div class='row' style={{ height: `${row.size}px`, transform: `translateY(${row.start}px)` }}>{cells}</div>);
+      rowsEls.push(<div class={`row ${rowClass}`} style={{ height: `${row.size}px`, transform: `translateY(${row.start}px)` }}>{cells}</div>);
     }
     return rowsEls;
   }

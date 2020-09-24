@@ -83,6 +83,13 @@ export class RevoGridComponent {
   @Prop({ reflect: true }) theme: ThemeSpace.Theme = 'default';
 
 
+  /** 
+   * Row class property
+   * Define this property in row object and this will be mapped as row class
+   */
+  @Prop({ reflect: true }) rowClass: string = '';
+
+
   // --------------------------------------------------------------------------
   //
   //  Events
@@ -301,6 +308,7 @@ export class RevoGridComponent {
         resize={this.resize}
         readonly={this.readonly}
         range={this.range}
+        rowClass={this.rowClass}
         editors={this.editors}/>;
   }
 }

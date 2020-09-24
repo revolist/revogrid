@@ -73,6 +73,12 @@ export default class ColumnService implements ColumnServiceI {
     return;
   }
 
+  getRowClass(r: number, prop: string): string {
+    const data: DataSource = this.dataStore.get('items');
+    const model: DataType = data[r] || {};
+    return model[prop] || '';
+  }
+
   getCellData(r: number, c: number): string {
     const {prop, model} = this.rowDataModel(r, c);
     return ColumnService.getData(model[prop as number]);

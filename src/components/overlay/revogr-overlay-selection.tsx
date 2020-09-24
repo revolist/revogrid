@@ -10,6 +10,7 @@ import {codesLetter} from '../../utils/keyCodes';
 import {isLetterKey} from '../../utils/keyCodes.utils';
 import {
   CELL_HANDLER_CLASS,
+  EDIT_INPUT_WR,
   FOCUS_CLASS,
   SELECTION_BORDER_CLASS,
   TMP_SELECTION_BG_CLASS
@@ -235,7 +236,7 @@ export class OverlaySelection {
     const style = this.getElStyle({...editCell, x1: editCell.x, y1: editCell.y });
 
     return <revogr-edit
-      class='edit-input-wrapper'
+      class={EDIT_INPUT_WR}
       onCellEdit={(e: CustomEvent<Edition.SaveDataDetails>) => this.onCellEdit(e.detail)}
       onCloseEdit={() => this.setEdit?.emit(false)}
       editCell={editable}
@@ -286,7 +287,7 @@ export class OverlaySelection {
       onMouseMove?(e: MouseEvent): void;
     } = {
       onDblClick: () => this.onDoubleClick(),
-      onMouseDown: (e: MouseEvent) => this.selectionService.onCellDown(e, this.getData()),
+      onMouseDown: (e: MouseEvent) => this.onMouseDown(e),
     };
     if (this.autoFill && selectionFocus) {
       hostProps.onMouseMove = (e: MouseEvent) => this.selectionService.onMouseMove(e, this.getData())
@@ -307,6 +308,14 @@ export class OverlaySelection {
   private onCellEdit(e: Edition.SaveDataDetails): void {
     const dataToSave = this.columnService.getSaveData(e.row, e.col, e.val);
     this.internalCellEdit.emit(dataToSave);
+  }
+
+  private onMouseDown(e: MouseEvent): void {
+    /** ignore focus if clicked input */
+    if ((e.target as HTMLElement|undefined)?.closest(`.${EDIT_INPUT_WR}`)) {
+      return;
+    }
+    this.selectionService.onCellDown(e, this.getData());
   }
   
   private onDoubleClick(): void {

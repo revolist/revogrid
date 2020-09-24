@@ -34,12 +34,15 @@
         },
         {
           "name": "row-size",
-          "description": "Indicates default row size."
+          "description": "Indicates default row size.\nBy default 0, means theme package size will be applied"
         },
         {
           "name": "theme",
           "description": "Theme name",
           "values": [
+            {
+              "name": "compact"
+            },
             {
               "name": "default"
             },
