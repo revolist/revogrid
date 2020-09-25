@@ -108,6 +108,7 @@ export default class CellSelectionService {
   chaneKeyDown(e: KeyboardEvent): {changes: Partial<Cell>; isMulti?: boolean}|void {
     const isMulti: boolean = this.canRange && e.shiftKey;
     switch (e.code) {
+      case codesLetter.TAB:
       case codesLetter.ARROW_UP:
       case codesLetter.ARROW_DOWN:
       case codesLetter.ARROW_LEFT:
@@ -122,6 +123,7 @@ export default class CellSelectionService {
         return { changes: { y: 1 }, isMulti};
       case codesLetter.ARROW_LEFT:
         return { changes: { x: -1 }, isMulti };
+      case codesLetter.TAB:
       case codesLetter.ARROW_RIGHT:
         return { changes: { x: 1 }, isMulti };
     }

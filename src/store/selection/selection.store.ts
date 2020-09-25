@@ -27,6 +27,10 @@ export default class SelectionStore {
     return this.store.get('edit');
   }
 
+  get range(): Selection.RangeArea|null {
+    return this.store.get('range');
+  }
+
   setLastCell(lastCell: Cell): void {
     // todo: for existing need to update
     setStore(this.store, { lastCell });

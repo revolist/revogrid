@@ -102,11 +102,9 @@ export default class ColumnService implements ColumnServiceI {
     return {prop, model, data, column};
   }
 
-  applyRangeData(d: Selection.ChangedRange): {
-    changedData: {[key: number]: DataType}
-  } {
+  getRangeData(d: Selection.ChangedRange): RevoGrid.DataLookup {
+    const changed: RevoGrid.DataLookup = {};
     const items: DataSource = this.dataStore.get('items');
-    const changed: {[rowIndex: number]: DataType} = {};
     
     // get original length sizes
     const copyRowLength = d.oldRange.y1 - d.oldRange.y + 1;
@@ -115,7 +113,6 @@ export default class ColumnService implements ColumnServiceI {
 
     // rows
     for (let rowIndex = d.newRange.y, i = 0; rowIndex < d.newRange.y1 + 1; rowIndex++, i++) {
-      const row = items[rowIndex];
 
       // copy original data link
       const copyRow = copyFrom[i % copyRowLength];
@@ -132,8 +129,6 @@ export default class ColumnService implements ColumnServiceI {
 
         /** if can write */
         if (!this.isReadOnly(rowIndex, colIndex)) {
-          row[p] = copyRow[oldP];
-          
 
           /** to show before save */
           if (!changed[rowIndex]) {
@@ -143,10 +138,40 @@ export default class ColumnService implements ColumnServiceI {
         }
       }
     }
+    return changed;
+  }
+
+  applyRangeData(data: RevoGrid.DataLookup): void {
+    const items: DataSource = this.dataStore.get('items');
+    for (let rowIndex in data) {
+      for (let prop in data[rowIndex]) {
+        items[rowIndex][prop] = data[rowIndex][prop];
+      }
+    }
     this.dataStore.set('items', [...items]);
-    return {
-      changedData: changed
-    };
+  }
+
+  getRangeStaticData(d: Selection.RangeArea, value: RevoGrid.DataFormat): RevoGrid.DataLookup {
+    const changed: RevoGrid.DataLookup = {};
+
+    // rows
+    for (let rowIndex = d.y, i = 0; rowIndex < d.y1 + 1; rowIndex++, i++) {
+      // columns
+      for (let colIndex = d.x, j = 0; colIndex < d.x1 + 1; colIndex++, j++) {
+        const p = this.columns[colIndex].prop;
+
+        /** if can write */
+        if (!this.isReadOnly(rowIndex, colIndex)) {
+
+          /** to show before save */
+          if (!changed[rowIndex]) {
+            changed[rowIndex] = {};
+          }
+          changed[rowIndex][p] = value;
+        }
+      }
+    }
+    return changed;
   }
 
   private copyRange(range: Selection.RangeArea, rangeProps: RevoGrid.ColumnProp[], items: DataSource): DataType[] {
