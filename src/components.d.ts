@@ -271,6 +271,10 @@ declare namespace LocalJSX {
          */
         "onBeforeRange"?: (event: CustomEvent<Selection.ChangedRange>) => void;
         /**
+          * Before range edit event. Triggered before range data applied, when range selection happened. Use e.preventDefault() to prevent edit data set and use you own.
+         */
+        "onBeforeRangeEdit"?: (event: CustomEvent<Edition.BeforeRangeSaveDataDetails>) => void;
+        /**
           * On header click.
          */
         "onHeaderClick"?: (event: CustomEvent<RevoGrid.ColumnRegular>) => void;
@@ -404,7 +408,7 @@ declare namespace LocalJSX {
         /**
           * Range data apply
          */
-        "onInternalRangeDataApply"?: (event: CustomEvent<RevoGrid.DataLookup>) => void;
+        "onInternalRangeDataApply"?: (event: CustomEvent<Edition.BeforeRangeSaveDataDetails>) => void;
         /**
           * Selection range changed
          */

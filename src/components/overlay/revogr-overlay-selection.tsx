@@ -77,7 +77,7 @@ export class OverlaySelection {
 
 
   /** Range data apply */
-  @Event({ cancelable: true }) internalRangeDataApply: EventEmitter<RevoGrid.DataLookup>;
+  @Event({ cancelable: true }) internalRangeDataApply: EventEmitter<Edition.BeforeRangeSaveDataDetails>;
   
 
   /** Pointer left document, clear any active operation */
@@ -344,7 +344,7 @@ export class OverlaySelection {
   }
 
   private onRangeApply(data: {[rowIndex: number]: RevoGrid.DataType}, range: Selection.RangeArea): void {
-    const dataEvent = this.internalRangeDataApply.emit(data);
+    const dataEvent = this.internalRangeDataApply.emit({ data, type: this.dataStore.get('type') });
     if (!dataEvent.defaultPrevented) {
       this.columnService.applyRangeData(data);
     }

@@ -262,6 +262,11 @@ export declare namespace Edition {
     type: RevoGrid.DimensionRows;
   };
 
+  type BeforeRangeSaveDataDetails = {
+    data: RevoGrid.DataLookup;
+    type: RevoGrid.DimensionRows;
+  };
+
   interface EditCell extends Selection.Cell {
     model?: RevoGrid.DataType;
     val?: SaveData;
