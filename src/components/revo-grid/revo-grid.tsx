@@ -105,6 +105,13 @@ export class RevoGridComponent {
   @Event() beforeEdit: EventEmitter<Edition.BeforeSaveDataDetails>;
 
   /** 
+   * Before range edit event.
+   * Triggered before range data applied, when range selection happened.
+   * Use e.preventDefault() to prevent edit data set and use you own. 
+   */
+  @Event() beforeRangeEdit: EventEmitter<Edition.BeforeRangeSaveDataDetails>;
+
+  /** 
    * After edit.
    * Triggered when after data applied.
    */
@@ -159,6 +166,15 @@ export class RevoGridComponent {
         this.afterEdit.emit(detail);
       }
     }, 0);
+  }
+
+  @Listen('internalRangeDataApply')
+  onBeforeRangeEdit(e: CustomEvent<Edition.BeforeRangeSaveDataDetails>): void {
+    e.cancelBubble = true;
+    const { defaultPrevented } = this.beforeRangeEdit.emit(e.detail);
+    if (defaultPrevented) {
+      e.preventDefault();
+    }
   }
 
   @Listen('internalSelectionChanged')

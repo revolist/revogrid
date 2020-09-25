@@ -31,8 +31,6 @@ export class Edit {
                 val
             });
         }
-        /** Close editor in next thread */
-        setTimeout(() => this.closeEdit.emit(), 0);
     }
 
     componentWillRender(): void {
