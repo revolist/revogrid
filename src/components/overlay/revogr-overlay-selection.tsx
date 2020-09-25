@@ -20,7 +20,8 @@ import {DataSourceState} from '../../store/dataSource/data.store';
 import RangeAreaCss = Selection.RangeAreaCss;
 import Cell = Selection.Cell;
 import { slice } from 'lodash';
-import { getRange } from '../../store/selection/selection.helpers';
+import { getRange, isRangeSingleCell } from '../../store/selection/selection.helpers';
+import { timeout } from '../../utils/utils';
 
 
 @Component({
@@ -73,6 +74,10 @@ export class OverlaySelection {
 
   /** Selection range changed */
   @Event({ cancelable: true }) internalSelectionChanged: EventEmitter<Selection.ChangedRange>;
+
+
+  /** Range data apply */
+  @Event({ cancelable: true }) internalRangeDataApply: EventEmitter<RevoGrid.DataLookup>;
   
 
   /** Pointer left document, clear any active operation */
@@ -100,8 +105,15 @@ export class OverlaySelection {
       return;
     }
 
+    // tab key means same as arrow right
+    if (codesLetter.TAB === e.code) {
+      this.keyChangeSelection(e);
+      return;
+    }
 
-
+    /**
+     *  IF EDIT MODE
+     */
     if (this.selectionStoreService.edited) {
       switch (e.code) {
         case codesLetter.ESCAPE:
@@ -110,6 +122,23 @@ export class OverlaySelection {
       }
       return;
     }
+    
+    /**
+     *  IF NOT EDIT MODE
+     */
+
+    // pressed clear key
+    if (codesLetter.BACKSPACE === e.code || codesLetter.DELETE === e.code) {
+      if (this.selectionStoreService.range && !isRangeSingleCell(this.selectionStoreService.range)) {
+        const data = this.columnService.getRangeStaticData(this.selectionStoreService.range, '');
+        this.onRangeApply(data, this.selectionStoreService.range);
+      } else if (this.canEdit()) {
+        const focused = this.selectionStoreService.focused;
+        this.onCellEdit({ row: focused.y, col: focused.x, val: '' }, true);
+      }
+      return;
+    }
+    
     // pressed enter
     if (codesLetter.ENTER === e.code) {
       if (this.canEdit()) {
@@ -127,12 +156,19 @@ export class OverlaySelection {
     }
 
     // pressed arrow, change selection position
-    const changes = this.selectionService.chaneKeyDown(e);
-    if (changes) {
-      await new Promise((r) => { setTimeout(() => r(), 0); });
-      this.changeSelection?.emit(changes);
+    if (await this.keyChangeSelection(e)) {
       return;
     }
+  }
+
+  private async keyChangeSelection(e: KeyboardEvent): Promise<boolean> {
+    const changes = this.selectionService.chaneKeyDown(e);
+    if (changes) {
+      await timeout();
+      this.changeSelection?.emit(changes);
+      return true;
+    }
+    return false;
   }
 
   @Watch('range') onRange(canRange: boolean): void {
@@ -168,18 +204,20 @@ export class OverlaySelection {
         const newRange = getRange(start, end);
         const rangeData: Selection.ChangedRange = {
           type: this.dataStore.get('type'),
+          newData: {},
           newRange,
           oldRange,
           newProps: slice(this.colData, newRange.x, newRange.x1 + 1).map(v => v.prop),
           oldProps: slice(this.colData, oldRange.x, oldRange.x1 + 1).map(v => v.prop),
         };
+
+        rangeData.newData = this.columnService.getRangeData(rangeData);
         const selectionEndEvent = this.internalSelectionChanged.emit(rangeData);
         if (selectionEndEvent.defaultPrevented) {
           this.selectionStoreService.clearTemp();
           return;
         }
-        this.selectionStoreService.applyRange(newRange);
-        this.columnService.applyRangeData(rangeData);
+        this.onRangeApply(rangeData.newData, newRange);
       },
       tempRange: (start, end) => this.selectionStoreService.setTempRange(start, end),
       autoFill: (isAutofill) => {
@@ -237,7 +275,7 @@ export class OverlaySelection {
 
     return <revogr-edit
       class={EDIT_INPUT_WR}
-      onCellEdit={(e: CustomEvent<Edition.SaveDataDetails>) => this.onCellEdit(e.detail)}
+      onCellEdit={e => this.onCellEdit(e.detail)}
       onCloseEdit={() => this.setEdit?.emit(false)}
       editCell={editable}
       column={this.columnService.columns[editCell.x]}
@@ -305,9 +343,23 @@ export class OverlaySelection {
     return <Host {...hostProps}>{els}<slot name='data'/></Host>;
   }
 
-  private onCellEdit(e: Edition.SaveDataDetails): void {
+  private onRangeApply(data: {[rowIndex: number]: RevoGrid.DataType}, range: Selection.RangeArea): void {
+    const dataEvent = this.internalRangeDataApply.emit(data);
+    if (!dataEvent.defaultPrevented) {
+      this.columnService.applyRangeData(data);
+    }
+    this.selectionStoreService.applyRange(range);
+  }
+
+  private onCellEdit(e: Edition.SaveDataDetails, clear = false): void {
     const dataToSave = this.columnService.getSaveData(e.row, e.col, e.val);
     this.internalCellEdit.emit(dataToSave);
+    // if not clear navigate to next cell after edit
+    if (!clear) {
+      this.keyChangeSelection(new KeyboardEvent('keydown', {
+        code: codesLetter.ARROW_DOWN
+      }));
+    }
   }
 
   private onMouseDown(e: MouseEvent): void {

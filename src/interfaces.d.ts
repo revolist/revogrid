@@ -112,6 +112,7 @@ export declare namespace RevoGrid {
 
   type DataType = { [T in ColumnProp]: DataFormat };
   type DataSource = DataType[];
+  type DataLookup = {[rowIndex: number]: DataType};
 
 
   // --------------------------------------------------------------------------
@@ -216,6 +217,7 @@ export declare namespace Selection {
     oldRange: RangeArea;
     newProps: RevoGrid.ColumnProp[];
     oldProps: RevoGrid.ColumnProp[];
+    newData: {[key: number]: RevoGrid.DataType};
   };
 
   interface Cell {

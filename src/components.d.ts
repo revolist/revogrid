@@ -402,6 +402,10 @@ declare namespace LocalJSX {
         "onInternalCellEdit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
         "onInternalFocusCell"?: (event: CustomEvent<Selection.FocusedCells>) => void;
         /**
+          * Range data apply
+         */
+        "onInternalRangeDataApply"?: (event: CustomEvent<RevoGrid.DataLookup>) => void;
+        /**
           * Selection range changed
          */
         "onInternalSelectionChanged"?: (event: CustomEvent<Selection.ChangedRange>) => void;

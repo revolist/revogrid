@@ -53,6 +53,9 @@ enum codes {
 enum codesLetter {
     ENTER = 'Enter',
     ESCAPE = 'Escape',
+    TAB = 'Tab',
+    BACKSPACE = 'Backspace',
+    DELETE = 'Delete',
     ARROW_RIGHT = 'ArrowRight',
     ARROW_LEFT = 'ArrowLeft',
     ARROW_UP = 'ArrowUp',
