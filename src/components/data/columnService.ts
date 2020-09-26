@@ -72,7 +72,6 @@ export default class ColumnService implements ColumnServiceI {
       }
       if (extra.style) {
         props.style = {...extra.style, ...props.style};
-        console.log(extra.style, props.style);
       }
     }
     return props;
