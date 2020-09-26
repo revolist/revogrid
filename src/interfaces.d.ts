@@ -87,7 +87,7 @@ export declare namespace RevoGrid {
 
   type CellProps = {
     style?: {[key: string]: string | undefined};
-    class?: string;
+    class?: {[key: string]: boolean} |string;
     [attr: string]: string|number|object;
   };
 
@@ -101,7 +101,7 @@ export declare namespace RevoGrid {
   interface HyperFunc<T> { (tag: string, props?: object, value?: string): T; }
   type CellTemplateFunc<T> = (createElement: HyperFunc<T>, props: ColumnDataSchemaModel) => T;
   type ColumnTemplateFunc<T> = (createElement: HyperFunc<T>, props: ColumnRegular) => T;
-  type PropertiesFunc = (props: ColumnDataSchemaModel) => CellProps;
+  type PropertiesFunc = (props: ColumnDataSchemaModel) => CellProps|void|undefined;
 
 
   // --------------------------------------------------------------------------
