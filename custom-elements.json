@@ -33,6 +33,10 @@
           "description": "When true, columns are resizable."
         },
         {
+          "name": "row-class",
+          "description": "Row class property\nDefine this property in row object and this will be mapped as row class"
+        },
+        {
           "name": "row-size",
           "description": "Indicates default row size.\nBy default 0, means theme package size will be applied"
         },
@@ -70,6 +74,10 @@
         },
         {
           "name": "readonly",
+          "description": ""
+        },
+        {
+          "name": "row-class",
           "description": ""
         }
       ]
@@ -178,6 +186,10 @@
         },
         {
           "name": "resize",
+          "description": ""
+        },
+        {
+          "name": "row-class",
           "description": ""
         },
         {

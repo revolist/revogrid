@@ -46,20 +46,33 @@ export default class ColumnService implements ColumnServiceI {
   }
 
   cellProperties(r: number, c: number, defaultProps: RevoGrid.CellProps): RevoGrid.CellProps{
+    const cellClass: {[key: string]: boolean} = {
+      [CELL_CLASS]: true,
+      [DISABLED_CLASS]: this.isReadOnly(r, c)
+    };
     let props: RevoGrid.CellProps = {
       ...defaultProps,
-      class: `${CELL_CLASS} ${this.isReadOnly(r, c) ? DISABLED_CLASS : ''}`,
+      class: cellClass,
     };
     const extraPropsFunc = this.columns[c]?.cellProperties;
     if (extraPropsFunc) {
       const extra = extraPropsFunc(this.rowDataModel(r, c));
+      if (!extra) {
+        return props;
+      }
+
       props = {...extra, ...props};
       // extend existing props
       if (extra.class) {
-        props.class = `${extra.class} ${props.class}`;
+        if (typeof extra.class === 'object') {
+          props.class = {...extra.class, ...cellClass};
+        } else if (typeof extra.class === 'string') {
+          cellClass[extra.class] = true;
+        }
       }
       if (extra.style) {
         props.style = {...extra.style, ...props.style};
+        console.log(extra.style, props.style);
       }
     }
     return props;
