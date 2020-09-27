@@ -11,9 +11,6 @@ export function generateFakeDataObject(rowsNumber, colsNumber) {
             result[row] = {};
         }
         result[row][col] = row + ':' + col;
-        if (row === 3) {
-            result[row]['selected'] = 'green';
-        }
         if (!columns[col]) {
             columns[col] = {
                 name: generateHeader(col),

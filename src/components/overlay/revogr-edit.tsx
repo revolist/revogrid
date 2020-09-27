@@ -57,7 +57,9 @@ export class Edit {
         }
 
         this.currentEditor.disconnectedCallback && this.currentEditor.disconnectedCallback();
-        this.currentEditor.element = null;
+        if (this.currentEditor.element) {
+            this.currentEditor.element = null;
+        }
         this.currentEditor = null;
     }
 
