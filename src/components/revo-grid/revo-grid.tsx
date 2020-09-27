@@ -140,6 +140,13 @@ export class RevoGridComponent {
   @Event() rowOrderChanged: EventEmitter<{from: number; to: number;}>;
 
   /** 
+   * Row order change started.
+   * Use e.preventDefault() to prevent row order change. 
+   * Use e.text = 'new name' to change item name on start.
+   */
+  @Event() rowDragStart: EventEmitter<{pos: RevoGrid.PositionItem, text: string}>;
+
+  /** 
    * On header click.
    */
   @Event() headerClick: EventEmitter<RevoGrid.ColumnRegular>;
@@ -158,7 +165,7 @@ export class RevoGridComponent {
   @Listen('internalCellEdit')
   onBeforeEdit(e: CustomEvent<Edition.BeforeSaveDataDetails>): void {
     e.cancelBubble = true;
-    const {defaultPrevented, detail } = this.beforeEdit.emit(e.detail);
+    const { defaultPrevented, detail } = this.beforeEdit.emit(e.detail);
     // apply data
     setTimeout(() => {
       if (!defaultPrevented) {
@@ -187,6 +194,15 @@ export class RevoGridComponent {
     const beforeFill = this.beforeAutofill.emit(e.detail);
     if (beforeFill.defaultPrevented) {
       return;
+    }
+  }
+
+  @Listen('initialRowDragStart')
+  onDragStart(e: CustomEvent<{pos: RevoGrid.PositionItem, text: string}>) {
+    e.cancelBubble = true;
+    const dragStart = this.rowDragStart.emit(e.detail);
+    if (dragStart.defaultPrevented) {
+      e.preventDefault();
     }
   }
 

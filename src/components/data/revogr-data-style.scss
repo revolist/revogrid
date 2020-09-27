@@ -10,13 +10,25 @@ revogr-data {
 	}
 
 	.revo-draggable {
+		$w: 24px;
+
+
 		$drag-icon-color: #d4d4d4;
 
-		float: left;
-		width: 24px;
+		border: none;
+		height: 32px;
+		display: inline-flex;
+		outline: 0;
+		padding: 0;
+		font-size: 0.8125rem;
+		box-sizing: border-box;
+		align-items: center;
+		white-space: nowrap;
+		vertical-align: middle;
+		justify-content: center;
+		text-decoration: none;
+		width: $w;
 		height: 100%;
-		text-align: center;
-		line-height: 24px;
 		cursor: pointer;
 
 		&:hover {
@@ -30,6 +42,7 @@ revogr-data {
 			vertical-align: middle;
 			display: inline-block;
 			pointer-events: none;
+			transition: background-color 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
 		}
 	}
 

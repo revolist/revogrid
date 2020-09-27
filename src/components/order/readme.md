@@ -17,12 +17,13 @@
 
 ## Events
 
-| Event                  | Description                                | Type                                                            |
-| ---------------------- | ------------------------------------------ | --------------------------------------------------------------- |
-| `initialRowDropped`    | Row dragged, new range ready to be applied | `CustomEvent<{ from: number; to: number; }>`                    |
-| `internalRowDrag`      | Row move                                   | `CustomEvent<PositionItem>`                                     |
-| `internalRowDragEnd`   | Row drag ended                             | `CustomEvent<any>`                                              |
-| `internalRowDragStart` | Row drag started                           | `CustomEvent<{ cell: Cell; text: string; pos: PositionItem; }>` |
+| Event                  | Description                                | Type                                                                               |
+| ---------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------- |
+| `initialRowDropped`    | Row dragged, new range ready to be applied | `CustomEvent<{ from: number; to: number; }>`                                       |
+| `internalRowDrag`      | Row move                                   | `CustomEvent<PositionItem>`                                                        |
+| `internalRowDragEnd`   | Row drag ended                             | `CustomEvent<any>`                                                                 |
+| `internalRowDragStart` | Row drag started                           | `CustomEvent<{ cell: Cell; text: string; pos: PositionItem; event: MouseEvent; }>` |
+| `internalRowMouseMove` | Row mouse move                             | `CustomEvent<Cell>`                                                                |
 
 
 ## Methods

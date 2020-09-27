@@ -8,8 +8,8 @@ import GridScrollingService, {ElementScroll} from './gridScrollingService';
 import ViewportSpace from './viewport.interfaces';
 import {DataSourceState} from '../../store/dataSource/data.store';
 import SelectionStoreConnector from '../../services/selection.store.connector';
-import {Edition, RevoGrid} from '../../interfaces';
-import OrderRenderer, { OrdererService } from './orderRenderer';
+import {Edition, Selection, RevoGrid} from '../../interfaces';
+import OrderRenderer, { OrdererService } from '../order/orderRenderer';
 
 import ViewportProps = ViewportSpace.ViewportProps;
 
@@ -27,6 +27,7 @@ export class RevogrViewport {
   @Event() setDimensionSize: EventEmitter<{type: RevoGrid.MultiDimensionType, sizes: RevoGrid.ViewSettingSizeProp}>;
   @Event() setViewportCoordinate: EventEmitter<RevoGrid.ViewPortScrollEvent>;
   @Event() setViewportSize: EventEmitter<RevoGrid.ViewPortResizeEvent>;
+  @Event({ cancelable: true }) initialRowDragStart: EventEmitter<{pos: RevoGrid.PositionItem, text: string}>;
 
   @Element() element: HTMLElement;
   @Prop() columnStores: {[T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>};
@@ -54,8 +55,14 @@ export class RevogrViewport {
   }
 
   @Listen('internalRowDragStart')
-  onRowDragStarted({detail: {pos}}: CustomEvent<{pos: RevoGrid.PositionItem}>): void {
-    this.orderService?.start(pos, this.element);
+  onRowDragStarted(e: CustomEvent<{pos: RevoGrid.PositionItem, text: string, event: MouseEvent}>): void {
+    e.cancelBubble = true;
+    const dragEvent = this.initialRowDragStart.emit({ ...e.detail });
+    if (dragEvent.defaultPrevented) {
+      e.preventDefault();
+      return;
+    }
+    this.orderService?.start(this.element, { ...e.detail, ...dragEvent.detail });
   }
 
   @Listen('internalRowDragEnd')
@@ -66,6 +73,11 @@ export class RevogrViewport {
   @Listen('internalRowDrag')
   onRowDrag({detail}: CustomEvent<RevoGrid.PositionItem>): void {
     this.orderService?.move(detail);
+  }
+  @Listen('internalRowMouseMove')
+  onRowMouseMove(e: CustomEvent<Selection.Cell>): void {
+    e.cancelBubble = true;
+    this.orderService?.moveTip(e.detail);
   }
 
   connectedCallback(): void {

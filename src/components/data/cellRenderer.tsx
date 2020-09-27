@@ -11,12 +11,16 @@ type Props = {
 
 const CellRenderer = ({model, canDrag, onDragStart}: Props, _children: VNode[]): (VNode|string)[] => {
     const els: (VNode|string)[] = [];
-    if (canDrag && model.column.rowDrag && isRowDragService(model.column.rowDrag, model)) {
-        els.push(
-            <span class={DRAGGABLE_CLASS} onMouseDown={e => onDragStart(e)}>
-                <span class={DRAG_ICON_CLASS}/>
-            </span>
-        );
+    if (model.column.rowDrag && isRowDragService(model.column.rowDrag, model)) {
+        if (canDrag) {
+            els.push(
+                <span class={DRAGGABLE_CLASS} onMouseDown={e => onDragStart(e)}>
+                    <span class={DRAG_ICON_CLASS}/>
+                </span>
+            );
+        } else {
+            els.push(<span class={DRAGGABLE_CLASS}/>);
+        }
     }
     els.push(`${ColumnService.getData(model.model[model.prop])}`);
     return els;

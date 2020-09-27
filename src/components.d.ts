@@ -279,6 +279,10 @@ declare namespace LocalJSX {
          */
         "onHeaderClick"?: (event: CustomEvent<RevoGrid.ColumnRegular>) => void;
         /**
+          * Row order change started. Use e.preventDefault() to prevent row order change.  Use e.text = 'new name' to change item name on start.
+         */
+        "onRowDragStart"?: (event: CustomEvent<{pos: RevoGrid.PositionItem, text: string}>) => void;
+        /**
           * Before row order apply. Use e.preventDefault() to prevent row order change.
          */
         "onRowOrderChanged"?: (event: CustomEvent<{from: number; to: number;}>) => void;
@@ -381,7 +385,12 @@ declare namespace LocalJSX {
           * Row drag started
          */
         "onInternalRowDragStart"?: (event: CustomEvent<{
-		cell: Selection.Cell, text: string, pos: RevoGrid.PositionItem}>) => void;
+		cell: Selection.Cell, text: string, pos: RevoGrid.PositionItem, event: MouseEvent
+	}>) => void;
+        /**
+          * Row mouse move
+         */
+        "onInternalRowMouseMove"?: (event: CustomEvent<Selection.Cell>) => void;
         "parent"?: HTMLElement;
     }
     interface RevogrOverlaySelection {
@@ -435,6 +444,7 @@ declare namespace LocalJSX {
           * Custom editors register
          */
         "editors"?: Edition.Editors;
+        "onInitialRowDragStart"?: (event: CustomEvent<{pos: RevoGrid.PositionItem, text: string}>) => void;
         "onSetDimensionSize"?: (event: CustomEvent<{type: RevoGrid.MultiDimensionType, sizes: RevoGrid.ViewSettingSizeProp}>) => void;
         "onSetViewportCoordinate"?: (event: CustomEvent<RevoGrid.ViewPortScrollEvent>) => void;
         "onSetViewportSize"?: (event: CustomEvent<RevoGrid.ViewPortResizeEvent>) => void;

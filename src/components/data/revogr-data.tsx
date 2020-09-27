@@ -75,9 +75,9 @@ export class RevogrData {
     }
     return <div {...props}>
       <CellRenderer
-      model={this.columnService.rowDataModel(row.itemIndex, col.itemIndex)}
-      canDrag={this.canDrag}
-      onDragStart={(e) => this.dragStartCell.emit(e)}/>
+        model={this.columnService.rowDataModel(row.itemIndex, col.itemIndex)}
+        canDrag={this.canDrag}
+        onDragStart={(e) => this.dragStartCell.emit(e)}/>
     </div>;
   }
 }

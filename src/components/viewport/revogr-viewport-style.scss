@@ -11,15 +11,46 @@ revogr-viewport {
 		flex-direction: row;
 	}
 
+	.draggable {
+		$s: 30px;
+		position: fixed;
+		height: $s;
+		line-height: $s;
+		background: #fff;
+		border-radius: 3px;
+		display: block;
+		z-index: 100;
+		margin-top: 5px;
+		margin-right: -20px;
+		box-shadow: 0 4px 20px 0 rgba(black, .15);
+		padding-left: 20px;
+		padding-right: 5px;
+	
+		&.hidden {
+			display: none;
+		}
+	
+		.revo-alt-icon {
+			$alt-icon-color: black;
+			background-color: $alt-icon-color;
+			position: absolute;
+			left: 5px;
+			top: 10px;
+		}
+	}
+
+	.draggable-wrapper {
+		&.hidden {
+			display: none;
+		}
+	}
+
 	.drag-position {
 		position: absolute;
 		left: 0;
 		right: 0;
 		height: 1px;
+		z-index: 2;
 		background: red;
-
-		&.hidden {
-			display: none;
-		}
 	}
 }
