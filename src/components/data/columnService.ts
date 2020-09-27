@@ -13,7 +13,7 @@ import DataType = RevoGrid.DataType;
 export interface ColumnServiceI {
   columns: RevoGrid.ColumnRegular[];
 
-  customRenderer(r: number, c: number): VNode | void;
+  customRenderer(r: number, c: number): VNode | string | void;
 
   isReadOnly(r: number, c: number): boolean;
 
@@ -77,7 +77,7 @@ export default class ColumnService implements ColumnServiceI {
     return props;
   }
 
-  customRenderer(r: number, c: number): VNode | void {
+  customRenderer(r: number, c: number): VNode | string | void {
     const tpl = this.columns[c]?.cellTemplate;
     if (tpl) {
       return tpl(h as unknown as RevoGrid.HyperFunc<VNode>, this.rowDataModel(r, c));

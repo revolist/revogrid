@@ -27,7 +27,7 @@ export class DataProvider {
     // sorting available for row type only
     if (type === 'row') {
       if (this.sorting) {
-        this.sortItems(source, this.sorting);
+        source = this.sortItems(source, this.sorting);
       }
     }
     this.stores[type].updateData([...source]);
