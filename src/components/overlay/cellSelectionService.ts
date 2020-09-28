@@ -64,32 +64,32 @@ export default class CellSelectionService {
       return;
     }
     let current = this.getCurrentCell({x, y}, data);
-      let direction: Partial<Cell>|null;
-      if (this.autoFillLast) {
-        direction = this.getCoordinate(this.autoFillStart, this.autoFillLast);
+    let direction: Partial<Cell>|null;
+    if (this.autoFillLast) {
+      direction = this.getCoordinate(this.autoFillStart, this.autoFillLast);
+    }
+
+    // first time or direction equal to start(same as first time)
+    if (!this.autoFillLast || !direction) {
+      direction = this.getLargestDirection(this.autoFillStart, current);
+
+      if (!this.autoFillLast) {
+        this.autoFillLast = this.autoFillStart;
       }
+    }
 
-      // first time or direction equal to start(same as first time)
-      if (!this.autoFillLast || !direction) {
-        direction = this.getLargestDirection(this.autoFillStart, current);
-
-        if (!this.autoFillLast) {
-          this.autoFillLast = this.autoFillStart;
-        }
+    // nothing changed
+    if (!direction) {
+      return;
+    }
+    each(direction, (v: number, k: keyof Cell) => {
+      if (v) {
+        current = { ...this.autoFillLast, [k]: current[k] };
       }
+    });
 
-      // nothing changed
-      if (!direction) {
-        return;
-      }
-      each(direction, (v: number, k: keyof Cell) => {
-        if (v) {
-          current = { ...this.autoFillLast, [k]: current[k] };
-        }
-      });
-
-      this.autoFillLast = current;
-      this.config.tempRange(this.autoFillInitial, this.autoFillLast);
+    this.autoFillLast = current;
+    this.config.tempRange(this.autoFillInitial, this.autoFillLast);
   }
 
   getLargestDirection(initial: Cell, last: Cell): Partial<Cell>|null {
