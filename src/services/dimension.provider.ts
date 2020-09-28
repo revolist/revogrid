@@ -62,7 +62,6 @@ export default class DimensionProvider {
                 break;
         }
         for (let s of stores) {
-            this.viewports.stores[s].clear();
             this.stores[s].setStore(data);
         }
         

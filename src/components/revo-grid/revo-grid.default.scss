@@ -1,8 +1,10 @@
 @import './revo-grid.common.scss';
 
 $header-size: 30px;
-$header-shadow: 0 1px 10px rgba(black, .2);
+$header-bg: #f8f9fa;
+$header-border-color: #c0c0c0;
 $default-rows-size: 30px;
+$cell-border-color: #e2e3e3;
 
 revo-grid[theme="default"] {
 	revogr-viewport {
@@ -12,27 +14,24 @@ revo-grid[theme="default"] {
 
 	revogr-header {
 		text-align: center;
-		box-shadow: $header-shadow;
 		line-height: $header-size;
+		background-color: $header-bg;
 		
 		.group-row {
 			box-shadow: none;
-
-			.data-header-cell {
-				color: #9493a2;
-			}
+		}
+		.header-row, .group-row {
+			text-transform: uppercase;
+			font-size: 12px;
+			color: #61656a;
 		}
 		.header-row {
 			height: $header-size;
-
-			&:not(.group) {
-				font-weight: 600;
-			}
 		}
 
 		.data-header-cell {
-			$shadow-left: -1px 0 0 0 $cell-border-color;
-			$shadow-right: -1px 0 0 0 $cell-border-color inset;
+			$shadow-left: -1px 0 0 0 $header-border-color;
+			$shadow-right: -1px 0 0 0 $header-border-color inset;
 			$shadow-bottom: 0 -1px 0 0 $header-border-color inset;
 			$shadow-top: 0 -1px 0 0 $header-border-color;
 			box-shadow: $shadow-left, $shadow-right, $shadow-top, $shadow-bottom;
@@ -41,22 +40,27 @@ revo-grid[theme="default"] {
 
 	revogr-viewport-scroll {
 		&.colPinStart {
-			box-shadow: -4px 0 0 rgba(black, .05) inset;
+			revogr-data .row .data-cell:last-child {
+				$cell-shadow-cell: 0 -1px 0 0 $cell-border-color inset, -1px 0 0 0 $header-border-color inset;
+				box-shadow: $cell-shadow-cell;
+			}
+			.footer-wrapper revogr-data .row:first-child .data-cell {
+				$cell-shadow-cell: 0 1px 0 0 $header-border-color inset, -1px 0 0 0 $header-border-color inset;
+				box-shadow: $cell-shadow-cell;
+			}
 		}
 
 		&.colPinEnd {
-			box-shadow: 4px 0 0 rgba(black, .05) inset;
+			&, revogr-header {
+				box-shadow: 1px 0 0 $header-border-color inset;
+			}
 		}
 	}
 
-	.header-wrapper revogr-data {
-		box-shadow: 0 4px 4px rgba(black, .05);
+	.footer-wrapper revogr-data .row:first-child .data-cell {
+		$cell-shadow-cell: 0 1px 0 0 $header-border-color inset, -1px 0 0 0 $cell-border-color inset;
+		box-shadow: $cell-shadow-cell;
 	}
-
-	.footer-wrapper revogr-data {
-		box-shadow: 0 -4px 4px rgba(black, .05);
-	}
-
 
 	revogr-data {
 		$cell-shadow-cell: 0 -1px 0 0 $cell-border-color inset, -1px 0 0 0 $cell-border-color inset;

@@ -1,5 +1,5 @@
 import { setMode } from '@stencil/core';
-import { allowedThemes, DEFAULT_THEME } from '../themeManager/themeService';
+import ThemeService from '../themeManager/themeService';
 
 
 setMode(elm => {
@@ -8,9 +8,9 @@ setMode(elm => {
         theme = theme.trim();
     }
 
-    const isAllowed = allowedThemes.indexOf(theme) > -1;
-    if (!isAllowed) {
-        elm.setAttribute('theme', DEFAULT_THEME);
+    const parsedTheme = ThemeService.getTheme(theme);
+    if (parsedTheme !== theme) {
+        elm.setAttribute('theme', parsedTheme);
     }
-    return  isAllowed ? theme : DEFAULT_THEME;
+    return parsedTheme;
 });

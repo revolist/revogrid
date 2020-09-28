@@ -60,8 +60,10 @@ export default class CellSelectionService {
 
   /** Autofill logic: on mouse move apply based on previous direction (if present) */
   doMouseMove({x, y}: MouseEvent, data: EventData): void {
-    if (this.autoFillInitial) {
-      let current = this.getCurrentCell({x, y}, data);
+    if (!this.autoFillInitial) {
+      return;
+    }
+    let current = this.getCurrentCell({x, y}, data);
       let direction: Partial<Cell>|null;
       if (this.autoFillLast) {
         direction = this.getCoordinate(this.autoFillStart, this.autoFillLast);
@@ -88,7 +90,6 @@ export default class CellSelectionService {
 
       this.autoFillLast = current;
       this.config.tempRange(this.autoFillInitial, this.autoFillLast);
-    }
   }
 
   getLargestDirection(initial: Cell, last: Cell): Partial<Cell>|null {
