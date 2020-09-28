@@ -80,7 +80,7 @@ export class RevoGridComponent {
 
 
   /** Theme name */
-  @Prop({ reflect: true }) theme: ThemeSpace.Theme = 'default';
+  @Prop({ reflect: true, mutable: true }) theme: ThemeSpace.Theme = 'default';
 
 
   /** 

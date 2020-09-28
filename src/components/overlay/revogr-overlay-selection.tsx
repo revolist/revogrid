@@ -221,8 +221,12 @@ export class OverlaySelection {
       },
       tempRange: (start, end) => this.selectionStoreService.setTempRange(start, end),
       autoFill: (isAutofill) => {
-        const focus = this.selectionStore.get('focus');
-        if (!focus) {
+        let focus = this.selectionStore.get('focus');
+        const range = this.selectionStore.get('range');
+        if (range) {
+          focus = {x: range.x, y: range.y};
+        }
+        if (!focus && !range) {
           return null;
         }
         this.autoFill = isAutofill;
