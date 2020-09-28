@@ -1,7 +1,6 @@
 import debounce from 'lodash/debounce';
 import each from 'lodash/each';
 
-import {codesLetter} from '../../utils/keyCodes';
 import {Selection, RevoGrid} from '../../interfaces';
 import {getItemByPosition} from '../../store/dimension/dimension.helpers';
 import Cell = Selection.Cell;
@@ -104,30 +103,6 @@ export default class CellSelectionService {
       return { y: 1 };
     }
     return null;
-  }
-
-  chaneKeyDown(e: KeyboardEvent): {changes: Partial<Cell>; isMulti?: boolean}|void {
-    const isMulti: boolean = this.canRange && e.shiftKey;
-    switch (e.code) {
-      case codesLetter.TAB:
-      case codesLetter.ARROW_UP:
-      case codesLetter.ARROW_DOWN:
-      case codesLetter.ARROW_LEFT:
-      case codesLetter.ARROW_RIGHT:
-        e.preventDefault();
-        break;
-    }
-    switch (e.code) {
-      case codesLetter.ARROW_UP:
-        return {changes: { y: -1 }, isMulti};
-      case codesLetter.ARROW_DOWN:
-        return { changes: { y: 1 }, isMulti};
-      case codesLetter.ARROW_LEFT:
-        return { changes: { x: -1 }, isMulti };
-      case codesLetter.TAB:
-      case codesLetter.ARROW_RIGHT:
-        return { changes: { x: 1 }, isMulti };
-    }
   }
 
   /** Calculate cell based on x, y position */

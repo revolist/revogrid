@@ -19,6 +19,7 @@ import ViewportProps = ViewportSpace.ViewportProps;
 })
 export class RevogrViewport {
   private elementToScroll: ElementScroll[] = [];
+  private clipboard: HTMLRevogrClipboardElement;
   private scrollingService: GridScrollingService;
   private selectionStoreConnector: SelectionStoreConnector;
 
@@ -54,6 +55,7 @@ export class RevogrViewport {
     }
   }
 
+  /** DRAG AND DROP */
   @Listen('internalRowDragStart')
   onRowDragStarted(e: CustomEvent<{pos: RevoGrid.PositionItem, text: string, event: MouseEvent}>): void {
     e.cancelBubble = true;
@@ -74,12 +76,25 @@ export class RevogrViewport {
   onRowDrag({detail}: CustomEvent<RevoGrid.PositionItem>): void {
     this.orderService?.move(detail);
   }
+
   @Listen('internalRowMouseMove')
   onRowMouseMove(e: CustomEvent<Selection.Cell>): void {
     e.cancelBubble = true;
     this.orderService?.moveTip(e.detail);
   }
 
+  /** Clipboard */
+  @Listen('internalCopy')
+  onCopy(_e: CustomEvent): void {
+    this.clipboard?.copy();
+  }
+
+  @Listen('internalPaste')
+  onPaste(_e: CustomEvent): void {
+    this.clipboard?.paste();
+  }
+
+  /** Component */
   connectedCallback(): void {
     this.selectionStoreConnector = new SelectionStoreConnector();
     this.scrollingService = new GridScrollingService(
@@ -190,6 +205,7 @@ export class RevogrViewport {
             virtualSize={this.viewports['row'].get('virtualSize')}
             onScrollVirtual={e => this.scrollingService.onScroll(e.detail)}/>
           <OrderRenderer ref={e => this.orderService = e}/>
+          <revogr-clipboard ref={e => this.clipboard = e}/>
         </div>
       </div>
       <revogr-scroll-virtual

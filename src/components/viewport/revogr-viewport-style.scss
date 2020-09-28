@@ -53,4 +53,13 @@ revogr-viewport {
 		z-index: 2;
 		background: red;
 	}
+
+	.clipboard {
+		// visibility: hidden;
+		// width: 0;
+		// height: 0;
+		position: absolute;
+		left: 0;
+		top: 0;
+	}
 }
