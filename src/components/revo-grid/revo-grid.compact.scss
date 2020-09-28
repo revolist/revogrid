@@ -44,7 +44,7 @@ revo-grid[theme="compact"] {
 	
 		revogr-viewport-scroll {
 			&.colPinStart {
-				box-shadow: 1px 0 0 $cell-border-color;
+				box-shadow: -1px 0 0 $cell-border-color inset;
 			}
 	
 			&.colPinEnd {
