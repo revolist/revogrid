@@ -7,6 +7,7 @@ $default-rows-size: 30px;
 $cell-border-color: #e2e3e3;
 
 revo-grid[theme="default"] {
+	font-size: 12px;
 	revogr-viewport {
 		$shadow-top: 0 -1px 0 0 $header-border-color;
 		box-shadow: $shadow-top;
