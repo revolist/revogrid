@@ -32,7 +32,7 @@ export class DataProvider {
     }
     this.stores[type].updateData([...source]);
     if (type === 'row') {
-      this.dimensionProvider.setRealSize(source, type);
+      this.dimensionProvider.setData(source, type);
     } else {
       this.dimensionProvider.setPins(source, type);
     }
