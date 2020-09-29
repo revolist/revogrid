@@ -47,6 +47,10 @@ export namespace Components {
          */
         "readonly": boolean;
         /**
+          * Refreshes data viewport. Can be specific part as row or pinned row or 'all' by default.
+         */
+        "refresh": (type?: RevoGrid.DimensionRows | 'all') => Promise<void>;
+        /**
           * When true, columns are resizable.
          */
         "resize": boolean;
@@ -58,6 +62,19 @@ export namespace Components {
           * Indicates default row size. By default 0, means theme package size will be applied
          */
         "rowSize": number;
+        /**
+          * Scrolls view port to specified column index
+         */
+        "scrollToColumnIndex": (coordinate?: number) => Promise<void>;
+        /**
+          * Scrolls view port to specified column prop
+         */
+        "scrollToColumnProp": (prop: RevoGrid.ColumnProp) => Promise<void>;
+        "scrollToCoordinate": (cell: Partial<Selection.Cell>) => Promise<void>;
+        /**
+          * Scrolls view port to specified row index
+         */
+        "scrollToRow": (coordinate?: number) => Promise<void>;
         /**
           * Source - defines main data source. Can be an Object or 2 dimensional array([][]); Keys/indexes referenced from columns Prop
          */
@@ -152,6 +169,7 @@ export namespace Components {
         "resize": boolean;
         "rowClass": string;
         "rowStores": {[T in RevoGrid.DimensionRows]: ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>};
+        "scrollToCoordinate": (cell: Partial<Selection.Cell>) => Promise<void>;
         "uuid": string|null;
         "viewports": {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.ViewportState>};
     }

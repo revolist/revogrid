@@ -1,4 +1,4 @@
-import {Component, Prop, h, Watch, Element, Listen, Event, EventEmitter} from '@stencil/core';
+import {Component, Prop, h, Watch, Element, Listen, Event, EventEmitter, Method} from '@stencil/core';
 import {ObservableMap} from '@stencil/store';
 import reduce from 'lodash/reduce';
 
@@ -156,6 +156,64 @@ export class RevoGridComponent {
    * Use e.preventDefault() to prevent cell focus change. 
    */
   @Event() beforeCellFocus: EventEmitter<Selection.FocusedCells>;
+
+
+  
+  // --------------------------------------------------------------------------
+  //
+  //  Methods
+  //
+  // --------------------------------------------------------------------------
+  /** 
+   * Refreshes data viewport.
+   * Can be specific part as row or pinned row or 'all' by default. 
+   */
+  @Method() async refresh(type: RevoGrid.DimensionRows|'all' = 'all'): Promise<void> {
+    this.dataProvider.refresh(type);
+  }
+
+  /** 
+   * Scrolls view port to specified row index
+   */
+  @Method() async scrollToRow(coordinate: number = 0): Promise<void> {
+    const y = this.dimensionProvider.getViewPortPos({
+      coordinate,
+      dimension: 'row'
+    });
+    await this.scrollToCoordinate({ y });
+  }
+
+
+  /** 
+   * Scrolls view port to specified column index
+   */
+  @Method() async scrollToColumnIndex(coordinate: number = 0): Promise<void> {
+    const x = this.dimensionProvider.getViewPortPos({
+      coordinate,
+      dimension: 'col'
+    });
+    await this.scrollToCoordinate({ x });
+  }
+
+  /** 
+   * Scrolls view port to specified column prop
+   */
+  @Method() async scrollToColumnProp(prop: RevoGrid.ColumnProp): Promise<void> {
+    const coordinate = this.columnProvider.getColumnIndexByProp(prop, 'col');
+    if (coordinate < 0) {
+      // already on the screen
+      return;
+    }
+    const x = this.dimensionProvider.getViewPortPos({
+      coordinate,
+      dimension: 'col'
+    });
+    await this.scrollToCoordinate({ x });
+  }
+
+  @Method() async scrollToCoordinate(cell: Partial<Selection.Cell>): Promise<void> {
+    await this.viewportElement.scrollToCoordinate(cell);
+  }
   
   // --------------------------------------------------------------------------
   //
@@ -251,6 +309,7 @@ export class RevoGridComponent {
   private themeService: ThemeService;
 
   @Element() element: HTMLElement;
+  private viewportElement: HTMLRevogrViewportElement;
 
 
   @Watch('columns')
@@ -329,18 +388,19 @@ export class RevoGridComponent {
 
   render() {
     return <revogr-viewport
-        onSetDimensionSize={e => this.dimensionProvider.setDimensionSize(e.detail.type, e.detail.sizes)}
-        onSetViewportCoordinate={e => this.dimensionProvider.setViewPortCoordinate(e.detail)}
-        onSetViewportSize={e => this.viewportProvider.setViewport(e.detail.dimension, { virtualSize:  e.detail.size})}
-        columnStores={this.columnStores}
-        dimensions={this.dimensionStores}
-        viewports={this.viewportStores}
-        rowStores={this.rowStores}
-        uuid={this.uuid}
-        resize={this.resize}
-        readonly={this.readonly}
-        range={this.range}
-        rowClass={this.rowClass}
-        editors={this.editors}/>;
+      ref={e => this.viewportElement = e}
+      onSetDimensionSize={e => this.dimensionProvider.setDimensionSize(e.detail.type, e.detail.sizes)}
+      onSetViewportCoordinate={e => this.dimensionProvider.setViewPortCoordinate(e.detail)}
+      onSetViewportSize={e => this.viewportProvider.setViewport(e.detail.dimension, { virtualSize:  e.detail.size})}
+      columnStores={this.columnStores}
+      dimensions={this.dimensionStores}
+      viewports={this.viewportStores}
+      rowStores={this.rowStores}
+      uuid={this.uuid}
+      resize={this.resize}
+      readonly={this.readonly}
+      range={this.range}
+      rowClass={this.rowClass}
+      editors={this.editors}/>;
   }
 }

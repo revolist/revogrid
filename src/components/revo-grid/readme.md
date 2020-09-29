@@ -40,6 +40,60 @@
 | `rowOrderChanged` | Before row order apply. Use e.preventDefault() to prevent row order change.                                                                                                             | `CustomEvent<{ from: number; to: number; }>`                                                                                                                             |
 
 
+## Methods
+
+### `refresh(type?: RevoGrid.DimensionRows | 'all') => Promise<void>`
+
+Refreshes data viewport.
+Can be specific part as row or pinned row or 'all' by default.
+
+#### Returns
+
+Type: `Promise<void>`
+
+
+
+### `scrollToColumnIndex(coordinate?: number) => Promise<void>`
+
+Scrolls view port to specified column index
+
+#### Returns
+
+Type: `Promise<void>`
+
+
+
+### `scrollToColumnProp(prop: RevoGrid.ColumnProp) => Promise<void>`
+
+Scrolls view port to specified column prop
+
+#### Returns
+
+Type: `Promise<void>`
+
+
+
+### `scrollToCoordinate(cell: Partial<Selection.Cell>) => Promise<void>`
+
+
+
+#### Returns
+
+Type: `Promise<void>`
+
+
+
+### `scrollToRow(coordinate?: number) => Promise<void>`
+
+Scrolls view port to specified row index
+
+#### Returns
+
+Type: `Promise<void>`
+
+
+
+
 ## Dependencies
 
 ### Depends on
