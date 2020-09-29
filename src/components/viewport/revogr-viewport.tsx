@@ -1,4 +1,4 @@
-import {Component, Prop, h, Host, Listen, Element, Event, EventEmitter, VNode} from '@stencil/core';
+import {Component, Prop, h, Host, Listen, Element, Event, EventEmitter, VNode, Method} from '@stencil/core';
 import {ObservableMap} from '@stencil/store';
 import '../../utils/closestPolifill';
 
@@ -12,6 +12,7 @@ import {Edition, Selection, RevoGrid} from '../../interfaces';
 import OrderRenderer, { OrdererService } from '../order/orderRenderer';
 
 import ViewportProps = ViewportSpace.ViewportProps;
+import { each } from 'lodash';
 
 @Component({
   tag: 'revogr-viewport',
@@ -78,6 +79,22 @@ export class RevogrViewport {
   onRowMouseMove(e: CustomEvent<Selection.Cell>): void {
     e.cancelBubble = true;
     this.orderService?.moveTip(e.detail);
+  }
+  
+  @Method() async scrollToCoordinate(cell: Partial<Selection.Cell>): Promise<void> {
+    each(cell, (coordinate: number, key: keyof Selection.Cell) => {
+      if(key === 'x') {
+        this.scrollingService.onScroll({
+          dimension: 'col',
+          coordinate
+        });
+      } else {
+        this.scrollingService.onScroll({
+          dimension: 'row',
+          coordinate
+        });
+      }
+    });
   }
 
   connectedCallback(): void {

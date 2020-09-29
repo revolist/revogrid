@@ -2,6 +2,7 @@ import reduce from 'lodash/reduce';
 import each from 'lodash/each';
 import isArray from 'lodash/isArray';
 import map from 'lodash/map';
+import findIndex from 'lodash/findIndex';
 
 import DataStore, {Groups} from '../store/dataSource/data.store';
 import {columnTypes} from '../store/storeTypes';
@@ -43,7 +44,7 @@ export default class ColumnDataProvider {
 		}
 
     get stores(): ColumnDataSources {
-        return this.dataSources;
+			return this.dataSources;
     }
     constructor(private dimensionProvider: DimensionProvider) {
         this.dataSources = reduce(columnTypes, (sources: Partial<ColumnDataSources>, k: RevoGrid.DimensionCols) => {
@@ -58,7 +59,12 @@ export default class ColumnDataProvider {
 
     getColumn(c: number, type: RevoGrid.DimensionCols): RevoGrid.ColumnRegular|undefined {
         return this.dataSources[type].store.get('items')[c];
-    }
+		}
+		
+		getColumnIndexByProp(prop: RevoGrid.ColumnProp, type: RevoGrid.DimensionCols): number {
+			const items = this.dataSources[type].store.get('items');
+			return findIndex(items, { prop });
+		}
 
     setColumns(columns: RevoGrid.ColumnData): ColumnCollection {
         const data: ColumnCollection = ColumnDataProvider.getColumns(columns);
@@ -103,9 +109,9 @@ export default class ColumnDataProvider {
 			const cols = this.dataSources[type].store.get('items');
 			cols[index] = column;
 			this.dataSources[type].setData({
-					items: [...cols]
+							items: [...cols]
 			});
-		}
+    }
 		
 		private clearSorting(): void {
 			const types = reduce(this.sorting, (r: {[key in Partial<RevoGrid.DimensionCols>]: boolean}, c: RevoGrid.ColumnRegular) => {

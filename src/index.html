@@ -79,6 +79,9 @@
         grid.addEventListener('rowDragStart', (e) => {
           console.log(e.detail);
         });
+        setTimeout(() => {
+          grid.scrollToColumnProp(30);
+        }, 500);
     </script>
 </body>
 </html>
