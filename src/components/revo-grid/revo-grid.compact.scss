@@ -62,8 +62,6 @@ revo-grid[theme="compact"] {
 			.data-cell {
 				box-shadow: $cell-shadow-cell;
 				padding: 0 15px;
-				overflow: hidden;
-				text-overflow: ellipsis;
 				color: rgba(black, .87);
 		
 				&.disabled {
