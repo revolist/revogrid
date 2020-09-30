@@ -32,6 +32,13 @@ revo-grid {
     align-items: flex-start;
     max-width: 100%;
   }
+
+  revogr-scroll-virtual {
+    position: relative;
+    &.vertical, &.horizontal {
+      z-index: 3;
+    }
+  }
 }
 
 
