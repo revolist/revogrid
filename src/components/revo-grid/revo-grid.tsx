@@ -155,7 +155,7 @@ export class RevoGridComponent {
    * Before cell focus changed.
    * Use e.preventDefault() to prevent cell focus change. 
    */
-  @Event() beforeCellFocus: EventEmitter<Selection.FocusedCells>;
+  @Event() beforeCellFocus: EventEmitter<Edition.BeforeSaveDataDetails>;
 
 
   
@@ -287,7 +287,7 @@ export class RevoGridComponent {
   }
 
   @Listen('internalFocusCell')
-  onCellFocus(e: CustomEvent<Selection.FocusedCells>): void {
+  onCellFocus(e: CustomEvent<Edition.BeforeSaveDataDetails>): void {
     e.cancelBubble = true;
     const {defaultPrevented} = this.beforeCellFocus.emit(e.detail);
     if (!this.canFocus || defaultPrevented) {

@@ -279,7 +279,7 @@ declare namespace LocalJSX {
         /**
           * Before cell focus changed. Use e.preventDefault() to prevent cell focus change.
          */
-        "onBeforeCellFocus"?: (event: CustomEvent<Selection.FocusedCells>) => void;
+        "onBeforeCellFocus"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
         /**
           * Before edit event. Triggered before edit data applied. Use e.preventDefault() to prevent edit data set and use you own.  Use e.val = {your value} to replace edit result with your own.
          */
@@ -431,7 +431,7 @@ declare namespace LocalJSX {
         "onChangeSelection"?: (event: CustomEvent<{changes: Partial<Selection.Cell>; isMulti?: boolean; }>) => void;
         "onFocusCell"?: (event: CustomEvent<Selection.FocusedCells>) => void;
         "onInternalCellEdit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
-        "onInternalFocusCell"?: (event: CustomEvent<Selection.FocusedCells>) => void;
+        "onInternalFocusCell"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
         /**
           * Range data apply
          */

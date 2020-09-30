@@ -65,7 +65,7 @@ export class OverlaySelection {
   }
 
   @Event({ cancelable: true }) internalCellEdit: EventEmitter<Edition.BeforeSaveDataDetails>;
-  @Event({ cancelable: true }) internalFocusCell: EventEmitter<Selection.FocusedCells>;
+  @Event({ cancelable: true }) internalFocusCell: EventEmitter<Edition.BeforeSaveDataDetails>;
 
   @Event({ bubbles: false }) setEdit: EventEmitter<string|boolean>;
   @Event({ bubbles: false }) changeSelection: EventEmitter<{changes: Partial<Selection.Cell>; isMulti?: boolean; }>;
@@ -182,14 +182,13 @@ export class OverlaySelection {
       change: (changes, isMulti?) => this.changeSelection?.emit({ changes, isMulti }),
       focus: (focus, end) => {
         const focused = { focus, end };
-        const {defaultPrevented} = this.internalFocusCell.emit();
+        const {defaultPrevented} = this.internalFocusCell.emit(this.columnService.getSaveData(focus.y, focus.x));
         if (defaultPrevented) {
           return;
         }
         this.focusCell.emit(focused);
       },
       unregister: () => this.unregister?.emit()
-
     });
     this.selectionService = new CellSelectionService({
       canRange: this.range,

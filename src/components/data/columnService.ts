@@ -96,8 +96,11 @@ export default class ColumnService implements ColumnServiceI {
     return ColumnService.getData(model[prop as number]);
   }
 
-  getSaveData(rowIndex: number, c: number, val: string): BeforeSaveDataDetails {
+  getSaveData(rowIndex: number, c: number, val?: string): BeforeSaveDataDetails {
     const {prop, model } = this.rowDataModel(rowIndex, c);
+    if (typeof val === 'undefined') {
+      val = this.getCellData(rowIndex, c)
+    }
     return { prop, rowIndex, val, model, type: this.dataStore.get('type')};
   }
 
@@ -198,7 +201,7 @@ export default class ColumnService implements ColumnServiceI {
     return toCopy;
   }
 
-  static getData(val: any): string {
+  static getData(val?: any): string {
     if (typeof val === 'undefined' || val === null) {
       return '';
     }
