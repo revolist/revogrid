@@ -30,12 +30,18 @@ export function generateFakeDataObject(rowsNumber, colsNumber) {
                     }, props.model[props.prop] || '');
                 } */
             }
+            if (col === 1) {
+                columns[col].cellTemplate = (h, props) => {
+                    console.log(props.model);
+                    return props.model[props.prop];
+                }
+            }
         }
     }
     const pinnedTopRows = result[10] && [result[10]] || [];
     const pinnedBottomRows = result[1] && [result[1]] || [];
     let headers = Object.keys(columns).map((k) => columns[k]);
-    const grouped = headers.splice(1, 4);
+    // const grouped = headers.splice(1, 4);
     /* const grouped2 = grouped.splice(0, 2);
     grouped.push({
         name: 'Grouped2',
@@ -45,10 +51,10 @@ export function generateFakeDataObject(rowsNumber, colsNumber) {
 
     const grouped4 = headers.splice(1, 3);
     */ 
-    headers.splice(6, 0, ...[{
+    /* headers.splice(6, 0, ...[{
         name: 'Grouped',
         children: grouped
-    }]);
+    }]); */
     /*
     headers.splice(1, 0, ...[{
         name: 'Grouped3',
