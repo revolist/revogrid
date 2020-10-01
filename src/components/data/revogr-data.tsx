@@ -74,9 +74,6 @@ export class RevogrData {
       return <div {...props}>{custom}</div>;
     }
     const model = this.columnService.rowDataModel(row.itemIndex, col.itemIndex);
-    if (!model) {
-      return;
-    }
     return <div {...props}>
       <CellRenderer
         model={model}
