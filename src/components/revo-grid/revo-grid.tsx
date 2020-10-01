@@ -43,7 +43,7 @@ export class RevoGridComponent {
   /**
    * Defines how many rows/columns should be rendered outside visible area.
    */
-  @Prop() frameSize: number = 0;
+  @Prop() frameSize: number = 5;
   /**
    * Indicates default row size.
    * By default 0, means theme package size will be applied

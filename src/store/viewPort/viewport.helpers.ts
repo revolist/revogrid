@@ -106,8 +106,7 @@ export function getItems(opt: {
   const items: RevoGrid.VirtualPositionItem[] = [];
   let index: number = opt.startIndex;
   let size: number = currentSize;
-  let i: number = 0;
-  while(size <= opt.maxSize && i < opt.maxCount) {
+  while(size <= opt.maxSize && index < opt.maxCount) {
     const newSize: number = getItemSize(index, opt.sizes, opt.origSize);
     items.push({
       start: opt.start + size,
@@ -117,7 +116,6 @@ export function getItems(opt: {
     });
     size += newSize;
     index++;
-    i++;
   }
   return items;
 }

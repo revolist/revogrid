@@ -41,10 +41,6 @@ export default class ColumnService implements ColumnServiceI {
     const readOnly: RevoGrid.ReadOnlyFormat = this.columns[c]?.readonly;
     if (typeof readOnly === 'function') {
       const data = this.rowDataModel(r, c);
-      // quick fix, remove
-      if (!data) {
-        return true;
-      }
       return readOnly(data);
     }
     return readOnly;
@@ -62,10 +58,6 @@ export default class ColumnService implements ColumnServiceI {
     const extraPropsFunc = this.columns[c]?.cellProperties;
     if (extraPropsFunc) {
       const data = this.rowDataModel(r, c);
-      // quick fix, remove
-      if (!data) {
-        return props;
-      }
       const extra = extraPropsFunc(data);
       if (!extra) {
         return props;
@@ -91,10 +83,6 @@ export default class ColumnService implements ColumnServiceI {
     const tpl = this.columns[c]?.cellTemplate;
     if (tpl) {
       const data = this.rowDataModel(r, c);
-      // quick fix, remove
-      if (!data) {
-        return;
-      }
       return tpl(h as unknown as RevoGrid.HyperFunc<VNode>, data);
     }
     return;
@@ -108,10 +96,6 @@ export default class ColumnService implements ColumnServiceI {
 
   getCellData(r: number, c: number): string {
     const data = this.rowDataModel(r, c);
-    // quick fix, remove
-    if (!data) {
-      return '';
-    }
     return ColumnService.getData(data.model[data.prop as number]);
   }
 
@@ -120,9 +104,6 @@ export default class ColumnService implements ColumnServiceI {
       val = this.getCellData(rowIndex, c)
     }
     const data = this.rowDataModel(rowIndex, c);
-    if (!data) {
-      throw new Error('Data expcted');
-    }
     return { prop: data.prop, rowIndex, val, model: data.model, type: this.dataStore.get('type')};
   }
 
@@ -130,13 +111,13 @@ export default class ColumnService implements ColumnServiceI {
     return this.columns[c]?.editor;
   }
 
-  rowDataModel(r: number, c: number): ColumnDataSchemaModel|void {
+  rowDataModel(r: number, c: number): ColumnDataSchemaModel {
     const column = this.columns[c];
     const prop: ColumnProp | undefined = column?.prop;
 
     const data: DataSource = this.dataStore.get('items');
     if (!data[r]) {
-      return;
+      console.error('unexpected count');
     }
     const model: DataType = data[r] || {};
     return {prop, model, data, column};
