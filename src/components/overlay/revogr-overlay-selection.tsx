@@ -34,6 +34,7 @@ export class OverlaySelection {
 
   private selectionStoreService: SelectionStore;
   private orderEditor: HTMLRevogrOrderEditorElement;
+  private copyData: string;
 
   @Element() element: HTMLElement;
 
@@ -102,6 +103,23 @@ export class OverlaySelection {
   @Listen('keydown', { target: 'document' })
   async handleKeyDown(e: KeyboardEvent): Promise<void> {
     if (!this.selectionStoreService.focused) {
+      return;
+    }
+
+    if (e.code=="KeyC"  && (e.metaKey || e.ctrlKey)){
+      const focused = this.selectionStoreService.focused;
+      const model = this.columnService.getCellData(focused.y, focused.x);
+      this.copyData=model;
+      return;
+    }
+    
+    if (e.code=="KeyV"  && (e.metaKey || e.ctrlKey)){
+      if (this.copyData){
+        const focused = this.selectionStoreService.focused;
+        this.columnService.setCellData(focused.y, focused.x,this.copyData);
+        const model = this.columnService.getCellData(focused.y, focused.x);
+        this.onCellEdit({ row: focused.y, col: focused.x, val: model }, true);  
+      }
       return;
     }
 

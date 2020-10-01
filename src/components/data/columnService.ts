@@ -98,6 +98,10 @@ export default class ColumnService implements ColumnServiceI {
     const data = this.rowDataModel(r, c);
     return ColumnService.getData(data.model[data.prop as number]);
   }
+  setCellData(r: number, c: number,value:string): void{
+    const data = this.rowDataModel(r, c);
+    ColumnService.setData(data.model,data.prop as string,value);
+  }
 
   getSaveData(rowIndex: number, c: number, val?: string): BeforeSaveDataDetails {
     if (typeof val === 'undefined') {
@@ -212,6 +216,9 @@ export default class ColumnService implements ColumnServiceI {
       return '';
     }
     return val.toString();
+  }
+  static setData(model:DataType,pos: string,value: string):void{
+      model[pos]=value;
   }
 }
 
