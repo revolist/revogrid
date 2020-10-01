@@ -116,6 +116,7 @@ export class OverlaySelection {
     if (e.code=="KeyV"  && (e.metaKey || e.ctrlKey)){
       if (this.copyData){
         const focused = this.selectionStoreService.focused;
+        if (this.columnService.isReadOnly(focused.y,focused.x)) return;
         this.columnService.setCellData(focused.y, focused.x,this.copyData);
         const model = this.columnService.getCellData(focused.y, focused.x);
         this.onCellEdit({ row: focused.y, col: focused.x, val: model }, true);  
