@@ -1,15 +1,17 @@
-import {Component, Prop, h, Host, Listen, Element, Event, EventEmitter, VNode} from '@stencil/core';
+import {Component, Prop, h, Host, Listen, Element, Event, EventEmitter, VNode, Method} from '@stencil/core';
 import {ObservableMap} from '@stencil/store';
+import { each } from 'lodash';
 import '../../utils/closestPolifill';
 
 import {UUID} from '../../utils/consts';
-import {gatherColumnData, ViewportColumn} from './viewport.helpers';
+import {gatherColumnData, getStoresCoordinates, ViewportColumn} from './viewport.helpers';
 import GridScrollingService, {ElementScroll} from './gridScrollingService';
 import ViewportSpace from './viewport.interfaces';
 import {DataSourceState} from '../../store/dataSource/data.store';
 import SelectionStoreConnector from '../../services/selection.store.connector';
 import {Edition, Selection, RevoGrid} from '../../interfaces';
 import OrderRenderer, { OrdererService } from '../order/orderRenderer';
+import { columnTypes } from '../../store/storeTypes';
 
 import ViewportProps = ViewportSpace.ViewportProps;
 
@@ -19,7 +21,6 @@ import ViewportProps = ViewportSpace.ViewportProps;
 })
 export class RevogrViewport {
   private elementToScroll: ElementScroll[] = [];
-  private clipboard: HTMLRevogrClipboardElement;
   private scrollingService: GridScrollingService;
   private selectionStoreConnector: SelectionStoreConnector;
 
@@ -82,16 +83,28 @@ export class RevogrViewport {
     e.cancelBubble = true;
     this.orderService?.moveTip(e.detail);
   }
-
-  /** Clipboard */
-  @Listen('internalCopy')
-  onCopy(_e: CustomEvent): void {
-    this.clipboard?.copy();
+  
+  @Method() async scrollToCoordinate(cell: Partial<Selection.Cell>): Promise<void> {
+    each(cell, (coordinate: number, key: keyof Selection.Cell) => {
+      if(key === 'x') {
+        this.scrollingService.onScroll({
+          dimension: 'col',
+          coordinate
+        });
+      } else {
+        this.scrollingService.onScroll({
+          dimension: 'row',
+          coordinate
+        });
+      }
+    });
   }
-
-  @Listen('internalPaste')
-  onPaste(_e: CustomEvent): void {
-    this.clipboard?.paste();
+  
+  @Method() async setEdit(rowIndex: number, colIndex: number, colType: RevoGrid.DimensionCols, rowType: RevoGrid.DimensionRows ): Promise<void> {
+    const stores = getStoresCoordinates(this.columnStores, this.rowStores);
+    const x = stores[colType];
+    const y = stores[rowType];
+    this.selectionStoreConnector?.setEditByCell({ x, y }, { x: colIndex, y: rowIndex });
   }
 
   /** Component */
@@ -109,10 +122,11 @@ export class RevogrViewport {
     this.elementToScroll.length = 0;
     const rows: RevoGrid.VirtualPositionItem[] = this.viewports['row'].get('items');
     const viewports: ViewportProps[] = [];
-    const cols: RevoGrid.DimensionCols[] = ['colPinStart', 'col', 'colPinEnd'];
     let index: number = 0;
-    cols.forEach((val) => {
+    columnTypes.forEach((val) => {
       const colStore = this.columnStores[val];
+
+      // only columns that have data show
       if (colStore.get('items').length) {
         const column: ViewportColumn = {
           colType: val,
@@ -146,7 +160,7 @@ export class RevogrViewport {
     /** render viewports columns */
     for (let view of viewports) {
       const dataViews: HTMLElement[] = [];
-      let j: number = 0;
+      let j = 0;
 
       /** render viewports rows */
       for (let data of view.dataPorts) {
@@ -205,7 +219,6 @@ export class RevogrViewport {
             virtualSize={this.viewports['row'].get('virtualSize')}
             onScrollVirtual={e => this.scrollingService.onScroll(e.detail)}/>
           <OrderRenderer ref={e => this.orderService = e}/>
-          <revogr-clipboard ref={e => this.clipboard = e}/>
         </div>
       </div>
       <revogr-scroll-virtual

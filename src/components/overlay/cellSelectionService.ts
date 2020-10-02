@@ -107,9 +107,20 @@ export default class CellSelectionService {
 
   /** Calculate cell based on x, y position */
   private getCurrentCell({x, y}: Cell, {el, rows, cols}: EventData): Cell {
-    const {top, left} = el.getBoundingClientRect();
-    const row = getItemByPosition(rows, y - top);
-    const col = getItemByPosition(cols, x - left);
+    const {top, left, height, width} = el.getBoundingClientRect();
+    let cellY = y - top;
+
+    // limit to element height
+    if (cellY >= height) {
+      cellY = height - 1;
+    }
+    let cellX = x - left;
+    // limit to element width
+    if (cellX >= width) {
+      cellX = width - 1;
+    }
+    const row = getItemByPosition(rows, cellY);
+    const col = getItemByPosition(cols, cellX);
     return { x: col.itemIndex, y: row.itemIndex };
   }
 

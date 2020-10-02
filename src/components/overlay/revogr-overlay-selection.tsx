@@ -36,6 +36,7 @@ export class OverlaySelection {
   private selectionStoreService: SelectionStore;
   private keyService: KeyService;
   private orderEditor: HTMLRevogrOrderEditorElement;
+  private clipboard: HTMLRevogrClipboardElement;
 
   @Element() element: HTMLElement;
 
@@ -70,7 +71,7 @@ export class OverlaySelection {
   @Event({ cancelable: true }) internalPaste: EventEmitter;
 
   @Event({ cancelable: true }) internalCellEdit: EventEmitter<Edition.BeforeSaveDataDetails>;
-  @Event({ cancelable: true }) internalFocusCell: EventEmitter<Selection.FocusedCells>;
+  @Event({ cancelable: true }) internalFocusCell: EventEmitter<Edition.BeforeSaveDataDetails>;
 
   @Event({ bubbles: false }) setEdit: EventEmitter<string|boolean>;
   @Event({ bubbles: false }) changeSelection: EventEmitter<{changes: Partial<Selection.Cell>; isMulti?: boolean; }>;
@@ -163,7 +164,6 @@ export class OverlaySelection {
 
     // copy operation
     if (this.keyService.isCopy(e)) {
-      this.internalCopy.emit();
       return;
     }
 
@@ -208,14 +208,13 @@ export class OverlaySelection {
       change: (changes, isMulti?) => this.changeSelection?.emit({ changes, isMulti }),
       focus: (focus, end) => {
         const focused = { focus, end };
-        const {defaultPrevented} = this.internalFocusCell.emit();
+        const {defaultPrevented} = this.internalFocusCell.emit(this.columnService.getSaveData(focus.y, focus.x));
         if (defaultPrevented) {
           return;
         }
         this.focusCell.emit(focused);
       },
       unregister: () => this.unregister?.emit()
-
     });
     this.selectionService = new CellSelectionService({
       canRange: this.range,
@@ -321,6 +320,13 @@ export class OverlaySelection {
     const tempRange = this.selectionStore.get('tempRange');
     const els: VNode[] = [];
 
+    if (range || selectionFocus) {
+      els.push(<revogr-clipboard
+        onCopyRegion={(e) => this.onCopy(e.detail)} ref={e => this.clipboard = e}
+        onPasteRegion={(e) => this.onPaste(e.detail)}
+        />);
+    }
+
     if (range) {
       els.push(...this.renderRange(range));
     }
@@ -371,14 +377,41 @@ export class OverlaySelection {
         parent={this.element}
         onInternalRowDragStart={(e) => this.onRowDragStart(e)}/>);
     }
-    return <Host {...hostProps}>{els}<slot name='data'/></Host>;
+    return <Host {...hostProps}>
+      {els}<slot name='data'/>
+    </Host>;
+  }
+
+  private onPaste(data: string[][]): void {
+    const focus = this.selectionStore.get('focus');
+    if (!focus) {
+      return;
+    }
+    const {changed, range} = this.columnService.getTransformedDataToApply(focus, data);
+    this.applyRangeData(changed);
+    this.selectionStoreService.applyRange(range);
+  }
+
+  private onCopy(e: DataTransfer): void {
+    const canCopy = this.internalCopy.emit();
+    if (canCopy.defaultPrevented) {
+      return;
+    }
+    let focus = this.selectionStore.get('focus');
+    let range = this.selectionStore.get('range');
+    let data: RevoGrid.DataFormat[][];
+    if (!range) {
+      range = getRange(focus, focus);
+    }
+    if (range) {
+      const props = slice(this.colData, range.x, range.x1 + 1).map(v => v.prop);
+      data = this.columnService.copyRangeArray(range, props, this.dataStore.get('items'));
+    }
+    this.clipboard.doCopy(e, data);
   }
 
   private onRangeApply(data: {[rowIndex: number]: RevoGrid.DataType}, range: Selection.RangeArea): void {
-    const dataEvent = this.internalRangeDataApply.emit({ data, type: this.dataStore.get('type') });
-    if (!dataEvent.defaultPrevented) {
-      this.columnService.applyRangeData(data);
-    }
+    this.applyRangeData(data);
     this.selectionStoreService.applyRange(range);
   }
 
@@ -407,6 +440,15 @@ export class OverlaySelection {
 
   private onRowDragStart({detail}: CustomEvent<{cell: Selection.Cell, text: string}>): void {
     detail.text = this.columnService.getCellData(detail.cell.y, detail.cell.x);
+  }
+
+  private applyRangeData(data: {[rowIndex: number]: RevoGrid.DataType}): boolean {
+    const dataEvent = this.internalRangeDataApply.emit({ data, type: this.dataStore.get('type') });
+    if (!dataEvent.defaultPrevented) {
+      this.columnService.applyRangeData(data);
+      return true;
+    }
+    return false;
   }
 
   private canEdit(): boolean {

@@ -5,7 +5,7 @@ import toArray from 'lodash/toArray';
 import size from 'lodash/size';
 
 import DataStore from '../store/dataSource/data.store';
-import {rowTypes} from '../store/storeTypes';
+import {isRowType, rowTypes} from '../store/storeTypes';
 import DimensionProvider from './dimension.provider';
 import {RevoGrid, Edition} from '../interfaces';
 import DimensionRows = RevoGrid.DimensionRows;
@@ -21,6 +21,7 @@ export class DataProvider {
       return sources;
     }, {}) as RowDataSources;
   }
+
   setData(data: RevoGrid.DataType[], type: DimensionRows): void {
     let source = [...data];
 
@@ -32,7 +33,7 @@ export class DataProvider {
     }
     this.stores[type].updateData([...source]);
     if (type === 'row') {
-      this.dimensionProvider.setRealSize(source, type);
+      this.dimensionProvider.setData(source, type);
     } else {
       this.dimensionProvider.setPins(source, type);
     }
@@ -58,5 +59,17 @@ export class DataProvider {
 
   private sortItems(data: RevoGrid.DataType[], sorting: Sorting): RevoGrid.DataType[] {
     return orderBy(data, keys(sorting), toArray(sorting));
+  }
+
+  refresh(type: RevoGrid.DimensionRows|'all' = 'all'): void {
+    if (isRowType(type)) {
+      this.refreshByDimension(type);
+    }
+    rowTypes.forEach((t: RevoGrid.DimensionRows) => this.refreshByDimension(t));
+  }
+
+  refreshByDimension(type: RevoGrid.DimensionRows) {
+    const items = this.stores[type].store.get('items');
+    this.stores[type].setData({ items: [...items]  });
   }
 }

@@ -53,14 +53,14 @@
 <body>
     <div class="tile large">
       <div>
-        <revo-grid theme="material2"></revo-grid>
+        <revo-grid style="height: 345px" theme="material"></revo-grid>
       </div>
     </div>
 
     <script type="module">
         import {generateFakeDataObject} from "/utilsExternal/generate-data.js";
 
-        const data = generateFakeDataObject(1000, 100);
+        const data = generateFakeDataObject(207, 50);
         const grid = document.querySelector('revo-grid');
 
         grid.columns = data.headers;
@@ -79,6 +79,10 @@
         grid.addEventListener('rowDragStart', (e) => {
           console.log(e.detail);
         });
+        setTimeout(() => {
+          grid.scrollToColumnProp(30);
+          grid.setCellEdit(1, 31);
+        }, 500);
     </script>
 </body>
 </html>

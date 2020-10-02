@@ -49,7 +49,7 @@ export class RevogrData {
     }
     const rowsEls: VNode[] = [];
     for (let row of this.rows) {
-      const cells: VNode[] = [];
+      const cells: (VNode|string|void)[] = [];
       const rowClass = this.rowClass ? this.columnService.getRowClass(row.itemIndex, this.rowClass) : '';
       for (let col of this.cols) {
         cells.push(this.getCellRenderer(row, col));
@@ -58,8 +58,8 @@ export class RevogrData {
     }
     return rowsEls;
   }
-
-  private getCellRenderer(row: RevoGrid.VirtualPositionItem, col: RevoGrid.VirtualPositionItem): VNode {
+  
+  private getCellRenderer(row: RevoGrid.VirtualPositionItem, col: RevoGrid.VirtualPositionItem): VNode|string|void {
     const defaultProps: RevoGrid.CellProps = {
       [DATA_COL]: col.itemIndex,
       [DATA_ROW]: row.itemIndex,
@@ -73,9 +73,10 @@ export class RevogrData {
     if (custom) {
       return <div {...props}>{custom}</div>;
     }
+    const model = this.columnService.rowDataModel(row.itemIndex, col.itemIndex);
     return <div {...props}>
       <CellRenderer
-        model={this.columnService.rowDataModel(row.itemIndex, col.itemIndex)}
+        model={model}
         canDrag={this.canDrag}
         onDragStart={(e) => this.dragStartCell.emit(e)}/>
     </div>;

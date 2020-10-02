@@ -4,6 +4,7 @@ import {columnTypes, rowTypes} from '../store/storeTypes';
 import DimensionStore from '../store/dimension/dimension.store';
 import ViewportProvider from "./viewport.provider";
 import {RevoGrid} from "../interfaces";
+import { getItemByIndex } from '../store/dimension/dimension.helpers';
 
 type Columns = {
     sizes: RevoGrid.ViewSettingSizeProp;
@@ -29,14 +30,27 @@ export default class DimensionProvider {
         this.stores[dimensionType].setRealSize(realCount);
     }
 
-    setPins(items: RevoGrid.ColumnRegular[]|RevoGrid.DataType[], dimensionType: RevoGrid.MultiDimensionType, pinSizes?: RevoGrid.ViewSettingSizeProp): void {
-        const realCount = items.length;
-        this.stores[dimensionType].setRealSize(realCount);
+    setData(items: RevoGrid.ColumnRegular[]|RevoGrid.DataType[], type: RevoGrid.DimensionType) {
+        this.setRealSize(items, type);
+        this.setViewPortCoordinate({
+            coordinate: this.viewports.stores[type].store.get('lastCoordinate'),
+            dimension: type
+        });
+    }
+
+    setPins(
+        items: RevoGrid.ColumnRegular[]|RevoGrid.DataType[],
+        dimensionType: RevoGrid.MultiDimensionType,
+        pinSizes?: RevoGrid.ViewSettingSizeProp
+    ): void {
+        this.setRealSize(items, dimensionType);
         this.stores[dimensionType].setDimensionSize(pinSizes);
 
         const dimension: RevoGrid.DimensionSettingsState = this.stores[dimensionType].getCurrentState();
-        this.viewports.stores[dimensionType].setViewport({ realCount, virtualSize: dimension.realSize });
-        this.viewports.stores[dimensionType].setViewPortCoordinate(0, dimension);
+        this.viewports.stores[dimensionType].setViewport({ virtualSize: dimension.realSize });
+
+        const coordinate = this.viewports.stores[dimensionType].store.get('lastCoordinate');
+        this.viewports.stores[dimensionType].setViewPortCoordinate(coordinate, dimension);
     }
 
     setMainArea(dimension: RevoGrid.DimensionType, columns: Columns): void {
@@ -49,6 +63,13 @@ export default class DimensionProvider {
     setViewPortCoordinate(e: RevoGrid.ViewPortScrollEvent): void {
         const dimension: RevoGrid.DimensionSettingsState = this.stores[e.dimension].getCurrentState();
         this.viewports.stores[e.dimension].setViewPortCoordinate(e.coordinate, dimension);
+    }
+
+    getViewPortPos(e: RevoGrid.ViewPortScrollEvent): number {
+        const dimension: RevoGrid.DimensionSettingsState = this.stores[e.dimension].getCurrentState();
+        const item = getItemByIndex(dimension, e.coordinate);
+
+        return item.start;
     }
 
     setSettings(data: Partial<RevoGrid.DimensionSettingsState>, dimensionType: RevoGrid.DimensionType): void {

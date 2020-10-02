@@ -9,6 +9,7 @@ import ColumnDataSchemaModel = RevoGrid.ColumnDataSchemaModel;
 import ColumnProp = RevoGrid.ColumnProp;
 import DataSource = RevoGrid.DataSource;
 import DataType = RevoGrid.DataType;
+import { getRange } from '../../store/selection/selection.helpers';
 
 export interface ColumnServiceI {
   columns: RevoGrid.ColumnRegular[];
@@ -40,7 +41,8 @@ export default class ColumnService implements ColumnServiceI {
   isReadOnly(r: number, c: number): boolean {
     const readOnly: RevoGrid.ReadOnlyFormat = this.columns[c]?.readonly;
     if (typeof readOnly === 'function') {
-      return readOnly(this.rowDataModel(r, c));
+      const data = this.rowDataModel(r, c);
+      return readOnly(data);
     }
     return readOnly;
   }
@@ -56,7 +58,8 @@ export default class ColumnService implements ColumnServiceI {
     };
     const extraPropsFunc = this.columns[c]?.cellProperties;
     if (extraPropsFunc) {
-      const extra = extraPropsFunc(this.rowDataModel(r, c));
+      const data = this.rowDataModel(r, c);
+      const extra = extraPropsFunc(data);
       if (!extra) {
         return props;
       }
@@ -80,7 +83,8 @@ export default class ColumnService implements ColumnServiceI {
   customRenderer(r: number, c: number): VNode | string | void {
     const tpl = this.columns[c]?.cellTemplate;
     if (tpl) {
-      return tpl(h as unknown as RevoGrid.HyperFunc<VNode>, this.rowDataModel(r, c));
+      const data = this.rowDataModel(r, c);
+      return tpl(h as unknown as RevoGrid.HyperFunc<VNode>, data);
     }
     return;
   }
@@ -92,13 +96,16 @@ export default class ColumnService implements ColumnServiceI {
   }
 
   getCellData(r: number, c: number): string {
-    const {prop, model} = this.rowDataModel(r, c);
-    return ColumnService.getData(model[prop as number]);
+    const data = this.rowDataModel(r, c);
+    return ColumnService.getData(data.model[data.prop as number]);
   }
 
-  getSaveData(rowIndex: number, c: number, val: string): BeforeSaveDataDetails {
-    const {prop, model } = this.rowDataModel(rowIndex, c);
-    return { prop, rowIndex, val, model, type: this.dataStore.get('type')};
+  getSaveData(rowIndex: number, c: number, val?: string): BeforeSaveDataDetails {
+    if (typeof val === 'undefined') {
+      val = this.getCellData(rowIndex, c)
+    }
+    const data = this.rowDataModel(rowIndex, c);
+    return { prop: data.prop, rowIndex, val, model: data.model, type: this.dataStore.get('type')};
   }
 
   getCellEditor(_r: number, c: number): string | undefined {
@@ -110,6 +117,9 @@ export default class ColumnService implements ColumnServiceI {
     const prop: ColumnProp | undefined = column?.prop;
 
     const data: DataSource = this.dataStore.get('items');
+    if (!data[r]) {
+      console.error('unexpected count');
+    }
     const model: DataType = data[r] || {};
     return {prop, model, data, column};
   }
@@ -119,9 +129,9 @@ export default class ColumnService implements ColumnServiceI {
     const items: DataSource = this.dataStore.get('items');
     
     // get original length sizes
-    const copyRowLength = d.oldRange.y1 - d.oldRange.y + 1;
     const copyColLength = d.oldProps.length;
-    const copyFrom = this.copyRange(d.oldRange, d.oldProps, items);
+    const copyFrom = this.copyRangeArray(d.oldRange, d.oldProps, items);
+    const copyRowLength = copyFrom.length;
 
     // rows
     for (let rowIndex = d.newRange.y, i = 0; rowIndex < d.newRange.y1 + 1; rowIndex++, i++) {
@@ -137,7 +147,7 @@ export default class ColumnService implements ColumnServiceI {
         }
 
         const p = this.columns[colIndex].prop;
-        const oldP = d.oldProps[j%copyColLength];
+        const currentCol = j%copyColLength;
 
         /** if can write */
         if (!this.isReadOnly(rowIndex, colIndex)) {
@@ -146,11 +156,56 @@ export default class ColumnService implements ColumnServiceI {
           if (!changed[rowIndex]) {
             changed[rowIndex] = {};
           }
-          changed[rowIndex][p] = copyRow[oldP];
+          changed[rowIndex][p] = copyRow[currentCol];
         }
       }
     }
     return changed;
+  }
+
+  getTransformedDataToApply(start: Selection.Cell, data: RevoGrid.DataFormat[][]): {
+    changed: RevoGrid.DataLookup, range: Selection.RangeArea
+  } {
+    const changed: RevoGrid.DataLookup = {};
+    const copyRowLength = data.length;
+    const colLength = this.columns.length;
+    const rowLength = this.dataStore.get('items').length;
+    // rows
+    let rowIndex = start.y;
+    let maxCol = 0;
+    for (let i = 0; rowIndex < rowLength && i < copyRowLength; rowIndex++, i++) {
+
+      // copy original data link
+      const copyRow = data[i % copyRowLength];
+      const copyColLength = copyRow?.length || 0;
+      // columns
+      let colIndex = start.x;
+      for (let j = 0; colIndex < colLength && j < copyColLength; colIndex++, j++) {
+      
+
+        const p = this.columns[colIndex].prop;
+        const currentCol = j%colLength;
+
+        /** if can write */
+        if (!this.isReadOnly(rowIndex, colIndex)) {
+
+          /** to show before save */
+          if (!changed[rowIndex]) {
+            changed[rowIndex] = {};
+          }
+          changed[rowIndex][p] = copyRow[currentCol];
+        }
+      }
+      maxCol = Math.max(maxCol, colIndex - 1);
+    }
+    const range = getRange(start, {
+      y: rowIndex - 1,
+      x: maxCol
+    })
+    return {
+      changed,
+      range
+    };
   }
 
   applyRangeData(data: RevoGrid.DataLookup): void {
@@ -186,19 +241,19 @@ export default class ColumnService implements ColumnServiceI {
     return changed;
   }
 
-  private copyRange(range: Selection.RangeArea, rangeProps: RevoGrid.ColumnProp[], items: DataSource): DataType[] {
-    const toCopy: DataType[] = [];
+  copyRangeArray(range: Selection.RangeArea, rangeProps: RevoGrid.ColumnProp[], items: DataSource): RevoGrid.DataFormat[][] {
+    const toCopy: RevoGrid.DataFormat[][] = [];
     for (let i = range.y; i < range.y1 + 1; i++) {
-      const row: DataType = {};
+      const row: RevoGrid.DataFormat[] = [];
       for (let prop of rangeProps) {
-        row[prop] = items[i][prop];
+        row.push(items[i][prop]);
       }
       toCopy.push(row);
     }
     return toCopy;
   }
 
-  static getData(val: any): string {
+  static getData(val?: any): string {
     if (typeof val === 'undefined' || val === null) {
       return '';
     }

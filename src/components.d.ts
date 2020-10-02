@@ -47,6 +47,10 @@ export namespace Components {
          */
         "readonly": boolean;
         /**
+          * Refreshes data viewport. Can be specific part as row or pinned row or 'all' by default.
+         */
+        "refresh": (type?: RevoGrid.DimensionRows | 'all') => Promise<void>;
+        /**
           * When true, columns are resizable.
          */
         "resize": boolean;
@@ -59,6 +63,20 @@ export namespace Components {
          */
         "rowSize": number;
         /**
+          * Scrolls view port to specified column index
+         */
+        "scrollToColumnIndex": (coordinate?: number) => Promise<void>;
+        /**
+          * Scrolls view port to specified column prop
+         */
+        "scrollToColumnProp": (prop: RevoGrid.ColumnProp) => Promise<void>;
+        "scrollToCoordinate": (cell: Partial<Selection.Cell>) => Promise<void>;
+        /**
+          * Scrolls view port to specified row index
+         */
+        "scrollToRow": (coordinate?: number) => Promise<void>;
+        "setCellEdit": (row: number, prop: RevoGrid.ColumnProp, rowSource?: RevoGrid.DimensionRows) => Promise<void>;
+        /**
           * Source - defines main data source. Can be an Object or 2 dimensional array([][]); Keys/indexes referenced from columns Prop
          */
         "source": RevoGrid.DataType[];
@@ -68,8 +86,7 @@ export namespace Components {
         "theme": ThemeSpace.Theme;
     }
     interface RevogrClipboard {
-        "copy": () => Promise<void>;
-        "paste": () => Promise<void>;
+        "doCopy": (e: DataTransfer, data?: RevoGrid.DataFormat[][]) => Promise<void>;
     }
     interface RevogrData {
         "canDrag": boolean;
@@ -156,6 +173,8 @@ export namespace Components {
         "resize": boolean;
         "rowClass": string;
         "rowStores": {[T in RevoGrid.DimensionRows]: ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>};
+        "scrollToCoordinate": (cell: Partial<Selection.Cell>) => Promise<void>;
+        "setEdit": (rowIndex: number, colIndex: number, colType: RevoGrid.DimensionCols, rowType: RevoGrid.DimensionRows) => Promise<void>;
         "uuid": string|null;
         "viewports": {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.ViewportState>};
     }
@@ -272,7 +291,7 @@ declare namespace LocalJSX {
         /**
           * Before cell focus changed. Use e.preventDefault() to prevent cell focus change.
          */
-        "onBeforeCellFocus"?: (event: CustomEvent<Selection.FocusedCells>) => void;
+        "onBeforeCellFocus"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
         /**
           * Before edit event. Triggered before edit data applied. Use e.preventDefault() to prevent edit data set and use you own.  Use e.val = {your value} to replace edit result with your own.
          */
@@ -335,6 +354,8 @@ declare namespace LocalJSX {
         "theme"?: ThemeSpace.Theme;
     }
     interface RevogrClipboard {
+        "onCopyRegion"?: (event: CustomEvent<DataTransfer>) => void;
+        "onPasteRegion"?: (event: CustomEvent<string[][]>) => void;
     }
     interface RevogrData {
         "canDrag"?: boolean;
@@ -427,7 +448,7 @@ declare namespace LocalJSX {
         "onFocusCell"?: (event: CustomEvent<Selection.FocusedCells>) => void;
         "onInternalCellEdit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
         "onInternalCopy"?: (event: CustomEvent<any>) => void;
-        "onInternalFocusCell"?: (event: CustomEvent<Selection.FocusedCells>) => void;
+        "onInternalFocusCell"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
         "onInternalPaste"?: (event: CustomEvent<any>) => void;
         /**
           * Range data apply
