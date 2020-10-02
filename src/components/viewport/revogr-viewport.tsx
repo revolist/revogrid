@@ -1,18 +1,19 @@
 import {Component, Prop, h, Host, Listen, Element, Event, EventEmitter, VNode, Method} from '@stencil/core';
 import {ObservableMap} from '@stencil/store';
+import { each } from 'lodash';
 import '../../utils/closestPolifill';
 
 import {UUID} from '../../utils/consts';
-import {gatherColumnData, ViewportColumn} from './viewport.helpers';
+import {gatherColumnData, getStoresCoordinates, ViewportColumn} from './viewport.helpers';
 import GridScrollingService, {ElementScroll} from './gridScrollingService';
 import ViewportSpace from './viewport.interfaces';
 import {DataSourceState} from '../../store/dataSource/data.store';
 import SelectionStoreConnector from '../../services/selection.store.connector';
 import {Edition, Selection, RevoGrid} from '../../interfaces';
 import OrderRenderer, { OrdererService } from '../order/orderRenderer';
+import { columnTypes } from '../../store/storeTypes';
 
 import ViewportProps = ViewportSpace.ViewportProps;
-import { each } from 'lodash';
 
 @Component({
   tag: 'revogr-viewport',
@@ -96,6 +97,14 @@ export class RevogrViewport {
       }
     });
   }
+  
+  @Method() async setEdit(rowIndex: number, colIndex: number, colType: RevoGrid.DimensionCols, rowType: RevoGrid.DimensionRows ): Promise<void> {
+    const stores = getStoresCoordinates(this.columnStores, this.rowStores);
+    const x = stores[colType];
+    const y = stores[rowType];
+    this.selectionStoreConnector?.setEditByCell({ x, y }, { x: colIndex, y: rowIndex });
+  }
+
 
   connectedCallback(): void {
     this.selectionStoreConnector = new SelectionStoreConnector();
@@ -111,10 +120,11 @@ export class RevogrViewport {
     this.elementToScroll.length = 0;
     const rows: RevoGrid.VirtualPositionItem[] = this.viewports['row'].get('items');
     const viewports: ViewportProps[] = [];
-    const cols: RevoGrid.DimensionCols[] = ['colPinStart', 'col', 'colPinEnd'];
     let index: number = 0;
-    cols.forEach((val) => {
+    columnTypes.forEach((val) => {
       const colStore = this.columnStores[val];
+
+      // only columns that have data show
       if (colStore.get('items').length) {
         const column: ViewportColumn = {
           colType: val,
@@ -148,7 +158,7 @@ export class RevogrViewport {
     /** render viewports columns */
     for (let view of viewports) {
       const dataViews: HTMLElement[] = [];
-      let j: number = 0;
+      let j = 0;
 
       /** render viewports rows */
       for (let data of view.dataPorts) {

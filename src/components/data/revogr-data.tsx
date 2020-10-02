@@ -58,7 +58,7 @@ export class RevogrData {
     }
     return rowsEls;
   }
-
+  
   private getCellRenderer(row: RevoGrid.VirtualPositionItem, col: RevoGrid.VirtualPositionItem): VNode|string|void {
     const defaultProps: RevoGrid.CellProps = {
       [DATA_COL]: col.itemIndex,

@@ -75,6 +75,7 @@ export namespace Components {
           * Scrolls view port to specified row index
          */
         "scrollToRow": (coordinate?: number) => Promise<void>;
+        "setCellEdit": (row: number, prop: RevoGrid.ColumnProp, rowSource?: RevoGrid.DimensionRows) => Promise<void>;
         /**
           * Source - defines main data source. Can be an Object or 2 dimensional array([][]); Keys/indexes referenced from columns Prop
          */
@@ -170,6 +171,7 @@ export namespace Components {
         "rowClass": string;
         "rowStores": {[T in RevoGrid.DimensionRows]: ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>};
         "scrollToCoordinate": (cell: Partial<Selection.Cell>) => Promise<void>;
+        "setEdit": (rowIndex: number, colIndex: number, colType: RevoGrid.DimensionCols, rowType: RevoGrid.DimensionRows) => Promise<void>;
         "uuid": string|null;
         "viewports": {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.ViewportState>};
     }
