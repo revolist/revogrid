@@ -214,6 +214,13 @@ export class RevoGridComponent {
   @Method() async scrollToCoordinate(cell: Partial<Selection.Cell>): Promise<void> {
     await this.viewportElement.scrollToCoordinate(cell);
   }
+
+  @Method() async setCellEdit(row: number, prop: RevoGrid.ColumnProp, rowSource: RevoGrid.DimensionRows = 'row'): Promise<void> {
+    const col = ColumnDataProvider.getColumnByProp(this.columns, prop);
+    if (col) {
+      this.viewportElement.setEdit(row, this.columnProvider.getColumnIndexByProp(prop, 'col'), col.pin || 'col', rowSource);
+    }
+  }
   
   // --------------------------------------------------------------------------
   //

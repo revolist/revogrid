@@ -3,6 +3,7 @@ import each from 'lodash/each';
 import isArray from 'lodash/isArray';
 import map from 'lodash/map';
 import findIndex from 'lodash/findIndex';
+import { find } from 'lodash';
 
 import DataStore, {Groups} from '../store/dataSource/data.store';
 import {columnTypes} from '../store/storeTypes';
@@ -44,7 +45,7 @@ export default class ColumnDataProvider {
 		}
 
     get stores(): ColumnDataSources {
-			return this.dataSources;
+        return this.dataSources;
     }
     constructor(private dimensionProvider: DimensionProvider) {
         this.dataSources = reduce(columnTypes, (sources: Partial<ColumnDataSources>, k: RevoGrid.DimensionCols) => {
@@ -61,10 +62,10 @@ export default class ColumnDataProvider {
         return this.dataSources[type].store.get('items')[c];
 		}
 		
-		getColumnIndexByProp(prop: RevoGrid.ColumnProp, type: RevoGrid.DimensionCols): number {
-			const items = this.dataSources[type].store.get('items');
-			return findIndex(items, { prop });
-		}
+    getColumnIndexByProp(prop: RevoGrid.ColumnProp, type: RevoGrid.DimensionCols): number {
+        const items = this.dataSources[type].store.get('items');
+        return findIndex(items, { prop });
+    }
 
     setColumns(columns: RevoGrid.ColumnData): ColumnCollection {
         const data: ColumnCollection = ColumnDataProvider.getColumns(columns);
@@ -90,9 +91,9 @@ export default class ColumnDataProvider {
         }
         this.sorting = data.sort;
         return data;
-		}
+    }
 		
-		updateColumn(column: RevoGrid.ColumnRegular, index: number): void {
+    updateColumn(column: RevoGrid.ColumnRegular, index: number): void {
 			const type: RevoGrid.DimensionCols = column.pin || 'col';
 			const cols = this.dataSources[type].store.get('items');
 			cols[index] = column;
@@ -108,9 +109,7 @@ export default class ColumnDataProvider {
 			const type: RevoGrid.DimensionCols = column.pin || 'col';
 			const cols = this.dataSources[type].store.get('items');
 			cols[index] = column;
-			this.dataSources[type].setData({
-							items: [...cols]
-			});
+			this.dataSources[type].setData({ items: [...cols] });
     }
 		
 		private clearSorting(): void {
@@ -134,16 +133,25 @@ export default class ColumnDataProvider {
 
     private static getPinSizes(cols: RevoGrid.ColumnRegular[]): RevoGrid.ViewSettingSizeProp {
         return reduce(cols, (res: RevoGrid.ViewSettingSizeProp, c: RevoGrid.ColumnRegular, i: number) => {
-					if (c.size) {
-							res[i] = c.size;
-					}
-					return res;
+            if (c.size) {
+                    res[i] = c.size;
+            }
+            return res;
         }, {});
 
     }
 
     private static isColGrouping(colData: RevoGrid.ColumnGrouping | RevoGrid.ColumnRegular): colData is RevoGrid.ColumnGrouping {
-			return !!(colData as RevoGrid.ColumnGrouping).children;
+        return !!(colData as RevoGrid.ColumnGrouping).children;
+    }
+
+    static getColumnByProp(columns: RevoGrid.ColumnData, prop: RevoGrid.ColumnProp): RevoGrid.ColumnRegular|undefined {
+        return find(columns, c => {
+            if (ColumnDataProvider.isColGrouping(c)) {
+                return ColumnDataProvider.getColumnByProp(c.children, prop);
+            }
+            return c.prop === prop;
+        }) as (RevoGrid.ColumnRegular|undefined);
     }
 
     // columns processing

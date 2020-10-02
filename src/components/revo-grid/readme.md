@@ -13,7 +13,7 @@
 | `colSize`            | `col-size`   | Indicates default column size.                                                                                              | `number`                               | `100`       |
 | `columns`            | --           | Columns - defines an array of grid columns. Can be column or grouped column.                                                | `(ColumnRegular \| ColumnGrouping)[]`  | `[]`        |
 | `editors`            | --           | Custom editors register                                                                                                     | `{ [name: string]: EditorCtr; }`       | `{}`        |
-| `frameSize`          | `frame-size` | Defines how many rows/columns should be rendered outside visible area.                                                      | `number`                               | `0`         |
+| `frameSize`          | `frame-size` | Defines how many rows/columns should be rendered outside visible area.                                                      | `number`                               | `5`         |
 | `pinnedBottomSource` | --           | Pinned bottom Source: {[T in ColumnProp]: any} - defines pinned bottom rows data source.                                    | `DataType[]`                           | `[]`        |
 | `pinnedTopSource`    | --           | Pinned top Source: {[T in ColumnProp]: any} - defines pinned top rows data source.                                          | `DataType[]`                           | `[]`        |
 | `range`              | `range`      | When true, user can range selection.                                                                                        | `boolean`                              | `false`     |
@@ -86,6 +86,16 @@ Type: `Promise<void>`
 ### `scrollToRow(coordinate?: number) => Promise<void>`
 
 Scrolls view port to specified row index
+
+#### Returns
+
+Type: `Promise<void>`
+
+
+
+### `setCellEdit(row: number, prop: RevoGrid.ColumnProp, rowSource?: RevoGrid.DimensionRows) => Promise<void>`
+
+
 
 #### Returns
 

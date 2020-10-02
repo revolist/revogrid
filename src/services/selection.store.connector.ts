@@ -31,6 +31,12 @@ export default class SelectionStoreConnector {
     return store;
   }
 
+  setEditByCell({x, y}: Selection.Cell, editCell: Selection.Cell): void {
+    const store = this.stores[y][x];
+    this.focus(store, { focus: editCell, end: editCell });
+    this.setEdit('');
+  }
+
   focus(store: ObservableMap<Selection.SelectionStoreState>, {focus, end}: {focus: Cell; end: Cell}): void {
     let currentStorePointer: Selection.Cell;
     // clear all stores focus leave only active one

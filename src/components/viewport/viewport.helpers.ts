@@ -8,6 +8,7 @@ import SlotType = ViewportSpace.SlotType;
 import Properties = ViewportSpace.Properties;
 import {ObservableMap} from "@stencil/store";
 import {DataSourceState} from "../../store/dataSource/data.store";
+import { columnTypes, rowTypes } from "../../store/storeTypes";
 
 export interface ViewportColumn {
     colType: RevoGrid.DimensionCols;
@@ -88,14 +89,13 @@ function dataPartition(data: ViewportColumn, type: RevoGrid.DimensionRows, slot:
 /** Collect Row data */
 function dataViewPort(data: ViewportColumn): ViewportData[] {
     const viewports: ViewportData[] = [];
-    const types: RevoGrid.DimensionRows[] = ['rowPinStart', 'row', 'rowPinEnd'];
     const slots: {[key in RevoGrid.DimensionRows]: SlotType} = {
         'rowPinStart': 'header',
         'row': 'content',
         'rowPinEnd': 'footer'
     };
     let y: number = 0;
-    types.forEach(type => {
+    rowTypes.forEach(type => {
         if (data.viewports[type].get('items').length || type === 'row') {
             viewports.push(
                 dataPartition({
@@ -122,4 +122,31 @@ function getLastCell(
         x: data.viewports[data.colType].get('realCount'),
         y: data.viewports[rowType].get('realCount')
     };
+}
+
+
+
+export function getStoresCoordinates(
+    columnStores: {[T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>},
+    rowStores: {[T in RevoGrid.DimensionRows]: ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>}
+) {
+    let x = 0;
+    let y = 0;
+    let stores: Partial<{[T in RevoGrid.MultiDimensionType]: number}> = {};
+    columnTypes.forEach(v => {
+      const colStore = columnStores[v];
+      if (colStore.get('items').length) {
+        	stores[v] = x;
+          x++;
+      }
+    });
+
+    rowTypes.forEach(v => {
+        const rowStore = rowStores[v];
+        if (rowStore.get('items').length) {
+						stores[v] = y;
+            y++;
+        }
+		});
+		return stores;
 }
