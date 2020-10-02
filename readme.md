@@ -75,7 +75,7 @@ The library published as a [scoped NPM package](https://docs.npmjs.com/misc/scop
 npm i @revolist/revogrid --save;
 
 // yarn
-yarn add @revolist/revogrid
+yarn add @revolist/revogrid;
 ```
 
 ## Framework
