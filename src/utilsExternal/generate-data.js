@@ -18,7 +18,7 @@ export function generateFakeDataObject(rowsNumber, colsNumber) {
                 pin: j === 0 ? 'colPinStart' : j === 20 ? 'colPinEnd' : undefined,
                 sortable: true,
                 size: j === 5 ? 200 : undefined,
-                readonly: !!(col%2),
+                // readonly: !!(col%5),
                 rowDrag: j === 2,
             }
             if (col === 1) {

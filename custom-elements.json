@@ -58,6 +58,14 @@
       ]
     },
     {
+      "name": "revogr-clipboard",
+      "description": {
+        "kind": "markdown",
+        "value": ""
+      },
+      "attributes": []
+    },
+    {
       "name": "revogr-data",
       "description": {
         "kind": "markdown",

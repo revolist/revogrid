@@ -56,6 +56,7 @@ export class RevogrViewport {
     }
   }
 
+  /** DRAG AND DROP */
   @Listen('internalRowDragStart')
   onRowDragStarted(e: CustomEvent<{pos: RevoGrid.PositionItem, text: string, event: MouseEvent}>): void {
     e.cancelBubble = true;
@@ -76,6 +77,7 @@ export class RevogrViewport {
   onRowDrag({detail}: CustomEvent<RevoGrid.PositionItem>): void {
     this.orderService?.move(detail);
   }
+
   @Listen('internalRowMouseMove')
   onRowMouseMove(e: CustomEvent<Selection.Cell>): void {
     e.cancelBubble = true;
@@ -105,7 +107,7 @@ export class RevogrViewport {
     this.selectionStoreConnector?.setEditByCell({ x, y }, { x: colIndex, y: rowIndex });
   }
 
-
+  /** Component */
   connectedCallback(): void {
     this.selectionStoreConnector = new SelectionStoreConnector();
     this.scrollingService = new GridScrollingService(

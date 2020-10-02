@@ -22,6 +22,7 @@ import Cell = Selection.Cell;
 import { slice } from 'lodash';
 import { getRange, isRangeSingleCell } from '../../store/selection/selection.helpers';
 import { timeout } from '../../utils/utils';
+import KeyService from './keyService';
 
 
 @Component({
@@ -33,7 +34,9 @@ export class OverlaySelection {
   private columnService: ColumnService;
 
   private selectionStoreService: SelectionStore;
+  private keyService: KeyService;
   private orderEditor: HTMLRevogrOrderEditorElement;
+  private clipboard: HTMLRevogrClipboardElement;
 
   @Element() element: HTMLElement;
 
@@ -63,6 +66,9 @@ export class OverlaySelection {
   @Watch('lastCell') lastCellChanged(cell: Cell): void {
     this.selectionStoreService?.setLastCell(cell);
   }
+
+  @Event({ cancelable: true }) internalCopy: EventEmitter;
+  @Event({ cancelable: true }) internalPaste: EventEmitter;
 
   @Event({ cancelable: true }) internalCellEdit: EventEmitter<Edition.BeforeSaveDataDetails>;
   @Event({ cancelable: true }) internalFocusCell: EventEmitter<Edition.BeforeSaveDataDetails>;
@@ -98,12 +104,20 @@ export class OverlaySelection {
     this.orderEditor?.dragStart(e.detail);
   }
 
+
+  /** Recived keyboard down from element */
+  @Listen('keyup', { target: 'document' })
+  onKeyUp(e: KeyboardEvent): void {
+    this.keyService.keyUp(e);
+  }
+
   /** Recived keyboard down from element */
   @Listen('keydown', { target: 'document' })
-  async handleKeyDown(e: KeyboardEvent): Promise<void> {
+  async onKeyDown(e: KeyboardEvent): Promise<void> {
     if (!this.selectionStoreService.focused) {
       return;
     }
+    this.keyService.keyDown(e);
 
     // tab key means same as arrow right
     if (codesLetter.TAB === e.code) {
@@ -126,6 +140,7 @@ export class OverlaySelection {
     /**
      *  IF NOT EDIT MODE
      */
+    
 
     // pressed clear key
     if (codesLetter.BACKSPACE === e.code || codesLetter.DELETE === e.code) {
@@ -147,6 +162,17 @@ export class OverlaySelection {
       return;
     }
 
+    // copy operation
+    if (this.keyService.isCopy(e)) {
+      return;
+    }
+
+    // paste operation
+    if (this.keyService.isPaste(e)) {
+      this.internalPaste.emit();
+      return;
+    }
+
     // pressed letter key
     if (isLetterKey(e.keyCode)) {
       if (this.canEdit()) {
@@ -162,7 +188,7 @@ export class OverlaySelection {
   }
 
   private async keyChangeSelection(e: KeyboardEvent): Promise<boolean> {
-    const changes = this.selectionService.chaneKeyDown(e);
+    const changes = this.keyService.changeDirectionKey(e, this.range);
     if (changes) {
       await timeout();
       this.changeSelection?.emit(changes);
@@ -232,6 +258,7 @@ export class OverlaySelection {
         return focus;
       }
     });
+    this.keyService = new KeyService();
   }
 
   disconnectedCallback(): void {
@@ -293,6 +320,13 @@ export class OverlaySelection {
     const tempRange = this.selectionStore.get('tempRange');
     const els: VNode[] = [];
 
+    if (range || selectionFocus) {
+      els.push(<revogr-clipboard
+        onCopyRegion={(e) => this.onCopy(e.detail)} ref={e => this.clipboard = e}
+        onPasteRegion={(e) => this.onPaste(e.detail)}
+        />);
+    }
+
     if (range) {
       els.push(...this.renderRange(range));
     }
@@ -343,14 +377,41 @@ export class OverlaySelection {
         parent={this.element}
         onInternalRowDragStart={(e) => this.onRowDragStart(e)}/>);
     }
-    return <Host {...hostProps}>{els}<slot name='data'/></Host>;
+    return <Host {...hostProps}>
+      {els}<slot name='data'/>
+    </Host>;
+  }
+
+  private onPaste(data: string[][]): void {
+    const focus = this.selectionStore.get('focus');
+    if (!focus) {
+      return;
+    }
+    const {changed, range} = this.columnService.getTransformedDataToApply(focus, data);
+    this.applyRangeData(changed);
+    this.selectionStoreService.applyRange(range);
+  }
+
+  private onCopy(e: DataTransfer): void {
+    const canCopy = this.internalCopy.emit();
+    if (canCopy.defaultPrevented) {
+      return;
+    }
+    let focus = this.selectionStore.get('focus');
+    let range = this.selectionStore.get('range');
+    let data: RevoGrid.DataFormat[][];
+    if (!range) {
+      range = getRange(focus, focus);
+    }
+    if (range) {
+      const props = slice(this.colData, range.x, range.x1 + 1).map(v => v.prop);
+      data = this.columnService.copyRangeArray(range, props, this.dataStore.get('items'));
+    }
+    this.clipboard.doCopy(e, data);
   }
 
   private onRangeApply(data: {[rowIndex: number]: RevoGrid.DataType}, range: Selection.RangeArea): void {
-    const dataEvent = this.internalRangeDataApply.emit({ data, type: this.dataStore.get('type') });
-    if (!dataEvent.defaultPrevented) {
-      this.columnService.applyRangeData(data);
-    }
+    this.applyRangeData(data);
     this.selectionStoreService.applyRange(range);
   }
 
@@ -379,6 +440,15 @@ export class OverlaySelection {
 
   private onRowDragStart({detail}: CustomEvent<{cell: Selection.Cell, text: string}>): void {
     detail.text = this.columnService.getCellData(detail.cell.y, detail.cell.x);
+  }
+
+  private applyRangeData(data: {[rowIndex: number]: RevoGrid.DataType}): boolean {
+    const dataEvent = this.internalRangeDataApply.emit({ data, type: this.dataStore.get('type') });
+    if (!dataEvent.defaultPrevented) {
+      this.columnService.applyRangeData(data);
+      return true;
+    }
+    return false;
   }
 
   private canEdit(): boolean {

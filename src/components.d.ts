@@ -85,6 +85,9 @@ export namespace Components {
          */
         "theme": ThemeSpace.Theme;
     }
+    interface RevogrClipboard {
+        "doCopy": (e: DataTransfer, data?: RevoGrid.DataFormat[][]) => Promise<void>;
+    }
     interface RevogrData {
         "canDrag": boolean;
         "colData": RevoGrid.ColumnRegular[];
@@ -188,6 +191,12 @@ declare global {
         prototype: HTMLRevoGridElement;
         new (): HTMLRevoGridElement;
     };
+    interface HTMLRevogrClipboardElement extends Components.RevogrClipboard, HTMLStencilElement {
+    }
+    var HTMLRevogrClipboardElement: {
+        prototype: HTMLRevogrClipboardElement;
+        new (): HTMLRevogrClipboardElement;
+    };
     interface HTMLRevogrDataElement extends Components.RevogrData, HTMLStencilElement {
     }
     var HTMLRevogrDataElement: {
@@ -238,6 +247,7 @@ declare global {
     };
     interface HTMLElementTagNameMap {
         "revo-grid": HTMLRevoGridElement;
+        "revogr-clipboard": HTMLRevogrClipboardElement;
         "revogr-data": HTMLRevogrDataElement;
         "revogr-edit": HTMLRevogrEditElement;
         "revogr-header": HTMLRevogrHeaderElement;
@@ -343,6 +353,10 @@ declare namespace LocalJSX {
          */
         "theme"?: ThemeSpace.Theme;
     }
+    interface RevogrClipboard {
+        "onCopyRegion"?: (event: CustomEvent<DataTransfer>) => void;
+        "onPasteRegion"?: (event: CustomEvent<string[][]>) => void;
+    }
     interface RevogrData {
         "canDrag"?: boolean;
         "colData"?: RevoGrid.ColumnRegular[];
@@ -433,7 +447,9 @@ declare namespace LocalJSX {
         "onChangeSelection"?: (event: CustomEvent<{changes: Partial<Selection.Cell>; isMulti?: boolean; }>) => void;
         "onFocusCell"?: (event: CustomEvent<Selection.FocusedCells>) => void;
         "onInternalCellEdit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
+        "onInternalCopy"?: (event: CustomEvent<any>) => void;
         "onInternalFocusCell"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
+        "onInternalPaste"?: (event: CustomEvent<any>) => void;
         /**
           * Range data apply
          */
@@ -484,6 +500,7 @@ declare namespace LocalJSX {
     }
     interface IntrinsicElements {
         "revo-grid": RevoGrid;
+        "revogr-clipboard": RevogrClipboard;
         "revogr-data": RevogrData;
         "revogr-edit": RevogrEdit;
         "revogr-header": RevogrHeader;
@@ -499,6 +516,7 @@ declare module "@stencil/core" {
     export namespace JSX {
         interface IntrinsicElements {
             "revo-grid": LocalJSX.RevoGrid & JSXBase.HTMLAttributes<HTMLRevoGridElement>;
+            "revogr-clipboard": LocalJSX.RevogrClipboard & JSXBase.HTMLAttributes<HTMLRevogrClipboardElement>;
             "revogr-data": LocalJSX.RevogrData & JSXBase.HTMLAttributes<HTMLRevogrDataElement>;
             "revogr-edit": LocalJSX.RevogrEdit & JSXBase.HTMLAttributes<HTMLRevogrEditElement>;
             "revogr-header": LocalJSX.RevogrHeader & JSXBase.HTMLAttributes<HTMLRevogrHeaderElement>;
