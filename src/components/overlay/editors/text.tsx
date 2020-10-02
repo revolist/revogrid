@@ -25,7 +25,9 @@ export class TextEditor implements Edition.EditorBase {
 
     private onKeyDown(e: KeyboardEvent): void {
         const isEnter: boolean = codesLetter.ENTER === e.code;
-        if (isEnter && e.target && this.editCallback) {
+        const isTab: boolean = codesLetter.TAB === e.code;
+
+        if ((isTab||isEnter) && e.target && this.editCallback) {
             // blur is needed to avoid autoscroll
             this.editInput.blur();
             // request callback which will close cell after all
