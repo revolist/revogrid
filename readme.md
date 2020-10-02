@@ -36,7 +36,8 @@ Works in any major framework (VueJs, React, Ember, Angular) or with no framework
 - Column sorting;
 - Range selection;
 - Theme packages;
-- Range edit(experimental new feature);
+- Range edit;
+- Copy/Paste, also copy/paste from Excel, Google Sheets or any other sheet format;
 - Easy extenation and support with modern VNode features and tsx support;
 - Multiple others useful features [RevoGrid](https://revolist.github.io/revogrid.demo.js).
 
