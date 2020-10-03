@@ -70,11 +70,17 @@ export namespace Components {
           * Scrolls view port to specified column prop
          */
         "scrollToColumnProp": (prop: RevoGrid.ColumnProp) => Promise<void>;
+        /**
+          * Scrolls view port to coordinate
+         */
         "scrollToCoordinate": (cell: Partial<Selection.Cell>) => Promise<void>;
         /**
           * Scrolls view port to specified row index
          */
         "scrollToRow": (coordinate?: number) => Promise<void>;
+        /**
+          * Bring cell to edit mode
+         */
         "setCellEdit": (row: number, prop: RevoGrid.ColumnProp, rowSource?: RevoGrid.DimensionRows) => Promise<void>;
         /**
           * Source - defines main data source. Can be an Object or 2 dimensional array([][]); Keys/indexes referenced from columns Prop
@@ -304,6 +310,14 @@ declare namespace LocalJSX {
           * Before range edit event. Triggered before range data applied, when range selection happened. Use e.preventDefault() to prevent edit data set and use you own.
          */
         "onBeforeRangeEdit"?: (event: CustomEvent<Edition.BeforeRangeSaveDataDetails>) => void;
+        /**
+          * Before sorting. Use e.preventDefault() to prevent sorting.
+         */
+        "onBeforeSorting"?: (event: CustomEvent<'desc'|'asc'>) => void;
+        /**
+          * Before sorting apply. Use e.preventDefault() to prevent sorting data change.
+         */
+        "onBeforeSortingApply"?: (event: CustomEvent<'desc'|'asc'>) => void;
         /**
           * On header click.
          */

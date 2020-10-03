@@ -140,6 +140,17 @@ export class RevoGridComponent {
   @Event() rowOrderChanged: EventEmitter<{from: number; to: number;}>;
 
   /** 
+  * Before sorting apply.
+  * Use e.preventDefault() to prevent sorting data change. 
+  */
+ @Event() beforeSortingApply: EventEmitter<'desc'|'asc'>;
+ /** 
+ * Before sorting.
+ * Use e.preventDefault() to prevent sorting. 
+ */
+  @Event() beforeSorting: EventEmitter<'desc'|'asc'>;
+
+  /** 
    * Row order change started.
    * Use e.preventDefault() to prevent row order change. 
    * Use e.text = 'new name' to change item name on start.
@@ -184,9 +195,7 @@ export class RevoGridComponent {
   }
 
 
-  /** 
-   * Scrolls view port to specified column index
-   */
+  /** Scrolls view port to specified column index */
   @Method() async scrollToColumnIndex(coordinate: number = 0): Promise<void> {
     const x = this.dimensionProvider.getViewPortPos({
       coordinate,
@@ -195,9 +204,7 @@ export class RevoGridComponent {
     await this.scrollToCoordinate({ x });
   }
 
-  /** 
-   * Scrolls view port to specified column prop
-   */
+  /**  Scrolls view port to specified column prop */
   @Method() async scrollToColumnProp(prop: RevoGrid.ColumnProp): Promise<void> {
     const coordinate = this.columnProvider.getColumnIndexByProp(prop, 'col');
     if (coordinate < 0) {
@@ -211,10 +218,12 @@ export class RevoGridComponent {
     await this.scrollToCoordinate({ x });
   }
 
+  /**  Scrolls view port to coordinate */
   @Method() async scrollToCoordinate(cell: Partial<Selection.Cell>): Promise<void> {
     await this.viewportElement.scrollToCoordinate(cell);
   }
 
+  /**  Bring cell to edit mode */
   @Method() async setCellEdit(row: number, prop: RevoGrid.ColumnProp, rowSource: RevoGrid.DimensionRows = 'row'): Promise<void> {
     const col = ColumnDataProvider.getColumnByProp(this.columns, prop);
     if (col) {
@@ -288,7 +297,19 @@ export class RevoGridComponent {
     }
     if (column.sortable) {
       const order = column.order && column.order === 'asc' ? 'desc' : 'asc';
+
+      // allow sort change
+      const canSort = this.beforeSorting.emit(order);
+      if (canSort.defaultPrevented) {
+        return;
+      }
       this.columnProvider.updateColumnSorting(column, index, order);
+
+      // apply sort data
+      const canSortApply = this.beforeSortingApply.emit(order);
+      if (canSortApply.defaultPrevented) {
+        return;
+      }
       this.dataProvider.sort({[column.prop]: order});
     }
   }

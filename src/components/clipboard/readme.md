@@ -5,19 +5,17 @@
 <!-- Auto Generated Below -->
 
 
+## Events
+
+| Event         | Description | Type                        |
+| ------------- | ----------- | --------------------------- |
+| `copyRegion`  |             | `CustomEvent<DataTransfer>` |
+| `pasteRegion` |             | `CustomEvent<string[][]>`   |
+
+
 ## Methods
 
-### `copy() => Promise<void>`
-
-
-
-#### Returns
-
-Type: `Promise<void>`
-
-
-
-### `paste() => Promise<void>`
+### `doCopy(e: DataTransfer, data?: RevoGrid.DataFormat[][]) => Promise<void>`
 
 
 
@@ -32,12 +30,12 @@ Type: `Promise<void>`
 
 ### Used by
 
- - [revogr-viewport](../viewport)
+ - [revogr-overlay-selection](../overlay)
 
 ### Graph
 ```mermaid
 graph TD;
-  revogr-viewport --> revogr-clipboard
+  revogr-overlay-selection --> revogr-clipboard
   style revogr-clipboard fill:#f9f,stroke:#333,stroke-width:4px
 ```
 
