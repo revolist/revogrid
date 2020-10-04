@@ -7,7 +7,7 @@ import {getItemByIndex} from '../../store/dimension/dimension.helpers';
 import CellSelectionService from './cellSelectionService';
 import SelectionStore from '../../store/selection/selection.store';
 import {codesLetter} from '../../utils/keyCodes';
-import {isLetterKey} from '../../utils/keyCodes.utils';
+import {isClear, isLetterKey} from '../../utils/keyCodes.utils';
 import {
   CELL_HANDLER_CLASS,
   EDIT_INPUT_WR,
@@ -143,7 +143,7 @@ export class OverlaySelection {
     
 
     // pressed clear key
-    if (codesLetter.BACKSPACE === e.code || codesLetter.DELETE === e.code) {
+    if (isClear(e.code)) {
       if (this.selectionStoreService.range && !isRangeSingleCell(this.selectionStoreService.range)) {
         const data = this.columnService.getRangeStaticData(this.selectionStoreService.range, '');
         this.onRangeApply(data, this.selectionStoreService.range);
@@ -377,9 +377,7 @@ export class OverlaySelection {
         parent={this.element}
         onInternalRowDragStart={(e) => this.onRowDragStart(e)}/>);
     }
-    return <Host {...hostProps}>
-      {els}<slot name='data'/>
-    </Host>;
+    return <Host {...hostProps}>{els}<slot name='data'/></Host>;
   }
 
   private onPaste(data: string[][]): void {

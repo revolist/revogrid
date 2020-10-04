@@ -1,4 +1,4 @@
-import KeyCodesEnum from './keyCodes';
+import KeyCodesEnum, { codesLetter } from './keyCodes';
 import OsPlatform from "./platform";
 import includes from 'lodash/includes'
 
@@ -67,5 +67,9 @@ export function isCtrlMetaKey(code:  KeyCodesEnum): boolean {
          KeyCodesEnum.COMMAND_RIGHT,
          KeyCodesEnum.COMMAND_FIREFOX
     ], code);
+}
+
+export function isClear(code:  string): boolean {
+    return codesLetter.BACKSPACE === code || codesLetter.DELETE === code;
 }
 

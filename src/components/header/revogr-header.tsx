@@ -23,12 +23,11 @@ export class RevogrHeaderComponent {
   @Prop() parent: string = '';
   @Prop() groups: Groups;
   @Prop() groupingDepth: number = 0;
+  @Prop() canResize: boolean;
+  @Prop() colData: RevoGrid.ColumnRegular[];
 
   @Event() initialHeaderClick: EventEmitter<{column: RevoGrid.ColumnRegular, index: number}>;
   @Event() headerResize: EventEmitter<RevoGrid.ViewSettingSizeProp>;
-  @Prop() canResize: boolean;
-
-  @Prop() colData: RevoGrid.ColumnRegular[];
   private headerService: HeaderService;
 
   @Watch('colData') colChanged(newVal: RevoGrid.ColumnRegular[]): void {

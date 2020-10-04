@@ -113,9 +113,9 @@ export class RevoGridComponent {
 
   /** 
    * After edit.
-   * Triggered when after data applied.
+   * Triggered when after data applied or Range changeged.
    */
-  @Event() afterEdit: EventEmitter<Edition.BeforeSaveDataDetails>;
+  @Event() afterEdit: EventEmitter<Edition.BeforeSaveDataDetails|Edition.BeforeRangeSaveDataDetails>;
 
 
   /** 
@@ -255,7 +255,9 @@ export class RevoGridComponent {
     const { defaultPrevented } = this.beforeRangeEdit.emit(e.detail);
     if (defaultPrevented) {
       e.preventDefault();
+      return;
     }
+    this.afterEdit.emit(e.detail);
   }
 
   @Listen('internalSelectionChanged')
