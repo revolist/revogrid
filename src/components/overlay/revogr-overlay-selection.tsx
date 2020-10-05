@@ -46,6 +46,10 @@ export class OverlaySelection {
   @Prop() range: boolean;
   @Prop() canDrag: boolean;
 
+  @Prop() selectionFocus: Selection.Cell;
+  @Prop() selectionRange: Selection.RangeArea;
+  @Prop() selectionTempRange: Selection.RangeArea;
+
   /** Dynamic stores */
   @Prop() selectionStore: ObservableMap<Selection.SelectionStoreState>;
   @Prop() dimensionRow: ObservableMap<RevoGrid.DimensionSettingsState>;
@@ -114,7 +118,7 @@ export class OverlaySelection {
   /** Recived keyboard down from element */
   @Listen('keydown', { target: 'document' })
   async onKeyDown(e: KeyboardEvent): Promise<void> {
-    if (!this.selectionStoreService.focused) {
+    if (!this.selectionFocus) {
       return;
     }
     this.keyService.keyDown(e);
@@ -144,11 +148,11 @@ export class OverlaySelection {
 
     // pressed clear key
     if (isClear(e.code)) {
-      if (this.selectionStoreService.range && !isRangeSingleCell(this.selectionStoreService.range)) {
-        const data = this.columnService.getRangeStaticData(this.selectionStoreService.range, '');
-        this.onRangeApply(data, this.selectionStoreService.range);
+      if (this.selectionRange && !isRangeSingleCell(this.selectionRange)) {
+        const data = this.columnService.getRangeStaticData(this.selectionRange, '');
+        this.onRangeApply(data, this.selectionRange);
       } else if (this.canEdit()) {
-        const focused = this.selectionStoreService.focused;
+        const focused = this.selectionFocus;
         this.onCellEdit({ row: focused.y, col: focused.x, val: '' }, true);
       }
       return;
@@ -225,7 +229,7 @@ export class OverlaySelection {
           return;
         }
         
-        const oldRange = this.selectionStore.get('range');
+        const oldRange = this.selectionRange;
         const newRange = getRange(start, end);
         const rangeData: Selection.ChangedRange = {
           type: this.dataStore.get('type'),
@@ -244,10 +248,12 @@ export class OverlaySelection {
         }
         this.onRangeApply(rangeData.newData, newRange);
       },
-      tempRange: (start, end) => this.selectionStoreService.setTempRange(start, end),
+      tempRange: (start, end) => {
+        this.selectionStoreService.setTempRange(start, end);
+      },
       autoFill: (isAutofill) => {
-        let focus = this.selectionStore.get('focus');
-        const range = this.selectionStore.get('range');
+        let focus = this.selectionFocus;
+        const range = this.selectionRange;
         if (range) {
           focus = {x: range.x, y: range.y};
         }
@@ -315,9 +321,9 @@ export class OverlaySelection {
   }
 
   render() {
-    const range = this.selectionStore.get('range');
-    const selectionFocus = this.selectionStore.get('focus');
-    const tempRange = this.selectionStore.get('tempRange');
+    const range = this.selectionRange;
+    const selectionFocus = this.selectionFocus;
+    const tempRange = this.selectionTempRange;
     const els: VNode[] = [];
 
     if (range || selectionFocus) {
@@ -381,7 +387,7 @@ export class OverlaySelection {
   }
 
   private onPaste(data: string[][]): void {
-    const focus = this.selectionStore.get('focus');
+    const focus = this.selectionFocus;
     if (!focus) {
       return;
     }
@@ -395,8 +401,8 @@ export class OverlaySelection {
     if (canCopy.defaultPrevented) {
       return;
     }
-    let focus = this.selectionStore.get('focus');
-    let range = this.selectionStore.get('range');
+    let focus = this.selectionFocus;
+    let range = this.selectionRange;
     let data: RevoGrid.DataFormat[][];
     if (!range) {
       range = getRange(focus, focus);
@@ -453,7 +459,7 @@ export class OverlaySelection {
     if (this.readonly) {
       return false;
     }
-    const editCell = this.selectionStoreService.focused;
+    const editCell = this.selectionFocus;
     return editCell && !this.columnService?.isReadOnly(editCell.y, editCell.x);
   }
 
@@ -461,7 +467,8 @@ export class OverlaySelection {
     return {
       el: this.element,
       rows: this.dimensionRow.state,
-      cols: this.dimensionCol.state
+      cols: this.dimensionCol.state,
+      lastCell: this.lastCell
     }
   }
 

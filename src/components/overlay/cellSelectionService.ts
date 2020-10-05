@@ -14,7 +14,12 @@ interface Config {
   autoFill(isAutofill: boolean): Cell|null;
 }
 
-type EventData = {el: HTMLElement, rows: RevoGrid.DimensionSettingsState, cols: RevoGrid.DimensionSettingsState};
+type EventData = {
+  el: HTMLElement;
+  rows: RevoGrid.DimensionSettingsState;
+  cols: RevoGrid.DimensionSettingsState;
+  lastCell: Selection.Cell;
+};
 
 export default class CellSelectionService {
   public canRange: boolean = false;
@@ -87,6 +92,10 @@ export default class CellSelectionService {
       }
     });
 
+    // check if not the latest
+    if (current.x >= data.lastCell.x || current.y >= data.lastCell.y) {
+      return;
+    }
     this.autoFillLast = current;
     this.config.tempRange(this.autoFillInitial, this.autoFillLast);
   }
