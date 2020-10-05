@@ -1,73 +1,9 @@
 @import './revo-grid.common.scss';
+@import './revo-grid.common-material.scss';
 
 $header-height: 45px;
 $default-rows-size: 32px;
-$cell-border-color: #f1f1f1;
-$header-border-color: $cell-border-color;
-
-$cell-shadow-cell: 0 -1px 0 0 $cell-border-color inset;
 
 revo-grid[theme="compact"] {
-	font-family: Nunito,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
-	
-	revogr-viewport {
-
-		revogr-header {
-			line-height: $header-height;
-			font-weight: 600;
-			text-align: left;
-	
-			.data-header-cell {
-				$shadow-bottom: 0 -1px 0 0 $header-border-color inset;
-				$shadow-top: 0 -1px 0 0 $header-border-color;
-				box-shadow: $shadow-top, $shadow-bottom;
-				padding: 0 15px;
-				overflow: hidden;
-				text-overflow: ellipsis;
-			}
-	
-	
-			.header-row {
-				height: $header-height;
-	
-				&.group {
-					$shadow-bottom: 0 -1px 0 0 $header-border-color inset;
-					box-shadow: $shadow-bottom;
-				}
-			}
-		}
-	
-	
-		.footer-wrapper revogr-data {
-			box-shadow: 0 -1px 0 $cell-border-color;
-		}
-	
-		revogr-viewport-scroll {
-			&.colPinStart {
-				box-shadow: -1px 0 0 $cell-border-color inset;
-			}
-	
-			&.colPinEnd {
-				box-shadow: -1px 0 0 $cell-border-color;
-			}
-		}
-	
-		revogr-data {
-			text-align: left;
-	
-			.row {
-				line-height: $default-rows-size;
-			}
-	
-			.data-cell {
-				box-shadow: $cell-shadow-cell;
-				padding: 0 15px;
-				color: rgba(black, .87);
-		
-				&.disabled {
-					background-color: $cell-disabled-bg;
-				}
-			}
-		}
-	}
+	@include revoGrid($header-height, $default-rows-size);
 }

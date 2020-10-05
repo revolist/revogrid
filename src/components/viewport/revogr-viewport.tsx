@@ -175,6 +175,10 @@ export class RevogrViewport {
             readonly={this.readonly}
             range={this.range}
 
+            selectionRange={selectionStore.get('range')}
+            selectionTempRange={selectionStore.get('tempRange')}
+            selectionFocus={selectionStore.get('focus')}
+
             onSetEdit={(e) => this.selectionStoreConnector.setEdit(e.detail)}
             onChangeSelection={(e) => this.selectionStoreConnector.change(e.detail)}
             onFocusCell={(e) => this.selectionStoreConnector.focus(selectionStore, e.detail)}

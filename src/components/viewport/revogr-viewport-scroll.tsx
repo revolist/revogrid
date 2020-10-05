@@ -74,10 +74,16 @@ export class RevogrViewportScroll {
         this.horizontalScroll,
         {
           resize: () => {
-            const els = {row: this.verticalScroll.clientHeight, col: this.horizontalScroll.clientWidth};
-            each(els, (size: number, dimension: RevoGrid.DimensionType) => {
-              this.resizeViewport.emit({ dimension, size });
-              this.scrollService?.scroll(0, dimension, true);
+            const els = {row: {
+              size: this.verticalScroll.clientHeight,
+              scroll: this.verticalScroll.scrollTop
+            }, col: {
+              size: this.horizontalScroll.clientWidth,
+              scroll: this.horizontalScroll.scrollLeft
+            }};
+            each(els, (item, dimension: RevoGrid.DimensionType) => {
+              this.resizeViewport.emit({ dimension, size: item.size });
+              this.scrollService?.scroll(item.scroll, dimension, true);
             });
           }
         }

@@ -156,10 +156,13 @@ export namespace Components {
         "lastCell": Selection.Cell;
         "range": boolean;
         "readonly": boolean;
+        "selectionFocus": Selection.Cell;
+        "selectionRange": Selection.RangeArea;
         /**
           * Dynamic stores
          */
         "selectionStore": ObservableMap<Selection.SelectionStoreState>;
+        "selectionTempRange": Selection.RangeArea;
     }
     interface RevogrScrollVirtual {
         "contentSize": number;
@@ -287,9 +290,9 @@ declare namespace LocalJSX {
          */
         "frameSize"?: number;
         /**
-          * After edit. Triggered when after data applied.
+          * After edit. Triggered when after data applied or Range changeged.
          */
-        "onAfterEdit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
+        "onAfterEdit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails|Edition.BeforeRangeSaveDataDetails>) => void;
         /**
           * Before autofill. Triggered before autofill applied. Use e.preventDefault() to prevent edit data apply.
          */
@@ -476,10 +479,13 @@ declare namespace LocalJSX {
         "onUnregister"?: (event: CustomEvent<any>) => void;
         "range"?: boolean;
         "readonly"?: boolean;
+        "selectionFocus"?: Selection.Cell;
+        "selectionRange"?: Selection.RangeArea;
         /**
           * Dynamic stores
          */
         "selectionStore"?: ObservableMap<Selection.SelectionStoreState>;
+        "selectionTempRange"?: Selection.RangeArea;
     }
     interface RevogrScrollVirtual {
         "contentSize"?: number;

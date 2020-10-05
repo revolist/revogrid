@@ -60,7 +60,7 @@
     <script type="module">
         import {generateFakeDataObject} from "/utilsExternal/generate-data.js";
 
-        const data = generateFakeDataObject(207, 50);
+        const data = generateFakeDataObject(207, 5);
         const grid = document.querySelector('revo-grid');
 
         grid.columns = data.headers;
@@ -81,7 +81,7 @@
         });
         setTimeout(() => {
           grid.scrollToColumnProp(30);
-          grid.setCellEdit(1, 31);
+          // grid.setCellEdit(1, 31);
         }, 500);
     </script>
 </body>

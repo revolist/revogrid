@@ -19,16 +19,8 @@ export default class SelectionStore {
     this.setLastCell(config.lastCell);
   }
 
-  get focused(): Cell|null {
-    return this.store.get('focus');
-  }
-
   get edited(): EditCell|null {
     return this.store.get('edit');
-  }
-
-  get range(): Selection.RangeArea|null {
-    return this.store.get('range');
   }
 
   setLastCell(lastCell: Cell): void {
