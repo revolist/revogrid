@@ -1,0 +1,68 @@
+@mixin revoGridDark() {
+    $font-color: #d8d8d8;
+    color: $font-color;
+
+    $cell-border-color: #404040;
+    $cell-shadow-cell: 0 -1px 0 0 $cell-border-color inset;
+
+    revogr-header {
+        .header-row {
+            &.group {
+                $shadow-bottom: 0 -1px 0 0 $cell-border-color inset;
+                box-shadow: $shadow-bottom;
+            }
+
+            &:not(.group) {
+                $shadow-bottom: 0 -1px 0 0 $cell-border-color inset;
+                $shadow-top: 0 -1px 0 0 $cell-border-color;
+                box-shadow: $shadow-top, $shadow-bottom;
+            }
+        }
+
+        .data-header-cell {
+            &.sortable {
+                &:hover {
+                    background-color: rgba($cell-border-color, .5);
+                }
+            }
+        }
+    }
+
+    .footer-wrapper revogr-data {
+        box-shadow: 0 -1px 0 $cell-border-color;
+    }
+
+    revogr-viewport revogr-data {
+        .data-cell {
+            color: rgba($font-color, .9);
+        }
+
+        .row {
+            box-shadow: $cell-shadow-cell;
+        }
+
+        .revo-draggable {
+            > .revo-drag-icon {
+                $drag-icon-color: rgba($font-color, .5);
+                background-color: $drag-icon-color;
+            }
+
+            &:hover {
+                > .revo-drag-icon {
+                    $drag-icon-color: rgba($font-color, .7);
+                    background-color: $drag-icon-color;
+                }
+            }
+        }
+    }
+
+    revogr-viewport-scroll {
+        &.colPinStart {
+            box-shadow: -1px 0 0 $cell-border-color inset;
+        }
+
+        &.colPinEnd {
+            box-shadow: -1px 0 0 $cell-border-color;
+        }
+    }
+}

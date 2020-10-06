@@ -13,7 +13,6 @@ revogr-data {
 		$w: 24px;
 
 
-		$drag-icon-color: #d4d4d4;
 
 		border: none;
 		height: 32px;
@@ -31,14 +30,7 @@ revogr-data {
 		height: 100%;
 		cursor: pointer;
 
-		&:hover {
-			> .revo-drag-icon {
-				background-color: black;
-			}
-		}
-
 		> .revo-drag-icon {
-			background-color: $drag-icon-color;
 			vertical-align: middle;
 			display: inline-block;
 			pointer-events: none;

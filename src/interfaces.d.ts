@@ -303,5 +303,5 @@ export declare namespace ThemeSpace {
       rowSize: number;
   };
 
-  type Theme = 'default'|'material'|'compact';
+  type Theme = 'default'|'material'|'compact'|'darkMaterial'|'darkCompact';
 }

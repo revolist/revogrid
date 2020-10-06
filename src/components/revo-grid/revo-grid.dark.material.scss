@@ -1,11 +1,11 @@
 @import './revo-grid.common.scss';
 @import './revo-grid.common-material.scss';
-@import './revo-grid.common.light.scss';
+@import './revo-grid.common.dark.scss';
 
 $header-height: 50px;
 $default-rows-size: 42px;
 
-revo-grid[theme="material"] {
+revo-grid[theme="darkMaterial"] {
 	@include revoGrid($header-height, $default-rows-size);
-	@include revoGridLight;
+	@include revoGridDark;
 }
