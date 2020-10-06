@@ -51,6 +51,7 @@
   <script nomodule src="/build/revo-grid.js"></script>
 </head>
 <body>
+    <button onclick="setGrid()">Test data update</button>
     <div class="tile large">
       <div>
         <revo-grid style="height: 345px" theme="material"></revo-grid>
@@ -83,6 +84,11 @@
           grid.scrollToColumnProp(30);
           // grid.setCellEdit(1, 31);
         }, 500);
+
+        window.setGrid = function setGrid() {
+          grid.source = [...data.rows];
+          console.log('data');
+        }
     </script>
 </body>
 </html>

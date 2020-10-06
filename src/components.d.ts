@@ -316,11 +316,17 @@ declare namespace LocalJSX {
         /**
           * Before sorting. Use e.preventDefault() to prevent sorting.
          */
-        "onBeforeSorting"?: (event: CustomEvent<'desc'|'asc'>) => void;
+        "onBeforeSorting"?: (event: CustomEvent<{
+    column: RevoGrid.ColumnRegular,
+    order: 'desc'|'asc'
+  }>) => void;
         /**
           * Before sorting apply. Use e.preventDefault() to prevent sorting data change.
          */
-        "onBeforeSortingApply"?: (event: CustomEvent<'desc'|'asc'>) => void;
+        "onBeforeSortingApply"?: (event: CustomEvent<{
+  column: RevoGrid.ColumnRegular,
+  order: 'desc'|'asc'
+}>) => void;
         /**
           * On header click.
          */
