@@ -145,12 +145,18 @@ export class RevoGridComponent {
   * Before sorting apply.
   * Use e.preventDefault() to prevent sorting data change. 
   */
- @Event() beforeSortingApply: EventEmitter<'desc'|'asc'>;
+ @Event() beforeSortingApply: EventEmitter<{
+  column: RevoGrid.ColumnRegular,
+  order: 'desc'|'asc'
+}>;
  /** 
  * Before sorting.
  * Use e.preventDefault() to prevent sorting. 
  */
-  @Event() beforeSorting: EventEmitter<'desc'|'asc'>;
+  @Event() beforeSorting: EventEmitter<{
+    column: RevoGrid.ColumnRegular,
+    order: 'desc'|'asc'
+  }>;
 
   /** 
    * Row order change started.
@@ -303,14 +309,16 @@ export class RevoGridComponent {
       const order = column.order && column.order === 'asc' ? 'desc' : 'asc';
 
       // allow sort change
-      const canSort = this.beforeSorting.emit(order);
+      const canSort = this.beforeSorting.emit({column, order});
       if (canSort.defaultPrevented) {
         return;
       }
-      this.columnProvider.updateColumnSorting(column, index, order);
+      const newCol = this.columnProvider.updateColumnSorting(column, index, order);
 
       // apply sort data
-      const canSortApply = this.beforeSortingApply.emit(order);
+      const canSortApply = this.beforeSortingApply.emit({
+        column: newCol, order
+      });
       if (canSortApply.defaultPrevented) {
         return;
       }
