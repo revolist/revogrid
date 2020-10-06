@@ -48,12 +48,6 @@ export default class SelectionStore {
 
   focus(cell?: Cell, isMulti: boolean = false): void {
     if (!cell) {
-      setStore(this.store, {
-        focus: null,
-        range: null,
-        edit: null,
-        tempRange: null
-      });
       return;
     }
     let end: Cell = cell;

@@ -36,7 +36,7 @@ export class Edit {
     componentWillRender(): void {
         if (!this.currentEditor) {
             if (this.editor) {
-                this.currentEditor = new this.editor(this.column, (e) => this.onSave(e));
+                this.currentEditor = new this.editor(this.column, (e) => this.onSave(e), () => this.closeEdit.emit());
             } else {
                 this.currentEditor = new TextEditor(this.column, (e) => this.onSave(e));
             }
