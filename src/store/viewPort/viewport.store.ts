@@ -64,6 +64,9 @@ export default class ViewportStore {
     if (dimension.realSize > virtualSize) {
       maxCoordinate = dimension.realSize - virtualSize;
     }
+    let toUpdate: Partial<RevoGrid.ViewportState> = {
+      lastCoordinate: position
+    };
     let pos: number = position;
     pos -= frameOffset * dimension.originItemSize;
     pos = pos < 0 ? 0 : pos < maxCoordinate  ? pos : maxCoordinate;
@@ -74,14 +77,17 @@ export default class ViewportStore {
 
     // left position changed
     if (!isActiveRange(pos, firstItem)) {
-      const toUpdate = getUpdatedItemsByPosition(
-          pos,
-          this.getItems(),
-          this.store.get('realCount'),
-          virtualSize,
-          dimension
-      );
-      setStore(this.store, { ...toUpdate, lastCoordinate: pos });
+      toUpdate = {
+          ...toUpdate,
+          ...getUpdatedItemsByPosition(
+            pos,
+            this.getItems(),
+            this.store.get('realCount'),
+            virtualSize,
+            dimension
+        ),
+      };
+      setStore(this.store, { ...toUpdate});
       // right position changed
     } else if (firstItem && (this.store.get('virtualSize') + pos) > lastItem?.end) {
       // check is any item missing for full fill content
@@ -101,11 +107,12 @@ export default class ViewportStore {
           end: this.store.get('end')
         };
         updateMissing(items, missing, range);
-        setStore(this.store, {
+        toUpdate = {
+          ...toUpdate,
           items: [...items],
-          lastCoordinate: pos,
           ...range
-        });
+        };
+        setStore(this.store, { ...toUpdate});
       }
     }
   }
