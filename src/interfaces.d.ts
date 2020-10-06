@@ -276,8 +276,12 @@ export declare namespace Edition {
 
   interface EditorCtr {
     new (
+        // column data
         column: RevoGrid.ColumnRegular,
-        editCallback?: (value: Edition.SaveData) => void,
+        // to save changes
+        saveCallback?: (value: Edition.SaveData) => void,
+        // to close editor
+        closeCallback?: () => void
     ): EditorBase;
   }
 

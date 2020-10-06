@@ -182,6 +182,7 @@ export class RevogrViewport {
             onSetEdit={(e) => this.selectionStoreConnector.setEdit(e.detail)}
             onChangeSelection={(e) => this.selectionStoreConnector.change(e.detail)}
             onFocusCell={(e) => this.selectionStoreConnector.focus(selectionStore, e.detail)}
+            onInternalFocusCell={() => this.selectionStoreConnector.clearFocus(selectionStore)}
             onUnregister={() => this.selectionStoreConnector.unregister(selectionStore)}>
 
             <revogr-data
