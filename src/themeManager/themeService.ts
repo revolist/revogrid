@@ -4,7 +4,13 @@ import ThemeDefault from "./theme.default";
 import ThemeMaterial from "./theme.material";
 
 export const DEFAULT_THEME = 'default';
-export const allowedThemes: string[] = [DEFAULT_THEME, 'material', 'compact'];
+export const allowedThemes: ThemeSpace.Theme[] = [
+    DEFAULT_THEME,
+    'material',
+    'compact',
+    'darkMaterial',
+    'darkCompact'
+];
 export default class ThemeService {
     private currentTheme: ThemeSpace.ThemePackage;
     private customRowSize: number = 0;
@@ -30,9 +36,11 @@ export default class ThemeService {
         const parsedTheme = ThemeService.getTheme(theme);
         switch(parsedTheme) {
             case 'material':
+            case 'darkMaterial':
                 this.currentTheme = new ThemeMaterial();
                 break;
             case 'compact':
+            case 'darkCompact':
                 this.currentTheme = new ThemeCompact();
                 break;
             default:
@@ -43,7 +51,7 @@ export default class ThemeService {
     }
 
     static getTheme(theme: string): ThemeSpace.Theme {
-        if (allowedThemes.indexOf(theme) > -1) {
+        if (allowedThemes.indexOf(theme as ThemeSpace.Theme) > -1) {
             return theme as ThemeSpace.Theme;
         }
         return DEFAULT_THEME;

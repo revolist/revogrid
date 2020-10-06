@@ -7,10 +7,6 @@ revogr-header {
 	.data-header-cell {
 		&.sortable {
 			cursor: pointer;
-
-			&:hover {
-				background-color: #f1f1f1;
-			}
 		}
 		&.asc {
 			&:after {
