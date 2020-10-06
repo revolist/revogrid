@@ -102,34 +102,35 @@ export default class ColumnDataProvider {
 			});
 	}
 
-    updateColumnSorting(column: RevoGrid.ColumnRegular, index: number, sorting: 'asc'|'desc'): void {
-			this.clearSorting();
-			column.order = sorting;
-			this.sorting[column.prop] = column;
-			const type: RevoGrid.DimensionCols = column.pin || 'col';
-			const cols = this.dataSources[type].store.get('items');
-			cols[index] = column;
-			this.dataSources[type].setData({ items: [...cols] });
+    updateColumnSorting(column: RevoGrid.ColumnRegular, index: number, sorting: 'asc'|'desc'): RevoGrid.ColumnRegular {
+        this.clearSorting();
+        column.order = sorting;
+        this.sorting[column.prop] = column;
+        const type: RevoGrid.DimensionCols = column.pin || 'col';
+        const cols = this.dataSources[type].store.get('items');
+        cols[index] = column;
+        this.dataSources[type].setData({ items: [...cols] });
+        return column;
     }
 		
-		private clearSorting(): void {
-			const types = reduce(this.sorting, (r: {[key in Partial<RevoGrid.DimensionCols>]: boolean}, c: RevoGrid.ColumnRegular) => {
-				const k: RevoGrid.DimensionCols = c.pin || 'col';
-				r[k] = true;
-				return r;
-			}, {} as {[key in Partial<RevoGrid.DimensionCols>]: boolean});
-			each(types, (_, type: RevoGrid.DimensionCols) => {
-				const cols = this.dataSources[type].store.get('items');
-				each(cols, (c: RevoGrid.ColumnRegular) => {
-					c.order = undefined;
-				});
-				this.dataSources[type].setData({
-						items: [...cols]
-				});
-			});
+    private clearSorting(): void {
+        const types = reduce(this.sorting, (r: {[key in Partial<RevoGrid.DimensionCols>]: boolean}, c: RevoGrid.ColumnRegular) => {
+            const k: RevoGrid.DimensionCols = c.pin || 'col';
+            r[k] = true;
+            return r;
+        }, {} as {[key in Partial<RevoGrid.DimensionCols>]: boolean});
+        each(types, (_, type: RevoGrid.DimensionCols) => {
+            const cols = this.dataSources[type].store.get('items');
+            each(cols, (c: RevoGrid.ColumnRegular) => {
+                c.order = undefined;
+            });
+            this.dataSources[type].setData({
+                    items: [...cols]
+            });
+        });
 
-			this.sorting = {};
-		}
+        this.sorting = {};
+    }
 
     private static getPinSizes(cols: RevoGrid.ColumnRegular[]): RevoGrid.ViewSettingSizeProp {
         return reduce(cols, (res: RevoGrid.ViewSettingSizeProp, c: RevoGrid.ColumnRegular, i: number) => {
