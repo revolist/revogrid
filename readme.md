@@ -49,7 +49,8 @@ Works in any major framework (VueJs, React, Ember, Angular) or with no framework
 * [Installation](#installation)
 * [Framework integration](#framework)
 * [Basic Usage](#basic-usage)
-* [Demo and Api](https://revolist.github.io/revogrid.demo.js)
+* [Demo, Usage samples and Api](https://revolist.github.io/revogrid.demo.js)
+* [Grid doc](https://github.com/revolist/revogrid/blob/master/src/components/revo-grid/readme.md)
 
 
 ## Overview
