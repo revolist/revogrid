@@ -112,16 +112,16 @@ export default class ColumnService implements ColumnServiceI {
     return this.columns[c]?.editor;
   }
 
-  rowDataModel(r: number, c: number): ColumnDataSchemaModel {
+  rowDataModel(rowIndex: number, c: number): ColumnDataSchemaModel {
     const column = this.columns[c];
     const prop: ColumnProp | undefined = column?.prop;
 
     const data: DataSource = this.dataStore.get('items');
-    if (!data[r]) {
+    if (!data[rowIndex]) {
       console.error('unexpected count');
     }
-    const model: DataType = data[r] || {};
-    return {prop, model, data, column};
+    const model: DataType = data[rowIndex] || {};
+    return {prop, model, data, column, rowIndex};
   }
 
   getRangeData(d: Selection.ChangedRange): RevoGrid.DataLookup {

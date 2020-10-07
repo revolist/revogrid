@@ -29,10 +29,16 @@ export declare namespace RevoGrid {
   // --------------------------------------------------------------------------
 
   type ColumnDataSchemaModel = {
+    // property
     prop: ColumnProp;
+    // row model
     model: DataType;
-    data: DataSource;
+    // column data
     column: ColumnRegular;
+    // index in grid datasource
+    rowIndex: number;
+    // grid datasource
+    data: DataSource;
   };
 
   type ReadOnlyFormat = boolean | ((params: ColumnDataSchemaModel) => boolean);
