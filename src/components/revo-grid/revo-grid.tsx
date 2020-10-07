@@ -143,6 +143,14 @@ export class RevoGridComponent {
   @Event() rowOrderChanged: EventEmitter<{from: number; to: number;}>;
 
   /** 
+  * Before source update sorting apply.
+  * Use this event if you intended to prevent sorting on data update.
+  * Use e.preventDefault() to prevent sorting data change during rows source update. 
+  */
+  @Event() beforeSourceSortingApply: EventEmitter;
+
+
+  /** 
   * Before sorting apply.
   * Use e.preventDefault() to prevent sorting data change. 
   */
@@ -151,7 +159,8 @@ export class RevoGridComponent {
   order: 'desc'|'asc'
 }>;
  /** 
- * Before sorting.
+ * Before sorting event.
+ * Initial sorting triggered, if this event stops no other event called.
  * Use e.preventDefault() to prevent sorting. 
  */
   @Event() beforeSorting: EventEmitter<{
@@ -370,7 +379,12 @@ export class RevoGridComponent {
 
   @Watch('source')
   dataChanged(newVal: RevoGrid.DataType[]): void {
-    this.dataProvider.setData(newVal, 'row');
+    let applySorting;
+    if (this.dataProvider.hasSorting) {
+      const event = this.beforeSourceSortingApply.emit();
+      applySorting = !event.defaultPrevented;
+    }
+    this.dataProvider.setData(newVal, 'row', applySorting);
   }
 
   @Watch('pinnedBottomSource')

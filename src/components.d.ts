@@ -343,7 +343,7 @@ declare namespace LocalJSX {
          */
         "onBeforeRangeEdit"?: (event: CustomEvent<Edition.BeforeRangeSaveDataDetails>) => void;
         /**
-          * Before sorting. Use e.preventDefault() to prevent sorting.
+          * Before sorting event. Initial sorting triggered, if this event stops no other event called. Use e.preventDefault() to prevent sorting.
          */
         "onBeforeSorting"?: (event: CustomEvent<{
     column: RevoGrid.ColumnRegular,
@@ -356,6 +356,10 @@ declare namespace LocalJSX {
   column: RevoGrid.ColumnRegular,
   order: 'desc'|'asc'
 }>) => void;
+        /**
+          * Before source update sorting apply. Use this event if you intended to prevent sorting on data update. Use e.preventDefault() to prevent sorting data change during rows source update.
+         */
+        "onBeforeSourceSortingApply"?: (event: CustomEvent<any>) => void;
         /**
           * On header click.
          */
