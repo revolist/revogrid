@@ -22,14 +22,16 @@ export class DataProvider {
     }, {}) as RowDataSources;
   }
 
-  setData(data: RevoGrid.DataType[], type: DimensionRows): void {
+  get hasSorting(): boolean {
+    return !!this.sorting;
+  }
+
+  setData(data: RevoGrid.DataType[], type: DimensionRows, doSorting = true): void {
     let source = [...data];
 
     // sorting available for row type only
-    if (type === 'row') {
-      if (this.sorting) {
-        source = this.sortItems(source, this.sorting);
-      }
+    if (type === 'row' && doSorting && this.sorting) {
+      source = this.sortItems(source, this.sorting);
     }
     this.stores[type].updateData([...source]);
     if (type === 'row') {
