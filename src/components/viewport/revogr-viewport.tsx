@@ -20,24 +20,24 @@ import ViewportProps = ViewportSpace.ViewportProps;
   styleUrl: 'revogr-viewport-style.scss'
 })
 export class RevogrViewport {
+  @Element() element: HTMLElement;
   private elementToScroll: ElementScroll[] = [];
   private scrollingService: GridScrollingService;
   private selectionStoreConnector: SelectionStoreConnector;
 
   private orderService: OrdererService;
 
-  @Event() setDimensionSize: EventEmitter<{type: RevoGrid.MultiDimensionType, sizes: RevoGrid.ViewSettingSizeProp}>;
-  @Event() setViewportCoordinate: EventEmitter<RevoGrid.ViewPortScrollEvent>;
-  @Event() setViewportSize: EventEmitter<RevoGrid.ViewPortResizeEvent>;
-  @Event({ cancelable: true }) initialRowDragStart: EventEmitter<{pos: RevoGrid.PositionItem, text: string}>;
+  // --------------------------------------------------------------------------
+  //
+  //  Properties
+  //
+  // --------------------------------------------------------------------------
 
-  @Element() element: HTMLElement;
   @Prop() columnStores: {[T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>};
   @Prop() rowStores: {[T in RevoGrid.DimensionRows]: ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>};
   @Prop() dimensions: {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.DimensionSettingsState>};
   @Prop() viewports: {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.ViewportState>};
-
-
+  
   /** Custom editors register  */
   @Prop() editors: Edition.Editors;
   @Prop() rowClass: string;
@@ -46,6 +46,26 @@ export class RevogrViewport {
   @Prop() resize: boolean;
   @Prop() readonly: boolean;
   @Prop() range: boolean;
+
+  // --------------------------------------------------------------------------
+  //
+  //  Events
+  //
+  // --------------------------------------------------------------------------
+
+  @Event() setDimensionSize: EventEmitter<{type: RevoGrid.MultiDimensionType, sizes: RevoGrid.ViewSettingSizeProp}>;
+  @Event() setViewportCoordinate: EventEmitter<RevoGrid.ViewPortScrollEvent>;
+  @Event() setViewportSize: EventEmitter<RevoGrid.ViewPortResizeEvent>;
+  @Event({ cancelable: true }) initialRowDragStart: EventEmitter<{pos: RevoGrid.PositionItem, text: string}>;
+
+
+
+  
+  // --------------------------------------------------------------------------
+  //
+  //  Listeners
+  //
+  // --------------------------------------------------------------------------
 
   /** Clear data which is outside of grid container */
   @Listen('click', { target: 'document' })
@@ -84,6 +104,13 @@ export class RevogrViewport {
     this.orderService?.moveTip(e.detail);
   }
   
+  
+  // --------------------------------------------------------------------------
+  //
+  //  Methods
+  //
+  // --------------------------------------------------------------------------
+
   @Method() async scrollToCoordinate(cell: Partial<Selection.Cell>): Promise<void> {
     each(cell, (coordinate: number, key: keyof Selection.Cell) => {
       if(key === 'x') {
@@ -193,6 +220,8 @@ export class RevogrViewport {
               range={this.range}
               rowClass={this.rowClass}
               slot='data'/>
+
+            <revogr-focus selectionStore={selectionStore} dimensionRow={data.dimensionRow} dimensionCol={data.dimensionCol}/>
           </revogr-overlay-selection>
         );
       }
@@ -219,9 +248,10 @@ export class RevogrViewport {
 
           <revogr-scroll-virtual
             class='vertical'
-            contentSize={contentHeight}
+            dimension='row'
+            viewportStore={this.viewports['row']}
+            dimensionStore={this.dimensions['row']}
             ref={el => this.elementToScroll.push(el)}
-            virtualSize={this.viewports['row'].get('virtualSize')}
             onScrollVirtual={e => this.scrollingService.onScroll(e.detail)}/>
           <OrderRenderer ref={e => this.orderService = e}/>
         </div>
@@ -229,9 +259,9 @@ export class RevogrViewport {
       <revogr-scroll-virtual
         class='horizontal'
         dimension='col'
-        contentSize={this.dimensions['col'].get('realSize')}
+        viewportStore={this.viewports['col']}
+        dimensionStore={this.dimensions['col']}
         ref={el => this.elementToScroll.push(el)}
-        virtualSize={this.viewports['col'].get('virtualSize')}
         onScrollVirtual={e => this.scrollingService.onScroll(e.detail)}/>
     </Host>;
   }

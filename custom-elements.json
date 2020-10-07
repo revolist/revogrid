@@ -48,6 +48,12 @@
               "name": "compact"
             },
             {
+              "name": "darkCompact"
+            },
+            {
+              "name": "darkMaterial"
+            },
+            {
               "name": "default"
             },
             {
@@ -92,6 +98,14 @@
     },
     {
       "name": "revogr-edit",
+      "description": {
+        "kind": "markdown",
+        "value": ""
+      },
+      "attributes": []
+    },
+    {
+      "name": "revogr-focus",
       "description": {
         "kind": "markdown",
         "value": ""
@@ -156,10 +170,6 @@
       },
       "attributes": [
         {
-          "name": "content-size",
-          "description": ""
-        },
-        {
           "name": "dimension",
           "description": "",
           "values": [
@@ -170,10 +180,6 @@
               "name": "row"
             }
           ]
-        },
-        {
-          "name": "virtual-size",
-          "description": ""
         }
       ]
     },

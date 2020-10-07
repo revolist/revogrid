@@ -2,7 +2,7 @@ import debounce from 'lodash/debounce';
 import each from 'lodash/each';
 
 import {Selection, RevoGrid} from '../../interfaces';
-import {getItemByPosition} from '../../store/dimension/dimension.helpers';
+import {getItemByIndex, getItemByPosition} from '../../store/dimension/dimension.helpers';
 import Cell = Selection.Cell;
 
 interface Config {
@@ -142,5 +142,32 @@ export default class CellSelectionService {
       }
     }
     return null;
+  }
+
+
+  static getCell({x, y, x1, y1}: Selection.RangeArea, dimensionRow: RevoGrid.DimensionSettingsState, dimensionCol: RevoGrid.DimensionSettingsState) {
+    const top: number = getItemByIndex(dimensionRow, y).start;
+    const left: number = getItemByIndex(dimensionCol, x).start;
+    const bottom: number = getItemByIndex(dimensionRow, y1).end;
+    const right: number = getItemByIndex(dimensionCol, x1).end;
+
+    return  {
+      left,
+      right,
+      top,
+      bottom,
+      width: right-left,
+      height: bottom-top
+    };
+  }
+
+  static getElStyle(range: Selection.RangeArea, dimensionRow: RevoGrid.DimensionSettingsState, dimensionCol: RevoGrid.DimensionSettingsState): Selection.RangeAreaCss {
+    const styles = CellSelectionService.getCell(range, dimensionRow, dimensionCol);
+    return  {
+      left: `${styles.left}px`,
+      top: `${styles.top}px`,
+      width: `${styles.width}px`,
+      height: `${styles.height}px`
+    };
   }
 }

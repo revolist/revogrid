@@ -24,7 +24,6 @@ export default class SelectionStore {
   }
 
   setLastCell(lastCell: Cell): void {
-    // todo: for existing need to update
     setStore(this.store, { lastCell });
   }
 
@@ -34,8 +33,7 @@ export default class SelectionStore {
   }
 
   setTempRange(start: Cell, end: Cell): void {
-    setStore(this.store, { tempRange: getRange(start, end) });
-    setStore(this.store, { edit: null });
+    setStore(this.store, { tempRange: getRange(start, end), edit: null });
   }
 
   clearTemp(): void {
@@ -52,6 +50,7 @@ export default class SelectionStore {
     }
     let end: Cell = cell;
 
+    // range edit
     if (isMulti) {
       let start: Cell|null = this.store.get('focus');
       if (start) {
@@ -61,6 +60,7 @@ export default class SelectionStore {
       }
     }
 
+    // single focus
     this.config.focus(cell, end);
   }
 

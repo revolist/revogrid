@@ -11,7 +11,8 @@ export const config: Config = {
   plugins: [sass({
     injectGlobalPaths: [
       'src/global/_colors.scss',
-      'src/global/_icons.scss'
+      'src/global/_icons.scss',
+      'src/global/_mixins.scss'
     ]
   })],
   outputTargets: [

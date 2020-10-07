@@ -2,6 +2,7 @@ import {Component, Element, Event, EventEmitter, h, Host, Method, Prop} from '@s
 import {getScrollbarWidth} from '../../utils/utils';
 import LocalScrollService from '../../services/localScrollService';
 import {RevoGrid} from "../../interfaces";
+import { ObservableMap } from '@stencil/store';
 
 @Component({
     tag: 'revogr-scroll-virtual',
@@ -14,9 +15,10 @@ export class RevogrScrollVirtual {
     private scrollService: LocalScrollService;
 
     @Element() element: HTMLElement;
+
     @Prop() dimension: RevoGrid.DimensionType = 'row';
-    @Prop() contentSize: number = 0;
-    @Prop() virtualSize: number = 0;
+    @Prop() viewportStore: ObservableMap<RevoGrid.ViewportState>;
+    @Prop() dimensionStore: ObservableMap<RevoGrid.DimensionSettingsState>;
 
     @Event() scrollVirtual: EventEmitter<RevoGrid.ViewPortScrollEvent>;
 
@@ -26,10 +28,6 @@ export class RevogrScrollVirtual {
             return;
         }
         this.scrollService?.setScroll(e);
-    }
-
-    get extContentSize(): number {
-        return LocalScrollService.getVirtualContentSize(this.contentSize, this.size, this.virtualSize);
     }
 
     set size(s: number) {
@@ -74,9 +72,9 @@ export class RevogrScrollVirtual {
             this.size = 0;
         }
         this.scrollService.setParams({
-            contentSize: this.contentSize,
+            contentSize: this.dimensionStore.get('realSize'),
             clientSize: this.size,
-            virtualSize: this.virtualSize
+            virtualSize: this.viewportStore.get('virtualSize')
         }, this.dimension);
     }
 
@@ -103,7 +101,11 @@ export class RevogrScrollVirtual {
     render() {
         const sizeType = this.dimension === 'row' ? 'height' : 'width';
         return <Host {...{'auto-hide' : this.isAutoHide }} onScroll={(e: MouseEvent) => this.onScroll(e)}>
-            <div style={{[sizeType]: `${this.extContentSize}px`}}/>
+            <div style={{[sizeType]: `${this.extContentSize(this.viewportStore.get('virtualSize'), this.dimensionStore.get('realSize'))}px`}}/>
         </Host>;
+    }
+
+    private extContentSize(vsize: number, contentSize: number): number {
+        return LocalScrollService.getVirtualContentSize(contentSize, this.size, vsize);
     }
 }

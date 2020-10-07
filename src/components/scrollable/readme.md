@@ -7,11 +7,11 @@
 
 ## Properties
 
-| Property      | Attribute      | Description | Type             | Default |
-| ------------- | -------------- | ----------- | ---------------- | ------- |
-| `contentSize` | `content-size` |             | `number`         | `0`     |
-| `dimension`   | `dimension`    |             | `"col" \| "row"` | `'row'` |
-| `virtualSize` | `virtual-size` |             | `number`         | `0`     |
+| Property         | Attribute   | Description | Type                                    | Default     |
+| ---------------- | ----------- | ----------- | --------------------------------------- | ----------- |
+| `dimension`      | `dimension` |             | `"col" \| "row"`                        | `'row'`     |
+| `dimensionStore` | --          |             | `ObservableMap<DimensionSettingsState>` | `undefined` |
+| `viewportStore`  | --          |             | `ObservableMap<ViewportState>`          | `undefined` |
 
 
 ## Events

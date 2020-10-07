@@ -51,7 +51,10 @@
   <script nomodule src="/build/revo-grid.js"></script>
 </head>
 <body>
-    <button onclick="setGrid()">Test data update</button>
+    <button onclick="setGrid()">Refresh data</button>
+    <button onclick="scrollToCol()">Scroll to column 30</button>
+    <button onclick="setEdit()">Set edit 30:1</button>
+
     <div class="tile large">
       <div>
         <revo-grid style="height: 345px" theme="material"></revo-grid>
@@ -61,7 +64,7 @@
     <script type="module">
         import {generateFakeDataObject} from "/utilsExternal/generate-data.js";
 
-        const data = generateFakeDataObject(207, 5);
+        const data = generateFakeDataObject(207, 100);
         const grid = document.querySelector('revo-grid');
 
         grid.columns = data.headers;
@@ -80,14 +83,15 @@
         grid.addEventListener('rowDragStart', (e) => {
           console.log(e.detail);
         });
-        setTimeout(() => {
-          grid.scrollToColumnProp(30);
-          // grid.setCellEdit(1, 31);
-        }, 500);
 
+        window.setEdit = function(x, y) {
+          grid.setCellEdit(1, 30);
+        };
+        window.scrollToCol = function(x) {
+          grid.scrollToColumnProp(x || 30);
+        };
         window.setGrid = function setGrid() {
           grid.source = [...data.rows];
-          console.log('data');
         }
     </script>
 </body>

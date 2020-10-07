@@ -9,6 +9,7 @@ import DimensionProvider from '../../services/dimension.provider';
 import ViewportProvider from '../../services/viewport.provider';
 import {Edition, Selection, RevoGrid, ThemeSpace} from '../../interfaces';
 import ThemeService from '../../themeManager/themeService';
+import { timeout } from '../../utils/utils';
 
 
 type ColumnStores = {
@@ -235,6 +236,7 @@ export class RevoGridComponent {
   @Method() async setCellEdit(row: number, prop: RevoGrid.ColumnProp, rowSource: RevoGrid.DimensionRows = 'row'): Promise<void> {
     const col = ColumnDataProvider.getColumnByProp(this.columns, prop);
     if (col) {
+      await timeout();
       this.viewportElement.setEdit(row, this.columnProvider.getColumnIndexByProp(prop, 'col'), col.pin || 'col', rowSource);
     }
   }

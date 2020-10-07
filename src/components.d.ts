@@ -116,6 +116,14 @@ export namespace Components {
          */
         "editor": Edition.EditorCtr|null;
     }
+    interface RevogrFocus {
+        "dimensionCol": ObservableMap<RevoGrid.DimensionSettingsState>;
+        "dimensionRow": ObservableMap<RevoGrid.DimensionSettingsState>;
+        /**
+          * Dynamic stores
+         */
+        "selectionStore": ObservableMap<Selection.SelectionStoreState>;
+    }
     interface RevogrHeader {
         "canResize": boolean;
         "colData": RevoGrid.ColumnRegular[];
@@ -165,10 +173,10 @@ export namespace Components {
         "selectionTempRange": Selection.RangeArea;
     }
     interface RevogrScrollVirtual {
-        "contentSize": number;
         "dimension": RevoGrid.DimensionType;
+        "dimensionStore": ObservableMap<RevoGrid.DimensionSettingsState>;
         "setScroll": (e: RevoGrid.ViewPortScrollEvent) => Promise<void>;
-        "virtualSize": number;
+        "viewportStore": ObservableMap<RevoGrid.ViewportState>;
     }
     interface RevogrViewport {
         "columnStores": {[T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>};
@@ -218,6 +226,12 @@ declare global {
         prototype: HTMLRevogrEditElement;
         new (): HTMLRevogrEditElement;
     };
+    interface HTMLRevogrFocusElement extends Components.RevogrFocus, HTMLStencilElement {
+    }
+    var HTMLRevogrFocusElement: {
+        prototype: HTMLRevogrFocusElement;
+        new (): HTMLRevogrFocusElement;
+    };
     interface HTMLRevogrHeaderElement extends Components.RevogrHeader, HTMLStencilElement {
     }
     var HTMLRevogrHeaderElement: {
@@ -259,6 +273,7 @@ declare global {
         "revogr-clipboard": HTMLRevogrClipboardElement;
         "revogr-data": HTMLRevogrDataElement;
         "revogr-edit": HTMLRevogrEditElement;
+        "revogr-focus": HTMLRevogrFocusElement;
         "revogr-header": HTMLRevogrHeaderElement;
         "revogr-order-editor": HTMLRevogrOrderEditorElement;
         "revogr-overlay-selection": HTMLRevogrOverlaySelectionElement;
@@ -408,6 +423,14 @@ declare namespace LocalJSX {
          */
         "onCloseEdit"?: (event: CustomEvent<any>) => void;
     }
+    interface RevogrFocus {
+        "dimensionCol"?: ObservableMap<RevoGrid.DimensionSettingsState>;
+        "dimensionRow"?: ObservableMap<RevoGrid.DimensionSettingsState>;
+        /**
+          * Dynamic stores
+         */
+        "selectionStore"?: ObservableMap<Selection.SelectionStoreState>;
+    }
     interface RevogrHeader {
         "canResize"?: boolean;
         "colData"?: RevoGrid.ColumnRegular[];
@@ -494,10 +517,10 @@ declare namespace LocalJSX {
         "selectionTempRange"?: Selection.RangeArea;
     }
     interface RevogrScrollVirtual {
-        "contentSize"?: number;
         "dimension"?: RevoGrid.DimensionType;
+        "dimensionStore"?: ObservableMap<RevoGrid.DimensionSettingsState>;
         "onScrollVirtual"?: (event: CustomEvent<RevoGrid.ViewPortScrollEvent>) => void;
-        "virtualSize"?: number;
+        "viewportStore"?: ObservableMap<RevoGrid.ViewportState>;
     }
     interface RevogrViewport {
         "columnStores"?: {[T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>};
@@ -529,6 +552,7 @@ declare namespace LocalJSX {
         "revogr-clipboard": RevogrClipboard;
         "revogr-data": RevogrData;
         "revogr-edit": RevogrEdit;
+        "revogr-focus": RevogrFocus;
         "revogr-header": RevogrHeader;
         "revogr-order-editor": RevogrOrderEditor;
         "revogr-overlay-selection": RevogrOverlaySelection;
@@ -545,6 +569,7 @@ declare module "@stencil/core" {
             "revogr-clipboard": LocalJSX.RevogrClipboard & JSXBase.HTMLAttributes<HTMLRevogrClipboardElement>;
             "revogr-data": LocalJSX.RevogrData & JSXBase.HTMLAttributes<HTMLRevogrDataElement>;
             "revogr-edit": LocalJSX.RevogrEdit & JSXBase.HTMLAttributes<HTMLRevogrEditElement>;
+            "revogr-focus": LocalJSX.RevogrFocus & JSXBase.HTMLAttributes<HTMLRevogrFocusElement>;
             "revogr-header": LocalJSX.RevogrHeader & JSXBase.HTMLAttributes<HTMLRevogrHeaderElement>;
             "revogr-order-editor": LocalJSX.RevogrOrderEditor & JSXBase.HTMLAttributes<HTMLRevogrOrderEditorElement>;
             "revogr-overlay-selection": LocalJSX.RevogrOverlaySelection & JSXBase.HTMLAttributes<HTMLRevogrOverlaySelectionElement>;
