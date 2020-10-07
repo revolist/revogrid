@@ -184,6 +184,14 @@
       ]
     },
     {
+      "name": "revogr-temp-range",
+      "description": {
+        "kind": "markdown",
+        "value": ""
+      },
+      "attributes": []
+    },
+    {
       "name": "revogr-viewport",
       "description": {
         "kind": "markdown",

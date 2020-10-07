@@ -17,8 +17,7 @@ revogr-overlay-selection {
 		cursor: crosshair;
 	}
 
-	.selection-border-range,
-	.temp-bg-range {
+	.selection-border-range {
 		position: absolute;
 		pointer-events:none;
 		z-index: 9;
@@ -26,11 +25,6 @@ revogr-overlay-selection {
 
 	.selection-border-range {
 		@include selection();
-	}
-
-	.temp-bg-range {
-		border: 1px solid red;
-		box-sizing: border-box;
 	}
 
 	revogr-edit {

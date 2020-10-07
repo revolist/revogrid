@@ -118,6 +118,7 @@ graph TD;
   revo-grid --> revogr-viewport
   revogr-viewport --> revogr-overlay-selection
   revogr-viewport --> revogr-data
+  revogr-viewport --> revogr-temp-range
   revogr-viewport --> revogr-focus
   revogr-viewport --> revogr-viewport-scroll
   revogr-viewport --> revogr-header

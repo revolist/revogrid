@@ -16,7 +16,7 @@ export class RevogrFocus {
   @Prop() dimensionRow: ObservableMap<RevoGrid.DimensionSettingsState>;
 	@Prop() dimensionCol: ObservableMap<RevoGrid.DimensionSettingsState>;
 
-  private focusChanged(e: HTMLElement): void {
+  private changed(e: HTMLElement): void {
     e?.scrollIntoView({
         block: 'nearest',
         inline: 'nearest'
@@ -24,20 +24,19 @@ export class RevogrFocus {
 	}
 
 	componentDidRender(): void {
-		this.el && this.focusChanged(this.el);
+		this.el && this.changed(this.el);
 	}
 	
 	render() {
-		const selectionFocus = this.selectionStore.get('focus');
-		let focusStyle: Partial<Selection.RangeAreaCss> = {};
-		if (selectionFocus) {
-				focusStyle = CellSelectionService.getElStyle({
-						...selectionFocus,
-						x1: selectionFocus.x,
-						y1: selectionFocus.y
+		const data = this.selectionStore.get('focus');
+		if (data) {
+				const style = CellSelectionService.getElStyle({
+						...data,
+						x1: data.x,
+						y1: data.y
 					}, this.dimensionRow.state, this.dimensionCol.state
 				);
-				return <Host class={FOCUS_CLASS} style={focusStyle} ref={(e: HTMLElement) => this.focusChanged(e)}/>;
+				return <Host class={FOCUS_CLASS} style={style}/>;
 		}
 	}
 }

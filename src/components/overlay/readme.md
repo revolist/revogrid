@@ -7,21 +7,20 @@
 
 ## Properties
 
-| Property             | Attribute  | Description                                                     | Type                                                      | Default     |
-| -------------------- | ---------- | --------------------------------------------------------------- | --------------------------------------------------------- | ----------- |
-| `canDrag`            | `can-drag` |                                                                 | `boolean`                                                 | `undefined` |
-| `colData`            | --         |                                                                 | `ColumnRegular[]`                                         | `undefined` |
-| `dataStore`          | --         | Static stores, not expected to change during component lifetime | `ObservableMap<DataSourceState<DataType, DimensionRows>>` | `undefined` |
-| `dimensionCol`       | --         |                                                                 | `ObservableMap<DimensionSettingsState>`                   | `undefined` |
-| `dimensionRow`       | --         |                                                                 | `ObservableMap<DimensionSettingsState>`                   | `undefined` |
-| `editors`            | --         | Custom editors register                                         | `{ [name: string]: EditorCtr; }`                          | `undefined` |
-| `lastCell`           | --         | Last cell position                                              | `Cell`                                                    | `undefined` |
-| `range`              | `range`    |                                                                 | `boolean`                                                 | `undefined` |
-| `readonly`           | `readonly` |                                                                 | `boolean`                                                 | `undefined` |
-| `selectionFocus`     | --         |                                                                 | `Cell`                                                    | `undefined` |
-| `selectionRange`     | --         |                                                                 | `{ x: number; y: number; x1: number; y1: number; }`       | `undefined` |
-| `selectionStore`     | --         | Dynamic stores                                                  | `ObservableMap<SelectionStoreState>`                      | `undefined` |
-| `selectionTempRange` | --         |                                                                 | `{ x: number; y: number; x1: number; y1: number; }`       | `undefined` |
+| Property         | Attribute  | Description                                                     | Type                                                      | Default     |
+| ---------------- | ---------- | --------------------------------------------------------------- | --------------------------------------------------------- | ----------- |
+| `canDrag`        | `can-drag` |                                                                 | `boolean`                                                 | `undefined` |
+| `colData`        | --         |                                                                 | `ColumnRegular[]`                                         | `undefined` |
+| `dataStore`      | --         | Static stores, not expected to change during component lifetime | `ObservableMap<DataSourceState<DataType, DimensionRows>>` | `undefined` |
+| `dimensionCol`   | --         |                                                                 | `ObservableMap<DimensionSettingsState>`                   | `undefined` |
+| `dimensionRow`   | --         |                                                                 | `ObservableMap<DimensionSettingsState>`                   | `undefined` |
+| `editors`        | --         | Custom editors register                                         | `{ [name: string]: EditorCtr; }`                          | `undefined` |
+| `lastCell`       | --         | Last cell position                                              | `Cell`                                                    | `undefined` |
+| `range`          | `range`    |                                                                 | `boolean`                                                 | `undefined` |
+| `readonly`       | `readonly` |                                                                 | `boolean`                                                 | `undefined` |
+| `selectionFocus` | --         |                                                                 | `Cell`                                                    | `undefined` |
+| `selectionRange` | --         |                                                                 | `{ x: number; y: number; x1: number; y1: number; }`       | `undefined` |
+| `selectionStore` | --         | Dynamic stores                                                  | `ObservableMap<SelectionStoreState>`                      | `undefined` |
 
 
 ## Events

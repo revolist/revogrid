@@ -1,0 +1,30 @@
+.temp-bg-range {
+    display: block;
+    position: absolute;
+    pointer-events: none;
+    z-index: 9;
+    border: 1px solid red;
+    box-sizing: border-box;
+
+    > div {
+        width: 1px;
+        height: 1px;
+        position: absolute;
+
+        &.top {
+            top: -1px;
+        }
+
+        &.bottom {
+            bottom: -1px;
+        }
+
+        &.left {
+            left: -1px;
+        }
+
+        &.right {
+            right: -1px;
+        }
+    }
+}

@@ -10,8 +10,7 @@ import {isClear, isLetterKey} from '../../utils/keyCodes.utils';
 import {
   CELL_HANDLER_CLASS,
   EDIT_INPUT_WR,
-  SELECTION_BORDER_CLASS,
-  TMP_SELECTION_BG_CLASS
+  SELECTION_BORDER_CLASS
 } from '../../utils/consts';
 import {DataSourceState} from '../../store/dataSource/data.store';
 
@@ -51,7 +50,6 @@ export class OverlaySelection {
 
   @Prop() selectionFocus: Selection.Cell;
   @Prop() selectionRange: Selection.RangeArea;
-  @Prop() selectionTempRange: Selection.RangeArea;
 
   /** Dynamic stores */
   @Prop() selectionStore: ObservableMap<Selection.SelectionStoreState>;
@@ -98,6 +96,14 @@ export class OverlaySelection {
   //  Listeners
   //
   // --------------------------------------------------------------------------
+
+   /** Pointer left document, clear any active operation */
+   @Listen('mousemove', { target: 'document' })
+   onMouseMove(e: MouseEvent): void {
+    if (this.autoFill && this.selectionFocus) {
+      this.selectionService.onMouseMove(e, this.getData())
+    }
+   }
 
   /** Pointer left document, clear any active operation */
   @Listen('mouseleave', { target: 'document' })
@@ -341,7 +347,6 @@ export class OverlaySelection {
   render() {
     const range = this.selectionRange;
     const selectionFocus = this.selectionFocus;
-    const tempRange = this.selectionTempRange;
     const els: VNode[] = [];
 
     if (range || selectionFocus) {
@@ -356,11 +361,6 @@ export class OverlaySelection {
       els.push(...this.renderRange(range));
     }
 
-    if (tempRange) {
-      const style: RangeAreaCss = CellSelectionService.getElStyle(tempRange, this.dimensionRow.state, this.dimensionCol.state);
-      els.push(<div class={TMP_SELECTION_BG_CLASS} style={style}/>);
-    }
-
     const editCell = this.renderEditCell();
     if (editCell) {
       els.push(editCell);
@@ -373,14 +373,10 @@ export class OverlaySelection {
     const hostProps: {
       onDblClick(): void;
       onMouseDown(e: MouseEvent): void;
-      onMouseMove?(e: MouseEvent): void;
     } = {
       onDblClick: () => this.onDoubleClick(),
       onMouseDown: (e: MouseEvent) => this.onMouseDown(e),
     };
-    if (this.autoFill && selectionFocus) {
-      hostProps.onMouseMove = (e: MouseEvent) => this.selectionService.onMouseMove(e, this.getData())
-    }
 
     if (this.canDrag) {
       els.push(<revogr-order-editor

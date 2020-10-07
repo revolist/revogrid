@@ -27,7 +27,7 @@ export default class CellSelectionService {
   private autoFillStart: Cell|null = null;
   private autoFillLast: Cell|null = null;
 
-  public readonly onMouseMove = debounce((e: MouseEvent, data: EventData) => this.doMouseMove(e, data), 5);
+  readonly onMouseMove = debounce((e: MouseEvent, data: EventData) => this.doMouseMove(e, data), 5);
 
   constructor(private config: Config) {
     this.canRange = config.canRange;
@@ -120,6 +120,7 @@ export default class CellSelectionService {
     let cellY = y - top;
 
     // limit to element height
+
     if (cellY >= height) {
       cellY = height - 1;
     }
@@ -130,6 +131,12 @@ export default class CellSelectionService {
     }
     const row = getItemByPosition(rows, cellY);
     const col = getItemByPosition(cols, cellX);
+    if (col.itemIndex < 0) {
+      col.itemIndex = 0;
+    }
+    if (row.itemIndex < 0) {
+      row.itemIndex = 0;
+    }
     return { x: col.itemIndex, y: row.itemIndex };
   }
 
@@ -161,13 +168,20 @@ export default class CellSelectionService {
     };
   }
 
-  static getElStyle(range: Selection.RangeArea, dimensionRow: RevoGrid.DimensionSettingsState, dimensionCol: RevoGrid.DimensionSettingsState): Selection.RangeAreaCss {
-    const styles = CellSelectionService.getCell(range, dimensionRow, dimensionCol);
+  static styleByCellProps(styles: {[key: string]: number}): Selection.RangeAreaCss {
     return  {
       left: `${styles.left}px`,
       top: `${styles.top}px`,
       width: `${styles.width}px`,
       height: `${styles.height}px`
     };
+  }
+
+  static getElStyle(
+    range: Selection.RangeArea,
+    dimensionRow: RevoGrid.DimensionSettingsState,
+    dimensionCol: RevoGrid.DimensionSettingsState): Selection.RangeAreaCss {
+    const styles = CellSelectionService.getCell(range, dimensionRow, dimensionCol);
+    return CellSelectionService.styleByCellProps(styles);
   }
 }

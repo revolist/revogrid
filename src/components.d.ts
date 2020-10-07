@@ -170,13 +170,20 @@ export namespace Components {
           * Dynamic stores
          */
         "selectionStore": ObservableMap<Selection.SelectionStoreState>;
-        "selectionTempRange": Selection.RangeArea;
     }
     interface RevogrScrollVirtual {
         "dimension": RevoGrid.DimensionType;
         "dimensionStore": ObservableMap<RevoGrid.DimensionSettingsState>;
         "setScroll": (e: RevoGrid.ViewPortScrollEvent) => Promise<void>;
         "viewportStore": ObservableMap<RevoGrid.ViewportState>;
+    }
+    interface RevogrTempRange {
+        "dimensionCol": ObservableMap<RevoGrid.DimensionSettingsState>;
+        "dimensionRow": ObservableMap<RevoGrid.DimensionSettingsState>;
+        /**
+          * Dynamic stores
+         */
+        "selectionStore": ObservableMap<Selection.SelectionStoreState>;
     }
     interface RevogrViewport {
         "columnStores": {[T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>};
@@ -256,6 +263,12 @@ declare global {
         prototype: HTMLRevogrScrollVirtualElement;
         new (): HTMLRevogrScrollVirtualElement;
     };
+    interface HTMLRevogrTempRangeElement extends Components.RevogrTempRange, HTMLStencilElement {
+    }
+    var HTMLRevogrTempRangeElement: {
+        prototype: HTMLRevogrTempRangeElement;
+        new (): HTMLRevogrTempRangeElement;
+    };
     interface HTMLRevogrViewportElement extends Components.RevogrViewport, HTMLStencilElement {
     }
     var HTMLRevogrViewportElement: {
@@ -278,6 +291,7 @@ declare global {
         "revogr-order-editor": HTMLRevogrOrderEditorElement;
         "revogr-overlay-selection": HTMLRevogrOverlaySelectionElement;
         "revogr-scroll-virtual": HTMLRevogrScrollVirtualElement;
+        "revogr-temp-range": HTMLRevogrTempRangeElement;
         "revogr-viewport": HTMLRevogrViewportElement;
         "revogr-viewport-scroll": HTMLRevogrViewportScrollElement;
     }
@@ -514,13 +528,20 @@ declare namespace LocalJSX {
           * Dynamic stores
          */
         "selectionStore"?: ObservableMap<Selection.SelectionStoreState>;
-        "selectionTempRange"?: Selection.RangeArea;
     }
     interface RevogrScrollVirtual {
         "dimension"?: RevoGrid.DimensionType;
         "dimensionStore"?: ObservableMap<RevoGrid.DimensionSettingsState>;
         "onScrollVirtual"?: (event: CustomEvent<RevoGrid.ViewPortScrollEvent>) => void;
         "viewportStore"?: ObservableMap<RevoGrid.ViewportState>;
+    }
+    interface RevogrTempRange {
+        "dimensionCol"?: ObservableMap<RevoGrid.DimensionSettingsState>;
+        "dimensionRow"?: ObservableMap<RevoGrid.DimensionSettingsState>;
+        /**
+          * Dynamic stores
+         */
+        "selectionStore"?: ObservableMap<Selection.SelectionStoreState>;
     }
     interface RevogrViewport {
         "columnStores"?: {[T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>};
@@ -557,6 +578,7 @@ declare namespace LocalJSX {
         "revogr-order-editor": RevogrOrderEditor;
         "revogr-overlay-selection": RevogrOverlaySelection;
         "revogr-scroll-virtual": RevogrScrollVirtual;
+        "revogr-temp-range": RevogrTempRange;
         "revogr-viewport": RevogrViewport;
         "revogr-viewport-scroll": RevogrViewportScroll;
     }
@@ -574,6 +596,7 @@ declare module "@stencil/core" {
             "revogr-order-editor": LocalJSX.RevogrOrderEditor & JSXBase.HTMLAttributes<HTMLRevogrOrderEditorElement>;
             "revogr-overlay-selection": LocalJSX.RevogrOverlaySelection & JSXBase.HTMLAttributes<HTMLRevogrOverlaySelectionElement>;
             "revogr-scroll-virtual": LocalJSX.RevogrScrollVirtual & JSXBase.HTMLAttributes<HTMLRevogrScrollVirtualElement>;
+            "revogr-temp-range": LocalJSX.RevogrTempRange & JSXBase.HTMLAttributes<HTMLRevogrTempRangeElement>;
             "revogr-viewport": LocalJSX.RevogrViewport & JSXBase.HTMLAttributes<HTMLRevogrViewportElement>;
             "revogr-viewport-scroll": LocalJSX.RevogrViewportScroll & JSXBase.HTMLAttributes<HTMLRevogrViewportScrollElement>;
         }

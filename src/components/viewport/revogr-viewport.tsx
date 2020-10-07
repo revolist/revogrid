@@ -203,7 +203,6 @@ export class RevogrViewport {
             range={this.range}
 
             selectionRange={selectionStore.get('range')}
-            selectionTempRange={selectionStore.get('tempRange')}
             selectionFocus={selectionStore.get('focus')}
 
             onSetEdit={(e) => this.selectionStoreConnector.setEdit(e.detail)}
@@ -220,7 +219,7 @@ export class RevogrViewport {
               range={this.range}
               rowClass={this.rowClass}
               slot='data'/>
-
+            <revogr-temp-range selectionStore={selectionStore} dimensionRow={data.dimensionRow} dimensionCol={data.dimensionCol}/>
             <revogr-focus selectionStore={selectionStore} dimensionRow={data.dimensionRow} dimensionCol={data.dimensionCol}/>
           </revogr-overlay-selection>
         );
