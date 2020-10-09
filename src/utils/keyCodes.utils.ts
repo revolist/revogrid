@@ -73,3 +73,7 @@ export function isClear(code:  string): boolean {
     return codesLetter.BACKSPACE === code || codesLetter.DELETE === code;
 }
 
+export function isTab(code:  string): boolean {
+    return codesLetter.TAB === code;
+}
+
