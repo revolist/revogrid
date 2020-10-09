@@ -1,5 +1,6 @@
 import {h, VNode} from '@stencil/core';
 import {codesLetter} from '../../../utils/keyCodes';
+import {isTab} from '../../../utils/keyCodes.utils';
 import {Edition, RevoGrid} from '../../../interfaces';
 import {timeout} from '../../../utils/utils';
 
@@ -11,7 +12,7 @@ export class TextEditor implements Edition.EditorBase {
 
     constructor(
         public column: RevoGrid.ColumnRegular,
-        private editCallback?: (value: Edition.SaveData) => void
+        private saveCallback?: (value: Edition.SaveData, preventFocus: boolean) => void
     ) {}
 
     async componentDidRender(): Promise<void> {
@@ -25,13 +26,13 @@ export class TextEditor implements Edition.EditorBase {
 
     private onKeyDown(e: KeyboardEvent): void {
         const isEnter: boolean = codesLetter.ENTER === e.code;
-        const isTab: boolean = codesLetter.TAB === e.code;
+        const isKeyTab: boolean = isTab(e.code);
 
-        if ((isTab||isEnter) && e.target && this.editCallback) {
+        if ((isKeyTab||isEnter) && e.target && this.saveCallback) {
             // blur is needed to avoid autoscroll
             this.editInput.blur();
             // request callback which will close cell after all
-            this.editCallback((e.target as HTMLInputElement).value);
+            this.saveCallback((e.target as HTMLInputElement).value, isKeyTab);
         }
     }
 

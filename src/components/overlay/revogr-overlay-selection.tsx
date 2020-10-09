@@ -159,7 +159,6 @@ export class OverlaySelection {
     /**
      *  IF NOT EDIT MODE
      */
-    
 
     // pressed clear key
     if (isClear(e.code)) {
@@ -429,7 +428,7 @@ export class OverlaySelection {
     const dataToSave = this.columnService.getSaveData(e.row, e.col, e.val);
     this.internalCellEdit.emit(dataToSave);
     // if not clear navigate to next cell after edit
-    if (!clear) {
+    if (!clear && !e.preventFocus) {
       this.keyChangeSelection(new KeyboardEvent('keydown', {
         code: codesLetter.ARROW_DOWN
       }));

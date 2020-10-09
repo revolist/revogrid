@@ -23,12 +23,13 @@ export class Edit {
 
 
     /** Callback triggered on cell editor save */
-    onSave(val: Edition.SaveData): void {
+    onSave(val: Edition.SaveData, preventFocus?: boolean): void {
         if (this.editCell) {
             this.cellEdit.emit({
                 col: this.editCell.x,
                 row: this.editCell.y,
-                val
+                val,
+                preventFocus
             });
         }
     }
@@ -36,9 +37,13 @@ export class Edit {
     componentWillRender(): void {
         if (!this.currentEditor) {
             if (this.editor) {
-                this.currentEditor = new this.editor(this.column, (e) => this.onSave(e), () => this.closeEdit.emit());
+                this.currentEditor = new this.editor(
+                    this.column,
+                    (e, preventFocus) => this.onSave(e, preventFocus),
+                    () => this.closeEdit.emit()
+                );
             } else {
-                this.currentEditor = new TextEditor(this.column, (e) => this.onSave(e));
+                this.currentEditor = new TextEditor(this.column, (e, preventFocus) => this.onSave(e, preventFocus));
             }
         }
     }

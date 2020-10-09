@@ -259,6 +259,7 @@ export declare namespace Edition {
     row: Selection.RowIndex;
     col: Selection.ColIndex;
     val: SaveData;
+    preventFocus?: boolean;
   };
   type BeforeSaveDataDetails = {
     prop: RevoGrid.ColumnProp;
@@ -285,7 +286,7 @@ export declare namespace Edition {
         // column data
         column: RevoGrid.ColumnRegular,
         // to save changes
-        saveCallback?: (value: Edition.SaveData) => void,
+        saveCallback?: (value: Edition.SaveData, preventFocus?: boolean) => void,
         // to close editor
         closeCallback?: () => void
     ): EditorBase;
