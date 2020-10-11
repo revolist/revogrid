@@ -17,7 +17,6 @@ export interface ViewportColumn {
 
     contentHeight: number;
     uuid: string;
-    rows: RevoGrid.VirtualPositionItem[];
     fixWidth?: boolean;
 
     viewports: {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.ViewportState>};
@@ -29,7 +28,6 @@ export interface ViewportColumn {
 }
 
 export function gatherColumnData(data: ViewportColumn): ViewportProps {
-    const cols: RevoGrid.VirtualPositionItem[] = data.viewports[data.colType].get('items');
     const parent: string = `[${UUID}="${data.uuid}"]`;
     const realSize = data.dimensions[data.colType].get('realSize');
     const prop: Properties = {
@@ -44,7 +42,6 @@ export function gatherColumnData(data: ViewportColumn): ViewportProps {
         prop.style = { minWidth: `${realSize}px` };
     }
     const headerProp: Properties = {
-        cols,
         parent,
         colData: data.colStore.get('items'),
         dimensionCol: data.dimensions[data.colType],
@@ -57,22 +54,22 @@ export function gatherColumnData(data: ViewportColumn): ViewportProps {
         prop,
         headerProp,
         parent,
+        viewportCol: data.viewports[data.colType],
         dataPorts: dataViewPort(data)
     };
 }
 
 function dataPartition(data: ViewportColumn, type: RevoGrid.DimensionRows, slot: SlotType, fixed?: boolean): ViewportData {
-    const cols: RevoGrid.VirtualPositionItem[] = data.viewports[data.colType].get('items');
     const colData = data.colStore.get('items');
     let lastCell = getLastCell(data, type);
     const dataPart: ViewportData = {
         colData,
-        cols,
+        viewportCol: data.viewports[data.colType],
         lastCell,
         slot,
         canDrag: !fixed,
         position: data.position,
-        rows: data.viewports[type].get('items'),
+        viewportRow: data.viewports[type],
         uuid: `${data.uuid}-${data.position.x}-${data.position.y}`,
         dataStore: data.rowStores[type],
         dimensionCol: data.dimensions[data.colType],
@@ -96,7 +93,7 @@ function dataViewPort(data: ViewportColumn): ViewportData[] {
     };
     let y: number = 0;
     rowTypes.forEach(type => {
-        if (data.viewports[type].get('items').length || type === 'row') {
+        if (data.viewports[type].get('realCount') || type === 'row') {
             viewports.push(
                 dataPartition({
                         ...data,
@@ -136,15 +133,15 @@ export function getStoresCoordinates(
     columnTypes.forEach(v => {
       const colStore = columnStores[v];
       if (colStore.get('items').length) {
-        	stores[v] = x;
-          x++;
+        stores[v] = x;
+        x++;
       }
     });
 
     rowTypes.forEach(v => {
         const rowStore = rowStores[v];
         if (rowStore.get('items').length) {
-						stores[v] = y;
+            stores[v] = y;
             y++;
         }
 		});

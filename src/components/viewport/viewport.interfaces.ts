@@ -22,9 +22,9 @@ declare namespace ViewportSpace {
         dimensionRow: ObservableMap<RevoGrid.DimensionSettingsState>;
         dimensionCol: ObservableMap<RevoGrid.DimensionSettingsState>;
         /** Cols dataset */
-        cols: RevoGrid.VirtualPositionItem[];
+        viewportCol:  ObservableMap<RevoGrid.ViewportState>;
         /** Rows dataset */
-        rows: RevoGrid.VirtualPositionItem[];
+        viewportRow: ObservableMap<RevoGrid.ViewportState>;
 
         /** Slot to put data */
         slot: SlotType;
@@ -38,6 +38,8 @@ declare namespace ViewportSpace {
     
     type ViewportProps = {
         prop: Properties;
+        /** Cols dataset */
+        viewportCol:  ObservableMap<RevoGrid.ViewportState>;
 
         /** header container props */
         headerProp: Properties;

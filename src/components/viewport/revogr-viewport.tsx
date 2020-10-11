@@ -119,10 +119,7 @@ export class RevogrViewport {
           coordinate
         });
       } else {
-        this.scrollingService.onScroll({
-          dimension: 'row',
-          coordinate
-        });
+        this.scrollingService.onScroll({ dimension: 'row', coordinate });
       }
     });
   }
@@ -146,8 +143,8 @@ export class RevogrViewport {
   }
 
   private renderViewports(contentHeight: number): VNode[] {
+    console.log('render');
     this.elementToScroll.length = 0;
-    const rows: RevoGrid.VirtualPositionItem[] = this.viewports['row'].get('items');
     const viewports: ViewportProps[] = [];
     let index: number = 0;
     columnTypes.forEach((val) => {
@@ -163,7 +160,6 @@ export class RevogrViewport {
           contentHeight: contentHeight,
           fixWidth: val !== 'col',
           uuid: `${this.uuid}-${index}`,
-          rows: rows,
 
           viewports: this.viewports,
           dimensions: this.dimensions,
@@ -229,7 +225,7 @@ export class RevogrViewport {
           {...view.prop}
           ref={el => this.elementToScroll.push(el)}
           onScrollViewport={e => this.scrollingService.onScroll(e.detail, view.prop.key)}>
-          <revogr-header {...view.headerProp} slot='header' canResize={this.resize}/>
+          <revogr-header viewportCol={view.viewportCol} {...view.headerProp} slot='header' canResize={this.resize}/>
           {dataViews}
         </revogr-viewport-scroll>
       );

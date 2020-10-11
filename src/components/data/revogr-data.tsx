@@ -25,8 +25,8 @@ export class RevogrData {
 
   @Prop() rowClass: string;
 
-  @Prop() rows: RevoGrid.VirtualPositionItem[];
-  @Prop() cols: RevoGrid.VirtualPositionItem[];
+  @Prop() viewportRow: ObservableMap<RevoGrid.ViewportState>;
+  @Prop() viewportCol:  ObservableMap<RevoGrid.ViewportState>;
 
   @Prop() dimensionRow: ObservableMap<RevoGrid.DimensionSettingsState>;
 
@@ -44,14 +44,16 @@ export class RevogrData {
   }
 
   render() {
-    if (!this.colData || !this.rows.length || !this.cols.length) {
+    const rows = this.viewportRow.get('items');
+    const cols = this.viewportCol.get('items');
+    if (!this.colData || !rows.length || !cols.length) {
       return '';
     }
     const rowsEls: VNode[] = [];
-    for (let row of this.rows) {
+    for (let row of rows) {
       const cells: (VNode|string|void)[] = [];
       const rowClass = this.rowClass ? this.columnService.getRowClass(row.itemIndex, this.rowClass) : '';
-      for (let col of this.cols) {
+      for (let col of cols) {
         cells.push(this.getCellRenderer(row, col));
       }
       rowsEls.push(<div class={`row ${rowClass}`} style={{ height: `${row.size}px`, transform: `translateY(${row.start}px)` }}>{cells}</div>);

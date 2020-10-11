@@ -17,7 +17,7 @@ import GroupHeaderRenderer from './headerGroupRenderer';
 })
 export class RevogrHeaderComponent {
   @Element() element!: HTMLStencilElement;
-  @Prop() cols: RevoGrid.VirtualPositionItem[];
+  @Prop() viewportCol:  ObservableMap<RevoGrid.ViewportState>;
   @Prop() dimensionCol: ObservableMap<RevoGrid.DimensionSettingsState>;
 
   @Prop() parent: string = '';
@@ -53,11 +53,12 @@ export class RevogrHeaderComponent {
   }
 
   render(): VNode[] {
+    const cols = this.viewportCol.get('items');
     const cells: VNode[] = [];
     const visibleProps: {[prop: string]: number} = {};
 
     // render header columns
-    for (let col of this.cols) {
+    for (let col of cols) {
       const colData = this.colData[col.itemIndex];
       cells.push(
         <HeaderRenderer

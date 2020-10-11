@@ -97,7 +97,6 @@ export namespace Components {
     interface RevogrData {
         "canDrag": boolean;
         "colData": RevoGrid.ColumnRegular[];
-        "cols": RevoGrid.VirtualPositionItem[];
         /**
           * Static stores, not expected to change during component lifetime
          */
@@ -106,7 +105,8 @@ export namespace Components {
         "range": boolean;
         "readonly": boolean;
         "rowClass": string;
-        "rows": RevoGrid.VirtualPositionItem[];
+        "viewportCol": ObservableMap<RevoGrid.ViewportState>;
+        "viewportRow": ObservableMap<RevoGrid.ViewportState>;
     }
     interface RevogrEdit {
         "column": RevoGrid.ColumnRegular|null;
@@ -127,11 +127,11 @@ export namespace Components {
     interface RevogrHeader {
         "canResize": boolean;
         "colData": RevoGrid.ColumnRegular[];
-        "cols": RevoGrid.VirtualPositionItem[];
         "dimensionCol": ObservableMap<RevoGrid.DimensionSettingsState>;
         "groupingDepth": number;
         "groups": Groups;
         "parent": string;
+        "viewportCol": ObservableMap<RevoGrid.ViewportState>;
     }
     interface RevogrOrderEditor {
         "clearOrder": () => Promise<void>;
@@ -416,7 +416,6 @@ declare namespace LocalJSX {
     interface RevogrData {
         "canDrag"?: boolean;
         "colData"?: RevoGrid.ColumnRegular[];
-        "cols"?: RevoGrid.VirtualPositionItem[];
         /**
           * Static stores, not expected to change during component lifetime
          */
@@ -426,7 +425,8 @@ declare namespace LocalJSX {
         "range"?: boolean;
         "readonly"?: boolean;
         "rowClass"?: string;
-        "rows"?: RevoGrid.VirtualPositionItem[];
+        "viewportCol"?: ObservableMap<RevoGrid.ViewportState>;
+        "viewportRow"?: ObservableMap<RevoGrid.ViewportState>;
     }
     interface RevogrEdit {
         "column"?: RevoGrid.ColumnRegular|null;
@@ -452,13 +452,13 @@ declare namespace LocalJSX {
     interface RevogrHeader {
         "canResize"?: boolean;
         "colData"?: RevoGrid.ColumnRegular[];
-        "cols"?: RevoGrid.VirtualPositionItem[];
         "dimensionCol"?: ObservableMap<RevoGrid.DimensionSettingsState>;
         "groupingDepth"?: number;
         "groups"?: Groups;
         "onHeaderResize"?: (event: CustomEvent<RevoGrid.ViewSettingSizeProp>) => void;
         "onInitialHeaderClick"?: (event: CustomEvent<{column: RevoGrid.ColumnRegular, index: number}>) => void;
         "parent"?: string;
+        "viewportCol"?: ObservableMap<RevoGrid.ViewportState>;
     }
     interface RevogrOrderEditor {
         /**
