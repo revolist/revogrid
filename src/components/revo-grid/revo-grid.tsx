@@ -43,14 +43,12 @@ export class RevoGridComponent {
   //
   // --------------------------------------------------------------------------
 
-  /**
-   * Show row indexes column
-   */
-  @Prop() rowHeaders: boolean = true;
+  /** Excel like show row indexe per row */
+  @Prop() rowHeaders: boolean = false;
   /**
    * Defines how many rows/columns should be rendered outside visible area.
    */
-  @Prop() frameSize: number = 5;
+  @Prop() frameSize: number = 1;
   /**
    * Indicates default row size.
    * By default 0, means theme package size will be applied

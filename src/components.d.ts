@@ -59,7 +59,7 @@ export namespace Components {
          */
         "rowClass": string;
         /**
-          * Show row indexes column
+          * Excel like show row indexe per row
          */
         "rowHeaders": boolean;
         /**
@@ -403,7 +403,7 @@ declare namespace LocalJSX {
          */
         "rowClass"?: string;
         /**
-          * Show row indexes column
+          * Excel like show row indexe per row
          */
         "rowHeaders"?: boolean;
         /**
