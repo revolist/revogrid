@@ -11,11 +11,11 @@
 | --------------- | ---------------- | ----------- | --------------------------------------- | ----------- |
 | `canResize`     | `can-resize`     |             | `boolean`                               | `undefined` |
 | `colData`       | --               |             | `ColumnRegular[]`                       | `undefined` |
-| `cols`          | --               |             | `VirtualPositionItem[]`                 | `undefined` |
 | `dimensionCol`  | --               |             | `ObservableMap<DimensionSettingsState>` | `undefined` |
 | `groupingDepth` | `grouping-depth` |             | `number`                                | `0`         |
 | `groups`        | --               |             | `{ [level: number]: Group[]; }`         | `undefined` |
 | `parent`        | `parent`         |             | `string`                                | `''`        |
+| `viewportCol`   | --               |             | `ObservableMap<ViewportState>`          | `undefined` |
 
 
 ## Events

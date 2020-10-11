@@ -18,8 +18,6 @@
 | `lastCell`       | --         | Last cell position                                              | `Cell`                                                    | `undefined` |
 | `range`          | `range`    |                                                                 | `boolean`                                                 | `undefined` |
 | `readonly`       | `readonly` |                                                                 | `boolean`                                                 | `undefined` |
-| `selectionFocus` | --         |                                                                 | `Cell`                                                    | `undefined` |
-| `selectionRange` | --         |                                                                 | `{ x: number; y: number; x1: number; y1: number; }`       | `undefined` |
 | `selectionStore` | --         | Dynamic stores                                                  | `ObservableMap<SelectionStoreState>`                      | `undefined` |
 
 

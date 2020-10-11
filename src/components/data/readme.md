@@ -11,13 +11,13 @@
 | -------------- | ----------- | --------------------------------------------------------------- | --------------------------------------------------------- | ----------- |
 | `canDrag`      | `can-drag`  |                                                                 | `boolean`                                                 | `undefined` |
 | `colData`      | --          |                                                                 | `ColumnRegular[]`                                         | `undefined` |
-| `cols`         | --          |                                                                 | `VirtualPositionItem[]`                                   | `undefined` |
 | `dataStore`    | --          | Static stores, not expected to change during component lifetime | `ObservableMap<DataSourceState<DataType, DimensionRows>>` | `undefined` |
 | `dimensionRow` | --          |                                                                 | `ObservableMap<DimensionSettingsState>`                   | `undefined` |
 | `range`        | `range`     |                                                                 | `boolean`                                                 | `undefined` |
 | `readonly`     | `readonly`  |                                                                 | `boolean`                                                 | `undefined` |
 | `rowClass`     | `row-class` |                                                                 | `string`                                                  | `undefined` |
-| `rows`         | --          |                                                                 | `VirtualPositionItem[]`                                   | `undefined` |
+| `viewportCol`  | --          |                                                                 | `ObservableMap<ViewportState>`                            | `undefined` |
+| `viewportRow`  | --          |                                                                 | `ObservableMap<ViewportState>`                            | `undefined` |
 
 
 ## Events

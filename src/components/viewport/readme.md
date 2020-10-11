@@ -7,23 +7,44 @@
 
 ## Properties
 
-| Property        | Attribute        | Description | Type     | Default |
-| --------------- | ---------------- | ----------- | -------- | ------- |
-| `contentHeight` | `content-height` |             | `number` | `0`     |
-| `contentWidth`  | `content-width`  |             | `number` | `0`     |
+| Property       | Attribute     | Description             | Type                                                                                                                                                                                                                                                                                                      | Default     |
+| -------------- | ------------- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| `columnStores` | --            |                         | `{ col: ObservableMap<DataSourceState<ColumnRegular, DimensionCols>>; colPinStart: ObservableMap<DataSourceState<ColumnRegular, DimensionCols>>; colPinEnd: ObservableMap<DataSourceState<ColumnRegular, DimensionCols>>; }`                                                                              | `undefined` |
+| `dimensions`   | --            |                         | `{ row: ObservableMap<DimensionSettingsState>; rowPinStart: ObservableMap<DimensionSettingsState>; rowPinEnd: ObservableMap<DimensionSettingsState>; col: ObservableMap<DimensionSettingsState>; colPinStart: ObservableMap<DimensionSettingsState>; colPinEnd: ObservableMap<DimensionSettingsState>; }` | `undefined` |
+| `editors`      | --            | Custom editors register | `{ [name: string]: EditorCtr; }`                                                                                                                                                                                                                                                                          | `undefined` |
+| `range`        | `range`       |                         | `boolean`                                                                                                                                                                                                                                                                                                 | `undefined` |
+| `readonly`     | `readonly`    |                         | `boolean`                                                                                                                                                                                                                                                                                                 | `undefined` |
+| `resize`       | `resize`      |                         | `boolean`                                                                                                                                                                                                                                                                                                 | `undefined` |
+| `rowClass`     | `row-class`   |                         | `string`                                                                                                                                                                                                                                                                                                  | `undefined` |
+| `rowHeaders`   | `row-headers` | Show row indexes column | `boolean`                                                                                                                                                                                                                                                                                                 | `true`      |
+| `rowStores`    | --            |                         | `{ row: ObservableMap<DataSourceState<DataType, DimensionRows>>; rowPinStart: ObservableMap<DataSourceState<DataType, DimensionRows>>; rowPinEnd: ObservableMap<DataSourceState<DataType, DimensionRows>>; }`                                                                                             | `undefined` |
+| `uuid`         | `uuid`        |                         | `string`                                                                                                                                                                                                                                                                                                  | `null`      |
+| `viewports`    | --            |                         | `{ row: ObservableMap<ViewportState>; rowPinStart: ObservableMap<ViewportState>; rowPinEnd: ObservableMap<ViewportState>; col: ObservableMap<ViewportState>; colPinStart: ObservableMap<ViewportState>; colPinEnd: ObservableMap<ViewportState>; }`                                                       | `undefined` |
 
 
 ## Events
 
-| Event            | Description | Type                                                             |
-| ---------------- | ----------- | ---------------------------------------------------------------- |
-| `resizeViewport` |             | `CustomEvent<{ dimension: DimensionType; size: number; }>`       |
-| `scrollViewport` |             | `CustomEvent<{ dimension: DimensionType; coordinate: number; }>` |
+| Event                   | Description | Type                                                                     |
+| ----------------------- | ----------- | ------------------------------------------------------------------------ |
+| `initialRowDragStart`   |             | `CustomEvent<{ pos: PositionItem; text: string; }>`                      |
+| `setDimensionSize`      |             | `CustomEvent<{ type: MultiDimensionType; sizes: ViewSettingSizeProp; }>` |
+| `setViewportCoordinate` |             | `CustomEvent<{ dimension: DimensionType; coordinate: number; }>`         |
+| `setViewportSize`       |             | `CustomEvent<{ dimension: DimensionType; size: number; }>`               |
 
 
 ## Methods
 
-### `setScroll(e: RevoGrid.ViewPortScrollEvent) => Promise<void>`
+### `scrollToCoordinate(cell: Partial<Selection.Cell>) => Promise<void>`
+
+
+
+#### Returns
+
+Type: `Promise<void>`
+
+
+
+### `setEdit(rowIndex: number, colIndex: number, colType: RevoGrid.DimensionCols, rowType: RevoGrid.DimensionRows) => Promise<void>`
 
 
 
@@ -38,13 +59,33 @@ Type: `Promise<void>`
 
 ### Used by
 
- - [revogr-viewport](.)
+ - [revo-grid](../revo-grid)
+
+### Depends on
+
+- [revogr-overlay-selection](../overlay)
+- [revogr-data](../data)
+- [revogr-temp-range](../selection-temp-range)
+- [revogr-focus](../selection-focus)
+- [revogr-viewport-scroll](../scroll)
+- [revogr-header](../header)
+- [revogr-scroll-virtual](../scrollable)
 
 ### Graph
 ```mermaid
 graph TD;
+  revogr-viewport --> revogr-overlay-selection
+  revogr-viewport --> revogr-data
+  revogr-viewport --> revogr-temp-range
+  revogr-viewport --> revogr-focus
   revogr-viewport --> revogr-viewport-scroll
-  style revogr-viewport-scroll fill:#f9f,stroke:#333,stroke-width:4px
+  revogr-viewport --> revogr-header
+  revogr-viewport --> revogr-scroll-virtual
+  revogr-overlay-selection --> revogr-edit
+  revogr-overlay-selection --> revogr-clipboard
+  revogr-overlay-selection --> revogr-order-editor
+  revo-grid --> revogr-viewport
+  style revogr-viewport fill:#f9f,stroke:#333,stroke-width:4px
 ```
 
 ----------------------------------------------

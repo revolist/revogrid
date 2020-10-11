@@ -37,6 +37,10 @@
           "description": "Row class property\nDefine this property in row object and this will be mapped as row class"
         },
         {
+          "name": "row-headers",
+          "description": "Excel like show row indexe per row"
+        },
+        {
           "name": "row-size",
           "description": "Indicates default row size.\nBy default 0, means theme package size will be applied"
         },
@@ -213,6 +217,10 @@
         {
           "name": "row-class",
           "description": ""
+        },
+        {
+          "name": "row-headers",
+          "description": "Show row indexes column"
         },
         {
           "name": "uuid",
