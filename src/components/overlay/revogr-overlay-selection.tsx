@@ -1,10 +1,11 @@
 import {Component, Event, EventEmitter, h, Host, Listen, Prop, VNode, Watch, Element, State} from '@stencil/core';
 import {ObservableMap} from '@stencil/store';
+import { slice } from 'lodash';
 
 import {Edition, RevoGrid, Selection} from '../../interfaces';
 import ColumnService from '../data/columnService';
 import CellSelectionService from './cellSelectionService';
-import SelectionStore from '../../store/selection/selection.store';
+import SelectionStoreService from '../../store/selection/selection.store.service';
 import {codesLetter} from '../../utils/keyCodes';
 import {isClear, isLetterKey} from '../../utils/keyCodes.utils';
 import {
@@ -15,8 +16,6 @@ import {
 import {DataSourceState} from '../../store/dataSource/data.store';
 
 import RangeAreaCss = Selection.RangeAreaCss;
-import Cell = Selection.Cell;
-import { slice } from 'lodash';
 import { getRange, isRangeSingleCell } from '../../store/selection/selection.helpers';
 import { timeout } from '../../utils/utils';
 import KeyService from './keyService';
@@ -30,7 +29,7 @@ export class OverlaySelection {
   private selectionService: CellSelectionService;
   private columnService: ColumnService;
 
-  private selectionStoreService: SelectionStore;
+  private selectionStoreService: SelectionStoreService;
   private keyService: KeyService;
   private orderEditor: HTMLRevogrOrderEditorElement;
   private clipboard: HTMLRevogrClipboardElement;
@@ -75,6 +74,9 @@ export class OverlaySelection {
   @Event({ cancelable: true }) internalFocusCell: EventEmitter<Edition.BeforeSaveDataDetails>;
 
   @Event({ bubbles: false }) setEdit: EventEmitter<string|boolean>;
+  @Event({ bubbles: false }) setRange: EventEmitter<Selection.RangeArea>;
+  @Event({ bubbles: false }) setTempRange: EventEmitter<Selection.RangeArea|null>;
+
   @Event({ bubbles: false }) changeSelection: EventEmitter<{changes: Partial<Selection.Cell>; isMulti?: boolean; }>;
   @Event({ bubbles: false }) focusCell: EventEmitter<Selection.FocusedCells>;
   @Event({ bubbles: false }) unregister: EventEmitter;
@@ -206,9 +208,6 @@ export class OverlaySelection {
   @Watch('colData') colChanged(newData: RevoGrid.ColumnRegular[]): void {
     this.columnService.columns = newData;
   }
-  @Watch('lastCell') lastCellChanged(cell: Cell): void {
-    this.selectionStoreService?.setLastCell(cell);
-  }
 
   @Watch('range') onRange(canRange: boolean): void {
     this.selectionService.canRange = canRange;
@@ -216,9 +215,9 @@ export class OverlaySelection {
 
   connectedCallback(): void {
     this.columnService = new ColumnService(this.dataStore, this.colData);
-    this.selectionStoreService = new SelectionStore(this.selectionStore, {
-      lastCell: this.lastCell,
-      change: (changes, isMulti?) => this.changeSelection?.emit({ changes, isMulti }),
+    this.selectionStoreService = new SelectionStoreService(this.selectionStore, {
+      change: (changes, isMulti?) => this.changeSelection.emit({ changes, isMulti }),
+      changeRange: (range) => this.setRange.emit(range),
       focus: (focus, end) => {
         const focused = { focus, end };
         const {defaultPrevented} = this.internalFocusCell.emit(this.columnService.getSaveData(focus.y, focus.x));
@@ -252,13 +251,13 @@ export class OverlaySelection {
         rangeData.newData = this.columnService.getRangeData(rangeData);
         const selectionEndEvent = this.internalSelectionChanged.emit(rangeData);
         if (selectionEndEvent.defaultPrevented) {
-          this.selectionStoreService.clearTemp();
+          this.setTempRange.emit(null);
           return;
         }
         this.onRangeApply(rangeData.newData, newRange);
       },
       tempRange: (start, end) => {
-        this.selectionStoreService.setTempRange(start, end);
+        this.setTempRange.emit(getRange(start, end));
       },
       autoFill: (isAutofill) => {
         let focus = this.selectionStoreService.focused;
@@ -417,7 +416,7 @@ export class OverlaySelection {
     if (!dataEvent.defaultPrevented) {
       this.columnService.applyRangeData(data);
     }
-    this.selectionStoreService.applyRange(range);
+    this.setRange.emit(range);
   }
 
   private onCellEdit(e: Edition.SaveDataDetails, clear = false): void {

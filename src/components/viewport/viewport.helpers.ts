@@ -28,7 +28,7 @@ export interface ViewportColumn {
 }
 
 export function gatherColumnData(data: ViewportColumn): ViewportProps {
-    const parent: string = `[${UUID}="${data.uuid}"]`;
+    const parent: string = data.uuid;
     const realSize = data.dimensions[data.colType].get('realSize');
     const prop: Properties = {
         contentWidth: realSize,
@@ -52,6 +52,7 @@ export function gatherColumnData(data: ViewportColumn): ViewportProps {
 
     return {
         prop,
+        position: data.position,
         headerProp,
         parent,
         viewportCol: data.viewports[data.colType],

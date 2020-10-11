@@ -4,6 +4,7 @@
 
     $cell-border-color: #404040;
     $cell-shadow-cell: 0 -1px 0 0 $cell-border-color inset;
+    $focused-header: rgba(#7394a0, .15);
 
     .rowHeaders {
         $el-color: #28272b;
@@ -32,6 +33,9 @@
                     background-color: rgba($cell-border-color, .5);
                 }
             }
+			&.focused-cell {
+				background: $focused-header;
+			}
         }
     }
 
@@ -46,6 +50,10 @@
 
         .row {
             box-shadow: $cell-shadow-cell;
+
+            &.focused-row {
+                background-color: $focused-header;
+            }
         }
 
         .revo-draggable {

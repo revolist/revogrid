@@ -109,6 +109,7 @@ export namespace Components {
         "range": boolean;
         "readonly": boolean;
         "rowClass": string;
+        "rowSelectionStore": ObservableMap<Selection.SelectionStoreState>;
         "viewportCol": ObservableMap<RevoGrid.ViewportState>;
         "viewportRow": ObservableMap<RevoGrid.ViewportState>;
     }
@@ -135,6 +136,7 @@ export namespace Components {
         "groupingDepth": number;
         "groups": Groups;
         "parent": string;
+        "selectionStore": ObservableMap<Selection.SelectionStoreState>;
         "viewportCol": ObservableMap<RevoGrid.ViewportState>;
     }
     interface RevogrOrderEditor {
@@ -435,6 +437,7 @@ declare namespace LocalJSX {
         "range"?: boolean;
         "readonly"?: boolean;
         "rowClass"?: string;
+        "rowSelectionStore"?: ObservableMap<Selection.SelectionStoreState>;
         "viewportCol"?: ObservableMap<RevoGrid.ViewportState>;
         "viewportRow"?: ObservableMap<RevoGrid.ViewportState>;
     }
@@ -468,6 +471,7 @@ declare namespace LocalJSX {
         "onHeaderResize"?: (event: CustomEvent<RevoGrid.ViewSettingSizeProp>) => void;
         "onInitialHeaderClick"?: (event: CustomEvent<{column: RevoGrid.ColumnRegular, index: number}>) => void;
         "parent"?: string;
+        "selectionStore"?: ObservableMap<Selection.SelectionStoreState>;
         "viewportCol"?: ObservableMap<RevoGrid.ViewportState>;
     }
     interface RevogrOrderEditor {
@@ -533,6 +537,8 @@ declare namespace LocalJSX {
          */
         "onInternalSelectionChanged"?: (event: CustomEvent<Selection.ChangedRange>) => void;
         "onSetEdit"?: (event: CustomEvent<string|boolean>) => void;
+        "onSetRange"?: (event: CustomEvent<Selection.RangeArea>) => void;
+        "onSetTempRange"?: (event: CustomEvent<Selection.RangeArea|null>) => void;
         "onUnregister"?: (event: CustomEvent<any>) => void;
         "range"?: boolean;
         "readonly"?: boolean;

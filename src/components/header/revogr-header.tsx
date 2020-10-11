@@ -3,9 +3,9 @@ import {HTMLStencilElement, VNode} from '@stencil/core/internal';
 import {ObservableMap} from "@stencil/store";
 import findIndex from 'lodash/findIndex';
 
-import {HEADER_ACTUAL_ROW_CLASS, HEADER_CLASS, HEADER_ROW_CLASS} from '../../utils/consts';
+import {HEADER_ACTUAL_ROW_CLASS, HEADER_CLASS, HEADER_ROW_CLASS, UUID} from '../../utils/consts';
 import HeaderService from './headerService';
-import {RevoGrid} from '../../interfaces';
+import {RevoGrid, Selection} from '../../interfaces';
 import {Groups} from '../../store/dataSource/data.store';
 import {getItemByIndex} from '../../store/dimension/dimension.helpers';
 import HeaderRenderer from './headerRenderer';
@@ -19,6 +19,7 @@ export class RevogrHeaderComponent {
   @Element() element!: HTMLStencilElement;
   @Prop() viewportCol:  ObservableMap<RevoGrid.ViewportState>;
   @Prop() dimensionCol: ObservableMap<RevoGrid.DimensionSettingsState>;
+  @Prop() selectionStore: ObservableMap<Selection.SelectionStoreState>;
 
   @Prop() parent: string = '';
   @Prop() groups: Groups;
@@ -39,7 +40,7 @@ export class RevogrHeaderComponent {
 
   connectedCallback(): void {
     this.headerService = new HeaderService(
-        `${this.parent} .${HEADER_ACTUAL_ROW_CLASS} .${HEADER_CLASS}`,
+        `[${UUID}="${this.parent}"] .${HEADER_ACTUAL_ROW_CLASS} .${HEADER_CLASS}`,
         this.colData,
         {
           canResize: this.canResize,
@@ -54,6 +55,7 @@ export class RevogrHeaderComponent {
 
   render(): VNode[] {
     const cols = this.viewportCol.get('items');
+    const range = this.selectionStore?.get('range');
     const cells: VNode[] = [];
     const visibleProps: {[prop: string]: number} = {};
 
@@ -62,6 +64,7 @@ export class RevogrHeaderComponent {
       const colData = this.colData[col.itemIndex];
       cells.push(
         <HeaderRenderer
+          range={range}
           column={col}
           data={colData}
           onClick={(e) => this.initialHeaderClick.emit(e)}/>

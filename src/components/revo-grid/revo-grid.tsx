@@ -313,20 +313,20 @@ export class RevoGridComponent {
   }
 
   @Listen('initialHeaderClick')
-  onHeaderClick({detail: {column, index}}: CustomEvent<{column: RevoGrid.ColumnRegular, index: number}>): void {
-    const {defaultPrevented} = this.headerClick.emit(column);
+  onHeaderClick(e: CustomEvent<{column: RevoGrid.ColumnRegular, index: number}>): void {
+    const {defaultPrevented} = this.headerClick.emit(e.detail.column);
     if (defaultPrevented) {
       return;
     }
-    if (column.sortable) {
-      const order = column.order && column.order === 'asc' ? 'desc' : 'asc';
+    if (e.detail.column.sortable) {
+      const order = e.detail.column.order && e.detail.column.order === 'asc' ? 'desc' : 'asc';
 
       // allow sort change
-      const canSort = this.beforeSorting.emit({column, order});
+      const canSort = this.beforeSorting.emit({column: e.detail.column, order});
       if (canSort.defaultPrevented) {
         return;
       }
-      const newCol = this.columnProvider.updateColumnSorting(column, index, order);
+      const newCol = this.columnProvider.updateColumnSorting(e.detail.column, e.detail.index, order);
 
       // apply sort data
       const canSortApply = this.beforeSortingApply.emit({
@@ -335,7 +335,7 @@ export class RevoGridComponent {
       if (canSortApply.defaultPrevented) {
         return;
       }
-      this.dataProvider.sort({[column.prop]: order});
+      this.dataProvider.sort({[e.detail.column.prop]: order});
     }
   }
 
