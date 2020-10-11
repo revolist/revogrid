@@ -6,7 +6,7 @@ import ColumnService from './columnService';
 import {DATA_COL, DATA_ROW} from '../../utils/consts';
 
 import {DataSourceState} from '../../store/dataSource/data.store';
-import {RevoGrid} from '../../interfaces';
+import {RevoGrid, Selection} from '../../interfaces';
 import CellRenderer from './cellRenderer';
 
 @Component({
@@ -25,6 +25,7 @@ export class RevogrData {
 
   @Prop() rowClass: string;
 
+  @Prop() rowSelectionStore: ObservableMap<Selection.SelectionStoreState>;
   @Prop() viewportRow: ObservableMap<RevoGrid.ViewportState>;
   @Prop() viewportCol:  ObservableMap<RevoGrid.ViewportState>;
 
@@ -49,10 +50,14 @@ export class RevogrData {
     if (!this.colData || !rows.length || !cols.length) {
       return '';
     }
+    const range = this.rowSelectionStore?.get('range');
     const rowsEls: VNode[] = [];
     for (let row of rows) {
       const cells: (VNode|string|void)[] = [];
-      const rowClass = this.rowClass ? this.columnService.getRowClass(row.itemIndex, this.rowClass) : '';
+      let rowClass = this.rowClass ? this.columnService.getRowClass(row.itemIndex, this.rowClass) : '';
+      if (range && row.itemIndex >= range.y && row.itemIndex <= range.y1) {
+        rowClass += ' focused-row';
+      }
       for (let col of cols) {
         cells.push(this.getCellRenderer(row, col));
       }

@@ -40,6 +40,7 @@ declare namespace ViewportSpace {
     
     type ViewportProps = {
         prop: Properties;
+        position: Selection.Cell;
         /** Cols dataset */
         viewportCol:  ObservableMap<RevoGrid.ViewportState>;
 

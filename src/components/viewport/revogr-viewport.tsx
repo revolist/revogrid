@@ -182,6 +182,7 @@ export class RevogrViewport {
 
     if (this.rowHeaders) {
       viewPortHtml.push(<RevogrRowHeaders
+        selectionStoreConnector={this.selectionStoreConnector}
         height={contentHeight}
         anyView={viewports[0]}
         resize={this.resize}
@@ -193,24 +194,28 @@ export class RevogrViewport {
     for (let view of viewports) {
       const dataViews: HTMLElement[] = [];
       let j = 0;
+      const colSelectionStore = this.selectionStoreConnector.registerColumn(view.position.x);
 
       /** render viewports rows */
       for (let data of view.dataPorts) {
+        const rowSelectionStore = this.selectionStoreConnector.registerRow(data.position.y);
         const selectionStore = this.selectionStoreConnector.register(data.position);
+        selectionStore.setLastCell(data.lastCell);
         dataViews.push(
-
           <revogr-overlay-selection
             {...data}
             slot={data.slot}
-            selectionStore={selectionStore}
+            selectionStore={selectionStore.store}
             editors={this.editors}
             readonly={this.readonly}
             range={this.range}
 
             onSetEdit={(e) => this.selectionStoreConnector.setEdit(e.detail)}
+            onSetRange={(e) => selectionStore.setRangeArea(e.detail)}
+            onSetTempRange={e => selectionStore.setTempArea(e.detail)}
             onChangeSelection={(e) => this.selectionStoreConnector.change(e.detail)}
             onFocusCell={(e) => this.selectionStoreConnector.focus(selectionStore, e.detail)}
-            onInternalFocusCell={() => this.selectionStoreConnector.clearFocus(selectionStore)}
+            onInternalFocusCell={() => selectionStore.clearFocus()}
             onUnregister={() => this.selectionStoreConnector.unregister(selectionStore)}>
 
             <revogr-data
@@ -220,9 +225,10 @@ export class RevogrViewport {
               readonly={this.readonly}
               range={this.range}
               rowClass={this.rowClass}
+              rowSelectionStore={rowSelectionStore.store}
               slot='data'/>
-            <revogr-temp-range selectionStore={selectionStore} dimensionRow={data.dimensionRow} dimensionCol={data.dimensionCol}/>
-            <revogr-focus selectionStore={selectionStore} dimensionRow={data.dimensionRow} dimensionCol={data.dimensionCol}/>
+            <revogr-temp-range selectionStore={selectionStore.store} dimensionRow={data.dimensionRow} dimensionCol={data.dimensionCol}/>
+            <revogr-focus selectionStore={selectionStore.store} dimensionRow={data.dimensionRow} dimensionCol={data.dimensionCol}/>
           </revogr-overlay-selection>
         );
       }
@@ -231,7 +237,7 @@ export class RevogrViewport {
           {...view.prop}
           ref={el => this.elementToScroll.push(el)}
           onScrollViewport={e => this.scrollingService.onScroll(e.detail, view.prop.key)}>
-          <revogr-header viewportCol={view.viewportCol} {...view.headerProp} slot='header' canResize={this.resize}/>
+          <revogr-header viewportCol={view.viewportCol} {...view.headerProp} selectionStore={colSelectionStore.store} slot='header' canResize={this.resize}/>
           {dataViews}
         </revogr-viewport-scroll>
       );

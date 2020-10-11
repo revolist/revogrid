@@ -3,6 +3,8 @@ $header-border-color: $cell-border-color;
 
 $cell-shadow-cell: 0 -1px 0 0 $cell-border-color inset;
 
+$focused-header: rgba(#e9eaed, 0.5);
+
 @mixin revoGridLight() {
     .rowHeaders {
         background-color: #f7faff;
@@ -29,6 +31,9 @@ $cell-shadow-cell: 0 -1px 0 0 $cell-border-color inset;
                     background-color: #f1f1f1;
                 }
             }
+			&.focused-cell {
+				background: $focused-header;
+			}
         }
     }
 
@@ -49,6 +54,10 @@ $cell-shadow-cell: 0 -1px 0 0 $cell-border-color inset;
     revogr-data {
         .row {
             box-shadow: $cell-shadow-cell;
+
+            &.focused-row {
+                background-color: $focused-header;
+            }
         }
 
         .data-cell {

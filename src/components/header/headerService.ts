@@ -26,10 +26,10 @@ export default class HeaderService {
         if (canResize) {
             interact(this.target).resizable({
                 edges: { bottom: false, right: true },
-                onend: event => {
-                    const index: number = parseInt(event.target.getAttribute(DATA_COL), 10);
+                onend: e => {
+                    const index: number = parseInt(e.target.getAttribute(DATA_COL), 10);
                     const col: RevoGrid.ColumnRegular = this.columns[index];
-                    let width: number = event.rect.width;
+                    let width: number = e.rect.width;
                     const minSize: number = col.minSize || MIN_COL_SIZE;
                     if (width < minSize) {
                         width = minSize;

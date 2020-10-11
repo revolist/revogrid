@@ -1,25 +1,48 @@
 import {Edition, Selection} from '../interfaces';
-import {createStore, ObservableMap} from '@stencil/store';
-import {setStore} from '../utils/store.utils';
-import {cropCellToMax, getRange, nextCell} from '../store/selection/selection.helpers';
+import {cropCellToMax, nextCell} from '../store/selection/selection.helpers';
+import { SelectionStore } from '../store/selection/selection.store';
 
 import Cell = Selection.Cell;
 import EditCell = Edition.EditCell;
 
-type StoresMatrix = {[y: number]: {[x: number]:  ObservableMap<Selection.SelectionStoreState>}};
-const state: Selection.SelectionStoreState = {
-  range: null,
-  tempRange: null,
-  focus: null,
-  edit: null,
-  lastCell: null
-};
+type StoresMatrix = {[y: number]: {[x: number]:  SelectionStore}};
+
 export default class SelectionStoreConnector {
   private readonly stores: StoresMatrix = {};
-  private focusedStore: ObservableMap<Selection.SelectionStoreState>|null = null;
 
-  register({x, y}: Selection.Cell): ObservableMap<Selection.SelectionStoreState> {
-    const store: ObservableMap<Selection.SelectionStoreState> = createStore({ ...state });
+  readonly columnStores: {[x: number]:  SelectionStore} = {};
+
+  readonly rowStores: {[y: number]:  SelectionStore} = {};
+  
+
+  get focusedStore(): SelectionStore|null {
+    for (let y in this.stores) {
+      for (let x in this.stores[y]) {
+        if (this.stores[y][x].store.get('focus')) {
+          return this.stores[y][x];
+        }
+      }
+    }
+    return null;
+  }
+
+  registerColumn(x: number): SelectionStore {
+    if (this.columnStores[x]) {
+      return this.columnStores[x];
+    }
+    this.columnStores[x] = new SelectionStore();
+    return this.columnStores[x];
+  }
+
+  registerRow(y: number): SelectionStore {
+    if (this.rowStores[y]) {
+      return this.rowStores[y];
+    }
+    this.rowStores[y] = new SelectionStore();
+    return this.rowStores[y];
+  }
+
+  register({x, y}: Selection.Cell): SelectionStore {
     if (!this.stores[y]) {
       this.stores[y] = {};
     }
@@ -27,8 +50,12 @@ export default class SelectionStoreConnector {
       // Store already registered. Do not register twice
       return this.stores[y][x];
     }
-    this.stores[y][x] = store;
-    return store;
+    this.stores[y][x] = new SelectionStore();
+    this.stores[y][x]?.store.onChange('range', (c) => {
+      this.columnStores[x].setRangeArea(c);
+      this.rowStores[y].setRangeArea(c);
+    });
+    return this.stores[y][x];
   }
 
   setEditByCell({x, y}: Selection.Cell, editCell: Selection.Cell): void {
@@ -37,14 +64,14 @@ export default class SelectionStoreConnector {
     this.setEdit('');
   }
 
-  focus(store: ObservableMap<Selection.SelectionStoreState>, {focus, end}: {focus: Cell; end: Cell}): void {
+  focus(store: SelectionStore, {focus, end}: {focus: Cell; end: Cell}): void {
     let currentStorePointer: Selection.Cell;
     // clear all stores focus leave only active one
     for (let y in this.stores) {
       for (let x in this.stores[y]) {
         const s = this.stores[y][x];
         if (s !== store) {
-          this.clearFocus(s);
+          s.clearFocus();
         } else {
           currentStorePointer = { x: parseInt(x, 10), y: parseInt(y, 10) };
         }
@@ -55,7 +82,7 @@ export default class SelectionStoreConnector {
     }
 
     // check is focus in next store
-    const lastCell: Cell = store.get('lastCell');
+    const lastCell: Cell = store.store.get('lastCell');
     // item in new store
     const nextItem: Partial<Cell>|null = nextCell(focus, lastCell);
 
@@ -76,7 +103,7 @@ export default class SelectionStoreConnector {
           nextStore = stores[++currentStorePointer[type]];
         } else {
           nextStore = stores[--currentStorePointer[type]];
-          const nextLastCell = nextStore?.get('lastCell');
+          const nextLastCell = nextStore?.store.get('lastCell');
           if (nextLastCell) {
             nextItem[type] = nextLastCell[type] + nextItem[type];
           }
@@ -94,66 +121,30 @@ export default class SelectionStoreConnector {
     focus = cropCellToMax(focus, lastCell);
     end = cropCellToMax(focus, lastCell);
 
-    setStore(store, {
-      focus,
-      range: getRange(focus, end),
-      edit: null,
-      tempRange: null
-    });
-    this.focusedStore = store;
+    store.setFocus(focus, end);
   }
 
   clearAll(): void {
     for (let y in this.stores) {
       for (let x in this.stores[y]) {
-        this.clearFocus(this.stores[y][x]);
+        this.stores[y][x]?.clearFocus();
       }
     }
   }
 
-  clearFocus(s: ObservableMap<Selection.SelectionStoreState>): void {
-    setStore(s, {
-      focus: null,
-      range: null,
-      edit: null,
-      tempRange: null
-    });
-  }
-
-  setRange(store: ObservableMap<Selection.SelectionStoreState>, start: Cell, end: Cell): void {
-    const range = getRange(start, end);
-    setStore(store, {
-      range,
-      edit: null,
-      tempRange: null
-    });
-  }
-
   get edit(): EditCell|undefined {
-    return this.focusedStore?.get('edit');
+    return this.focusedStore?.store.get('edit');
+  }
+
+  get focused(): Cell|undefined {
+    return this.focusedStore?.store.get('focus');
   }
 
   setEdit(val: string|boolean): void {
     if (!this.focusedStore) {
       return;
     }
-
-    const focus: Cell|null = this.focused;
-    if (focus && typeof val === 'string') { // !dataProvider.isReadOnly(focus.y, focus.x)
-      setStore(this.focusedStore, {
-        edit: {
-          x: focus.x,
-          y: focus.y,
-          val
-        }
-      });
-      return;
-    }
-    setStore(this.focusedStore, { edit: null });
-  }
-
-  get focused(): Cell|undefined {
-    return this.focusedStore?.get('focus');
+    this.focusedStore.setEdit(val);
   }
 
   change({changes, isMulti}: {changes: Partial<Cell>, isMulti?: boolean}): void {
@@ -161,8 +152,8 @@ export default class SelectionStoreConnector {
       return;
     }
 
-    const range = this.focusedStore.get('range');
-    const focus = this.focusedStore.get('focus');
+    const range = this.focusedStore.store.get('range');
+    const focus = this.focusedStore.store.get('focus');
 
     if (!range || !focus) {
       return;
@@ -181,13 +172,13 @@ export default class SelectionStoreConnector {
     }
 
     if (isMulti) {
-      this.setRange(this.focusedStore, start, end);
+      this.focusedStore.setRange(start, end);
     } else {
       this.focus(this.focusedStore, {focus: start, end: start});
     }
   }
 
-  unregister(store: ObservableMap<Selection.SelectionStoreState>): void {
+  unregister(store: SelectionStore): void {
     for (let y in this.stores) {
       for (let x in this.stores[y]) {
         if (this.stores[y][x] === store) {
@@ -198,13 +189,14 @@ export default class SelectionStoreConnector {
     }
     store.dispose();
   }
+  
 
-  private getXStores(y: number): { [p: number]: ObservableMap<Selection.SelectionStoreState> } {
+  private getXStores(y: number): { [p: number]: SelectionStore } {
     return this.stores[y];
   }
 
-  private getYStores(x: number): { [p: number]: ObservableMap<Selection.SelectionStoreState> } {
-    const stores: { [p: number]: ObservableMap<Selection.SelectionStoreState> } = {};
+  private getYStores(x: number): { [p: number]: SelectionStore } {
+    const stores: { [p: number]: SelectionStore } = {};
     for (let i in this.stores) {
       stores[i] = this.stores[i][x];
     }

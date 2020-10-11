@@ -7,6 +7,8 @@ $header-border-color: #c0c0c0;
 $default-rows-size: 27px;
 $cell-border-color: #e2e3e3;
 
+$focused-header: rgba(#e9eaed, 0.5);
+
 revo-grid[theme="default"] {
 	font-size: 12px;
 	revogr-viewport {
@@ -37,6 +39,10 @@ revo-grid[theme="default"] {
 			$shadow-bottom: 0 -1px 0 0 $header-border-color inset;
 			$shadow-top: 0 -1px 0 0 $header-border-color;
 			box-shadow: $shadow-left, $shadow-right, $shadow-top, $shadow-bottom;
+
+			&.focused-cell {
+				background: $focused-header;
+			}
 		}
 	}
 
@@ -87,6 +93,10 @@ revo-grid[theme="default"] {
 		text-align: center;
 		.row {
 			line-height: $default-rows-size;
+
+            &.focused-row {
+                background-color: $focused-header;
+            }
 		}
 		.data-cell {
 			box-shadow: $cell-shadow-bottom, $cell-shadow-right;
