@@ -5,6 +5,13 @@
     $cell-border-color: #404040;
     $cell-shadow-cell: 0 -1px 0 0 $cell-border-color inset;
 
+    .rowHeaders {
+        $el-color: #28272b;
+        background-color: rgba($el-color, .8);
+        revogr-data .data-cell {
+            color: rgba($font-color, .8);
+        }
+    }
     revogr-header {
         .header-row {
             &.group {

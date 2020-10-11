@@ -2,8 +2,9 @@
 
 $header-size: 30px;
 $header-bg: #f8f9fa;
+$header-color: #61656a;
 $header-border-color: #c0c0c0;
-$default-rows-size: 30px;
+$default-rows-size: 27px;
 $cell-border-color: #e2e3e3;
 
 revo-grid[theme="default"] {
@@ -24,7 +25,7 @@ revo-grid[theme="default"] {
 		.header-row, .group-row {
 			text-transform: uppercase;
 			font-size: 12px;
-			color: #61656a;
+			color: $header-color;
 		}
 		.header-row {
 			height: $header-size;
@@ -40,6 +41,21 @@ revo-grid[theme="default"] {
 	}
 
 	revogr-viewport-scroll {
+		&.rowHeaders {
+			background-color: $header-bg;
+			revogr-data .data-cell {
+				$cell-shadow-bottom: 0 -1px 0 0 $header-border-color inset;
+				$cell-shadow-right: -1px 0 0 0 $header-border-color inset;
+				color: $header-color;
+				box-shadow: $cell-shadow-bottom, $cell-shadow-right;
+			}
+
+			revogr-header {
+				$cell-shadow-right: -1px 0 0 0 $header-border-color inset;
+				$shadow-bottom: 0 -1px 0 0 $header-border-color inset;
+				box-shadow: $shadow-bottom, $cell-shadow-right;
+			}
+		}
 		&.colPinStart {
 			revogr-data .row .data-cell:last-child {
 				$cell-shadow-cell: 0 -1px 0 0 $cell-border-color inset, -1px 0 0 0 $header-border-color inset;
@@ -59,21 +75,24 @@ revo-grid[theme="default"] {
 	}
 
 	.footer-wrapper revogr-data .row:first-child .data-cell {
-		$cell-shadow-cell: 0 1px 0 0 $header-border-color inset, -1px 0 0 0 $cell-border-color inset;
-		box-shadow: $cell-shadow-cell;
+		$cell-shadow-top: 0 1px 0 0 $cell-border-color inset;
+		$cell-shadow-right: -1px 0 0 0 $cell-border-color inset;
+		$cell-shadow-bottom: 0 -1px 0 0 $cell-border-color inset;
+		box-shadow: $cell-shadow-top, $cell-shadow-right, $cell-shadow-bottom;
 	}
 
 	revogr-data {
-		$cell-shadow-cell: 0 -1px 0 0 $cell-border-color inset, -1px 0 0 0 $cell-border-color inset;
+		$cell-shadow-bottom: 0 -1px 0 0 $cell-border-color inset;
+		$cell-shadow-right: -1px 0 0 0 $cell-border-color inset;
 		text-align: center;
 		.row {
 			line-height: $default-rows-size;
 		}
 		.data-cell {
-			box-shadow: $cell-shadow-cell;
+			box-shadow: $cell-shadow-bottom, $cell-shadow-right;
 	
 			&.disabled {
-				background-color: $cell-disabled-bg;
+				background-color: $cell-shadow-bottom, $cell-shadow-right;
 			}
 		}
 	}

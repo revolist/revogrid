@@ -23,6 +23,14 @@ export default class SelectionStore {
     return this.store.get('edit');
   }
 
+  get focused(): Cell|null {
+    return this.store.get('focus');
+  }
+
+  get ranged(): Selection.RangeArea|null {
+    return this.store.get('range');
+  }
+
   setLastCell(lastCell: Cell): void {
     setStore(this.store, { lastCell });
   }

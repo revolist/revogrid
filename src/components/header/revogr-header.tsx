@@ -66,7 +66,7 @@ export class RevogrHeaderComponent {
           data={colData}
           onClick={(e) => this.initialHeaderClick.emit(e)}/>
       );
-      visibleProps[colData.prop] = col.itemIndex;
+      visibleProps[colData?.prop] = col.itemIndex;
     }
 
     const groupRow = this.renderGroups(visibleProps);

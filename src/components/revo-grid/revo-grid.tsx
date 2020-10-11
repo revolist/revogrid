@@ -44,6 +44,10 @@ export class RevoGridComponent {
   // --------------------------------------------------------------------------
 
   /**
+   * Show row indexes column
+   */
+  @Prop() rowHeaders: boolean = true;
+  /**
    * Defines how many rows/columns should be rendered outside visible area.
    */
   @Prop() frameSize: number = 5;
@@ -457,6 +461,7 @@ export class RevoGridComponent {
       readonly={this.readonly}
       range={this.range}
       rowClass={this.rowClass}
+      rowHeaders={this.rowHeaders}
       editors={this.editors}/>;
   }
 }

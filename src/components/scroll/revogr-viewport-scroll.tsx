@@ -1,7 +1,7 @@
 import {Component, Event, EventEmitter, h, Method, Element, Prop, Host} from '@stencil/core';
 import each from 'lodash/each';
 
-import GridResizeService from './gridResizeService';
+import GridResizeService from '../viewport/gridResizeService';
 import LocalScrollService from "../../services/localScrollService";
 import {RevoGrid} from "../../interfaces";
 
@@ -10,7 +10,8 @@ import {RevoGrid} from "../../interfaces";
   styleUrl: 'revogr-viewport-scroll-style.scss'
 })
 export class RevogrViewportScroll {
-  @Event() scrollViewport: EventEmitter<RevoGrid.ViewPortScrollEvent>;
+  @Element() horizontalScroll: HTMLElement;
+  @Event({bubbles: false}) scrollViewport: EventEmitter<RevoGrid.ViewPortScrollEvent>;
   @Event() resizeViewport: EventEmitter<RevoGrid.ViewPortResizeEvent>;
 
 
@@ -19,7 +20,6 @@ export class RevogrViewportScroll {
 
   private oldValY: number = this.contentHeight;
   private oldValX: number = this.contentWidth;
-  @Element() horizontalScroll: HTMLElement;
   private verticalScroll: HTMLElement;
 
   private horizontalMouseWheel: (e: WheelEvent) => void;

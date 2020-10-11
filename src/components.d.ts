@@ -59,6 +59,10 @@ export namespace Components {
          */
         "rowClass": string;
         /**
+          * Show row indexes column
+         */
+        "rowHeaders": boolean;
+        /**
           * Indicates default row size. By default 0, means theme package size will be applied
          */
         "rowSize": number;
@@ -164,8 +168,6 @@ export namespace Components {
         "lastCell": Selection.Cell;
         "range": boolean;
         "readonly": boolean;
-        "selectionFocus": Selection.Cell;
-        "selectionRange": Selection.RangeArea;
         /**
           * Dynamic stores
          */
@@ -196,6 +198,10 @@ export namespace Components {
         "readonly": boolean;
         "resize": boolean;
         "rowClass": string;
+        /**
+          * Show row indexes column
+         */
+        "rowHeaders": boolean;
         "rowStores": {[T in RevoGrid.DimensionRows]: ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>};
         "scrollToCoordinate": (cell: Partial<Selection.Cell>) => Promise<void>;
         "setEdit": (rowIndex: number, colIndex: number, colType: RevoGrid.DimensionCols, rowType: RevoGrid.DimensionRows) => Promise<void>;
@@ -397,6 +403,10 @@ declare namespace LocalJSX {
          */
         "rowClass"?: string;
         /**
+          * Show row indexes column
+         */
+        "rowHeaders"?: boolean;
+        /**
           * Indicates default row size. By default 0, means theme package size will be applied
          */
         "rowSize"?: number;
@@ -526,8 +536,6 @@ declare namespace LocalJSX {
         "onUnregister"?: (event: CustomEvent<any>) => void;
         "range"?: boolean;
         "readonly"?: boolean;
-        "selectionFocus"?: Selection.Cell;
-        "selectionRange"?: Selection.RangeArea;
         /**
           * Dynamic stores
          */
@@ -562,6 +570,10 @@ declare namespace LocalJSX {
         "readonly"?: boolean;
         "resize"?: boolean;
         "rowClass"?: string;
+        /**
+          * Show row indexes column
+         */
+        "rowHeaders"?: boolean;
         "rowStores"?: {[T in RevoGrid.DimensionRows]: ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>};
         "uuid"?: string|null;
         "viewports"?: {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.ViewportState>};

@@ -60,7 +60,7 @@ export function generateFakeDataObject(rowsNumber, colsNumber) {
     return {
         rows: result,
         pinnedTopRows,
-        // pinnedBottomRows,
+        pinnedBottomRows,
         headers
     };
 }

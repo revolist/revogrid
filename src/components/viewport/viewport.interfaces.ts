@@ -32,6 +32,8 @@ declare namespace ViewportSpace {
         /** Current grid uniq Id */
         uuid: string;
 
+        type: RevoGrid.DimensionRows;
+
         canDrag?: boolean;
         style?: {[key: string]: string};
     };
@@ -52,4 +54,4 @@ declare namespace ViewportSpace {
     };
 }
 
-export default ViewportSpace;
+export {ViewportSpace};

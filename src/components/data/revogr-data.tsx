@@ -72,7 +72,7 @@ export class RevogrData {
     };
     const props = this.columnService.cellProperties(row.itemIndex, col.itemIndex, defaultProps);
     const custom = this.columnService.customRenderer(row.itemIndex, col.itemIndex);
-    if (custom) {
+    if (typeof custom !== 'undefined') {
       return <div {...props}>{custom}</div>;
     }
     const model = this.columnService.rowDataModel(row.itemIndex, col.itemIndex);

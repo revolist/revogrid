@@ -48,9 +48,6 @@ export class OverlaySelection {
   @Prop() range: boolean;
   @Prop() canDrag: boolean;
 
-  @Prop() selectionFocus: Selection.Cell;
-  @Prop() selectionRange: Selection.RangeArea;
-
   /** Dynamic stores */
   @Prop() selectionStore: ObservableMap<Selection.SelectionStoreState>;
   @Prop() dimensionRow: ObservableMap<RevoGrid.DimensionSettingsState>;
@@ -100,7 +97,7 @@ export class OverlaySelection {
    /** Pointer left document, clear any active operation */
    @Listen('mousemove', { target: 'document' })
    onMouseMove(e: MouseEvent): void {
-    if (this.autoFill && this.selectionFocus) {
+    if (this.autoFill && this.selectionStoreService.focused) {
       this.selectionService.onMouseMove(e, this.getData())
     }
    }
@@ -133,7 +130,7 @@ export class OverlaySelection {
   /** Recived keyboard down from element */
   @Listen('keydown', { target: 'document' })
   async onKeyDown(e: KeyboardEvent): Promise<void> {
-    if (!this.selectionFocus) {
+    if (!this.selectionStoreService.focused) {
       return;
     }
     this.keyService.keyDown(e);
@@ -162,11 +159,11 @@ export class OverlaySelection {
 
     // pressed clear key
     if (isClear(e.code)) {
-      if (this.selectionRange && !isRangeSingleCell(this.selectionRange)) {
-        const data = this.columnService.getRangeStaticData(this.selectionRange, '');
-        this.onRangeApply(data, this.selectionRange);
+      if (this.selectionStoreService.ranged && !isRangeSingleCell(this.selectionStoreService.ranged)) {
+        const data = this.columnService.getRangeStaticData(this.selectionStoreService.ranged, '');
+        this.onRangeApply(data, this.selectionStoreService.ranged);
       } else if (this.canEdit()) {
-        const focused = this.selectionFocus;
+        const focused = this.selectionStoreService.focused;
         this.onCellEdit({ row: focused.y, col: focused.x, val: '' }, true);
       }
       return;
@@ -213,17 +210,6 @@ export class OverlaySelection {
     this.selectionStoreService?.setLastCell(cell);
   }
 
-
-  private async keyChangeSelection(e: KeyboardEvent): Promise<boolean> {
-    const changes = this.keyService.changeDirectionKey(e, this.range);
-    if (changes) {
-      await timeout();
-      this.changeSelection?.emit(changes);
-      return true;
-    }
-    return false;
-  }
-
   @Watch('range') onRange(canRange: boolean): void {
     this.selectionService.canRange = canRange;
   }
@@ -252,7 +238,7 @@ export class OverlaySelection {
           return;
         }
         
-        const oldRange = this.selectionRange;
+        const oldRange = this.selectionStoreService.ranged;
         const newRange = getRange(start, end);
         const rangeData: Selection.ChangedRange = {
           type: this.dataStore.get('type'),
@@ -275,8 +261,8 @@ export class OverlaySelection {
         this.selectionStoreService.setTempRange(start, end);
       },
       autoFill: (isAutofill) => {
-        let focus = this.selectionFocus;
-        const range = this.selectionRange;
+        let focus = this.selectionStoreService.focused;
+        const range = this.selectionStoreService.ranged;
         if (range) {
           focus = {x: range.x, y: range.y};
         }
@@ -344,8 +330,8 @@ export class OverlaySelection {
   }
 
   render() {
-    const range = this.selectionRange;
-    const selectionFocus = this.selectionFocus;
+    const range = this.selectionStoreService.ranged;
+    const selectionFocus = this.selectionStoreService.focused;
     const els: VNode[] = [];
 
     if (range || selectionFocus) {
@@ -389,8 +375,18 @@ export class OverlaySelection {
     return <Host {...hostProps}>{els}<slot name='data'/></Host>;
   }
 
+  private async keyChangeSelection(e: KeyboardEvent): Promise<boolean> {
+    const changes = this.keyService.changeDirectionKey(e, this.range);
+    if (changes) {
+      await timeout();
+      this.changeSelection?.emit(changes);
+      return true;
+    }
+    return false;
+  }
+
   private onPaste(data: string[][]): void {
-    const focus = this.selectionFocus;
+    const focus = this.selectionStoreService.focused;
     if (!focus) {
       return;
     }
@@ -403,8 +399,8 @@ export class OverlaySelection {
     if (canCopy.defaultPrevented) {
       return;
     }
-    let focus = this.selectionFocus;
-    let range = this.selectionRange;
+    let focus = this.selectionStoreService.focused;
+    let range = this.selectionStoreService.ranged;
     let data: RevoGrid.DataFormat[][];
     if (!range) {
       range = getRange(focus, focus);
@@ -455,7 +451,7 @@ export class OverlaySelection {
     if (this.readonly) {
       return false;
     }
-    const editCell = this.selectionFocus;
+    const editCell = this.selectionStoreService.focused;
     return editCell && !this.columnService?.isReadOnly(editCell.y, editCell.x);
   }
 

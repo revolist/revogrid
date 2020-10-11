@@ -21,6 +21,20 @@ revogr-viewport-scroll {
     z-index: 2;
   }
 
+  &.rowHeaders {
+    z-index: 2;
+    font-size: 10px;
+
+    revogr-data .data-cell {
+      text-align: center;
+    }
+
+    .data-cell {
+      padding: 0 1em !important;
+      min-width: 100%;
+    }
+  }
+
   &.col {
     flex-grow: 1;
   }
@@ -34,6 +48,7 @@ revogr-viewport-scroll {
     flex-direction: column;
     max-height: 100%;
     width: 100%;
+    min-width: 100%;
     position: relative;
     z-index: 0;
   }

@@ -53,7 +53,7 @@ export declare namespace RevoGrid {
 
   interface ColumnRegular {
     /** mapping to data */
-    prop: ColumnProp;
+    prop?: ColumnProp;
     /** column pin 'colPinStart'|'colPinEnd' */
     pin?: DimensionColPin;
     /** column header */
@@ -105,7 +105,7 @@ export declare namespace RevoGrid {
   // --------------------------------------------------------------------------
 
   interface HyperFunc<T> { (tag: string, props?: object, value?: string): T; }
-  type CellTemplateFunc<T> = (createElement: HyperFunc<T>, props: ColumnDataSchemaModel) => T|string;
+  type CellTemplateFunc<T> = (createElement: HyperFunc<T>, props: ColumnDataSchemaModel) => any;
   type ColumnTemplateFunc<T> = (createElement: HyperFunc<T>, props: ColumnRegular) => T|string;
   type PropertiesFunc = (props: ColumnDataSchemaModel) => CellProps|void|undefined;
 

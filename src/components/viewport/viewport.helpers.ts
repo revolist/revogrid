@@ -1,7 +1,7 @@
 /** Collect data for pinned columns in required @ViewportProps format */
 import {RevoGrid, Selection} from "../../interfaces";
 import {UUID} from "../../utils/consts";
-import ViewportSpace from "./viewport.interfaces";
+import {ViewportSpace} from "./viewport.interfaces";
 import ViewportProps = ViewportSpace.ViewportProps;
 import ViewportData = ViewportSpace.ViewportData;
 import SlotType = ViewportSpace.SlotType;
@@ -67,13 +67,14 @@ function dataPartition(data: ViewportColumn, type: RevoGrid.DimensionRows, slot:
         viewportCol: data.viewports[data.colType],
         lastCell,
         slot,
+        type,
         canDrag: !fixed,
         position: data.position,
         viewportRow: data.viewports[type],
         uuid: `${data.uuid}-${data.position.x}-${data.position.y}`,
         dataStore: data.rowStores[type],
         dimensionCol: data.dimensions[data.colType],
-        dimensionRow: data.dimensions[type]
+        dimensionRow: data.dimensions[type],
     };
 
     if (fixed) {

@@ -1,7 +1,6 @@
 @mixin revoGrid($header-height, $default-rows-size) {
     font-family: Nunito,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji","Segoe UI Symbol";
 	revogr-viewport {
-
 		revogr-header {
 			line-height: $header-height;
 			font-weight: 600;
@@ -35,9 +34,6 @@
 		// properties to auto-stretch grid
 		.viewports {
 			width: 100%;
-		}
-		revogr-viewport-scroll .inner-content-table {
-			min-width: 100%;
 		}
 	}
 }
