@@ -271,6 +271,7 @@ export declare namespace Edition {
 
   type BeforeRangeSaveDataDetails = {
     data: RevoGrid.DataLookup;
+    models: {[rowIndex: number]: RevoGrid.DataType};
     type: RevoGrid.DimensionRows;
   };
 
