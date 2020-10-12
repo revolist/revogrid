@@ -84,6 +84,12 @@
         grid.addEventListener('beforeEdit', (e) => {
           console.log('after edit', e);
         });
+
+        grid.addEventListener('beforeRangeEdit', (e) => {
+          console.log('before edit', e);
+        });
+
+        
         grid.addEventListener('rowDragStart', (e) => {
           console.log(e.detail);
         });

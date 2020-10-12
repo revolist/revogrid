@@ -411,8 +411,17 @@ export class OverlaySelection {
     this.clipboard.doCopy(e, data);
   }
 
-  private onRangeApply(data: {[rowIndex: number]: RevoGrid.DataType}, range: Selection.RangeArea): void {
-    const dataEvent = this.internalRangeDataApply.emit({ data, type: this.dataStore.get('type') });
+  private onRangeApply(data: RevoGrid.DataLookup, range: Selection.RangeArea): void {
+    const items = this.dataStore?.get('items');
+    const models: RevoGrid.DataLookup = {};
+    for (let rowIndex in data) {
+      models[rowIndex] = items[parseInt(rowIndex, 10)]
+    }
+    const dataEvent = this.internalRangeDataApply.emit({
+      data,
+      models,
+      type: this.dataStore.get('type')
+    });
     if (!dataEvent.defaultPrevented) {
       this.columnService.applyRangeData(data);
     }
