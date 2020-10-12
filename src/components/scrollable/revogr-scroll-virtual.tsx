@@ -30,6 +30,23 @@ export class RevogrScrollVirtual {
         this.scrollService?.setScroll(e);
     }
 
+  // update on delta in case we don't know existing position or external change
+  @Method()
+  async changeScroll(e: RevoGrid.ViewPortScrollEvent): Promise<RevoGrid.ViewPortScrollEvent> {
+    if (e.delta) {
+      switch (e.dimension) {
+        case 'col':
+          e.coordinate = this.element.scrollLeft + e.delta;
+          break;
+        case 'row':
+          e.coordinate = this.element.scrollTop + e.delta;
+          break;
+      }
+      this.setScroll(e);
+    }
+    return e;
+  }
+
     set size(s: number) {
         if (this.dimension === 'row') {
             this.element.style.minWidth = `${s}px`;

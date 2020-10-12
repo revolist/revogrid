@@ -41,7 +41,7 @@ export function getUpdatedItemsByPosition<T extends ItemsToUpdate>(
       if (toUpdate) {
         const extra = addMissingItems(activeItem, realCount, virtualSize, toUpdate, dimension);
         if (extra.length) {
-          updateMissing(toUpdate.items, extra, toUpdate);
+          updateMissingAndRange(toUpdate.items, extra, toUpdate);
         }
       }
     }
@@ -66,9 +66,10 @@ export function getUpdatedItemsByPosition<T extends ItemsToUpdate>(
   return toUpdate;
 }
 
-export function updateMissing(items: RevoGrid.VirtualPositionItem[], missing: RevoGrid.VirtualPositionItem[], range: RevoGrid.Range) {
+export function updateMissingAndRange(items: RevoGrid.VirtualPositionItem[], missing: RevoGrid.VirtualPositionItem[], range: RevoGrid.Range) {
   items.splice(range.end + 1, 0, ...missing);
-  if (range.start >= range.end) {
+  // update range if start larger after recombination
+  if (range.start >= range.end && !(range.start === range.end && range.start === 0)) {
     range.start += missing.length;
   }
   range.end += missing.length;
@@ -89,7 +90,7 @@ export function addMissingItems<T extends ItemsToUpdate> (
     startIndex: lastItem.itemIndex + 1,
     origSize: dimension.originItemSize,
     maxSize: virtualSize - (lastItem.end - firstItem.start),
-    maxCount: realCount - 1 - lastItem.itemIndex
+    maxCount: realCount
   });
   return items;
 }

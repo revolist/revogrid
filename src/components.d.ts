@@ -176,6 +176,7 @@ export namespace Components {
         "selectionStore": ObservableMap<Selection.SelectionStoreState>;
     }
     interface RevogrScrollVirtual {
+        "changeScroll": (e: RevoGrid.ViewPortScrollEvent) => Promise<RevoGrid.ViewPortScrollEvent>;
         "dimension": RevoGrid.DimensionType;
         "dimensionStore": ObservableMap<RevoGrid.DimensionSettingsState>;
         "setScroll": (e: RevoGrid.ViewPortScrollEvent) => Promise<void>;
@@ -211,6 +212,7 @@ export namespace Components {
         "viewports": {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.ViewportState>};
     }
     interface RevogrViewportScroll {
+        "changeScroll": (e: RevoGrid.ViewPortScrollEvent) => Promise<RevoGrid.ViewPortScrollEvent>;
         "contentHeight": number;
         "contentWidth": number;
         "setScroll": (e: RevoGrid.ViewPortScrollEvent) => Promise<void>;

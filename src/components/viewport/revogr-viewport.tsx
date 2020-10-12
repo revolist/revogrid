@@ -5,7 +5,7 @@ import '../../utils/closestPolifill';
 
 import {UUID} from '../../utils/consts';
 import {gatherColumnData, getStoresCoordinates, ViewportColumn} from './viewport.helpers';
-import GridScrollingService, {ElementScroll} from './gridScrollingService';
+import GridScrollingService from './gridScrollingService';
 import {ViewportSpace} from './viewport.interfaces';
 import {DataSourceState} from '../../store/dataSource/data.store';
 import SelectionStoreConnector from '../../services/selection.store.connector';
@@ -22,7 +22,6 @@ import RevogrRowHeaders from '../rowHeaders/revogr-row-headers';
 })
 export class RevogrViewport {
   @Element() element: HTMLElement;
-  private elementToScroll: ElementScroll[] = [];
   private scrollingService: GridScrollingService;
   private selectionStoreConnector: SelectionStoreConnector;
 
@@ -138,12 +137,8 @@ export class RevogrViewport {
       (e: RevoGrid.ViewPortScrollEvent) => this.setViewportCoordinate.emit(e));
   }
 
-  componentDidRender(): void {
-    this.scrollingService.registerElements(this.elementToScroll);
-  }
-
   private renderViewports(contentHeight: number): VNode[] {
-    this.elementToScroll.length = 0;
+    this.scrollingService?.unregister();
     const viewports: ViewportProps[] = [];
     let index: number = 0;
 
@@ -186,8 +181,8 @@ export class RevogrViewport {
         height={contentHeight}
         anyView={viewports[0]}
         resize={this.resize}
-        onScrollViewport={e => this.scrollingService.onScroll(e, 'colPinStart')}
-        onElementToScroll={e => this.elementToScroll.push(e)}/>);
+        onScrollViewport={e => this.scrollingService.onScroll(e, 'headerRow')}
+        onElementToScroll={e => this.scrollingService.registerElement(e, 'headerRow')}/>);
     }
 
     /** render viewports columns */
@@ -235,7 +230,7 @@ export class RevogrViewport {
       viewPortHtml.push(
         <revogr-viewport-scroll
           {...view.prop}
-          ref={el => this.elementToScroll.push(el)}
+          ref={el => this.scrollingService.registerElement(el, view.prop.key)}
           onScrollViewport={e => this.scrollingService.onScroll(e.detail, view.prop.key)}>
           <revogr-header viewportCol={view.viewportCol} {...view.headerProp} selectionStore={colSelectionStore.store} slot='header' canResize={this.resize}/>
           {dataViews}
@@ -258,7 +253,7 @@ export class RevogrViewport {
             dimension='row'
             viewportStore={this.viewports['row']}
             dimensionStore={this.dimensions['row']}
-            ref={el => this.elementToScroll.push(el)}
+            ref={el => this.scrollingService.registerElement(el, 'rowScroll')}
             onScrollVirtual={e => this.scrollingService.onScroll(e.detail)}/>
           <OrderRenderer ref={e => this.orderService = e}/>
         </div>
@@ -268,7 +263,7 @@ export class RevogrViewport {
         dimension='col'
         viewportStore={this.viewports['col']}
         dimensionStore={this.dimensions['col']}
-        ref={el => this.elementToScroll.push(el)}
+        ref={el => this.scrollingService.registerElement(el, 'colScroll')}
         onScrollVirtual={e => this.scrollingService.onScroll(e.detail)}/>
     </Host>;
   }

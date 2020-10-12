@@ -1,8 +1,10 @@
+import throttle from 'lodash/throttle';
 interface Events {
     resize(): void;
 }
 export default class GridResizeService {
     private resizeObserver: ResizeObserver|null = null;
+    private resize = throttle(() => this.events?.resize(), 10);
     constructor(el: HTMLElement, private events: Events) {
         this.init(el);
     }
@@ -13,10 +15,7 @@ export default class GridResizeService {
             window.ResizeObserver = (module.ResizeObserver as unknown as typeof ResizeObserver);
         }
 
-        this.resizeObserver = new ResizeObserver(async() => {
-            this.events?.resize();
-        });
-
+        this.resizeObserver = new ResizeObserver(this.resize);
         this.resizeObserver?.observe(el);
     }
 

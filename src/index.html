@@ -47,7 +47,7 @@
 
     .tile.large {
       width: 800px;
-      height: 500px;
+      height: 600px;
     }
   </style>
 
@@ -61,14 +61,14 @@
 
     <div class="tile large">
       <div>
-        <revo-grid style="height: 345px" row-headers="true" theme="material"></revo-grid>
+        <revo-grid style="height: 100%" row-headers="true" theme="material"></revo-grid>
       </div>
     </div>
 
     <script type="module">
         import {generateFakeDataObject} from "/utilsExternal/generate-data.js";
 
-        const data = generateFakeDataObject(207, 100);
+        const data = generateFakeDataObject(400, 100);
         const grid = document.querySelector('revo-grid');
 
         grid.columns = data.headers;
