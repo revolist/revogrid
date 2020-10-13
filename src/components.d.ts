@@ -100,7 +100,7 @@ export namespace Components {
     }
     interface RevogrData {
         "canDrag": boolean;
-        "colData": RevoGrid.ColumnRegular[];
+        "colData": ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
         /**
           * Static stores, not expected to change during component lifetime
          */
@@ -153,7 +153,7 @@ export namespace Components {
     }
     interface RevogrOverlaySelection {
         "canDrag": boolean;
-        "colData": RevoGrid.ColumnRegular[];
+        "colData": ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
         /**
           * Static stores, not expected to change during component lifetime
          */
@@ -429,7 +429,7 @@ declare namespace LocalJSX {
     }
     interface RevogrData {
         "canDrag"?: boolean;
-        "colData"?: RevoGrid.ColumnRegular[];
+        "colData"?: ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
         /**
           * Static stores, not expected to change during component lifetime
          */
@@ -509,7 +509,7 @@ declare namespace LocalJSX {
     }
     interface RevogrOverlaySelection {
         "canDrag"?: boolean;
-        "colData"?: RevoGrid.ColumnRegular[];
+        "colData"?: ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
         /**
           * Static stores, not expected to change during component lifetime
          */

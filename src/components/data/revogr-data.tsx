@@ -1,4 +1,4 @@
-import {Component, Element, Event, Prop, Watch, VNode, EventEmitter, h} from '@stencil/core';
+import {Component, Element, Event, Prop, VNode, EventEmitter, h} from '@stencil/core';
 import {HTMLStencilElement} from '@stencil/core/internal';
 import {ObservableMap} from '@stencil/store';
 
@@ -17,7 +17,6 @@ export class RevogrData {
   private columnService: ColumnService;
 
   @Element() element!: HTMLStencilElement;
-  @Prop() colData: RevoGrid.ColumnRegular[];
 
   @Prop() readonly: boolean;
   @Prop() range: boolean;
@@ -25,6 +24,7 @@ export class RevogrData {
 
   @Prop() rowClass: string;
 
+  @Prop() colData: ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
   @Prop() rowSelectionStore: ObservableMap<Selection.SelectionStoreState>;
   @Prop() viewportRow: ObservableMap<RevoGrid.ViewportState>;
   @Prop() viewportCol:  ObservableMap<RevoGrid.ViewportState>;
@@ -36,10 +36,6 @@ export class RevogrData {
 
   @Event() dragStartCell: EventEmitter<MouseEvent>;
 
-  @Watch('colData') colChanged(newData: RevoGrid.ColumnRegular[]): void {
-    this.columnService.columns = newData;
-  }
-
   connectedCallback(): void {
     this.columnService = new ColumnService(this.dataStore, this.colData);
   }
@@ -47,7 +43,7 @@ export class RevogrData {
   render() {
     const rows = this.viewportRow.get('items');
     const cols = this.viewportCol.get('items');
-    if (!this.colData || !rows.length || !cols.length) {
+    if (!this.columnService.columns.length || !rows.length || !cols.length) {
       return '';
     }
     const range = this.rowSelectionStore?.get('range');
@@ -81,6 +77,10 @@ export class RevogrData {
       return <div {...props}>{custom}</div>;
     }
     const model = this.columnService.rowDataModel(row.itemIndex, col.itemIndex);
+    if (!model.column) {
+      console.error('Investigate column problem');
+      return;
+    }
     return <div {...props}>
       <CellRenderer
         model={model}
