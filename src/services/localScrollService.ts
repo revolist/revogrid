@@ -62,7 +62,7 @@ export default class LocalScrollService {
     }
 
     // initiate scrolling event
-    scroll(coordinate: number, dimension: RevoGrid.DimensionType, force: boolean = false): void {
+    scroll(coordinate: number, dimension: RevoGrid.DimensionType, force: boolean = false, delta?: number): void {
         this.cancelScroll(dimension);
         if (!force && this.previousScroll[dimension] === coordinate) {
             this.previousScroll[dimension] = 0;
@@ -72,7 +72,8 @@ export default class LocalScrollService {
         const param: Params = this.getParams(dimension);
         this.cfg.beforeScroll({
             dimension: dimension,
-            coordinate: param.virtualSize ? this.convert(coordinate, param) : coordinate
+            coordinate: param.virtualSize ? this.convert(coordinate, param) : coordinate,
+            delta
         });
     }
 

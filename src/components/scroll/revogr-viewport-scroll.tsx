@@ -40,6 +40,23 @@ export class RevogrViewportScroll {
     this.scrollService?.setScroll(e);
   }
 
+  // update on delta in case we don't know existing position or external change
+  @Method()
+  async changeScroll(e: RevoGrid.ViewPortScrollEvent): Promise<RevoGrid.ViewPortScrollEvent> {
+    if (e.delta) {
+      switch (e.dimension) {
+        case 'col':
+          e.coordinate = this.horizontalScroll.scrollLeft + e.delta;
+          break;
+        case 'row':
+          e.coordinate = this.verticalScroll.scrollTop + e.delta;
+          break;
+      }
+      this.setScroll(e);
+    }
+    return e;
+  }
+
 
   connectedCallback(): void {
     this.scrollService = new LocalScrollService({
@@ -61,13 +78,13 @@ export class RevogrViewportScroll {
     this.verticalMouseWheel = (e: WheelEvent) => {
       e.preventDefault();
       const y = this.verticalScroll.scrollTop + e.deltaY;
-      this.scrollService?.scroll(y, 'row');
+      this.scrollService?.scroll(y, 'row', undefined, e.deltaY);
       this.latestScrollUpdate('row');
     };
     this.horizontalMouseWheel = (e: WheelEvent) => {
       e.preventDefault();
       const x = this.horizontalScroll.scrollLeft + e.deltaX;
-      this.scrollService?.scroll(x, 'col');
+      this.scrollService?.scroll(x, 'col', undefined, e.deltaX);
       this.latestScrollUpdate('col');
     };
     this.gridResizeService = new GridResizeService(

@@ -11,7 +11,7 @@ import {
   getFirstItem,
   getLastItem,
   getUpdatedItemsByPosition,
-  isActiveRange, updateMissing
+  isActiveRange, updateMissingAndRange
 } from './viewport.helpers';
 
 import {setStore} from '../../utils/store.utils';
@@ -106,7 +106,7 @@ export default class ViewportStore {
           start: this.store.get('start'),
           end: this.store.get('end')
         };
-        updateMissing(items, missing, range);
+        updateMissingAndRange(items, missing, range);
         toUpdate = {
           ...toUpdate,
           items: [...items],
