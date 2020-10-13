@@ -22,19 +22,15 @@ export interface ColumnServiceI {
 }
 
 export default class ColumnService implements ColumnServiceI {
-  private source: RevoGrid.ColumnRegular[] = [];
+  private readonly source: ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
 
   get columns(): RevoGrid.ColumnRegular[] {
-    return this.source;
-  }
-
-  set columns(source: RevoGrid.ColumnRegular[]) {
-    this.source = source;
+    return this.source.get('items');
   }
 
   constructor(
     private dataStore: ObservableMap<DataSourceState<DataType, RevoGrid.DimensionRows>>,
-    columns: RevoGrid.ColumnRegular[]) {
+    columns: ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>) {
     this.source = columns;
   }
 

@@ -61,10 +61,9 @@ export function gatherColumnData(data: ViewportColumn): ViewportProps {
 }
 
 function dataPartition(data: ViewportColumn, type: RevoGrid.DimensionRows, slot: SlotType, fixed?: boolean): ViewportData {
-    const colData = data.colStore.get('items');
     let lastCell = getLastCell(data, type);
     const dataPart: ViewportData = {
-        colData,
+        colData: data.colStore,
         viewportCol: data.viewports[data.colType],
         lastCell,
         slot,

@@ -1,6 +1,7 @@
 import { h, VNode } from "@stencil/core";
 import { RevoGrid } from "../../interfaces";
 import SelectionStoreConnector from "../../services/selection.store.connector";
+import DataStore from "../../store/dataSource/data.store";
 import ViewportStore from "../../store/viewPort/viewport.store";
 import { UUID } from "../../utils/consts";
 import { ElementScroll } from "../viewport/gridScrollingService";
@@ -15,6 +16,7 @@ type Props = {
 	onElementToScroll(e: ElementScroll): void;
 };
 
+
 const RevogrRowHeaders = ({anyView, height, selectionStoreConnector, onScrollViewport, onElementToScroll}: Props, _children: VNode[]): VNode => {
 	const dataViews: HTMLElement[] = [];
     const viewport = new ViewportStore();
@@ -26,13 +28,17 @@ const RevogrRowHeaders = ({anyView, height, selectionStoreConnector, onScrollVie
     /** render viewports rows */
     let totalLength = 0;
     for (let data of anyView.dataPorts) {
+      const colData = new DataStore<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>('colPinStart');
       const rowSelectionStore = selectionStoreConnector.registerRow(data.position.y);
       const start = totalLength;
+      colData.setData({
+        items: [{ cellTemplate: (_h, e: {rowIndex: number}) => (start + e.rowIndex) }]
+      });
       dataViews.push(
         <revogr-data
           slot='content'
           {...data}
-          colData={[{ cellTemplate: (_h, e: {rowIndex: number}) => (start + e.rowIndex) }]}
+          colData={colData.store}
           viewportCol={viewport.store}
           readonly={true}
           range={false}

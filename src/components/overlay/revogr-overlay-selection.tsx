@@ -55,7 +55,7 @@ export class OverlaySelection {
   /** Static stores, not expected to change during component lifetime */
   @Prop() dataStore: ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
 
-  @Prop() colData: RevoGrid.ColumnRegular[];
+  @Prop() colData: ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
   /** Last cell position */
   @Prop() lastCell: Selection.Cell;
   /** Custom editors register */
@@ -204,11 +204,6 @@ export class OverlaySelection {
     }
   }
 
-
-  @Watch('colData') colChanged(newData: RevoGrid.ColumnRegular[]): void {
-    this.columnService.columns = newData;
-  }
-
   @Watch('range') onRange(canRange: boolean): void {
     this.selectionService.canRange = canRange;
   }
@@ -239,13 +234,14 @@ export class OverlaySelection {
         
         const oldRange = this.selectionStoreService.ranged;
         const newRange = getRange(start, end);
+        const columns = [...this.columnService.columns];
         const rangeData: Selection.ChangedRange = {
           type: this.dataStore.get('type'),
           newData: {},
           newRange,
           oldRange,
-          newProps: slice(this.colData, newRange.x, newRange.x1 + 1).map(v => v.prop),
-          oldProps: slice(this.colData, oldRange.x, oldRange.x1 + 1).map(v => v.prop),
+          newProps: slice(columns, newRange.x, newRange.x1 + 1).map(v => v.prop),
+          oldProps: slice(columns, oldRange.x, oldRange.x1 + 1).map(v => v.prop),
         };
 
         rangeData.newData = this.columnService.getRangeData(rangeData);
@@ -405,7 +401,8 @@ export class OverlaySelection {
       range = getRange(focus, focus);
     }
     if (range) {
-      const props = slice(this.colData, range.x, range.x1 + 1).map(v => v.prop);
+      const columns = [...this.columnService.columns];
+      const props = slice(columns, range.x, range.x1 + 1).map(v => v.prop);
       data = this.columnService.copyRangeArray(range, props, this.dataStore.get('items'));
     }
     this.clipboard.doCopy(e, data);
