@@ -1,4 +1,4 @@
-export const MIN_COL_SIZE: number = 5;
+export const MIN_COL_SIZE: number = 30;
 export const DATA_COL = 'data-col';
 export const DATA_ROW = 'data-row';
 

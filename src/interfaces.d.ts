@@ -60,7 +60,11 @@ export declare namespace RevoGrid {
     name?: DataFormat;
     /** default column size */
     size?: number;
-    /** minimal column size */
+    /** 
+     * minimal column size
+     * this property can not be less than cell padding
+     * in order to keep performance on top and minimize dom elements number
+     */
     minSize?: number;
     /** is column can be sorted */
     sortable?: boolean;
