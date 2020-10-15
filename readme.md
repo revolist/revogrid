@@ -67,13 +67,14 @@ Latest ✔ | Latest ✔ | Latest ✔ | Latest ✔ | Latest ✔ |
 The library published as a [scoped NPM package](https://docs.npmjs.com/misc/scope) in the [NPMJS Revolist account](https://www.npmjs.com/org/revolist).
 [Check for more info on our demo side](https://revolist.github.io/revogrid.demo.js/?path=/docs/docs-installing--page).
 
+With NPM:
+```bash
+npm i @revolist/revogrid --save;
+```
+
+With Yarn:
 
 ```bash
-
-// npm
-npm i @revolist/revogrid --save;
-
-// yarn
 yarn add @revolist/revogrid;
 ```
 
