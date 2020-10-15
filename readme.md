@@ -2,15 +2,18 @@
   <a href="https://revolist.github.io/revogrid.demo.js">
     <img src="./assets/logo.svg" alt="RevoGrid" height="150" />
   </a>
-  
-  [![Latest Version on NPM](https://img.shields.io/npm/v/@revolist/revogrid)](https://www.npmjs.com/package/@revolist/revogrid)
-  [![Software License](https://img.shields.io/npm/l/@revolist/revogrid)](https://github.com/revolist/revogrid/blob/master/LICENSE)
+</p>
+
+##
+<p align="center">
+  <a href="https://www.npmjs.com/package/@revolist/revogrid"><img src="https://img.shields.io/npm/v/@revolist/revogrid" alt="Latest Version on NPM"/></a>
+  <a href="https://github.com/revolist/revogrid/blob/master/LICENSE"><img src="https://img.shields.io/npm/l/@revolist/revogrid" alt="Software License"/></a>
 </p>
 
 <p>
-Virtual grid implementation based on webcomponent using StencilJs.
-Handles millions of rows and columns fast and efficiently.
-Works in any major framework (VueJs, React, Ember, Angular) or with no framework at all.
+Powerful data grid implementation based on webcomponent using StencilJs.
+Handles millions of cells and thousands columns easy and efficiently.
+Any major framework or with no framework at all.
   
 </p>
 
