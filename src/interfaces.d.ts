@@ -263,7 +263,7 @@ export declare namespace Edition {
   type SaveDataDetails = {
     row: Selection.RowIndex;
     col: Selection.ColIndex;
-    val: SaveData;
+    val: any;
     preventFocus?: boolean;
   };
   type BeforeSaveDataDetails = {

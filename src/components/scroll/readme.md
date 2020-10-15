@@ -15,13 +15,23 @@
 
 ## Events
 
-| Event            | Description | Type                                                             |
-| ---------------- | ----------- | ---------------------------------------------------------------- |
-| `resizeViewport` |             | `CustomEvent<{ dimension: DimensionType; size: number; }>`       |
-| `scrollViewport` |             | `CustomEvent<{ dimension: DimensionType; coordinate: number; }>` |
+| Event            | Description | Type                                                                             |
+| ---------------- | ----------- | -------------------------------------------------------------------------------- |
+| `resizeViewport` |             | `CustomEvent<{ dimension: DimensionType; size: number; }>`                       |
+| `scrollViewport` |             | `CustomEvent<{ dimension: DimensionType; coordinate: number; delta?: number; }>` |
 
 
 ## Methods
+
+### `changeScroll(e: RevoGrid.ViewPortScrollEvent) => Promise<RevoGrid.ViewPortScrollEvent>`
+
+
+
+#### Returns
+
+Type: `Promise<ViewPortScrollEvent>`
+
+
 
 ### `setScroll(e: RevoGrid.ViewPortScrollEvent) => Promise<void>`
 
