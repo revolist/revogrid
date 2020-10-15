@@ -16,13 +16,22 @@ Handles millions of cells and thousands columns easy and efficiently.
   
 </p>
 
+<p align="center">
+  <a href="https://revolist.github.io/revogrid.demo.js">Demo and API</a> •
+  <a href="#key-features">Key Features</a> •
+  <a href="#basic-usage">How To Use</a> •
+  <a href="#installation">Installation</a> •
+  <a href="https://github.com/revolist/revogrid/blob/master/src/components/revo-grid/readme.md">Docs</a> •
+  <a href="#license">License</a>
+</p>
 
 <br>
 
 
-## Features
+## Key Features
 
-- Millions of cells virtual viewport scroll with a powerful core is in-build by default. Intelligent Virtual Dom; 
+- Millions of cells virtual viewport scroll with a powerful core is in-build by default. 
+  Intelligent Virtual DOM and smart row recombination in order to achieve less redraws;
 - Column and Row custom sizes;
 - Column resizing;
 - Pinned columns (columns are always on the left or on the right of the screen);
@@ -41,17 +50,6 @@ Handles millions of cells and thousands columns easy and efficiently.
 - Copy/Paste, also copy/paste from Excel, Google Sheets or any other sheet format;
 - Easy extenation and support with modern VNode features and tsx support;
 - Multiple others useful features [RevoGrid](https://revolist.github.io/revogrid.demo.js).
-
-
-
-## Content
-
-* [Overview](#overview)
-* [Installation](#installation)
-* [Framework integration](#framework)
-* [Basic Usage](#basic-usage)
-* [Demo, Usage samples and Api](https://revolist.github.io/revogrid.demo.js)
-* [Grid doc](https://github.com/revolist/revogrid/blob/master/src/components/revo-grid/readme.md)
 
 
 ## Overview
@@ -150,4 +148,11 @@ grid.source = items;
 ## Contributing
 
 If you have any idea, feel free to open an issue to discuss a new feature, or fork RevoGrid and submit your changes back to me.
+
+
+## License
+
+MIT
+
+---
 
