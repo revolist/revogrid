@@ -11,7 +11,7 @@
 </p>
 
 <p>
-Powerful data grid implementation based on webcomponent using StencilJs.
+Powerful data grid implementation.
 Handles millions of cells and thousands columns easy and efficiently.
 Any major framework or with no framework at all.
   
