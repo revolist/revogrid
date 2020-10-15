@@ -1,4 +1,4 @@
-<p>
+<p align="center">
   <a href="https://revolist.github.io/revogrid.demo.js">
     <img src="./assets/logo.svg" alt="RevoGrid" height="150" />
   </a>
