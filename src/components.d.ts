@@ -454,7 +454,7 @@ declare namespace LocalJSX {
         /**
           * Close editor event
          */
-        "onCloseEdit"?: (event: CustomEvent<any>) => void;
+        "onCloseEdit"?: (event: CustomEvent<boolean|undefined>) => void;
     }
     interface RevogrFocus {
         "dimensionCol"?: ObservableMap<RevoGrid.DimensionSettingsState>;
