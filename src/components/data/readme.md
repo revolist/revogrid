@@ -7,17 +7,18 @@
 
 ## Properties
 
-| Property       | Attribute   | Description                                                     | Type                                                      | Default     |
-| -------------- | ----------- | --------------------------------------------------------------- | --------------------------------------------------------- | ----------- |
-| `canDrag`      | `can-drag`  |                                                                 | `boolean`                                                 | `undefined` |
-| `colData`      | --          |                                                                 | `ColumnRegular[]`                                         | `undefined` |
-| `dataStore`    | --          | Static stores, not expected to change during component lifetime | `ObservableMap<DataSourceState<DataType, DimensionRows>>` | `undefined` |
-| `dimensionRow` | --          |                                                                 | `ObservableMap<DimensionSettingsState>`                   | `undefined` |
-| `range`        | `range`     |                                                                 | `boolean`                                                 | `undefined` |
-| `readonly`     | `readonly`  |                                                                 | `boolean`                                                 | `undefined` |
-| `rowClass`     | `row-class` |                                                                 | `string`                                                  | `undefined` |
-| `viewportCol`  | --          |                                                                 | `ObservableMap<ViewportState>`                            | `undefined` |
-| `viewportRow`  | --          |                                                                 | `ObservableMap<ViewportState>`                            | `undefined` |
+| Property            | Attribute   | Description                                                     | Type                                                           | Default     |
+| ------------------- | ----------- | --------------------------------------------------------------- | -------------------------------------------------------------- | ----------- |
+| `canDrag`           | `can-drag`  |                                                                 | `boolean`                                                      | `undefined` |
+| `colData`           | --          |                                                                 | `ObservableMap<DataSourceState<ColumnRegular, DimensionCols>>` | `undefined` |
+| `dataStore`         | --          | Static stores, not expected to change during component lifetime | `ObservableMap<DataSourceState<DataType, DimensionRows>>`      | `undefined` |
+| `dimensionRow`      | --          |                                                                 | `ObservableMap<DimensionSettingsState>`                        | `undefined` |
+| `range`             | `range`     |                                                                 | `boolean`                                                      | `undefined` |
+| `readonly`          | `readonly`  |                                                                 | `boolean`                                                      | `undefined` |
+| `rowClass`          | `row-class` |                                                                 | `string`                                                       | `undefined` |
+| `rowSelectionStore` | --          |                                                                 | `ObservableMap<SelectionStoreState>`                           | `undefined` |
+| `viewportCol`       | --          |                                                                 | `ObservableMap<ViewportState>`                                 | `undefined` |
+| `viewportRow`       | --          |                                                                 | `ObservableMap<ViewportState>`                                 | `undefined` |
 
 
 ## Events

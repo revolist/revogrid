@@ -9,8 +9,8 @@
 
 | Property       | Attribute     | Description             | Type                                                                                                                                                                                                                                                                                                      | Default     |
 | -------------- | ------------- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| `columnStores` | --            |                         | `{ col: ObservableMap<DataSourceState<ColumnRegular, DimensionCols>>; colPinStart: ObservableMap<DataSourceState<ColumnRegular, DimensionCols>>; colPinEnd: ObservableMap<DataSourceState<ColumnRegular, DimensionCols>>; }`                                                                              | `undefined` |
-| `dimensions`   | --            |                         | `{ row: ObservableMap<DimensionSettingsState>; rowPinStart: ObservableMap<DimensionSettingsState>; rowPinEnd: ObservableMap<DimensionSettingsState>; col: ObservableMap<DimensionSettingsState>; colPinStart: ObservableMap<DimensionSettingsState>; colPinEnd: ObservableMap<DimensionSettingsState>; }` | `undefined` |
+| `columnStores` | --            |                         | `{ colPinStart: ObservableMap<DataSourceState<ColumnRegular, DimensionCols>>; colPinEnd: ObservableMap<DataSourceState<ColumnRegular, DimensionCols>>; col: ObservableMap<DataSourceState<ColumnRegular, DimensionCols>>; }`                                                                              | `undefined` |
+| `dimensions`   | --            |                         | `{ colPinStart: ObservableMap<DimensionSettingsState>; colPinEnd: ObservableMap<DimensionSettingsState>; col: ObservableMap<DimensionSettingsState>; row: ObservableMap<DimensionSettingsState>; rowPinStart: ObservableMap<DimensionSettingsState>; rowPinEnd: ObservableMap<DimensionSettingsState>; }` | `undefined` |
 | `editors`      | --            | Custom editors register | `{ [name: string]: EditorCtr; }`                                                                                                                                                                                                                                                                          | `undefined` |
 | `range`        | `range`       |                         | `boolean`                                                                                                                                                                                                                                                                                                 | `undefined` |
 | `readonly`     | `readonly`    |                         | `boolean`                                                                                                                                                                                                                                                                                                 | `undefined` |
@@ -19,17 +19,17 @@
 | `rowHeaders`   | `row-headers` | Show row indexes column | `boolean`                                                                                                                                                                                                                                                                                                 | `true`      |
 | `rowStores`    | --            |                         | `{ row: ObservableMap<DataSourceState<DataType, DimensionRows>>; rowPinStart: ObservableMap<DataSourceState<DataType, DimensionRows>>; rowPinEnd: ObservableMap<DataSourceState<DataType, DimensionRows>>; }`                                                                                             | `undefined` |
 | `uuid`         | `uuid`        |                         | `string`                                                                                                                                                                                                                                                                                                  | `null`      |
-| `viewports`    | --            |                         | `{ row: ObservableMap<ViewportState>; rowPinStart: ObservableMap<ViewportState>; rowPinEnd: ObservableMap<ViewportState>; col: ObservableMap<ViewportState>; colPinStart: ObservableMap<ViewportState>; colPinEnd: ObservableMap<ViewportState>; }`                                                       | `undefined` |
+| `viewports`    | --            |                         | `{ colPinStart: ObservableMap<ViewportState>; colPinEnd: ObservableMap<ViewportState>; col: ObservableMap<ViewportState>; row: ObservableMap<ViewportState>; rowPinStart: ObservableMap<ViewportState>; rowPinEnd: ObservableMap<ViewportState>; }`                                                       | `undefined` |
 
 
 ## Events
 
-| Event                   | Description | Type                                                                     |
-| ----------------------- | ----------- | ------------------------------------------------------------------------ |
-| `initialRowDragStart`   |             | `CustomEvent<{ pos: PositionItem; text: string; }>`                      |
-| `setDimensionSize`      |             | `CustomEvent<{ type: MultiDimensionType; sizes: ViewSettingSizeProp; }>` |
-| `setViewportCoordinate` |             | `CustomEvent<{ dimension: DimensionType; coordinate: number; }>`         |
-| `setViewportSize`       |             | `CustomEvent<{ dimension: DimensionType; size: number; }>`               |
+| Event                   | Description | Type                                                                             |
+| ----------------------- | ----------- | -------------------------------------------------------------------------------- |
+| `initialRowDragStart`   |             | `CustomEvent<{ pos: PositionItem; text: string; }>`                              |
+| `setDimensionSize`      |             | `CustomEvent<{ type: MultiDimensionType; sizes: ViewSettingSizeProp; }>`         |
+| `setViewportCoordinate` |             | `CustomEvent<{ dimension: DimensionType; coordinate: number; delta?: number; }>` |
+| `setViewportSize`       |             | `CustomEvent<{ dimension: DimensionType; size: number; }>`                       |
 
 
 ## Methods
