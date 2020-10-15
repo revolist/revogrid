@@ -316,12 +316,23 @@ export class OverlaySelection {
     return <revogr-edit
       class={EDIT_INPUT_WR}
       onCellEdit={e => this.onCellEdit(e.detail)}
-      onCloseEdit={() => this.setEdit?.emit(false)}
+      onCloseEdit={(focusNext) => {
+        this.setEdit?.emit(false);
+        if (focusNext) {
+          this.focusNext();
+        }
+      }}
       editCell={editable}
       column={this.columnService.columns[editCell.x]}
       editor={this.editors[this.columnService.getCellEditor(editCell.y, editCell.x)]}
       style={style}
     />
+  }
+
+  private focusNext() {
+    this.keyChangeSelection(new KeyboardEvent('keydown', {
+      code: codesLetter.ARROW_DOWN
+    }));
   }
 
   render() {
@@ -430,9 +441,7 @@ export class OverlaySelection {
     this.internalCellEdit.emit(dataToSave);
     // if not clear navigate to next cell after edit
     if (!clear && !e.preventFocus) {
-      this.keyChangeSelection(new KeyboardEvent('keydown', {
-        code: codesLetter.ARROW_DOWN
-      }));
+      this.focusNext();
     }
   }
 

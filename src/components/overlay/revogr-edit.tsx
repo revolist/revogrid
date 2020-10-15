@@ -19,7 +19,7 @@ export class Edit {
     @Event({ bubbles: false  }) cellEdit: EventEmitter<Edition.SaveDataDetails>;
 
     /** Close editor event */
-    @Event({ bubbles: false }) closeEdit: EventEmitter;
+    @Event({ bubbles: false }) closeEdit: EventEmitter<boolean|undefined>;
 
 
     /** Callback triggered on cell editor save */
@@ -40,7 +40,7 @@ export class Edit {
                 this.currentEditor = new this.editor(
                     this.column,
                     (e, preventFocus) => this.onSave(e, preventFocus),
-                    () => this.closeEdit.emit()
+                    (focusNext) => this.closeEdit.emit(focusNext)
                 );
             } else {
                 this.currentEditor = new TextEditor(this.column, (e, preventFocus) => this.onSave(e, preventFocus));

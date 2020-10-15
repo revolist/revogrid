@@ -292,9 +292,9 @@ export declare namespace Edition {
         // column data
         column: RevoGrid.ColumnRegular,
         // to save changes
-        saveCallback?: (value: Edition.SaveData, preventFocus?: boolean) => void,
-        // to close editor
-        closeCallback?: () => void
+        saveCallback: (value: Edition.SaveData, preventFocus?: boolean) => void,
+        // to close editor, if focusNext true, after close editor focus on next cell
+        closeCallback: (focusNext?: boolean) => void
     ): EditorBase;
   }
 
