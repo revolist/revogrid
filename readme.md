@@ -9,11 +9,10 @@
   <a href="https://www.npmjs.com/package/@revolist/revogrid"><img src="https://img.shields.io/npm/v/@revolist/revogrid" alt="Latest Version on NPM"/></a>
   <a href="https://github.com/revolist/revogrid/blob/master/LICENSE"><img src="https://img.shields.io/npm/l/@revolist/revogrid" alt="Software License"/></a>
 </p>
-
-<p>
-Powerful data grid implementation.
+<h4 align="center">Powerful data grid component built on top of <a href="https://stenciljs.com" target="_blank">StencilJS</a>.</h4>
+<p align="center">
 Handles millions of cells and thousands columns easy and efficiently.
-Any major framework or with no framework at all.
+<br>Any major framework or with no framework at all.
   
 </p>
 
