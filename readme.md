@@ -96,37 +96,77 @@ yarn add @revolist/revogrid;
 Grid works as web component. 
 All you have to do just to place component on the page and access it properties as an element.
 
-Add component to your project.
+### Add component to your project with index.html:
+
 
 ```html
 <!DOCTYPE html>
 <html>
 <head>
-```
-
-If you import from node modules:
-```html
+  
+// Import from node modules
 <script src="node_modules/@revolist/revogrid/dist/revo-grid/revo-grid.js"></script>
-```
-With unpkg
-```html
-    <script src="https://cdn.jsdelivr.net/npm/@revolist/revogrid@latest/dist/revo-grid/revo-grid.js"></script>
-```
 
-```html
-    // Alternatively, if you wanted to take advantage of ES Modules, you could include the components using an import statement. Note that in this scenario applyPolyfills is needed if you are targeting Edge or IE11.
-    <script type="module">
-      import { defineCustomElements } from 'https://unpkg.com/@revolist/revogrid@latest/loader/index.es2017.js';
-      defineCustomElements();
-    </script>
+// With unpkg
+<script src="https://cdn.jsdelivr.net/npm/@revolist/revogrid@latest/dist/revo-grid/revo-grid.js"></script>
+
 </head>
 <body>
+    // after you imported file to your project simply define component
     <revo-grid class="grid-component"/>
 </body>
 </html>
 ```
 
+### Import with es module:
 
+Alternatively, if you wanted to take advantage of ES Modules, you could include the components using an import statement. 
+Note that in this scenario applyPolyfills is needed if you are targeting Edge or IE11.
+```html
+<script type="module">
+  import { defineCustomElements, applyPolyfills } from 'https://unpkg.com/@revolist/revogrid@latest/loader/index.es2017.js';
+  defineCustomElements();
+</script>
+```
+
+### Import with webpack:
+
+```javascript
+import { defineCustomElements } from '@revolist/revogrid/loader';
+defineCustomElements(); // let browser know new component registered
+```
+
+
+### Import with webpack + VueJs:
+
+```javascript
+<template>
+<revo-grid
+      theme="material"
+      :canFocus.prop="canFocus"
+      :source.prop="source"
+      :columns.prop="columns"/>
+</template>
+
+<script>
+import { defineCustomElements } from '@revolist/revogrid/loader';
+
+defineCustomElements();
+Vue.config.ignoredElements = [/revo-\w*/]; // Ignore web-component and avoid parsing it as VueJs
+
+export default {
+  data () {
+    return {
+      canFocus: true,
+      source: [],
+      columns: []
+    }
+  }
+}
+</script>
+```
+
+### Usage:
 
 ```javascript
 const grid = document.querySelector('revo-grid');
@@ -138,12 +178,14 @@ const columns = [
     {
         prop: 'details',
         name: 'Second column',
-        cellTemplate: (h, props) => {
-          return h('div', {
+        cellTemplate: (createElement, props) => {
+          return createElement('div', {
             style: {
               backgroundColor: 'red'
             },
-            class: 'inner-cell'
+            class: {
+              'inner-cell': true
+            }
           }, props.model[props.prop] || '');
         }
     }
