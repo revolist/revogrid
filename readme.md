@@ -54,11 +54,11 @@ Millions of cells and thousands columns easy and efficiently. Any major framewor
 
 
 ## Overview
-<p align="center">
-The RevoGrid component helps represent a huge amount of data in a form of data table.
 
+The RevoGrid component helps represent a huge amount of data in a form of data table "excel like" or as list.
+<br>
+<p align="center">
 <img src="./assets/excel.png" alt="Excel grid preview" width="100%" />
-Check for more details [RevoGrid page](https://revolist.github.io/revogrid.demo.js).
 </p>
 
 ![Chrome](https://raw.github.com/alrra/browser-logos/master/src/chrome/chrome_48x48.png) | ![Firefox](https://raw.github.com/alrra/browser-logos/master/src/firefox/firefox_48x48.png) | ![Safari](https://raw.github.com/alrra/browser-logos/master/src/safari/safari_48x48.png) | ![Opera](https://raw.github.com/alrra/browser-logos/master/src/opera/opera_48x48.png) | ![Edge](https://raw.github.com/alrra/browser-logos/master/src/edge/edge_48x48.png) |
