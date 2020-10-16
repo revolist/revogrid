@@ -96,16 +96,24 @@ yarn add @revolist/revogrid;
 Grid works as web component. 
 All you have to do just to place component on the page and access it properties as an element.
 
+Add component to your project.
+
 ```html
 <!DOCTYPE html>
 <html>
 <head>
-    // node_modules path
-    <script src="node_modules/@revolist/revogrid/dist/revo-grid/revo-grid.js"></script>
-    // or with unpkg
-    <script src="https://cdn.jsdelivr.net/npm/@revolist/revogrid@latest/dist/revo-grid/revo-grid.js"></script>
-    
+```
 
+If you import from node modules:
+```html
+<script src="node_modules/@revolist/revogrid/dist/revo-grid/revo-grid.js"></script>
+```
+With unpkg
+```html
+    <script src="https://cdn.jsdelivr.net/npm/@revolist/revogrid@latest/dist/revo-grid/revo-grid.js"></script>
+```
+
+```html
     // Alternatively, if you wanted to take advantage of ES Modules, you could include the components using an import statement. Note that in this scenario applyPolyfills is needed if you are targeting Edge or IE11.
     <script type="module">
       import { defineCustomElements } from 'https://unpkg.com/@revolist/revogrid@latest/loader/index.es2017.js';
@@ -117,6 +125,7 @@ All you have to do just to place component on the page and access it properties 
 </body>
 </html>
 ```
+
 
 
 ```javascript
