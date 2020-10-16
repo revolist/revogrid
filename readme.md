@@ -38,26 +38,28 @@ Millions of cells and thousands columns easy and efficiently. Any major framewor
 - Pinned columns (columns are always on the left or on the right of the screen);
 - Pinned row (rows are always at the top or at the bottom);
 - Column grouping;
+- Cell editing;
 - Custom header renderer;
 - Custom cell renderer templates (build your own cell view);
-- Cell editing;
 - Custom cell editor (apply your own editors and cell types);
 - Custom cell properties;
 - Drag and drop rows;
 - Column sorting;
 - Range selection;
-- Theme packages;
 - Range edit;
-- Copy/Paste, also copy/paste from Excel, Google Sheets or any other sheet format;
+- Theme packages: Excel like, material, etc;
+- Copy/Paste: Copy/paste from Excel, Google Sheets or any other sheet format;
 - Easy extenation and support with modern VNode features and tsx support;
-- Multiple others useful features [RevoGrid](https://revolist.github.io/revogrid.demo.js).
+- Hundred small customizations and improvements [RevoGrid](https://revolist.github.io/revogrid.demo.js).
 
 
 ## Overview
-
+<p align="center">
 The RevoGrid component helps represent a huge amount of data in a form of data table.
-Check for more details [RevoGrid page](https://revolist.github.io/revogrid.demo.js).
 
+<img src="./assets/excel.png" alt="Excel grid preview" width="100%" />
+Check for more details [RevoGrid page](https://revolist.github.io/revogrid.demo.js).
+</p>
 
 ![Chrome](https://raw.github.com/alrra/browser-logos/master/src/chrome/chrome_48x48.png) | ![Firefox](https://raw.github.com/alrra/browser-logos/master/src/firefox/firefox_48x48.png) | ![Safari](https://raw.github.com/alrra/browser-logos/master/src/safari/safari_48x48.png) | ![Opera](https://raw.github.com/alrra/browser-logos/master/src/opera/opera_48x48.png) | ![Edge](https://raw.github.com/alrra/browser-logos/master/src/edge/edge_48x48.png) |
 --- | --- | --- | --- | --- |
