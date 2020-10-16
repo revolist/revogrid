@@ -24,7 +24,7 @@ Millions of cells and thousands columns easy and efficiently. Any major framewor
   <a href="#license">License</a>
 </p>
 
-<img src="./assets/min-material.png" alt="Material grid preview" width="100%" />
+<img src="./assets/huge-material.png" alt="Material grid preview" width="100%" />
 
 <br>
 
