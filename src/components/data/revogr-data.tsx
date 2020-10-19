@@ -71,7 +71,7 @@ export class RevogrData {
         transform: `translateX(${col.start}px)`
       }
     };
-    const props = this.columnService.cellProperties(row.itemIndex, col.itemIndex, defaultProps);
+    const props = this.columnService.mergeProperties(row.itemIndex, col.itemIndex, defaultProps);
     const custom = this.columnService.customRenderer(row.itemIndex, col.itemIndex);
     if (typeof custom !== 'undefined') {
       return <div {...props}>{custom}</div>;

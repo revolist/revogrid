@@ -14,7 +14,7 @@ import DimensionColPin = RevoGrid.DimensionColPin;
 type Group = {
     name: string;
     level: number;
-    props: RevoGrid.ColumnProp[];
+    ids: RevoGrid.ColumnProp[];
 };
 type ColumnGrouping = {
     [T in RevoGrid.DimensionCols]: Group[];
@@ -76,10 +76,7 @@ export default class ColumnDataProvider {
                     if (!res[g.level]) {
                         res[g.level] = [];
                     }
-                    res[g.level].push({
-                      name: g.name,
-                      ids: g.props
-                    });
+                    res[g.level].push(g);
                     return res;
                 }, {})
             })
@@ -165,9 +162,9 @@ export default class ColumnDataProvider {
 
                 // group template
                 const group: Group = {
-                  name: colData.name,
+                  ...colData,
                   level,
-                  props: []
+                  ids: []
                 };
 
                 // check columns for update
@@ -185,7 +182,7 @@ export default class ColumnDataProvider {
                         if (key !== 'sizes' && collectionItem.length) {
                             res.columnGrouping[key].push({
                                 ...group,
-                                props: map(collectionItem, 'prop')
+                                ids: map(collectionItem, 'prop')
                             });
                         }
                     } else {

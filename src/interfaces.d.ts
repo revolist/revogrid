@@ -50,8 +50,14 @@ export declare namespace RevoGrid {
     name: DataFormat;
   }
 
+  interface ColumnProperties {
+    /** column inner template */
+    columnTemplate?: ColumnTemplateFunc<VNode>;
+    /** cell properties */
+    columnProperties?: ColPropertiesFunc;
+  }
 
-  interface ColumnRegular {
+  interface ColumnRegular extends ColumnProperties {
     /** mapping to data */
     prop?: ColumnProp;
     /** column pin 'colPinStart'|'colPinEnd' */
@@ -83,10 +89,6 @@ export declare namespace RevoGrid {
     cellProperties?: PropertiesFunc;
     /** cell inner template */
     cellTemplate?: CellTemplateFunc<VNode>;
-    /** column inner template */
-    columnTemplate?: ColumnTemplateFunc<VNode>;
-    /** cell properties */
-    columnProperties?: PropertiesFunc;
   }
 
   type ColumnDataSchema = ColumnGrouping|ColumnRegular;
@@ -97,7 +99,7 @@ export declare namespace RevoGrid {
 
   type CellProps = {
     style?: {[key: string]: string | undefined};
-    class?: {[key: string]: boolean} |string;
+    class?: {[key: string]: boolean};
     [attr: string]: string|number|object;
   };
 
@@ -112,6 +114,7 @@ export declare namespace RevoGrid {
   type CellTemplateFunc<T> = (createElement: HyperFunc<T>, props: ColumnDataSchemaModel) => any;
   type ColumnTemplateFunc<T> = (createElement: HyperFunc<T>, props: ColumnRegular) => T|string;
   type PropertiesFunc = (props: ColumnDataSchemaModel) => CellProps|void|undefined;
+  type ColPropertiesFunc = (props: ColumnDataSchema) => CellProps|void|undefined;
 
 
   // --------------------------------------------------------------------------

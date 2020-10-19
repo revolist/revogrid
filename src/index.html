@@ -46,8 +46,8 @@
     }
 
     .tile.large {
-      width: 1800px;
-      height: 1600px;
+      width: 1000px;
+      height: 600px;
     }
   </style>
 
@@ -68,7 +68,7 @@
     <script type="module">
         import {generateFakeDataObject} from "/utilsExternal/generate-data.js";
 
-        const data = generateFakeDataObject(10000, 1000);
+        const data = generateFakeDataObject(1000, 100);
         const grid = document.querySelector('revo-grid');
 
         grid.columns = data.headers;
