@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://revolist.github.io/revogrid.demo.js">
+  <a href="https://revolist.github.io/revogrid">
     <img src="./assets/logo.svg" alt="RevoGrid" height="150" />
   </a>
 </p>
@@ -16,7 +16,7 @@ Millions of cells and thousands columns easy and efficiently. Any major framewor
 </p>
 
 <p align="center">
-  <a href="https://revolist.github.io/revogrid.demo.js">Demo and API</a> •
+  <a href="https://revolist.github.io/revogrid">Demo and API</a> •
   <a href="#key-features">Key Features</a> •
   <a href="#basic-usage">How To Use</a> •
   <a href="#installation">Installation</a> •
@@ -50,7 +50,7 @@ Millions of cells and thousands columns easy and efficiently. Any major framewor
 - Theme packages: Excel like, material, etc;
 - Copy/Paste: Copy/paste from Excel, Google Sheets or any other sheet format;
 - Easy extenation and support with modern VNode features and tsx support;
-- Hundred small customizations and improvements [RevoGrid](https://revolist.github.io/revogrid.demo.js).
+- Hundred small customizations and improvements [RevoGrid](https://revolist.github.io/revogrid).
 
 
 ## Overview
@@ -69,7 +69,7 @@ Latest ✔ | Latest ✔ | Latest ✔ | Latest ✔ | Latest ✔ |
 ## Installation
 
 The library published as a [scoped NPM package](https://docs.npmjs.com/misc/scope) in the [NPMJS Revolist account](https://www.npmjs.com/org/revolist).
-[Check for more info on our demo side](https://revolist.github.io/revogrid.demo.js/?path=/docs/docs-installing--page).
+[Check for more info on our demo side](https://revolist.github.io/revogrid/guide/installing.html).
 
 With NPM:
 ```bash
@@ -84,9 +84,9 @@ yarn add @revolist/revogrid;
 
 ## Framework
 
-- [JavaScript](docs/vanilajs.md) or [Storybook Demo and Api](https://revolist.github.io/revogrid.demo.js);
-- [VueJs](docs/vue.md) or [Storybook Demo and Api](https://revolist.github.io/revogrid.demo.js);
-- [React](docs/react.md) or [Storybook Demo and Api](https://revolist.github.io/revogrid.demo.js);
+- [JavaScript](docs/vanilajs.md) or [Demo and Api](https://revolist.github.io/revogrid/guide);
+- [VueJs](docs/vue.md) or [Demo and Api](https://revolist.github.io/revogrid/guide/framework.vue);
+- [React](docs/react.md) or [Demo and Api](https://revolist.github.io/revogrid/guide/framework.react);
 - [Angular](docs/angular.md).
 - [Ember](docs/ember.md).
 
