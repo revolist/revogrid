@@ -1,0 +1,3 @@
+[submodule "demo"]
+	path = demo
+	url = https://github.com/revolist/revogrid-vuepress.git
