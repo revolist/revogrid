@@ -11,7 +11,7 @@ import ColumnRegular = RevoGrid.ColumnRegular;
 import DimensionRows = RevoGrid.DimensionRows;
 import DimensionCols = RevoGrid.DimensionCols;
 
-export type Group = {
+export interface Group extends RevoGrid.ColumnProperties {
   name: string;
   ids: (string|number)[];
 }

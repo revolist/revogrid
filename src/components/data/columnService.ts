@@ -3,13 +3,13 @@ import {ObservableMap} from '@stencil/store';
 import {DataSourceState} from '../../store/dataSource/data.store';
 import { CELL_CLASS, DISABLED_CLASS } from '../../utils/consts';
 import {Edition, RevoGrid, Selection} from '../../interfaces';
+import { getRange } from '../../store/selection/selection.helpers';
 
 import BeforeSaveDataDetails = Edition.BeforeSaveDataDetails;
 import ColumnDataSchemaModel = RevoGrid.ColumnDataSchemaModel;
 import ColumnProp = RevoGrid.ColumnProp;
 import DataSource = RevoGrid.DataSource;
 import DataType = RevoGrid.DataType;
-import { getRange } from '../../store/selection/selection.helpers';
 
 export interface ColumnServiceI {
   columns: RevoGrid.ColumnRegular[];
@@ -43,7 +43,23 @@ export default class ColumnService implements ColumnServiceI {
     return readOnly;
   }
 
-  cellProperties(r: number, c: number, defaultProps: RevoGrid.CellProps): RevoGrid.CellProps{
+  static doMerge(existing: RevoGrid.CellProps, extra:  RevoGrid.CellProps) {
+    let props = {...extra, ...existing};
+    // extend existing props
+    if (extra.class) {
+      if (typeof extra.class === 'object') {
+        props.class = {...extra.class, ...props.class};
+      } else if (typeof extra.class === 'string') {
+        props.class[extra.class] = true;
+      }
+    }
+    if (extra.style) {
+      props.style = {...extra.style, ...props.style};
+    }
+    return props;
+  }
+
+  mergeProperties(r: number, c: number, defaultProps: RevoGrid.CellProps): RevoGrid.CellProps {
     const cellClass: {[key: string]: boolean} = {
       [CELL_CLASS]: true,
       [DISABLED_CLASS]: this.isReadOnly(r, c)
@@ -59,19 +75,7 @@ export default class ColumnService implements ColumnServiceI {
       if (!extra) {
         return props;
       }
-
-      props = {...extra, ...props};
-      // extend existing props
-      if (extra.class) {
-        if (typeof extra.class === 'object') {
-          props.class = {...extra.class, ...cellClass};
-        } else if (typeof extra.class === 'string') {
-          cellClass[extra.class] = true;
-        }
-      }
-      if (extra.style) {
-        props.style = {...extra.style, ...props.style};
-      }
+      return ColumnService.doMerge(props, extra);
     }
     return props;
   }
