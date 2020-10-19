@@ -435,7 +435,7 @@ export class RevoGridComponent {
     this.dimensionProvider = new DimensionProvider(this.viewportProvider);
     this.columnProvider = new ColumnDataProvider(this.dimensionProvider);
     this.dataProvider = new DataProvider(this.dimensionProvider);
-    this.uuid = (new Date()).getTime().toString();
+    this.uuid = `${(new Date()).getTime()}-rvgrid`;
     this.themeChanged(this.theme);
 
     this.columnChanged(this.columns);
