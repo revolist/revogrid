@@ -43,14 +43,16 @@ export default class ColumnService implements ColumnServiceI {
     return readOnly;
   }
 
-  static doMerge(existing: RevoGrid.CellProps, extra:  RevoGrid.CellProps) {
-    let props = {...extra, ...existing};
+  static doMerge(existing: RevoGrid.CellProps, extra: RevoGrid.CellProps) {
+    let props: RevoGrid.CellProps = {...extra, ...existing};
     // extend existing props
     if (extra.class) {
-      if (typeof extra.class === 'object') {
+      if (typeof extra.class === 'object' && typeof props.class === 'object') {
         props.class = {...extra.class, ...props.class};
-      } else if (typeof extra.class === 'string') {
+      } else if (typeof extra.class === 'string' && typeof props.class === 'object') {
         props.class[extra.class] = true;
+      } else if (typeof props.class === 'string') {
+        props.class += ' ' + extra.class;
       }
     }
     if (extra.style) {
