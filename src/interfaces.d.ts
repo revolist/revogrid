@@ -101,7 +101,7 @@ export declare namespace RevoGrid {
 
   type CellProps = {
     style?: {[key: string]: string | undefined};
-    class?: {[key: string]: boolean};
+    class?: {[key: string]: boolean}|string;
     [attr: string]: string|number|object|boolean;
   };
 

@@ -38,7 +38,9 @@ const HeaderRenderer = (p: Props, _children: VNode[]): VNode => {
     };
     if (p.range) {
         if (p.column.itemIndex >= p.range.x && p.column.itemIndex <= p.range.x1) {
-            dataProps.class[FOCUS_CLASS] = true;
+            if (typeof dataProps.class === 'object') {
+                dataProps.class[FOCUS_CLASS] = true;
+            }
         }
     }
     return <HeaderCellRenderer data={p.data} props={dataProps}/>;
