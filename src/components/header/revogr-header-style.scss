@@ -23,8 +23,9 @@ revogr-header {
 			padding-right: 30px;
 			&:after {
 				position: absolute;
-				right: 10px;
-				font-size: 13px;
+				right: 5px;
+                font-size: 13px;
+                top: 0;
 			}
 		}
 	}
@@ -52,14 +53,17 @@ revogr-header {
 
     .data-header-cell {
         &.active {
-            overflow: visible !important;
             z-index: 10;
 
-            > div {
+            .resizable {
                 background-color: deepskyblue;
             }
         }
-        > div {
+        .header-content {
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .resizable {
             display: block;
             position: absolute;
             z-index: 90;

@@ -7,7 +7,7 @@ import {createStore, ObservableMap} from '@stencil/store';
 import reduce from 'lodash/reduce';
 
 import {setStore} from '../../utils/store.utils';
-import {calculateDimensionData} from './dimension.helpers';
+import {calculateDimensionData, DimensionSize} from './dimension.helpers';
 import {RevoGrid} from "../../interfaces";
 
 type Item = keyof RevoGrid.DimensionSettingsState;
@@ -64,8 +64,9 @@ export default class DimensionStore {
     setStore(this.store, data);
   }
 
-  setDimensionSize(sizes: RevoGrid.ViewSettingSizeProp): void {
-    const dimensionData = calculateDimensionData(this.getCurrentState(), sizes);
+  setDimensionSize(sizes: RevoGrid.ViewSettingSizeProp): DimensionSize {
+    const dimensionData: DimensionSize = calculateDimensionData(this.getCurrentState(), sizes);
     setStore(this.store, dimensionData);
+    return dimensionData;
   }
 }
