@@ -309,10 +309,10 @@ export const ResizableElement = (props: (Partial<Props>&RevoGrid.CellProps), chi
                     onClick={e => e.preventDefault()}
                     onMouseDown={(e: MouseEvent) => directive?.handleDown(e)}
                     onTouchStart={(e: TouchEvent) => directive?.handleDown(e)}
-                    class={`resizable-${props.active[p]}`}/>
+                    class={`resizable resizable-${props.active[p]}`}/>
                 );
             }
         }
     }
-    return <div {...props} ref={(e: HTMLElement) => directive?.set(e)}>{children}{resizeEls}</div>;
+    return <div {...props} ref={(e: HTMLElement) => directive?.set(e)}><div class='header-content'>{children}</div>{resizeEls}</div>;
 };

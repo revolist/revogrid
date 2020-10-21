@@ -39,6 +39,7 @@ export class RevogrHeaderComponent {
     const cells: VNode[] = [];
     const visibleProps: {[prop: string]: number} = {};
 
+    console.log('header', cols);
     // render header columns
     for (let col of cols) {
       const colData = this.colData[col.itemIndex];

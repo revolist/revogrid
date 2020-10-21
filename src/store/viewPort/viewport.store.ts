@@ -119,28 +119,39 @@ export default class ViewportStore {
 
   /** Update viewport sizes */
   setViewPortDimension(sizes: RevoGrid.ViewSettingSizeProp): void {
+    const items = this.store.get('items');
+    const count = items.length
     // viewport not inited
-    if (!this.store.get('items').length) {
+    if (!count) {
       return;
     }
 
-    const items = this.store.get('items');
-    let changedCoordinate: number = 0;
+    let changedCoordinate = 0;
+    let i = 0;
+    let start = this.store.get('start');
 
-    for (let item of items) {
-      let changedSize: number = 0;
+    // loop through array from initial item after recombination
+    while(i < count) {
+      const item = items[start];
       // change pos if size change present before
       if (changedCoordinate) {
         item.start += changedCoordinate;
         item.end += changedCoordinate;
       }
       // change size
-      const size: number = sizes[item.itemIndex] || 0;
+      const size: number|undefined = sizes[item.itemIndex];
       if (size) {
-        changedSize = size - item.size;
+        const changedSize = size - item.size;
         changedCoordinate += changedSize;
         item.size = size;
         item.end = item.start + size;
+      }
+
+      // loop by start index
+      start++;
+      i++;
+      if (start === count) {
+        start = 0;
       }
     }
 
