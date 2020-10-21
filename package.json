@@ -1,6 +1,6 @@
 {
   "name": "@revolist/revogrid",
-  "version": "1.6.30",
+  "version": "1.6.31",
   "description": "Virtual reactive data grid component - RevoGrid.",
   "license": "MIT",
   "bugs": {
