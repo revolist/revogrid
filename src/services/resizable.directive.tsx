@@ -16,6 +16,8 @@ type Props = {
 
 export type ResizeEvent = {
     eventName: string;
+    changedX?: number;
+    changedY?: number;
     width?: number;
     height?: number;
 };
@@ -121,6 +123,8 @@ export class ResizeDirective {
             eventName,
             width: this.width + this.changeX,
             height: this.height + this.changeY,
+            changedX: this.changeX,
+            changedY: this.changeY,
             ...additionalOptions
         });
     }

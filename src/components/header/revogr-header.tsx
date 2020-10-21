@@ -2,6 +2,7 @@ import {Component, Element, Event, EventEmitter, h, Prop} from '@stencil/core';
 import {HTMLStencilElement, VNode} from '@stencil/core/internal';
 import {ObservableMap} from "@stencil/store";
 import findIndex from 'lodash/findIndex';
+import keyBy from 'lodash/keyBy';
 
 import {HEADER_ACTUAL_ROW_CLASS, HEADER_ROW_CLASS} from '../../utils/consts';
 import {RevoGrid, Selection} from '../../interfaces';
@@ -31,6 +32,19 @@ export class RevogrHeaderComponent {
 
   private onResize({width}: {width?: number}, index: number): void {
     this.headerResize.emit({[index]: width || 0})
+  }
+
+  private onResizeGroup({changedX}: {changedX?: number}, startIndex: number, endIndex: number): void {
+    const sizes: RevoGrid.ViewSettingSizeProp = {};
+    const cols = keyBy(this.viewportCol.get('items'), 'itemIndex');
+    const change = changedX / (endIndex - startIndex + 1);
+    for (let i = startIndex; i <= endIndex; i++) {
+      const item = cols[i];
+      if (item) {
+        sizes[i] = item.size + change;
+      }
+    }
+    this.headerResize.emit(sizes);
   }
 
   render(): VNode[] {
@@ -80,7 +94,15 @@ export class RevogrHeaderComponent {
             // coordinates
             const groupStart = getItemByIndex(this.dimensionCol.state, groupStartIndex).start;
             const groupEnd = getItemByIndex(this.dimensionCol.state, groupEndIndex).end;
-            groupRow.push(<GroupHeaderRenderer start={groupStart} end={groupEnd} group={group}/>);
+            groupRow.push(
+              <GroupHeaderRenderer
+                start={groupStart}
+                end={groupEnd}
+                group={group} 
+                canResize={this.canResize}
+                onResize={(e) => this.onResizeGroup(e, groupStartIndex, groupEndIndex)}
+                />
+            );
           }
         }
       }
