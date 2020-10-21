@@ -1,5 +1,6 @@
 import { h, VNode } from "@stencil/core";
 import { RevoGrid } from "../../interfaces";
+import { ResizableElement } from "../../services/resizable.directive";
 import ColumnService from "../data/columnService";
 
 type Props = {
@@ -23,5 +24,5 @@ export const HeaderCellRenderer = ({data, props}: Props): VNode => {
             cellProps = ColumnService.doMerge(props, extra);
         }
     }
-    return <div {...cellProps}>{headerChildren}</div>;
+    return <ResizableElement {...cellProps}>{headerChildren}</ResizableElement>;
 };

@@ -72,6 +72,8 @@ export declare namespace RevoGrid {
      * in order to keep performance on top and minimize dom elements number
      */
     minSize?: number;
+    /**  max column size */
+    maxSize?: number;
     /** is column can be sorted */
     sortable?: boolean;
     order?: 'asc'|'desc';
@@ -100,7 +102,7 @@ export declare namespace RevoGrid {
   type CellProps = {
     style?: {[key: string]: string | undefined};
     class?: {[key: string]: boolean};
-    [attr: string]: string|number|object;
+    [attr: string]: string|number|object|boolean;
   };
 
 

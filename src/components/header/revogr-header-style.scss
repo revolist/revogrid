@@ -49,4 +49,88 @@ revogr-header {
 	.group-row {
 		position: relative;
 	}
+
+    .data-header-cell {
+        &.active {
+            overflow: visible !important;
+            z-index: 10;
+
+            > div {
+                background-color: deepskyblue;
+            }
+        }
+        > div {
+            display: block;
+            position: absolute;
+            z-index: 90;
+            touch-action: none;
+            user-select: none;
+            &:hover {
+                background-color: deepskyblue;
+            }
+        }
+        $size: 6px;
+        > .resizable-r {
+            cursor: ew-resize;
+            width: $size;
+            right: 0;
+            top: 0;
+            height: 100%;
+        }
+        > .resizable-rb {
+            cursor: se-resize;
+            width: $size;
+            height: $size;
+            right: 0;
+            bottom: 0;
+        }
+
+        > .resizable-b {
+            cursor: s-resize;
+            height: $size;
+            bottom: 0;
+            width: 100%;
+            left: 0;
+        }
+
+        > .resizable-lb {
+            cursor: sw-resize;
+            width: $size;
+            height: $size;
+            left: 0;
+            bottom: 0;
+        }
+
+        > .resizable-l {
+            cursor: w-resize;
+            width: $size;
+            left: 0;
+            height: 100%;
+            top: 0;
+        }
+
+        > .resizable-lt {
+            cursor: nw-resize;
+            width: $size;
+            height: $size;
+            left: 0;
+            top: 0;
+        }
+
+        > .resizable-t {
+            cursor: n-resize;
+            height: $size;
+            top: 0;
+            width: 100%;
+            left: 0;
+        }
+
+        > .resizable-rt {
+            cursor: ne-resize;
+            width: $size;
+            height: $size;
+            right: 0;
+            top: 0;
+        }
+    }
 }
