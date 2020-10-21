@@ -1,10 +1,9 @@
-import {Component, Element, Event, EventEmitter, h, Prop, Watch} from '@stencil/core';
+import {Component, Element, Event, EventEmitter, h, Prop} from '@stencil/core';
 import {HTMLStencilElement, VNode} from '@stencil/core/internal';
 import {ObservableMap} from "@stencil/store";
 import findIndex from 'lodash/findIndex';
 
-import {HEADER_ACTUAL_ROW_CLASS, HEADER_CLASS, HEADER_ROW_CLASS, UUID} from '../../utils/consts';
-import HeaderService from './headerService';
+import {HEADER_ACTUAL_ROW_CLASS, HEADER_ROW_CLASS} from '../../utils/consts';
 import {RevoGrid, Selection} from '../../interfaces';
 import {Groups} from '../../store/dataSource/data.store';
 import {getItemByIndex} from '../../store/dimension/dimension.helpers';
@@ -29,28 +28,9 @@ export class RevogrHeaderComponent {
 
   @Event() initialHeaderClick: EventEmitter<{column: RevoGrid.ColumnRegular, index: number}>;
   @Event() headerResize: EventEmitter<RevoGrid.ViewSettingSizeProp>;
-  private headerService: HeaderService;
 
-  @Watch('colData') colChanged(newVal: RevoGrid.ColumnRegular[]): void {
-    this.headerService.columns = newVal;
-  }
-  @Watch('canResize') onResizeChanged(newVal: boolean) {
-    this.headerService.resizeChange(newVal);
-  }
-
-  connectedCallback(): void {
-    this.headerService = new HeaderService(
-        `[${UUID}="${this.parent}"] .${HEADER_ACTUAL_ROW_CLASS} .${HEADER_CLASS}`,
-        this.colData,
-        {
-          canResize: this.canResize,
-          resize: (sizes: RevoGrid.ViewSettingSizeProp) => this.headerResize.emit(sizes)
-        }
-    );
-  }
-
-  disconnectedCallback(): void {
-    this.headerService?.destroy();
+  private onResize({width}: {width?: number}, index: number): void {
+    this.headerResize.emit({[index]: width || 0})
   }
 
   render(): VNode[] {
@@ -67,6 +47,9 @@ export class RevogrHeaderComponent {
           range={range}
           column={col}
           data={colData}
+
+          canResize={this.canResize}
+          onResize={(e) => this.onResize(e, col.itemIndex)}
           onClick={(e) => this.initialHeaderClick.emit(e)}/>
       );
       visibleProps[colData?.prop] = col.itemIndex;
@@ -97,7 +80,6 @@ export class RevogrHeaderComponent {
             // coordinates
             const groupStart = getItemByIndex(this.dimensionCol.state, groupStartIndex).start;
             const groupEnd = getItemByIndex(this.dimensionCol.state, groupEndIndex).end;
-            
             groupRow.push(<GroupHeaderRenderer start={groupStart} end={groupEnd} group={group}/>);
           }
         }
