@@ -57,10 +57,12 @@ export function getUpdatedItemsByPosition<T extends ItemsToUpdate>(
       maxCount: realCount,
       sizes: dimension.sizes
     });
+
+    // range now comes from 0 to length - 1
     toUpdate = {
       items,
-      start: items[0]?.itemIndex || 0,
-      end: items[items.length - 1]?.itemIndex || 0
+      start: 0,
+      end: items.length - 1
     };
   }
   return toUpdate;
