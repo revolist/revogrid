@@ -13,6 +13,7 @@ import DimensionCols = RevoGrid.DimensionCols;
 
 export interface Group extends RevoGrid.ColumnProperties {
   name: string;
+  children: RevoGrid.ColumnRegular[];
   ids: (string|number)[];
 }
 export type Groups = {[level: number]: Group[]};

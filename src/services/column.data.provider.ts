@@ -5,16 +5,14 @@ import map from 'lodash/map';
 import findIndex from 'lodash/findIndex';
 import { find } from 'lodash';
 
-import DataStore, {Groups} from '../store/dataSource/data.store';
+import DataStore, {Group as StoreGroup, Groups} from '../store/dataSource/data.store';
 import {columnTypes} from '../store/storeTypes';
 import DimensionProvider from './dimension.provider';
 import {RevoGrid} from '../interfaces';
 import DimensionColPin = RevoGrid.DimensionColPin;
 
-type Group = {
-    name: string;
+interface Group extends StoreGroup {
     level: number;
-    ids: RevoGrid.ColumnProp[];
 };
 type ColumnGrouping = {
     [T in RevoGrid.DimensionCols]: Group[];
