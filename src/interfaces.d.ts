@@ -57,13 +57,16 @@ export declare namespace RevoGrid {
     columnProperties?: ColPropertiesFunc;
   }
 
-  interface ColumnRegular extends ColumnProperties {
-    /** mapping to data */
-    prop?: ColumnProp;
-    /** column pin 'colPinStart'|'colPinEnd' */
-    pin?: DimensionColPin;
-    /** column header */
-    name?: DataFormat;
+  type ColumnTypes = {[name: string]: RevoGrid.ColumnType};
+
+
+  interface ColumnType extends ColumnProperties {
+    /** is column or cell readonly */
+    readonly?: ReadOnlyFormat;
+    /** cell properties */
+    cellProperties?: PropertiesFunc;
+    /** cell inner template */
+    cellTemplate?: CellTemplateFunc<VNode>;
     /** default column size */
     size?: number;
     /** 
@@ -74,23 +77,26 @@ export declare namespace RevoGrid {
     minSize?: number;
     /**  max column size */
     maxSize?: number;
+
+    /** represents custom editor defined in @editors property */
+    editor?: string;
+  }
+
+  interface ColumnRegular extends ColumnType {
+    /** mapping to data */
+    prop?: ColumnProp;
+    /** column pin 'colPinStart'|'colPinEnd' */
+    pin?: DimensionColPin;
+    /** column header */
+    name?: DataFormat;
     /** is column can be sorted */
     sortable?: boolean;
     order?: 'asc'|'desc';
-
-
-    /** custom editor key if present */
-    editor?: string;
-
     /** is cell in column or individual can be dragged */
     rowDrag?: RowDrag;
 
-    /** is column or cell readonly */
-    readonly?: ReadOnlyFormat;
-    /** cell properties */
-    cellProperties?: PropertiesFunc;
-    /** cell inner template */
-    cellTemplate?: CellTemplateFunc<VNode>;
+    /** represents type defined in @columnTypes property */
+    columnType?: string;
   }
 
   type ColumnDataSchema = ColumnGrouping|ColumnRegular;

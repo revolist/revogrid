@@ -19,6 +19,10 @@ export namespace Components {
          */
         "colSize": number;
         /**
+          * Types Every type represent multiple column properties Types will be merged but can be replaced with column properties
+         */
+        "columnTypes": {[name: string]: RevoGrid.ColumnType};
+        /**
           * Columns - defines an array of grid columns. Can be column or grouped column.
          */
         "columns": (RevoGrid.ColumnRegular|RevoGrid.ColumnGrouping)[];
@@ -316,6 +320,10 @@ declare namespace LocalJSX {
           * Indicates default column size.
          */
         "colSize"?: number;
+        /**
+          * Types Every type represent multiple column properties Types will be merged but can be replaced with column properties
+         */
+        "columnTypes"?: {[name: string]: RevoGrid.ColumnType};
         /**
           * Columns - defines an array of grid columns. Can be column or grouped column.
          */
