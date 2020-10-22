@@ -5,6 +5,15 @@ revogr-header {
 	display: block;
 
 	.data-header-cell {
+        &.align-center {
+            text-align: center;
+        }
+        &.align-left {
+            text-align: left;
+        }
+        &.align-right {
+            text-align: right;
+        }
 		&.sortable {
 			cursor: pointer;
 		}
