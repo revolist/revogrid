@@ -15,6 +15,7 @@ revogr-viewport-scroll {
   overflow-x: auto;
   overflow-y: hidden;
   position: relative;
+  z-index: 1;
   height: 100%;
 
   &.colPinStart, &.colPinEnd {
