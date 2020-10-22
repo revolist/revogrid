@@ -83,6 +83,12 @@ export class RevoGridComponent {
   /** Custom editors register */
   @Prop() editors: Edition.Editors = {};
 
+  /** Types
+   *  Every type represent multiple column properties
+   *  Types will be merged but can be replaced with column properties
+   */
+  @Prop() columnTypes: {[name: string]: RevoGrid.ColumnType} = {};
+
 
   /** Theme name */
   @Prop({ reflect: true, mutable: true }) theme: ThemeSpace.Theme = 'default';
@@ -367,7 +373,7 @@ export class RevoGridComponent {
 
   @Watch('columns')
   columnChanged(newVal: RevoGrid.ColumnData) {
-    this.columnProvider.setColumns(newVal);
+    this.columnProvider.setColumns(newVal, this.columnTypes);
     this.dataProvider.sort(this.columnProvider.order);
   }
 

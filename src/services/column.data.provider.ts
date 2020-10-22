@@ -65,8 +65,8 @@ export default class ColumnDataProvider {
         return findIndex(items, { prop });
     }
 
-    setColumns(columns: RevoGrid.ColumnData): ColumnCollection {
-        const data: ColumnCollection = ColumnDataProvider.getColumns(columns);
+    setColumns(columns: RevoGrid.ColumnData, types?: RevoGrid.ColumnTypes): ColumnCollection {
+        const data: ColumnCollection = ColumnDataProvider.getColumns(columns, 0, types);
         each(columnTypes, (k: RevoGrid.DimensionCols) => {
             this.dataSources[k].updateData(data.columns[k], {
                 depth: data.maxLevel,
@@ -151,64 +151,31 @@ export default class ColumnDataProvider {
     }
 
     // columns processing
-    private static getColumns(columns: RevoGrid.ColumnData, level: number = 0): ColumnCollection {
+    private static getColumns(
+        columns: RevoGrid.ColumnData,
+        level: number = 0,
+        types?: RevoGrid.ColumnTypes
+    ): ColumnCollection {
         return reduce(columns, (res: ColumnCollection, colData: RevoGrid.ColumnDataSchema) => {
             // if grouped column
             if (ColumnDataProvider.isColGrouping(colData)) {
-                // receive parsed data up to single cell
-                const collection: ColumnCollection = ColumnDataProvider.getColumns(colData.children, level + 1);
-
-                // group template
-                const group: Group = {
-                  ...colData,
-                  level,
-                  ids: []
-                };
-
-                // check columns for update
-                for (let k in collection.columns) {
-                    const key = k as keyof Columns;
-                    const resultItem = res.columns[key];
-                    const collectionItem = collection.columns[key];
-
-                    // if column data
-                    if (isArray(resultItem) && isArray(collectionItem)) {
-                        // fill columns
-                        resultItem.push(...collectionItem);
-
-                        // fill grouping
-                        if (key !== 'sizes' && collectionItem.length) {
-                            res.columnGrouping[key].push({
-                                ...group,
-                                ids: map(collectionItem, 'prop')
-                            });
-                        }
-                    } else {
-                        // fill sizes
-                        (res.columns[key] as RevoGrid.ViewSettingSizeProp) = {...resultItem, ...collectionItem} as RevoGrid.ViewSettingSizeProp;
-                    }
-                }
-                // merge column groupings
-                for (let k in collection.columnGrouping) {
-                    const key = k as RevoGrid.DimensionCols;
-                    const collectionItem = collection.columnGrouping[key];
-                    res.columnGrouping[key].push(...collectionItem);
-                }
-                res.maxLevel = Math.max(res.maxLevel, collection.maxLevel);
+                return ColumnDataProvider.gatherGroup(res, colData, level, types);
             } 
             // if regular column
-            else {
-                if (!colData.pin) {
-                    res.columns.col.push(colData);
-                    if (colData.size) {
-                        res.columns.sizes[res.columns.col.length - 1] = colData.size;
-                    }
-                } else {
-                    res.columns[colData.pin].push(colData);
+            const regularColumn = {
+                ...(colData.columnType && types && types[colData.columnType]),
+                ...colData
+            };
+            if (!regularColumn.pin) {
+                res.columns.col.push(regularColumn);
+                if (regularColumn.size) {
+                    res.columns.sizes[res.columns.col.length - 1] = regularColumn.size;
                 }
-                if (colData.order) {
-                    res.sort[colData.prop] = colData;
-                }
+            } else {
+                res.columns[regularColumn.pin].push(regularColumn);
+            }
+            if (regularColumn.order) {
+                res.sort[regularColumn.prop] = regularColumn;
             }
             return res;
         }, {
@@ -226,6 +193,54 @@ export default class ColumnDataProvider {
             maxLevel: level,
             sort: {}
         });
+    }
+
+    private static gatherGroup(
+        res: ColumnCollection,
+        colData: RevoGrid.ColumnGrouping,
+        level: number = 0,
+        types?: RevoGrid.ColumnTypes): ColumnCollection {
+        // receive parsed data up to single cell
+        const collection: ColumnCollection = ColumnDataProvider.getColumns(colData.children, level + 1, types);
+
+        // group template
+        const group: Group = {
+          ...colData,
+          level,
+          ids: []
+        };
+
+        // check columns for update
+        for (let k in collection.columns) {
+            const key = k as keyof Columns;
+            const resultItem = res.columns[key];
+            const collectionItem = collection.columns[key];
+
+            // if column data
+            if (isArray(resultItem) && isArray(collectionItem)) {
+                // fill columns
+                resultItem.push(...collectionItem);
+
+                // fill grouping
+                if (key !== 'sizes' && collectionItem.length) {
+                    res.columnGrouping[key].push({
+                        ...group,
+                        ids: map(collectionItem, 'prop')
+                    });
+                }
+            } else {
+                // fill sizes
+                (res.columns[key] as RevoGrid.ViewSettingSizeProp) = {...resultItem, ...collectionItem} as RevoGrid.ViewSettingSizeProp;
+            }
+        }
+        // merge column groupings
+        for (let k in collection.columnGrouping) {
+            const key = k as RevoGrid.DimensionCols;
+            const collectionItem = collection.columnGrouping[key];
+            res.columnGrouping[key].push(...collectionItem);
+        }
+        res.maxLevel = Math.max(res.maxLevel, collection.maxLevel);
+        return res;
     }
 }
 
