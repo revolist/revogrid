@@ -46,5 +46,15 @@ revogr-data {
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
+
+		&.align-center {
+            text-align: center;
+        }
+        &.align-left {
+            text-align: left;
+        }
+        &.align-right {
+            text-align: right;
+		}
 	}
 }
