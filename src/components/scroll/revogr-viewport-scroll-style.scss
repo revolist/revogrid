@@ -1,7 +1,7 @@
 @mixin noScroll {
   /* Hide scrollbar for IE and Edge */
   -ms-overflow-style: none;
-
+  scrollbar-width: none;  /* Firefox */
   /* Hide scrollbar for Chrome, Safari and Opera */
   &::-webkit-scrollbar {
     display: none;
@@ -58,15 +58,7 @@ revogr-viewport-scroll {
     position: relative;
     width: 100%;
     flex-grow: 1;
-
-    /* Hide scrollbar for IE and Edge */
-    -ms-overflow-style: none;
-
-    /* Hide scrollbar for Chrome, Safari and Opera */
-    &::-webkit-scrollbar {
-      display: none;
-      -webkit-appearance: none;
-    }
+    @include noScroll;
 
 
     revogr-data, revogr-overlay-selection {
