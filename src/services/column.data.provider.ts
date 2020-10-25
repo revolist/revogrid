@@ -3,7 +3,7 @@ import each from 'lodash/each';
 import isArray from 'lodash/isArray';
 import map from 'lodash/map';
 import findIndex from 'lodash/findIndex';
-import { find } from 'lodash';
+import find from 'lodash/find';
 
 import DataStore, {Group as StoreGroup, Groups} from '../store/dataSource/data.store';
 import {columnTypes} from '../store/storeTypes';

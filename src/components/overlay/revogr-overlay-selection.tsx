@@ -1,6 +1,6 @@
 import {Component, Event, EventEmitter, h, Host, Listen, Prop, VNode, Watch, Element, State} from '@stencil/core';
 import {ObservableMap} from '@stencil/store';
-import { slice } from 'lodash';
+import slice from 'lodash/slice';
 
 import {Edition, RevoGrid, Selection} from '../../interfaces';
 import ColumnService from '../data/columnService';
