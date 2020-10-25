@@ -18,3 +18,12 @@
   background-size: cover;
   background-repeat: no-repeat;
 }
+
+.arrow-down {
+  font-size: 11px;
+  color: gray;
+  float: right;
+  &:before {
+    content: '▼';
+  }
+}

@@ -10,6 +10,7 @@ import ViewportProvider from '../../services/viewport.provider';
 import {Edition, Selection, RevoGrid, ThemeSpace} from '../../interfaces';
 import ThemeService from '../../themeManager/themeService';
 import { timeout } from '../../utils/utils';
+import SelectColumnType from '../../plugins/select/select';
 
 
 type ColumnStores = {
@@ -87,7 +88,9 @@ export class RevoGridComponent {
    *  Every type represent multiple column properties
    *  Types will be merged but can be replaced with column properties
    */
-  @Prop() columnTypes: {[name: string]: RevoGrid.ColumnType} = {};
+  @Prop() columnTypes: {[name: string]: RevoGrid.ColumnType} = {
+    'select': new SelectColumnType()
+  };
 
 
   /** Theme name */

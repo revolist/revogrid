@@ -13,7 +13,7 @@ interface GlobalColumn extends RevoGrid.ColumnProperties {
 }
 
 export const HeaderCellRenderer = ({data, props}: Props): VNode => {
-    let headerChildren: VNode|string = data?.name || '';
+    let headerChildren: VNode|VNode[]|string = data?.name || '';
     let cellProps = props;
     if (data?.columnTemplate) {
         headerChildren = data.columnTemplate(h as unknown as RevoGrid.HyperFunc<VNode>, data);

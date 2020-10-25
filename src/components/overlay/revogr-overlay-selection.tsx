@@ -312,7 +312,6 @@ export class OverlaySelection {
     };
 
     const style = CellSelectionService.getElStyle({...editCell, x1: editCell.x, y1: editCell.y }, this.dimensionRow.state, this.dimensionCol.state);
-
     return <revogr-edit
       class={EDIT_INPUT_WR}
       onCellEdit={e => this.onCellEdit(e.detail)}
@@ -324,7 +323,7 @@ export class OverlaySelection {
       }}
       editCell={editable}
       column={this.columnService.columns[editCell.x]}
-      editor={this.editors[this.columnService.getCellEditor(editCell.y, editCell.x)]}
+      editor={this.columnService.getCellEditor(editCell.y, editCell.x, this.editors)}
       style={style}
     />
   }
