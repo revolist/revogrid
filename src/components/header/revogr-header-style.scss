@@ -71,6 +71,7 @@ revogr-header {
         .header-content {
             overflow: hidden;
             text-overflow: ellipsis;
+            white-space: nowrap;
         }
         .resizable {
             display: block;
