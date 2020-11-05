@@ -222,7 +222,8 @@ export declare namespace Selection {
     range: RangeArea|null;
     tempRange: RangeArea|null;
     focus: Cell|null;
-    edit: Edition.EditCell|null;
+    
+    edit: Edition.EditCellStore|null;
     lastCell: Cell|null;
   };
 
@@ -291,10 +292,11 @@ export declare namespace Edition {
     type: RevoGrid.DimensionRows;
   };
 
-  interface EditCell extends Selection.Cell {
-    model?: RevoGrid.DataType;
+  interface EditCellStore extends Selection.Cell {
     val?: SaveData;
   }
+
+  type EditCell = EditCellStore&BeforeSaveDataDetails;
 
   type Editors = {[name: string]: EditorCtr};
 

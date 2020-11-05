@@ -2,7 +2,6 @@ import {ObservableMap} from '@stencil/store';
 import {Edition, Selection} from '../../interfaces';
 import {getRange} from './selection.helpers';
 import Cell = Selection.Cell;
-import EditCell = Edition.EditCell;
 
 
 interface Config {
@@ -17,7 +16,7 @@ export default class SelectionStoreService {
     this.store = store;
   }
 
-  get edited(): EditCell|null {
+  get edited(): Edition.EditCellStore|null {
     return this.store.get('edit');
   }
 
