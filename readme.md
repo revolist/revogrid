@@ -11,7 +11,8 @@
 </p>
 <h4 align="center">Powerful data grid component built on top of <a href="https://stenciljs.com" target="_blank">StencilJS</a>.</h4>
 <p align="center">
-Millions of cells and thousands columns easy and efficiently. Any major framework or with no framework at all.
+Support Millions of cells and thousands columns easy and efficiently for fast data rendering.
+Works in any major framework or with no framework at all.
   
 </p>
 
