@@ -136,37 +136,7 @@ import { defineCustomElements } from '@revolist/revogrid/loader';
 defineCustomElements(); // let browser know new component registered
 ```
 
-
-### Import with webpack + VueJs:
-
-```javascript
-<template>
-<revo-grid
-      theme="material"
-      :canFocus.prop="canFocus"
-      :source.prop="source"
-      :columns.prop="columns"/>
-</template>
-
-<script>
-import { defineCustomElements } from '@revolist/revogrid/loader';
-
-defineCustomElements();
-Vue.config.ignoredElements = [/revo-\w*/]; // Ignore web-component and avoid parsing it as VueJs
-
-export default {
-  data () {
-    return {
-      canFocus: true,
-      source: [],
-      columns: []
-    }
-  }
-}
-</script>
-```
-
-### Usage:
+### Usage JavaScript:
 
 ```javascript
 const grid = document.querySelector('revo-grid');
@@ -199,6 +169,51 @@ grid.columns = columns;
 grid.source = items;
 ```
 
+### Usage VueJs with vue-datagrid component wrapper:
+
+```vue
+<template>
+  <div id="app">
+    <v-grid
+      v-if="grid === 1"
+      key="1"
+      theme="compact"
+      :source="rows"
+      :columns="columns"
+    ></v-grid>
+  </div>
+</template>
+
+<script>
+import VGrid from "@revolist/vue-datagrid";
+export default {
+  name: "App",
+  data() {
+    return {
+      columns: [
+        {
+          prop: "name",
+          name: "First",
+        },
+        {
+          prop: "details",
+          name: "Second",
+        },
+      ],
+      rows: [
+        {
+          name: "1",
+          details: "Item 1",
+        },
+      ]
+    };
+  },
+  components: {
+    VGrid,
+  },
+};
+</script>
+```
 
 ## Contributing
 
