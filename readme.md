@@ -26,7 +26,7 @@ Works in any major framework or with no framework at all.
 </p>
 
 <img src="./assets/material.jpg" alt="Material grid preview" width="100%" />
-<small><i>RevoGrid material theme.</i></small>
+<i style="color: gray">RevoGrid material theme.</i>
 <br>
 
 
