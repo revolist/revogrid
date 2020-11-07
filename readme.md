@@ -118,7 +118,7 @@ All you have to do just to place component on the page and access it properties 
 </html>
 ```
 
-### Import with es module:
+### Or import as module:
 
 Alternatively, if you wanted to take advantage of ES Modules, you could include the components using an import statement. 
 Note that in this scenario applyPolyfills is needed if you are targeting Edge or IE11.
@@ -129,14 +129,12 @@ Note that in this scenario applyPolyfills is needed if you are targeting Edge or
 </script>
 ```
 
-### Import with webpack:
+### Or import with webpack:
 
 ```javascript
 import { defineCustomElements } from '@revolist/revogrid/loader';
 defineCustomElements(); // let browser know new component registered
 ```
-
-### Usage JavaScript:
 
 ```javascript
 const grid = document.querySelector('revo-grid');
@@ -169,7 +167,7 @@ grid.columns = columns;
 grid.source = items;
 ```
 
-### Usage VueJs with vue-datagrid component wrapper:
+## Usage VueJs
 
 ```vue
 <template>
