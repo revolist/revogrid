@@ -26,7 +26,7 @@ Works in any major framework or with no framework at all.
 </p>
 
 <img src="./assets/material.jpg" alt="Material grid preview" width="100%" />
-
+<i>RevoGrid material theme.</i>
 <br>
 
 
@@ -48,7 +48,7 @@ Works in any major framework or with no framework at all.
 - Column sorting;
 - Range selection;
 - Range edit;
-- Theme packages: Excel like, material, etc;
+- Theme packages: Excel like, material, compact, dark or light;
 - Copy/Paste: Copy/paste from Excel, Google Sheets or any other sheet format;
 - Easy extenation and support with modern VNode features and tsx support;
 - Hundred small customizations and improvements [RevoGrid](https://revolist.github.io/revogrid).
@@ -58,9 +58,6 @@ Works in any major framework or with no framework at all.
 
 The RevoGrid component helps represent a huge amount of data in a form of data table "excel like" or as list.
 <br>
-<p align="center">
-<img src="./assets/excel.png" alt="Excel grid preview" width="100%" />
-</p>
 
 ![Chrome](https://raw.github.com/alrra/browser-logos/master/src/chrome/chrome_48x48.png) | ![Firefox](https://raw.github.com/alrra/browser-logos/master/src/firefox/firefox_48x48.png) | ![Safari](https://raw.github.com/alrra/browser-logos/master/src/safari/safari_48x48.png) | ![Opera](https://raw.github.com/alrra/browser-logos/master/src/opera/opera_48x48.png) | ![Edge](https://raw.github.com/alrra/browser-logos/master/src/edge/edge_48x48.png) |
 --- | --- | --- | --- | --- |
