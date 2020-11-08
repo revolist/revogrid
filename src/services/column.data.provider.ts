@@ -177,6 +177,9 @@ export default class ColumnDataProvider {
             if (regularColumn.order) {
                 res.sort[regularColumn.prop] = regularColumn;
             }
+
+            // trigger setup hook if present
+            regularColumn.beforeSetup && regularColumn.beforeSetup(regularColumn);
             return res;
         }, {
             columns: {

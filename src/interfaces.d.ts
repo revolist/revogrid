@@ -98,6 +98,8 @@ export declare namespace RevoGrid {
     /** represents type defined in @columnTypes property */
     columnType?: string;
     [key: string]: any;
+
+    beforeSetup?(col: ColumnRegular): void;
   }
 
   type ColumnDataSchema = ColumnGrouping|ColumnRegular;

@@ -14,11 +14,11 @@ import {
   SELECTION_BORDER_CLASS
 } from '../../utils/consts';
 import {DataSourceState} from '../../store/dataSource/data.store';
-
-import RangeAreaCss = Selection.RangeAreaCss;
 import { getRange, isRangeSingleCell } from '../../store/selection/selection.helpers';
 import { timeout } from '../../utils/utils';
 import KeyService from './keyService';
+
+import RangeAreaCss = Selection.RangeAreaCss;
 
 
 @Component({
