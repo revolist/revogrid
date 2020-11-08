@@ -8,6 +8,7 @@
 <p align="center">
   <a href="https://www.npmjs.com/package/@revolist/revogrid"><img src="https://img.shields.io/npm/v/@revolist/revogrid" alt="Latest Version on NPM"/></a>
   <a href="https://github.com/revolist/revogrid/blob/master/LICENSE"><img src="https://img.shields.io/npm/l/@revolist/revogrid" alt="Software License"/></a>
+  <img src=https://badgen.net/bundlephobia/tree-shaking/@revolist/revogrid@latest" alt="Tree shaking"/>
 </p>
 <h4 align="center">Powerful data grid component built on top of <a href="https://stenciljs.com" target="_blank">StencilJS</a>.</h4>
 <p align="center">
@@ -31,8 +32,10 @@ Support Millions of cells and thousands columns easy and efficiently for fast da
 
 ## Key Features
 
-- Millions of cells virtual viewport scroll with a powerful core is in-build by default. 
-  Intelligent Virtual DOM and smart row recombination in order to achieve less redraws;
+- Millions of cells virtual viewport scroll with a powerful core is in-build by default;
+- Keayboard support;
+- Super light initial starter. https://badgen.net/badge/bundlephobia/min/@revolist/revogrid  Can be imported with polifill or as esm module for modern browsers;
+- Intelligent Virtual DOM and smart row recombination in order to achieve less redraws;
 - Column and Row custom sizes;
 - Column resizing;
 - Pinned columns (columns are always on the left or on the right of the screen);
@@ -55,7 +58,7 @@ Support Millions of cells and thousands columns easy and efficiently for fast da
 
 ## Overview
 
-The RevoGrid component helps represent a huge amount of data in a form of data table "excel like" or as list.
+The RevoGrid component helps represent a huge amount of data in a form of data table "excel like" or as list. On top of it it provides inbuilt range edit or per cell edit, keyboard support and custom edit and render features. Works in any major framework or with no framework at all.
 <br>
 
 ![Chrome](https://raw.github.com/alrra/browser-logos/master/src/chrome/chrome_48x48.png) | ![Firefox](https://raw.github.com/alrra/browser-logos/master/src/firefox/firefox_48x48.png) | ![Safari](https://raw.github.com/alrra/browser-logos/master/src/safari/safari_48x48.png) | ![Opera](https://raw.github.com/alrra/browser-logos/master/src/opera/opera_48x48.png) | ![Edge](https://raw.github.com/alrra/browser-logos/master/src/edge/edge_48x48.png) |
