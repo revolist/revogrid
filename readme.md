@@ -35,7 +35,7 @@ Support Millions of cells and thousands columns easy and efficiently for fast da
 
 - Millions of cells virtual viewport scroll with a powerful core is in-build by default;
 - Keayboard support;
-- Super light initial starter. https://badgen.net/badge/bundlephobia/min/@revolist/revogrid  Can be imported with polifill or as esm module for modern browsers;
+- Super light initial starter <img src="https://badgen.net/bundlephobia/min/@revolist/revogrid@latest" alt="Min size"/>. Can be imported with polifill or as module for modern browsers;
 - Intelligent Virtual DOM and smart row recombination in order to achieve less redraws;
 - Column and Row custom sizes;
 - Column resizing;
