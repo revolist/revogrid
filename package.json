@@ -44,9 +44,10 @@
   ],
   "scripts": {
     "build": "stencil build --prod --docs",
+    "build:demo": "cd ./demo/ && rm -rf node_modules && npm i && npm run build",
     "start": "stencil build --dev --watch --serve",
     "generate": "stencil generate",
-    "deploy": "gh-pages -d ./demo/src/.vuepress/dist"
+    "deploy": "git submodule update --remote && npm run build:demo && gh-pages -d ./demo/src/.vuepress/dist"
   },
   "devDependencies": {
     "@juggle/resize-observer": "^3.1.2",
