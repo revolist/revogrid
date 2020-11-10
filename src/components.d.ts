@@ -62,6 +62,7 @@ export namespace Components {
           * Row class property Define this property in row object and this will be mapped as row class
          */
         "rowClass": string;
+        "rowDefinitions": RevoGrid.RowDefinition[];
         /**
           * Excel like show row indexe per row
          */
@@ -414,6 +415,7 @@ declare namespace LocalJSX {
           * Row class property Define this property in row object and this will be mapped as row class
          */
         "rowClass"?: string;
+        "rowDefinitions"?: RevoGrid.RowDefinition[];
         /**
           * Excel like show row indexe per row
          */
