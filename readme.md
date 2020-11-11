@@ -8,10 +8,12 @@
 <p align="center">
   <a href="https://www.npmjs.com/package/@revolist/revogrid"><img src="https://img.shields.io/npm/v/@revolist/revogrid" alt="Latest Version on NPM"/></a>
   <a href="https://github.com/revolist/revogrid/blob/master/LICENSE"><img src="https://img.shields.io/npm/l/@revolist/revogrid" alt="Software License"/></a>
+  <img src="https://badgen.net/bundlephobia/dependency-count/@revolist/revogrid@latest" alt="Tree shaking"/>
+  <img src="https://badgen.net/bundlephobia/tree-shaking/@revolist/revogrid@latest" alt="Tree shaking"/>
 </p>
-<h4 align="center">Powerful data grid component built on top of <a href="https://stenciljs.com" target="_blank">StencilJS</a>.</h4>
+<h4 align="center">Powerful data grid component built with <a href="https://stenciljs.com" target="_blank">StencilJS</a>.</h4>
 <p align="center">
-Millions of cells and thousands columns easy and efficiently. Any major framework or with no framework at all.
+Support Millions of cells and thousands columns easy and efficiently for fast data rendering. Easy to use.
   
 </p>
 
@@ -25,14 +27,16 @@ Millions of cells and thousands columns easy and efficiently. Any major framewor
 </p>
 
 <img src="./assets/material.jpg" alt="Material grid preview" width="100%" />
-
+<i>RevoGrid material theme.</i>
 <br>
 
 
 ## Key Features
 
-- Millions of cells virtual viewport scroll with a powerful core is in-build by default. 
-  Intelligent Virtual DOM and smart row recombination in order to achieve less redraws;
+- Millions of cells virtual viewport scroll with a powerful core is in-build by default;
+- Keayboard support;
+- Super light initial starter <img src="https://badgen.net/bundlephobia/min/@revolist/revogrid@latest" alt="Min size"/>. Can be imported with polifill or as module for modern browsers;
+- Intelligent Virtual DOM and smart row recombination in order to achieve less redraws;
 - Column and Row custom sizes;
 - Column resizing;
 - Pinned columns (columns are always on the left or on the right of the screen);
@@ -47,7 +51,7 @@ Millions of cells and thousands columns easy and efficiently. Any major framewor
 - Column sorting;
 - Range selection;
 - Range edit;
-- Theme packages: Excel like, material, etc;
+- Theme packages: Excel like, material, compact, dark or light;
 - Copy/Paste: Copy/paste from Excel, Google Sheets or any other sheet format;
 - Easy extenation and support with modern VNode features and tsx support;
 - Hundred small customizations and improvements [RevoGrid](https://revolist.github.io/revogrid).
@@ -55,11 +59,8 @@ Millions of cells and thousands columns easy and efficiently. Any major framewor
 
 ## Overview
 
-The RevoGrid component helps represent a huge amount of data in a form of data table "excel like" or as list.
+The RevoGrid component helps represent a huge amount of data in a form of data table "excel like" or as list. On top of it it provides inbuilt range edit or per cell edit, keyboard support and custom edit and render features. Works in any major framework or with no framework at all.
 <br>
-<p align="center">
-<img src="./assets/excel.png" alt="Excel grid preview" width="100%" />
-</p>
 
 ![Chrome](https://raw.github.com/alrra/browser-logos/master/src/chrome/chrome_48x48.png) | ![Firefox](https://raw.github.com/alrra/browser-logos/master/src/firefox/firefox_48x48.png) | ![Safari](https://raw.github.com/alrra/browser-logos/master/src/safari/safari_48x48.png) | ![Opera](https://raw.github.com/alrra/browser-logos/master/src/opera/opera_48x48.png) | ![Edge](https://raw.github.com/alrra/browser-logos/master/src/edge/edge_48x48.png) |
 --- | --- | --- | --- | --- |
@@ -118,7 +119,7 @@ All you have to do just to place component on the page and access it properties 
 </html>
 ```
 
-### Import with es module:
+### Or import as module:
 
 Alternatively, if you wanted to take advantage of ES Modules, you could include the components using an import statement. 
 Note that in this scenario applyPolyfills is needed if you are targeting Edge or IE11.
@@ -129,44 +130,12 @@ Note that in this scenario applyPolyfills is needed if you are targeting Edge or
 </script>
 ```
 
-### Import with webpack:
+### Or import with webpack:
 
 ```javascript
 import { defineCustomElements } from '@revolist/revogrid/loader';
 defineCustomElements(); // let browser know new component registered
 ```
-
-
-### Import with webpack + VueJs:
-
-```javascript
-<template>
-<revo-grid
-      theme="material"
-      :canFocus.prop="canFocus"
-      :source.prop="source"
-      :columns.prop="columns"/>
-</template>
-
-<script>
-import { defineCustomElements } from '@revolist/revogrid/loader';
-
-defineCustomElements();
-Vue.config.ignoredElements = [/revo-\w*/]; // Ignore web-component and avoid parsing it as VueJs
-
-export default {
-  data () {
-    return {
-      canFocus: true,
-      source: [],
-      columns: []
-    }
-  }
-}
-</script>
-```
-
-### Usage:
 
 ```javascript
 const grid = document.querySelector('revo-grid');
@@ -199,6 +168,51 @@ grid.columns = columns;
 grid.source = items;
 ```
 
+## Usage VueJs
+
+```vue
+<template>
+  <div id="app">
+    <v-grid
+      v-if="grid === 1"
+      key="1"
+      theme="compact"
+      :source="rows"
+      :columns="columns"
+    ></v-grid>
+  </div>
+</template>
+
+<script>
+import VGrid from "@revolist/vue-datagrid";
+export default {
+  name: "App",
+  data() {
+    return {
+      columns: [
+        {
+          prop: "name",
+          name: "First",
+        },
+        {
+          prop: "details",
+          name: "Second",
+        },
+      ],
+      rows: [
+        {
+          name: "1",
+          details: "Item 1",
+        },
+      ]
+    };
+  },
+  components: {
+    VGrid,
+  },
+};
+</script>
+```
 
 ## Contributing
 

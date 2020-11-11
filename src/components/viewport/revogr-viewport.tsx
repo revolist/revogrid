@@ -1,6 +1,6 @@
 import {Component, Prop, h, Host, Listen, Element, Event, EventEmitter, VNode, Method} from '@stencil/core';
 import {ObservableMap} from '@stencil/store';
-import { each } from 'lodash';
+import each from 'lodash/each';
 import '../../utils/closestPolifill';
 
 import {UUID} from '../../utils/consts';
