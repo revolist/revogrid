@@ -1,4 +1,4 @@
-import {VNode} from "@stencil/core";
+import {VNode, VNodeData} from "@stencil/core";
 
 export declare namespace RevoGrid {
 
@@ -79,7 +79,7 @@ export declare namespace RevoGrid {
     maxSize?: number;
 
     /** represents custom editor defined in @editors property */
-    editor?: string;
+    editor?: string|Edition.EditorCtr;
   }
 
   interface ColumnRegular extends ColumnType {
@@ -97,6 +97,9 @@ export declare namespace RevoGrid {
 
     /** represents type defined in @columnTypes property */
     columnType?: string;
+    [key: string]: any;
+
+    beforeSetup?(col: ColumnRegular): void;
   }
 
   type ColumnDataSchema = ColumnGrouping|ColumnRegular;
@@ -118,9 +121,17 @@ export declare namespace RevoGrid {
   //
   // --------------------------------------------------------------------------
 
-  interface HyperFunc<T> { (tag: string, props?: object, value?: string): T; }
+  interface HyperFunc<T> { (tag: any): T; }
+  interface HyperFunc<T> { (tag: any, data: any): T; }
+  interface HyperFunc<T> { (tag: any, text: string): T; }
+  interface HyperFunc<T> { (sel: any, children: Array<T | undefined | null>): T; }
+  interface HyperFunc<T> { (sel: any, data: any, text: string): T; }
+  interface HyperFunc<T> { (sel: any, data: any, children: Array<T | undefined | null>): T; }
+  interface HyperFunc<T> { (sel: any, data: any, children: T): T; }
+
+
   type CellTemplateFunc<T> = (createElement: HyperFunc<T>, props: ColumnDataSchemaModel) => any;
-  type ColumnTemplateFunc<T> = (createElement: HyperFunc<T>, props: ColumnRegular) => T|string;
+  type ColumnTemplateFunc<T> = (createElement: HyperFunc<T>, props: ColumnRegular) => T|T[]|string;
   type PropertiesFunc = (props: ColumnDataSchemaModel) => CellProps|void|undefined;
   type ColPropertiesFunc = (props: ColumnDataSchema) => CellProps|void|undefined;
 
@@ -328,7 +339,7 @@ export declare namespace Edition {
     editCell?: EditCell;
     componentDidRender?(): void;
     disconnectedCallback?(): void;
-    render(createElement?: HyperFunc<VNode>): VNode;
+    render(createElement?: HyperFunc<VNode>): VNode|VNode[]|string|void;
   }
 }
 
