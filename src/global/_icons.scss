@@ -20,10 +20,20 @@
 }
 
 .arrow-down {
-  font-size: 11px;
-  color: gray;
-  float: right;
-  &:before {
-    content: '▼';
+  position: absolute;
+  right: 5px;
+  top: 0;
+
+  svg {
+    width: 8px;
+    margin-top: 5px;
+    margin-left: 5px;
+    opacity: .4;
   }
+}
+
+.cell-value-wrapper {
+  margin-right: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
