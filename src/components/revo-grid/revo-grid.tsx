@@ -87,7 +87,7 @@ export class RevoGridComponent {
    *  Every type represent multiple column properties
    *  Types will be merged but can be replaced with column properties
    */
-  @Prop() columnTypes: {[name: string]: RevoGrid.ColumnType};
+  @Prop() columnTypes: {[name: string]: RevoGrid.ColumnType} = {};
 
 
   /** Theme name */
