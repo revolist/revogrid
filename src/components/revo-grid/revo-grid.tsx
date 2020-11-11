@@ -10,6 +10,7 @@ import ViewportProvider from '../../services/viewport.provider';
 import {Edition, Selection, RevoGrid, ThemeSpace} from '../../interfaces';
 import ThemeService from '../../themeManager/themeService';
 import { timeout } from '../../utils/utils';
+import { each } from 'lodash';
 
 
 type ColumnStores = {
@@ -79,6 +80,7 @@ export class RevoGridComponent {
   @Prop() pinnedTopSource: RevoGrid.DataType[] = [];
   /** Pinned bottom Source: {[T in ColumnProp]: any} - defines pinned bottom rows data source. */
   @Prop() pinnedBottomSource: RevoGrid.DataType[] = [];
+  @Prop() rowDefinitions: RevoGrid.RowDefinition[] = [];
 
   /** Custom editors register */
   @Prop() editors: Edition.Editors = {};
@@ -405,6 +407,32 @@ export class RevoGridComponent {
     this.dataProvider.setData(newVal, 'rowPinStart');
   }
 
+  @Watch('rowDefinitions')
+  rowDefChanged(newVal: RevoGrid.RowDefinition[]) {
+    if (!newVal.length) {
+      return;
+    }
+    const rows = reduce(newVal, (r: Partial<{[T in RevoGrid.DimensionRows]: {
+      sizes?: Record<number, number>
+    }}>, v) => {
+      if (!r[v.type]) {
+        r[v.type] = {};
+      }
+      if (v.size) {
+        if (!r[v.type].sizes) {
+          r[v.type].sizes = {};
+        }
+        r[v.type].sizes[v.index] = v.size;
+      }
+      return r;
+    }, {});
+    each(rows, (r, k: RevoGrid.DimensionRows) => {
+      if (r.sizes) {
+        this.dimensionProvider.setDimensionSize(k, r.sizes);
+      }
+    });
+  }
+
   get columnStores(): ColumnStores {
     return reduce(this.columnProvider.stores, (res: Partial<ColumnStores>, dataSource, k: RevoGrid.DimensionCols) => {
       res[k] = dataSource.store;
@@ -448,6 +476,7 @@ export class RevoGridComponent {
     this.dataChanged(this.source);
     this.dataTopChanged(this.pinnedTopSource);
     this.dataBottomChanged(this.pinnedBottomSource);
+    this.rowDefChanged(this.rowDefinitions);
   }
 
   render() {

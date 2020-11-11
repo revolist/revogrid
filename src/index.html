@@ -80,6 +80,11 @@
         grid.readonly = false;
         grid.range = true;
         grid.resize = true;
+        grid.rowDefinitions = [{
+          type: 'row',
+          index: 1,
+          size: 100
+        }];
         grid.rowClass = 'selected';
         grid.addEventListener('beforeEdit', (e) => {
           console.log('after edit', e);
