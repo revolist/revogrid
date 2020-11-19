@@ -3,7 +3,7 @@ import {cropCellToMax, nextCell} from '../store/selection/selection.helpers';
 import { SelectionStore } from '../store/selection/selection.store';
 
 import Cell = Selection.Cell;
-import EditCell = Edition.EditCell;
+import EditCellStore = Edition.EditCellStore;
 
 type StoresMatrix = {[y: number]: {[x: number]:  SelectionStore}};
 
@@ -132,7 +132,7 @@ export default class SelectionStoreConnector {
     }
   }
 
-  get edit(): EditCell|undefined {
+  get edit(): EditCellStore|undefined {
     return this.focusedStore?.store.get('edit');
   }
 

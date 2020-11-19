@@ -10,7 +10,6 @@ export function generateFakeDataObject(rowsNumber, colsNumber) {
         if (!result[row]) {
             result[row] = {};
         }
-        result[row][col] = row + ':' + col;
         if (!columns[col]) {
             columns[col] = {
                 name: generateHeader(col),
@@ -29,7 +28,8 @@ export function generateFakeDataObject(rowsNumber, colsNumber) {
                 // readonly: !!(col%5),
                 //rowDrag: j === 2,
             }
-            if (col === 1) {
+            if (col === 5) {
+                
                 /*
                 cellTemplate: (h, props) => {
                     return h('div', {
@@ -40,6 +40,17 @@ export function generateFakeDataObject(rowsNumber, colsNumber) {
                     }, props.model[props.prop] || '');
                 } */
             }
+        }
+        result[row][col] = row + ':' + col;
+        if (col === 5) {
+            columns[col] = {
+                ...columns[col],
+                columnType: 'select',
+                labelKey: 'label',
+                valueKey: 'value',
+                source: [{ label: 'according', value: 'a' }, { label: 'beyound', value: 'b' }]
+            };
+            result[row][col] = 'b';
         }
     }
     const pinnedTopRows = result[10] && [result[10]] || [];

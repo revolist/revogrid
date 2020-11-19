@@ -1,6 +1,6 @@
 import {Component, Event, EventEmitter, h, Host, Listen, Prop, VNode, Watch, Element, State} from '@stencil/core';
 import {ObservableMap} from '@stencil/store';
-import { slice } from 'lodash';
+import slice from 'lodash/slice';
 
 import {Edition, RevoGrid, Selection} from '../../interfaces';
 import ColumnService from '../data/columnService';
@@ -14,11 +14,11 @@ import {
   SELECTION_BORDER_CLASS
 } from '../../utils/consts';
 import {DataSourceState} from '../../store/dataSource/data.store';
-
-import RangeAreaCss = Selection.RangeAreaCss;
 import { getRange, isRangeSingleCell } from '../../store/selection/selection.helpers';
 import { timeout } from '../../utils/utils';
 import KeyService from './keyService';
+
+import RangeAreaCss = Selection.RangeAreaCss;
 
 
 @Component({
@@ -312,7 +312,6 @@ export class OverlaySelection {
     };
 
     const style = CellSelectionService.getElStyle({...editCell, x1: editCell.x, y1: editCell.y }, this.dimensionRow.state, this.dimensionCol.state);
-
     return <revogr-edit
       class={EDIT_INPUT_WR}
       onCellEdit={e => this.onCellEdit(e.detail)}
@@ -324,7 +323,7 @@ export class OverlaySelection {
       }}
       editCell={editable}
       column={this.columnService.columns[editCell.x]}
-      editor={this.editors[this.columnService.getCellEditor(editCell.y, editCell.x)]}
+      editor={this.columnService.getCellEditor(editCell.y, editCell.x, this.editors)}
       style={style}
     />
   }

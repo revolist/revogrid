@@ -25,6 +25,17 @@ revo-grid {
 		}
   }
   
+  revo-dropdown {
+    width: 100%;
+
+    .rv-dr-root {
+      max-height: 100%;
+    }
+    &.shrink label {
+      opacity: 0;
+    }
+  }
+
   .viewports {
     max-height: 100%;
     display: flex;

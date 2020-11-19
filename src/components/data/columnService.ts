@@ -110,8 +110,16 @@ export default class ColumnService implements ColumnServiceI {
     return { prop: data.prop, rowIndex, val, model: data.model, type: this.dataStore.get('type')};
   }
 
-  getCellEditor(_r: number, c: number): string | undefined {
-    return this.columns[c]?.editor;
+  getCellEditor(_r: number, c: number, editors: Edition.Editors): Edition.EditorCtr|undefined {
+    const editor = this.columns[c]?.editor;
+    if (!editor) {
+      return undefined;
+    }
+    // reference
+    if (typeof editor === 'string') {
+      return editors[editor];
+    }
+    return editor;
   }
 
   rowDataModel(rowIndex: number, c: number): ColumnDataSchemaModel {
