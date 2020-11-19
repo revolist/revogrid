@@ -21,6 +21,8 @@ export class RevogrViewportScroll {
   private oldValY: number = this.contentHeight;
   private oldValX: number = this.contentWidth;
   private verticalScroll: HTMLElement;
+  private header: HTMLElement;
+  private footer: HTMLElement;
 
   private horizontalMouseWheel: (e: WheelEvent) => void;
   private verticalMouseWheel: (e: WheelEvent) => void;
@@ -90,12 +92,16 @@ export class RevogrViewportScroll {
     this.gridResizeService = new GridResizeService(
         this.horizontalScroll,
         {
-          resize: () => {
+          resize: (entries: ReadonlyArray<ResizeObserverEntry>) => {
+            let height = entries[0]?.contentRect.height || 0;
+            if (height) {
+              height -= this.header.clientHeight + this.footer.clientHeight;
+            }
             const els = {row: {
-              size: this.verticalScroll.clientHeight,
+              size: height,
               scroll: this.verticalScroll.scrollTop
             }, col: {
-              size: this.horizontalScroll.clientWidth,
+              size: entries[0]?.contentRect.width || 0,
               scroll: this.horizontalScroll.scrollLeft
             }};
             each(els, (item, dimension: RevoGrid.DimensionType) => {
@@ -144,7 +150,7 @@ export class RevogrViewportScroll {
   render() {
     return <Host onScroll={(e: MouseEvent) => this.onScroll('col', e)}>
       <div class='inner-content-table' style={{ width: `${this.contentWidth}px` }}>
-        <div class='header-wrapper'>
+        <div class='header-wrapper' ref={(e) => this.header = e}>
           <slot name='header'/>
         </div>
         <div class='vertical-inner'
@@ -154,7 +160,7 @@ export class RevogrViewportScroll {
             <slot name='content'/>
           </div>
         </div>
-        <div class='footer-wrapper'>
+        <div class='footer-wrapper' ref={(e) => this.footer = e}>
           <slot name='footer'/>
         </div>
       </div>
