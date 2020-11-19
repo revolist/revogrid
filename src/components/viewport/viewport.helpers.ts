@@ -65,12 +65,12 @@ function dataPartition(data: ViewportColumn, type: RevoGrid.DimensionRows, slot:
     const dataPart: ViewportData = {
         colData: data.colStore,
         viewportCol: data.viewports[data.colType],
+        viewportRow: data.viewports[type],
         lastCell,
         slot,
         type,
         canDrag: !fixed,
         position: data.position,
-        viewportRow: data.viewports[type],
         uuid: `${data.uuid}-${data.position.x}-${data.position.y}`,
         dataStore: data.rowStores[type],
         dimensionCol: data.dimensions[data.colType],
