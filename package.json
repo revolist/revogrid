@@ -1,6 +1,6 @@
 {
   "name": "@revolist/revogrid",
-  "version": "1.7.13",
+  "version": "1.7.14",
   "description": "Virtual reactive data grid component - RevoGrid.",
   "license": "MIT",
   "bugs": {
@@ -47,7 +47,7 @@
     "build:demo": "cd ./demo/ && rm -rf node_modules && npm i && npm run build",
     "start": "stencil build --dev --watch --serve",
     "generate": "stencil generate",
-    "deploy": "git submodule update --remote && npm run build:demo && gh-pages -d ./demo/src/.vuepress/dist"
+    "deploy": "npm run build:demo && gh-pages -d ./demo/src/.vuepress/dist"
   },
   "devDependencies": {
     "@juggle/resize-observer": "^3.1.2",
