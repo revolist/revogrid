@@ -12,5 +12,11 @@ revogr-edit {
 
 	revo-dropdown {
 		height: 100%;
+
+		&.shrink {
+			fieldset legend > span {
+				display: none;
+			}
+		}
 	}
 }
