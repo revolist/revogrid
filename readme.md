@@ -47,7 +47,7 @@ Support Millions of cells and thousands columns easy and efficiently for fast da
 - Custom cell renderer templates (build your own cell view);
 - Custom cell editor (apply your own editors and cell types);
 - Custom cell properties;
-- [Column types (select, string, number, etc)](https://revolist.github.io/revogrid/guide/column.types.html);
+- [Column types (select, string, number, date, custom)](https://revolist.github.io/revogrid/guide/column.types.html);
 - Drag and drop rows;
 - Column sorting;
 - Range selection;
