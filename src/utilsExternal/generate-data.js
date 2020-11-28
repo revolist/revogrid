@@ -1,4 +1,16 @@
-import {generateHeader} from "./generate-header.js";
+export function generateHeader(index) {
+    const asciiFirstLetter = 65;
+    const lettersCount = 26;
+    let div = index + 1;
+    let label = '';
+    let pos;
+    while (div > 0) {
+        pos = (div - 1) % lettersCount;
+        label = String.fromCharCode(asciiFirstLetter + pos) + label;
+        div = parseInt(((div - pos) / lettersCount).toString(), 10);
+    }
+    return label.toLowerCase();
+}
 
 export function generateFakeDataObject(rowsNumber, colsNumber) {
     const result = [];
@@ -16,41 +28,14 @@ export function generateFakeDataObject(rowsNumber, colsNumber) {
                 prop: col,
                 pin: j === 0 ? 'colPinStart' : j === 20 ? 'colPinEnd' : undefined,
                 sortable: true,
-                columnProperties: (props) => {
-                    return {
-                        style: {
-                            backgroundColor: j === 0 ? 'red' : ''
-                        }
-                    };
-                }
-                
-                // size: j === 5 ? 200 : undefined,
-                // readonly: !!(col%5),
-                //rowDrag: j === 2,
-            }
-            if (col === 5) {
-                
-                /*
-                cellTemplate: (h, props) => {
-                    return h('div', {
-                        style: {},
-                        class: {
-                            'inner-cell': true
-                        }
-                    }, props.model[props.prop] || '');
-                } */
             }
         }
         result[row][col] = row + ':' + col;
         if (col === 5) {
             columns[col] = {
                 ...columns[col],
-                columnType: 'select',
-                labelKey: 'label',
-                valueKey: 'value',
-                source: [{ label: 'according', value: 'a' }, { label: 'beyound', value: 'b' }]
+                autoSize: true
             };
-            result[row][col] = 'b';
         }
     }
     const pinnedTopRows = result[10] && [result[10]] || [];
@@ -81,51 +66,5 @@ export function generateFakeDataObject(rowsNumber, colsNumber) {
         pinnedTopRows,
         // pinnedBottomRows,
         headers
-    };
-}
-
-export function generateData(rowsNumber, colsNumber) {
-    const result = [];
-    const all = colsNumber * rowsNumber;
-    for (let j = 0; j < all; j++) {
-        let col = j%colsNumber;
-        let row = j/colsNumber|0;
-        if (!result[row]) {
-            result[row] = {};
-        }
-        result[row][col] = row + ':' + col;
-    }
-    return result;
-}
-
-export function generateFakeData(rowsNumber, colsNumber) {
-    const result = [];
-    const rowData = [];
-    const headers = [];
-    for (let j = 0; j < colsNumber; j++) {
-        rowData.push(j.toString());
-        headers.push({
-            prop: j,
-            pin: j === 4 ? 'start' : undefined,
-            size: j === 5 ? 200 : undefined,
-            name: generateHeader(j),
-            cellTemplate: (h, props) => {
-                return h('div', {
-                    style: {
-                        // backgroundColor: j%2 ? 'red' : undefined
-                    },
-                    class: {
-                        'inner-cell': true
-                    }
-                }, props.model[props.prop] || '');
-            }
-        });
-    }
-    for (let i = 0; i < rowsNumber; i++) {
-        result.push(rowData);
-    }
-    return {
-        rows: result,
-        headers: headers
     };
 }

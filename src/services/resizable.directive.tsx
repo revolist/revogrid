@@ -12,6 +12,7 @@ type Props = {
     maxHeight?: number;
 
     onResize?(e: ResizeEvent): void;
+    onDoubleClick?(): void;
 };
 
 export type ResizeEvent = {
@@ -311,9 +312,26 @@ export const ResizableElement = (props: (Partial<Props>&RevoGrid.CellProps), chi
             for (let p in props.active) {
                 resizeEls.push(<div
                     onClick={e => e.preventDefault()}
+                    onDblClick={(e) => {
+                        e.preventDefault();
+                        props.onDoubleClick && props.onDoubleClick();
+                    }}
                     onMouseDown={(e: MouseEvent) => directive?.handleDown(e)}
                     onTouchStart={(e: TouchEvent) => directive?.handleDown(e)}
                     class={`resizable resizable-${props.active[p]}`}/>
+                );
+            }
+        }
+    } else {
+        if (props.active) {
+            for (let p in props.active) {
+                resizeEls.push(<div
+                    onClick={e => e.preventDefault()}
+                    onDblClick={(e) => {
+                        e.preventDefault();
+                        props.onDoubleClick && props.onDoubleClick();
+                    }}
+                    class={`no-resize resizable resizable-${props.active[p]}`}/>
                 );
             }
         }

@@ -91,12 +91,15 @@ export declare namespace RevoGrid {
     name?: DataFormat;
     /** is column can be sorted */
     sortable?: boolean;
+    /** column size would be changed based on content size */
+    autoSize?: boolean;
     order?: 'asc'|'desc';
     /** is cell in column or individual can be dragged */
     rowDrag?: RowDrag;
 
     /** represents type defined in @columnTypes property */
     columnType?: string;
+
     [key: string]: any;
 
     beforeSetup?(col: ColumnRegular): void;
@@ -198,7 +201,7 @@ export declare namespace RevoGrid {
     lastCoordinate: number;
   }
 
-  type ViewSettingSizeProp = { [index: string]: number };
+  type ViewSettingSizeProp = Record<string, number>;
 
   interface VirtualPositionItem extends PositionItem {
     size: number;
@@ -230,6 +233,18 @@ export declare namespace RevoGrid {
 }
 
 
+
+// --------------------------------------------------------------------------
+//
+//  Plugin space
+//
+// --------------------------------------------------------------------------
+export declare namespace RevoPlugin {
+  class Plugin {
+    constructor(revogrid: HTMLRevoGridElement, ...[]);
+    destroy(): void;
+  }
+}
 
 // --------------------------------------------------------------------------
 //

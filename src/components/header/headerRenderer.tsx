@@ -4,13 +4,15 @@ import { ResizeEvent } from '../../services/resizable.directive';
 import { DATA_COL, FOCUS_CLASS, HEADER_CLASS, HEADER_SORTABLE_CLASS, MIN_COL_SIZE } from '../../utils/consts';
 import { HeaderCellRenderer } from './headerCellRenderer';
 
+type ClickEventData = {column: RevoGrid.ColumnRegular, index: number};
 type Props = {
     column: RevoGrid.VirtualPositionItem;
     data?: RevoGrid.ColumnRegular;
     range?: Selection.RangeArea;
     canResize?: boolean;
     onResize?(e: ResizeEvent): void;
-    onClick?(data: {column: RevoGrid.ColumnRegular, index: number}): void;
+    onClick?(data: ClickEventData): void;
+    onDoubleClick?(data: ClickEventData): void;
 };
 
 const HeaderRenderer = (p: Props, _children: VNode[]): VNode => {
@@ -21,7 +23,7 @@ const HeaderRenderer = (p: Props, _children: VNode[]): VNode => {
     if (p.data?.order) {
         cellClass[p.data.order] = true;
     }
-    const dataProps: RevoGrid.CellProps = {
+    const dataProps = {
         [DATA_COL]: p.column.itemIndex,
         canResize: p.canResize,
         minWidth: p.data?.minSize || MIN_COL_SIZE,
@@ -30,6 +32,7 @@ const HeaderRenderer = (p: Props, _children: VNode[]): VNode => {
         class: cellClass,
         style: { width: `${p.column.size}px`, transform: `translateX(${p.column.start}px)` },
         onResize: p.onResize,
+        onDoubleClick: () => p.onDoubleClick({ column: p.data, index: p.column.itemIndex }),
         onClick: (e: MouseEvent) => {
             if (!e.defaultPrevented && p.onClick) {
                 p.onClick({ column: p.data, index: p.column.itemIndex });

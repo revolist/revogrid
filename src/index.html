@@ -79,25 +79,16 @@
 
         grid.readonly = false;
         grid.range = true;
-        grid.resize = true;
+        grid.resize = false;
         grid.rowDefinitions = [{
           type: 'row',
           index: 1,
           size: 100
         }];
-        grid.rowClass = 'selected';
-        grid.addEventListener('beforeEdit', (e) => {
-          console.log('after edit', e);
-        });
 
-        grid.addEventListener('beforeRangeEdit', (e) => {
-          console.log('before edit', e);
-        });
-
-        
-        grid.addEventListener('rowDragStart', (e) => {
-          console.log(e.detail);
-        });
+        grid.autoSizeColumn = {
+          mode: 'autoSizeAll'
+        };
 
         window.setEdit = function(x, y) {
           grid.setCellEdit(1, 30);

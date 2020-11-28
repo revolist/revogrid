@@ -6,10 +6,16 @@
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 import { Edition, RevoGrid, Selection, ThemeSpace } from "./interfaces";
+import { AutoSizeColumnConfig } from "./plugins/autoSizeColumn";
+import { ColumnCollection } from "./services/column.data.provider";
 import { ObservableMap } from "@stencil/store";
 import { DataSourceState, Groups } from "./store/dataSource/data.store";
 export namespace Components {
     interface RevoGrid {
+        /**
+          * Autosize config Enable columns autoSize, for more details check @autoSizeColumn plugin By default disabled, hence operation is not resource efficient true to enable with default params (double header separator click for autosize) or provide config
+         */
+        "autoSizeColumn": boolean|AutoSizeColumnConfig|undefined;
         /**
           * When true cell focus appear.
          */
@@ -62,6 +68,9 @@ export namespace Components {
           * Row class property Define this property in row object and this will be mapped as row class
          */
         "rowClass": string;
+        /**
+          * Row properies applied
+         */
         "rowDefinitions": RevoGrid.RowDefinition[];
         /**
           * Excel like show row indexe per row
@@ -314,6 +323,10 @@ declare global {
 declare namespace LocalJSX {
     interface RevoGrid {
         /**
+          * Autosize config Enable columns autoSize, for more details check @autoSizeColumn plugin By default disabled, hence operation is not resource efficient true to enable with default params (double header separator click for autosize) or provide config
+         */
+        "autoSizeColumn"?: boolean|AutoSizeColumnConfig|undefined;
+        /**
           * When true cell focus appear.
          */
         "canFocus"?: boolean;
@@ -341,6 +354,10 @@ declare namespace LocalJSX {
           * After edit. Triggered when after data applied or Range changeged.
          */
         "onAfterEdit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails|Edition.BeforeRangeSaveDataDetails>) => void;
+        "onAfterSourceSet"?: (event: CustomEvent<{
+    type: RevoGrid.DimensionRows;
+    source: RevoGrid.DataType[];
+  }>) => void;
         /**
           * Before autofill. Triggered before autofill applied. Use e.preventDefault() to prevent edit data apply.
          */
@@ -349,6 +366,7 @@ declare namespace LocalJSX {
           * Before cell focus changed. Use e.preventDefault() to prevent cell focus change.
          */
         "onBeforeCellFocus"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
+        "onBeforeColumnsSet"?: (event: CustomEvent<ColumnCollection>) => void;
         /**
           * Before edit event. Triggered before edit data applied. Use e.preventDefault() to prevent edit data set and use you own.  Use e.val = {your value} to replace edit result with your own.
          */
@@ -415,6 +433,9 @@ declare namespace LocalJSX {
           * Row class property Define this property in row object and this will be mapped as row class
          */
         "rowClass"?: string;
+        /**
+          * Row properies applied
+         */
         "rowDefinitions"?: RevoGrid.RowDefinition[];
         /**
           * Excel like show row indexe per row
@@ -480,6 +501,7 @@ declare namespace LocalJSX {
         "dimensionCol"?: ObservableMap<RevoGrid.DimensionSettingsState>;
         "groupingDepth"?: number;
         "groups"?: Groups;
+        "onHeaderDblClick"?: (event: CustomEvent<{column: RevoGrid.ColumnRegular, index: number}>) => void;
         "onHeaderResize"?: (event: CustomEvent<RevoGrid.ViewSettingSizeProp>) => void;
         "onInitialHeaderClick"?: (event: CustomEvent<{column: RevoGrid.ColumnRegular, index: number}>) => void;
         "parent"?: string;

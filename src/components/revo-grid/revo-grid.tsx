@@ -2,16 +2,17 @@ import {Component, Prop, h, Watch, Element, Listen, Event, EventEmitter, Method}
 import {ObservableMap} from '@stencil/store';
 import reduce from 'lodash/reduce';
 
-import ColumnDataProvider from '../../services/column.data.provider';
+import ColumnDataProvider, { ColumnCollection } from '../../services/column.data.provider';
 import {DataProvider} from '../../services/data.provider';
 import {DataSourceState} from '../../store/dataSource/data.store';
 import DimensionProvider from '../../services/dimension.provider';
 import ViewportProvider from '../../services/viewport.provider';
-import {Edition, Selection, RevoGrid, ThemeSpace} from '../../interfaces';
+import {Edition, Selection, RevoGrid, ThemeSpace, RevoPlugin} from '../../interfaces';
 import ThemeService from '../../themeManager/themeService';
 import { timeout } from '../../utils/utils';
 import { each } from 'lodash';
-
+import AutoSize, { AutoSizeColumnConfig } from '../../plugins/autoSizeColumn';
+import { columnTypes } from '../../store/storeTypes';
 
 type ColumnStores = {
   [T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
@@ -80,6 +81,7 @@ export class RevoGridComponent {
   @Prop() pinnedTopSource: RevoGrid.DataType[] = [];
   /** Pinned bottom Source: {[T in ColumnProp]: any} - defines pinned bottom rows data source. */
   @Prop() pinnedBottomSource: RevoGrid.DataType[] = [];
+  /** Row properies applied */
   @Prop() rowDefinitions: RevoGrid.RowDefinition[] = [];
 
   /** Custom editors register */
@@ -103,6 +105,14 @@ export class RevoGridComponent {
   @Prop({ reflect: true }) rowClass: string = '';
 
 
+  /** 
+   * Autosize config
+   * Enable columns autoSize, for more details check @autoSizeColumn plugin
+   * By default disabled, hence operation is not resource efficient
+   * true to enable with default params (double header separator click for autosize)
+   * or provide config
+   */
+  @Prop() autoSizeColumn: boolean|AutoSizeColumnConfig|undefined;
   // --------------------------------------------------------------------------
   //
   //  Events
@@ -197,6 +207,11 @@ export class RevoGridComponent {
   @Event() beforeCellFocus: EventEmitter<Edition.BeforeSaveDataDetails>;
 
 
+  @Event() afterSourceSet: EventEmitter<{
+    type: RevoGrid.DimensionRows;
+    source: RevoGrid.DataType[];
+  }>;
+  @Event() beforeColumnsSet: EventEmitter<ColumnCollection>;
   
   // --------------------------------------------------------------------------
   //
@@ -211,9 +226,7 @@ export class RevoGridComponent {
     this.dataProvider.refresh(type);
   }
 
-  /** 
-   * Scrolls view port to specified row index
-   */
+  /**  Scrolls view port to specified row index */
   @Method() async scrollToRow(coordinate: number = 0): Promise<void> {
     const y = this.dimensionProvider.getViewPortPos({
       coordinate,
@@ -369,20 +382,32 @@ export class RevoGridComponent {
   private viewportProvider: ViewportProvider;
   private themeService: ThemeService;
 
-  @Element() element: HTMLElement;
+  /** 
+   * Plugins
+   * Define plugins collection
+   */
+  private plugins: RevoPlugin.Plugin[] = [];
+
+  @Element() element: HTMLRevoGridElement;
   private viewportElement: HTMLRevogrViewportElement;
 
 
   @Watch('columns')
   columnChanged(newVal: RevoGrid.ColumnData) {
-    this.columnProvider.setColumns(newVal, this.columnTypes);
+    const columnGather = ColumnDataProvider.getColumns(newVal, 0, this.columnTypes);
+    this.beforeColumnsSet.emit(columnGather);
+    for (let type of columnTypes) {
+      const items = columnGather.columns[type];
+      this.dimensionProvider.setRealSize(items.length, type);
+      this.dimensionProvider.setColumns(type, ColumnDataProvider.getSizes(items), type !== 'col');
+    }
+    this.columnProvider.setColumns(columnGather);
     this.dataProvider.sort(this.columnProvider.order);
   }
 
   @Watch('theme')
   themeChanged(t: ThemeSpace.Theme) {
     this.themeService.register(t);
-
     this.dimensionProvider.setSettings({ originItemSize: this.themeService.rowSize, frameOffset: this.frameSize || 0 }, 'row');
     this.dimensionProvider.setSettings({ originItemSize: this.colSize, frameOffset: this.frameSize || 0 }, 'col');
   }
@@ -394,7 +419,10 @@ export class RevoGridComponent {
       const event = this.beforeSourceSortingApply.emit();
       applySorting = !event.defaultPrevented;
     }
-    this.dataProvider.setData(newVal, 'row', applySorting);
+    this.afterSourceSet.emit({
+      type: 'row',
+      source: this.dataProvider.setData(newVal, 'row', applySorting)
+    });
   }
 
   @Watch('pinnedBottomSource')
@@ -467,9 +495,24 @@ export class RevoGridComponent {
       rowSize: this.rowSize
     });
     this.dimensionProvider = new DimensionProvider(this.viewportProvider);
-    this.columnProvider = new ColumnDataProvider(this.dimensionProvider);
+    this.columnProvider = new ColumnDataProvider();
     this.dataProvider = new DataProvider(this.dimensionProvider);
     this.uuid = `${(new Date()).getTime()}-rvgrid`;
+
+
+    if (this.autoSizeColumn) {
+      this.plugins.push(
+        new AutoSize(
+          this.element,
+          {
+            dataProvider: this.dataProvider,
+            columnProvider: this.columnProvider,
+            dimensionProvider: this.dimensionProvider
+          },
+          typeof this.autoSizeColumn === 'object' ? this.autoSizeColumn : undefined
+        )
+      );
+    }
     this.themeChanged(this.theme);
 
     this.columnChanged(this.columns);
@@ -477,6 +520,10 @@ export class RevoGridComponent {
     this.dataTopChanged(this.pinnedTopSource);
     this.dataBottomChanged(this.pinnedBottomSource);
     this.rowDefChanged(this.rowDefinitions);
+  }
+
+  disconnectedCallback(): void {
+    each(this.plugins, p => p.destroy());
   }
 
   render() {
