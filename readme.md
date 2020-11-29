@@ -39,6 +39,7 @@ Support Millions of cells and thousands columns easy and efficiently for fast da
 - Intelligent Virtual DOM and smart row recombination in order to achieve less redraws;
 - Column and Row custom sizes;
 - Column resizing;
+- Column auto-size support (content related column size feature);
 - Pinned columns (columns are always on the left or on the right of the screen);
 - Pinned row (rows are always at the top or at the bottom);
 - Column grouping;
