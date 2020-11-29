@@ -26,7 +26,7 @@ export class DataProvider {
     return !!this.sorting;
   }
 
-  setData(data: RevoGrid.DataType[], type: DimensionRows, doSorting = true): void {
+  setData(data: RevoGrid.DataType[], type: DimensionRows, doSorting = true): RevoGrid.DataType[] {
     let source = [...data];
 
     // sorting available for row type only
@@ -37,8 +37,9 @@ export class DataProvider {
     if (type === 'row') {
       this.dimensionProvider.setData(source, type);
     } else {
-      this.dimensionProvider.setPins(source, type);
+      this.dimensionProvider.setColumns(type, undefined, true);
     }
+    return source;
   }
 
   setCellData(data: Edition.BeforeSaveDataDetails): void {

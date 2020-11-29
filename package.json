@@ -3,17 +3,17 @@
   "version": "1.8.2",
   "description": "Virtual reactive data grid component - RevoGrid.",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/revolist/revogrid/issues"
-  },
-  "homepage": "https://github.com/revolist/revogrid#readme",
   "directories": {
     "doc": "docs"
   },
   "author": "revolist",
+  "homepage": "https://github.com/revolist/revogrid#readme",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/revolist/revogrid.git"
+  },
+  "bugs": {
+    "url": "https://github.com/revolist/revogrid/issues"
   },
   "keywords": [
     "revo-grid",

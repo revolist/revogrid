@@ -107,7 +107,13 @@ export default class ColumnService implements ColumnServiceI {
       val = this.getCellData(rowIndex, c)
     }
     const data = this.rowDataModel(rowIndex, c);
-    return { prop: data.prop, rowIndex, val, model: data.model, type: this.dataStore.get('type')};
+    return {
+      prop: data.prop,
+      rowIndex,
+      val,
+      model: data.model,
+      type: this.dataStore.get('type')
+    };
   }
 
   getCellEditor(_r: number, c: number, editors: Edition.Editors): Edition.EditorCtr|undefined {
