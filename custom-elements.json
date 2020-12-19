@@ -9,6 +9,10 @@
       },
       "attributes": [
         {
+          "name": "auto-size-column",
+          "description": "Autosize config\nEnable columns autoSize, for more details check @autoSizeColumn plugin\nBy default disabled, hence operation is not resource efficient\ntrue to enable with default params (double header separator click for autosize)\nor provide config"
+        },
+        {
           "name": "can-focus",
           "description": "When true cell focus appear."
         },

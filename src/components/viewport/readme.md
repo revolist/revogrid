@@ -27,7 +27,7 @@
 | Event                   | Description | Type                                                                             |
 | ----------------------- | ----------- | -------------------------------------------------------------------------------- |
 | `initialRowDragStart`   |             | `CustomEvent<{ pos: PositionItem; text: string; }>`                              |
-| `setDimensionSize`      |             | `CustomEvent<{ type: MultiDimensionType; sizes: ViewSettingSizeProp; }>`         |
+| `setDimensionSize`      |             | `CustomEvent<{ type: MultiDimensionType; sizes: Record<string, number>; }>`      |
 | `setViewportCoordinate` |             | `CustomEvent<{ dimension: DimensionType; coordinate: number; delta?: number; }>` |
 | `setViewportSize`       |             | `CustomEvent<{ dimension: DimensionType; size: number; }>`                       |
 
