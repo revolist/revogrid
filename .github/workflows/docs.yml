@@ -2,12 +2,9 @@ name: Deploy
 on:
   workflow_dispatch:
     inputs:
-      doc:
-        description: 'Run documentation'     
-        required: true
-        default: 'warning'
       tags:
         description: 'Documentation update' 
+        default: 'Doc update'
 jobs:
   build:
     runs-on: ubuntu-latest
