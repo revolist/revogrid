@@ -13,11 +13,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    # Setup .npmrc file to publish to npm
-    - uses: actions/setup-node@v1
-      with:
-        node-version: '12.x'
-        registry-url: 'https://registry.npmjs.org'
-    - run: npm install
+
+    # Checout submodule
+    - name: Checkout submodules
+      run: git submodule update --init --recursive
+        
     # Build
-    - run: npm run deploy
+    - name: Build demo
+      run: npm run build:demo
+
+    # Post
+    - name: Post demo
+      run: gh-pages -d ./demo/src/.vuepress/dist
