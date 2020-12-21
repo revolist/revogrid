@@ -25,7 +25,7 @@ jobs:
     # Build
     - name: Package build
       working-directory: ./demo
-      run: npm run build
+      run: sudo npm run build
 
     - name: Deploy 🚀
       uses: JamesIves/github-pages-deploy-action@3.7.1
