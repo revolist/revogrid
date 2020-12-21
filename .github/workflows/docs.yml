@@ -1,4 +1,4 @@
-name: Node.js Package
+name: Deploy
 on:
   workflow_dispatch:
     inputs:
