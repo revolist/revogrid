@@ -6,34 +6,37 @@ import ViewportStore from "../../store/viewPort/viewport.store";
 import { UUID } from "../../utils/consts";
 import { ElementScroll } from "../viewport/gridScrollingService";
 import { ViewportSpace } from "../viewport/viewport.interfaces";
+import { RowHeaderRender } from "./row-header-render";
 
 type Props = {
 	height: number;
 	anyView: ViewportSpace.ViewportProps;
   resize: boolean;
   selectionStoreConnector: SelectionStoreConnector;
+  rowHeaderColumn?: RevoGrid.RowHeaders;
 	onScrollViewport(e: RevoGrid.ViewPortScrollEvent): void;
 	onElementToScroll(e: ElementScroll): void;
 };
 
+const LETTER_BLOCK_SIZE = 10;
 
-const RevogrRowHeaders = ({anyView, height, selectionStoreConnector, onScrollViewport, onElementToScroll}: Props, _children: VNode[]): VNode => {
-	const dataViews: HTMLElement[] = [];
+const RevogrRowHeaders = ({
+  anyView,
+  height,
+  selectionStoreConnector,
+  rowHeaderColumn,
+  onScrollViewport,
+  onElementToScroll
+}: Props): VNode => {
+	  const dataViews: HTMLElement[] = [];
     const viewport = new ViewportStore();
-    viewport.setViewport({
-      realCount: 1,
-      virtualSize: 0,
-      items: [{ size: 0, start: 0, end: 0, itemIndex: 0 }]
-    });
     /** render viewports rows */
     let totalLength = 0;
+    const column = { cellTemplate: RowHeaderRender(totalLength), ...rowHeaderColumn };
     for (let data of anyView.dataPorts) {
       const colData = new DataStore<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>('colPinStart');
       const rowSelectionStore = selectionStoreConnector.registerRow(data.position.y);
-      const start = totalLength;
-      colData.setData({
-        items: [{ cellTemplate: (_h, e: {rowIndex: number}) => (start + e.rowIndex) }]
-      });
+      colData.setData({ items: [column] });
       dataViews.push(
         <revogr-data
           slot='content'
@@ -46,7 +49,18 @@ const RevogrRowHeaders = ({anyView, height, selectionStoreConnector, onScrollVie
       );
       totalLength += data.dataStore.get('items').length;
     }
-    const size = totalLength;
+    const colSize = rowHeaderColumn?.size || (totalLength.toString().length + 1) * LETTER_BLOCK_SIZE;
+    viewport.setViewport({
+      realCount: 1,
+      virtualSize: 0,
+      items: [{
+        size: colSize,
+        start: 0,
+        end: colSize,
+        itemIndex: 0
+      }]
+    });
+
     const parent = `${anyView.prop[UUID]}-rowHeaders`;
     return <revogr-viewport-scroll
       {...{[UUID]: parent}}
@@ -54,7 +68,7 @@ const RevogrRowHeaders = ({anyView, height, selectionStoreConnector, onScrollVie
       contentWidth={0}
       class='rowHeaders'
       key='rowHeaders'
-      style={{minWidth: `${size.toString().length + 1}em`}}
+      style={{minWidth: `${colSize}px`}}
       ref={el => onElementToScroll(el)}
       onScrollViewport={e => onScrollViewport(e.detail)}>
       <revogr-header
@@ -62,7 +76,7 @@ const RevogrRowHeaders = ({anyView, height, selectionStoreConnector, onScrollVie
         viewportCol={viewport.store}
         parent={parent}
         slot='header'
-        colData={[]}
+        colData={[column]}
         canResize={false}/>
       {dataViews}
     </revogr-viewport-scroll>;

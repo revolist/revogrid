@@ -75,7 +75,7 @@ export namespace Components {
         /**
           * Excel like show row indexe per row
          */
-        "rowHeaders": boolean;
+        "rowHeaders": RevoGrid.RowHeaders|boolean;
         /**
           * Indicates default row size. By default 0, means theme package size will be applied
          */
@@ -218,7 +218,7 @@ export namespace Components {
         /**
           * Show row indexes column
          */
-        "rowHeaders": boolean;
+        "rowHeaders": RevoGrid.RowHeaders|boolean;
         "rowStores": {[T in RevoGrid.DimensionRows]: ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>};
         "scrollToCoordinate": (cell: Partial<Selection.Cell>) => Promise<void>;
         "setEdit": (rowIndex: number, colIndex: number, colType: RevoGrid.DimensionCols, rowType: RevoGrid.DimensionRows) => Promise<void>;
@@ -440,7 +440,7 @@ declare namespace LocalJSX {
         /**
           * Excel like show row indexe per row
          */
-        "rowHeaders"?: boolean;
+        "rowHeaders"?: RevoGrid.RowHeaders|boolean;
         /**
           * Indicates default row size. By default 0, means theme package size will be applied
          */
@@ -613,7 +613,7 @@ declare namespace LocalJSX {
         /**
           * Show row indexes column
          */
-        "rowHeaders"?: boolean;
+        "rowHeaders"?: RevoGrid.RowHeaders|boolean;
         "rowStores"?: {[T in RevoGrid.DimensionRows]: ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>};
         "uuid"?: string|null;
         "viewports"?: {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.ViewportState>};

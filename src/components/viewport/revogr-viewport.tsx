@@ -47,7 +47,7 @@ export class RevogrViewport {
   @Prop() readonly: boolean;
   @Prop() range: boolean;
   /** Show row indexes column */
-  @Prop() rowHeaders: boolean = true;
+  @Prop() rowHeaders: RevoGrid.RowHeaders|boolean;
 
   // --------------------------------------------------------------------------
   //
@@ -181,6 +181,7 @@ export class RevogrViewport {
         height={contentHeight}
         anyView={viewports[0]}
         resize={this.resize}
+        rowHeaderColumn={typeof this.rowHeaders === 'object' ? this.rowHeaders : undefined}
         onScrollViewport={e => this.scrollingService.onScroll(e, 'headerRow')}
         onElementToScroll={e => this.scrollingService.registerElement(e, 'headerRow')}/>);
     }

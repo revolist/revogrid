@@ -46,7 +46,7 @@ export class RevoGridComponent {
   // --------------------------------------------------------------------------
 
   /** Excel like show row indexe per row */
-  @Prop() rowHeaders: boolean = false;
+  @Prop() rowHeaders: RevoGrid.RowHeaders|boolean;
   /**
    * Defines how many rows/columns should be rendered outside visible area.
    */

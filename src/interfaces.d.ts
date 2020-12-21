@@ -100,9 +100,9 @@ export declare namespace RevoGrid {
     /** represents type defined in @columnTypes property */
     columnType?: string;
 
-    [key: string]: any;
-
     beforeSetup?(col: ColumnRegular): void;
+
+    [key: string]: any;
   }
 
   type ColumnDataSchema = ColumnGrouping|ColumnRegular;
@@ -161,6 +161,8 @@ export declare namespace RevoGrid {
     size: number;
     index: number;
   };
+
+  interface RowHeaders extends RevoGrid.ColumnRegular {}
 
   // --------------------------------------------------------------------------
   //
