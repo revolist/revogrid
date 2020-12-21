@@ -21,10 +21,9 @@ jobs:
     - name: Build demo
       run: npm run build:demo
 
-    - name: Deploy 🚀
-      uses: JamesIves/github-pages-deploy-action@3.7.1
+
+    - name: Deploy
+      uses: peaceiris/actions-gh-pages@v3
       with:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        BRANCH: gh-pages # The branch the action should deploy to.
-        FOLDER: ./demo/src/.vuepress/dist # The folder the action should deploy.
-        CLEAN: true # Automatically remove deleted files from the deploy branch
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./demo/src/.vuepress/dist
