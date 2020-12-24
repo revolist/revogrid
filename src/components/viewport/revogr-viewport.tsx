@@ -15,6 +15,7 @@ import { columnTypes } from '../../store/storeTypes';
 
 import ViewportProps = ViewportSpace.ViewportProps;
 import RevogrRowHeaders from '../rowHeaders/revogr-row-headers';
+import { ColumnFilter } from '../../plugins/filter/filter.plugin';
 
 @Component({
   tag: 'revogr-viewport',
@@ -48,6 +49,7 @@ export class RevogrViewport {
   @Prop() range: boolean;
   /** Show row indexes column */
   @Prop() rowHeaders: RevoGrid.RowHeaders|boolean;
+  @Prop() columnFilter: boolean|ColumnFilter;
 
   // --------------------------------------------------------------------------
   //
@@ -233,7 +235,13 @@ export class RevogrViewport {
           {...view.prop}
           ref={el => this.scrollingService.registerElement(el, view.prop.key)}
           onScrollViewport={e => this.scrollingService.onScroll(e.detail, view.prop.key)}>
-          <revogr-header viewportCol={view.viewportCol} {...view.headerProp} selectionStore={colSelectionStore.store} slot='header' canResize={this.resize}/>
+          <revogr-header
+            viewportCol={view.viewportCol}
+            {...view.headerProp}
+            selectionStore={colSelectionStore.store}
+            slot='header'
+            columnFilter={this.columnFilter}
+            canResize={this.resize}/>
           {dataViews}
         </revogr-viewport-scroll>
       );

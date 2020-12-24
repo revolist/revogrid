@@ -4,19 +4,15 @@ import { ResizableElement } from "../../services/resizable.directive";
 import ColumnService from "../data/columnService";
 
 type Props = {
-    data?: GlobalColumn;
+    data?: RevoGrid.ColumnRegular;
     props: RevoGrid.CellProps;
 };
 
-interface GlobalColumn extends RevoGrid.ColumnProperties {
-    name?: string;
-}
-
-export const HeaderCellRenderer = ({data, props}: Props): VNode => {
-    let headerChildren: VNode|VNode[]|string = data?.name || '';
+export const HeaderCellRenderer = ({data, props}: Props, children: VNode[]): VNode => {
+    let colTemplate: VNode|VNode[]|string = data?.name || '';
     let cellProps = props;
     if (data?.columnTemplate) {
-        headerChildren = data.columnTemplate(h as unknown as RevoGrid.HyperFunc<VNode>, data);
+        colTemplate = data.columnTemplate(h as unknown as RevoGrid.HyperFunc<VNode>, data);
     }
     if (data?.columnProperties) {
         const extra = data.columnProperties(data);
@@ -24,5 +20,5 @@ export const HeaderCellRenderer = ({data, props}: Props): VNode => {
             cellProps = ColumnService.doMerge(props, extra);
         }
     }
-    return <ResizableElement {...cellProps}>{headerChildren}</ResizableElement>;
+    return <ResizableElement {...cellProps}>{colTemplate}{children}</ResizableElement>;
 };

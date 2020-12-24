@@ -21,7 +21,9 @@ export type GDataType = DataType|ColumnRegular;
 export type GDimension = DimensionRows|DimensionCols;
 export type DataSourceState<T extends GDataType, ST extends GDimension> = {
   items: T[];
+  original: T[];
   groupingDepth: number;
+  trimmed: Record<number, boolean>;
   groups: Groups;
   type: ST;
 };
@@ -34,8 +36,10 @@ export default class DataStore<T extends GDataType, ST extends GDimension> {
   constructor(type: ST) {
     this.dataStore = createStore({
       items: [],
+      original: [],
       groupingDepth: 0,
       groups: {},
+      trimmed: {},
       type
     });
   }

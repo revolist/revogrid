@@ -89,12 +89,12 @@ export default class AutoSizeColumn implements RevoPlugin.Plugin {
         const beforeColumnsSet = ({detail: {columns}}: CustomEvent<ColumnCollection>) => {
             this.columnSet(columns);
         };
-        const headerDblClick = ({detail: {column, index}}: CustomEvent<{column: RevoGrid.ColumnRegular, index: number}>) => {
-            const type = ColumnDataProvider.getColumnType(column);
-            const size = this.getColumnSize(index, type);
+        const headerDblClick = ({detail}: CustomEvent<RevoGrid.InitialHeaderClick>) => {
+            const type = ColumnDataProvider.getColumnType(detail);
+            const size = this.getColumnSize(detail.index, type);
             if (size) {
                 this.providers.dimensionProvider.setDimensionSize(type, {
-                    [index]: size
+                    [detail.index]: size
                 });
             }
         };

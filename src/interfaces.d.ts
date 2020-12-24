@@ -93,6 +93,8 @@ export declare namespace RevoGrid {
     sortable?: boolean;
     /** column size would be changed based on content size */
     autoSize?: boolean;
+    /** filter */
+    filter?: boolean;
     order?: 'asc'|'desc';
     /** is cell in column or individual can be dragged */
     rowDrag?: RowDrag;
@@ -180,6 +182,11 @@ export declare namespace RevoGrid {
     coordinate: number;
     delta?: number;
   };
+
+  type InitialHeaderClick = {
+    index: number;
+    originalEvent: MouseEvent;
+  }&RevoGrid.ColumnRegular;
 
 
   // --------------------------------------------------------------------------

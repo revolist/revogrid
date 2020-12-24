@@ -1,4 +1,4 @@
-import {Component, Prop, h, Watch, Element, Listen, Event, EventEmitter, Method} from '@stencil/core';
+import {Component, Prop, h, Watch, Element, Listen, Event, EventEmitter, Method, VNode, State} from '@stencil/core';
 import {ObservableMap} from '@stencil/store';
 import reduce from 'lodash/reduce';
 
@@ -13,6 +13,7 @@ import { timeout } from '../../utils/utils';
 import { each } from 'lodash';
 import AutoSize, { AutoSizeColumnConfig } from '../../plugins/autoSizeColumn';
 import { columnTypes } from '../../store/storeTypes';
+import FilterPlugin, { ColumnFilter } from '../../plugins/filter/filter.plugin';
 
 type ColumnStores = {
   [T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
@@ -112,7 +113,10 @@ export class RevoGridComponent {
    * true to enable with default params (double header separator click for autosize)
    * or provide config
    */
-  @Prop() autoSizeColumn: boolean|AutoSizeColumnConfig|undefined;
+  @Prop() autoSizeColumn: boolean|AutoSizeColumnConfig = false;
+
+  /** Can filter */
+  @Prop() columnFilter: boolean|ColumnFilter = false;
   // --------------------------------------------------------------------------
   //
   //  Events
@@ -205,7 +209,14 @@ export class RevoGridComponent {
    * Use e.preventDefault() to prevent cell focus change. 
    */
   @Event() beforeCellFocus: EventEmitter<Edition.BeforeSaveDataDetails>;
-
+  /** 
+   * Before data apply.
+   * You can override data source here 
+   */
+  @Event() beforeSourceSet: EventEmitter<{
+    type: RevoGrid.DimensionRows;
+    source: RevoGrid.DataType[];
+  }>;
 
   @Event() afterSourceSet: EventEmitter<{
     type: RevoGrid.DimensionRows;
@@ -272,6 +283,20 @@ export class RevoGridComponent {
       this.viewportElement.setEdit(row, this.columnProvider.getColumnIndexByProp(prop, 'col'), col.pin || 'col', rowSource);
     }
   }
+
+  /** 
+   * Register new virtual node inside of grid
+   * Used for additional items creation such as plugin elements
+  */
+  @Method() async registerVNode(elements: VNode[]): Promise<void> {
+    this.extraElements.push(...elements);
+    this.extraElements = [...this.extraElements];
+  }
+
+  /**  Get data from source */
+  @Method() async getSource(type: RevoGrid.DimensionRows = 'row'): Promise<RevoGrid.DataType[]> {
+    return this.rowStores[type].get('items');
+  }
   
   // --------------------------------------------------------------------------
   //
@@ -334,8 +359,11 @@ export class RevoGridComponent {
   }
 
   @Listen('initialHeaderClick')
-  onHeaderClick(e: CustomEvent<{column: RevoGrid.ColumnRegular, index: number}>): void {
-    const {defaultPrevented} = this.headerClick.emit(e.detail.column);
+  onHeaderClick(e: CustomEvent<RevoGrid.InitialHeaderClick>): void {
+    const {defaultPrevented} = this.headerClick.emit({
+      ...e.detail.column,
+      originalEvent:  e.detail.originalEvent
+    });
     if (defaultPrevented) {
       return;
     }
@@ -375,6 +403,8 @@ export class RevoGridComponent {
   //
   // --------------------------------------------------------------------------
 
+  @State() extraElements: VNode[] = [];
+
   private uuid: string|null = null;
   private columnProvider: ColumnDataProvider;
   private dataProvider: DataProvider;
@@ -413,15 +443,24 @@ export class RevoGridComponent {
   }
 
   @Watch('source')
-  dataChanged(newVal: RevoGrid.DataType[]): void {
+  dataChanged(source: RevoGrid.DataType[]): void {
+    let newSource: RevoGrid.DataType[] = [...source];
+    
+    const beforeSourceSet = this.beforeSourceSet.emit({
+      type: 'row',
+      source: newSource
+    });
+    newSource = beforeSourceSet.detail.source;
+
     let applySorting;
     if (this.dataProvider.hasSorting) {
       const event = this.beforeSourceSortingApply.emit();
       applySorting = !event.defaultPrevented;
     }
+
     this.afterSourceSet.emit({
       type: 'row',
-      source: this.dataProvider.setData(newVal, 'row', applySorting)
+      source: this.dataProvider.setData(newSource, 'row', applySorting)
     });
   }
 
@@ -513,6 +552,9 @@ export class RevoGridComponent {
         )
       );
     }
+    if (this.columnFilter) {
+      this.plugins.push(new FilterPlugin(this.element, this.uuid));
+    }
     this.themeChanged(this.theme);
 
     this.columnChanged(this.columns);
@@ -527,7 +569,7 @@ export class RevoGridComponent {
   }
 
   render() {
-    return <revogr-viewport
+    return [<revogr-viewport
       ref={e => this.viewportElement = e}
       onSetDimensionSize={e => this.dimensionProvider.setDimensionSize(e.detail.type, e.detail.sizes)}
       onSetViewportCoordinate={e => this.dimensionProvider.setViewPortCoordinate(e.detail)}
@@ -542,6 +584,7 @@ export class RevoGridComponent {
       range={this.range}
       rowClass={this.rowClass}
       rowHeaders={this.rowHeaders}
-      editors={this.editors}/>;
+      columnFilter={this.columnFilter}
+      editors={this.editors}/>, this.extraElements]
   }
 }
