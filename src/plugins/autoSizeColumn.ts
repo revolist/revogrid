@@ -10,6 +10,7 @@ import ColumnDataProvider, { ColumnCollection } from '../services/column.data.pr
 import { DataProvider } from '../services/data.provider';
 import { columnTypes } from '../store/storeTypes';
 import DimensionProvider, {ColumnItems} from '../services/dimension.provider';
+import { getSourceItem } from '../store/dataSource/data.store';
 
 interface Column extends RevoGrid.ColumnRegular {
     index: number;
@@ -226,8 +227,9 @@ export default class AutoSizeColumn implements RevoPlugin.Plugin {
             return 0;
         }
         return reduce(this.providers.dataProvider.stores, (r, s) => {
-            const perStore = reduce(s.store.get('items'), (prev, row) => {
-                return Math.max(prev || 0, this.getLength(row[col.prop]));
+            const perStore = reduce(s.store.get('items'), (prev, _row, i) => {
+                const item = getSourceItem(s.store, i);
+                return Math.max(prev || 0, this.getLength(item[col.prop]));
             }, 0);
             return Math.max(r, perStore);
         }, col.size || 0);
@@ -287,7 +289,6 @@ export default class AutoSizeColumn implements RevoPlugin.Plugin {
         el.classList.add('revo-test-container');
         return el;
     }
-
 
     destroy() {
         for (let type in this.subscriptions) {

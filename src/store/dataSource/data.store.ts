@@ -10,6 +10,7 @@ import DataType = RevoGrid.DataType;
 import ColumnRegular = RevoGrid.ColumnRegular;
 import DimensionRows = RevoGrid.DimensionRows;
 import DimensionCols = RevoGrid.DimensionCols;
+import findIndex from 'lodash/findIndex';
 
 export interface Group extends RevoGrid.ColumnProperties {
   name: string;
@@ -20,8 +21,8 @@ export type Groups = {[level: number]: Group[]};
 export type GDataType = DataType|ColumnRegular;
 export type GDimension = DimensionRows|DimensionCols;
 export type DataSourceState<T extends GDataType, ST extends GDimension> = {
-  items: T[];
-  original: T[];
+  items: number[];
+  source: T[];
   groupingDepth: number;
   trimmed: Record<number, boolean>;
   groups: Groups;
@@ -36,7 +37,7 @@ export default class DataStore<T extends GDataType, ST extends GDimension> {
   constructor(type: ST) {
     this.dataStore = createStore({
       items: [],
-      original: [],
+      source: [],
       groupingDepth: 0,
       groups: {},
       trimmed: {},
@@ -44,8 +45,11 @@ export default class DataStore<T extends GDataType, ST extends GDimension> {
     });
   }
 
-  updateData(items: T[], grouping?: { depth: number; groups: Groups }): void {
-    const data: Partial<DataSourceState<T, ST>> = { items };
+  updateData(source: T[], grouping?: { depth: number; groups: Groups }): void {
+    const data: Partial<DataSourceState<T, ST>> = {
+      source
+    };
+    this.indexMapping(data);
     if (grouping) {
       data.groupingDepth = grouping.depth;
       data.groups = grouping.groups;
@@ -53,9 +57,61 @@ export default class DataStore<T extends GDataType, ST extends GDimension> {
     this.setData(data);
   }
 
-  setData(data: Partial<DataSourceState<T, ST>>): void {
-    setStore(this.store, data );
+  setData(input: Partial<DataSourceState<T, ST>>): void {
+    const data: Partial<DataSourceState<T, ST>> = {
+      ...input
+    };
+    setStore(this.store, data);
+  }
+
+  private indexMapping(data: Partial<DataSourceState<T, ST>> ) {
+    if (data.source) {
+      // Array.keys() require an ES6 polyfill in order to work in all browsers
+      data.items = [...Array(data.source.length).keys()]
+    }
+    return data;
   }
 }
 
+/**
+ * get all visible items
+ * @param store - store to process
+ */
+export function getVisibleSourceItem(store: ObservableMap<DataSourceState<any, any>>) {
+  const source = store.get('source');
+  return store.get('items').map(v => source[v]);
+}
 
+/**
+ * get mapped item from source
+ * @param store - store to process
+ * @param virtualIndex - virtual index to process
+ */
+export function getSourceItem(store: ObservableMap<DataSourceState<any, any>>, virtualIndex: number) {
+  const items = store.get('items');
+  const source = store.get('source');
+  return source[items[virtualIndex]];
+}
+
+/**
+ * set item to source
+ * @param store  - store to process
+ * @param modelByIndex - collection of rows with virtual indexes to setup
+ */
+export function setSourceItem<T>(store: ObservableMap<DataSourceState<T, any>>, modelByIndex: Record<number, T>) {
+  const items = store.get('items');
+  const source = store.get('source');
+
+  for (let virtualIndex in modelByIndex) {
+    const realIndex = items[virtualIndex];
+    source[realIndex] = modelByIndex[virtualIndex];
+  }
+  store.set('source', [...source]);
+}
+
+export function getSourceItemVirtualIndexByProp(store: ObservableMap<DataSourceState<any, any>>, prop: RevoGrid.ColumnProp) {
+  const items = store.get('items');
+  const source = store.get('source');
+  const physicalIndex = findIndex(source, { prop });
+  return items.indexOf(physicalIndex);
+}

@@ -1,15 +1,17 @@
 /** Collect data for pinned columns in required @ViewportProps format */
-import {RevoGrid, Selection} from "../../interfaces";
-import {UUID} from "../../utils/consts";
-import {ViewportSpace} from "./viewport.interfaces";
+import {ObservableMap} from '@stencil/store';
+
+import {RevoGrid, Selection} from '../../interfaces';
+import {UUID} from '../../utils/consts';
+import {ViewportSpace} from './viewport.interfaces';
+import {DataSourceState, getVisibleSourceItem} from '../../store/dataSource/data.store';
+import { columnTypes, rowTypes } from '../../store/storeTypes';
+
 import ViewportProps = ViewportSpace.ViewportProps;
 import ViewportData = ViewportSpace.ViewportData;
 import SlotType = ViewportSpace.SlotType;
 import Properties = ViewportSpace.Properties;
-import {ObservableMap} from "@stencil/store";
-import {DataSourceState} from "../../store/dataSource/data.store";
-import { columnTypes, rowTypes } from "../../store/storeTypes";
-
+import HeaderProperties = ViewportSpace.HeaderProperties;
 export interface ViewportColumn {
     colType: RevoGrid.DimensionCols;
     position: Selection.Cell;
@@ -41,9 +43,9 @@ export function gatherColumnData(data: ViewportColumn): ViewportProps {
     if (data.fixWidth) {
         prop.style = { minWidth: `${realSize}px` };
     }
-    const headerProp: Properties = {
+    const headerProp: HeaderProperties = {
         parent,
-        colData: data.colStore.get('items'),
+        colData: getVisibleSourceItem(data.colStore),
         dimensionCol: data.dimensions[data.colType],
         groups: data.colStore.get('groups'),
         groupingDepth: data.colStore.get('groupingDepth'),

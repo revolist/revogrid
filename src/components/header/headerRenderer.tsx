@@ -33,22 +33,14 @@ const HeaderRenderer = (p: Props): VNode => {
         class: cellClass,
         style: { width: `${p.column.size}px`, transform: `translateX(${p.column.start}px)` },
         onResize: p.onResize,
-        onDoubleClick(e: MouseEvent) {
-            p.onDoubleClick({
-                column: p.data,
-                index: p.column.itemIndex,
-                originalEvent: e
-            });
+        onDoubleClick(originalEvent: MouseEvent) {
+            p.onDoubleClick({ column: p.data, index: p.column.itemIndex, originalEvent });
         },
-        onClick(e: MouseEvent) {
-            if (e.defaultPrevented || !p.onClick) {
+        onClick(originalEvent: MouseEvent) {
+            if (originalEvent.defaultPrevented || !p.onClick) {
                 return;
             }
-            p.onClick({
-                column: p.data,
-                index: p.column.itemIndex,
-                originalEvent: e
-            });
+            p.onClick({ column: p.data, index: p.column.itemIndex, originalEvent });
         }
     };
     if (p.range) {

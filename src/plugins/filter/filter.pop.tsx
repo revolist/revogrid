@@ -1,5 +1,6 @@
 import { Component, h, Host, Listen, Method, Prop, State, Event, EventEmitter } from "@stencil/core";
 import { RevoGrid } from "../../interfaces";
+import '../../utils/closestPolifill';
 import { filterCollection, filterEntities, FilterType, filterType } from "./filter.service";
 
 export type FilterItem = {

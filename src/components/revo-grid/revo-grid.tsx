@@ -295,7 +295,7 @@ export class RevoGridComponent {
 
   /**  Get data from source */
   @Method() async getSource(type: RevoGrid.DimensionRows = 'row'): Promise<RevoGrid.DataType[]> {
-    return this.rowStores[type].get('items');
+    return this.rowStores[type].get('source');
   }
   
   // --------------------------------------------------------------------------

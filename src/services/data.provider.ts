@@ -4,7 +4,7 @@ import keys from 'lodash/keys';
 import toArray from 'lodash/toArray';
 import size from 'lodash/size';
 
-import DataStore from '../store/dataSource/data.store';
+import DataStore, { getSourceItem, setSourceItem } from '../store/dataSource/data.store';
 import {isRowType, rowTypes} from '../store/storeTypes';
 import DimensionProvider from './dimension.provider';
 import {RevoGrid, Edition} from '../interfaces';
@@ -42,10 +42,11 @@ export class DataProvider {
     return source;
   }
 
-  setCellData(data: Edition.BeforeSaveDataDetails): void {
-    const items = this.stores[data.type].store.get('items');
-    items[data.rowIndex][data.prop] = data.val;
-    this.stores[data.type].setData({ items: [...items]  });
+  setCellData(data: Edition.BeforeSaveDataDetails) {
+    const store = this.stores[data.type].store;
+    const model =  getSourceItem(store, data.rowIndex);
+    model[data.prop] = data.val;
+    setSourceItem(store, { [data.rowIndex]: model });
   }
 
   // sorting available for row type only
@@ -56,8 +57,8 @@ export class DataProvider {
     }
     this.sorting = sorting;
 
-    const items = this.sortItems(this.stores['row'].store.get('items'), sorting);
-    this.stores['row'].setData({ items });
+    const source = this.sortItems(this.stores['row'].store.get('source'), sorting);
+    this.stores['row'].setData({ source });
   }
 
   private sortItems(data: RevoGrid.DataType[], sorting: Sorting): RevoGrid.DataType[] {

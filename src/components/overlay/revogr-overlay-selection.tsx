@@ -13,7 +13,7 @@ import {
   EDIT_INPUT_WR,
   SELECTION_BORDER_CLASS
 } from '../../utils/consts';
-import {DataSourceState} from '../../store/dataSource/data.store';
+import {DataSourceState, getSourceItem} from '../../store/dataSource/data.store';
 import { getRange, isRangeSingleCell } from '../../store/selection/selection.helpers';
 import { timeout } from '../../utils/utils';
 import KeyService from './keyService';
@@ -413,16 +413,19 @@ export class OverlaySelection {
     if (range) {
       const columns = [...this.columnService.columns];
       const props = slice(columns, range.x, range.x1 + 1).map(v => v.prop);
-      data = this.columnService.copyRangeArray(range, props, this.dataStore.get('items'));
+      data = this.columnService.copyRangeArray(
+        range,
+        props,
+        this.dataStore
+      );
     }
     this.clipboard.doCopy(e, data);
   }
 
   private onRangeApply(data: RevoGrid.DataLookup, range: Selection.RangeArea): void {
-    const items = this.dataStore?.get('items');
     const models: RevoGrid.DataLookup = {};
     for (let rowIndex in data) {
-      models[rowIndex] = items[parseInt(rowIndex, 10)]
+      models[rowIndex] = getSourceItem(this.dataStore, parseInt(rowIndex, 10))
     }
     const dataEvent = this.internalRangeDataApply.emit({
       data,
