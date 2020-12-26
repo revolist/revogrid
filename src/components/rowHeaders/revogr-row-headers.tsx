@@ -35,9 +35,11 @@ const RevogrRowHeaders = ({
     /** render viewports rows */
     let totalLength = 1;
     const column = { cellTemplate: RowHeaderRender(totalLength), ...rowHeaderColumn };
+
     for (let data of anyView.dataPorts) {
       const colData = new DataStore<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>('colPinStart');
       const rowSelectionStore = selectionStoreConnector.registerRow(data.position.y);
+      // initiate column data
       colData.updateData([column]);
       dataViews.push(
         <revogr-data
@@ -51,6 +53,7 @@ const RevogrRowHeaders = ({
       );
       totalLength += data.dataStore.get('items').length;
     }
+
     const colSize = rowHeaderColumn?.size || (totalLength.toString().length + 1) * LETTER_BLOCK_SIZE;
     viewport.setViewport({
       realCount: 1,

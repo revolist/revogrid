@@ -31,11 +31,11 @@ export function generateFakeDataObject(rowsNumber, colsNumber) {
             }
         }
         result[row][col] = row + ':' + col;
+        if (col === 0) {
+            columns[col].rowDrag = true;
+        }
         if (col === 5) {
-            columns[col] = {
-                ...columns[col],
-                autoSize: true
-            };
+            columns[col].autoSize = true;
         }
     }
     const pinnedTopRows = result[10] && [result[10]] || [];

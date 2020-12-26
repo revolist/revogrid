@@ -28,6 +28,11 @@ export default class DimensionProvider {
         this.stores[type].setRealSize(realCount);
     }
 
+    /**
+     * Sets dimension data and view port coordinate
+     * @param items - data/column items
+     * @param type - dimension type
+     */
     setData(items: RevoGrid.ColumnRegular[]|RevoGrid.DataType[], type: RevoGrid.DimensionType) {
         this.setRealSize(items.length, type);
         this.setViewPortCoordinate({

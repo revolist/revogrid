@@ -186,7 +186,8 @@ export declare namespace RevoGrid {
   type InitialHeaderClick = {
     index: number;
     originalEvent: MouseEvent;
-  }&RevoGrid.ColumnRegular;
+    column: RevoGrid.ColumnRegular;
+  };
 
 
   // --------------------------------------------------------------------------

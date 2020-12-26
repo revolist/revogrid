@@ -122,6 +122,18 @@ export namespace Components {
           * Theme name
          */
         "theme": ThemeSpace.Theme;
+        /**
+          * Trimmed rows Functionality which allows to hide rows from main data set
+          * @trimmedRows are physical row indexes to hide
+         */
+        "trimmedRows": Record<number, boolean>;
+        /**
+          * Update column sorting
+          * @param column - full column details to update
+          * @param index - virtual column index
+          * @param order - order to apply
+         */
+        "updateColumnSorting": (column: RevoGrid.ColumnRegular, index: number, order: 'asc' | 'desc') => Promise<void>;
     }
     interface RevogrClipboard {
         "doCopy": (e: DataTransfer, data?: RevoGrid.DataFormat[][]) => Promise<void>;
@@ -381,6 +393,10 @@ declare namespace LocalJSX {
           * Defines how many rows/columns should be rendered outside visible area.
          */
         "frameSize"?: number;
+        "onAfterColumnsSet"?: (event: CustomEvent<{
+    columns: ColumnCollection;
+    order: Record<RevoGrid.ColumnProp, 'asc'|'desc'>;
+  }>) => void;
         /**
           * After edit. Triggered when after data applied or Range changeged.
          */
@@ -491,6 +507,11 @@ declare namespace LocalJSX {
           * Theme name
          */
         "theme"?: ThemeSpace.Theme;
+        /**
+          * Trimmed rows Functionality which allows to hide rows from main data set
+          * @trimmedRows are physical row indexes to hide
+         */
+        "trimmedRows"?: Record<number, boolean>;
     }
     interface RevogrClipboard {
         "onCopyRegion"?: (event: CustomEvent<DataTransfer>) => void;

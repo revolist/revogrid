@@ -1,20 +1,15 @@
 import reduce from 'lodash/reduce';
-import orderBy from 'lodash/orderBy';
-import keys from 'lodash/keys';
-import toArray from 'lodash/toArray';
-import size from 'lodash/size';
 
-import DataStore, { getSourceItem, setSourceItem } from '../store/dataSource/data.store';
+import DataStore, { getSourceItem, getVisibleSourceItem, setSourceItem } from '../store/dataSource/data.store';
 import {isRowType, rowTypes} from '../store/storeTypes';
 import DimensionProvider from './dimension.provider';
 import {RevoGrid, Edition} from '../interfaces';
 import DimensionRows = RevoGrid.DimensionRows;
 
 type RowDataSources = {[T in DimensionRows]: DataStore<RevoGrid.DataType, RevoGrid.DimensionRows>};
-type Sorting = {[prop in  RevoGrid.ColumnProp]: 'asc'|'desc'};
+
 export class DataProvider {
   public readonly stores: RowDataSources;
-  private sorting: Sorting| null = null;
   constructor(private dimensionProvider: DimensionProvider) {
     this.stores = reduce(rowTypes, (sources: Partial<RowDataSources>, k: DimensionRows) => {
       sources[k] = new DataStore(k);
@@ -22,24 +17,15 @@ export class DataProvider {
     }, {}) as RowDataSources;
   }
 
-  get hasSorting(): boolean {
-    return !!this.sorting;
-  }
-
-  setData(data: RevoGrid.DataType[], type: DimensionRows, doSorting = true): RevoGrid.DataType[] {
-    let source = [...data];
-
-    // sorting available for row type only
-    if (type === 'row' && doSorting && this.sorting) {
-      source = this.sortItems(source, this.sorting);
-    }
-    this.stores[type].updateData([...source]);
+  setData(data: RevoGrid.DataType[], type: DimensionRows): RevoGrid.DataType[] {
+    // set row data
+    this.stores[type].updateData([...data]);
     if (type === 'row') {
-      this.dimensionProvider.setData(source, type);
+      this.dimensionProvider.setData(data, type);
     } else {
       this.dimensionProvider.setColumns(type, undefined, true);
     }
-    return source;
+    return data;
   }
 
   setCellData(data: Edition.BeforeSaveDataDetails) {
@@ -49,31 +35,24 @@ export class DataProvider {
     setSourceItem(store, { [data.rowIndex]: model });
   }
 
-  // sorting available for row type only
-  sort(sorting: Sorting): void {
-    if (!size(sorting)) {
-      this.sorting = null;
-      return;
-    }
-    this.sorting = sorting;
 
-    const source = this.sortItems(this.stores['row'].store.get('source'), sorting);
-    this.stores['row'].setData({ source });
-  }
-
-  private sortItems(data: RevoGrid.DataType[], sorting: Sorting): RevoGrid.DataType[] {
-    return orderBy(data, keys(sorting), toArray(sorting));
-  }
-
-  refresh(type: RevoGrid.DimensionRows|'all' = 'all'): void {
+  refresh(type: RevoGrid.DimensionRows|'all' = 'all') {
     if (isRowType(type)) {
-      this.refreshByDimension(type);
+      this.updateItems(type);
     }
-    rowTypes.forEach((t: RevoGrid.DimensionRows) => this.refreshByDimension(t));
+    rowTypes.forEach((t: RevoGrid.DimensionRows) => this.updateItems(t));
   }
 
-  refreshByDimension(type: RevoGrid.DimensionRows) {
+  updateItems(type: RevoGrid.DimensionRows) {
     const items = this.stores[type].store.get('items');
     this.stores[type].setData({ items: [...items]  });
+  }
+
+  setTrimmed(trimmed: Record<number, boolean>, type: RevoGrid.DimensionRows) {
+    const store = this.stores[type];
+    store.setData({ trimmed });
+    if (type === 'row') {
+      this.dimensionProvider.setData(getVisibleSourceItem(store.store), type);
+    }
   }
 }

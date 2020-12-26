@@ -66,10 +66,14 @@ export default class ColumnDataProvider {
     }
 
     setColumns(data: ColumnCollection): ColumnCollection {
-        each(columnTypes, (k: DimensionCols) => {
+        each(columnTypes, k => {
+            // set columns data
             this.dataSources[k].updateData(data.columns[k], {
+                // max depth level
                 depth: data.maxLevel,
-                groups: reduce(data.columnGrouping[k], (res: Groups, g: Group) => {
+
+                // groups
+                groups: reduce(data.columnGrouping[k], (res: Groups, g) => {
                     if (!res[g.level]) {
                         res[g.level] = [];
                     }

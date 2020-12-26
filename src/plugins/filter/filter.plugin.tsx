@@ -1,16 +1,17 @@
 import { h } from "@stencil/core";
-import { RevoGrid, RevoPlugin } from "../../interfaces";
+import BasePlugin from '../basePlugin';
+import { RevoGrid } from "../../interfaces";
 import { FILTER_BUTTON_CLASS } from "./filter.button";
 import { FilterItem } from "./filter.pop";
 import { filterEntities } from "./filter.service";
 
 export type ColumnFilter = {};
-type HeaderEvent = CustomEvent<RevoGrid.InitialHeaderClick>;
+type HeaderEvent = CustomEvent<RevoGrid.ColumnRegular>;
 
-export default class FilterPlugin implements RevoPlugin.Plugin {
-    private readonly subscriptions: Record<string, ((e: CustomEvent) => void)> = {};
+export default class FilterPlugin extends BasePlugin {
     private pop: HTMLRevogrFilterPanelElement;
-    constructor(private revogrid: HTMLRevoGridElement, uiid: string) {
+    constructor(protected revogrid: HTMLRevoGridElement, uiid: string) {
+        super(revogrid);
         const headerClick = (e: HeaderEvent) => this.headerClick(e);
         const beforeSourceSet = () => {
             // set any filters here if present
@@ -18,18 +19,12 @@ export default class FilterPlugin implements RevoPlugin.Plugin {
         this.addEventListener('headerClick', headerClick);
         this.addEventListener('beforeSourceSet', beforeSourceSet);
 
-
-        
         this.revogrid.registerVNode([
             <revogr-filter-panel
                 uuid={`filter-${uiid}`}
                 onFilterChange={e => this.onFilterChange(e.detail)}
                 ref={(e) => this.pop = e}/>
         ]);
-    }
-    private addEventListener(name: string, func: ((e: CustomEvent) => void)) {
-        this.revogrid.addEventListener(name, func);
-        this.subscriptions[name] = func;
     }
     private headerClick(e: HeaderEvent) {
         const el = e.detail.originalEvent?.target as HTMLElement;
@@ -50,13 +45,13 @@ export default class FilterPlugin implements RevoPlugin.Plugin {
     private async onFilterChange(predicate: FilterItem) {
         let items = await this.revogrid.getSource();
         const filter = filterEntities[predicate.type];
-        const indexes: Record<string, boolean> = items.reduce((result, v, index) => {
-            if (filter(v[predicate.prop], predicate.extra)) {
+        const indexes: Record<number, boolean> = items.reduce((result, v, index) => {
+            if (!filter(v[predicate.prop], predicate.extra)) {
                 result[index] = true;
             }
             return result;
         }, {});
-        console.log(indexes);
+        this.revogrid.trimmedRows = indexes;
     }
 
     private isFilterBtn(e: HTMLElement) {
@@ -64,11 +59,5 @@ export default class FilterPlugin implements RevoPlugin.Plugin {
             return true;
         }
         return e?.closest(`.${FILTER_BUTTON_CLASS}`);
-    }
-
-    destroy() {
-        for (let type in this.subscriptions) {
-            this.revogrid.removeEventListener(type, this.subscriptions[type]);
-        }
     }
 }

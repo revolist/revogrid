@@ -1,6 +1,6 @@
 /**
-* Storing initial data and column information
-*/
+ * Storing data storage for column/row
+ */
 
 import {createStore, ObservableMap} from '@stencil/store';
 
@@ -21,12 +21,17 @@ export type Groups = {[level: number]: Group[]};
 export type GDataType = DataType|ColumnRegular;
 export type GDimension = DimensionRows|DimensionCols;
 export type DataSourceState<T extends GDataType, ST extends GDimension> = {
+  // items - index based array for mapping to source tree
   items: number[];
+  // original data source
   source: T[];
+  // grouping
   groupingDepth: number;
-  trimmed: Record<number, boolean>;
   groups: Groups;
+  // data source type
   type: ST;
+  // trim data, to hide entities from visible data source
+  trimmed: Record<number, boolean>;
 };
 
 export default class DataStore<T extends GDataType, ST extends GDimension> {
@@ -40,14 +45,31 @@ export default class DataStore<T extends GDataType, ST extends GDimension> {
       source: [],
       groupingDepth: 0,
       groups: {},
-      trimmed: {},
-      type
+      type,
+      trimmed: {}
+    });
+    // apply trimmed rows if present
+    this.dataStore.onChange('trimmed', (trimmed) => {
+      const source = this.dataStore.get('source');
+      this.dataStore.set('items', source.reduce((result, _v, i) => {
+        if (!trimmed[i]) {
+          result.push(i);
+        }
+        return result;
+      }, []));
     });
   }
 
-  updateData(source: T[], grouping?: { depth: number; groups: Groups }): void {
+  /**
+   * full data source update
+   * @param source - data column/row source
+   * @param grouping - grouping information if present
+   */
+  updateData(source: T[], grouping?: { depth: number; groups: Groups }) {
     const data: Partial<DataSourceState<T, ST>> = {
-      source
+      source,
+      // during full update we do trim data drop
+      trimmed: {}
     };
     this.indexMapping(data);
     if (grouping) {
@@ -57,7 +79,8 @@ export default class DataStore<T extends GDataType, ST extends GDimension> {
     this.setData(data);
   }
 
-  setData(input: Partial<DataSourceState<T, ST>>): void {
+  // local data update
+  setData(input: Partial<DataSourceState<T, ST>>) {
     const data: Partial<DataSourceState<T, ST>> = {
       ...input
     };
