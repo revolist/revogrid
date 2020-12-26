@@ -51,6 +51,16 @@ export namespace Components {
          */
         "getSource": (type?: RevoGrid.DimensionRows) => Promise<RevoGrid.DataType[]>;
         /**
+          * Provides access to internal store observer Can be used for plugin support
+          * @param type - type of source
+         */
+        "getSourceStore": (type?: RevoGrid.DimensionRows) => Promise<ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>>;
+        /**
+          * Get data from visible part of source Trimmed/filtered rows will be excluded
+          * @param type - type of source
+         */
+        "getVisibleSource": (type?: RevoGrid.DimensionRows) => Promise<any[]>;
+        /**
           * Pinned bottom Source: {[T in ColumnProp]: any} - defines pinned bottom rows data source.
          */
         "pinnedBottomSource": RevoGrid.DataType[];
@@ -133,7 +143,7 @@ export namespace Components {
           * @param index - virtual column index
           * @param order - order to apply
          */
-        "updateColumnSorting": (column: RevoGrid.ColumnRegular, index: number, order: 'asc' | 'desc') => Promise<void>;
+        "updateColumnSorting": (column: RevoGrid.ColumnRegular, index: number, order: 'asc' | 'desc') => Promise<RevoGrid.ColumnRegular>;
     }
     interface RevogrClipboard {
         "doCopy": (e: DataTransfer, data?: RevoGrid.DataFormat[][]) => Promise<void>;

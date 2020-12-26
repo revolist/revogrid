@@ -1,6 +1,3 @@
-import orderBy from 'lodash/orderBy';
-import keys from 'lodash/keys';
-import toArray from 'lodash/toArray';
 import size from 'lodash/size';
 
 import { RevoGrid } from '../interfaces';
@@ -41,10 +38,7 @@ export default class SortingPlugin extends BasePlugin {
 					detail.source = data;
 				}
 			};
-			const afterColumnsSet = async({detail: {order}}: CustomEvent<ColumnSetEvent>) => {
-        let items = await this.revogrid.getSource();
-				this.sort(order, items);
-			};
+			const afterColumnsSet = async({detail: {order}}: CustomEvent<ColumnSetEvent>) => this.sort(order);
 			const headerClick = async(e: CustomEvent<RevoGrid.InitialHeaderClick>) => {
 				if (e.defaultPrevented) {
 					return;
@@ -68,7 +62,7 @@ export default class SortingPlugin extends BasePlugin {
 		if (beforeSortingEvent.defaultPrevented) {
 			return;
 		}
-		const newCol = this.revogrid.updateColumnSorting(column, index, order);
+		const newCol = await this.revogrid.updateColumnSorting(column, index, order);
 
 		// apply sort data
 		const canSortApply = this.emit('beforeSortingApply', { column: newCol, order });
@@ -76,13 +70,12 @@ export default class SortingPlugin extends BasePlugin {
 			return;
 		}
 
-		let items = await this.revogrid.getSource();
-		this.sort({[column.prop]: order}, items);
+		this.sort({[column.prop]: order});
 	}
 	
-	private setData(data: RevoGrid.DataType[], type: DimensionRows, doSorting = true): RevoGrid.DataType[]|void {
+	private setData(data: RevoGrid.DataType[], type: DimensionRows): RevoGrid.DataType[]|void {
     // sorting available for row type only
-    if (type === 'row' && doSorting && this.sorting) {
+    if (type === 'row' && this.sorting) {
       return this.sortItems(data, this.sorting);
     }
 	}
@@ -92,18 +85,52 @@ export default class SortingPlugin extends BasePlugin {
 	 * @param sorting - per column sorting
 	 * @param data - this.stores['row'].store.get('source')
 	 */
-	private sort(sorting: SortingOrder, data: RevoGrid.DataType[]) {
+	private async sort(sorting: SortingOrder) {
 		if (!size(sorting)) {
 			this.sorting = null;
 			return;
 		}
 		this.sorting = sorting;
 
-		const source = this.sortItems(data, sorting);
-		this.revogrid.source = source;
+
+		const store = await this.revogrid.getSourceStore();
+		let items = store.get('items');
+		const source = store.get('source');
+		items = this.sortIndexByItems(items, source, this.sorting);
+		store.set('items', items);
 	}
 
-	private sortItems(data: RevoGrid.DataType[], sorting: SortingOrder): RevoGrid.DataType[] {
-		return orderBy(data, keys(sorting), toArray(sorting));
+	private keySort(a: any, b: any, dir: 'asc'|'desc') {
+		const d = dir === 'asc' ? 1 : -1;
+		if (a === b) {
+			return 0;
+		}
+		return a > b ? 1 * d : -1 * d;
+	}
+
+	private sortIndexByItems(indexes: number[], source: RevoGrid.DataType[], sorting: SortingOrder): number[] {
+		return indexes.sort((a, b) => {
+			let sorted = 0;
+			for (let prop in sorting) {
+				const dir = sorting[prop];
+				const itemA = source[a][prop];
+				const itemB = source[b][prop];
+				sorted = this.keySort(itemA, itemB, dir);
+			}
+			return sorted;
+		});
+	}
+
+	private sortItems(source: RevoGrid.DataType[], sorting: SortingOrder): RevoGrid.DataType[] {
+		return source.sort((a, b) => {
+			let sorted = 0;
+			for (let prop in sorting) {
+				const dir = sorting[prop];
+				const itemA = a[prop];
+				const itemB = b[prop];
+				sorted = this.keySort(itemA, itemB, dir);
+			}
+			return sorted;
+		});
 	}
 }

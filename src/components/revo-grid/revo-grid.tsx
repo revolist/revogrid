@@ -4,7 +4,7 @@ import reduce from 'lodash/reduce';
 
 import ColumnDataProvider, { ColumnCollection } from '../../services/column.data.provider';
 import {DataProvider} from '../../services/data.provider';
-import {DataSourceState} from '../../store/dataSource/data.store';
+import {DataSourceState, getVisibleSourceItem} from '../../store/dataSource/data.store';
 import DimensionProvider from '../../services/dimension.provider';
 import ViewportProvider from '../../services/viewport.provider';
 import {Edition, Selection, RevoGrid, ThemeSpace, RevoPlugin} from '../../interfaces';
@@ -316,6 +316,24 @@ export class RevoGridComponent {
     return this.rowStores[type].get('source');
   }
 
+  /**  
+   * Get data from visible part of source
+   * Trimmed/filtered rows will be excluded
+   * @param type - type of source
+   */
+  @Method() async getVisibleSource(type: RevoGrid.DimensionRows = 'row') {
+    return getVisibleSourceItem(this.rowStores[type]);
+  }
+
+  /**
+   * Provides access to internal store observer
+   * Can be used for plugin support
+   * @param type - type of source
+   */
+  @Method() async getSourceStore(type: RevoGrid.DimensionRows = 'row') {
+    return this.rowStores[type];
+  }
+
   /**
    * Update column sorting
    * @param column - full column details to update
@@ -323,7 +341,7 @@ export class RevoGridComponent {
    * @param order - order to apply
    */
   @Method() async updateColumnSorting(column: RevoGrid.ColumnRegular, index: number, order: 'asc'|'desc') {
-    this.columnProvider.updateColumnSorting(column, index, order)
+    return this.columnProvider.updateColumnSorting(column, index, order)
   }
   
   // --------------------------------------------------------------------------
@@ -457,7 +475,6 @@ export class RevoGridComponent {
   @Watch('source')
   dataChanged(source: RevoGrid.DataType[]) {
     let newSource = [...source];
-    
     const beforeSourceSet = this.beforeSourceSet.emit({
       type: 'row',
       source: newSource

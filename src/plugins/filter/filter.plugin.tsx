@@ -46,11 +46,10 @@ export default class FilterPlugin extends BasePlugin {
         let items = await this.revogrid.getSource();
         const filter = filterEntities[predicate.type];
         const indexes: Record<number, boolean> = items.reduce((result, v, index) => {
-            if (!filter(v[predicate.prop], predicate.extra)) {
-                result[index] = true;
-            }
+            result[index] = !filter(v[predicate.prop], predicate.extra);
             return result;
         }, {});
+        console.log(indexes, 'p');
         this.revogrid.trimmedRows = indexes;
     }
 

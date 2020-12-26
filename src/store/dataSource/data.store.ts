@@ -3,6 +3,7 @@
  */
 
 import {createStore, ObservableMap} from '@stencil/store';
+import findIndex from 'lodash/findIndex';
 
 import {setStore} from '../../utils/store.utils';
 import {RevoGrid} from "../../interfaces";
@@ -10,13 +11,13 @@ import DataType = RevoGrid.DataType;
 import ColumnRegular = RevoGrid.ColumnRegular;
 import DimensionRows = RevoGrid.DimensionRows;
 import DimensionCols = RevoGrid.DimensionCols;
-import findIndex from 'lodash/findIndex';
 
 export interface Group extends RevoGrid.ColumnProperties {
   name: string;
   children: RevoGrid.ColumnRegular[];
   ids: (string|number)[];
 }
+type Trimmed = Record<number, boolean>;
 export type Groups = {[level: number]: Group[]};
 export type GDataType = DataType|ColumnRegular;
 export type GDimension = DimensionRows|DimensionCols;
@@ -31,7 +32,7 @@ export type DataSourceState<T extends GDataType, ST extends GDimension> = {
   // data source type
   type: ST;
   // trim data, to hide entities from visible data source
-  trimmed: Record<number, boolean>;
+  trimmed: Trimmed;
 };
 
 export default class DataStore<T extends GDataType, ST extends GDimension> {
@@ -48,15 +49,28 @@ export default class DataStore<T extends GDataType, ST extends GDimension> {
       type,
       trimmed: {}
     });
-    // apply trimmed rows if present
-    this.dataStore.onChange('trimmed', (trimmed) => {
-      const source = this.dataStore.get('source');
-      this.dataStore.set('items', source.reduce((result, _v, i) => {
-        if (!trimmed[i]) {
-          result.push(i);
+    this.dataStore.use({
+      set: (k, newVal, oldVal) => {
+        switch(k) {
+          case 'trimmed':
+            const items = this.dataStore.get('items');
+            const trimmed = newVal as Trimmed;
+            const oldTrimmed = oldVal as Trimmed;
+
+            // check if not longer trimmed put back to items
+            for (let o in oldTrimmed) {
+              const index = parseInt(o, 10);
+              if (!trimmed[o] && items.indexOf(index) === -1) {
+                items.push(index);
+              }
+            }
+
+            // check if present in new trimmed remove from items
+            const newItems = items.filter(v => !trimmed[v]);
+            this.dataStore.set('items', newItems);
+            break;
         }
-        return result;
-      }, []));
+      }
     });
   }
 
