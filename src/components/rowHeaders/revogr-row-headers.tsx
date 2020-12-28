@@ -1,12 +1,13 @@
-import { h, VNode } from "@stencil/core";
-import { RevoGrid } from "../../interfaces";
-import SelectionStoreConnector from "../../services/selection.store.connector";
-import DataStore from "../../store/dataSource/data.store";
-import ViewportStore from "../../store/viewPort/viewport.store";
-import { UUID } from "../../utils/consts";
-import { ElementScroll } from "../viewport/gridScrollingService";
-import { ViewportSpace } from "../viewport/viewport.interfaces";
-import { RowHeaderRender } from "./row-header-render";
+import { h, VNode } from '@stencil/core';
+
+import { RevoGrid } from '../../interfaces';
+import SelectionStoreConnector from '../../services/selection.store.connector';
+import DataStore from '../../store/dataSource/data.store';
+import ViewportStore from '../../store/viewPort/viewport.store';
+import { UUID } from '../../utils/consts';
+import { ElementScroll } from '../viewport/gridScrollingService';
+import { ViewportSpace } from '../viewport/viewport.interfaces';
+import { RowHeaderRender } from './row-header-render';
 
 type Props = {
 	height: number;
@@ -30,13 +31,16 @@ const RevogrRowHeaders = ({
 }: Props): VNode => {
 	  const dataViews: HTMLElement[] = [];
     const viewport = new ViewportStore();
+
     /** render viewports rows */
-    let totalLength = 0;
+    let totalLength = 1;
     const column = { cellTemplate: RowHeaderRender(totalLength), ...rowHeaderColumn };
+
     for (let data of anyView.dataPorts) {
       const colData = new DataStore<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>('colPinStart');
       const rowSelectionStore = selectionStoreConnector.registerRow(data.position.y);
-      colData.setData({ items: [column] });
+      // initiate column data
+      colData.updateData([column]);
       dataViews.push(
         <revogr-data
           slot='content'
@@ -49,6 +53,7 @@ const RevogrRowHeaders = ({
       );
       totalLength += data.dataStore.get('items').length;
     }
+
     const colSize = rowHeaderColumn?.size || (totalLength.toString().length + 1) * LETTER_BLOCK_SIZE;
     viewport.setViewport({
       realCount: 1,

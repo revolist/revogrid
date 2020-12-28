@@ -1,8 +1,8 @@
 import {Component, Prop, h, Host, Listen, Element, Event, EventEmitter, VNode, Method} from '@stencil/core';
 import {ObservableMap} from '@stencil/store';
 import each from 'lodash/each';
-import '../../utils/closestPolifill';
 
+import '../../utils/closestPolifill';
 import {UUID} from '../../utils/consts';
 import {gatherColumnData, getStoresCoordinates, ViewportColumn} from './viewport.helpers';
 import GridScrollingService from './gridScrollingService';
@@ -13,8 +13,9 @@ import {Edition, Selection, RevoGrid} from '../../interfaces';
 import OrderRenderer, { OrdererService } from '../order/orderRenderer';
 import { columnTypes } from '../../store/storeTypes';
 
-import ViewportProps = ViewportSpace.ViewportProps;
 import RevogrRowHeaders from '../rowHeaders/revogr-row-headers';
+
+import ViewportProps = ViewportSpace.ViewportProps;
 
 @Component({
   tag: 'revogr-viewport',
@@ -48,6 +49,7 @@ export class RevogrViewport {
   @Prop() range: boolean;
   /** Show row indexes column */
   @Prop() rowHeaders: RevoGrid.RowHeaders|boolean;
+  @Prop() columnFilter: boolean;
 
   // --------------------------------------------------------------------------
   //
@@ -71,7 +73,7 @@ export class RevogrViewport {
 
   /** Clear data which is outside of grid container */
   @Listen('click', { target: 'document' })
-  handleOutsideClick(e: KeyboardEvent): void {
+  handleOutsideClick(e: KeyboardEvent) {
     const target: HTMLElement|null = e.target as HTMLElement;
     if (!target?.closest(`[${UUID}="${this.uuid}"]`)) {
       this.selectionStoreConnector.clearAll();
@@ -80,7 +82,7 @@ export class RevogrViewport {
 
   /** DRAG AND DROP */
   @Listen('internalRowDragStart')
-  onRowDragStarted(e: CustomEvent<{pos: RevoGrid.PositionItem, text: string, event: MouseEvent}>): void {
+  onRowDragStarted(e: CustomEvent<{pos: RevoGrid.PositionItem, text: string, event: MouseEvent}>) {
     e.cancelBubble = true;
     const dragEvent = this.initialRowDragStart.emit({ ...e.detail });
     if (dragEvent.defaultPrevented) {
@@ -91,12 +93,12 @@ export class RevogrViewport {
   }
 
   @Listen('internalRowDragEnd')
-  onRowDragEnd(): void {
+  onRowDragEnd() {
     this.orderService?.end();
   }
 
   @Listen('internalRowDrag')
-  onRowDrag({detail}: CustomEvent<RevoGrid.PositionItem>): void {
+  onRowDrag({detail}: CustomEvent<RevoGrid.PositionItem>) {
     this.orderService?.move(detail);
   }
 
@@ -233,7 +235,13 @@ export class RevogrViewport {
           {...view.prop}
           ref={el => this.scrollingService.registerElement(el, view.prop.key)}
           onScrollViewport={e => this.scrollingService.onScroll(e.detail, view.prop.key)}>
-          <revogr-header viewportCol={view.viewportCol} {...view.headerProp} selectionStore={colSelectionStore.store} slot='header' canResize={this.resize}/>
+          <revogr-header
+            viewportCol={view.viewportCol}
+            {...view.headerProp}
+            selectionStore={colSelectionStore.store}
+            slot='header'
+            columnFilter={this.columnFilter}
+            canResize={this.resize}/>
           {dataViews}
         </revogr-viewport-scroll>
       );

@@ -26,10 +26,11 @@ export class RevogrHeaderComponent {
   @Prop() groupingDepth: number = 0;
   @Prop() canResize: boolean;
   @Prop() colData: RevoGrid.ColumnRegular[];
+  @Prop() columnFilter: boolean;
 
-  @Event() initialHeaderClick: EventEmitter<{column: RevoGrid.ColumnRegular, index: number}>;
+  @Event() initialHeaderClick: EventEmitter<RevoGrid.InitialHeaderClick>;
   @Event() headerResize: EventEmitter<RevoGrid.ViewSettingSizeProp>;
-  @Event() headerDblClick: EventEmitter<{column: RevoGrid.ColumnRegular, index: number}>;
+  @Event() headerDblClick: EventEmitter<RevoGrid.InitialHeaderClick>;
 
   private onResize({width}: {width?: number}, index: number): void {
     this.headerResize.emit({[index]: width || 0})
@@ -63,9 +64,10 @@ export class RevogrHeaderComponent {
           column={col}
           data={colData}
 
+          canFilter={!!this.columnFilter}
           canResize={this.canResize}
           onResize={(e) => this.onResize(e, col.itemIndex)}
-          onDoubleClick={(data) => this.headerDblClick.emit(data)}
+          onDoubleClick={(e) => this.headerDblClick.emit(e)}
           onClick={(e) => this.initialHeaderClick.emit(e)}/>
       );
       visibleProps[colData?.prop] = col.itemIndex;

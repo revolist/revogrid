@@ -5,6 +5,8 @@ revogr-header {
 	display: block;
 
 	.data-header-cell {
+        display: flex;
+
         &.align-center {
             text-align: center;
         }
@@ -17,26 +19,24 @@ revogr-header {
 		&.sortable {
 			cursor: pointer;
 		}
-		&.asc {
-			&:after {
-				content: '↑';
-			}
-		}
-		&.desc {
-			&:after {
-				content: '↓';
-			}
-		}
-
-		&.asc, &.desc {
-			padding-right: 30px;
-			&:after {
-				position: absolute;
-				right: 5px;
-                font-size: 13px;
-                top: 0;
-			}
-		}
+        
+        i {
+            &.asc, &.desc {
+                &:after {
+                    font-size: 13px;
+                }
+            }
+            &.asc {
+                &:after {
+                    content: '↑';
+                }
+            }
+            &.desc {
+                &:after {
+                    content: '↓';
+                }
+            }
+        }
 	}
 
 	.data-header-cell,
@@ -72,6 +72,7 @@ revogr-header {
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            flex-grow: 1;
         }
         .resizable {
             display: block;
@@ -146,5 +147,8 @@ revogr-header {
             right: 0;
             top: 0;
         }
+    } 
+    .rv-filter {
+        visibility: hidden;
     }
 }

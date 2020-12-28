@@ -93,6 +93,8 @@ export declare namespace RevoGrid {
     sortable?: boolean;
     /** column size would be changed based on content size */
     autoSize?: boolean;
+    /** filter */
+    filter?: boolean|string|string[];
     order?: 'asc'|'desc';
     /** is cell in column or individual can be dragged */
     rowDrag?: RowDrag;
@@ -181,6 +183,12 @@ export declare namespace RevoGrid {
     delta?: number;
   };
 
+  type InitialHeaderClick = {
+    index: number;
+    originalEvent: MouseEvent;
+    column: RevoGrid.ColumnRegular;
+  };
+
 
   // --------------------------------------------------------------------------
   //
@@ -246,6 +254,8 @@ export declare namespace RevoPlugin {
     constructor(revogrid: HTMLRevoGridElement, ...[]);
     destroy(): void;
   }
+
+  type PluginClass = typeof Plugin;
 }
 
 // --------------------------------------------------------------------------

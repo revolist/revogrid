@@ -1,11 +1,20 @@
 import {ObservableMap} from '@stencil/store';
 
-import {DataSourceState} from '../../store/dataSource/data.store';
+import {DataSourceState, Groups} from '../../store/dataSource/data.store';
 import {RevoGrid, Selection} from '../../interfaces';
 
 declare namespace ViewportSpace {
     type Properties = {[key: string]: any};
     type SlotType = 'content'|'header'|'footer';
+
+    type HeaderProperties = {
+        parent: string;
+        colData: RevoGrid.ColumnRegular[];
+        dimensionCol: ObservableMap<RevoGrid.DimensionSettingsState>;
+        groups: Groups;
+        groupingDepth: number;
+        onHeaderResize?(e: CustomEvent<RevoGrid.ViewSettingSizeProp>): void;
+    };
 
 
     type ViewportData = {

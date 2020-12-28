@@ -4,12 +4,13 @@
  */
 import each from 'lodash/each';
 import reduce from 'lodash/reduce';
-
-import { RevoGrid, RevoPlugin, Edition } from '../interfaces';
+import BasePlugin from './basePlugin';
+import { RevoGrid, Edition } from '../interfaces';
 import ColumnDataProvider, { ColumnCollection } from '../services/column.data.provider';
 import { DataProvider } from '../services/data.provider';
 import { columnTypes } from '../store/storeTypes';
 import DimensionProvider, {ColumnItems} from '../services/dimension.provider';
+import { getSourceItem } from '../store/dataSource/data.store';
 
 interface Column extends RevoGrid.ColumnRegular {
     index: number;
@@ -52,9 +53,8 @@ enum ColumnAutoSizeMode {
     autoSizeAll = 'autoSizeAll'
 }
 
-export default class AutoSizeColumn implements RevoPlugin.Plugin {
+export default class AutoSizeColumn extends BasePlugin {
     private autoSizeColumns: Partial<AutoSizeColumns>|null = null;
-    private readonly subscriptions: Record<string, ((e: CustomEvent) => void)> = {};
     private readonly letterBlockSize: number;
 
     /** for config option when @preciseSize enabled */
@@ -64,11 +64,12 @@ export default class AutoSizeColumn implements RevoPlugin.Plugin {
     private dataResolve: Resolve|null = null;
     private dataReject: Reject|null = null;
 
-    constructor(private revogrid: HTMLRevoGridElement, private providers: {
+    constructor(revogrid: HTMLRevoGridElement, private providers: {
         dataProvider: DataProvider,
         dimensionProvider: DimensionProvider,
         columnProvider: ColumnDataProvider
     }, private config?: AutoSizeColumnConfig) {
+        super(revogrid);
         this.letterBlockSize = config?.letterBlockSize || LETTER_BLOCK_SIZE;
 
         // create test container to check text width
@@ -89,12 +90,12 @@ export default class AutoSizeColumn implements RevoPlugin.Plugin {
         const beforeColumnsSet = ({detail: {columns}}: CustomEvent<ColumnCollection>) => {
             this.columnSet(columns);
         };
-        const headerDblClick = ({detail: {column, index}}: CustomEvent<{column: RevoGrid.ColumnRegular, index: number}>) => {
-            const type = ColumnDataProvider.getColumnType(column);
-            const size = this.getColumnSize(index, type);
+        const headerDblClick = ({detail}: CustomEvent<RevoGrid.InitialHeaderClick>) => {
+            const type = ColumnDataProvider.getColumnType(detail);
+            const size = this.getColumnSize(detail.index, type);
             if (size) {
                 this.providers.dimensionProvider.setDimensionSize(type, {
-                    [index]: size
+                    [detail.index]: size
                 });
             }
         };
@@ -112,10 +113,6 @@ export default class AutoSizeColumn implements RevoPlugin.Plugin {
                 this.addEventListener('headerDblClick', headerDblClick);
                 break;
         }
-    }
-    private addEventListener(name: string, func: ((e: CustomEvent) => void)) {
-        this.revogrid.addEventListener(name, func);
-        this.subscriptions[name] = func;
     }
 
     private async setSource(source: RevoGrid.DataType[]): Promise<void> {
@@ -226,8 +223,9 @@ export default class AutoSizeColumn implements RevoPlugin.Plugin {
             return 0;
         }
         return reduce(this.providers.dataProvider.stores, (r, s) => {
-            const perStore = reduce(s.store.get('items'), (prev, row) => {
-                return Math.max(prev || 0, this.getLength(row[col.prop]));
+            const perStore = reduce(s.store.get('items'), (prev, _row, i) => {
+                const item = getSourceItem(s.store, i);
+                return Math.max(prev || 0, this.getLength(item[col.prop]));
             }, 0);
             return Math.max(r, perStore);
         }, col.size || 0);
@@ -288,11 +286,8 @@ export default class AutoSizeColumn implements RevoPlugin.Plugin {
         return el;
     }
 
-
     destroy() {
-        for (let type in this.subscriptions) {
-            this.revogrid.removeEventListener(type, this.subscriptions[type]);
-        }
+        super.destroy();
         this.precsizeCalculationArea?.remove();
     }
 }

@@ -21,6 +21,10 @@
           "description": "Indicates default column size."
         },
         {
+          "name": "filter",
+          "description": "Enables filter plugin\nCan be boolean\nCan be filter collection"
+        },
+        {
           "name": "frame-size",
           "description": "Defines how many rows/columns should be rendered outside visible area."
         },
@@ -113,6 +117,19 @@
       "attributes": []
     },
     {
+      "name": "revogr-filter-panel",
+      "description": {
+        "kind": "markdown",
+        "value": ""
+      },
+      "attributes": [
+        {
+          "name": "uuid",
+          "description": ""
+        }
+      ]
+    },
+    {
       "name": "revogr-focus",
       "description": {
         "kind": "markdown",
@@ -129,6 +146,10 @@
       "attributes": [
         {
           "name": "can-resize",
+          "description": ""
+        },
+        {
+          "name": "column-filter",
           "description": ""
         },
         {
@@ -206,6 +227,10 @@
         "value": ""
       },
       "attributes": [
+        {
+          "name": "column-filter",
+          "description": ""
+        },
         {
           "name": "range",
           "description": ""

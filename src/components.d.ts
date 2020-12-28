@@ -5,17 +5,21 @@
  * It contains typing information for all components that exist in this project.
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
-import { Edition, RevoGrid, Selection, ThemeSpace } from "./interfaces";
+import { Edition, RevoGrid, RevoPlugin, Selection, ThemeSpace } from "./interfaces";
 import { AutoSizeColumnConfig } from "./plugins/autoSizeColumn";
+import { ColumnFilterConfig, FilterCollection } from "./plugins/filter/filter.plugin";
 import { ColumnCollection } from "./services/column.data.provider";
+import { VNode } from "@stencil/core";
 import { ObservableMap } from "@stencil/store";
 import { DataSourceState, Groups } from "./store/dataSource/data.store";
+import { LogicFunction } from "./plugins/filter/filter.types";
+import { FilterItem, ShowData } from "./plugins/filter/filter.pop";
 export namespace Components {
     interface RevoGrid {
         /**
           * Autosize config Enable columns autoSize, for more details check @autoSizeColumn plugin By default disabled, hence operation is not resource efficient true to enable with default params (double header separator click for autosize) or provide config
          */
-        "autoSizeColumn": boolean|AutoSizeColumnConfig|undefined;
+        "autoSizeColumn": boolean|AutoSizeColumnConfig;
         /**
           * When true cell focus appear.
          */
@@ -37,9 +41,35 @@ export namespace Components {
          */
         "editors": Edition.Editors;
         /**
+          * Enables filter plugin Can be boolean Can be filter collection
+         */
+        "filter": boolean|ColumnFilterConfig;
+        /**
           * Defines how many rows/columns should be rendered outside visible area.
          */
         "frameSize": number;
+        /**
+          * Receive all columns in data source
+         */
+        "getColumns": () => Promise<RevoGrid.ColumnRegular[]>;
+        /**
+          * Get all active plugins instances
+         */
+        "getPlugins": () => Promise<RevoPlugin.Plugin[]>;
+        /**
+          * Get data from source
+         */
+        "getSource": (type?: RevoGrid.DimensionRows) => Promise<RevoGrid.DataType[]>;
+        /**
+          * Provides access to internal store observer Can be used for plugin support
+          * @param type - type of source
+         */
+        "getSourceStore": (type?: RevoGrid.DimensionRows) => Promise<ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>>;
+        /**
+          * Get data from visible part of source Trimmed/filtered rows will be excluded
+          * @param type - type of source
+         */
+        "getVisibleSource": (type?: RevoGrid.DimensionRows) => Promise<any[]>;
         /**
           * Pinned bottom Source: {[T in ColumnProp]: any} - defines pinned bottom rows data source.
          */
@@ -48,6 +78,10 @@ export namespace Components {
           * Pinned top Source: {[T in ColumnProp]: any} - defines pinned top rows data source.
          */
         "pinnedTopSource": RevoGrid.DataType[];
+        /**
+          * Custom grid plugins Has to be predefined during first grid init Every plugin should be inherited from BasePlugin
+         */
+        "plugins": RevoPlugin.PluginClass[];
         /**
           * When true, user can range selection.
          */
@@ -60,6 +94,10 @@ export namespace Components {
           * Refreshes data viewport. Can be specific part as row or pinned row or 'all' by default.
          */
         "refresh": (type?: RevoGrid.DimensionRows | 'all') => Promise<void>;
+        /**
+          * Register new virtual node inside of grid Used for additional items creation such as plugin elements
+         */
+        "registerVNode": (elements: VNode[]) => Promise<void>;
         /**
           * When true, columns are resizable.
          */
@@ -108,6 +146,19 @@ export namespace Components {
           * Theme name
          */
         "theme": ThemeSpace.Theme;
+        /**
+          * Trimmed rows Functionality which allows to hide rows from main data set
+          * @trimmedRows are physical row indexes to hide
+         */
+        "trimmedRows": Record<number, boolean>;
+        /**
+          * Update column sorting
+          * @param column - full column details to update
+          * @param index - virtual column index
+          * @param order - order to apply
+         */
+        "updateColumnSorting": (column: RevoGrid.ColumnRegular, index: number, order: 'asc' | 'desc') => Promise<RevoGrid.ColumnRegular>;
+        "updateColumns": (cols: RevoGrid.ColumnRegular[]) => Promise<void>;
     }
     interface RevogrClipboard {
         "doCopy": (e: DataTransfer, data?: RevoGrid.DataFormat[][]) => Promise<void>;
@@ -135,6 +186,14 @@ export namespace Components {
          */
         "editor": Edition.EditorCtr|null;
     }
+    interface RevogrFilterPanel {
+        "filterEntities": Record<string, LogicFunction>;
+        "filterNames": Record<string, string>;
+        "filterTypes": Record<string, string[]>;
+        "getChanges": () => Promise<ShowData>;
+        "show": (newEntity?: ShowData) => Promise<void>;
+        "uuid": string;
+    }
     interface RevogrFocus {
         "dimensionCol": ObservableMap<RevoGrid.DimensionSettingsState>;
         "dimensionRow": ObservableMap<RevoGrid.DimensionSettingsState>;
@@ -146,6 +205,7 @@ export namespace Components {
     interface RevogrHeader {
         "canResize": boolean;
         "colData": RevoGrid.ColumnRegular[];
+        "columnFilter": boolean;
         "dimensionCol": ObservableMap<RevoGrid.DimensionSettingsState>;
         "groupingDepth": number;
         "groups": Groups;
@@ -205,6 +265,7 @@ export namespace Components {
         "selectionStore": ObservableMap<Selection.SelectionStoreState>;
     }
     interface RevogrViewport {
+        "columnFilter": boolean;
         "columnStores": {[T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>};
         "dimensions": {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.DimensionSettingsState>};
         /**
@@ -256,6 +317,12 @@ declare global {
     var HTMLRevogrEditElement: {
         prototype: HTMLRevogrEditElement;
         new (): HTMLRevogrEditElement;
+    };
+    interface HTMLRevogrFilterPanelElement extends Components.RevogrFilterPanel, HTMLStencilElement {
+    }
+    var HTMLRevogrFilterPanelElement: {
+        prototype: HTMLRevogrFilterPanelElement;
+        new (): HTMLRevogrFilterPanelElement;
     };
     interface HTMLRevogrFocusElement extends Components.RevogrFocus, HTMLStencilElement {
     }
@@ -310,6 +377,7 @@ declare global {
         "revogr-clipboard": HTMLRevogrClipboardElement;
         "revogr-data": HTMLRevogrDataElement;
         "revogr-edit": HTMLRevogrEditElement;
+        "revogr-filter-panel": HTMLRevogrFilterPanelElement;
         "revogr-focus": HTMLRevogrFocusElement;
         "revogr-header": HTMLRevogrHeaderElement;
         "revogr-order-editor": HTMLRevogrOrderEditorElement;
@@ -325,7 +393,7 @@ declare namespace LocalJSX {
         /**
           * Autosize config Enable columns autoSize, for more details check @autoSizeColumn plugin By default disabled, hence operation is not resource efficient true to enable with default params (double header separator click for autosize) or provide config
          */
-        "autoSizeColumn"?: boolean|AutoSizeColumnConfig|undefined;
+        "autoSizeColumn"?: boolean|AutoSizeColumnConfig;
         /**
           * When true cell focus appear.
          */
@@ -347,13 +415,27 @@ declare namespace LocalJSX {
          */
         "editors"?: Edition.Editors;
         /**
+          * Enables filter plugin Can be boolean Can be filter collection
+         */
+        "filter"?: boolean|ColumnFilterConfig;
+        /**
           * Defines how many rows/columns should be rendered outside visible area.
          */
         "frameSize"?: number;
         /**
+          * Column updated
+         */
+        "onAfterColumnsSet"?: (event: CustomEvent<{
+    columns: ColumnCollection;
+    order: Record<RevoGrid.ColumnProp, 'asc'|'desc'>;
+  }>) => void;
+        /**
           * After edit. Triggered when after data applied or Range changeged.
          */
         "onAfterEdit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails|Edition.BeforeRangeSaveDataDetails>) => void;
+        /**
+          * After rows updated
+         */
         "onAfterSourceSet"?: (event: CustomEvent<{
     type: RevoGrid.DimensionRows;
     source: RevoGrid.DataType[];
@@ -366,11 +448,18 @@ declare namespace LocalJSX {
           * Before cell focus changed. Use e.preventDefault() to prevent cell focus change.
          */
         "onBeforeCellFocus"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
+        /**
+          * Before column update
+         */
         "onBeforeColumnsSet"?: (event: CustomEvent<ColumnCollection>) => void;
         /**
           * Before edit event. Triggered before edit data applied. Use e.preventDefault() to prevent edit data set and use you own.  Use e.val = {your value} to replace edit result with your own.
          */
         "onBeforeEdit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
+        /**
+          * Before filter applied to data source Use e.preventDefault() to prevent cell focus change Update @collection if you wish to change filters on the flight
+         */
+        "onBeforeFilterApply"?: (event: CustomEvent<{ collection: FilterCollection; }>) => void;
         /**
           * Before range apply. Triggered before range applied. Use e.preventDefault() to prevent range.
          */
@@ -394,6 +483,13 @@ declare namespace LocalJSX {
   order: 'desc'|'asc'
 }>) => void;
         /**
+          * Before data apply. You can override data source here
+         */
+        "onBeforeSourceSet"?: (event: CustomEvent<{
+    type: RevoGrid.DimensionRows;
+    source: RevoGrid.DataType[];
+  }>) => void;
+        /**
           * Before source update sorting apply. Use this event if you intended to prevent sorting on data update. Use e.preventDefault() to prevent sorting data change during rows source update.
          */
         "onBeforeSourceSortingApply"?: (event: CustomEvent<any>) => void;
@@ -410,6 +506,10 @@ declare namespace LocalJSX {
          */
         "onRowOrderChanged"?: (event: CustomEvent<{from: number; to: number;}>) => void;
         /**
+          * Triggered when view port scrolled
+         */
+        "onViewportScroll"?: (event: CustomEvent<RevoGrid.ViewPortScrollEvent>) => void;
+        /**
           * Pinned bottom Source: {[T in ColumnProp]: any} - defines pinned bottom rows data source.
          */
         "pinnedBottomSource"?: RevoGrid.DataType[];
@@ -417,6 +517,10 @@ declare namespace LocalJSX {
           * Pinned top Source: {[T in ColumnProp]: any} - defines pinned top rows data source.
          */
         "pinnedTopSource"?: RevoGrid.DataType[];
+        /**
+          * Custom grid plugins Has to be predefined during first grid init Every plugin should be inherited from BasePlugin
+         */
+        "plugins"?: RevoPlugin.PluginClass[];
         /**
           * When true, user can range selection.
          */
@@ -453,6 +557,11 @@ declare namespace LocalJSX {
           * Theme name
          */
         "theme"?: ThemeSpace.Theme;
+        /**
+          * Trimmed rows Functionality which allows to hide rows from main data set
+          * @trimmedRows are physical row indexes to hide
+         */
+        "trimmedRows"?: Record<number, boolean>;
     }
     interface RevogrClipboard {
         "onCopyRegion"?: (event: CustomEvent<DataTransfer>) => void;
@@ -487,6 +596,13 @@ declare namespace LocalJSX {
          */
         "onCloseEdit"?: (event: CustomEvent<boolean|undefined>) => void;
     }
+    interface RevogrFilterPanel {
+        "filterEntities"?: Record<string, LogicFunction>;
+        "filterNames"?: Record<string, string>;
+        "filterTypes"?: Record<string, string[]>;
+        "onFilterChange"?: (event: CustomEvent<FilterItem>) => void;
+        "uuid"?: string;
+    }
     interface RevogrFocus {
         "dimensionCol"?: ObservableMap<RevoGrid.DimensionSettingsState>;
         "dimensionRow"?: ObservableMap<RevoGrid.DimensionSettingsState>;
@@ -498,12 +614,13 @@ declare namespace LocalJSX {
     interface RevogrHeader {
         "canResize"?: boolean;
         "colData"?: RevoGrid.ColumnRegular[];
+        "columnFilter"?: boolean;
         "dimensionCol"?: ObservableMap<RevoGrid.DimensionSettingsState>;
         "groupingDepth"?: number;
         "groups"?: Groups;
-        "onHeaderDblClick"?: (event: CustomEvent<{column: RevoGrid.ColumnRegular, index: number}>) => void;
+        "onHeaderDblClick"?: (event: CustomEvent<RevoGrid.InitialHeaderClick>) => void;
         "onHeaderResize"?: (event: CustomEvent<RevoGrid.ViewSettingSizeProp>) => void;
-        "onInitialHeaderClick"?: (event: CustomEvent<{column: RevoGrid.ColumnRegular, index: number}>) => void;
+        "onInitialHeaderClick"?: (event: CustomEvent<RevoGrid.InitialHeaderClick>) => void;
         "parent"?: string;
         "selectionStore"?: ObservableMap<Selection.SelectionStoreState>;
         "viewportCol"?: ObservableMap<RevoGrid.ViewportState>;
@@ -596,6 +713,7 @@ declare namespace LocalJSX {
         "selectionStore"?: ObservableMap<Selection.SelectionStoreState>;
     }
     interface RevogrViewport {
+        "columnFilter"?: boolean;
         "columnStores"?: {[T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>};
         "dimensions"?: {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.DimensionSettingsState>};
         /**
@@ -629,6 +747,7 @@ declare namespace LocalJSX {
         "revogr-clipboard": RevogrClipboard;
         "revogr-data": RevogrData;
         "revogr-edit": RevogrEdit;
+        "revogr-filter-panel": RevogrFilterPanel;
         "revogr-focus": RevogrFocus;
         "revogr-header": RevogrHeader;
         "revogr-order-editor": RevogrOrderEditor;
@@ -647,6 +766,7 @@ declare module "@stencil/core" {
             "revogr-clipboard": LocalJSX.RevogrClipboard & JSXBase.HTMLAttributes<HTMLRevogrClipboardElement>;
             "revogr-data": LocalJSX.RevogrData & JSXBase.HTMLAttributes<HTMLRevogrDataElement>;
             "revogr-edit": LocalJSX.RevogrEdit & JSXBase.HTMLAttributes<HTMLRevogrEditElement>;
+            "revogr-filter-panel": LocalJSX.RevogrFilterPanel & JSXBase.HTMLAttributes<HTMLRevogrFilterPanelElement>;
             "revogr-focus": LocalJSX.RevogrFocus & JSXBase.HTMLAttributes<HTMLRevogrFocusElement>;
             "revogr-header": LocalJSX.RevogrHeader & JSXBase.HTMLAttributes<HTMLRevogrHeaderElement>;
             "revogr-order-editor": LocalJSX.RevogrOrderEditor & JSXBase.HTMLAttributes<HTMLRevogrOrderEditorElement>;

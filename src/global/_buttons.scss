@@ -1,0 +1,24 @@
+.revo-button {
+    $h: 30px;
+    position: relative;
+    overflow: hidden;
+    color: #fff;
+    background-color: #6200ee;
+    height: $h;
+    line-height: $h;
+    padding: 0 10px;
+    outline: 0;
+    border: 0;
+    border-radius: 7px;
+    cursor: pointer;
+
+    &.green {
+        background-color: #20ca1e;
+    }
+
+    &.light {
+        background-color: #D8F4FF;
+        color: black;
+        box-shadow: none;
+    }
+}

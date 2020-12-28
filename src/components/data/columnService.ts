@@ -1,6 +1,6 @@
 import {h, VNode} from '@stencil/core';
 import {ObservableMap} from '@stencil/store';
-import {DataSourceState} from '../../store/dataSource/data.store';
+import {DataSourceState, getSourceItem, getVisibleSourceItem, setSourceByVirtualIndex} from '../../store/dataSource/data.store';
 import { CELL_CLASS, DISABLED_CLASS } from '../../utils/consts';
 import {Edition, RevoGrid, Selection} from '../../interfaces';
 import { getRange } from '../../store/selection/selection.helpers';
@@ -8,16 +8,12 @@ import { getRange } from '../../store/selection/selection.helpers';
 import BeforeSaveDataDetails = Edition.BeforeSaveDataDetails;
 import ColumnDataSchemaModel = RevoGrid.ColumnDataSchemaModel;
 import ColumnProp = RevoGrid.ColumnProp;
-import DataSource = RevoGrid.DataSource;
 import DataType = RevoGrid.DataType;
 
 export interface ColumnServiceI {
   columns: RevoGrid.ColumnRegular[];
-
   customRenderer(r: number, c: number): VNode | string | void;
-
   isReadOnly(r: number, c: number): boolean;
-
   getCellData(r: number, c: number): string;
 }
 
@@ -25,7 +21,7 @@ export default class ColumnService implements ColumnServiceI {
   private readonly source: ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
 
   get columns(): RevoGrid.ColumnRegular[] {
-    return this.source.get('items');
+    return getVisibleSourceItem(this.source);
   }
 
   constructor(
@@ -92,8 +88,7 @@ export default class ColumnService implements ColumnServiceI {
   }
 
   getRowClass(r: number, prop: string): string {
-    const data: DataSource = this.dataStore.get('items');
-    const model: DataType = data[r] || {};
+    const model: DataType = getSourceItem(this.dataStore, r) || {};
     return model[prop] || '';
   }
 
@@ -131,22 +126,16 @@ export default class ColumnService implements ColumnServiceI {
   rowDataModel(rowIndex: number, c: number): ColumnDataSchemaModel {
     const column = this.columns[c];
     const prop: ColumnProp | undefined = column?.prop;
-
-    const data: DataSource = this.dataStore.get('items');
-    if (!data[rowIndex]) {
-      console.error('unexpected count');
-    }
-    const model: DataType = data[rowIndex] || {};
-    return {prop, model, data, column, rowIndex};
+    const model: DataType = getSourceItem(this.dataStore, rowIndex) || {};
+    return {prop, model, data: this.dataStore.get('source'), column, rowIndex};
   }
 
   getRangeData(d: Selection.ChangedRange): RevoGrid.DataLookup {
     const changed: RevoGrid.DataLookup = {};
-    const items: DataSource = this.dataStore.get('items');
     
     // get original length sizes
     const copyColLength = d.oldProps.length;
-    const copyFrom = this.copyRangeArray(d.oldRange, d.oldProps, items);
+    const copyFrom = this.copyRangeArray(d.oldRange, d.oldProps, this.dataStore);
     const copyRowLength = copyFrom.length;
 
     // rows
@@ -224,14 +213,15 @@ export default class ColumnService implements ColumnServiceI {
     };
   }
 
-  applyRangeData(data: RevoGrid.DataLookup): void {
-    const items: DataSource = this.dataStore.get('items');
+  applyRangeData(data: RevoGrid.DataLookup) {
+    const items: Record<number, DataType> = {};
     for (let rowIndex in data) {
+      const oldModel = items[rowIndex] = getSourceItem(this.dataStore, parseInt(rowIndex, 10));
       for (let prop in data[rowIndex]) {
-        items[rowIndex][prop] = data[rowIndex][prop];
+        oldModel[prop] = data[rowIndex][prop];
       }
     }
-    this.dataStore.set('items', [...items]);
+    setSourceByVirtualIndex(this.dataStore, items);
   }
 
   getRangeStaticData(d: Selection.RangeArea, value: RevoGrid.DataFormat): RevoGrid.DataLookup {
@@ -257,12 +247,17 @@ export default class ColumnService implements ColumnServiceI {
     return changed;
   }
 
-  copyRangeArray(range: Selection.RangeArea, rangeProps: RevoGrid.ColumnProp[], items: DataSource): RevoGrid.DataFormat[][] {
+  copyRangeArray(
+    range: Selection.RangeArea,
+    rangeProps: RevoGrid.ColumnProp[],
+    store: ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>
+  ): RevoGrid.DataFormat[][] {
     const toCopy: RevoGrid.DataFormat[][] = [];
     for (let i = range.y; i < range.y1 + 1; i++) {
       const row: RevoGrid.DataFormat[] = [];
       for (let prop of rangeProps) {
-        row.push(items[i][prop]);
+        const item = getSourceItem(store, i);
+        row.push(item[prop]);
       }
       toCopy.push(row);
     }

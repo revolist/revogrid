@@ -1,14 +1,13 @@
 import {Component, Method, Event, EventEmitter, Prop, Listen} from '@stencil/core';
 import { ObservableMap } from '@stencil/store';
 import debounce from 'lodash/debounce';
+
 import { RevoGrid, Selection } from '../../interfaces';
 import { DataSourceState } from '../../store/dataSource/data.store';
 import { DRAGG_TEXT } from '../../utils/consts';
 import RowOrderService from './rowOrderService';
 
-@Component({
-	tag: 'revogr-order-editor'
-})
+@Component({ tag: 'revogr-order-editor' })
 export class OrderEditor {
 	private rowOrderService: RowOrderService;
 	private moveFunc: ((e: Selection.Cell) => void)|null;
@@ -125,18 +124,18 @@ export class OrderEditor {
 	}
 
 	connectedCallback(): void {
-		this.rowOrderService = new RowOrderService({
-				positionChanged: (from, to) => {
-						const dropEvent = this.initialRowDropped.emit({from, to});
-						if (dropEvent.defaultPrevented) {
-								return;
-						}
-						const items = this.dataStore.get('items');
-						const toMove = items.splice(from, 1);
-						items.splice(to, 0, ...toMove);
-						this.dataStore.set('items', [...items]);
-				}
-		});
+		this.rowOrderService = new RowOrderService({ positionChanged: (f, t) => this.onPositionChanged(f, t) });
+	}
+
+	private onPositionChanged(from: number, to: number) {
+		const dropEvent = this.initialRowDropped.emit({from, to});
+		if (dropEvent.defaultPrevented) {
+				return;
+		}
+		const items = this.dataStore.get('items');
+		const toMove = items.splice(from, 1);
+		items.splice(to, 0, ...toMove);
+		this.dataStore.set('items', [...items]);
 	}
 
 	private getData() {

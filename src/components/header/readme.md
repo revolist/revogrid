@@ -11,6 +11,7 @@
 | ---------------- | ---------------- | ----------- | --------------------------------------- | ----------- |
 | `canResize`      | `can-resize`     |             | `boolean`                               | `undefined` |
 | `colData`        | --               |             | `ColumnRegular[]`                       | `undefined` |
+| `columnFilter`   | `column-filter`  |             | `boolean`                               | `undefined` |
 | `dimensionCol`   | --               |             | `ObservableMap<DimensionSettingsState>` | `undefined` |
 | `groupingDepth`  | `grouping-depth` |             | `number`                                | `0`         |
 | `groups`         | --               |             | `{ [level: number]: Group[]; }`         | `undefined` |
@@ -21,11 +22,11 @@
 
 ## Events
 
-| Event                | Description | Type                                                     |
-| -------------------- | ----------- | -------------------------------------------------------- |
-| `headerDblClick`     |             | `CustomEvent<{ column: ColumnRegular; index: number; }>` |
-| `headerResize`       |             | `CustomEvent<{ [x: string]: number; }>`                  |
-| `initialHeaderClick` |             | `CustomEvent<{ column: ColumnRegular; index: number; }>` |
+| Event                | Description | Type                                                                                |
+| -------------------- | ----------- | ----------------------------------------------------------------------------------- |
+| `headerDblClick`     |             | `CustomEvent<{ index: number; originalEvent: MouseEvent; column: ColumnRegular; }>` |
+| `headerResize`       |             | `CustomEvent<{ [x: string]: number; }>`                                             |
+| `initialHeaderClick` |             | `CustomEvent<{ index: number; originalEvent: MouseEvent; column: ColumnRegular; }>` |
 
 
 ## Dependencies
