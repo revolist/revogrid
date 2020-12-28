@@ -4,6 +4,7 @@
 
 import {createStore, ObservableMap} from '@stencil/store';
 import findIndex from 'lodash/findIndex';
+import range from 'lodash/range';
 
 import {setStore} from '../../utils/store.utils';
 import {RevoGrid} from "../../interfaces";
@@ -103,8 +104,7 @@ export default class DataStore<T extends GDataType, ST extends GDimension> {
 
   private indexMapping(data: Partial<DataSourceState<T, ST>> ) {
     if (data.source) {
-      // Array.keys() require an ES6 polyfill in order to work in all browsers
-      data.items = [...Array(data.source.length).keys()]
+      data.items = range(0, data.source.length);
     }
     return data;
   }
