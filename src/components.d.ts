@@ -506,6 +506,10 @@ declare namespace LocalJSX {
          */
         "onRowOrderChanged"?: (event: CustomEvent<{from: number; to: number;}>) => void;
         /**
+          * Triggered when view port scrolled
+         */
+        "onViewportScroll"?: (event: CustomEvent<RevoGrid.ViewPortScrollEvent>) => void;
+        /**
           * Pinned bottom Source: {[T in ColumnProp]: any} - defines pinned bottom rows data source.
          */
         "pinnedBottomSource"?: RevoGrid.DataType[];
