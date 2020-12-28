@@ -12,7 +12,7 @@ export const HeaderCellRenderer = ({data, props}: Props, children: VNode[]): VNo
     let colTemplate: VNode|VNode[]|string = data?.name || '';
     let cellProps = props;
     if (data?.columnTemplate) {
-        colTemplate = data.columnTemplate(h as RevoGrid.HyperFunc<VNode>, data);
+        colTemplate = data.columnTemplate(h, data);
     }
     if (data?.columnProperties) {
         const extra = data.columnProperties(data);
@@ -20,5 +20,8 @@ export const HeaderCellRenderer = ({data, props}: Props, children: VNode[]): VNo
             cellProps = ColumnService.doMerge(props, extra);
         }
     }
-    return <ResizableElement {...cellProps}>{colTemplate}{children}</ResizableElement>;
+    return <ResizableElement {...cellProps}>
+        <div class='header-content'>{colTemplate}</div>
+        {children}
+    </ResizableElement>;
 };

@@ -1,7 +1,7 @@
 import size from 'lodash/size';
 
-import { RevoGrid } from '../interfaces';
-import BasePlugin from './basePlugin';
+import { RevoGrid } from '../../interfaces';
+import BasePlugin from '../basePlugin';
 
 import DimensionRows = RevoGrid.DimensionRows;
 

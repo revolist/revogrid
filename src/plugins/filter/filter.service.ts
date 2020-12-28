@@ -28,7 +28,7 @@ export const filterEntities: Record<FilterType, LogicFunction> = {
     notContains: notContains,
 };
 
-export const filterCollection: Record<string, FilterType[]> = {
+export const filterTypes: Record<string, FilterType[]> = {
     string: [
         'none',
         'notEmpty',

@@ -135,13 +135,26 @@ export function getSourceItem(store: ObservableMap<DataSourceState<any, any>>, v
  * @param store  - store to process
  * @param modelByIndex - collection of rows with virtual indexes to setup
  */
-export function setSourceItem<T>(store: ObservableMap<DataSourceState<T, any>>, modelByIndex: Record<number, T>) {
+export function setSourceByVirtualIndex<T>(store: ObservableMap<DataSourceState<T, any>>, modelByIndex: Record<number, T>) {
   const items = store.get('items');
   const source = store.get('source');
 
   for (let virtualIndex in modelByIndex) {
     const realIndex = items[virtualIndex];
     source[realIndex] = modelByIndex[virtualIndex];
+  }
+  store.set('source', [...source]);
+}
+
+/**
+ * set item to source
+ * @param store  - store to process
+ * @param modelByIndex - collection of rows with physical indexes to setup
+ */
+export function setSourceByPhysicalIndex<T>(store: ObservableMap<DataSourceState<T, any>>, modelByIndex: Record<number, T>) {
+  const source = store.get('source');
+  for (let index in modelByIndex) {
+    source[index] = modelByIndex[index];
   }
   store.set('source', [...source]);
 }

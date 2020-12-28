@@ -1,6 +1,6 @@
 import reduce from 'lodash/reduce';
 
-import DataStore, { getSourceItem, getVisibleSourceItem, setSourceItem } from '../store/dataSource/data.store';
+import DataStore, { getSourceItem, getVisibleSourceItem, setSourceByVirtualIndex } from '../store/dataSource/data.store';
 import {isRowType, rowTypes} from '../store/storeTypes';
 import DimensionProvider from './dimension.provider';
 import {RevoGrid, Edition} from '../interfaces';
@@ -32,7 +32,7 @@ export class DataProvider {
     const store = this.stores[data.type].store;
     const model =  getSourceItem(store, data.rowIndex);
     model[data.prop] = data.val;
-    setSourceItem(store, { [data.rowIndex]: model });
+    setSourceByVirtualIndex(store, { [data.rowIndex]: model });
   }
 
 

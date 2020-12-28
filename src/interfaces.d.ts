@@ -254,6 +254,8 @@ export declare namespace RevoPlugin {
     constructor(revogrid: HTMLRevoGridElement, ...[]);
     destroy(): void;
   }
+
+  type PluginClass = typeof Plugin;
 }
 
 // --------------------------------------------------------------------------

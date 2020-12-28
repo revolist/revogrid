@@ -1,6 +1,7 @@
 import {h, VNode} from '@stencil/core';
 import { RevoGrid, Selection } from '../../interfaces';
 import { FilterButton } from '../../plugins/filter/filter.button';
+import { SortingSign } from '../../plugins/sorting/sorting.sign';
 import { ResizeEvent } from '../../services/resizable.directive';
 import { DATA_COL, FOCUS_CLASS, HEADER_CLASS, HEADER_SORTABLE_CLASS, MIN_COL_SIZE } from '../../utils/consts';
 import { HeaderCellRenderer } from './headerCellRenderer';
@@ -52,7 +53,8 @@ const HeaderRenderer = (p: Props): VNode => {
     }
 
     return <HeaderCellRenderer data={p.data} props={dataProps}>
-        {p.canFilter && p.data?.filter !== false ? <FilterButton/> : ''}
+        {p.data?.order ? <SortingSign column={p.data}/> : ''}
+        {p.canFilter && p.data?.filter !== false ? <FilterButton column={p.data}/> : ''}
     </HeaderCellRenderer>;
 };
 

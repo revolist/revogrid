@@ -336,10 +336,5 @@ export const ResizableElement = (props: (Partial<Props>&RevoGrid.CellProps), chi
             }
         }
     }
-    return <div
-        {...props}
-        ref={(e: HTMLElement) => directive?.set(e)}>
-            <div class='header-content'>{children}</div>
-            {resizeEls}
-    </div>;
+    return <div {...props} ref={(e: HTMLElement) => directive?.set(e)}>{children}{resizeEls}</div>;
 };

@@ -1,105 +1,135 @@
-import { Component, h, Host, Listen, Method, Prop, State, Event, EventEmitter } from "@stencil/core";
+import { Component, h, Host, Listen, Prop, State, Event, EventEmitter, VNode, Method } from "@stencil/core";
+import { filterEntities, FilterType, filterType } from "./filter.service";
 import { RevoGrid } from "../../interfaces";
 import '../../utils/closestPolifill';
-import { filterCollection, filterEntities, FilterType, filterType } from "./filter.service";
+import { isFilterBtn } from "./filter.button";
+import { RevoButton } from "../../components/button/button";
 
+/**
+ * @typedef FilterItem
+ * @type {object}
+ * @property {ColumnProp} prop - column id
+ * @property {FilterType} type - filter type definition
+ * @property {any} value - value for additional filtering, text value or some id
+ */
 export type FilterItem = {
-    type: FilterType;
     prop?: RevoGrid.ColumnProp;
-    extra?: string;
+    type?: FilterType;
+    value?: any;
 };
 
+export type ShowData = {
+    x: number;
+    y: number;
+} & FilterItem;
+
+const defaultType: FilterType = 'none';
+
 @Component({
-    tag: 'revogr-filter-panel'
+    tag: 'revogr-filter-panel',
+    styleUrl: 'filter.style.scss'
 })
 export class FilterPanel {
-    private currentFilter: FilterItem = {
-        type: 'none'
-    };
     private extraElement: HTMLInputElement|undefined;
+    @State() changes: ShowData|undefined;
     @Prop({ mutable: true, reflect: true }) uuid: string;
-    @State() isVisible: {x: number; y: number; prop: RevoGrid.ColumnProp}|undefined;
-    @State() extra: string|undefined;
-      /** Action finished */
+    @Prop() filterTypes: Record<string, FilterType[]> = {};
+    @Event() filterChange: EventEmitter<FilterItem>;
     @Listen('mousedown', { target: 'document' }) onMouseDown(e: MouseEvent): void {
-        if (this.isVisible && !e.defaultPrevented) {
-            if (this.isOutside(e.target as any)) {
-                this.show();
+        if (this.changes && !e.defaultPrevented) {
+            const el = e.target as HTMLElement;
+            if (this.isOutside(el) && !isFilterBtn(el)) {
+                this.changes = undefined;
             }
         }
     }
-    @Method() async show(isVisible?: {x: number; y: number; prop: RevoGrid.ColumnProp}) {
-        this.isVisible = isVisible;
-        if (!isVisible) {
-            this.close();
+    @Method() async show(newEntity?: ShowData) {
+        this.changes = newEntity;
+        if (this.changes) {
+            this.changes.type = this.changes.type || defaultType;
         }
     }
 
-    @Event() filterChange: EventEmitter;
-
-    renderConditions() {
-        return filterCollection
-            .string
-            .map(k =>
-                <option value={k} selected={this.currentFilter?.type === k}>{filterType[k]}</option>
-            );
+    @Method() async getChanges() {
+        return this.changes;
     }
 
-    renderExtra(extra?: string) {
+    renderConditions(type: FilterType) {
+        const options: VNode[] = [];
+        for (let gIndex in this.filterTypes) {
+            options.push(...this.filterTypes[gIndex].map(k =>
+                <option value={k} selected={type === k}>{filterType[k]}</option>));
+            options.push(<option disabled></option>);
+        }
+        return options;
+    }
+
+    renderExtra(extra?: string, value?: any) {
         this.extraElement = undefined;
         switch(extra) {
             case 'input':
-                return <input type="text" ref={e => this.extraElement = e}/>;
+                return <input
+                    type="text"
+                    value={value}
+                    onInput={e => this.changes.value = (e.target as HTMLInputElement).value}
+                    onKeyDown={e => this.onKeyDown(e)}
+                    ref={e => this.extraElement = e}/>;
             default:
                 return '';
         }
     }
 
     render() {
-        if (!this.isVisible) {
+        if (!this.changes || !this.changes) {
             return <Host style={{ display: 'none' }}></Host>;
         }
         const style = {
             display: 'block',
-            left: `${this.isVisible.x}px`,
-            top: `${this.isVisible.y}px`,
+            left: `${this.changes.x}px`,
+            top: `${this.changes.y}px`,
         };
         return <Host style={style}>
             <label>Filter by condition</label>
             <br/>
-            <select onChange={e => this.onFilterChange(e)}>{this.renderConditions()}</select>
-            <br/>
-            <div>{this.renderExtra(this.extra)}</div>
-            <button onClick={() => this.onSave()}>Save</button>
-            <button onClick={() => this.onCancel()}>Cancel</button>
+            <select class="select-css" onChange={e => this.onFilterChange(e)}>{this.renderConditions(this.changes.type)}</select>
+            <div>{this.renderExtra(filterEntities[this.changes.type].extra, this.changes.value)}</div>
+            <RevoButton class={{ green: true }} onClick={() => this.onSave()}>Save</RevoButton>
+            <RevoButton class={{ light: true }} onClick={() => this.onCancel()}>Cancel</RevoButton>
         </Host>;
     }
 
     private onFilterChange(e: Event) {
+        if (!this.changes) {
+            throw new Error('Changes required per edit');
+        }
         const el = e.target as HTMLSelectElement;
-        const val = el.value as FilterType;
-        this.extra = filterEntities[val].extra;
-        this.currentFilter.type = val;
+        const type = el.value as FilterType;
+        this.changes = {
+            ...this.changes,
+            type
+        };
+    }
+
+    private onKeyDown(e: KeyboardEvent) {
+        if (e.key.toLowerCase() === 'enter') {
+            this.onSave();
+        }
     }
 
     private onCancel() {
-        this.show();
+        this.changes = undefined;
     }
 
     private onSave() {
+        if (!this.changes) {
+            throw new Error('Changes required per edit');
+        }
         this.filterChange.emit({
-            ...this.currentFilter,
-            prop: this.isVisible?.prop,
-            extra: this.extraElement?.value?.trim()
+            prop: this.changes.prop,
+            type: this.changes.type,
+            value: this.extraElement?.value?.trim()
         });
-        this.show();
-    }
-
-    private close() {
-        this.extraElement = undefined;
-        this.currentFilter = {
-            type: 'none'
-        };
+        this.changes = undefined;
     }
 
     private isOutside(e: HTMLElement|null) {

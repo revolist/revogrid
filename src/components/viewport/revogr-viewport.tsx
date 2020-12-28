@@ -14,7 +14,6 @@ import OrderRenderer, { OrdererService } from '../order/orderRenderer';
 import { columnTypes } from '../../store/storeTypes';
 
 import RevogrRowHeaders from '../rowHeaders/revogr-row-headers';
-import { ColumnFilter } from '../../plugins/filter/filter.plugin';
 
 import ViewportProps = ViewportSpace.ViewportProps;
 
@@ -50,7 +49,7 @@ export class RevogrViewport {
   @Prop() range: boolean;
   /** Show row indexes column */
   @Prop() rowHeaders: RevoGrid.RowHeaders|boolean;
-  @Prop() columnFilter: boolean|ColumnFilter;
+  @Prop() columnFilter: boolean;
 
   // --------------------------------------------------------------------------
   //

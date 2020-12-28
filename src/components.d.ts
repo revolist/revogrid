@@ -5,13 +5,15 @@
  * It contains typing information for all components that exist in this project.
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
-import { Edition, RevoGrid, Selection, ThemeSpace } from "./interfaces";
+import { Edition, RevoGrid, RevoPlugin, Selection, ThemeSpace } from "./interfaces";
 import { AutoSizeColumnConfig } from "./plugins/autoSizeColumn";
-import { ColumnFilter } from "./plugins/filter/filter.plugin";
+import { ColumnFilterConfig, FilterCollection } from "./plugins/filter/filter.plugin";
 import { ColumnCollection } from "./services/column.data.provider";
 import { VNode } from "@stencil/core";
 import { ObservableMap } from "@stencil/store";
 import { DataSourceState, Groups } from "./store/dataSource/data.store";
+import { FilterType } from "./plugins/filter/filter.service";
+import { FilterItem, ShowData } from "./plugins/filter/filter.pop";
 export namespace Components {
     interface RevoGrid {
         /**
@@ -27,9 +29,9 @@ export namespace Components {
          */
         "colSize": number;
         /**
-          * Can filter
+          * Enables filter plugin Can be boolean Can be filter collection
          */
-        "columnFilter": boolean|ColumnFilter;
+        "columnFilter": boolean|ColumnFilterConfig;
         /**
           * Types Every type represent multiple column properties Types will be merged but can be replaced with column properties
          */
@@ -46,6 +48,14 @@ export namespace Components {
           * Defines how many rows/columns should be rendered outside visible area.
          */
         "frameSize": number;
+        /**
+          * Receive all columns in data source
+         */
+        "getColumns": () => Promise<RevoGrid.ColumnRegular[]>;
+        /**
+          * Get all active plugins instances
+         */
+        "getPlugins": () => Promise<RevoPlugin.Plugin[]>;
         /**
           * Get data from source
          */
@@ -68,6 +78,10 @@ export namespace Components {
           * Pinned top Source: {[T in ColumnProp]: any} - defines pinned top rows data source.
          */
         "pinnedTopSource": RevoGrid.DataType[];
+        /**
+          * Custom grid plugins Has to be predefined during first grid init Every plugin should be inherited from BasePlugin
+         */
+        "plugins": RevoPlugin.PluginClass[];
         /**
           * When true, user can range selection.
          */
@@ -144,6 +158,7 @@ export namespace Components {
           * @param order - order to apply
          */
         "updateColumnSorting": (column: RevoGrid.ColumnRegular, index: number, order: 'asc' | 'desc') => Promise<RevoGrid.ColumnRegular>;
+        "updateColumns": (cols: RevoGrid.ColumnRegular[]) => Promise<void>;
     }
     interface RevogrClipboard {
         "doCopy": (e: DataTransfer, data?: RevoGrid.DataFormat[][]) => Promise<void>;
@@ -172,7 +187,9 @@ export namespace Components {
         "editor": Edition.EditorCtr|null;
     }
     interface RevogrFilterPanel {
-        "show": (isVisible?: { x: number; y: number; prop: RevoGrid.ColumnProp; }) => Promise<void>;
+        "filterTypes": Record<string, FilterType[]>;
+        "getChanges": () => Promise<ShowData>;
+        "show": (newEntity?: ShowData) => Promise<void>;
         "uuid": string;
     }
     interface RevogrFocus {
@@ -186,7 +203,7 @@ export namespace Components {
     interface RevogrHeader {
         "canResize": boolean;
         "colData": RevoGrid.ColumnRegular[];
-        "columnFilter": boolean|ColumnFilter;
+        "columnFilter": boolean;
         "dimensionCol": ObservableMap<RevoGrid.DimensionSettingsState>;
         "groupingDepth": number;
         "groups": Groups;
@@ -246,7 +263,7 @@ export namespace Components {
         "selectionStore": ObservableMap<Selection.SelectionStoreState>;
     }
     interface RevogrViewport {
-        "columnFilter": boolean|ColumnFilter;
+        "columnFilter": boolean;
         "columnStores": {[T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>};
         "dimensions": {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.DimensionSettingsState>};
         /**
@@ -384,9 +401,9 @@ declare namespace LocalJSX {
          */
         "colSize"?: number;
         /**
-          * Can filter
+          * Enables filter plugin Can be boolean Can be filter collection
          */
-        "columnFilter"?: boolean|ColumnFilter;
+        "columnFilter"?: boolean|ColumnFilterConfig;
         /**
           * Types Every type represent multiple column properties Types will be merged but can be replaced with column properties
          */
@@ -403,6 +420,9 @@ declare namespace LocalJSX {
           * Defines how many rows/columns should be rendered outside visible area.
          */
         "frameSize"?: number;
+        /**
+          * Column updated
+         */
         "onAfterColumnsSet"?: (event: CustomEvent<{
     columns: ColumnCollection;
     order: Record<RevoGrid.ColumnProp, 'asc'|'desc'>;
@@ -411,6 +431,9 @@ declare namespace LocalJSX {
           * After edit. Triggered when after data applied or Range changeged.
          */
         "onAfterEdit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails|Edition.BeforeRangeSaveDataDetails>) => void;
+        /**
+          * After rows updated
+         */
         "onAfterSourceSet"?: (event: CustomEvent<{
     type: RevoGrid.DimensionRows;
     source: RevoGrid.DataType[];
@@ -423,11 +446,18 @@ declare namespace LocalJSX {
           * Before cell focus changed. Use e.preventDefault() to prevent cell focus change.
          */
         "onBeforeCellFocus"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
+        /**
+          * Before column update
+         */
         "onBeforeColumnsSet"?: (event: CustomEvent<ColumnCollection>) => void;
         /**
           * Before edit event. Triggered before edit data applied. Use e.preventDefault() to prevent edit data set and use you own.  Use e.val = {your value} to replace edit result with your own.
          */
         "onBeforeEdit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
+        /**
+          * Before filter applied to data source Use e.preventDefault() to prevent cell focus change Update @collection if you wish to change filters on the flight
+         */
+        "onBeforeFilterApply"?: (event: CustomEvent<{ collection: FilterCollection; }>) => void;
         /**
           * Before range apply. Triggered before range applied. Use e.preventDefault() to prevent range.
          */
@@ -481,6 +511,10 @@ declare namespace LocalJSX {
           * Pinned top Source: {[T in ColumnProp]: any} - defines pinned top rows data source.
          */
         "pinnedTopSource"?: RevoGrid.DataType[];
+        /**
+          * Custom grid plugins Has to be predefined during first grid init Every plugin should be inherited from BasePlugin
+         */
+        "plugins"?: RevoPlugin.PluginClass[];
         /**
           * When true, user can range selection.
          */
@@ -557,7 +591,8 @@ declare namespace LocalJSX {
         "onCloseEdit"?: (event: CustomEvent<boolean|undefined>) => void;
     }
     interface RevogrFilterPanel {
-        "onFilterChange"?: (event: CustomEvent<any>) => void;
+        "filterTypes"?: Record<string, FilterType[]>;
+        "onFilterChange"?: (event: CustomEvent<FilterItem>) => void;
         "uuid"?: string;
     }
     interface RevogrFocus {
@@ -571,7 +606,7 @@ declare namespace LocalJSX {
     interface RevogrHeader {
         "canResize"?: boolean;
         "colData"?: RevoGrid.ColumnRegular[];
-        "columnFilter"?: boolean|ColumnFilter;
+        "columnFilter"?: boolean;
         "dimensionCol"?: ObservableMap<RevoGrid.DimensionSettingsState>;
         "groupingDepth"?: number;
         "groups"?: Groups;
@@ -670,7 +705,7 @@ declare namespace LocalJSX {
         "selectionStore"?: ObservableMap<Selection.SelectionStoreState>;
     }
     interface RevogrViewport {
-        "columnFilter"?: boolean|ColumnFilter;
+        "columnFilter"?: boolean;
         "columnStores"?: {[T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>};
         "dimensions"?: {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.DimensionSettingsState>};
         /**

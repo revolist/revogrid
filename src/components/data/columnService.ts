@@ -1,6 +1,6 @@
 import {h, VNode} from '@stencil/core';
 import {ObservableMap} from '@stencil/store';
-import {DataSourceState, getSourceItem, getVisibleSourceItem, setSourceItem} from '../../store/dataSource/data.store';
+import {DataSourceState, getSourceItem, getVisibleSourceItem, setSourceByVirtualIndex} from '../../store/dataSource/data.store';
 import { CELL_CLASS, DISABLED_CLASS } from '../../utils/consts';
 import {Edition, RevoGrid, Selection} from '../../interfaces';
 import { getRange } from '../../store/selection/selection.helpers';
@@ -221,7 +221,7 @@ export default class ColumnService implements ColumnServiceI {
         oldModel[prop] = data[rowIndex][prop];
       }
     }
-    setSourceItem(this.dataStore, items);
+    setSourceByVirtualIndex(this.dataStore, items);
   }
 
   getRangeStaticData(d: Selection.RangeArea, value: RevoGrid.DataFormat): RevoGrid.DataLookup {

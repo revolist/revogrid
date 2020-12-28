@@ -10,7 +10,6 @@ import {Groups} from '../../store/dataSource/data.store';
 import {getItemByIndex} from '../../store/dimension/dimension.helpers';
 import HeaderRenderer from './headerRenderer';
 import GroupHeaderRenderer from './headerGroupRenderer';
-import { ColumnFilter } from '../../plugins/filter/filter.plugin';
 
 @Component({
   tag: 'revogr-header',
@@ -27,7 +26,7 @@ export class RevogrHeaderComponent {
   @Prop() groupingDepth: number = 0;
   @Prop() canResize: boolean;
   @Prop() colData: RevoGrid.ColumnRegular[];
-  @Prop() columnFilter: boolean|ColumnFilter;
+  @Prop() columnFilter: boolean;
 
   @Event() initialHeaderClick: EventEmitter<RevoGrid.InitialHeaderClick>;
   @Event() headerResize: EventEmitter<RevoGrid.ViewSettingSizeProp>;

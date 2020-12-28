@@ -110,6 +110,8 @@ export function scaleValue(value: number, from: [number, number], to: [number, n
   return ((to[1] - to[0]) * (value - from[0]) / (from[1] - from[0])) + to[0];
 }
 
-export async function timeout(delay: number = 0): Promise<void> {
-  await new Promise((r) => { setTimeout(() => r(), delay); });
+export async function timeout(delay = 0): Promise<void> {
+  await new Promise((r: (v?: any) => void) => {
+    setTimeout(() => r(), delay);
+  });
 }
