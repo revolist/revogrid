@@ -4,7 +4,7 @@ import beginsWith from "./conditions/string/beginswith";
 import contains, { notContains } from "./conditions/string/contains";
 import { LogicFunction } from "./filter.types";
 
-export const filterType = {
+export const filterNames = {
     none: 'None',
     empty: 'Not set',
     notEmpty: 'Set',
@@ -15,7 +15,7 @@ export const filterType = {
     notContains: 'Does not contain'
 };
 
-export type FilterType = keyof typeof filterType;
+export type FilterType = keyof typeof filterNames;
 
 export const filterEntities: Record<FilterType, LogicFunction> = {
     none: () => true,
@@ -30,7 +30,6 @@ export const filterEntities: Record<FilterType, LogicFunction> = {
 
 export const filterTypes: Record<string, FilterType[]> = {
     string: [
-        'none',
         'notEmpty',
         'empty',
         'eq',

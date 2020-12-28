@@ -4,8 +4,12 @@ const eq: LogicFunction = (value: LogicFunctionParam, extra?: LogicFunctionExtra
     if (typeof value === 'undefined' || value === null && !extra) {
         return true;
     }
-    return JSON.stringify(value) === extra;
+    if (typeof value !== 'string') {
+        value === JSON.stringify(value);
+    }
+    return value === extra;
 };
+
 export const notEq: LogicFunction = (value: LogicFunctionParam, extra?: LogicFunctionExtraParam) => !eq(value, extra);
 notEq.extra = 'input' as ExtraField;
 eq.extra = 'input' as ExtraField;

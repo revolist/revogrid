@@ -128,7 +128,7 @@ export class RevoGridComponent {
    * Can be boolean
    * Can be filter collection
    */
-  @Prop() columnFilter: boolean|ColumnFilterConfig = false;
+  @Prop() filter: boolean|ColumnFilterConfig = false;
 
 
   /** 
@@ -630,12 +630,12 @@ export class RevoGridComponent {
       );
     }
     this.trimmedRowsChanged(this.trimmedRows);
-    if (this.columnFilter) {
+    if (this.filter) {
       this.internalPlugins.push(
         new FilterPlugin(
           this.element,
           this.uuid,
-          typeof this.columnFilter === 'object' ? this.columnFilter : undefined
+          typeof this.filter === 'object' ? this.filter : undefined
         )
       );
     }
@@ -674,7 +674,7 @@ export class RevoGridComponent {
       range={this.range}
       rowClass={this.rowClass}
       rowHeaders={this.rowHeaders}
-      columnFilter={!!this.columnFilter}
+      columnFilter={!!this.filter}
       editors={this.editors}/>, this.extraElements]
   }
 }

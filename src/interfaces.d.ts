@@ -94,7 +94,7 @@ export declare namespace RevoGrid {
     /** column size would be changed based on content size */
     autoSize?: boolean;
     /** filter */
-    filter?: boolean;
+    filter?: boolean|string|string[];
     order?: 'asc'|'desc';
     /** is cell in column or individual can be dragged */
     rowDrag?: RowDrag;

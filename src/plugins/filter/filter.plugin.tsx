@@ -3,12 +3,27 @@ import BasePlugin from '../basePlugin';
 import { RevoGrid } from '../../interfaces';
 import { FILTER_PROP, isFilterBtn } from './filter.button';
 import { FilterItem } from './filter.pop';
-import { filterEntities, FilterType, filterTypes } from './filter.service';
+import { filterEntities, filterNames, FilterType, filterTypes } from './filter.service';
 import { LogicFunction } from './filter.types';
 
+type CustomFilter = {
+    columnFilterType: string; // property defined in column filter: string/number/abstract/enum...etc
+    name: string;
+    func: LogicFunction;
+};
+
+/**
+ * @typedef ColumnFilterConfig
+ * @type {object}
+ * @property {FilterCollection|undefined} collection - preserved filter data
+ * @property {string[]|undefined} include - filters to be included, if defined everything else out of scope will be ignored
+ * @property {Record<string, CustomFilter>|undefined} customFilters - hash map of {FilterType:CustomFilter}.
+ * A way to define your own filter types per column
+ */
 export type ColumnFilterConfig = {
-    collection: FilterCollection;
-    filters?: FilterType[];
+    collection?: FilterCollection;
+    include?: string[];
+    customFilters?: Record<string, CustomFilter>;
 };
 type HeaderEvent = CustomEvent<RevoGrid.ColumnRegular>;
 type FilterCollectionItem = {
@@ -22,7 +37,10 @@ export type FilterCollection = Record<RevoGrid.ColumnProp, FilterCollectionItem>
 export default class FilterPlugin extends BasePlugin {
     private pop: HTMLRevogrFilterPanelElement;
     private filterCollection: FilterCollection = {};
-    private possibleFilters: Record<string, FilterType[]> = {...filterTypes};
+    private possibleFilters: Record<string, string[]> = {...filterTypes};
+    private possibleFilterNames: Record<string, string> = {...filterNames};
+    private possibleFilterEntities: Record<string, LogicFunction> = {...filterEntities};
+
     constructor(protected revogrid: HTMLRevoGridElement, uiid: string, config?: ColumnFilterConfig) {
         super(revogrid);
         if (config) {
@@ -36,7 +54,8 @@ export default class FilterPlugin extends BasePlugin {
         this.revogrid.registerVNode([
             <revogr-filter-panel
                 uuid={`filter-${uiid}`}
-                filterTypes={this.possibleFilters}
+                filterNames={this.possibleFilterNames}
+                filterEntities={this.possibleFilterEntities}
                 onFilterChange={e => this.onFilterChange(e.detail)}
                 ref={(e) => this.pop = e}/>
         ]);
@@ -46,14 +65,33 @@ export default class FilterPlugin extends BasePlugin {
         if (config.collection) {
             this.filterCollection = {...config.collection};
         }
-        if (config.filters) {
-            const filters: Record<string, FilterType[]> = {};
-            for (let t in filterTypes) {
-                const newTypes = filterTypes[t].filter(f => config?.filters.indexOf(f) > -1);
+        if (config.customFilters) {
+            for (let cType in config.customFilters) {
+                const cFilter = config.customFilters[cType];
+                if (!this.possibleFilters[cFilter.columnFilterType]) {
+                    this.possibleFilters[cFilter.columnFilterType] = [];
+                }
+                this.possibleFilters[cFilter.columnFilterType].push(cType);
+                this.possibleFilterEntities[cType] = cFilter.func;
+                this.possibleFilterNames[cType] = cFilter.name;
+            }
+        }
+
+        /** 
+         * which filters has to be included/excluded
+         * convinient way to exclude system filters
+         */
+        if (config.include) {
+            const filters: Record<string, string[]> = {};
+
+            for (let t in this.possibleFilters) {
+                // validate filters, if appropriate function present
+                const newTypes = this.possibleFilters[t].filter(f => config.include.indexOf(f) > -1);
                 if (newTypes.length) {
                     filters[t] = newTypes;
                 }
             }
+            // if any valid filters provided show them
             if (Object.keys(filters).length > 0) {
                 this.possibleFilters = filters;
             }
@@ -78,12 +116,40 @@ export default class FilterPlugin extends BasePlugin {
         const gridPos = this.revogrid.getBoundingClientRect();
         const buttonPos = el.getBoundingClientRect();
         const prop = e.detail.prop;
+        this.pop.filterTypes = this.getColumnFilter(e.detail.filter);
         this.pop.show({
             ...this.filterCollection[prop],
             x: buttonPos.x - gridPos.x,
             y: buttonPos.y - gridPos.y + buttonPos.height,
             prop
         });
+    }
+
+    private getColumnFilter(type?: boolean|string|string[]): Record<string, string[]> {
+        let filterType = 'string';
+        if (!type) {
+            return { [filterType]: this.possibleFilters[filterType] };
+        }
+
+        // if custom column filter
+        if (this.isValidType(type)) {
+            filterType = type;
+
+
+        // if multiple filters applied
+        } else if (typeof type === 'object' && type.length) {
+            return type.reduce((r: Record<string, string[]>, multiType) => {
+                if (this.isValidType(multiType)) {
+                    r[multiType] = this.possibleFilters[multiType];
+                }
+                return r;
+            }, {});
+        }
+        return { [filterType]: this.possibleFilters[filterType] };
+    }
+
+    private isValidType(type: any): type is string {
+        return !!(typeof type === 'string' && this.possibleFilters[type]);
     }
 
     // called on internal component change
@@ -105,7 +171,7 @@ export default class FilterPlugin extends BasePlugin {
             if (type === 'none') {
                 delete this.filterCollection[prop];
             } else {
-                const filter = filterEntities[type];
+                const filter = this.possibleFilterEntities[type];
                 this.filterCollection[prop] = {
                     filter, value, type
                 };
@@ -132,7 +198,7 @@ export default class FilterPlugin extends BasePlugin {
                 delete c[FILTER_PROP];
                 columnsToUpdate.push(c);
             }
-            if (!c.filter && hasFilter) {
+            if (!c[FILTER_PROP] && hasFilter) {
                 columnsToUpdate.push(c);
                 c[FILTER_PROP] = true;
             }

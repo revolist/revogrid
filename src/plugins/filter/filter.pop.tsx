@@ -1,9 +1,10 @@
 import { Component, h, Host, Listen, Prop, State, Event, EventEmitter, VNode, Method } from "@stencil/core";
-import { filterEntities, FilterType, filterType } from "./filter.service";
+import { FilterType } from "./filter.service";
 import { RevoGrid } from "../../interfaces";
-import '../../utils/closestPolifill';
 import { isFilterBtn } from "./filter.button";
 import { RevoButton } from "../../components/button/button";
+import '../../utils/closestPolifill';
+import { LogicFunction } from "./filter.types";
 
 /**
  * @typedef FilterItem
@@ -33,7 +34,9 @@ export class FilterPanel {
     private extraElement: HTMLInputElement|undefined;
     @State() changes: ShowData|undefined;
     @Prop({ mutable: true, reflect: true }) uuid: string;
-    @Prop() filterTypes: Record<string, FilterType[]> = {};
+    @Prop() filterTypes: Record<string, string[]> = {};
+    @Prop() filterNames: Record<string, string> = {};
+    @Prop() filterEntities: Record<string, LogicFunction> = {};
     @Event() filterChange: EventEmitter<FilterItem>;
     @Listen('mousedown', { target: 'document' }) onMouseDown(e: MouseEvent): void {
         if (this.changes && !e.defaultPrevented) {
@@ -57,8 +60,10 @@ export class FilterPanel {
     renderConditions(type: FilterType) {
         const options: VNode[] = [];
         for (let gIndex in this.filterTypes) {
+            options.push(<option value={defaultType}>{this.filterNames[defaultType]}</option>);
+
             options.push(...this.filterTypes[gIndex].map(k =>
-                <option value={k} selected={type === k}>{filterType[k]}</option>));
+                <option value={k} selected={type === k}>{this.filterNames[k]}</option>));
             options.push(<option disabled></option>);
         }
         return options;
@@ -92,7 +97,7 @@ export class FilterPanel {
             <label>Filter by condition</label>
             <br/>
             <select class="select-css" onChange={e => this.onFilterChange(e)}>{this.renderConditions(this.changes.type)}</select>
-            <div>{this.renderExtra(filterEntities[this.changes.type].extra, this.changes.value)}</div>
+            <div>{this.renderExtra(this.filterEntities[this.changes.type].extra, this.changes.value)}</div>
             <RevoButton class={{ green: true }} onClick={() => this.onSave()}>Save</RevoButton>
             <RevoButton class={{ light: true }} onClick={() => this.onCancel()}>Cancel</RevoButton>
         </Host>;

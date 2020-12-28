@@ -12,7 +12,7 @@ import { ColumnCollection } from "./services/column.data.provider";
 import { VNode } from "@stencil/core";
 import { ObservableMap } from "@stencil/store";
 import { DataSourceState, Groups } from "./store/dataSource/data.store";
-import { FilterType } from "./plugins/filter/filter.service";
+import { LogicFunction } from "./plugins/filter/filter.types";
 import { FilterItem, ShowData } from "./plugins/filter/filter.pop";
 export namespace Components {
     interface RevoGrid {
@@ -29,10 +29,6 @@ export namespace Components {
          */
         "colSize": number;
         /**
-          * Enables filter plugin Can be boolean Can be filter collection
-         */
-        "columnFilter": boolean|ColumnFilterConfig;
-        /**
           * Types Every type represent multiple column properties Types will be merged but can be replaced with column properties
          */
         "columnTypes": {[name: string]: RevoGrid.ColumnType};
@@ -44,6 +40,10 @@ export namespace Components {
           * Custom editors register
          */
         "editors": Edition.Editors;
+        /**
+          * Enables filter plugin Can be boolean Can be filter collection
+         */
+        "filter": boolean|ColumnFilterConfig;
         /**
           * Defines how many rows/columns should be rendered outside visible area.
          */
@@ -187,7 +187,9 @@ export namespace Components {
         "editor": Edition.EditorCtr|null;
     }
     interface RevogrFilterPanel {
-        "filterTypes": Record<string, FilterType[]>;
+        "filterEntities": Record<string, LogicFunction>;
+        "filterNames": Record<string, string>;
+        "filterTypes": Record<string, string[]>;
         "getChanges": () => Promise<ShowData>;
         "show": (newEntity?: ShowData) => Promise<void>;
         "uuid": string;
@@ -401,10 +403,6 @@ declare namespace LocalJSX {
          */
         "colSize"?: number;
         /**
-          * Enables filter plugin Can be boolean Can be filter collection
-         */
-        "columnFilter"?: boolean|ColumnFilterConfig;
-        /**
           * Types Every type represent multiple column properties Types will be merged but can be replaced with column properties
          */
         "columnTypes"?: {[name: string]: RevoGrid.ColumnType};
@@ -416,6 +414,10 @@ declare namespace LocalJSX {
           * Custom editors register
          */
         "editors"?: Edition.Editors;
+        /**
+          * Enables filter plugin Can be boolean Can be filter collection
+         */
+        "filter"?: boolean|ColumnFilterConfig;
         /**
           * Defines how many rows/columns should be rendered outside visible area.
          */
@@ -591,7 +593,9 @@ declare namespace LocalJSX {
         "onCloseEdit"?: (event: CustomEvent<boolean|undefined>) => void;
     }
     interface RevogrFilterPanel {
-        "filterTypes"?: Record<string, FilterType[]>;
+        "filterEntities"?: Record<string, LogicFunction>;
+        "filterNames"?: Record<string, string>;
+        "filterTypes"?: Record<string, string[]>;
         "onFilterChange"?: (event: CustomEvent<FilterItem>) => void;
         "uuid"?: string;
     }

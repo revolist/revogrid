@@ -4,8 +4,11 @@ const contains: LogicFunction = (value: LogicFunctionParam, extra?: LogicFunctio
     if (!value) {
         return false;
     }
-    if (extra && typeof extra === 'string') {
-        return JSON.stringify(value).toLocaleLowerCase().indexOf(extra) > -1;
+    if (extra) {
+        if (typeof value !== 'string') {
+            value = JSON.stringify(value);
+        }
+        return value.toLocaleLowerCase().indexOf(extra) > -1;
     }
     return true;
 };
