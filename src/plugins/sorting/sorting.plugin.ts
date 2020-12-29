@@ -1,6 +1,7 @@
 import size from 'lodash/size';
 
 import { RevoGrid } from '../../interfaces';
+import { setStore } from '../../utils/store.utils';
 import BasePlugin from '../basePlugin';
 
 import DimensionRows = RevoGrid.DimensionRows;
@@ -96,8 +97,10 @@ export default class SortingPlugin extends BasePlugin {
 		const store = await this.revogrid.getSourceStore();
 		let items = store.get('items');
 		const source = store.get('source');
-		items = this.sortIndexByItems(items, source, this.sorting);
-		store.set('items', items);
+		setStore(store, {
+			items: this.sortIndexByItems(items, source, this.sorting),
+			source: [...source]
+		});
 	}
 
 	private keySort(a: any, b: any, dir: 'asc'|'desc') {
