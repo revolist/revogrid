@@ -47,9 +47,13 @@ export default class FilterPlugin extends BasePlugin {
             this.initConfig(config);
         }
         const headerClick = (e: HeaderEvent) => this.headerClick(e);
-        const beforeSourceSet = () => this.filterByProps(this.filterCollection);
+        const afterSourceSet = () => {
+            if (Object.keys(this.filterCollection).length) {
+                this.filterByProps(this.filterCollection);
+            }
+        };
         this.addEventListener('headerClick', headerClick);
-        this.addEventListener('beforeSourceSet', beforeSourceSet);
+        this.addEventListener('afterSourceSet', afterSourceSet);
 
         this.revogrid.registerVNode([
             <revogr-filter-panel
