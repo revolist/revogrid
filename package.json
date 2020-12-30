@@ -1,6 +1,6 @@
 {
   "name": "@revolist/revogrid",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "description": "Virtual reactive data grid component - RevoGrid.",
   "license": "MIT",
   "directories": {
@@ -25,9 +25,15 @@
     "grid",
     "datagrid",
     "virtualgrid",
-    "virtual vue grid",
-    "react datagrid",
-    "editable datagrid",
+    "virtual",
+    "vue",
+    "react",
+    "react-grid",
+    "vue-grid",
+    "vue-datagrid",
+    "fast-grid",
+    "excel-grid"
+    "editable",
     "excel"
   ],
   "main": "dist/index.cjs.js",
