@@ -37,6 +37,8 @@ Support Millions of cells and thousands columns easy and efficiently for fast da
 - Keayboard support;
 - Super light initial starter <img src="https://badgen.net/bundlephobia/min/@revolist/revogrid@latest" alt="Min size"/>. Can be imported with polifill or as module for modern browsers;
 - Intelligent Virtual DOM and smart row recombination in order to achieve less redraws;
+- Sorting: multiple options, can be customized per column and advanced with events;
+- Filtering: predefined system filters and a way to define you own;
 - Column and Row custom sizes;
 - Column resizing;
 - Column auto-size support (content related column size feature);
@@ -50,12 +52,13 @@ Support Millions of cells and thousands columns easy and efficiently for fast da
 - Custom cell properties;
 - [Column types (select, string, number, date, custom)](https://revolist.github.io/revogrid/guide/column.types.html);
 - Drag and drop rows;
-- Column sorting;
 - Range selection;
 - Range edit;
 - Theme packages: Excel like, material, compact, dark or light;
 - Copy/Paste: Copy/paste from Excel, Google Sheets or any other sheet format;
 - Easy extenation and support with modern VNode features and tsx support;
+- Trimmed rows: hide rows on demand;
+- Plugin system: create your own plugins or extend existing one, it's transparent and easy;
 - Hundred small customizations and improvements [RevoGrid](https://revolist.github.io/revogrid).
 
 
