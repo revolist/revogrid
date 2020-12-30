@@ -91,9 +91,9 @@ yarn add @revolist/revogrid;
 ## Framework
 
 - [JavaScript](https://revolist.github.io/revogrid/guide);
-- [VueJs](https://revolist.github.io/revogrid/guide/framework.vue);
-- [React](https://revolist.github.io/revogrid/guide/framework.react);
-- [Angular](docs/angular.md).
+- [VueJs](https://revolist.github.io/revogrid/guide/framework.vue.overview.html);
+- [React](https://revolist.github.io/revogrid/guide/framework.react.overview.html);
+- [Angular](https://revolist.github.io/revogrid/guide/framework.angular.overview.html).
 - [Ember](docs/ember.md).
 
 
