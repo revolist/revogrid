@@ -32,7 +32,7 @@
     "vue-grid",
     "vue-datagrid",
     "fast-grid",
-    "excel-grid"
+    "excel-grid",
     "editable",
     "excel"
   ],
