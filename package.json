@@ -51,7 +51,7 @@
   "scripts": {
     "build": "stencil build --prod --docs",
     "build:demo": "cd ./demo/ && rm -rf node_modules && npm i && npm run build",
-    "start": "stencil build --dev --watch --serve",
+    "serve": "stencil build --dev --watch --serve",
     "generate": "stencil generate",
     "deploy": "git submodule update && npm run build:demo && gh-pages -d ./demo/src/.vuepress/dist"
   },

@@ -123,7 +123,7 @@ export default class ColumnDataProvider {
             setSourceByVirtualIndex(this.dataSources[type].store, colsToUpdate));
 	}
 		
-    updateColumn(column: ColumnRegular, index: number): void {
+    updateColumn(column: ColumnRegular, index: number) {
         const type = ColumnDataProvider.getColumnType(column);
         setSourceByVirtualIndex(this.dataSources[type].store, {[index]: column});
 	}

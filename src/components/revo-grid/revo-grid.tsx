@@ -15,6 +15,7 @@ import AutoSize, { AutoSizeColumnConfig } from '../../plugins/autoSizeColumn';
 import { columnTypes } from '../../store/storeTypes';
 import FilterPlugin, { ColumnFilterConfig, FilterCollection } from '../../plugins/filter/filter.plugin';
 import SortingPlugin from '../../plugins/sorting/sorting.plugin';
+import ExportFilePlugin from '../../plugins/export/exportFile';
 
 type ColumnStores = {
   [T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
@@ -137,6 +138,13 @@ export class RevoGridComponent {
    * @trimmedRows are physical row indexes to hide
    */
   @Prop() trimmedRows: Record<number, boolean> = {};
+
+  /** 
+   * Enables export plugin
+   * Can be boolean
+   * Can be export options
+   */
+  @Prop() export: boolean = false;
 
   
   // --------------------------------------------------------------------------
@@ -363,12 +371,20 @@ export class RevoGridComponent {
   }
 
   /**
-   * Provides access to internal store observer
+   * Provides access to rows internal store observer
    * Can be used for plugin support
    * @param type - type of source
    */
   @Method() async getSourceStore(type: RevoGrid.DimensionRows = 'row') {
     return this.rowStores[type];
+  }
+  /**
+   * Provides access to column internal store observer
+   * Can be used for plugin support
+   * @param type - type of column
+   */
+  @Method() async getColumnStore(type: RevoGrid.DimensionCols = 'col') {
+    return this.columnStores[type];
   }
 
   /**
@@ -395,7 +411,7 @@ export class RevoGridComponent {
    * Get all active plugins instances
    */
   @Method() async getPlugins(): Promise<RevoPlugin.Plugin[]> {
-    return this.internalPlugins;
+    return [...this.internalPlugins];
   }
   
   // --------------------------------------------------------------------------
@@ -642,6 +658,11 @@ export class RevoGridComponent {
           this.uuid,
           typeof this.filter === 'object' ? this.filter : undefined
         )
+      );
+    }
+    if (this.export) {
+      this.internalPlugins.push(
+        new ExportFilePlugin(this.element)
       );
     }
     this.internalPlugins.push(new SortingPlugin(this.element));

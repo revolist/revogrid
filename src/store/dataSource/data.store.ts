@@ -16,6 +16,7 @@ import DimensionCols = RevoGrid.DimensionCols;
 export interface Group extends RevoGrid.ColumnProperties {
   name: string;
   children: RevoGrid.ColumnRegular[];
+  // props/ids
   ids: (string|number)[];
 }
 type Trimmed = Record<number, boolean>;
@@ -165,3 +166,4 @@ export function getSourceItemVirtualIndexByProp(store: ObservableMap<DataSourceS
   const physicalIndex = findIndex(source, { prop });
   return items.indexOf(physicalIndex);
 }
+
