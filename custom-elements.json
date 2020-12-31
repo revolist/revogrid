@@ -21,6 +21,10 @@
           "description": "Indicates default column size."
         },
         {
+          "name": "export",
+          "description": "Enables export plugin\nCan be boolean\nCan be export options"
+        },
+        {
           "name": "filter",
           "description": "Enables filter plugin\nCan be boolean\nCan be filter collection"
         },
