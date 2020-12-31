@@ -92,6 +92,10 @@
           mode: 'autoSizeAll'
         };
 
+        grid.addEventListener('beforeExport', (e) => {
+          console.log(e.detail);
+        });
+
         window.setEdit = function(x, y) {
           grid.setCellEdit(1, 30);
         };

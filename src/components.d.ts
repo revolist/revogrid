@@ -9,6 +9,7 @@ import { Edition, RevoGrid, RevoPlugin, Selection, ThemeSpace } from "./interfac
 import { AutoSizeColumnConfig } from "./plugins/autoSizeColumn";
 import { ColumnFilterConfig, FilterCollection } from "./plugins/filter/filter.plugin";
 import { ColumnCollection } from "./services/column.data.provider";
+import { DataInput } from "./plugins/export/types";
 import { VNode } from "@stencil/core";
 import { ObservableMap } from "@stencil/store";
 import { DataSourceState, Groups } from "./store/dataSource/data.store";
@@ -469,6 +470,10 @@ declare namespace LocalJSX {
           * Before edit event. Triggered before edit data applied. Use e.preventDefault() to prevent edit data set and use you own.  Use e.val = {your value} to replace edit result with your own.
          */
         "onBeforeEdit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
+        /**
+          * Before export Use e.preventDefault() to prevent export Replace data in Event in case you want to modify it in export
+         */
+        "onBeforeExport"?: (event: CustomEvent<DataInput>) => void;
         /**
           * Before filter applied to data source Use e.preventDefault() to prevent cell focus change Update @collection if you wish to change filters on the flight
          */
