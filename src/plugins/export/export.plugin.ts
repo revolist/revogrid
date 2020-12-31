@@ -1,12 +1,12 @@
 import  fill from 'lodash/fill';
 import { RevoGrid } from '../../interfaces';
 import { Groups } from '../../store/dataSource/data.store';
-import { ColSource, DataInput, Formatter } from './types';
+import { ColSource, CSVFormat, DataInput, Formatter } from './types';
 
 import { columnTypes, rowTypes } from '../../store/storeTypes';
 import { timeout } from '../../utils/utils';
 import BasePlugin from '../basePlugin';
-import ExportCsv, { CSVFormat } from './csv';
+import ExportCsv from './csv';
 
 enum ExportTypes {
 	csv = 'csv'

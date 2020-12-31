@@ -1,14 +1,6 @@
-import { DataInput, Formatter, FormatterOptions } from "./types";
+import { CSVFormat, DataInput, Formatter } from "./types";
 
-export interface CSVFormat extends FormatterOptions {
-    fileKind: 'csv';
-    bom: boolean;
-    columnDelimiter: string;
-    rowDelimiter: string;
-    filename?: string;
-}
-
-export const DEFAULT_FORMAT: CSVFormat = {
+const INITIAL: CSVFormat = {
     mime: 'text/csv',
     fileKind: 'csv',
     // BOM signature
@@ -31,16 +23,16 @@ const escapeRegex = new RegExp('"', 'g');
 export default class ExportCsv implements Formatter {
   readonly options: Readonly<CSVFormat>;
   constructor(options: Partial<CSVFormat> = {}) {
-    this.options = {...DEFAULT_FORMAT, ...options};
+    this.options = {...INITIAL, ...options};
   }
 
   doExport({data, headers, props }: DataInput) {
-    const anyHeaders = headers?.length > 0;
-
     let result = this.options.bom ? NO_BREAK_SPACE : '';
 
-    if (anyHeaders) {
+    // any header
+    if (headers?.length > 0) {
       headers.forEach((header) => {
+        // ignore empty
         if (!header.length) {
           return;
         }
@@ -54,8 +46,7 @@ export default class ExportCsv implements Formatter {
         result += this.options.rowDelimiter;
       }
       result += props.map(p =>
-        this.parseCell(row[p], this.options.columnDelimiter))
-        .join(this.options.columnDelimiter);
+        this.parseCell(row[p], this.options.columnDelimiter)).join(this.options.columnDelimiter);
     });
 
     return result;
@@ -70,19 +61,15 @@ export default class ExportCsv implements Formatter {
   }
 
   private parseCell(value: any, columnDelimiter: string, force = false) {
-    let escapedValue = value;
+    let escape = value;
     if (typeof value !== 'string') {
-      escapedValue = JSON.stringify(value);
+      escape = JSON.stringify(value);
+    }
+    const toEscape = [CARRIAGE_RETURN, DOUBLE_QT, LINE_FEED, columnDelimiter];
+    if (escape !== '' && (force || toEscape.some(i => escape.indexOf(i) >= 0))) {
+      return `"${escape.replace(escapeRegex, '""')}"`;
     }
 
-    if (escapedValue !== '' && (force ||
-      escapedValue.indexOf(CARRIAGE_RETURN) >= 0 ||
-      escapedValue.indexOf(DOUBLE_QT) >= 0 ||
-      escapedValue.indexOf(LINE_FEED) >= 0 ||
-      escapedValue.indexOf(columnDelimiter) >= 0)) {
-      return `"${escapedValue.replace(escapeRegex, '""')}"`;
-    }
-
-    return escapedValue;
+    return escape;
   }
 }
