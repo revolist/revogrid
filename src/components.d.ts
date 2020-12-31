@@ -41,6 +41,10 @@ export namespace Components {
          */
         "editors": Edition.Editors;
         /**
+          * Enables export plugin Can be boolean Can be export options
+         */
+        "export": boolean;
+        /**
           * Enables filter plugin Can be boolean Can be filter collection
          */
         "filter": boolean|ColumnFilterConfig;
@@ -48,6 +52,11 @@ export namespace Components {
           * Defines how many rows/columns should be rendered outside visible area.
          */
         "frameSize": number;
+        /**
+          * Provides access to column internal store observer Can be used for plugin support
+          * @param type - type of column
+         */
+        "getColumnStore": (type?: RevoGrid.DimensionCols) => Promise<ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>>;
         /**
           * Receive all columns in data source
          */
@@ -61,7 +70,7 @@ export namespace Components {
          */
         "getSource": (type?: RevoGrid.DimensionRows) => Promise<RevoGrid.DataType[]>;
         /**
-          * Provides access to internal store observer Can be used for plugin support
+          * Provides access to rows internal store observer Can be used for plugin support
           * @param type - type of source
          */
         "getSourceStore": (type?: RevoGrid.DimensionRows) => Promise<ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>>;
@@ -414,6 +423,10 @@ declare namespace LocalJSX {
           * Custom editors register
          */
         "editors"?: Edition.Editors;
+        /**
+          * Enables export plugin Can be boolean Can be export options
+         */
+        "export"?: boolean;
         /**
           * Enables filter plugin Can be boolean Can be filter collection
          */

@@ -1,6 +1,6 @@
 {
   "name": "@revolist/revogrid",
-  "version": "2.0.4",
+  "version": "2.1.0",
   "description": "Virtual reactive data grid component - RevoGrid.",
   "license": "MIT",
   "directories": {
@@ -34,7 +34,9 @@
     "fast-grid",
     "excel-grid",
     "editable",
-    "excel"
+    "excel",
+    "export",
+    "filtering"
   ],
   "main": "dist/index.cjs.js",
   "module": "dist/index.js",
@@ -51,7 +53,7 @@
   "scripts": {
     "build": "stencil build --prod --docs",
     "build:demo": "cd ./demo/ && rm -rf node_modules && npm i && npm run build",
-    "start": "stencil build --dev --watch --serve",
+    "serve": "stencil build --dev --watch --serve",
     "generate": "stencil generate",
     "deploy": "git submodule update && npm run build:demo && gh-pages -d ./demo/src/.vuepress/dist"
   },
