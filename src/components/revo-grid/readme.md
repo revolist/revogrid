@@ -15,6 +15,7 @@
 | `columnTypes`        | --                 | Types Every type represent multiple column properties Types will be merged but can be replaced with column properties                                                                                                                                   | `{ [name: string]: ColumnType; }`                                                                                                         | `{}`        |
 | `columns`            | --                 | Columns - defines an array of grid columns. Can be column or grouped column.                                                                                                                                                                            | `(ColumnRegular \| ColumnGrouping)[]`                                                                                                     | `[]`        |
 | `editors`            | --                 | Custom editors register                                                                                                                                                                                                                                 | `{ [name: string]: EditorCtr; }`                                                                                                          | `{}`        |
+| `export`             | `export`           | Enables export plugin Can be boolean Can be export options                                                                                                                                                                                              | `boolean`                                                                                                                                 | `false`     |
 | `filter`             | `filter`           | Enables filter plugin Can be boolean Can be filter collection                                                                                                                                                                                           | `boolean \| { collection?: Record<ColumnProp, FilterCollectionItem>; include?: string[]; customFilters?: Record<string, CustomFilter>; }` | `false`     |
 | `frameSize`          | `frame-size`       | Defines how many rows/columns should be rendered outside visible area.                                                                                                                                                                                  | `number`                                                                                                                                  | `1`         |
 | `pinnedBottomSource` | --                 | Pinned bottom Source: {[T in ColumnProp]: any} - defines pinned bottom rows data source.                                                                                                                                                                | `DataType[]`                                                                                                                              | `[]`        |
@@ -43,6 +44,7 @@
 | `beforeCellFocus`          | Before cell focus changed. Use e.preventDefault() to prevent cell focus change.                                                                                                         | `CustomEvent<{ prop: ColumnProp; model: DataType; val?: string; rowIndex: number; type: DimensionRows; }>`                                                                                          |
 | `beforeColumnsSet`         | Before column update                                                                                                                                                                    | `CustomEvent<{ columns: Record<DimensionCols, ColumnRegular[]>; columnGrouping: Record<DimensionCols, Group[]>; maxLevel: number; sort: Record<ColumnProp, ColumnRegular>; }>`                      |
 | `beforeEdit`               | Before edit event. Triggered before edit data applied. Use e.preventDefault() to prevent edit data set and use you own.  Use e.val = {your value} to replace edit result with your own. | `CustomEvent<{ prop: ColumnProp; model: DataType; val?: string; rowIndex: number; type: DimensionRows; }>`                                                                                          |
+| `beforeExport`             | Before export Use e.preventDefault() to prevent export Replace data in Event in case you want to modify it in export                                                                    | `CustomEvent<{ data: DataType[]; } & ColSource>`                                                                                                                                                    |
 | `beforeFilterApply`        | Before filter applied to data source Use e.preventDefault() to prevent cell focus change Update @collection if you wish to change filters on the flight                                 | `CustomEvent<{ collection: Record<ColumnProp, FilterCollectionItem>; }>`                                                                                                                            |
 | `beforeRange`              | Before range apply. Triggered before range applied. Use e.preventDefault() to prevent range.                                                                                            | `CustomEvent<{ type: DimensionRows; newRange: RangeArea; oldRange: RangeArea; newProps: ColumnProp[]; oldProps: ColumnProp[]; newData: { [key: number]: DataType; }; }>`                            |
 | `beforeRangeEdit`          | Before range edit event. Triggered before range data applied, when range selection happened. Use e.preventDefault() to prevent edit data set and use you own.                           | `CustomEvent<{ data: DataLookup; models: { [rowIndex: number]: DataType; }; type: DimensionRows; }>`                                                                                                |
@@ -57,6 +59,17 @@
 
 
 ## Methods
+
+### `getColumnStore(type?: RevoGrid.DimensionCols) => Promise<ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>>`
+
+Provides access to column internal store observer
+Can be used for plugin support
+
+#### Returns
+
+Type: `Promise<ObservableMap<DataSourceState<ColumnRegular, DimensionCols>>>`
+
+
 
 ### `getColumns() => Promise<RevoGrid.ColumnRegular[]>`
 
@@ -90,7 +103,7 @@ Type: `Promise<DataType[]>`
 
 ### `getSourceStore(type?: RevoGrid.DimensionRows) => Promise<ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>>`
 
-Provides access to internal store observer
+Provides access to rows internal store observer
 Can be used for plugin support
 
 #### Returns
