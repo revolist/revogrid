@@ -15,7 +15,8 @@ import AutoSize, { AutoSizeColumnConfig } from '../../plugins/autoSizeColumn';
 import { columnTypes } from '../../store/storeTypes';
 import FilterPlugin, { ColumnFilterConfig, FilterCollection } from '../../plugins/filter/filter.plugin';
 import SortingPlugin from '../../plugins/sorting/sorting.plugin';
-import ExportFilePlugin from '../../plugins/export/exportFile';
+import ExportFilePlugin from '../../plugins/export/export.plugin';
+import { DataInput } from '../../plugins/export/types';
 
 type ColumnStores = {
   [T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
@@ -274,9 +275,13 @@ export class RevoGridComponent {
    * Triggered when view port scrolled
    */
   @Event() viewportScroll: EventEmitter<RevoGrid.ViewPortScrollEvent>;
+  /**  
+   * Before export
+   * Use e.preventDefault() to prevent export
+   * Replace data in Event in case you want to modify it in export
+   */
+  @Event() beforeExport: EventEmitter<DataInput>;
 
-  // 
-  
   // --------------------------------------------------------------------------
   //
   //  Methods

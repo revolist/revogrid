@@ -15,7 +15,11 @@ export type ExportFormat = Partial<CSVFormat>;
 export default class ExportFilePlugin extends BasePlugin {
 	/** Exports string */
 	async exportString(options: ExportFormat = {}, t: ExportTypes = ExportTypes.csv) {
-		return this.formatter(t, options).doExport(await this.getData());
+		const data = await this.beforeExport();
+		if (!data) {
+			return null;
+		}
+		return this.formatter(t, options).doExport(data);
 	}
 
 	/** Exports Blob */
@@ -53,9 +57,22 @@ export default class ExportFilePlugin extends BasePlugin {
 	async getBlob(formatter: Formatter) {
 		const type = `${formatter.options.mime};charset=${formatter.options.encoding}`;
 		if (typeof Blob !== 'undefined') {
-			return new Blob([formatter.doExport(await this.getData())], { type });
+			const data = await this.beforeExport();
+			if (!data) {
+				return null;
+			}
+			return new Blob([formatter.doExport(data)], { type });
 		}
 		return null;
+	}
+
+	private async beforeExport() {
+		let data = await this.getData();
+		const event: CustomEvent<{data: DataInput}> = this.emit('beforeExport', { data });
+		if (event.defaultPrevented) {
+			return null;
+		}
+		return event.detail.data;
 	}
 	
 	private async getData(): Promise<DataInput> {
