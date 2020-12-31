@@ -34,7 +34,9 @@
     "fast-grid",
     "excel-grid",
     "editable",
-    "excel"
+    "excel",
+    "export",
+    "filtering"
   ],
   "main": "dist/index.cjs.js",
   "module": "dist/index.js",
