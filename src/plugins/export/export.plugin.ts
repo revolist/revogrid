@@ -1,10 +1,12 @@
 import  fill from 'lodash/fill';
 import { RevoGrid } from '../../interfaces';
 import { Groups } from '../../store/dataSource/data.store';
+import { ColSource, DataInput, Formatter } from './types';
+
 import { columnTypes, rowTypes } from '../../store/storeTypes';
+import { timeout } from '../../utils/utils';
 import BasePlugin from '../basePlugin';
 import ExportCsv, { CSVFormat } from './csv';
-import { ColSource, DataInput, Formatter } from './types';
 
 enum ExportTypes {
 	csv = 'csv'
@@ -31,12 +33,15 @@ export default class ExportFilePlugin extends BasePlugin {
 	async exportFile(options: ExportFormat = {}, t: ExportTypes = ExportTypes.csv) {
 		const formatter = this.formatter(t, options);
 		const blob = await this.getBlob(formatter);
+
+		// url
 		const URL = (window.URL || window.webkitURL);
 
 		const a = document.createElement('a');
-		const name = `${formatter.options.filename}.${formatter.options.fileKind}`;
+		const {filename, fileKind} = formatter.options;
+		const name = `${filename}.${fileKind}`;
 
-		if (a.download !== void 0) {
+		if (a.download) {
 			const url = URL.createObjectURL(blob);
 
 			a.style.display = 'none';
@@ -45,9 +50,12 @@ export default class ExportFilePlugin extends BasePlugin {
 			this.revogrid.appendChild(a);
 			a.dispatchEvent(new MouseEvent('click'));
 			this.revogrid.removeChild(a);
+	
+			// delay for revoke, correct for some browsers
+			await timeout(120);
+			URL.revokeObjectURL(url);
 
-			setTimeout(() => { URL.revokeObjectURL(url); }, 120);
-
+		// for ie
 		} else if (navigator.msSaveOrOpenBlob) {
 			navigator.msSaveOrOpenBlob(blob, name);
 		}
@@ -66,6 +74,7 @@ export default class ExportFilePlugin extends BasePlugin {
 		return null;
 	}
 
+	// before event
 	private async beforeExport() {
 		let data = await this.getData();
 		const event: CustomEvent<{data: DataInput}> = this.emit('beforeExport', { data });
@@ -181,6 +190,7 @@ export default class ExportFilePlugin extends BasePlugin {
 		}, []);
 	}
 
+	// get correct class for future multiple types support
 	private formatter(type: ExportTypes, options: ExportFormat = {}) {
 		switch(type) {
 			case ExportTypes.csv:
