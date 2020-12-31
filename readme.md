@@ -39,6 +39,7 @@ Support Millions of cells and thousands columns easy and efficiently for fast da
 - Intelligent Virtual DOM and smart row recombination in order to achieve less redraws;
 - Sorting: multiple options, can be customized per column and advanced with events;
 - Filtering: predefined system filters and a way to define you own;
+- Export to file;
 - Column and Row custom sizes;
 - Column resizing;
 - Column auto-size support (content related column size feature);
@@ -54,7 +55,9 @@ Support Millions of cells and thousands columns easy and efficiently for fast da
 - Drag and drop rows;
 - Range selection;
 - Range edit;
-- Theme packages: Excel like, material, compact, dark or light;
+- Theme packages:
+  - Excel like
+  - Material, compact, dark or light;
 - Copy/Paste: Copy/paste from Excel, Google Sheets or any other sheet format;
 - Easy extenation and support with modern VNode features and tsx support;
 - Trimmed rows: hide rows on demand;
