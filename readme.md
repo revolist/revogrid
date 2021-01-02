@@ -45,7 +45,7 @@ Support Millions of cells and thousands columns easy and efficiently for fast da
 - Export to file;
 - Custom sizes per Column and Row;
 - Column resizing;
-- Column auto-size support (content related column size feature);
+- Autosize support (Column size based on content);
 - Pinned/Sticky/Freezed:
   - Columns (define left or right);
   - Rows (define top or bottom);
