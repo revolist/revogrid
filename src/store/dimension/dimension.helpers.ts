@@ -73,32 +73,32 @@ export function calculateDimensionData(
 }
 
 export function getItemByPosition(
-    dimension: DimensionPosition,
+    {indexes, positionIndexes, originItemSize, positionIndexToItem}: DimensionPosition,
     pos: number): RevoGrid.PositionItem {
   const item: RevoGrid.PositionItem = {
     itemIndex: 0,
     start: 0,
     end: 0
   };
-  const currentPlace: number = dimension.indexes.length ? sortedIndex(dimension.positionIndexes, pos) : 0;
+  const currentPlace: number = indexes.length ? sortedIndex(positionIndexes, pos) : 0;
   // not found or first index
   if (!currentPlace) {
-    item.itemIndex = Math.floor(pos/dimension.originItemSize);
-    item.start = item.itemIndex * dimension.originItemSize;
-    item.end = item.start + dimension.originItemSize;
+    item.itemIndex = Math.floor(pos/originItemSize);
+    item.start = item.itemIndex * originItemSize;
+    item.end = item.start + originItemSize;
     return item;
   }
-  const positionItem: RevoGrid.PositionItem = dimension.positionIndexToItem[currentPlace - 1];
+  const positionItem: RevoGrid.PositionItem = positionIndexToItem[currentPlace - 1];
   // if item has specified size
   if (positionItem.end > pos) {
     return positionItem;
   }
   // special size item was present before
   const relativePos: number = pos - positionItem.end;
-  const relativeIndex: number = Math.floor(relativePos/dimension.originItemSize);
+  const relativeIndex: number = Math.floor(relativePos/originItemSize);
   item.itemIndex = positionItem.itemIndex + 1 + relativeIndex;
-  item.start = positionItem.end + relativeIndex * dimension.originItemSize;
-  item.end = item.start + dimension.originItemSize;
+  item.start = positionItem.end + relativeIndex * originItemSize;
+  item.end = item.start + originItemSize;
   return item;
 }
 

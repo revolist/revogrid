@@ -34,8 +34,7 @@ export class RevogrViewportScroll {
    * Last mw event time for trigger scroll function below
    * If mousewheel function was ignored we still need to trigger render
    */
-  private mouseWheelScroll: {[T in RevoGrid.DimensionType]: number} = {col: 0, row: 0};
-
+  private mouseWheelScroll: Record<RevoGrid.DimensionType, number> = {col: 0, row: 0};
   @Method()
   async setScroll(e: RevoGrid.ViewPortScrollEvent): Promise<void> {
     this.latestScrollUpdate(e.dimension);

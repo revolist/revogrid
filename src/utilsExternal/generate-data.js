@@ -39,8 +39,14 @@ export function generateFakeDataObject(rowsNumber, colsNumber) {
             columns[col].autoSize = true;
         }
     }
-    const pinnedTopRows = result[10] && [result[10]] || [];
+    const pinnedTopRows = result[3] && [result[3]] || [];
+    if (pinnedTopRows) {
+        pinnedTopRows[0][0] = 'top';
+    }
     const pinnedBottomRows = result[1] && [result[1]] || [];
+    if (pinnedBottomRows) {
+        pinnedBottomRows[0][0] = 'bottom';
+    }
     let headers = Object.keys(columns).map((k) => columns[k]);
 
     const grouped = headers.splice(1, 4);
@@ -65,7 +71,7 @@ export function generateFakeDataObject(rowsNumber, colsNumber) {
     return {
         rows: result,
         pinnedTopRows,
-        // pinnedBottomRows,
+        pinnedBottomRows,
         headers
     };
 }

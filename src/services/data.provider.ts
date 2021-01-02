@@ -20,11 +20,7 @@ export class DataProvider {
   setData(data: RevoGrid.DataType[], type: DimensionRows): RevoGrid.DataType[] {
     // set row data
     this.stores[type].updateData([...data]);
-    if (type === 'row') {
-      this.dimensionProvider.setData(data, type);
-    } else {
-      this.dimensionProvider.setColumns(type, undefined, true);
-    }
+    this.dimensionProvider.setData(data, type, type !== 'row');
     return data;
   }
 

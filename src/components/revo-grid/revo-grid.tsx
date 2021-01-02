@@ -693,8 +693,11 @@ export class RevoGridComponent {
     return [<revogr-viewport
       ref={e => this.viewportElement = e}
       onSetDimensionSize={e => this.dimensionProvider.setDimensionSize(e.detail.type, e.detail.sizes)}
-      onSetViewportCoordinate={e => { 
-        this.dimensionProvider.setViewPortCoordinate(e.detail);
+      onSetViewportCoordinate={e => {
+        this.dimensionProvider.setViewPortCoordinate({
+          coordinate: e.detail.coordinate,
+          type: e.detail.dimension
+        });
         this.viewportScroll.emit(e.detail);
       }}
       onSetViewportSize={e => this.viewportProvider.setViewport(e.detail.dimension, { virtualSize:  e.detail.size})}

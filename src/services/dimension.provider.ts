@@ -33,12 +33,24 @@ export default class DimensionProvider {
      * @param items - data/column items
      * @param type - dimension type
      */
-    setData(items: RevoGrid.ColumnRegular[]|RevoGrid.DataType[], type: RevoGrid.DimensionType) {
+    setData(
+        items: RevoGrid.ColumnRegular[]|RevoGrid.DataType[],
+        type: RevoGrid.MultiDimensionType,
+        noVirtual = false
+    ) {
         this.setRealSize(items.length, type);
+        if (noVirtual) {
+            this.setNoVirtual(type);
+        }
         this.setViewPortCoordinate({
             coordinate: this.viewports.stores[type].store.get('lastCoordinate'),
-            dimension: type
+            type
         });
+    }
+
+    private setNoVirtual(type: RevoGrid.MultiDimensionType) {
+        const dimension: RevoGrid.DimensionSettingsState = this.stores[type].getCurrentState();
+        this.viewports.stores[type].setViewport({ virtualSize: dimension.realSize });
     }
 
     setColumns(
@@ -48,18 +60,18 @@ export default class DimensionProvider {
     ): void {
         this.stores[type].setDimensionSize(sizes);
 
-        const dimension: RevoGrid.DimensionSettingsState = this.stores[type].getCurrentState();
-
         if (noVirtual) {
-            this.viewports.stores[type].setViewport({ virtualSize: dimension.realSize });
+            this.setNoVirtual(type);
         }
-        const coordinate = this.viewports.stores[type].store.get('lastCoordinate');
-        this.viewports.stores[type].setViewPortCoordinate(coordinate, dimension);
+        this.setViewPortCoordinate({
+            coordinate: this.viewports.stores[type].store.get('lastCoordinate'),
+            type
+        });
     }
 
-    setViewPortCoordinate(e: RevoGrid.ViewPortScrollEvent): void {
-        const dimension: RevoGrid.DimensionSettingsState = this.stores[e.dimension].getCurrentState();
-        this.viewports.stores[e.dimension].setViewPortCoordinate(e.coordinate, dimension);
+    setViewPortCoordinate({coordinate, type}: { coordinate: number, type: RevoGrid.MultiDimensionType}): void {
+        const dimension: RevoGrid.DimensionSettingsState = this.stores[type].getCurrentState();
+        this.viewports.stores[type].setViewPortCoordinate(coordinate, dimension);
     }
 
     getViewPortPos(e: RevoGrid.ViewPortScrollEvent): number {
