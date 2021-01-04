@@ -95,7 +95,6 @@ export class FilterPanel {
         };
         return <Host style={style}>
             <label>Filter by condition</label>
-            <br/>
             <select class="select-css" onChange={e => this.onFilterChange(e)}>{this.renderConditions(this.changes.type)}</select>
             <div>{this.renderExtra(this.filterEntities[this.changes.type].extra, this.changes.value)}</div>
             <RevoButton class={{ green: true }} onClick={() => this.onSave()}>Save</RevoButton>
