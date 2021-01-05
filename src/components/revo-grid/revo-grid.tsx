@@ -17,7 +17,7 @@ import FilterPlugin, { ColumnFilterConfig, FilterCollection } from '../../plugin
 import SortingPlugin from '../../plugins/sorting/sorting.plugin';
 import ExportFilePlugin from '../../plugins/export/export.plugin';
 import { DataInput } from '../../plugins/export/types';
-import GroupingPlugin from '../../plugins/grouping.plugin';
+import GroupingRowPlugin from '../../plugins/grouping.row.plugin';
 
 type ColumnStores = {
   [T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
@@ -610,9 +610,9 @@ export class RevoGridComponent {
   }
 
   @Watch('grouping') groupingChanged(newVal: string[]) {
-    let grPlugin: GroupingPlugin|undefined;
+    let grPlugin: GroupingRowPlugin|undefined;
     for (let p of this.internalPlugins) {
-      const isGrouping = p as unknown as GroupingPlugin;
+      const isGrouping = p as unknown as GroupingRowPlugin;
       if (isGrouping.setGrouping) {
         grPlugin = isGrouping;
         break;
@@ -698,7 +698,7 @@ export class RevoGridComponent {
       });
     }
 
-    this.internalPlugins.push(new GroupingPlugin(this.element));
+    this.internalPlugins.push(new GroupingRowPlugin(this.element));
     this.groupingChanged(this.grouping);
     this.themeChanged(this.theme);
     this.columnChanged(this.columns);
