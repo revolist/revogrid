@@ -42,7 +42,7 @@ export function generateFakeDataObject(rowsNumber, colsNumber) {
     const pinnedTopRows = result[3] && [result[3]] || [];
     const pinnedBottomRows = result[1] && [result[1]] || [];
     let headers = Object.keys(columns).map((k) => columns[k]);
-    /*
+
     const grouped = headers.splice(1, 4);
     const grouped2 = grouped.splice(0, 2);
     grouped.push({
@@ -52,7 +52,7 @@ export function generateFakeDataObject(rowsNumber, colsNumber) {
     headers.splice(6, 0, ...[{
         name: 'Grouped',
         children: grouped
-    }]); */
+    }]);
     /* 
     const grouped4 = headers.splice(1, 3);
     */ 

@@ -17,7 +17,7 @@ import FilterPlugin, { ColumnFilterConfig, FilterCollection } from '../../plugin
 import SortingPlugin from '../../plugins/sorting/sorting.plugin';
 import ExportFilePlugin from '../../plugins/export/export.plugin';
 import { DataInput } from '../../plugins/export/types';
-import GroupingRowPlugin from '../../plugins/grouping.row.plugin';
+import GroupingRowPlugin from '../../plugins/groupingRow/grouping.row.plugin';
 
 type ColumnStores = {
   [T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;

@@ -20,7 +20,7 @@ export interface Group extends RevoGrid.ColumnProperties {
   ids: (string|number)[];
 }
 type Trimmed = Record<number, boolean>;
-export type Groups = {[level: number]: Group[]};
+export type Groups = Record<number|string, Group[]>; //  {[level: number]: Group }
 export type GDataType = DataType|ColumnRegular;
 export type GDimension = DimensionRows|DimensionCols;
 export type DataSourceState<T extends GDataType, ST extends GDimension> = {

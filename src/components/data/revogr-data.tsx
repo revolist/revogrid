@@ -5,9 +5,12 @@ import {ObservableMap} from '@stencil/store';
 import ColumnService from './columnService';
 import {DATA_COL, DATA_ROW} from '../../utils/consts';
 
-import {DataSourceState} from '../../store/dataSource/data.store';
+import {DataSourceState, getSourceItem} from '../../store/dataSource/data.store';
 import {RevoGrid, Selection} from '../../interfaces';
 import CellRenderer from './cellRenderer';
+import GroupingRowPlugin from '../../plugins/groupingRow/grouping.row.plugin';
+import RowRenderer from './rowRenderer';
+import GroupingRowRenderer from '../../plugins/groupingRow/grouping.row.renderer';
 
 @Component({
   tag: 'revogr-data',
@@ -36,7 +39,7 @@ export class RevogrData {
 
   @Event() dragStartCell: EventEmitter<MouseEvent>;
 
-  connectedCallback(): void {
+  connectedCallback() {
     this.columnService = new ColumnService(this.dataStore, this.colData);
   }
 
@@ -49,6 +52,12 @@ export class RevogrData {
     const range = this.rowSelectionStore?.get('range');
     const rowsEls: VNode[] = [];
     for (let row of rows) {
+      const dataRow = getSourceItem(this.dataStore, row.itemIndex);
+      if (GroupingRowPlugin.isGrouping(dataRow)) {
+        rowsEls.push(<GroupingRowRenderer model={dataRow} size={row.size} start={row.start}/>);
+        continue;
+      }
+
       const cells: (VNode|string|void)[] = [];
       let rowClass = this.rowClass ? this.columnService.getRowClass(row.itemIndex, this.rowClass) : '';
       if (range && row.itemIndex >= range.y && row.itemIndex <= range.y1) {
@@ -57,7 +66,7 @@ export class RevogrData {
       for (let col of cols) {
         cells.push(this.getCellRenderer(row, col));
       }
-      rowsEls.push(<div class={`row ${rowClass}`} style={{ height: `${row.size}px`, transform: `translateY(${row.start}px)` }}>{cells}</div>);
+      rowsEls.push(<RowRenderer rowClass={rowClass} size={row.size} start={row.start}>{cells}</RowRenderer>);
     }
     return rowsEls;
   }

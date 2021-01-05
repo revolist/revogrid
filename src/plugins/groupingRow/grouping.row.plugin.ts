@@ -1,12 +1,14 @@
-import { RevoGrid } from "../interfaces";
-import BasePlugin from "./basePlugin";
+import { RevoGrid } from "../../interfaces";
+import BasePlugin from "../basePlugin";
+import { PSEUDO_GROUP_ITEM } from "./grouping.row.renderer";
 
-type BeforeSourceSetEvent = CustomEvent<{
+type BeforeSourceSetEvent = {
     type: RevoGrid.DimensionRows;
     source: RevoGrid.DataType[];
-  }>;
+};
 
 type GroupingIndex = {[key: string]: GroupingIndex};
+const GROUP_DEPTH = '__rvgr-depth';
 
 export default class GroupingRowPlugin extends BasePlugin {
     private currentGrouping: string[]|undefined;
@@ -14,25 +16,28 @@ export default class GroupingRowPlugin extends BasePlugin {
 
     constructor(protected revogrid: HTMLRevoGridElement) {
 			super(revogrid);
-			const beforeSourceSet = ({detail}: BeforeSourceSetEvent) => {
-				if (this.currentGrouping && this.currentGrouping.length && detail.source) {
-					this.getGroupsPerModel(detail.source);
-				}
-			};
+			const beforeSourceSet = ({detail}: CustomEvent<BeforeSourceSetEvent>) => this.onDataSet(detail);
 			this.addEventListener('beforeSourceSet', beforeSourceSet);
     }
 
-    private getGroupsPerModel(models: RevoGrid.DataType[]) {
-			groupBy(models, item => this.currentGrouping.map(key => item[key]));
+    private onDataSet(data: BeforeSourceSetEvent) {
+      if (this.currentGrouping && this.currentGrouping.length && data.source) {
+        data.source = groupBy(data.source, item => this.currentGrouping.map(key => item[key]));
+        console.log(data.source);
+      }
     }
 
     setGrouping(groups: string[]) {
-			this.currentGroupingIndexes ={};
+			this.currentGroupingIndexes = {};
 			groups?.reduce((r: GroupingIndex, model) => {
 				r[model] = {};
 				return r[model];
 			}, this.currentGroupingIndexes);
 			this.currentGrouping = groups;
+    }
+
+    static isGrouping(row: RevoGrid.DataType): boolean {
+      return typeof row[PSEUDO_GROUP_ITEM] !== 'undefined';
     }
 }
 
@@ -69,9 +74,9 @@ function groupBy<T>(array: T[], f: (v: T) => any) {
     groupIndexes[groupKeys].push(i);
   });
 
-  const groupMirror: Record<number, any> = {};
-  const pseudoGroup: GroupingIndex = {};
-  let currentIndex = 0;
+  const itemsMirror: RevoGrid.DataType[] = [];
+  const pseudoGroupTest: GroupingIndex = {};
+  // let currentIndex = 0;
   groupsOrder.forEach(group => {
     const parseGroup = JSON.parse(group.id);
     if (!isArray(parseGroup)) {
@@ -81,32 +86,18 @@ function groupBy<T>(array: T[], f: (v: T) => any) {
     let depth = 0;
     parseGroup.reduce((existingGroups: GroupingIndex, groupValue: string) => {
 			if (!existingGroups[groupValue]) {
-				groupMirror[currentIndex++] = {
-					id: groupValue,
-					type: 'pseudo',
-					name: groupValue,
-					depth
-				};
+				itemsMirror.push({
+					[PSEUDO_GROUP_ITEM]: groupValue,
+					[GROUP_DEPTH]: depth,
+				});
 				existingGroups[groupValue] = {};
 			}
 			depth++;
 			return existingGroups[groupValue];
-    }, pseudoGroup);
-    group.ids.forEach(id =>
-			groupMirror[currentIndex++] = {
-				type: 'link',
-				name: group.id,
-				id,
-				depth
-			});
+    }, pseudoGroupTest);
+    group.children.forEach(item => itemsMirror.push(item));
   });
-  console.log(groupMirror);
-  return groups;
-  /*
-  return Object.keys(groups).map(group => {
-      console.log('---', JSON.parse(group));
-      return groups[group];
-  })*/
+  return itemsMirror;
 }
 
 function isArray<T>(data: any|T[]): data is T[] {
