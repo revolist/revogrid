@@ -84,10 +84,10 @@ export default class DataStore<T extends GDataType, ST extends GDimension> {
   updateData(source: T[], grouping?: { depth: number; groups: Groups }) {
     const data: Partial<DataSourceState<T, ST>> = {
       source,
-      // during full update we do trim data drop
-      trimmed: {}
+      // during full update we do drop trim 
+      trimmed: {},
+      items: range(0, source?.length || 0)
     };
-    this.indexMapping(data);
     if (grouping) {
       data.groupingDepth = grouping.depth;
       data.groups = grouping.groups;
@@ -101,13 +101,6 @@ export default class DataStore<T extends GDataType, ST extends GDimension> {
       ...input
     };
     setStore(this.store, data);
-  }
-
-  private indexMapping(data: Partial<DataSourceState<T, ST>> ) {
-    if (data.source) {
-      data.items = range(0, data.source.length);
-    }
-    return data;
   }
 }
 

@@ -2,7 +2,7 @@ import {h, VNode} from '@stencil/core';
 import { ResizeEvent } from '../../services/resizable.directive';
 import { Group } from '../../store/dataSource/data.store';
 import { HEADER_CLASS, MIN_COL_SIZE } from '../../utils/consts';
-import { HeaderCellRenderer } from './headerCellRenderer';
+import { HeaderCellRenderer } from '../../components/header/headerCellRenderer';
 
 type Props = {
   start: number;

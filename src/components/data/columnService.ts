@@ -127,7 +127,13 @@ export default class ColumnService implements ColumnServiceI {
     const column = this.columns[c];
     const prop: ColumnProp | undefined = column?.prop;
     const model: DataType = getSourceItem(this.dataStore, rowIndex) || {};
-    return {prop, model, data: this.dataStore.get('source'), column, rowIndex};
+    return {
+      prop,
+      model,
+      data: this.dataStore.get('source'),
+      column,
+      rowIndex
+    };
   }
 
   getRangeData(d: Selection.ChangedRange): RevoGrid.DataLookup {
