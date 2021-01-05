@@ -81,6 +81,10 @@ export namespace Components {
          */
         "getVisibleSource": (type?: RevoGrid.DimensionRows) => Promise<any[]>;
         /**
+          * Group models by provided properties Define properties to be groped by
+         */
+        "grouping": string[];
+        /**
           * Pinned bottom Source: {[T in ColumnProp]: any} - defines pinned bottom rows data source.
          */
         "pinnedBottomSource": RevoGrid.DataType[];
@@ -436,6 +440,10 @@ declare namespace LocalJSX {
           * Defines how many rows/columns should be rendered outside visible area.
          */
         "frameSize"?: number;
+        /**
+          * Group models by provided properties Define properties to be groped by
+         */
+        "grouping"?: string[];
         /**
           * Column updated
          */

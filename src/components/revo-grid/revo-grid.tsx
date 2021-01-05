@@ -17,6 +17,7 @@ import FilterPlugin, { ColumnFilterConfig, FilterCollection } from '../../plugin
 import SortingPlugin from '../../plugins/sorting/sorting.plugin';
 import ExportFilePlugin from '../../plugins/export/export.plugin';
 import { DataInput } from '../../plugins/export/types';
+import GroupingPlugin from '../../plugins/grouping.plugin';
 
 type ColumnStores = {
   [T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
@@ -146,6 +147,12 @@ export class RevoGridComponent {
    * Can be export options
    */
   @Prop() export: boolean = false;
+
+  /** 
+   * Group models by provided properties
+   * Define properties to be groped by
+   */
+  @Prop() grouping: string[];
 
   
   // --------------------------------------------------------------------------
@@ -598,9 +605,23 @@ export class RevoGridComponent {
     });
   }
 
-  @Watch('trimmedRows')
-  trimmedRowsChanged(newVal: Record<number, boolean>) {
+  @Watch('trimmedRows') trimmedRowsChanged(newVal: Record<number, boolean>) {
     this.dataProvider.setTrimmed(newVal, 'row');
+  }
+
+  @Watch('grouping') groupingChanged(newVal: string[]) {
+    let grPlugin: GroupingPlugin|undefined;
+    for (let p of this.internalPlugins) {
+      const isGrouping = p as unknown as GroupingPlugin;
+      if (isGrouping.setGrouping) {
+        grPlugin = isGrouping;
+        break;
+      }
+    }
+    if (!grPlugin) {
+      return;
+    }
+    grPlugin.setGrouping(newVal);
   }
 
   get columnStores(): ColumnStores {
@@ -676,6 +697,9 @@ export class RevoGridComponent {
         this.internalPlugins.push(new p(this.element));
       });
     }
+
+    this.internalPlugins.push(new GroupingPlugin(this.element));
+    this.groupingChanged(this.grouping);
     this.themeChanged(this.theme);
     this.columnChanged(this.columns);
     this.dataChanged(this.source);
