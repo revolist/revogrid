@@ -101,6 +101,7 @@ export default class SortingPlugin extends BasePlugin {
 			items: this.sortIndexByItems(items, source, this.sorting),
 			source: [...source]
 		});
+		this.emit('afterSortingApply');
 	}
 
 	private keySort(a: any, b: any, dir: 'asc'|'desc') {

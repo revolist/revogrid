@@ -1,6 +1,6 @@
 import  fill from 'lodash/fill';
 import { RevoGrid } from '../../interfaces';
-import { Groups } from '../../store/dataSource/data.store';
+import { Group, Groups } from '../../store/dataSource/data.store';
 import { ColSource, CSVFormat, DataInput, Formatter } from './types';
 
 import { columnTypes, rowTypes } from '../../store/storeTypes';
@@ -151,7 +151,7 @@ export default class ExportFilePlugin extends BasePlugin {
 			const levelGroups = groups[d];
 
 			// add names of groups
-			levelGroups.forEach(group => {
+			levelGroups.forEach((group: Group) => {
 				const minIndex = this.findGroupStartIndex(group.ids, visibleItems);
 				if (typeof minIndex === 'number') {
 					row[minIndex] = group.name;

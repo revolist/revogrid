@@ -12,6 +12,7 @@ import DataType = RevoGrid.DataType;
 import ColumnRegular = RevoGrid.ColumnRegular;
 import DimensionRows = RevoGrid.DimensionRows;
 import DimensionCols = RevoGrid.DimensionCols;
+import { Trimmed, trimmedPlugin } from '../../plugins/trimmed/trimmed.plugin';
 
 export interface Group extends RevoGrid.ColumnProperties {
   name: string;
@@ -19,8 +20,7 @@ export interface Group extends RevoGrid.ColumnProperties {
   // props/ids
   ids: (string|number)[];
 }
-type Trimmed = Record<number, boolean>;
-export type Groups = Record<number|string, Group[]>; //  {[level: number]: Group }
+export type Groups = Record<any, any>;
 export type GDataType = DataType|ColumnRegular;
 export type GDimension = DimensionRows|DimensionCols;
 export type DataSourceState<T extends GDataType, ST extends GDimension> = {
@@ -43,7 +43,7 @@ export default class DataStore<T extends GDataType, ST extends GDimension> {
     return this.dataStore;
   }
   constructor(type: ST) {
-    this.dataStore = createStore({
+    const store = this.dataStore = createStore({
       items: [],
       source: [],
       groupingDepth: 0,
@@ -51,29 +51,7 @@ export default class DataStore<T extends GDataType, ST extends GDimension> {
       type,
       trimmed: {}
     });
-    this.dataStore.use({
-      set: (k, newVal, oldVal) => {
-        switch(k) {
-          case 'trimmed':
-            const items = this.dataStore.get('items');
-            const trimmed = newVal as Trimmed;
-            const oldTrimmed = oldVal as Trimmed;
-
-            // check if not longer trimmed put back to items
-            for (let o in oldTrimmed) {
-              const index = parseInt(o, 10);
-              if (!trimmed[o] && items.indexOf(index) === -1) {
-                items.push(index);
-              }
-            }
-
-            // check if present in new trimmed remove from items
-            const newItems = items.filter(v => !trimmed[v]);
-            this.dataStore.set('items', newItems);
-            break;
-        }
-      }
-    });
+    store.use(trimmedPlugin(store));
   }
 
   /**
@@ -81,18 +59,27 @@ export default class DataStore<T extends GDataType, ST extends GDimension> {
    * @param source - data column/row source
    * @param grouping - grouping information if present
    */
-  updateData(source: T[], grouping?: { depth: number; groups: Groups }) {
+  updateData(source: T[], grouping?: { depth: number; groups: Groups }, silent = false) {
     const data: Partial<DataSourceState<T, ST>> = {
       source,
-      // during full update we do drop trim 
-      trimmed: {},
       items: range(0, source?.length || 0)
     };
+
+    // during full update we do drop trim 
+    if (!silent) {
+      data.trimmed = {};
+    }
     if (grouping) {
       data.groupingDepth = grouping.depth;
       data.groups = grouping.groups;
     }
     this.setData(data);
+  }
+
+  addTrimmed(some: Partial<Trimmed>) {
+    let trimmed = this.store.get('trimmed');
+    trimmed = {...trimmed, ...some};
+    setStore(this.store, { trimmed });
   }
 
   // local data update
@@ -102,6 +89,14 @@ export default class DataStore<T extends GDataType, ST extends GDimension> {
     };
     setStore(this.store, data);
   }
+}
+/**
+ * get physical index by virtual
+ * @param store - store to process
+ */
+export function getPhysical(store: ObservableMap<DataSourceState<any, any>>, virtualIndex: number) {
+  const items = store.get('items');
+  return items[virtualIndex];
 }
 
 /**

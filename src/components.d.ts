@@ -8,6 +8,7 @@ import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 import { Edition, RevoGrid, RevoPlugin, Selection, ThemeSpace } from "./interfaces";
 import { AutoSizeColumnConfig } from "./plugins/autoSizeColumn";
 import { ColumnFilterConfig, FilterCollection } from "./plugins/filter/filter.plugin";
+import { GroupingOptions } from "./plugins/groupingRow/grouping.row.plugin";
 import { ColumnCollection } from "./services/column.data.provider";
 import { DataInput } from "./plugins/export/types";
 import { VNode } from "@stencil/core";
@@ -17,6 +18,10 @@ import { LogicFunction } from "./plugins/filter/filter.types";
 import { FilterItem, ShowData } from "./plugins/filter/filter.pop";
 export namespace Components {
     interface RevoGrid {
+        /**
+          * Add trimmed by type
+         */
+        "addTrimmed": (newVal: Record<number, boolean>, trimmedType?: string, type?: RevoGrid.DimensionRows) => Promise<void>;
         /**
           * Autosize config Enable columns autoSize, for more details check @autoSizeColumn plugin By default disabled, hence operation is not resource efficient true to enable with default params (double header separator click for autosize) or provide config
          */
@@ -83,7 +88,7 @@ export namespace Components {
         /**
           * Group models by provided properties Define properties to be groped by
          */
-        "grouping": string[];
+        "grouping": GroupingOptions;
         /**
           * Pinned bottom Source: {[T in ColumnProp]: any} - defines pinned bottom rows data source.
          */
@@ -172,6 +177,9 @@ export namespace Components {
           * @param order - order to apply
          */
         "updateColumnSorting": (column: RevoGrid.ColumnRegular, index: number, order: 'asc' | 'desc') => Promise<RevoGrid.ColumnRegular>;
+        /**
+          * Update columns
+         */
         "updateColumns": (cols: RevoGrid.ColumnRegular[]) => Promise<void>;
     }
     interface RevogrClipboard {
@@ -443,7 +451,7 @@ declare namespace LocalJSX {
         /**
           * Group models by provided properties Define properties to be groped by
          */
-        "grouping"?: string[];
+        "grouping"?: GroupingOptions;
         /**
           * Column updated
          */

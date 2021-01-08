@@ -61,14 +61,14 @@
 
     <div class="tile large">
       <div>
-        <revo-grid style="height: 100%" row-headers="true" theme="material"></revo-grid>
+        <revo-grid style="height: 100%" theme="material"></revo-grid>
       </div>
     </div>
 
     <script type="module">
         import {generateFakeDataObject} from "/utilsExternal/generate-data.js";
 
-        const data = generateFakeDataObject(15, 5);
+        const data = generateFakeDataObject(1000, 10000);
         const grid = document.querySelector('revo-grid');
 
         grid.columns = data.headers;
@@ -82,7 +82,10 @@
         grid.resize = true;
         grid.filter = true;
         grid.export = true;
-        grid.grouping = [0, 1, 2];
+        grid.grouping = {
+          props: [1, 2, 3, 4],
+          useEntireRow: false
+        };
         /* grid.rowDefinitions = [{
           type: 'row',
           index: 1,

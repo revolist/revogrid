@@ -17,7 +17,7 @@ import FilterPlugin, { ColumnFilterConfig, FilterCollection } from '../../plugin
 import SortingPlugin from '../../plugins/sorting/sorting.plugin';
 import ExportFilePlugin from '../../plugins/export/export.plugin';
 import { DataInput } from '../../plugins/export/types';
-import GroupingRowPlugin from '../../plugins/groupingRow/grouping.row.plugin';
+import GroupingRowPlugin, { GroupingOptions } from '../../plugins/groupingRow/grouping.row.plugin';
 
 type ColumnStores = {
   [T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
@@ -152,7 +152,7 @@ export class RevoGridComponent {
    * Group models by provided properties
    * Define properties to be groped by
    */
-  @Prop() grouping: string[];
+  @Prop() grouping: GroupingOptions;
 
   
   // --------------------------------------------------------------------------
@@ -335,8 +335,14 @@ export class RevoGridComponent {
     await this.scrollToCoordinate({ x });
   }
 
+  /** Update columns */
   @Method() async updateColumns(cols: RevoGrid.ColumnRegular[]) {
     this.columnProvider.updateColumns(cols);
+  }
+
+  /** Add trimmed by type */
+  @Method() async addTrimmed(newVal: Record<number, boolean>, trimmedType = 'external', type: RevoGrid.DimensionRows = 'row') {
+    this.dataProvider.setTrimmed({ [trimmedType]: newVal }, type);
   }
 
   /**  Scrolls view port to coordinate */
@@ -606,10 +612,10 @@ export class RevoGridComponent {
   }
 
   @Watch('trimmedRows') trimmedRowsChanged(newVal: Record<number, boolean>) {
-    this.dataProvider.setTrimmed(newVal, 'row');
+    this.dataProvider.setTrimmed({ 'external': newVal }, 'row');
   }
 
-  @Watch('grouping') groupingChanged(newVal: string[]) {
+  @Watch('grouping') groupingChanged(newVal: GroupingOptions = {}) {
     let grPlugin: GroupingRowPlugin|undefined;
     for (let p of this.internalPlugins) {
       const isGrouping = p as unknown as GroupingRowPlugin;
@@ -698,7 +704,9 @@ export class RevoGridComponent {
       });
     }
 
-    this.internalPlugins.push(new GroupingRowPlugin(this.element));
+    this.internalPlugins.push(new GroupingRowPlugin(this.element, {
+      dataProvider: this.dataProvider
+    }));
     this.groupingChanged(this.grouping);
     this.themeChanged(this.theme);
     this.columnChanged(this.columns);

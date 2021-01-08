@@ -12,7 +12,7 @@ import DataType = RevoGrid.DataType;
 
 export interface ColumnServiceI {
   columns: RevoGrid.ColumnRegular[];
-  customRenderer(r: number, c: number): VNode | string | void;
+  customRenderer(r: number, c: number, model: ColumnDataSchemaModel): VNode | string | void;
   isReadOnly(r: number, c: number): boolean;
   getCellData(r: number, c: number): string;
 }
@@ -78,11 +78,10 @@ export default class ColumnService implements ColumnServiceI {
     return props;
   }
 
-  customRenderer(r: number, c: number): VNode | string | void {
+  customRenderer(_r: number, c: number, model: ColumnDataSchemaModel): VNode | string | void {
     const tpl = this.columns[c]?.cellTemplate;
     if (tpl) {
-      const data = this.rowDataModel(r, c);
-      return tpl(h as unknown as RevoGrid.HyperFunc<VNode>, data);
+      return tpl(h as unknown as RevoGrid.HyperFunc<VNode>, model);
     }
     return;
   }
@@ -126,7 +125,7 @@ export default class ColumnService implements ColumnServiceI {
   rowDataModel(rowIndex: number, c: number): ColumnDataSchemaModel {
     const column = this.columns[c];
     const prop: ColumnProp | undefined = column?.prop;
-    const model: DataType = getSourceItem(this.dataStore, rowIndex) || {};
+    const model = getSourceItem(this.dataStore, rowIndex) || {};
     return {
       prop,
       model,

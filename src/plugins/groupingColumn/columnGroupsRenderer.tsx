@@ -1,14 +1,14 @@
 import {h, VNode} from '@stencil/core';
 import findIndex from 'lodash/findIndex';
 import { RevoGrid } from '../../interfaces';
-import { Groups } from '../../store/dataSource/data.store';
+import { Group } from '../../store/dataSource/data.store';
 import { getItemByIndex } from '../../store/dimension/dimension.helpers';
 import { HEADER_ROW_CLASS } from '../../utils/consts';
 import GroupHeaderRenderer from './headerGroupRenderer';
 
 type Props = {
     visibleProps: {[prop: string]: number},
-    groups: Groups,
+    groups: Record<number, Group[]>,
     dimensionCol: Pick<RevoGrid.DimensionSettingsState, 'indexes'|'originItemSize'|'indexToItem'>,
     depth: number;
     canResize: boolean;

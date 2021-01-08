@@ -7,6 +7,11 @@ revogr-data {
 		position: absolute;
 		width: 100%;
 		left: 0;
+
+		&.groupingRow {
+			background-color: #f7fafe;
+			font-weight: 600;
+		}
 	}
 
 	.revo-draggable {

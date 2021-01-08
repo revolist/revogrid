@@ -26,7 +26,7 @@ export function generateFakeDataObject(rowsNumber, colsNumber) {
             columns[col] = {
                 name: generateHeader(col),
                 prop: col,
-                // pin: j === 0 ? 'colPinStart' : j === 20 ? 'colPinEnd' : undefined,
+                pin: j === 0 ? 'colPinStart' : j === 20 ? 'colPinEnd' : undefined,
                 sortable: true,
             }
         }
