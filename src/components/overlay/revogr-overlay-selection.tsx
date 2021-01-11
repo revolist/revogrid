@@ -20,6 +20,9 @@ import KeyService from './keyService';
 
 import RangeAreaCss = Selection.RangeAreaCss;
 
+export type BeforeEdit = {
+  isCancel: boolean;
+}&Edition.BeforeSaveDataDetails;
 
 @Component({
   tag: 'revogr-overlay-selection',
@@ -73,11 +76,10 @@ export class OverlaySelection {
   @Event({ cancelable: true }) internalCellEdit: EventEmitter<Edition.BeforeSaveDataDetails>;
   @Event({ cancelable: true }) internalFocusCell: EventEmitter<Edition.BeforeSaveDataDetails>;
 
-  @Event({ bubbles: false }) setEdit: EventEmitter<string|boolean>;
+  @Event({ bubbles: false }) setEdit: EventEmitter<BeforeEdit>;
   @Event({ bubbles: false }) setRange: EventEmitter<Selection.RangeArea>;
   @Event({ bubbles: false }) setTempRange: EventEmitter<Selection.RangeArea|null>;
 
-  @Event({ bubbles: false }) changeSelection: EventEmitter<{changes: Partial<Selection.Cell>; isMulti?: boolean; }>;
   @Event({ bubbles: false }) focusCell: EventEmitter<Selection.FocusedCells>;
   @Event({ bubbles: false }) unregister: EventEmitter;
 
@@ -149,7 +151,7 @@ export class OverlaySelection {
     if (this.selectionStoreService.edited) {
       switch (e.code) {
         case codesLetter.ESCAPE:
-          this.canEdit() && this.setEdit?.emit(false);
+          this.doEdit(undefined, true);
           break;
       }
       return;
@@ -173,9 +175,7 @@ export class OverlaySelection {
     
     // pressed enter
     if (codesLetter.ENTER === e.code) {
-      if (this.canEdit()) {
-        this.setEdit?.emit('');
-      }
+      this.doEdit();
       return;
     }
 
@@ -192,9 +192,7 @@ export class OverlaySelection {
 
     // pressed letter key
     if (isLetterKey(e.keyCode)) {
-      if (this.canEdit()) {
-        this.setEdit?.emit(e.key);
-      }
+      this.doEdit(e.key);
       return;
     }
 
@@ -211,8 +209,9 @@ export class OverlaySelection {
   connectedCallback(): void {
     this.columnService = new ColumnService(this.dataStore, this.colData);
     this.selectionStoreService = new SelectionStoreService(this.selectionStore, {
-      change: (changes, isMulti?) => this.changeSelection.emit({ changes, isMulti }),
-      changeRange: (range) => this.setRange.emit(range),
+      changeRange: (range) => {
+        this.setRange.emit(range);
+      },
       focus: (focus, end) => {
         const focused = { focus, end };
         const {defaultPrevented} = this.internalFocusCell.emit(this.columnService.getSaveData(focus.y, focus.x));
@@ -271,7 +270,7 @@ export class OverlaySelection {
     this.keyService = new KeyService();
   }
 
-  disconnectedCallback(): void {
+  disconnectedCallback() {
     this.selectionStoreService.destroy();
   }
 
@@ -315,8 +314,8 @@ export class OverlaySelection {
     return <revogr-edit
       class={EDIT_INPUT_WR}
       onCellEdit={e => this.onCellEdit(e.detail)}
-      onCloseEdit={(focusNext) => {
-        this.setEdit?.emit(false);
+      onCloseEdit={focusNext => {
+        this.doEdit(undefined, true);
         if (focusNext) {
           this.focusNext();
         }
@@ -326,12 +325,6 @@ export class OverlaySelection {
       editor={this.columnService.getCellEditor(editCell.y, editCell.x, this.editors)}
       style={style}
     />
-  }
-
-  private focusNext() {
-    this.keyChangeSelection(new KeyboardEvent('keydown', {
-      code: codesLetter.ARROW_DOWN
-    }));
   }
 
   render() {
@@ -364,7 +357,7 @@ export class OverlaySelection {
       onDblClick(): void;
       onMouseDown(e: MouseEvent): void;
     } = {
-      onDblClick: () => this.onDoubleClick(),
+      onDblClick: () => this.doEdit(),
       onMouseDown: (e: MouseEvent) => this.onMouseDown(e),
     };
 
@@ -380,14 +373,32 @@ export class OverlaySelection {
     return <Host {...hostProps}>{els}<slot name='data'/></Host>;
   }
 
-  private async keyChangeSelection(e: KeyboardEvent): Promise<boolean> {
-    const changes = this.keyService.changeDirectionKey(e, this.range);
-    if (changes) {
-      await timeout();
-      this.changeSelection?.emit(changes);
-      return true;
+  private doEdit(val = '', isCancel = false) {
+    if (this.canEdit()) {
+      const editCell = this.selectionStore.get('focus');
+      const data = this.columnService.getSaveData(editCell.y, editCell.x);
+      this.setEdit?.emit({
+        ...data,
+        isCancel,
+        val
+      });
     }
-    return false;
+  }
+
+  private focusNext() {
+    this.keyChangeSelection(new KeyboardEvent('keydown', {
+      code: codesLetter.ARROW_DOWN
+    }));
+  }
+
+  private async keyChangeSelection(e: KeyboardEvent): Promise<boolean> {
+    const data = this.keyService.changeDirectionKey(e, this.range);
+    if (!data) {
+      return false;
+    }
+    await timeout();
+    this.selectionStoreService.positionChange(data.changes, data.isMulti);
+    return true;
   }
 
   private onPaste(data: string[][]): void {
@@ -453,10 +464,6 @@ export class OverlaySelection {
       return;
     }
     this.selectionService.onCellDown(e, this.getData());
-  }
-  
-  private onDoubleClick(): void {
-    this.canEdit() && this.setEdit?.emit('');
   }
 
   private onRowDragStart({detail}: CustomEvent<{cell: Selection.Cell, text: string}>): void {

@@ -16,6 +16,7 @@ import { ObservableMap } from "@stencil/store";
 import { DataSourceState, Groups } from "./store/dataSource/data.store";
 import { LogicFunction } from "./plugins/filter/filter.types";
 import { FilterItem, ShowData } from "./plugins/filter/filter.pop";
+import { BeforeEdit } from "./components/overlay/revogr-overlay-selection";
 export namespace Components {
     interface RevoGrid {
         /**
@@ -30,6 +31,10 @@ export namespace Components {
           * When true cell focus appear.
          */
         "canFocus": boolean;
+        /**
+          * Clear current grid focus
+         */
+        "clearFocus": () => Promise<void>;
         /**
           * Indicates default column size.
          */
@@ -287,6 +292,10 @@ export namespace Components {
         "selectionStore": ObservableMap<Selection.SelectionStoreState>;
     }
     interface RevogrViewport {
+        /**
+          * Clear current grid focus
+         */
+        "clearFocus": () => Promise<void>;
         "columnFilter": boolean;
         "columnStores": {[T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>};
         "dimensions": {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.DimensionSettingsState>};
@@ -486,6 +495,10 @@ declare namespace LocalJSX {
           * Before edit event. Triggered before edit data applied. Use e.preventDefault() to prevent edit data set and use you own.  Use e.val = {your value} to replace edit result with your own.
          */
         "onBeforeEdit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
+        /**
+          * Before edit started Use e.preventDefault() to prevent edit
+         */
+        "onBeforeEditStart"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
         /**
           * Before export Use e.preventDefault() to prevent export Replace data in Event in case you want to modify it in export
          */
@@ -707,7 +720,6 @@ declare namespace LocalJSX {
           * Last cell position
          */
         "lastCell"?: Selection.Cell;
-        "onChangeSelection"?: (event: CustomEvent<{changes: Partial<Selection.Cell>; isMulti?: boolean; }>) => void;
         "onFocusCell"?: (event: CustomEvent<Selection.FocusedCells>) => void;
         "onInternalCellEdit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
         "onInternalCopy"?: (event: CustomEvent<any>) => void;
@@ -721,7 +733,7 @@ declare namespace LocalJSX {
           * Selection range changed
          */
         "onInternalSelectionChanged"?: (event: CustomEvent<Selection.ChangedRange>) => void;
-        "onSetEdit"?: (event: CustomEvent<string|boolean>) => void;
+        "onSetEdit"?: (event: CustomEvent<BeforeEdit>) => void;
         "onSetRange"?: (event: CustomEvent<Selection.RangeArea>) => void;
         "onSetTempRange"?: (event: CustomEvent<Selection.RangeArea|null>) => void;
         "onUnregister"?: (event: CustomEvent<any>) => void;
@@ -754,6 +766,7 @@ declare namespace LocalJSX {
           * Custom editors register
          */
         "editors"?: Edition.Editors;
+        "onBeforeEditStart"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
         "onInitialRowDragStart"?: (event: CustomEvent<{pos: RevoGrid.PositionItem, text: string}>) => void;
         "onSetDimensionSize"?: (event: CustomEvent<{type: RevoGrid.MultiDimensionType, sizes: RevoGrid.ViewSettingSizeProp}>) => void;
         "onSetViewportCoordinate"?: (event: CustomEvent<RevoGrid.ViewPortScrollEvent>) => void;

@@ -68,7 +68,7 @@
     <script type="module">
         import {generateFakeDataObject} from "/utilsExternal/generate-data.js";
 
-        const data = generateFakeDataObject(1000, 10000);
+        const data = generateFakeDataObject(5, 5);
         const grid = document.querySelector('revo-grid');
 
         grid.columns = data.headers;
@@ -83,7 +83,7 @@
         grid.filter = true;
         grid.export = true;
         grid.grouping = {
-          props: [1, 2, 3, 4],
+          props: [1],
           useEntireRow: false
         };
         /* grid.rowDefinitions = [{

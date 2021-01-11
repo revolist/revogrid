@@ -5,7 +5,6 @@ import Cell = Selection.Cell;
 
 
 interface Config {
-  change(changes: Partial<Cell>, isMulti?: boolean): void;
   changeRange(range: Selection.RangeArea): void;
   unregister(): void;
   focus(focus: Cell, end: Cell): void;
@@ -28,10 +27,6 @@ export default class SelectionStoreService {
     return this.store.get('range');
   }
 
-  change(area: Partial<Cell>, isMulti: boolean = false): void {
-    this.config.change(area, isMulti);
-  }
-
   focus(cell?: Cell, isMulti: boolean = false): void {
     if (!cell) {
       return;
@@ -50,8 +45,41 @@ export default class SelectionStoreService {
     // single focus
     this.config.focus(cell, end);
   }
+  
+  positionChange(changes: Partial<Cell>, isMulti?: boolean) {
+    const data = getCoordinate(this.store, changes, isMulti);
+    if (!data) {
+      return;
+    }
+    if (isMulti) {
+      this.config.changeRange(getRange(data.start, data.end));
+    } else {
+      this.config.focus(data.start, data.start);
+    }
+  }
 
   destroy(): void {
     this.config.unregister();
   }
+}
+
+function getCoordinate(store: ObservableMap<Selection.SelectionStoreState>, changes: Partial<Cell>, isMulti?: boolean) {
+  const range = store.get('range');
+  const focus = store.get('focus');
+  if (!range || !focus) {
+    return null;
+  }
+  const start: Cell = { x: range.x, y: range.y };
+  const end: Cell = isMulti ? { x: range.x1, y: range.y1 } : start;
+  const updateCoordinate = (c: keyof Cell) => {
+    const point: Cell = end[c] > focus[c]  ? end : start;
+    point[c] += changes[c];
+  };
+  if (changes.x) {
+    updateCoordinate('x');
+  }
+  if (changes.y) {
+    updateCoordinate('y');
+  }
+  return {start, end};
 }

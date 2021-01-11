@@ -75,6 +75,7 @@ export default class GroupingRowPlugin extends BasePlugin {
       } else {
         const {trimmed} = this.doCollapse(i, source);
         newTrimmed = {...newTrimmed, ...trimmed};
+        this.revogrid.clearFocus();
       }
 
       rowStore.set('source', source);

@@ -289,6 +289,12 @@ export class RevoGridComponent {
    */
   @Event() beforeExport: EventEmitter<DataInput>;
 
+  /**  
+   * Before edit started
+   * Use e.preventDefault() to prevent edit
+   */
+  @Event() beforeEditStart: EventEmitter<Edition.BeforeSaveDataDetails>;
+
   // --------------------------------------------------------------------------
   //
   //  Methods
@@ -426,6 +432,13 @@ export class RevoGridComponent {
   }
 
   /**
+   * Clear current grid focus
+   */
+  @Method() async clearFocus() {
+    return this.viewportElement.clearFocus();
+  }
+
+  /**
    * Get all active plugins instances
    */
   @Method() async getPlugins(): Promise<RevoPlugin.Plugin[]> {
@@ -450,7 +463,7 @@ export class RevoGridComponent {
   }
 
   @Listen('internalRangeDataApply')
-  onBeforeRangeEdit(e: CustomEvent<Edition.BeforeRangeSaveDataDetails>): void {
+  onBeforeRangeEdit(e: CustomEvent<Edition.BeforeRangeSaveDataDetails>) {
     e.cancelBubble = true;
     const { defaultPrevented } = this.beforeRangeEdit.emit(e.detail);
     if (defaultPrevented) {
@@ -461,7 +474,7 @@ export class RevoGridComponent {
   }
 
   @Listen('internalSelectionChanged')
-  onRangeChanged(e: CustomEvent<Selection.ChangedRange>): void {
+  onRangeChanged(e: CustomEvent<Selection.ChangedRange>) {
     e.cancelBubble = true;
     const beforeRange = this.beforeRange.emit(e.detail);
     if (beforeRange.defaultPrevented) {
@@ -483,7 +496,7 @@ export class RevoGridComponent {
   }
 
   @Listen('initialRowDropped')
-  onRowDropped(e: CustomEvent<{from: number; to: number;}>): void {
+  onRowDropped(e: CustomEvent<{from: number; to: number;}>) {
     e.cancelBubble = true;
     const {defaultPrevented} = this.rowOrderChanged.emit(e.detail);
     if (defaultPrevented) {
@@ -492,7 +505,7 @@ export class RevoGridComponent {
   }
 
   @Listen('initialHeaderClick')
-  onHeaderClick(e: CustomEvent<RevoGrid.InitialHeaderClick>): void {
+  onHeaderClick(e: CustomEvent<RevoGrid.InitialHeaderClick>) {
     const {defaultPrevented} = this.headerClick.emit({
       ...e.detail.column,
       originalEvent:  e.detail.originalEvent
@@ -503,7 +516,7 @@ export class RevoGridComponent {
   }
 
   @Listen('internalFocusCell')
-  onCellFocus(e: CustomEvent<Edition.BeforeSaveDataDetails>): void {
+  onCellFocus(e: CustomEvent<Edition.BeforeSaveDataDetails>) {
     e.cancelBubble = true;
     const {defaultPrevented} = this.beforeCellFocus.emit(e.detail);
     if (!this.canFocus || defaultPrevented) {
@@ -658,7 +671,7 @@ export class RevoGridComponent {
     }, {}) as ViewportStores;
   }
 
-  connectedCallback(): void {
+  connectedCallback() {
     this.viewportProvider = new ViewportProvider();
     this.themeService = new ThemeService({
       rowSize: this.rowSize
@@ -716,7 +729,7 @@ export class RevoGridComponent {
     this.rowDefChanged(this.rowDefinitions);
   }
 
-  disconnectedCallback(): void {
+  disconnectedCallback() {
     each(this.internalPlugins, p => p.destroy());
     this.internalPlugins = [];
   }
