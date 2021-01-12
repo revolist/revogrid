@@ -3,7 +3,7 @@ import { ObservableMap } from "@stencil/store";
 import { throttle } from "lodash";
 import {RevoGrid, Selection} from '../../interfaces';
 import {  TMP_SELECTION_BG_CLASS } from "../../utils/consts";
-import CellSelectionService from "../overlay/cellSelectionService";
+import { getElStyle } from "../overlay/cellSelectionService";
 
 @Component({
 		tag: 'revogr-temp-range',
@@ -48,7 +48,7 @@ export class RevogrFocus {
 		if (data.x < range.x) {
 			derectionX = 'left';
 		}
-		const style: Selection.RangeAreaCss = CellSelectionService.getElStyle(data, this.dimensionRow.state, this.dimensionCol.state);
+		const style: Selection.RangeAreaCss = getElStyle(data, this.dimensionRow.state, this.dimensionCol.state);
 		return <Host class={TMP_SELECTION_BG_CLASS} style={style}>
 			<div class={`${derectionX} ${directionY}`} ref={(e: HTMLElement) => this.el = e}/>
 		</Host>;

@@ -8,8 +8,6 @@ import { gatherGrouping, isGrouping } from './grouping.service';
 export type GroupingOptions = {
   // properties array to group
   props?: RevoGrid.ColumnProp[];
-  // should real data row be in the whole line with no padding
-  useEntireRow?: boolean;
 };
 
 type BeforeSourceSetEvent = {
@@ -31,28 +29,33 @@ export default class GroupingRowPlugin extends BasePlugin {
       dataProvider: DataProvider
     }) {
 			super(revogrid);
-      this.addEventListener('beforeSourceSet', ({detail}: CustomEvent<BeforeSourceSetEvent>) => this.onDataSet(detail));
-      this.addEventListener('afterFilterApply', () => this.doSourceUpdate());
-      this.addEventListener('afterSortingApply', () => this.doSourceUpdate());
+      this.addEventListener('beforeSourceSet', ({detail}: CustomEvent<BeforeSourceSetEvent>) => {
+        this.onDataSet(detail);
+      });
+      this.addEventListener('afterFilterApply', () => {
+        console.log('filter');
+        this.doSourceUpdate();
+      });
+      this.addEventListener('afterSortingApply', () => {
+        this.doSourceUpdate();
+      });
       this.addEventListener('beforeCellFocus', e => this.onFocus(e));
       this.addEventListener(GROUP_EXPAND_EVENT, ({detail}: CustomEvent<OnExpandEvent>) => this.onExpand(detail));
     }
 
     private doSourceUpdate() {
-      if (this.groupingProps && this.groupingProps.length) {
-        // todo: preserve grouping expand
-        this.clearGrouping();
-        const rowStore = this.providers.dataProvider.stores.row.store;
-        const source = [...rowStore.get('source')];
-        const {sourceWithGroups, depth, trimmed} = gatherGrouping(source, item => this.groupingProps.map(key => item[key]));
-        this.providers.dataProvider.setData(
-          sourceWithGroups,
-          'row',
-          { depth, groups: {[this.getGroupingField()]: true}},
-          true
-        );
-        this.revogrid.addTrimmed(trimmed, TRIMMED_GROUPING);
+      if (!this.groupingProps || !this.groupingProps.length) {
+        return;
       }
+      const source = this.getSource(true);
+      const {sourceWithGroups, depth, trimmed} = gatherGrouping(source, item => this.groupingProps.map(key => item[key]));
+      this.providers.dataProvider.setData(
+        sourceWithGroups,
+        'row',
+        { depth, groups: {[this.getGroupingField()]: true}},
+        true
+      );
+      this.revogrid.addTrimmed(trimmed, TRIMMED_GROUPING);
     }
 
     private onFocus(e: CustomEvent<Edition.BeforeSaveDataDetails>) {
@@ -63,7 +66,7 @@ export default class GroupingRowPlugin extends BasePlugin {
 
     private onExpand({ virtualIndex }: OnExpandEvent) {
       const rowStore = this.providers.dataProvider.stores.row.store;
-      const source = [...rowStore.get('source')];
+      const source = [...this.getSource()];
       let newTrimmed = rowStore.get('trimmed')[TRIMMED_GROUPING];
 
       let i = getPhysical(rowStore, virtualIndex);
@@ -78,7 +81,7 @@ export default class GroupingRowPlugin extends BasePlugin {
         this.revogrid.clearFocus();
       }
 
-      rowStore.set('source', source);
+      this.setSource(source);
       this.revogrid.addTrimmed(newTrimmed, TRIMMED_GROUPING);
     }
 
@@ -158,13 +161,35 @@ export default class GroupingRowPlugin extends BasePlugin {
       return this.groupingProps[0];
     }
 
-    setGrouping({props}: GroupingOptions) {
-			this.groupingProps = props;
+    private getSource(withoutGrouping = false) {
+      const rowStore = this.providers.dataProvider.stores.row.store;
+      const source = [...rowStore.get('source')];
+      if (!withoutGrouping) {
+        return source;
+      }
+      return source.filter(m => !isGrouping(m));
     }
 
-    clearGrouping() {
+    private setSource(data: RevoGrid.DataType[]) {
       const rowStore = this.providers.dataProvider.stores.row.store;
-      const source = [...rowStore.get('source')].filter(m => !isGrouping(m));
-      this.providers.dataProvider.setData(source);
+      rowStore.set('source', data);
+    }
+
+    // apply grouping
+    setGrouping({props}: GroupingOptions) {
+      this.groupingProps = props;
+      // clear props
+      if (!props || !Object.keys(props).length) {
+        this.clearGrouping();
+        return;
+      }
+      // props exist and source inited
+      if (this.getSource().length) {
+        this.doSourceUpdate();
+      }
+    }
+    
+    clearGrouping() {
+      this.providers.dataProvider.setData(this.getSource(true));
     }
 }

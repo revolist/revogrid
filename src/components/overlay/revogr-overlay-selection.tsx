@@ -4,7 +4,7 @@ import slice from 'lodash/slice';
 
 import {Edition, RevoGrid, Selection} from '../../interfaces';
 import ColumnService from '../data/columnService';
-import CellSelectionService from './cellSelectionService';
+import CellSelectionService, { getCell, getElStyle } from './cellSelectionService';
 import SelectionStoreService from '../../store/selection/selection.store.service';
 import {codesLetter} from '../../utils/keyCodes';
 import {isClear, isLetterKey} from '../../utils/keyCodes.utils';
@@ -224,7 +224,12 @@ export class OverlaySelection {
     });
     this.selectionService = new CellSelectionService({
       canRange: this.range,
-      focus: (cell, isMulti?) => this.selectionStoreService.focus(cell, isMulti),
+      changeRange: (range) => {
+        this.selectionStoreService.changeRange(range);
+      },
+      focus: (cell, isMulti?) => {
+        this.selectionStoreService.focus(cell, isMulti);
+      },
       applyRange: (start?, end?) => {
         // no changes to apply
         if (!start || !end) {
@@ -275,16 +280,16 @@ export class OverlaySelection {
   }
 
   private renderRange(range: Selection.RangeArea): VNode[] {
-    const style: RangeAreaCss = CellSelectionService.getElStyle(range, this.dimensionRow.state, this.dimensionCol.state);
+    const style: RangeAreaCss = getElStyle(range, this.dimensionRow.state, this.dimensionCol.state);
     return [<div class={SELECTION_BORDER_CLASS} style={style}/>];
   }
 
   private renderAutofill(range: Selection.RangeArea, selectionFocus: Selection.Cell): VNode {
     let handlerStyle;
     if (range) {
-      handlerStyle = CellSelectionService.getCell(range, this.dimensionRow.state, this.dimensionCol.state);
+      handlerStyle = getCell(range, this.dimensionRow.state, this.dimensionCol.state);
     } else {
-      handlerStyle = CellSelectionService.getCell({
+      handlerStyle = getCell({
         ...selectionFocus,
         x1: selectionFocus.x,
         y1: selectionFocus.y
@@ -310,7 +315,7 @@ export class OverlaySelection {
       ...this.columnService.getSaveData(editCell.y, editCell.x, val)
     };
 
-    const style = CellSelectionService.getElStyle({...editCell, x1: editCell.x, y1: editCell.y }, this.dimensionRow.state, this.dimensionCol.state);
+    const style = getElStyle({...editCell, x1: editCell.x, y1: editCell.y }, this.dimensionRow.state, this.dimensionCol.state);
     return <revogr-edit
       class={EDIT_INPUT_WR}
       onCellEdit={e => this.onCellEdit(e.detail)}
@@ -397,7 +402,10 @@ export class OverlaySelection {
       return false;
     }
     await timeout();
-    this.selectionStoreService.positionChange(data.changes, data.isMulti);
+
+    const range = this.selectionStore.get('range');
+    const focus = this.selectionStore.get('focus');
+    this.selectionService.keyPositionChange(data.changes, this.getData(), range, focus, data.isMulti);
     return true;
   }
 

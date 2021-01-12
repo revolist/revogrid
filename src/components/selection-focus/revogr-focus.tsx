@@ -2,7 +2,7 @@ import { Component, Prop, h, Host, Element } from "@stencil/core";
 import { ObservableMap } from "@stencil/store";
 import {RevoGrid, Selection} from '../../interfaces';
 import { FOCUS_CLASS } from "../../utils/consts";
-import CellSelectionService from "../overlay/cellSelectionService";
+import { getElStyle } from "../overlay/cellSelectionService";
 
 @Component({
 		tag: 'revogr-focus',
@@ -30,7 +30,7 @@ export class RevogrFocus {
 	render() {
 		const data = this.selectionStore.get('focus');
 		if (data) {
-				const style = CellSelectionService.getElStyle({
+				const style = getElStyle({
 						...data,
 						x1: data.x,
 						y1: data.y

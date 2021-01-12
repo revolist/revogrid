@@ -51,6 +51,7 @@ export class RevogrData {
     }
     const range = this.rowSelectionStore?.get('range');
     const rowsEls: VNode[] = [];
+
     const depth = this.dataStore.get('groupingDepth');
     const groups = this.dataStore.get('groups');
     let hasGrouping: boolean|undefined = undefined;

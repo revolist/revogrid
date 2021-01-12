@@ -26,7 +26,7 @@ export function generateFakeDataObject(rowsNumber, colsNumber) {
             columns[col] = {
                 name: generateHeader(col),
                 prop: col,
-                pin: j === 0 ? 'colPinStart' : j === 20 ? 'colPinEnd' : undefined,
+                // pin: j === 0 ? 'colPinStart' : j === 20 ? 'colPinEnd' : undefined,
                 sortable: true,
             }
         }
@@ -39,7 +39,7 @@ export function generateFakeDataObject(rowsNumber, colsNumber) {
             columns[col].autoSize = true;
         }
     }
-    const pinnedTopRows = result[3] && [result[3]] || [];
+    const pinnedTopRows = result[3] && [{...result[3]}] || [];
     const pinnedBottomRows = result[1] && [result[1]] || [];
     let headers = Object.keys(columns).map((k) => columns[k]);
 
@@ -64,8 +64,8 @@ export function generateFakeDataObject(rowsNumber, colsNumber) {
     }]); */
     return {
         rows: result,
-        pinnedTopRows,
-        pinnedBottomRows,
+        // pinnedTopRows,
+        // pinnedBottomRows,
         headers
     };
 }
