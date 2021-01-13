@@ -36,31 +36,14 @@ export default class GroupingRowPlugin extends BasePlugin {
 			super(revogrid);
     }
 
-    private doSourceUpdate() {
-      if (!this.groupingProps || !this.groupingProps.length) {
-        return;
-      }
-      const {source, expanded} = this.getSource(true);
-      const {sourceWithGroups, depth, trimmed} = gatherGrouping(
-        source,
-        item => this.groupingProps.map(key => item[key]),
-        expanded
-      );
-      this.providers.dataProvider.setData(
-        sourceWithGroups,
-        'row',
-        { depth, groups: {[this.getGroupingField()]: true}},
-        true
-      );
-      this.revogrid.addTrimmed(trimmed, TRIMMED_GROUPING);
-    }
-
+    // befoce cell focus
     private onFocus(e: CustomEvent<Edition.BeforeSaveDataDetails>) {
       if (isGrouping(e.detail.model)) {
         e.preventDefault();
       }
     }
 
+    // expand event triggered
     private onExpand({ virtualIndex }: OnExpandEvent) {
       const rowStore = this.providers.dataProvider.stores.row.store;
       const {source} = this.getSource();
@@ -82,6 +65,7 @@ export default class GroupingRowPlugin extends BasePlugin {
       this.revogrid.addTrimmed(newTrimmed, TRIMMED_GROUPING);
     }
 
+    // provide collapse data
     private doCollapse(
       pIndex: number,
       source: RevoGrid.DataType[]
@@ -106,6 +90,7 @@ export default class GroupingRowPlugin extends BasePlugin {
       return {trimmed};
     } 
 
+    // provide expand data
     private doExpand(
       pIndex: number,
       vIndex: number,
@@ -151,6 +136,7 @@ export default class GroupingRowPlugin extends BasePlugin {
       return {trimmed};
     }
 
+    // check if items is child of current clicked group
     private isSameGroup(currentGroup: any[], currentModel: RevoGrid.DataType, nextModel: RevoGrid.DataType) {
       const nextGroup = getParsedGroup(nextModel[PSEUDO_GROUP_ITEM_ID]);
       if (!nextGroup) {
@@ -162,23 +148,21 @@ export default class GroupingRowPlugin extends BasePlugin {
     }
 
     private onDataSet(data: BeforeSourceSetEvent) {
-      if (this.groupingProps && this.groupingProps.length && data.source) {
-        const {sourceWithGroups, depth, trimmed} = gatherGrouping(data.source, item => this.groupingProps.map(key => item[key]));
-        data.source = sourceWithGroups;
-        this.providers.dataProvider.setGrouping({depth, prop: this.getGroupingField()});
-        this.revogrid.addTrimmed(trimmed, TRIMMED_GROUPING);
+      if (!this.groupingProps || !this.groupingProps.length || !data.source || !data.source.length) {
+        return;
       }
+      const {sourceWithGroups, depth, trimmed} = gatherGrouping(data.source, item => this.groupingProps.map(key => item[key]));
+      data.source = sourceWithGroups;
+      this.providers.dataProvider.setGrouping({depth, prop: this.getGroupingField()});
+      this.revogrid.addTrimmed(trimmed, TRIMMED_GROUPING);
     }
 
+    // recieve field to group icons place
     private getGroupingField() {
       return this.groupingProps[0];
     }
 
-    private getItems() {
-      const rowStore = this.providers.dataProvider.stores.row.store;
-      return rowStore.get('items');
-    }
-
+    // get source based on proxy item collection to preserve row order
     private getSource(withoutGrouping = false) {
       const rowStore = this.providers.dataProvider.stores.row.store;
       const source = rowStore.get('source');
@@ -206,11 +190,19 @@ export default class GroupingRowPlugin extends BasePlugin {
       });
     }
 
+    // proxy for set source
     private setSource(data: RevoGrid.DataType[]) {
       const rowStore = this.providers.dataProvider.stores.row.store;
       rowStore.set('source', data);
     }
 
+    // proxy for items get
+    private getItems() {
+      const rowStore = this.providers.dataProvider.stores.row.store;
+      return rowStore.get('items');
+    }
+
+    // evaluate drag between groups
     private onDrag(e: CustomEvent<{from: number; to: number;}>) {
       const {from, to} = e.detail;
       const isDown = (to - from) >= 0;
@@ -228,19 +220,62 @@ export default class GroupingRowPlugin extends BasePlugin {
       }
     }
 
+    // subscribe to grid events to process them accordingly
     private subscribe() {
+      /** if grouping present and new data source arrived */
       this.addEventListener('beforeSourceSet', ({detail}: CustomEvent<BeforeSourceSetEvent>) => {
         this.onDataSet(detail);
       });
+
+      /**
+       * filter applied need to clear grouping and apply again
+       * based on new results can be new grouping
+       */ 
       this.addEventListener('afterFilterApply', () => {
         this.doSourceUpdate();
       });
+      /**
+       * sorting applied need to clear grouping and apply again
+       * based on new results whole grouping order will changed
+      */
       this.addEventListener('afterSortingApply', () => {
         this.doSourceUpdate();
       });
+
+      /**
+       * Apply logic for focus inside of grouping
+       * We can't focus on grouping rows, navigation only inside of groups for now
+       */ 
       this.addEventListener('beforeCellFocus', e => this.onFocus(e));
-      this.addEventListener('rowOrderChanged', e => this.onDrag(e))
+      /**
+       * Prevent row drag outside the group
+       */
+      this.addEventListener('rowOrderChanged', e => this.onDrag(e));
+
+      /**
+       * When grouping expand icon was cliced
+       */
       this.addEventListener(GROUP_EXPAND_EVENT, ({detail}: CustomEvent<OnExpandEvent>) => this.onExpand(detail));
+    }
+
+    /** Start global source update with group clearing and applying new one */
+    private doSourceUpdate() {
+      if (!this.groupingProps || !this.groupingProps.length) {
+        return;
+      }
+      const {source, expanded} = this.getSource(true);
+      const {sourceWithGroups, depth, trimmed} = gatherGrouping(
+        source,
+        item => this.groupingProps.map(key => item[key]),
+        expanded
+      );
+      this.providers.dataProvider.setData(
+        sourceWithGroups,
+        'row',
+        { depth, groups: {[this.getGroupingField()]: true}},
+        true
+      );
+      this.revogrid.addTrimmed(trimmed, TRIMMED_GROUPING);
     }
 
     // apply grouping
@@ -262,6 +297,7 @@ export default class GroupingRowPlugin extends BasePlugin {
       this.subscribe();
     }
     
+    // clear grouping
     clearGrouping() {
       const {source} = this.getSource(true);
       this.providers.dataProvider.setData(source);
