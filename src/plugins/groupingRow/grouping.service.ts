@@ -1,7 +1,6 @@
 import { RevoGrid } from "../../interfaces";
-import { GROUP_DEPTH, PSEUDO_GROUP_ITEM, PSEUDO_GROUP_ITEM_ID } from "./grouping.row.renderer";
+import { GROUP_DEPTH, GROUP_EXPANDED, PSEUDO_GROUP_ITEM, PSEUDO_GROUP_ITEM_ID, PSEUDO_GROUP_ITEM_VALUE } from "./grouping.row.renderer";
 
-type GroupingIndex = {[key: string]: GroupingIndex};
 type Group<T> = {
 	id: string;
 	children: T[];
@@ -35,49 +34,65 @@ function groupBy<T>(array: T[], f: (v: T) => any) {
   return groupsOrder;
 }
 
-// gather data
-export function gatherGrouping<T>(array: T[], f: (v: T) => any) {
+/**
+ * Gather data for grouping
+ * @param array - flat data array
+ * @param mapFunc - mapping function for stringify
+ * @param expanded - potentially expanded items if present
+ */
+export function gatherGrouping<T>(array: T[], mapFunc: (v: T) => any, expanded?: Record<string, boolean>) {
   // build groups
-  const groupsOrder = groupBy(array, f);
+  const groupsOrder = groupBy(array, mapFunc);
 
   const itemsMirror: RevoGrid.DataType[] = []; // grouped source
-  const pseudoGroupTest: GroupingIndex = {}; // check if group header exists
+  const pseudoGroupTest: Record<string, any> = {}; // check if group header exists
 
   let itemIndex = 0; // item index in source
   let groupingDepth = 0; // to save max group depth
 	const trimmed: Record<number, boolean> = {}; // collapse all groups in the beginning
   // go through groups
   groupsOrder.forEach(group => {
-    const parseGroup = JSON.parse(group.id);
+    const parseGroup = getParsedGroup(group.id);
     // extra precaution and type safe guard
-    if (!isArray(parseGroup)) {
+    if (!parseGroup) {
         return;
     }
 
     // add group headers
     let depth = 0;
-    parseGroup.reduce((existingGroups: GroupingIndex, groupValue: string) => {
+    let isExpanded = false;
+    parseGroup.reduce((prevVal: string[], groupValue: string) => {
+      prevVal.push(groupValue);
+      const newVal = prevVal.join(',');
       // if header not added, add new header
-			if (!existingGroups[groupValue]) {
-				itemsMirror.push(getPseudoGroup(groupValue, depth, group.id));
+      if (!pseudoGroupTest[newVal]) {
+        isExpanded = expanded && expanded[newVal];
+				itemsMirror.push(getPseudoGroup(groupValue, newVal, depth, group.id, isExpanded));
 
         // if not first level auto collapse
-        if (depth) {
-					trimmed[itemIndex] = true;
+        if (depth && !isExpanded) {
+          // check if parent expanded, expand this layer too
+          const parent = prevVal.slice(0, prevVal.length - 1);
+          if (!(expanded && parent.length && expanded[parent.join(',')])) {
+					  trimmed[itemIndex] = true;
+          }
         }
         itemIndex++;
-				existingGroups[groupValue] = {};
+				pseudoGroupTest[newVal] = true;
       }
       // calculate depth
       depth++;
       groupingDepth = depth;
-			return existingGroups[groupValue];
-    }, pseudoGroupTest);
+      return prevVal;
+    }, []);
 
     // add regular items
     group.children.forEach(item => {
-      trimmed[itemIndex++] = true; // collapse row
+      if (!isExpanded) {
+        trimmed[itemIndex] = true; // collapse row
+      }
       itemsMirror.push(item);
+      itemIndex++;
     });
   });
   return {
@@ -87,11 +102,13 @@ export function gatherGrouping<T>(array: T[], f: (v: T) => any) {
   };
 }
 
-function getPseudoGroup(groupValue: string, depth: number, id: string) {
+function getPseudoGroup(groupValue: string, value: string, depth: number, id: string, isExpanded = false) {
 	return {
 		[PSEUDO_GROUP_ITEM]: groupValue,
 		[GROUP_DEPTH]: depth,
-		[PSEUDO_GROUP_ITEM_ID]: id
+    [PSEUDO_GROUP_ITEM_ID]: id,
+    [PSEUDO_GROUP_ITEM_VALUE]: value,
+    [GROUP_EXPANDED]: isExpanded
 	};
 }
 
@@ -99,6 +116,26 @@ export function isGrouping(row?: RevoGrid.DataType) {
 	return row && typeof row[PSEUDO_GROUP_ITEM] !== 'undefined';
 }
 
-function isArray<T>(data: any|T[]): data is T[] {
+export function isArray<T>(data: any|T[]): data is T[] {
 	return typeof (data as T[]).push !== 'undefined';
+}
+
+export function measureEqualDepth<T>(groupA: T[], groupB: T[]) {
+  const ln = groupA.length;
+  let i = 0;
+  for (; i < ln; i++) {
+    if (groupA[i] !== groupB[i]) {
+      return i;
+    }
+  }
+  return i;
+}
+
+export function getParsedGroup(id: string): any[] {
+  const parseGroup = JSON.parse(id);
+  // extra precaution and type safe guard
+  if (!isArray(parseGroup)) {
+      return null;
+  }
+  return parseGroup;
 }
