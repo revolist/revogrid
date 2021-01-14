@@ -34,17 +34,21 @@ const RevogrRowHeaders = ({
 
     /** render viewports rows */
     let totalLength = 1;
-    const column = { cellTemplate: RowHeaderRender(totalLength), ...rowHeaderColumn };
 
     for (let data of anyView.dataPorts) {
       const colData = new DataStore<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>('colPinStart');
       const rowSelectionStore = selectionStoreConnector.registerRow(data.position.y);
+
+      const dataStore = new DataStore<RevoGrid.DataType, RevoGrid.DimensionRows>(data.type);
+      dataStore.updateData(data.dataStore.get('source'));
       // initiate column data
+      const column = { cellTemplate: RowHeaderRender(totalLength), ...rowHeaderColumn };
       colData.updateData([column]);
       dataViews.push(
         <revogr-data
           slot='content'
           {...data}
+          dataStore={dataStore.store}
           colData={colData.store}
           viewportCol={viewport.store}
           readonly={true}
@@ -81,7 +85,6 @@ const RevogrRowHeaders = ({
         viewportCol={viewport.store}
         parent={parent}
         slot='header'
-        colData={[column]}
         canResize={false}/>
       {dataViews}
     </revogr-viewport-scroll>;

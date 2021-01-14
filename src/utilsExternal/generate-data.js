@@ -26,11 +26,11 @@ export function generateFakeDataObject(rowsNumber, colsNumber) {
             columns[col] = {
                 name: generateHeader(col),
                 prop: col,
-                pin: j === 0 ? 'colPinStart' : j === 20 ? 'colPinEnd' : undefined,
+                // pin: j === 0 ? 'colPinStart' : j === 20 ? 'colPinEnd' : undefined,
                 sortable: true,
             }
         }
-        result[row][col] = row + ':' + col;
+        result[row][col] = row%5 ? col : row%3 ? col%3 ? 2 :3 : row; // row + ':' + col;
         if (col === 0) {
             columns[col].rowDrag = true;
             // columns[col].order = 'asc';
@@ -39,14 +39,8 @@ export function generateFakeDataObject(rowsNumber, colsNumber) {
             columns[col].autoSize = true;
         }
     }
-    const pinnedTopRows = result[3] && [result[3]] || [];
-    if (pinnedTopRows) {
-        pinnedTopRows[0][0] = 'top';
-    }
+    const pinnedTopRows = result[3] && [{...result[3]}] || [];
     const pinnedBottomRows = result[1] && [result[1]] || [];
-    if (pinnedBottomRows) {
-        pinnedBottomRows[0][0] = 'bottom';
-    }
     let headers = Object.keys(columns).map((k) => columns[k]);
 
     const grouped = headers.splice(1, 4);
@@ -70,8 +64,8 @@ export function generateFakeDataObject(rowsNumber, colsNumber) {
     }]); */
     return {
         rows: result,
-        pinnedTopRows,
-        pinnedBottomRows,
+        // pinnedTopRows,
+        // pinnedBottomRows,
         headers
     };
 }

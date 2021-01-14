@@ -9,7 +9,7 @@ type Props = {
     onDragStart?(e: MouseEvent): void;
 }
 
-const CellRenderer = ({model, canDrag, onDragStart}: Props, _children: VNode[]): (VNode|string)[] => {
+const CellRenderer = ({model, canDrag, onDragStart}: Props) => {
     const els: (VNode|string)[] = [];
     if (model.column.rowDrag && isRowDragService(model.column.rowDrag, model)) {
         if (canDrag) {

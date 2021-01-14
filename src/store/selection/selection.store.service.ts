@@ -2,13 +2,13 @@ import {ObservableMap} from '@stencil/store';
 import {Edition, Selection} from '../../interfaces';
 import {getRange} from './selection.helpers';
 import Cell = Selection.Cell;
+import Range = Selection.RangeArea;
 
 
 interface Config {
-  change(changes: Partial<Cell>, isMulti?: boolean): void;
-  changeRange(range: Selection.RangeArea): void;
+  changeRange(range: Range): boolean;
   unregister(): void;
-  focus(focus: Cell, end: Cell): void;
+  focus(focus: Cell, end: Cell): boolean;
 }
 
 export default class SelectionStoreService {
@@ -24,17 +24,17 @@ export default class SelectionStoreService {
     return this.store.get('focus');
   }
 
-  get ranged(): Selection.RangeArea|null {
+  get ranged(): Range|null {
     return this.store.get('range');
   }
 
-  change(area: Partial<Cell>, isMulti: boolean = false): void {
-    this.config.change(area, isMulti);
+  changeRange(range: Range) {
+    return this.config.changeRange(range);
   }
 
-  focus(cell?: Cell, isMulti: boolean = false): void {
+  focus(cell?: Cell, isMulti = false) {
     if (!cell) {
-      return;
+      return false;
     }
     let end: Cell = cell;
 
@@ -42,15 +42,14 @@ export default class SelectionStoreService {
     if (isMulti) {
       let start: Cell|null = this.store.get('focus');
       if (start) {
-        this.config.changeRange(getRange(start, end));
-        return;
+        return this.config.changeRange(getRange(start, end));
       }
     }
 
     // single focus
-    this.config.focus(cell, end);
+    return this.config.focus(cell, end);
   }
-
+  
   destroy(): void {
     this.config.unregister();
   }

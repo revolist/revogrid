@@ -147,37 +147,6 @@ export default class SelectionStoreConnector {
     this.focusedStore.setEdit(val);
   }
 
-  change({changes, isMulti}: {changes: Partial<Cell>, isMulti?: boolean}): void {
-    if (!this.focusedStore) {
-      return;
-    }
-
-    const range = this.focusedStore.store.get('range');
-    const focus = this.focusedStore.store.get('focus');
-
-    if (!range || !focus) {
-      return;
-    }
-    const start: Cell = { x: range.x, y: range.y };
-    const end: Cell = isMulti ? { x: range.x1, y: range.y1 } : start;
-    const updateCoordinate = (c: keyof Cell) => {
-      const point: Cell = end[c] > focus[c]  ? end : start;
-      point[c] += changes[c];
-    };
-    if (changes.x) {
-      updateCoordinate('x');
-    }
-    if (changes.y) {
-      updateCoordinate('y');
-    }
-
-    if (isMulti) {
-      this.focusedStore.setRange(start, end);
-    } else {
-      this.focus(this.focusedStore, {focus: start, end: start});
-    }
-  }
-
   unregister(store: SelectionStore): void {
     for (let y in this.stores) {
       for (let x in this.stores[y]) {

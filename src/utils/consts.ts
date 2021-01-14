@@ -24,3 +24,4 @@ export const CELL_HANDLER_CLASS = 'autofill-handle';
 export const EDIT_INPUT_WR = 'edit-input-wrapper';
 
 export const DRAGG_TEXT = 'Draggable item';
+export const GRID_INTERNALS = '__rvgr';

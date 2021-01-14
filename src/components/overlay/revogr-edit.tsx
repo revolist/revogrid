@@ -21,7 +21,6 @@ export class Edit {
     /** Close editor event */
     @Event({ bubbles: false }) closeEdit: EventEmitter<boolean|undefined>;
 
-
     /** Callback triggered on cell editor save */
     onSave(val: Edition.SaveData, preventFocus?: boolean): void {
         if (this.editCell) {

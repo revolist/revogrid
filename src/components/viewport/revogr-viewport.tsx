@@ -61,6 +61,7 @@ export class RevogrViewport {
   @Event() setViewportCoordinate: EventEmitter<RevoGrid.ViewPortScrollEvent>;
   @Event() setViewportSize: EventEmitter<RevoGrid.ViewPortResizeEvent>;
   @Event({ cancelable: true }) initialRowDragStart: EventEmitter<{pos: RevoGrid.PositionItem, text: string}>;
+  @Event() beforeEditStart: EventEmitter<Edition.BeforeSaveDataDetails>;
 
 
 
@@ -125,6 +126,13 @@ export class RevogrViewport {
     });
   }
   
+  /**
+   * Clear current grid focus
+   */
+  @Method() async clearFocus() {
+    this.selectionStoreConnector.clearAll();
+  }
+
   @Method() async setEdit(rowIndex: number, colIndex: number, colType: RevoGrid.DimensionCols, rowType: RevoGrid.DimensionRows ): Promise<void> {
     const stores = getStoresCoordinates(this.columnStores, this.rowStores);
     const x = stores[colType];
@@ -208,12 +216,18 @@ export class RevogrViewport {
             readonly={this.readonly}
             range={this.range}
 
-            onSetEdit={(e) => this.selectionStoreConnector.setEdit(e.detail)}
+            onSetEdit={({detail}) => {
+              const event = this.beforeEditStart.emit(detail);
+              if (!event.defaultPrevented) {
+                this.selectionStoreConnector.setEdit(detail.isCancel ? false : detail.val);
+              }
+            }}
             onSetRange={(e) => selectionStore.setRangeArea(e.detail)}
             onSetTempRange={e => selectionStore.setTempArea(e.detail)}
-            onChangeSelection={(e) => this.selectionStoreConnector.change(e.detail)}
-            onFocusCell={(e) => this.selectionStoreConnector.focus(selectionStore, e.detail)}
-            onInternalFocusCell={() => selectionStore.clearFocus()}
+            onFocusCell={e => {
+              selectionStore.clearFocus();
+              this.selectionStoreConnector.focus(selectionStore, e.detail);
+            }}
             onUnregister={() => this.selectionStoreConnector.unregister(selectionStore)}>
 
             <revogr-data

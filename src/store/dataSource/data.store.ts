@@ -1,13 +1,11 @@
-/**
- * Storing data storage for column/row
- */
-
 import {createStore, ObservableMap} from '@stencil/store';
 import findIndex from 'lodash/findIndex';
 import range from 'lodash/range';
 
+import { Trimmed, trimmedPlugin } from '../../plugins/trimmed/trimmed.plugin';
 import {setStore} from '../../utils/store.utils';
 import {RevoGrid} from "../../interfaces";
+import {proxyPlugin} from './data.proxy';
 import DataType = RevoGrid.DataType;
 import ColumnRegular = RevoGrid.ColumnRegular;
 import DimensionRows = RevoGrid.DimensionRows;
@@ -19,13 +17,14 @@ export interface Group extends RevoGrid.ColumnProperties {
   // props/ids
   ids: (string|number)[];
 }
-type Trimmed = Record<number, boolean>;
-export type Groups = {[level: number]: Group[]};
+export type Groups = Record<any, any>;
 export type GDataType = DataType|ColumnRegular;
 export type GDimension = DimensionRows|DimensionCols;
 export type DataSourceState<T extends GDataType, ST extends GDimension> = {
   // items - index based array for mapping to source tree
   items: number[];
+  // all items, used as proxy for sorting, trimming and others
+  proxyItems: number[];
   // original data source
   source: T[];
   // grouping
@@ -43,37 +42,17 @@ export default class DataStore<T extends GDataType, ST extends GDimension> {
     return this.dataStore;
   }
   constructor(type: ST) {
-    this.dataStore = createStore({
+    const store = this.dataStore = createStore({
       items: [],
+      proxyItems: [],
       source: [],
       groupingDepth: 0,
       groups: {},
       type,
       trimmed: {}
     });
-    this.dataStore.use({
-      set: (k, newVal, oldVal) => {
-        switch(k) {
-          case 'trimmed':
-            const items = this.dataStore.get('items');
-            const trimmed = newVal as Trimmed;
-            const oldTrimmed = oldVal as Trimmed;
-
-            // check if not longer trimmed put back to items
-            for (let o in oldTrimmed) {
-              const index = parseInt(o, 10);
-              if (!trimmed[o] && items.indexOf(index) === -1) {
-                items.push(index);
-              }
-            }
-
-            // check if present in new trimmed remove from items
-            const newItems = items.filter(v => !trimmed[v]);
-            this.dataStore.set('items', newItems);
-            break;
-        }
-      }
-    });
+    store.use(proxyPlugin(store));
+    store.use(trimmedPlugin(store));
   }
 
   /**
@@ -81,18 +60,35 @@ export default class DataStore<T extends GDataType, ST extends GDimension> {
    * @param source - data column/row source
    * @param grouping - grouping information if present
    */
-  updateData(source: T[], grouping?: { depth: number; groups: Groups }) {
-    const data: Partial<DataSourceState<T, ST>> = {
-      source,
-      // during full update we do trim data drop
-      trimmed: {}
-    };
-    this.indexMapping(data);
-    if (grouping) {
-      data.groupingDepth = grouping.depth;
-      data.groups = grouping.groups;
+  updateData(source: T[], grouping?: { depth: number; groups: Groups }, silent = false) {
+    // during full update we do drop trim 
+    if (!silent) {
+      this.store.set('trimmed', {});
     }
-    this.setData(data);
+    // clear items
+    this.store.set('items', []);
+    const items = range(0, source?.length || 0);
+
+    // set proxy first
+    setStore(this.store, {
+      source,
+      proxyItems: [...items]
+    });
+    // update data items
+    this.store.set('items', items);
+    // apply grooping if present
+    if (grouping) {
+      setStore(this.store, {
+        groupingDepth: grouping.depth,
+        groups: grouping.groups
+      });
+    }
+  }
+
+  addTrimmed(some: Partial<Trimmed>) {
+    let trimmed = this.store.get('trimmed');
+    trimmed = {...trimmed, ...some};
+    setStore(this.store, { trimmed });
   }
 
   // local data update
@@ -102,13 +98,14 @@ export default class DataStore<T extends GDataType, ST extends GDimension> {
     };
     setStore(this.store, data);
   }
-
-  private indexMapping(data: Partial<DataSourceState<T, ST>> ) {
-    if (data.source) {
-      data.items = range(0, data.source.length);
-    }
-    return data;
-  }
+}
+/**
+ * get physical index by virtual
+ * @param store - store to process
+ */
+export function getPhysical(store: ObservableMap<DataSourceState<any, any>>, virtualIndex: number) {
+  const items = store.get('items');
+  return items[virtualIndex];
 }
 
 /**
@@ -158,6 +155,10 @@ export function setSourceByPhysicalIndex<T>(store: ObservableMap<DataSourceState
     source[index] = modelByIndex[index];
   }
   store.set('source', [...source]);
+}
+
+export function setItems<T>(store: ObservableMap<DataSourceState<T, any>>, items: number[]) {
+  store.set('items', items);
 }
 
 export function getSourceItemVirtualIndexByProp(store: ObservableMap<DataSourceState<any, any>>, prop: RevoGrid.ColumnProp) {

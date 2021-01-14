@@ -17,6 +17,7 @@ import FilterPlugin, { ColumnFilterConfig, FilterCollection } from '../../plugin
 import SortingPlugin from '../../plugins/sorting/sorting.plugin';
 import ExportFilePlugin from '../../plugins/export/export.plugin';
 import { DataInput } from '../../plugins/export/types';
+import GroupingRowPlugin, { GroupingOptions } from '../../plugins/groupingRow/grouping.row.plugin';
 
 type ColumnStores = {
   [T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
@@ -146,6 +147,12 @@ export class RevoGridComponent {
    * Can be export options
    */
   @Prop() export: boolean = false;
+
+  /** 
+   * Group models by provided properties
+   * Define properties to be groped by
+   */
+  @Prop() grouping: GroupingOptions;
 
   
   // --------------------------------------------------------------------------
@@ -282,6 +289,12 @@ export class RevoGridComponent {
    */
   @Event() beforeExport: EventEmitter<DataInput>;
 
+  /**  
+   * Before edit started
+   * Use e.preventDefault() to prevent edit
+   */
+  @Event() beforeEditStart: EventEmitter<Edition.BeforeSaveDataDetails>;
+
   // --------------------------------------------------------------------------
   //
   //  Methods
@@ -328,8 +341,14 @@ export class RevoGridComponent {
     await this.scrollToCoordinate({ x });
   }
 
+  /** Update columns */
   @Method() async updateColumns(cols: RevoGrid.ColumnRegular[]) {
     this.columnProvider.updateColumns(cols);
+  }
+
+  /** Add trimmed by type */
+  @Method() async addTrimmed(newVal: Record<number, boolean>, trimmedType = 'external', type: RevoGrid.DimensionRows = 'row') {
+    this.dataProvider.setTrimmed({ [trimmedType]: newVal }, type);
   }
 
   /**  Scrolls view port to coordinate */
@@ -413,6 +432,13 @@ export class RevoGridComponent {
   }
 
   /**
+   * Clear current grid focus
+   */
+  @Method() async clearFocus() {
+    return this.viewportElement.clearFocus();
+  }
+
+  /**
    * Get all active plugins instances
    */
   @Method() async getPlugins(): Promise<RevoPlugin.Plugin[]> {
@@ -437,7 +463,7 @@ export class RevoGridComponent {
   }
 
   @Listen('internalRangeDataApply')
-  onBeforeRangeEdit(e: CustomEvent<Edition.BeforeRangeSaveDataDetails>): void {
+  onBeforeRangeEdit(e: CustomEvent<Edition.BeforeRangeSaveDataDetails>) {
     e.cancelBubble = true;
     const { defaultPrevented } = this.beforeRangeEdit.emit(e.detail);
     if (defaultPrevented) {
@@ -448,7 +474,7 @@ export class RevoGridComponent {
   }
 
   @Listen('internalSelectionChanged')
-  onRangeChanged(e: CustomEvent<Selection.ChangedRange>): void {
+  onRangeChanged(e: CustomEvent<Selection.ChangedRange>) {
     e.cancelBubble = true;
     const beforeRange = this.beforeRange.emit(e.detail);
     if (beforeRange.defaultPrevented) {
@@ -470,7 +496,7 @@ export class RevoGridComponent {
   }
 
   @Listen('initialRowDropped')
-  onRowDropped(e: CustomEvent<{from: number; to: number;}>): void {
+  onRowDropped(e: CustomEvent<{from: number; to: number;}>) {
     e.cancelBubble = true;
     const {defaultPrevented} = this.rowOrderChanged.emit(e.detail);
     if (defaultPrevented) {
@@ -479,7 +505,7 @@ export class RevoGridComponent {
   }
 
   @Listen('initialHeaderClick')
-  onHeaderClick(e: CustomEvent<RevoGrid.InitialHeaderClick>): void {
+  onHeaderClick(e: CustomEvent<RevoGrid.InitialHeaderClick>) {
     const {defaultPrevented} = this.headerClick.emit({
       ...e.detail.column,
       originalEvent:  e.detail.originalEvent
@@ -490,7 +516,7 @@ export class RevoGridComponent {
   }
 
   @Listen('internalFocusCell')
-  onCellFocus(e: CustomEvent<Edition.BeforeSaveDataDetails>): void {
+  onCellFocus(e: CustomEvent<Edition.BeforeSaveDataDetails>) {
     e.cancelBubble = true;
     const {defaultPrevented} = this.beforeCellFocus.emit(e.detail);
     if (!this.canFocus || defaultPrevented) {
@@ -598,9 +624,23 @@ export class RevoGridComponent {
     });
   }
 
-  @Watch('trimmedRows')
-  trimmedRowsChanged(newVal: Record<number, boolean>) {
-    this.dataProvider.setTrimmed(newVal, 'row');
+  @Watch('trimmedRows') trimmedRowsChanged(newVal: Record<number, boolean>) {
+    this.dataProvider.setTrimmed({ 'external': newVal }, 'row');
+  }
+
+  @Watch('grouping') groupingChanged(newVal: GroupingOptions = {}) {
+    let grPlugin: GroupingRowPlugin|undefined;
+    for (let p of this.internalPlugins) {
+      const isGrouping = p as unknown as GroupingRowPlugin;
+      if (isGrouping.setGrouping) {
+        grPlugin = isGrouping;
+        break;
+      }
+    }
+    if (!grPlugin) {
+      return;
+    }
+    grPlugin.setGrouping(newVal || {});
   }
 
   get columnStores(): ColumnStores {
@@ -631,7 +671,7 @@ export class RevoGridComponent {
     }, {}) as ViewportStores;
   }
 
-  connectedCallback(): void {
+  connectedCallback() {
     this.viewportProvider = new ViewportProvider();
     this.themeService = new ThemeService({
       rowSize: this.rowSize
@@ -676,6 +716,11 @@ export class RevoGridComponent {
         this.internalPlugins.push(new p(this.element));
       });
     }
+
+    this.internalPlugins.push(new GroupingRowPlugin(this.element, {
+      dataProvider: this.dataProvider
+    }));
+    this.groupingChanged(this.grouping);
     this.themeChanged(this.theme);
     this.columnChanged(this.columns);
     this.dataChanged(this.source);
@@ -684,7 +729,7 @@ export class RevoGridComponent {
     this.rowDefChanged(this.rowDefinitions);
   }
 
-  disconnectedCallback(): void {
+  disconnectedCallback() {
     each(this.internalPlugins, p => p.destroy());
     this.internalPlugins = [];
   }

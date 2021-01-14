@@ -9,8 +9,8 @@ revogr-overlay-selection {
 		width: $handler-size;
 		height: $handler-size;
 		background: $selection-border;
-		margin-left: -$handler-size + 2;
-		margin-top: -$handler-size/2 + 1;
+		margin-left: -$handler-size + 1;
+		margin-top: -$handler-size + 1;
 		border: 1px solid white;
 		box-sizing: border-box;
 		z-index: 10;

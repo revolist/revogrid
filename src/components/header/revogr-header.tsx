@@ -1,15 +1,13 @@
 import {Component, Element, Event, EventEmitter, h, Prop} from '@stencil/core';
 import {HTMLStencilElement, VNode} from '@stencil/core/internal';
 import {ObservableMap} from "@stencil/store";
-import findIndex from 'lodash/findIndex';
 import keyBy from 'lodash/keyBy';
 
 import {HEADER_ACTUAL_ROW_CLASS, HEADER_ROW_CLASS} from '../../utils/consts';
 import {RevoGrid, Selection} from '../../interfaces';
 import {Groups} from '../../store/dataSource/data.store';
-import {getItemByIndex} from '../../store/dimension/dimension.helpers';
 import HeaderRenderer from './headerRenderer';
-import GroupHeaderRenderer from './headerGroupRenderer';
+import ColumnGroupsRenderer from '../../plugins/groupingColumn/columnGroupsRenderer';
 
 @Component({
   tag: 'revogr-header',
@@ -36,7 +34,7 @@ export class RevogrHeaderComponent {
     this.headerResize.emit({[index]: width || 0})
   }
 
-  private onResizeGroup({changedX}: {changedX?: number}, startIndex: number, endIndex: number): void {
+  private onResizeGroup(changedX: number, startIndex: number, endIndex: number): void {
     const sizes: RevoGrid.ViewSettingSizeProp = {};
     const cols = keyBy(this.viewportCol.get('items'), 'itemIndex');
     const change = changedX / (endIndex - startIndex + 1);
@@ -73,45 +71,18 @@ export class RevogrHeaderComponent {
       visibleProps[colData?.prop] = col.itemIndex;
     }
 
-    const groupRow = this.renderGroups(visibleProps);
     return [
-      <div class='group-row'>{groupRow}</div>,
+      <div class='group-row'>
+        <ColumnGroupsRenderer
+          canResize={this.canResize}
+          visibleProps={visibleProps}
+          groups={this.groups}
+          dimensionCol={this.dimensionCol.state}
+          depth={this.groupingDepth}
+          onResize={(changedX, startIndex, endIndex) =>
+            this.onResizeGroup(changedX, startIndex, endIndex)}/>  
+      </div>,
       <div class={`${HEADER_ROW_CLASS} ${HEADER_ACTUAL_ROW_CLASS}`}>{cells}</div>
     ];
-  }
-
-  renderGroups(visibleProps: {[prop: string]: number}): VNode[] {
-    // render group columns
-    const groupRow: VNode[] = [];
-    for (let i = 0; i < this.groupingDepth; i++) {
-      if (this.groups[i]) {
-        for (let group of this.groups[i]) {
-          // if group in visible range
-          // find first visible group prop in visible columns range
-          const indexFirstVisibleCol: number|undefined =
-              findIndex(group.ids, (id) => typeof visibleProps[id] === 'number');
-          if (indexFirstVisibleCol > -1) {
-            const colVisibleIndex = visibleProps[group.ids[indexFirstVisibleCol]]; // get column index
-            const groupStartIndex = colVisibleIndex - indexFirstVisibleCol; // first column index in group
-            const groupEndIndex = groupStartIndex + group.ids.length - 1; // last column index in group
-
-            // coordinates
-            const groupStart = getItemByIndex(this.dimensionCol.state, groupStartIndex).start;
-            const groupEnd = getItemByIndex(this.dimensionCol.state, groupEndIndex).end;
-            groupRow.push(
-              <GroupHeaderRenderer
-                start={groupStart}
-                end={groupEnd}
-                group={group} 
-                canResize={this.canResize}
-                onResize={(e) => this.onResizeGroup(e, groupStartIndex, groupEndIndex)}
-                />
-            );
-          }
-        }
-      }
-      groupRow.push(<div class={`${HEADER_ROW_CLASS} group`}/>);
-    }
-    return groupRow;
   }
 }

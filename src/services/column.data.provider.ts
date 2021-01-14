@@ -1,14 +1,11 @@
 import reduce from 'lodash/reduce';
 import each from 'lodash/each';
-import isArray from 'lodash/isArray';
-import map from 'lodash/map';
 import find from 'lodash/find';
 
 import DataStore,
 {
     getSourceItem,
     getSourceItemVirtualIndexByProp,
-    Group as StoreGroup,
     Groups,
     setSourceByVirtualIndex
 } from '../store/dataSource/data.store';
@@ -18,11 +15,8 @@ import {RevoGrid} from '../interfaces';
 import ColumnRegular = RevoGrid.ColumnRegular;
 import DimensionCols = RevoGrid.DimensionCols;
 import ColumnProp = RevoGrid.ColumnProp;
+import GroupingColumnPlugin, { ColumnGrouping } from '../plugins/groupingColumn/grouping.col.plugin';
 
-interface Group extends StoreGroup {
-    level: number;
-};
-type ColumnGrouping = Record<DimensionCols, Group[]>;
 
 export type ColumnCollection = {
     columns: ColumnItems;
@@ -161,13 +155,9 @@ export default class ColumnDataProvider {
 
     }
 
-    private static isColGrouping(colData: RevoGrid.ColumnGrouping | ColumnRegular): colData is RevoGrid.ColumnGrouping {
-        return !!(colData as RevoGrid.ColumnGrouping).children;
-    }
-
     static getColumnByProp(columns: RevoGrid.ColumnData, prop: ColumnProp): ColumnRegular|undefined {
         return find(columns, c => {
-            if (ColumnDataProvider.isColGrouping(c)) {
+            if (GroupingColumnPlugin.isColGrouping(c)) {
                 return ColumnDataProvider.getColumnByProp(c.children, prop);
             }
             return c.prop === prop;
@@ -182,8 +172,13 @@ export default class ColumnDataProvider {
     ): ColumnCollection {
         return reduce(columns, (res: ColumnCollection, colData: RevoGrid.ColumnDataSchema) => {
             /** Grouped column */
-            if (ColumnDataProvider.isColGrouping(colData)) {
-                return ColumnDataProvider.gatherGroup(res, colData, level, types);
+            if (GroupingColumnPlugin.isColGrouping(colData)) {
+                return GroupingColumnPlugin.gatherGroup(
+                    res,
+                    colData,
+                    ColumnDataProvider.getColumns(colData.children, level + 1, types),
+                    level
+                );
             } 
             /** Regular column */
             const regularColumn = {
@@ -220,50 +215,7 @@ export default class ColumnDataProvider {
         });
     }
 
-    private static gatherGroup(
-        res: ColumnCollection,
-        colData: RevoGrid.ColumnGrouping,
-        level: number = 0,
-        types?: RevoGrid.ColumnTypes): ColumnCollection {
-        // receive parsed data up to single cell
-        const collection: ColumnCollection = ColumnDataProvider.getColumns(colData.children, level + 1, types);
-
-        // group template
-        const group: Group = {
-          ...colData,
-          level,
-          ids: []
-        };
-
-        // check columns for update
-        for (let k in collection.columns) {
-            const key = k as keyof ColumnItems;
-            const resultItem = res.columns[key];
-            const collectionItem = collection.columns[key];
-
-            // if column data
-            if (isArray(resultItem) && isArray(collectionItem)) {
-                // fill columns
-                resultItem.push(...collectionItem);
-
-                // fill grouping
-                if (collectionItem.length) {
-                    res.columnGrouping[key].push({
-                        ...group,
-                        ids: map(collectionItem, 'prop'),
-                    });
-                }
-            }
-        }
-        // merge column groupings
-        for (let k in collection.columnGrouping) {
-            const key = k as DimensionCols;
-            const collectionItem = collection.columnGrouping[key];
-            res.columnGrouping[key].push(...collectionItem);
-        }
-        res.maxLevel = Math.max(res.maxLevel, collection.maxLevel);
-        return res;
-    }
+    
 
     static getColumnType(col: ColumnRegular): DimensionCols {
         if (col.pin) {

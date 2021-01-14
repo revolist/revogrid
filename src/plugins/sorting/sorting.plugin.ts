@@ -95,12 +95,14 @@ export default class SortingPlugin extends BasePlugin {
 
 
 		const store = await this.revogrid.getSourceStore();
-		let items = store.get('items');
+
 		const source = store.get('source');
+		const proxyItems = this.sortIndexByItems([...store.get('proxyItems')], source, this.sorting);
 		setStore(store, {
-			items: this.sortIndexByItems(items, source, this.sorting),
+			proxyItems,
 			source: [...source]
 		});
+		this.emit('afterSortingApply');
 	}
 
 	private keySort(a: any, b: any, dir: 'asc'|'desc') {

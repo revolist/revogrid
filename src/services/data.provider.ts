@@ -1,10 +1,11 @@
 import reduce from 'lodash/reduce';
 
-import DataStore, { getSourceItem, getVisibleSourceItem, setSourceByVirtualIndex } from '../store/dataSource/data.store';
+import DataStore, { getSourceItem, getVisibleSourceItem, Groups, setSourceByVirtualIndex } from '../store/dataSource/data.store';
 import {isRowType, rowTypes} from '../store/storeTypes';
 import DimensionProvider from './dimension.provider';
 import {RevoGrid, Edition} from '../interfaces';
 import DimensionRows = RevoGrid.DimensionRows;
+import { Trimmed } from '../plugins/trimmed/trimmed.plugin';
 
 type RowDataSources = {[T in DimensionRows]: DataStore<RevoGrid.DataType, RevoGrid.DimensionRows>};
 
@@ -17,36 +18,40 @@ export class DataProvider {
     }, {}) as RowDataSources;
   }
 
-  setData(data: RevoGrid.DataType[], type: DimensionRows): RevoGrid.DataType[] {
+  setData(data: RevoGrid.DataType[], type: DimensionRows = 'row', grouping?: { depth: number; groups: Groups }, silent = false): RevoGrid.DataType[] {
     // set row data
-    this.stores[type].updateData([...data]);
+    this.stores[type].updateData([...data], grouping, silent);
     this.dimensionProvider.setData(data, type, type !== 'row');
     return data;
   }
 
-  setCellData(data: Edition.BeforeSaveDataDetails) {
-    const store = this.stores[data.type].store;
-    const model =  getSourceItem(store, data.rowIndex);
-    model[data.prop] = data.val;
-    setSourceByVirtualIndex(store, { [data.rowIndex]: model });
+  setCellData({type, rowIndex, prop, val}: Edition.BeforeSaveDataDetails) {
+    const store = this.stores[type].store;
+    const model = getSourceItem(store, rowIndex);
+    model[prop] = val;
+    setSourceByVirtualIndex(store, { [rowIndex]: model });
   }
 
 
   refresh(type: RevoGrid.DimensionRows|'all' = 'all') {
     if (isRowType(type)) {
-      this.updateItems(type);
+      this.refreshItems(type);
     }
-    rowTypes.forEach((t: RevoGrid.DimensionRows) => this.updateItems(t));
+    rowTypes.forEach((t: RevoGrid.DimensionRows) => this.refreshItems(t));
   }
 
-  updateItems(type: RevoGrid.DimensionRows) {
+  refreshItems(type: RevoGrid.DimensionRows = 'row') {
     const items = this.stores[type].store.get('items');
     this.stores[type].setData({ items: [...items]  });
   }
 
-  setTrimmed(trimmed: Record<number, boolean>, type: RevoGrid.DimensionRows) {
+  setGrouping({depth, prop}: {depth: number, prop: RevoGrid.ColumnProp}, type: RevoGrid.DimensionRows = 'row') {
+    this.stores[type].setData({ groupingDepth: depth, groups: {[prop]: true}  });
+  }
+
+  setTrimmed(trimmed: Partial<Trimmed>, type: RevoGrid.DimensionRows = 'row') {
     const store = this.stores[type];
-    store.setData({ trimmed });
+    store.addTrimmed(trimmed)
     if (type === 'row') {
       this.dimensionProvider.setData(getVisibleSourceItem(store.store), type);
     }

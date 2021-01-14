@@ -8,6 +8,7 @@ import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 import { Edition, RevoGrid, RevoPlugin, Selection, ThemeSpace } from "./interfaces";
 import { AutoSizeColumnConfig } from "./plugins/autoSizeColumn";
 import { ColumnFilterConfig, FilterCollection } from "./plugins/filter/filter.plugin";
+import { GroupingOptions } from "./plugins/groupingRow/grouping.row.plugin";
 import { ColumnCollection } from "./services/column.data.provider";
 import { DataInput } from "./plugins/export/types";
 import { VNode } from "@stencil/core";
@@ -15,8 +16,13 @@ import { ObservableMap } from "@stencil/store";
 import { DataSourceState, Groups } from "./store/dataSource/data.store";
 import { LogicFunction } from "./plugins/filter/filter.types";
 import { FilterItem, ShowData } from "./plugins/filter/filter.pop";
+import { BeforeEdit } from "./components/overlay/revogr-overlay-selection";
 export namespace Components {
     interface RevoGrid {
+        /**
+          * Add trimmed by type
+         */
+        "addTrimmed": (newVal: Record<number, boolean>, trimmedType?: string, type?: RevoGrid.DimensionRows) => Promise<void>;
         /**
           * Autosize config Enable columns autoSize, for more details check @autoSizeColumn plugin By default disabled, hence operation is not resource efficient true to enable with default params (double header separator click for autosize) or provide config
          */
@@ -25,6 +31,10 @@ export namespace Components {
           * When true cell focus appear.
          */
         "canFocus": boolean;
+        /**
+          * Clear current grid focus
+         */
+        "clearFocus": () => Promise<void>;
         /**
           * Indicates default column size.
          */
@@ -80,6 +90,10 @@ export namespace Components {
           * @param type - type of source
          */
         "getVisibleSource": (type?: RevoGrid.DimensionRows) => Promise<any[]>;
+        /**
+          * Group models by provided properties Define properties to be groped by
+         */
+        "grouping": GroupingOptions;
         /**
           * Pinned bottom Source: {[T in ColumnProp]: any} - defines pinned bottom rows data source.
          */
@@ -168,6 +182,9 @@ export namespace Components {
           * @param order - order to apply
          */
         "updateColumnSorting": (column: RevoGrid.ColumnRegular, index: number, order: 'asc' | 'desc') => Promise<RevoGrid.ColumnRegular>;
+        /**
+          * Update columns
+         */
         "updateColumns": (cols: RevoGrid.ColumnRegular[]) => Promise<void>;
     }
     interface RevogrClipboard {
@@ -275,6 +292,10 @@ export namespace Components {
         "selectionStore": ObservableMap<Selection.SelectionStoreState>;
     }
     interface RevogrViewport {
+        /**
+          * Clear current grid focus
+         */
+        "clearFocus": () => Promise<void>;
         "columnFilter": boolean;
         "columnStores": {[T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>};
         "dimensions": {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.DimensionSettingsState>};
@@ -437,6 +458,10 @@ declare namespace LocalJSX {
          */
         "frameSize"?: number;
         /**
+          * Group models by provided properties Define properties to be groped by
+         */
+        "grouping"?: GroupingOptions;
+        /**
           * Column updated
          */
         "onAfterColumnsSet"?: (event: CustomEvent<{
@@ -470,6 +495,10 @@ declare namespace LocalJSX {
           * Before edit event. Triggered before edit data applied. Use e.preventDefault() to prevent edit data set and use you own.  Use e.val = {your value} to replace edit result with your own.
          */
         "onBeforeEdit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
+        /**
+          * Before edit started Use e.preventDefault() to prevent edit
+         */
+        "onBeforeEditStart"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
         /**
           * Before export Use e.preventDefault() to prevent export Replace data in Event in case you want to modify it in export
          */
@@ -691,7 +720,6 @@ declare namespace LocalJSX {
           * Last cell position
          */
         "lastCell"?: Selection.Cell;
-        "onChangeSelection"?: (event: CustomEvent<{changes: Partial<Selection.Cell>; isMulti?: boolean; }>) => void;
         "onFocusCell"?: (event: CustomEvent<Selection.FocusedCells>) => void;
         "onInternalCellEdit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
         "onInternalCopy"?: (event: CustomEvent<any>) => void;
@@ -705,7 +733,7 @@ declare namespace LocalJSX {
           * Selection range changed
          */
         "onInternalSelectionChanged"?: (event: CustomEvent<Selection.ChangedRange>) => void;
-        "onSetEdit"?: (event: CustomEvent<string|boolean>) => void;
+        "onSetEdit"?: (event: CustomEvent<BeforeEdit>) => void;
         "onSetRange"?: (event: CustomEvent<Selection.RangeArea>) => void;
         "onSetTempRange"?: (event: CustomEvent<Selection.RangeArea|null>) => void;
         "onUnregister"?: (event: CustomEvent<any>) => void;
@@ -738,6 +766,7 @@ declare namespace LocalJSX {
           * Custom editors register
          */
         "editors"?: Edition.Editors;
+        "onBeforeEditStart"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
         "onInitialRowDragStart"?: (event: CustomEvent<{pos: RevoGrid.PositionItem, text: string}>) => void;
         "onSetDimensionSize"?: (event: CustomEvent<{type: RevoGrid.MultiDimensionType, sizes: RevoGrid.ViewSettingSizeProp}>) => void;
         "onSetViewportCoordinate"?: (event: CustomEvent<RevoGrid.ViewPortScrollEvent>) => void;

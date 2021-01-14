@@ -3,7 +3,7 @@ import { ObservableMap } from '@stencil/store';
 import debounce from 'lodash/debounce';
 
 import { RevoGrid, Selection } from '../../interfaces';
-import { DataSourceState } from '../../store/dataSource/data.store';
+import { DataSourceState, setItems } from '../../store/dataSource/data.store';
 import { DRAGG_TEXT } from '../../utils/consts';
 import RowOrderService from './rowOrderService';
 
@@ -132,10 +132,10 @@ export class OrderEditor {
 		if (dropEvent.defaultPrevented) {
 				return;
 		}
-		const items = this.dataStore.get('items');
+		const items = [...this.dataStore.get('items')];
 		const toMove = items.splice(from, 1);
 		items.splice(to, 0, ...toMove);
-		this.dataStore.set('items', [...items]);
+		setItems(this.dataStore, items);
 	}
 
 	private getData() {

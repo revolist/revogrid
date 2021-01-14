@@ -196,22 +196,29 @@ export default class FilterPlugin extends BasePlugin {
         const columns = await this.revogrid.getColumns();
         const columnsToUpdate: RevoGrid.ColumnRegular[] = [];
         // todo improvement: loop through collection of props
-        columns.forEach(c => {
-            const hasFilter = collection[c.prop];
-            if (c[FILTER_PROP] && !hasFilter) {
-                delete c[FILTER_PROP];
-                columnsToUpdate.push(c);
+        columns.forEach(col => {
+            const column = {...col};
+            const hasFilter = collection[column.prop];
+            if (column[FILTER_PROP] && !hasFilter) {
+                delete column[FILTER_PROP];
+                columnsToUpdate.push(column);
             }
-            if (!c[FILTER_PROP] && hasFilter) {
-                columnsToUpdate.push(c);
-                c[FILTER_PROP] = true;
+            if (!column[FILTER_PROP] && hasFilter) {
+                columnsToUpdate.push(column);
+                column[FILTER_PROP] = true;
             }
         });
-        this.revogrid.trimmedRows = this.getIndexesToFilter(items, collection);
-        this.revogrid.updateColumns(columnsToUpdate);
+        const itemsToFilter = this.getRowFilter(items, collection);
+        const event = this.emit('beforeFilterTrimmed', { collection, items: itemsToFilter });
+        if (event.defaultPrevented) {
+            return;
+        }
+        await this.revogrid.addTrimmed(itemsToFilter, 'filter');
+        await this.revogrid.updateColumns(columnsToUpdate);
+        this.emit('afterFilterApply');
     }
 
-    private getIndexesToFilter(rows: RevoGrid.DataType[], collection: FilterCollection) {
+    private getRowFilter(rows: RevoGrid.DataType[], collection: FilterCollection) {
         const trimmed: Record<number, boolean> = {};
         rows.forEach((model, rowIndex) => {
             for (const prop in collection) {

@@ -14,9 +14,14 @@ export default abstract class BasePlugin implements RevoPlugin.Plugin  {
         return event;
     }
 
-    destroy() {
+    protected clearSubscriptions() {
         for (let type in this.subscriptions) {
             this.revogrid.removeEventListener(type, this.subscriptions[type]);
+            delete this.subscriptions[type];
         }
+    }
+
+    destroy() {
+       this.clearSubscriptions();
     }
 }
