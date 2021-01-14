@@ -1,3 +1,4 @@
+import { getGroupingName, isGrouping } from "../groupingRow/grouping.service";
 import { CSVFormat, DataInput, Formatter } from "./types";
 
 const INITIAL: CSVFormat = {
@@ -45,6 +46,11 @@ export default class ExportCsv implements Formatter {
       if (index > 0) {
         result += this.options.rowDelimiter;
       }
+      // support grouping
+      if (isGrouping(row)) {
+        result += this.parseCell(getGroupingName(row), this.options.columnDelimiter);
+        return;
+      }
       result += props.map(p =>
         this.parseCell(row[p], this.options.columnDelimiter)).join(this.options.columnDelimiter);
     });
@@ -66,6 +72,9 @@ export default class ExportCsv implements Formatter {
       escape = JSON.stringify(value);
     }
     const toEscape = [CARRIAGE_RETURN, DOUBLE_QT, LINE_FEED, columnDelimiter];
+    if (typeof escape === 'undefined') {
+      return "";
+    }
     if (escape !== '' && (force || toEscape.some(i => escape.indexOf(i) >= 0))) {
       return `"${escape.replace(escapeRegex, '""')}"`;
     }

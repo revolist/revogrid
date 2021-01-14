@@ -9,6 +9,7 @@
   	  height: 100%;
       width: 100%;
       padding: 20px;
+      box-sizing: border-box;
       margin: 0;
       overflow: hidden;
       background-color: #f7f9fc;
@@ -46,7 +47,7 @@
     }
 
     .tile.large {
-      width: 1000px;
+      max-width: 1000px;
       height: 600px;
     }
   </style>
@@ -69,7 +70,7 @@
     <script type="module">
         import {generateFakeDataObject} from "/utilsExternal/generate-data.js";
 
-        const data = generateFakeDataObject(5, 5);
+        const data = generateFakeDataObject(1000, 5000);
         const grid = document.querySelector('revo-grid');
 
         grid.columns = data.headers;
@@ -84,7 +85,8 @@
         grid.filter = true;
         grid.export = true;
         grid.grouping = {
-          props: [1, 2]
+          props: [1, 2],
+          // expandedAll: true
         };
         /* grid.rowDefinitions = [{
           type: 'row',

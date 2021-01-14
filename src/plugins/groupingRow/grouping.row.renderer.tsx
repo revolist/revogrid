@@ -1,20 +1,11 @@
 import { h } from "@stencil/core";
 import RowRenderer, { RowProps } from "../../components/data/rowRenderer";
 import { RevoGrid } from "../../interfaces";
-import { GRID_INTERNALS } from "../../utils/consts";
-
+import { GROUP_DEPTH, GROUP_EXPANDED, GROUP_EXPAND_BTN, GROUP_EXPAND_EVENT, PSEUDO_GROUP_ITEM } from "./grouping.const";
 interface GroupRowPros extends RowProps {
     model: RevoGrid.DataType;
 }
 type Props = GroupRowPros&RevoGrid.PositionItem;
-
-export const GROUP_DEPTH = `${GRID_INTERNALS}-depth`;
-export const PSEUDO_GROUP_ITEM = `${GRID_INTERNALS}-name`;
-export const PSEUDO_GROUP_ITEM_ID = `${GRID_INTERNALS}-id`;
-export const PSEUDO_GROUP_ITEM_VALUE = `${GRID_INTERNALS}-value`;
-export const GROUP_EXPANDED = `${GRID_INTERNALS}-expanded`;
-export const GROUP_EXPAND_BTN = `group-expand`;
-export const GROUP_EXPAND_EVENT = `groupExpandClick`;
 
 function expandEvent(e: MouseEvent, model: RevoGrid.DataType, virtualIndex: number) {
     const event = new CustomEvent(GROUP_EXPAND_EVENT, { detail: {

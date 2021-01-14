@@ -217,7 +217,8 @@ export class RevogrViewport {
             range={this.range}
 
             onSetEdit={({detail}) => {
-              if (!this.beforeEditStart.emit(detail).defaultPrevented) {
+              const event = this.beforeEditStart.emit(detail);
+              if (!event.defaultPrevented) {
                 this.selectionStoreConnector.setEdit(detail.isCancel ? false : detail.val);
               }
             }}

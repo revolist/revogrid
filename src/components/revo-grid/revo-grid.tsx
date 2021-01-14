@@ -640,7 +640,7 @@ export class RevoGridComponent {
     if (!grPlugin) {
       return;
     }
-    grPlugin.setGrouping(newVal);
+    grPlugin.setGrouping(newVal || {});
   }
 
   get columnStores(): ColumnStores {

@@ -1,10 +1,15 @@
 import { RevoGrid } from "../../interfaces";
-import { GROUP_DEPTH, GROUP_EXPANDED, PSEUDO_GROUP_ITEM, PSEUDO_GROUP_ITEM_ID, PSEUDO_GROUP_ITEM_VALUE } from "./grouping.row.renderer";
+import { GROUP_DEPTH, GROUP_EXPANDED, PSEUDO_GROUP_ITEM, PSEUDO_GROUP_ITEM_ID, PSEUDO_GROUP_ITEM_VALUE } from "./grouping.const";
 
 type Group<T> = {
 	id: string;
 	children: T[];
 	ids: number[];
+};
+
+export type ExpandedOptions = {
+  prevExpanded?: Record<string, boolean>;
+  expandedAll?: boolean; // skip trim
 };
 
 function groupBy<T>(array: T[], f: (v: T) => any) {
@@ -40,7 +45,10 @@ function groupBy<T>(array: T[], f: (v: T) => any) {
  * @param mapFunc - mapping function for stringify
  * @param expanded - potentially expanded items if present
  */
-export function gatherGrouping<T>(array: T[], mapFunc: (v: T) => any, expanded?: Record<string, boolean>) {
+export function gatherGrouping<T>(
+  array: T[],
+  mapFunc: (v: T) => any,
+  {prevExpanded, expandedAll}: ExpandedOptions) {
   // build groups
   const groupsOrder = groupBy(array, mapFunc);
 
@@ -60,20 +68,21 @@ export function gatherGrouping<T>(array: T[], mapFunc: (v: T) => any, expanded?:
 
     // add group headers
     let depth = 0;
-    let isExpanded = false;
+    let skipTrim = !!expandedAll;
+    let isExpanded = skipTrim;
     parseGroup.reduce((prevVal: string[], groupValue: string) => {
       prevVal.push(groupValue);
       const newVal = prevVal.join(',');
       // if header not added, add new header
       if (!pseudoGroupTest[newVal]) {
-        isExpanded = expanded && expanded[newVal];
+        isExpanded = expandedAll || prevExpanded && prevExpanded[newVal];
 				itemsMirror.push(getPseudoGroup(groupValue, newVal, depth, group.id, isExpanded));
 
         // if not first level auto collapse
-        if (depth && !isExpanded) {
+        if (depth && !isExpanded && !skipTrim) {
           // check if parent expanded, expand this layer too
           const parent = prevVal.slice(0, prevVal.length - 1);
-          if (!(expanded && parent.length && expanded[parent.join(',')])) {
+          if (!(prevExpanded && parent.length && prevExpanded[parent.join(',')])) {
 					  trimmed[itemIndex] = true;
           }
         }
@@ -88,7 +97,7 @@ export function gatherGrouping<T>(array: T[], mapFunc: (v: T) => any, expanded?:
 
     // add regular items
     group.children.forEach(item => {
-      if (!isExpanded) {
+      if (!isExpanded && !skipTrim) {
         trimmed[itemIndex] = true; // collapse row
       }
       itemsMirror.push(item);
@@ -110,6 +119,10 @@ function getPseudoGroup(groupValue: string, value: string, depth: number, id: st
     [PSEUDO_GROUP_ITEM_VALUE]: value,
     [GROUP_EXPANDED]: isExpanded
 	};
+}
+
+export function getGroupingName(row?: RevoGrid.DataType) {
+  return row && row[PSEUDO_GROUP_ITEM];
 }
 
 export function isGrouping(row?: RevoGrid.DataType) {
