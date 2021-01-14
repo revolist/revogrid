@@ -9,8 +9,8 @@ import Range = Selection.RangeArea;
 
 interface Config {
   canRange: boolean;
-  changeRange(range: Range): void;
-  focus(cell: Cell, isMulti?: boolean): void;
+  changeRange(range: Range): boolean;
+  focus(cell: Cell, isMulti?: boolean): boolean;
   applyRange(start: Cell, end: Cell): void;
   tempRange(start: Cell, end: Cell): void;
   autoFill(isAutofill: boolean): Cell|null;
@@ -38,21 +38,20 @@ export default class CellSelectionService {
 
   keyPositionChange(changes: Partial<Cell>, eData: EventData, range?: Range, focus?: Cell, isMulti = false) {
     if (!range || !focus) {
-      return;
+      return false;
     }
     const data = getCoordinate(range, focus, changes, isMulti);
     if (!data) {
-      return;
+      return false;
     }
     if (isMulti) {
       if (isAfterLast(data.end, eData) || isBeforeFirst(data.start)) {
-        return;
+        return false;
       }
       const range = getRange(data.start, data.end);
-      this.config.changeRange(range);
-    } else {
-      this.config.focus(data.start);
+      return this.config.changeRange(range);
     }
+    return this.config.focus(data.start);
   }
 
 

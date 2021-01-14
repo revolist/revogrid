@@ -2,12 +2,13 @@ import { Edition, RevoGrid } from '../../interfaces';
 import { DataProvider } from '../../services/data.provider';
 import { getPhysical, setItems } from '../../store/dataSource/data.store';
 import BasePlugin from '../basePlugin';
-import { GROUP_DEPTH, GROUP_EXPANDED, GROUP_EXPAND_EVENT, PSEUDO_GROUP_ITEM_ID, PSEUDO_GROUP_ITEM_VALUE } from './grouping.row.renderer';
-import { gatherGrouping, getParsedGroup, isGrouping, measureEqualDepth } from './grouping.service';
+import { GROUP_DEPTH, GROUP_EXPANDED, GROUP_EXPAND_EVENT, PSEUDO_GROUP_ITEM_ID, PSEUDO_GROUP_ITEM_VALUE } from './grouping.const';
+import { ExpandedOptions, gatherGrouping, getParsedGroup, isGrouping, measureEqualDepth } from './grouping.service';
 
 export type GroupingOptions = {
   // properties array to group
   props?: RevoGrid.ColumnProp[];
+  expandedAll?: boolean;
 };
 
 type BeforeSourceSetEvent = {
@@ -22,7 +23,7 @@ type OnExpandEvent = {
 
 type SourceGather = {
   source: RevoGrid.DataType[];
-  expanded: Record<string, boolean>;
+  prevExpanded: Record<string, boolean>;
 };
 
 const TRIMMED_GROUPING = 'grouping';
@@ -144,17 +145,7 @@ export default class GroupingRowPlugin extends BasePlugin {
       }
       
       const depth = measureEqualDepth(currentGroup, nextGroup);
-      return currentModel[GROUP_DEPTH] <= depth;
-    }
-
-    private onDataSet(data: BeforeSourceSetEvent) {
-      if (!this.groupingProps || !this.groupingProps.length || !data.source || !data.source.length) {
-        return;
-      }
-      const {sourceWithGroups, depth, trimmed} = gatherGrouping(data.source, item => this.groupingProps.map(key => item[key]));
-      data.source = sourceWithGroups;
-      this.providers.dataProvider.setGrouping({depth, prop: this.getGroupingField()});
-      this.revogrid.addTrimmed(trimmed, TRIMMED_GROUPING);
+      return currentModel[GROUP_DEPTH] < depth;
     }
 
     // recieve field to group icons place
@@ -180,13 +171,13 @@ export default class GroupingRowPlugin extends BasePlugin {
           result.source.push(model);
         } else {
           if (model[GROUP_EXPANDED] ) {
-            result.expanded[model[PSEUDO_GROUP_ITEM_VALUE]] = true;
+            result.prevExpanded[model[PSEUDO_GROUP_ITEM_VALUE]] = true;
           }
         }
         return result;
       }, {
         source: [],
-        expanded: {}
+        prevExpanded: {}
       });
     }
 
@@ -259,15 +250,18 @@ export default class GroupingRowPlugin extends BasePlugin {
     }
 
     /** Start global source update with group clearing and applying new one */
-    private doSourceUpdate() {
+    private doSourceUpdate(options?: ExpandedOptions) {
       if (!this.groupingProps || !this.groupingProps.length) {
         return;
       }
-      const {source, expanded} = this.getSource(true);
+      const {source, prevExpanded} = this.getSource(true);
       const {sourceWithGroups, depth, trimmed} = gatherGrouping(
         source,
         item => this.groupingProps.map(key => item[key]),
-        expanded
+        {
+          prevExpanded,
+          ...options
+        }
       );
       this.providers.dataProvider.setData(
         sourceWithGroups,
@@ -278,20 +272,43 @@ export default class GroupingRowPlugin extends BasePlugin {
       this.revogrid.addTrimmed(trimmed, TRIMMED_GROUPING);
     }
 
+    /** 
+     * Apply grouping on data set
+     * Just in case clear grouping from source
+     * if source came from other plugin
+     */
+    private onDataSet(data: BeforeSourceSetEvent) {
+      if (!this.groupingProps || !this.groupingProps.length || !data?.source || !data.source.length) {
+        return;
+      }
+      const source = data.source.filter(s => !isGrouping(s));
+      const expanded = this.revogrid.grouping || {};
+      const {sourceWithGroups, depth, trimmed} = gatherGrouping(
+        source,
+        item => this.groupingProps.map(key => item[key]),
+        {...(expanded || {})}
+      );
+      data.source = sourceWithGroups;
+      this.providers.dataProvider.setGrouping({depth, prop: this.getGroupingField()});
+      this.revogrid.addTrimmed(trimmed, TRIMMED_GROUPING);
+    }
+
     // apply grouping
-    setGrouping({props}: GroupingOptions) {
+    setGrouping(options: GroupingOptions) {
       // unsubscribe from all events when group applied
       this.clearSubscriptions();
-      this.groupingProps = props;
+      this.groupingProps = options.props;
       // clear props, no grouping exists
-      if (!props || !Object.keys(props).length) {
+      if (!options.props || !Object.keys(options.props).length) {
         this.clearGrouping();
         return;
       }
       // props exist and source inited
       const {source} = this.getSource();
       if (source.length) {
-        this.doSourceUpdate();
+        this.doSourceUpdate({
+          ...(options)
+        });
       }
       // if has any grouping subscribe to events again
       this.subscribe();

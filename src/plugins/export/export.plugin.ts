@@ -40,25 +40,18 @@ export default class ExportFilePlugin extends BasePlugin {
 		const a = document.createElement('a');
 		const {filename, fileKind} = formatter.options;
 		const name = `${filename}.${fileKind}`;
+		const url = URL.createObjectURL(blob);
 
-		if (a.download) {
-			const url = URL.createObjectURL(blob);
+		a.style.display = 'none';
+		a.setAttribute('href', url);
+		a.setAttribute('download', name);
+		this.revogrid.appendChild(a);
+		a.dispatchEvent(new MouseEvent('click'));
+		this.revogrid.removeChild(a);
 
-			a.style.display = 'none';
-			a.setAttribute('href', url);
-			a.setAttribute('download', name);
-			this.revogrid.appendChild(a);
-			a.dispatchEvent(new MouseEvent('click'));
-			this.revogrid.removeChild(a);
-	
-			// delay for revoke, correct for some browsers
-			await timeout(120);
-			URL.revokeObjectURL(url);
-
-		// for ie
-		} else if (navigator.msSaveOrOpenBlob) {
-			navigator.msSaveOrOpenBlob(blob, name);
-		}
+		// delay for revoke, correct for some browsers
+		await timeout(120);
+		URL.revokeObjectURL(url);
 	}
 
 	/** Blob object */
