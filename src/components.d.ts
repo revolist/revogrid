@@ -54,7 +54,7 @@ export namespace Components {
         /**
           * Enables export plugin Can be boolean Can be export options
          */
-        "export": boolean;
+        "exporting": boolean;
         /**
           * Enables filter plugin Can be boolean Can be filter collection
          */
@@ -448,7 +448,7 @@ declare namespace LocalJSX {
         /**
           * Enables export plugin Can be boolean Can be export options
          */
-        "export"?: boolean;
+        "exporting"?: boolean;
         /**
           * Enables filter plugin Can be boolean Can be filter collection
          */

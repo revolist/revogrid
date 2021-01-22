@@ -25,7 +25,6 @@
 
 | Event                      | Description             | Type                                                                                                                                                                     |
 | -------------------------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `changeSelection`          |                         | `CustomEvent<{ changes: Partial<Cell>; isMulti?: boolean; }>`                                                                                                            |
 | `focusCell`                |                         | `CustomEvent<{ focus: Cell; end: Cell; }>`                                                                                                                               |
 | `internalCellEdit`         |                         | `CustomEvent<{ prop: ColumnProp; model: DataType; val?: string; rowIndex: number; type: DimensionRows; }>`                                                               |
 | `internalCopy`             |                         | `CustomEvent<any>`                                                                                                                                                       |
@@ -33,7 +32,7 @@
 | `internalPaste`            |                         | `CustomEvent<any>`                                                                                                                                                       |
 | `internalRangeDataApply`   | Range data apply        | `CustomEvent<{ data: DataLookup; models: { [rowIndex: number]: DataType; }; type: DimensionRows; }>`                                                                     |
 | `internalSelectionChanged` | Selection range changed | `CustomEvent<{ type: DimensionRows; newRange: RangeArea; oldRange: RangeArea; newProps: ColumnProp[]; oldProps: ColumnProp[]; newData: { [key: number]: DataType; }; }>` |
-| `setEdit`                  |                         | `CustomEvent<boolean \| string>`                                                                                                                                         |
+| `setEdit`                  |                         | `CustomEvent<{ isCancel: boolean; } & BeforeSaveDataDetails>`                                                                                                            |
 | `setRange`                 |                         | `CustomEvent<{ x: number; y: number; x1: number; y1: number; }>`                                                                                                         |
 | `setTempRange`             |                         | `CustomEvent<{ x: number; y: number; x1: number; y1: number; }>`                                                                                                         |
 | `unregister`               |                         | `CustomEvent<any>`                                                                                                                                                       |
