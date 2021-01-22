@@ -209,6 +209,7 @@ grid.source = items;
 
 <script>
 import VGrid from "@revolist/vue-datagrid";
+// vue 3 @revolist/vue3-datagrid;
 export default {
   name: "App",
   data() {
