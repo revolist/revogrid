@@ -3,6 +3,7 @@ www/
 loader/
 demo/
 demo/node_modules
+fw/
 
 *~
 *.sw[mnpcod]

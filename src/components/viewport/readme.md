@@ -11,7 +11,7 @@
 | -------------- | --------------- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
 | `columnFilter` | `column-filter` |                         | `boolean`                                                                                                                                                                                                                                                                                                 | `undefined` |
 | `columnStores` | --              |                         | `{ colPinStart: ObservableMap<DataSourceState<ColumnRegular, DimensionCols>>; colPinEnd: ObservableMap<DataSourceState<ColumnRegular, DimensionCols>>; col: ObservableMap<DataSourceState<ColumnRegular, DimensionCols>>; }`                                                                              | `undefined` |
-| `dimensions`   | --              |                         | `{ colPinStart: ObservableMap<DimensionSettingsState>; colPinEnd: ObservableMap<DimensionSettingsState>; col: ObservableMap<DimensionSettingsState>; row: ObservableMap<DimensionSettingsState>; rowPinStart: ObservableMap<DimensionSettingsState>; rowPinEnd: ObservableMap<DimensionSettingsState>; }` | `undefined` |
+| `dimensions`   | --              |                         | `{ row: ObservableMap<DimensionSettingsState>; rowPinStart: ObservableMap<DimensionSettingsState>; rowPinEnd: ObservableMap<DimensionSettingsState>; colPinStart: ObservableMap<DimensionSettingsState>; colPinEnd: ObservableMap<DimensionSettingsState>; col: ObservableMap<DimensionSettingsState>; }` | `undefined` |
 | `editors`      | --              | Custom editors register | `{ [name: string]: EditorCtr; }`                                                                                                                                                                                                                                                                          | `undefined` |
 | `range`        | `range`         |                         | `boolean`                                                                                                                                                                                                                                                                                                 | `undefined` |
 | `readonly`     | `readonly`      |                         | `boolean`                                                                                                                                                                                                                                                                                                 | `undefined` |
@@ -20,20 +20,31 @@
 | `rowHeaders`   | `row-headers`   | Show row indexes column | `RowHeaders \| boolean`                                                                                                                                                                                                                                                                                   | `undefined` |
 | `rowStores`    | --              |                         | `{ row: ObservableMap<DataSourceState<DataType, DimensionRows>>; rowPinStart: ObservableMap<DataSourceState<DataType, DimensionRows>>; rowPinEnd: ObservableMap<DataSourceState<DataType, DimensionRows>>; }`                                                                                             | `undefined` |
 | `uuid`         | `uuid`          |                         | `string`                                                                                                                                                                                                                                                                                                  | `null`      |
-| `viewports`    | --              |                         | `{ colPinStart: ObservableMap<ViewportState>; colPinEnd: ObservableMap<ViewportState>; col: ObservableMap<ViewportState>; row: ObservableMap<ViewportState>; rowPinStart: ObservableMap<ViewportState>; rowPinEnd: ObservableMap<ViewportState>; }`                                                       | `undefined` |
+| `viewports`    | --              |                         | `{ row: ObservableMap<ViewportState>; rowPinStart: ObservableMap<ViewportState>; rowPinEnd: ObservableMap<ViewportState>; colPinStart: ObservableMap<ViewportState>; colPinEnd: ObservableMap<ViewportState>; col: ObservableMap<ViewportState>; }`                                                       | `undefined` |
 
 
 ## Events
 
-| Event                   | Description | Type                                                                             |
-| ----------------------- | ----------- | -------------------------------------------------------------------------------- |
-| `initialRowDragStart`   |             | `CustomEvent<{ pos: PositionItem; text: string; }>`                              |
-| `setDimensionSize`      |             | `CustomEvent<{ type: MultiDimensionType; sizes: Record<string, number>; }>`      |
-| `setViewportCoordinate` |             | `CustomEvent<{ dimension: DimensionType; coordinate: number; delta?: number; }>` |
-| `setViewportSize`       |             | `CustomEvent<{ dimension: DimensionType; size: number; }>`                       |
+| Event                   | Description | Type                                                                                                       |
+| ----------------------- | ----------- | ---------------------------------------------------------------------------------------------------------- |
+| `beforeEditStart`       |             | `CustomEvent<{ prop: ColumnProp; model: DataType; val?: string; rowIndex: number; type: DimensionRows; }>` |
+| `initialRowDragStart`   |             | `CustomEvent<{ pos: PositionItem; text: string; }>`                                                        |
+| `setDimensionSize`      |             | `CustomEvent<{ type: MultiDimensionType; sizes: Record<string, number>; }>`                                |
+| `setViewportCoordinate` |             | `CustomEvent<{ dimension: DimensionType; coordinate: number; delta?: number; }>`                           |
+| `setViewportSize`       |             | `CustomEvent<{ dimension: DimensionType; size: number; }>`                                                 |
 
 
 ## Methods
+
+### `clearFocus() => Promise<void>`
+
+Clear current grid focus
+
+#### Returns
+
+Type: `Promise<void>`
+
+
 
 ### `scrollToCoordinate(cell: Partial<Selection.Cell>) => Promise<void>`
 

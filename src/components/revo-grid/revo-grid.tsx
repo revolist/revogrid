@@ -146,7 +146,7 @@ export class RevoGridComponent {
    * Can be boolean
    * Can be export options
    */
-  @Prop() export: boolean = false;
+  @Prop() exporting: boolean = false;
 
   /** 
    * Group models by provided properties
@@ -705,7 +705,7 @@ export class RevoGridComponent {
         )
       );
     }
-    if (this.export) {
+    if (this.exporting) {
       this.internalPlugins.push(
         new ExportFilePlugin(this.element)
       );

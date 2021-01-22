@@ -49,7 +49,9 @@ Support Millions of cells and thousands columns easy and efficiently for fast da
 - Pinned/Sticky/Freezed:
   - Columns (define left or right);
   - Rows (define top or bottom);
-- Column grouping;
+- Grouping:
+  - Column grouping (Nester headers);
+  - Row grouping (Nested rows);
 - Cell editing;
 - Customizations:
   - Header template;

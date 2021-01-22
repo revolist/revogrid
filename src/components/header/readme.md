@@ -14,7 +14,7 @@
 | `columnFilter`   | `column-filter`  |             | `boolean`                               | `undefined` |
 | `dimensionCol`   | --               |             | `ObservableMap<DimensionSettingsState>` | `undefined` |
 | `groupingDepth`  | `grouping-depth` |             | `number`                                | `0`         |
-| `groups`         | --               |             | `{ [level: number]: Group[]; }`         | `undefined` |
+| `groups`         | --               |             | `{ [x: string]: any; }`                 | `undefined` |
 | `parent`         | `parent`         |             | `string`                                | `''`        |
 | `selectionStore` | --               |             | `ObservableMap<SelectionStoreState>`    | `undefined` |
 | `viewportCol`    | --               |             | `ObservableMap<ViewportState>`          | `undefined` |
