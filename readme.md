@@ -80,6 +80,9 @@ Support Millions of cells and thousands columns easy and efficiently for fast da
 
 ## Overview
 
+
+<img src="./assets/framework.png" alt="Framework friendly" width="100%" />
+
 The RevoGrid component helps represent a huge amount of data in a form of data table "excel like" or as list. On top of it it provides inbuilt range edit or per cell edit, keyboard support and custom edit and render features. Works in any major framework or with no framework at all.
 <br>
 
