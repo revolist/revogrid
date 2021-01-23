@@ -34,7 +34,7 @@ Support Millions of cells and thousands columns easy and efficiently for fast da
 ## Key Features
 
 - Millions of cells viewport with a powerful core in-build by default;
-- Keayboard support with excel like focus;
+- Keyboard support with excel like focus;
 - Super light initial starter <img src="https://badgen.net/bundlephobia/min/@revolist/revogrid@latest" alt="Min size"/>. Can be imported with polifill or as module for modern browsers;
 - Intelligent Virtual DOM and smart row recombination in order to achieve less redraws;
 - Sorting (multiple options, can be customized per column and advanced with events);
