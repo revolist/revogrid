@@ -14,6 +14,7 @@ import { DataInput } from "./plugins/export/types";
 import { VNode } from "@stencil/core";
 import { ObservableMap } from "@stencil/store";
 import { DataSourceState, Groups } from "./store/dataSource/data.store";
+import { ColumnSource, RowSource } from "./components/data/columnService";
 import { LogicFunction } from "./plugins/filter/filter.types";
 import { FilterItem, ShowData } from "./plugins/filter/filter.pop";
 import { BeforeEdit } from "./components/overlay/revogr-overlay-selection";
@@ -192,11 +193,11 @@ export namespace Components {
     }
     interface RevogrData {
         "canDrag": boolean;
-        "colData": ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
         /**
           * Static stores, not expected to change during component lifetime
          */
-        "dataStore": ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
+        "colData": ColumnSource;
+        "dataStore": RowSource;
         "dimensionRow": ObservableMap<RevoGrid.DimensionSettingsState>;
         "range": boolean;
         "readonly": boolean;
@@ -504,9 +505,13 @@ declare namespace LocalJSX {
          */
         "onBeforeExport"?: (event: CustomEvent<DataInput>) => void;
         /**
-          * Before filter applied to data source Use e.preventDefault() to prevent cell focus change Update @collection if you wish to change filters on the flight
+          * Before filter applied to data source Use e.preventDefault() to prevent cell focus change Update @collection if you wish to change filters
          */
         "onBeforeFilterApply"?: (event: CustomEvent<{ collection: FilterCollection; }>) => void;
+        /**
+          * Before filter trimmed values Use e.preventDefault() to prevent value trimming and filter apply Update @collection if you wish to change filters Update @itemsToFilter if you wish to filter indexes of trimming
+         */
+        "onBeforeFilterTrimmed"?: (event: CustomEvent<{ collection: FilterCollection; itemsToFilter: Record<number, boolean>}>) => void;
         /**
           * Before range apply. Triggered before range applied. Use e.preventDefault() to prevent range.
          */
@@ -616,11 +621,11 @@ declare namespace LocalJSX {
     }
     interface RevogrData {
         "canDrag"?: boolean;
-        "colData"?: ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
         /**
           * Static stores, not expected to change during component lifetime
          */
-        "dataStore"?: ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
+        "colData"?: ColumnSource;
+        "dataStore"?: RowSource;
         "dimensionRow"?: ObservableMap<RevoGrid.DimensionSettingsState>;
         "onDragStartCell"?: (event: CustomEvent<MouseEvent>) => void;
         "range"?: boolean;

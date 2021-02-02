@@ -4,6 +4,7 @@ import { RevoGrid } from "../../interfaces";
 import { GROUP_DEPTH, GROUP_EXPANDED, GROUP_EXPAND_BTN, GROUP_EXPAND_EVENT, PSEUDO_GROUP_ITEM } from "./grouping.const";
 interface GroupRowPros extends RowProps {
     model: RevoGrid.DataType;
+    hasExpand: boolean;
 }
 type Props = GroupRowPros&RevoGrid.PositionItem;
 
@@ -15,10 +16,14 @@ function expandEvent(e: MouseEvent, model: RevoGrid.DataType, virtualIndex: numb
 }
 
 const GroupingRowRenderer = (props: Props) => {
-    const {model, itemIndex} =  props;
+    const {model, itemIndex, hasExpand} =  props;
     const name = model[PSEUDO_GROUP_ITEM];
     const expanded = model[GROUP_EXPANDED];
     const depth = parseInt(model[GROUP_DEPTH], 10) || 0;
+    if (!hasExpand) {
+        return <RowRenderer {...props} rowClass='groupingRow' depth={depth}/>;
+    }
+
     return <RowRenderer {...props} rowClass='groupingRow' depth={depth}>
         <button
             class={{ [GROUP_EXPAND_BTN]: true }}

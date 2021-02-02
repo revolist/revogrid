@@ -166,7 +166,7 @@ export default class FilterPlugin extends BasePlugin {
      * @method
      * @param conditions - list of filters to apply
      */
-    filterByProps(conditions: Record<RevoGrid.ColumnProp, FilterItem>, override = false) {
+    async filterByProps(conditions: Record<RevoGrid.ColumnProp, FilterItem>, override = false) {
         if (override) {
             this.filterCollection = {};
         }
@@ -181,19 +181,19 @@ export default class FilterPlugin extends BasePlugin {
                 };
             }
         }
-        const event = this.emit('beforeFilterApply', { collection:  this.filterCollection});
-        if (event.defaultPrevented) {
+        const source = await this.revogrid.getSource();
+        const columns = await this.revogrid.getColumns();
+        const {defaultPrevented, detail} = this.emit('beforeFilterApply', { collection:  this.filterCollection, source, columns});
+        if (defaultPrevented) {
             return;
         }
-        this.doFiltering(event.detail.collection);
+        this.doFiltering(detail.collection, detail.source, detail.columns);
     }
 
     /**
      * Triggers grid filtering
      */
-    async doFiltering(collection: FilterCollection) {
-        const items = await this.revogrid.getSource();
-        const columns = await this.revogrid.getColumns();
+    async doFiltering(collection: FilterCollection, items: RevoGrid.DataType[], columns: RevoGrid.ColumnRegular[]) {
         const columnsToUpdate: RevoGrid.ColumnRegular[] = [];
         // todo improvement: loop through collection of props
         columns.forEach(col => {
@@ -209,11 +209,11 @@ export default class FilterPlugin extends BasePlugin {
             }
         });
         const itemsToFilter = this.getRowFilter(items, collection);
-        const event = this.emit('beforeFilterTrimmed', { collection, items: itemsToFilter });
-        if (event.defaultPrevented) {
+        const {defaultPrevented, detail} = this.emit('beforeFilterTrimmed', { collection, itemsToFilter, source: items });
+        if (defaultPrevented) {
             return;
         }
-        await this.revogrid.addTrimmed(itemsToFilter, 'filter');
+        await this.revogrid.addTrimmed(detail.itemsToFilter, 'filter');
         await this.revogrid.updateColumns(columnsToUpdate);
         this.emit('afterFilterApply');
     }

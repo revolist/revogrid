@@ -57,6 +57,16 @@ export default class ColumnDataProvider {
     getColumn(virtualIndex: number, type: DimensionCols): ColumnRegular|undefined {
         return getSourceItem(this.dataSources[type].store, virtualIndex);
     }
+
+    getColumns(type: DimensionCols | 'all' = 'all') {
+        if (type !== 'all') {
+            return this.dataSources[type].store.get('source');
+        }
+        return columnTypes.reduce((r: ColumnRegular[], t) => {
+            r.push(...this.dataSources[t].store.get('source'));
+            return r;
+        }, []);
+    }
 		
     getColumnIndexByProp(prop: ColumnProp, type: DimensionCols): number {
         return getSourceItemVirtualIndexByProp(this.dataSources[type].store, prop);
@@ -65,6 +75,10 @@ export default class ColumnDataProvider {
     getColumnByProp(prop: ColumnProp, type: DimensionCols): ColumnRegular|undefined {
         const items = this.dataSources[type].store.get('source');
         return find(items, { prop });
+    }
+
+    refreshByType(type: DimensionCols) {
+        this.dataSources[type].refresh();
     }
 
     setColumns(data: ColumnCollection): ColumnCollection {

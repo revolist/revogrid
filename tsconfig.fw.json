@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "outDir": "./dist/",
     "allowSyntheticDefaultImports": true,
     "declaration": false,
     "experimentalDecorators": true,
@@ -7,8 +8,18 @@
     "moduleResolution": "node",
     "module": "esnext",
     "target": "es2017",
-    "jsx": "react"
+    "jsx": "react",
+    "jsxFactory": "h",
+    "sourceMap": true,
+    "strictNullChecks": false,
+    "importHelpers": true,
+    "isolatedModules": true
   },
-  "include": ["src"],
-  "exclude": ["node_modules"]
+  "include": [
+    "src",
+    "*.d.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

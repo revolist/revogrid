@@ -2,10 +2,10 @@ import {Component, Element, Event, Prop, VNode, EventEmitter, h} from '@stencil/
 import {HTMLStencilElement} from '@stencil/core/internal';
 import {ObservableMap} from '@stencil/store';
 
-import ColumnService from './columnService';
+import ColumnService, { ColumnSource, RowSource } from './columnService';
 import {DATA_COL, DATA_ROW} from '../../utils/consts';
 
-import {DataSourceState, getSourceItem} from '../../store/dataSource/data.store';
+import {getSourceItem} from '../../store/dataSource/data.store';
 import {RevoGrid, Selection} from '../../interfaces';
 import CellRenderer from './cellRenderer';
 import RowRenderer, { PADDING_DEPTH } from './rowRenderer';
@@ -26,8 +26,6 @@ export class RevogrData {
   @Prop() canDrag: boolean;
 
   @Prop() rowClass: string;
-
-  @Prop() colData: ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
   @Prop() rowSelectionStore: ObservableMap<Selection.SelectionStoreState>;
   @Prop() viewportRow: ObservableMap<RevoGrid.ViewportState>;
   @Prop() viewportCol:  ObservableMap<RevoGrid.ViewportState>;
@@ -35,7 +33,8 @@ export class RevogrData {
   @Prop() dimensionRow: ObservableMap<RevoGrid.DimensionSettingsState>;
 
   /** Static stores, not expected to change during component lifetime */
-  @Prop() dataStore: ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
+  @Prop() colData: ColumnSource;
+  @Prop() dataStore: RowSource;
 
   @Event() dragStartCell: EventEmitter<MouseEvent>;
 
@@ -53,18 +52,11 @@ export class RevogrData {
     const rowsEls: VNode[] = [];
 
     const depth = this.dataStore.get('groupingDepth');
-    const groups = this.dataStore.get('groups');
-    let hasGrouping: boolean|undefined = undefined;
     for (let row of rows) {
       const dataRow = getSourceItem(this.dataStore, row.itemIndex);
-      const groupingRow = isGrouping(dataRow);
-
-      if (typeof hasGrouping === 'undefined') {
-        hasGrouping = cols.some(c => this.isGroupProp(c.itemIndex, groups));
-      }
       /** grouping */
-      if (hasGrouping && groupingRow) {
-        rowsEls.push(<GroupingRowRenderer {...row} model={dataRow}/>);
+      if (isGrouping(dataRow)) {
+        rowsEls.push(<GroupingRowRenderer {...row} model={dataRow} hasExpand={this.columnService.hasGrouping}/>);
         continue;
       }
       /** grouping end */
@@ -75,7 +67,7 @@ export class RevogrData {
         rowClass += ' focused-row';
       }
       for (let col of cols) {
-        cells.push(this.getCellRenderer(row, col, !groupingRow && this.canDrag, /** grouping apply*/ depth));
+        cells.push(this.getCellRenderer(row, col, this.canDrag, /** grouping apply*/ this.columnService.hasGrouping ? depth : 0));
       }
       rowsEls.push(
         <RowRenderer
@@ -85,11 +77,6 @@ export class RevogrData {
       );
     }
     return rowsEls;
-  }
-  
-  private isGroupProp(col: number, groups: Record<string, boolean>) {
-    const column = this.columnService.columns[col];
-    return !!groups[column?.prop];
   }
 
   private getCellRenderer(

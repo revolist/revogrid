@@ -9,6 +9,7 @@ import BeforeSaveDataDetails = Edition.BeforeSaveDataDetails;
 import ColumnDataSchemaModel = RevoGrid.ColumnDataSchemaModel;
 import ColumnProp = RevoGrid.ColumnProp;
 import DataType = RevoGrid.DataType;
+import { isGroupingColumn } from '../../plugins/groupingRow/grouping.service';
 
 export interface ColumnServiceI {
   columns: RevoGrid.ColumnRegular[];
@@ -17,17 +18,29 @@ export interface ColumnServiceI {
   getCellData(r: number, c: number): string;
 }
 
-export default class ColumnService implements ColumnServiceI {
-  private readonly source: ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
+export type ColumnSource = ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
+export type RowSource = ObservableMap<DataSourceState<DataType, RevoGrid.DimensionRows>>;
 
+export default class ColumnService implements ColumnServiceI {
   get columns(): RevoGrid.ColumnRegular[] {
     return getVisibleSourceItem(this.source);
   }
 
-  constructor(
-    private dataStore: ObservableMap<DataSourceState<DataType, RevoGrid.DimensionRows>>,
-    columns: ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>) {
-    this.source = columns;
+  hasGrouping = false;
+
+  constructor(private dataStore: RowSource, private source: ColumnSource) {
+    source.onChange('source', (s) => this.checkGrouping(s));
+    this.checkGrouping(source.get('source'));
+  }
+
+  private checkGrouping(cols: RevoGrid.ColumnRegular[]) {
+    for (let col of cols) {
+      if (isGroupingColumn(col)) {
+        this.hasGrouping = true;
+        return;
+      }
+      this.hasGrouping = false;
+    }
   }
 
   isReadOnly(r: number, c: number): boolean {

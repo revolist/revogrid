@@ -274,9 +274,18 @@ export class RevoGridComponent {
   /**  
    * Before filter applied to data source
    * Use e.preventDefault() to prevent cell focus change
-   * Update @collection if you wish to change filters on the flight
+   * Update @collection if you wish to change filters
    */
   @Event() beforeFilterApply: EventEmitter<{ collection: FilterCollection; }>;
+
+  /**  
+   * Before filter trimmed values
+   * Use e.preventDefault() to prevent value trimming and filter apply
+   * Update @collection if you wish to change filters
+   * Update @itemsToFilter if you wish to filter indexes of trimming
+   */
+  @Event() beforeFilterTrimmed: EventEmitter<{ collection: FilterCollection; itemsToFilter: Record<number, boolean>}>;
+  
 
   /**  
    * Triggered when view port scrolled
@@ -425,10 +434,7 @@ export class RevoGridComponent {
    * Receive all columns in data source
    */
   @Method() async getColumns(): Promise<RevoGrid.ColumnRegular[]> {
-    return reduce(this.columnStores, (res, store) => {
-      res.push(...store.get('source'));
-      return res;
-    }, []);
+    return this.columnProvider.getColumns();
   }
 
   /**
@@ -718,7 +724,8 @@ export class RevoGridComponent {
     }
 
     this.internalPlugins.push(new GroupingRowPlugin(this.element, {
-      dataProvider: this.dataProvider
+      dataProvider: this.dataProvider,
+      columnProvider: this.columnProvider
     }));
     this.groupingChanged(this.grouping);
     this.themeChanged(this.theme);
