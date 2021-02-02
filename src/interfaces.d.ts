@@ -1,4 +1,5 @@
 import {VNode, VNodeData} from "@stencil/core";
+import { type } from "os";
 
 export declare namespace RevoGrid {
 
@@ -82,6 +83,8 @@ export declare namespace RevoGrid {
     editor?: string|Edition.EditorCtr;
   }
 
+  type Order = 'asc'|'desc'|undefined;
+
   interface ColumnRegular extends ColumnType {
     /** mapping to data */
     prop?: ColumnProp;
@@ -95,7 +98,7 @@ export declare namespace RevoGrid {
     autoSize?: boolean;
     /** filter */
     filter?: boolean|string|string[];
-    order?: 'asc'|'desc';
+    order?: Order;
     /** is cell in column or individual can be dragged */
     rowDrag?: RowDrag;
 
