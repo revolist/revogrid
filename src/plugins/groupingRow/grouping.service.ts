@@ -1,5 +1,5 @@
 import { RevoGrid } from "../../interfaces";
-import { GROUP_DEPTH, GROUP_EXPANDED, PSEUDO_GROUP_ITEM, PSEUDO_GROUP_ITEM_ID, PSEUDO_GROUP_ITEM_VALUE } from "./grouping.const";
+import { GROUP_DEPTH, GROUP_EXPANDED, PSEUDO_GROUP_COLUMN, PSEUDO_GROUP_ITEM, PSEUDO_GROUP_ITEM_ID, PSEUDO_GROUP_ITEM_VALUE } from "./grouping.const";
 
 type Group<T> = {
 	id: string;
@@ -129,6 +129,10 @@ export function isGrouping(row?: RevoGrid.DataType) {
 	return row && typeof row[PSEUDO_GROUP_ITEM] !== 'undefined';
 }
 
+export function isGroupingColumn(column?: RevoGrid.ColumnRegular) {
+  return column && typeof column[PSEUDO_GROUP_COLUMN] !== 'undefined';
+}
+
 export function isArray<T>(data: any|T[]): data is T[] {
 	return typeof (data as T[]).push !== 'undefined';
 }
@@ -151,4 +155,15 @@ export function getParsedGroup(id: string): any[] {
       return null;
   }
   return parseGroup;
+}
+
+// check if items is child of current clicked group
+export function isSameGroup(currentGroup: any[], currentModel: RevoGrid.DataType, nextModel: RevoGrid.DataType) {
+  const nextGroup = getParsedGroup(nextModel[PSEUDO_GROUP_ITEM_ID]);
+  if (!nextGroup) {
+    return false;
+  }
+  
+  const depth = measureEqualDepth(currentGroup, nextGroup);
+  return currentModel[GROUP_DEPTH] < depth;
 }

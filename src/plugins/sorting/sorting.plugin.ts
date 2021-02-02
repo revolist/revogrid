@@ -58,18 +58,20 @@ export default class SortingPlugin extends BasePlugin {
 	}
 
 	private async headerClick(column: RevoGrid.ColumnRegular, index: number) {
-		const order = column.order && column.order === 'asc' ? 'desc' : 'asc';
-		const beforeSortingEvent = this.emit('beforeSorting', {column: column, order});
-		if (beforeSortingEvent.defaultPrevented) {
+		let order: RevoGrid.Order = column.order && column.order === 'asc' ? 'desc' : 'asc';
+		const beforeEvent = this.emit('beforeSorting', {column, order});
+		if (beforeEvent.defaultPrevented) {
 			return;
 		}
-		const newCol = await this.revogrid.updateColumnSorting(column, index, order);
+		order = beforeEvent.detail.order;
+		const newCol = await this.revogrid.updateColumnSorting(beforeEvent.detail.column, index, order);
 
 		// apply sort data
-		const canSortApply = this.emit('beforeSortingApply', { column: newCol, order });
-		if (canSortApply.defaultPrevented) {
+		const beforeApplyEvent = this.emit('beforeSortingApply', { column: newCol, order });
+		if (beforeApplyEvent.defaultPrevented) {
 			return;
 		}
+		order = beforeApplyEvent.detail.order;
 
 		this.sort({[column.prop]: order});
 	}

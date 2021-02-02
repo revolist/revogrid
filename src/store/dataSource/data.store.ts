@@ -60,7 +60,7 @@ export default class DataStore<T extends GDataType, ST extends GDimension> {
    * @param source - data column/row source
    * @param grouping - grouping information if present
    */
-  updateData(source: T[], grouping?: { depth: number; groups: Groups }, silent = false) {
+  updateData(source: T[], grouping?: { depth: number; groups?: Groups }, silent = false) {
     // during full update we do drop trim 
     if (!silent) {
       this.store.set('trimmed', {});
@@ -97,6 +97,11 @@ export default class DataStore<T extends GDataType, ST extends GDimension> {
       ...input
     };
     setStore(this.store, data);
+  }
+
+  refresh() {
+    const source = this.store.get('source');
+    this.store.set('source', [...source]);
   }
 }
 /**

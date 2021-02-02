@@ -56,7 +56,7 @@
     "serve": "stencil build --dev --watch --serve",
     "generate": "stencil generate",
     "deploy": "git submodule update && npm run build:demo && gh-pages -d ./demo/src/.vuepress/dist",
-    "build:framework": "npm run build:vue && npm run build:angular && npm run build:react && npm run build:svelte",
+    "build:framework": "npm run build && npm run build:vue && npm run build:angular && npm run build:react && npm run build:svelte",
     "build:vue": "npm run compile-framework --type=vue",
     "build:react": "npm run compile-framework --type=react",
     "build:angular": "npm run compile-framework --type=angular",

@@ -57,6 +57,7 @@
 </head>
 <body>
     <button onclick="clearGrouping()">Clear grouping</button>
+    <button onclick="setGrouping()">Set grouping</button>
     <button onclick="exportGrid()">Export</button>
     <button onclick="scrollToCol()">Scroll to column 30</button>
     <button onclick="setEdit()">Set edit 30:1</button>
@@ -69,39 +70,8 @@
 
     <script type="module">
         import {generateFakeDataObject} from "/utilsExternal/generate-data.js";
-
         const data = generateFakeDataObject(1000, 5000);
         const grid = document.querySelector('revo-grid');
-
-        grid.columns = data.headers;
-        grid.source = data.rows;
-
-        grid.pinnedTopSource = data.pinnedTopRows;
-        grid.pinnedBottomSource = data.pinnedBottomRows;
-
-        grid.readonly = false;
-        grid.range = true;
-        grid.resize = true;
-        grid.filter = true;
-        grid.exporting = true;
-        grid.grouping = {
-          props: [1, 2],
-          // expandedAll: true
-        };
-        /* grid.rowDefinitions = [{
-          type: 'row',
-          index: 1,
-          size: 100
-        }]; */
-
-        grid.autoSizeColumn = {
-          mode: 'autoSizeAll'
-        };
-
-        grid.addEventListener('beforeExport', (e) => {
-          console.log(e.detail);
-        });
-
         window.setEdit = function(x, y) {
           grid.setCellEdit(1, 30);
         };
@@ -110,6 +80,13 @@
         };
         window.clearGrouping = function() {
           grid.grouping = {};
+        };
+        window.setGrouping = function() {
+          grid.grouping = {
+            props: ['key'],
+            expandedAll: true,
+            applyToProp: '6'
+          };
         };
         window.exportGrid = function() {
           grid.getPlugins().then(plugins => {
@@ -123,6 +100,35 @@
             })
           });
         }
+
+
+        grid.columns = data.headers;
+        grid.source = data.rows;
+
+        grid.pinnedTopSource = data.pinnedTopRows;
+        grid.pinnedBottomSource = data.pinnedBottomRows;
+
+        grid.readonly = false;
+        grid.range = true;
+        grid.resize = true;
+        grid.filter = true;
+        grid.exporting = true;
+        grid.autoSizeColumn = {
+          mode: 'autoSizeAll'
+        };
+        setGrouping();
+        grid.addEventListener('beforeExport', (e) => {
+          console.log(e.detail);
+        });
+
+        
+        /* grid.rowDefinitions = [{
+          type: 'row',
+          index: 1,
+          size: 100
+        }]; */
+
+        
     </script>
 </body>
 </html>

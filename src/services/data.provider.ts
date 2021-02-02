@@ -18,7 +18,7 @@ export class DataProvider {
     }, {}) as RowDataSources;
   }
 
-  setData(data: RevoGrid.DataType[], type: DimensionRows = 'row', grouping?: { depth: number; groups: Groups }, silent = false): RevoGrid.DataType[] {
+  setData(data: RevoGrid.DataType[], type: DimensionRows = 'row', grouping?: { depth: number; groups?: Groups }, silent = false): RevoGrid.DataType[] {
     // set row data
     this.stores[type].updateData([...data], grouping, silent);
     this.dimensionProvider.setData(data, type, type !== 'row');
@@ -45,8 +45,8 @@ export class DataProvider {
     this.stores[type].setData({ items: [...items]  });
   }
 
-  setGrouping({depth, prop}: {depth: number, prop: RevoGrid.ColumnProp}, type: RevoGrid.DimensionRows = 'row') {
-    this.stores[type].setData({ groupingDepth: depth, groups: {[prop]: true}  });
+  setGrouping({depth}: {depth: number}, type: RevoGrid.DimensionRows = 'row') {
+    this.stores[type].setData({ groupingDepth: depth  });
   }
 
   setTrimmed(trimmed: Partial<Trimmed>, type: RevoGrid.DimensionRows = 'row') {

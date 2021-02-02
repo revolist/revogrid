@@ -21,16 +21,18 @@ export function generateFakeDataObject(rowsNumber, colsNumber) {
         let row = j/colsNumber|0;
         if (!result[row]) {
             result[row] = {};
+            result[row]['key'] = 'a';
         }
         if (!columns[col]) {
             columns[col] = {
                 name: generateHeader(col),
                 prop: col,
-                // pin: j === 0 ? 'colPinStart' : j === 20 ? 'colPinEnd' : undefined,
+                pin: j === 0 ? 'colPinStart' : j === 20 ? 'colPinEnd' : undefined,
                 sortable: true,
             }
         }
         result[row][col] = row%5 ? col : row%3 ? col%3 ? 2 :3 : row; // row + ':' + col;
+        
         if (col === 0) {
             columns[col].rowDrag = true;
             // columns[col].order = 'asc';
