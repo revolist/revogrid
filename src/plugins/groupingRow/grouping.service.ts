@@ -156,3 +156,14 @@ export function getParsedGroup(id: string): any[] {
   }
   return parseGroup;
 }
+
+// check if items is child of current clicked group
+export function isSameGroup(currentGroup: any[], currentModel: RevoGrid.DataType, nextModel: RevoGrid.DataType) {
+  const nextGroup = getParsedGroup(nextModel[PSEUDO_GROUP_ITEM_ID]);
+  if (!nextGroup) {
+    return false;
+  }
+  
+  const depth = measureEqualDepth(currentGroup, nextGroup);
+  return currentModel[GROUP_DEPTH] < depth;
+}

@@ -8,7 +8,7 @@ import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 import { Edition, RevoGrid, RevoPlugin, Selection, ThemeSpace } from "./interfaces";
 import { AutoSizeColumnConfig } from "./plugins/autoSizeColumn";
 import { ColumnFilterConfig, FilterCollection } from "./plugins/filter/filter.plugin";
-import { GroupingOptions } from "./plugins/groupingRow/grouping.row.plugin";
+import { GroupingOptions } from "./plugins/groupingRow/grouping.row.types";
 import { ColumnCollection } from "./services/column.data.provider";
 import { DataInput } from "./plugins/export/types";
 import { VNode } from "@stencil/core";
