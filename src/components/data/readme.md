@@ -10,8 +10,8 @@
 | Property            | Attribute   | Description                                                     | Type                                                           | Default     |
 | ------------------- | ----------- | --------------------------------------------------------------- | -------------------------------------------------------------- | ----------- |
 | `canDrag`           | `can-drag`  |                                                                 | `boolean`                                                      | `undefined` |
-| `colData`           | --          |                                                                 | `ObservableMap<DataSourceState<ColumnRegular, DimensionCols>>` | `undefined` |
-| `dataStore`         | --          | Static stores, not expected to change during component lifetime | `ObservableMap<DataSourceState<DataType, DimensionRows>>`      | `undefined` |
+| `colData`           | --          | Static stores, not expected to change during component lifetime | `ObservableMap<DataSourceState<ColumnRegular, DimensionCols>>` | `undefined` |
+| `dataStore`         | --          |                                                                 | `ObservableMap<DataSourceState<DataType, DimensionRows>>`      | `undefined` |
 | `dimensionRow`      | --          |                                                                 | `ObservableMap<DimensionSettingsState>`                        | `undefined` |
 | `range`             | `range`     |                                                                 | `boolean`                                                      | `undefined` |
 | `readonly`          | `readonly`  |                                                                 | `boolean`                                                      | `undefined` |
