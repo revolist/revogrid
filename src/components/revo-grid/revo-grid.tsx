@@ -702,7 +702,6 @@ export class RevoGridComponent {
         )
       );
     }
-    this.trimmedRowsChanged(this.trimmedRows);
     if (this.filter) {
       this.internalPlugins.push(
         new FilterPlugin(
@@ -735,6 +734,7 @@ export class RevoGridComponent {
     this.dataTopChanged(this.pinnedTopSource);
     this.dataBottomChanged(this.pinnedBottomSource);
     this.rowDefChanged(this.rowDefinitions);
+    this.trimmedRowsChanged(this.trimmedRows);
   }
 
   disconnectedCallback() {
