@@ -1,10 +1,9 @@
 import {Component, Element, Event, EventEmitter, h, Prop} from '@stencil/core';
 import {HTMLStencilElement, VNode} from '@stencil/core/internal';
-import {ObservableMap} from "@stencil/store";
 import keyBy from 'lodash/keyBy';
 
 import {HEADER_ACTUAL_ROW_CLASS, HEADER_ROW_CLASS} from '../../utils/consts';
-import {RevoGrid, Selection} from '../../interfaces';
+import {Observable, RevoGrid, Selection} from '../../interfaces';
 import {Groups} from '../../store/dataSource/data.store';
 import HeaderRenderer from './headerRenderer';
 import ColumnGroupsRenderer from '../../plugins/groupingColumn/columnGroupsRenderer';
@@ -15,9 +14,9 @@ import ColumnGroupsRenderer from '../../plugins/groupingColumn/columnGroupsRende
 })
 export class RevogrHeaderComponent {
   @Element() element!: HTMLStencilElement;
-  @Prop() viewportCol:  ObservableMap<RevoGrid.ViewportState>;
-  @Prop() dimensionCol: ObservableMap<RevoGrid.DimensionSettingsState>;
-  @Prop() selectionStore: ObservableMap<Selection.SelectionStoreState>;
+  @Prop() viewportCol:  Observable<RevoGrid.ViewportState>;
+  @Prop() dimensionCol: Observable<RevoGrid.DimensionSettingsState>;
+  @Prop() selectionStore: Observable<Selection.SelectionStoreState>;
 
   @Prop() parent: string = '';
   @Prop() groups: Groups;

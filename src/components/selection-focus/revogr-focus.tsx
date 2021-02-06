@@ -1,6 +1,5 @@
 import { Component, Prop, h, Host, Element } from "@stencil/core";
-import { ObservableMap } from "@stencil/store";
-import {RevoGrid, Selection} from '../../interfaces';
+import {Observable, RevoGrid, Selection} from '../../interfaces';
 import { FOCUS_CLASS } from "../../utils/consts";
 import { getElStyle } from "../overlay/cellSelectionService";
 
@@ -12,9 +11,9 @@ export class RevogrFocus {
 	@Element() el: HTMLElement;
 
   /** Dynamic stores */
-  @Prop() selectionStore: ObservableMap<Selection.SelectionStoreState>;
-  @Prop() dimensionRow: ObservableMap<RevoGrid.DimensionSettingsState>;
-	@Prop() dimensionCol: ObservableMap<RevoGrid.DimensionSettingsState>;
+  @Prop() selectionStore: Observable<Selection.SelectionStoreState>;
+  @Prop() dimensionRow: Observable<RevoGrid.DimensionSettingsState>;
+	@Prop() dimensionCol: Observable<RevoGrid.DimensionSettingsState>;
 
   private changed(e: HTMLElement): void {
     e?.scrollIntoView({

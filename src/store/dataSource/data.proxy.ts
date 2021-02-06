@@ -1,9 +1,9 @@
-import { ObservableMap, Subscription } from "@stencil/store";
+import { Observable, PluginSubscribe } from "../../interfaces";
 import { DataSourceState } from "../../store/dataSource/data.store";
 
 type State = DataSourceState<any, any>;
 
-export const proxyPlugin = (store: ObservableMap<State>): Subscription<State> => ({
+export const proxyPlugin = (store: Observable<State>): PluginSubscribe<State> => ({
 	set(k, newVal) {
     if (!isProxy(k)) {
       return;

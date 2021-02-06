@@ -1,5 +1,4 @@
-import {ObservableMap} from '@stencil/store';
-import {Edition, Selection} from '../../interfaces';
+import {Edition, Observable, Selection} from '../../interfaces';
 import {getRange} from './selection.helpers';
 import Cell = Selection.Cell;
 import Range = Selection.RangeArea;
@@ -12,7 +11,7 @@ interface Config {
 }
 
 export default class SelectionStoreService {
-  constructor(public store: ObservableMap<Selection.SelectionStoreState>, private config: Config) {
+  constructor(public store: Observable<Selection.SelectionStoreState>, private config: Config) {
     this.store = store;
   }
 

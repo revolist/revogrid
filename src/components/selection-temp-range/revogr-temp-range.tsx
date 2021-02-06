@@ -1,21 +1,20 @@
 import { Component, Prop, h, Host } from "@stencil/core";
-import { ObservableMap } from "@stencil/store";
 import { throttle } from "lodash";
-import {RevoGrid, Selection} from '../../interfaces';
+import {Observable, RevoGrid, Selection} from '../../interfaces';
 import {  TMP_SELECTION_BG_CLASS } from "../../utils/consts";
 import { getElStyle } from "../overlay/cellSelectionService";
 
 @Component({
-		tag: 'revogr-temp-range',
-		styleUrl: 'revogr-temp-range-style.scss'
+	tag: 'revogr-temp-range',
+	styleUrl: 'revogr-temp-range-style.scss'
 })
 export class RevogrFocus {
 	el: HTMLElement;
 
   /** Dynamic stores */
-  @Prop() selectionStore: ObservableMap<Selection.SelectionStoreState>;
-  @Prop() dimensionRow: ObservableMap<RevoGrid.DimensionSettingsState>;
-	@Prop() dimensionCol: ObservableMap<RevoGrid.DimensionSettingsState>;
+  @Prop() selectionStore: Observable<Selection.SelectionStoreState>;
+  @Prop() dimensionRow: Observable<RevoGrid.DimensionSettingsState>;
+	@Prop() dimensionCol: Observable<RevoGrid.DimensionSettingsState>;
   private readonly onChange = throttle((e: HTMLElement) => this.doChange(e), 300);
 
   private doChange(e: HTMLElement): void {

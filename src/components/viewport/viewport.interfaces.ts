@@ -1,7 +1,5 @@
-import {ObservableMap} from '@stencil/store';
-
 import {DataSourceState, Groups} from '../../store/dataSource/data.store';
-import {RevoGrid, Selection} from '../../interfaces';
+import {Observable, RevoGrid, Selection} from '../../interfaces';
 
 declare namespace ViewportSpace {
     type Properties = {[key: string]: any};
@@ -10,7 +8,7 @@ declare namespace ViewportSpace {
     type HeaderProperties = {
         parent: string;
         colData: RevoGrid.ColumnRegular[];
-        dimensionCol: ObservableMap<RevoGrid.DimensionSettingsState>;
+        dimensionCol: Observable<RevoGrid.DimensionSettingsState>;
         groups: Groups;
         groupingDepth: number;
         onHeaderResize?(e: CustomEvent<RevoGrid.ViewSettingSizeProp>): void;
@@ -23,17 +21,17 @@ declare namespace ViewportSpace {
 
         /** Viewport data position. Position provides connection between independent data stores and Selection store. */
         position: Selection.Cell;
-        colData: ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
+        colData: Observable<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
 
-        dataStore: ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
+        dataStore: Observable<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
 
         /** Stores to pass dimension data for render */
-        dimensionRow: ObservableMap<RevoGrid.DimensionSettingsState>;
-        dimensionCol: ObservableMap<RevoGrid.DimensionSettingsState>;
+        dimensionRow: Observable<RevoGrid.DimensionSettingsState>;
+        dimensionCol: Observable<RevoGrid.DimensionSettingsState>;
         /** Cols dataset */
-        viewportCol:  ObservableMap<RevoGrid.ViewportState>;
+        viewportCol:  Observable<RevoGrid.ViewportState>;
         /** Rows dataset */
-        viewportRow: ObservableMap<RevoGrid.ViewportState>;
+        viewportRow: Observable<RevoGrid.ViewportState>;
 
         /** Slot to put data */
         slot: SlotType;
@@ -51,7 +49,7 @@ declare namespace ViewportSpace {
         prop: Properties;
         position: Selection.Cell;
         /** Cols dataset */
-        viewportCol:  ObservableMap<RevoGrid.ViewportState>;
+        viewportCol:  Observable<RevoGrid.ViewportState>;
 
         /** header container props */
         headerProp: Properties;

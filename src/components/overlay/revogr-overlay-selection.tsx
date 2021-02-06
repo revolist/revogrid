@@ -1,8 +1,7 @@
 import {Component, Event, EventEmitter, h, Host, Listen, Prop, VNode, Watch, Element, State} from '@stencil/core';
-import {ObservableMap} from '@stencil/store';
 import slice from 'lodash/slice';
 
-import {Edition, RevoGrid, Selection} from '../../interfaces';
+import {Edition, Observable, RevoGrid, Selection} from '../../interfaces';
 import ColumnService from '../data/columnService';
 import CellSelectionService, { getCell, getElStyle } from './cellSelectionService';
 import SelectionStoreService from '../../store/selection/selection.store.service';
@@ -51,14 +50,14 @@ export class OverlaySelection {
   @Prop() canDrag: boolean;
 
   /** Dynamic stores */
-  @Prop() selectionStore: ObservableMap<Selection.SelectionStoreState>;
-  @Prop() dimensionRow: ObservableMap<RevoGrid.DimensionSettingsState>;
-  @Prop() dimensionCol: ObservableMap<RevoGrid.DimensionSettingsState>;
+  @Prop() selectionStore: Observable<Selection.SelectionStoreState>;
+  @Prop() dimensionRow: Observable<RevoGrid.DimensionSettingsState>;
+  @Prop() dimensionCol: Observable<RevoGrid.DimensionSettingsState>;
 
   /** Static stores, not expected to change during component lifetime */
-  @Prop() dataStore: ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
+  @Prop() dataStore: Observable<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
 
-  @Prop() colData: ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
+  @Prop() colData: Observable<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
   /** Last cell position */
   @Prop() lastCell: Selection.Cell;
   /** Custom editors register */

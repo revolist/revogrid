@@ -1,5 +1,5 @@
-import { createStore, ObservableMap } from "@stencil/store";
-import { Selection } from "../../interfaces";
+import { createStore } from "@stencil/store";
+import { Observable, Selection } from "../../interfaces";
 import { setStore } from "../../utils/store.utils";
 import { getRange } from "./selection.helpers";
 
@@ -14,7 +14,7 @@ function defaultState(): Selection.SelectionStoreState {
 }
 
 export class SelectionStore {
-	readonly store: ObservableMap<Selection.SelectionStoreState>;
+	readonly store: Observable<Selection.SelectionStoreState>;
 	constructor() {
     this.store = createStore(defaultState());
 	}

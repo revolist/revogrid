@@ -3,12 +3,12 @@
 * Dimension information and sizes
 */
 
-import {createStore, ObservableMap} from '@stencil/store';
+import {createStore} from '@stencil/store';
 import reduce from 'lodash/reduce';
 
 import {setStore} from '../../utils/store.utils';
 import {calculateDimensionData, DimensionSize} from './dimension.helpers';
-import {RevoGrid} from "../../interfaces";
+import {Observable, RevoGrid} from "../../interfaces";
 
 type Item = keyof RevoGrid.DimensionSettingsState;
 
@@ -36,7 +36,7 @@ function initialState(): RevoGrid.DimensionSettingsState {
 }
 
 export default class DimensionStore {
-  readonly store: ObservableMap<RevoGrid.DimensionSettingsState>;
+  readonly store: Observable<RevoGrid.DimensionSettingsState>;
   constructor() {
     this.store = createStore(initialState());
   }

@@ -1,12 +1,11 @@
 import {Component, Element, Event, Prop, VNode, EventEmitter, h} from '@stencil/core';
 import {HTMLStencilElement} from '@stencil/core/internal';
-import {ObservableMap} from '@stencil/store';
 
 import ColumnService, { ColumnSource, RowSource } from './columnService';
 import {DATA_COL, DATA_ROW} from '../../utils/consts';
 
 import {getSourceItem} from '../../store/dataSource/data.store';
-import {RevoGrid, Selection} from '../../interfaces';
+import {Observable, RevoGrid, Selection} from '../../interfaces';
 import CellRenderer from './cellRenderer';
 import RowRenderer, { PADDING_DEPTH } from './rowRenderer';
 import GroupingRowRenderer from '../../plugins/groupingRow/grouping.row.renderer';
@@ -26,11 +25,11 @@ export class RevogrData {
   @Prop() canDrag: boolean;
 
   @Prop() rowClass: string;
-  @Prop() rowSelectionStore: ObservableMap<Selection.SelectionStoreState>;
-  @Prop() viewportRow: ObservableMap<RevoGrid.ViewportState>;
-  @Prop() viewportCol:  ObservableMap<RevoGrid.ViewportState>;
+  @Prop() rowSelectionStore: Observable<Selection.SelectionStoreState>;
+  @Prop() viewportRow: Observable<RevoGrid.ViewportState>;
+  @Prop() viewportCol:  Observable<RevoGrid.ViewportState>;
 
-  @Prop() dimensionRow: ObservableMap<RevoGrid.DimensionSettingsState>;
+  @Prop() dimensionRow: Observable<RevoGrid.DimensionSettingsState>;
 
   /** Static stores, not expected to change during component lifetime */
   @Prop() colData: ColumnSource;

@@ -1,5 +1,11 @@
-import {VNode, VNodeData} from "@stencil/core";
-import { type } from "os";
+/* eslint-disable */
+/* tslint:disable */
+
+import {VNode} from "@stencil/core";
+import { ObservableMap, Subscription } from "@stencil/store";
+
+export type Observable<T> = ObservableMap<T>;
+export type PluginSubscribe<T> = Subscription<T>;
 
 export declare namespace RevoGrid {
 

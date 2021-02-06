@@ -1,8 +1,7 @@
 import {h, VNode} from '@stencil/core';
-import {ObservableMap} from '@stencil/store';
 import {DataSourceState, getSourceItem, getVisibleSourceItem, setSourceByVirtualIndex} from '../../store/dataSource/data.store';
 import { CELL_CLASS, DISABLED_CLASS } from '../../utils/consts';
-import {Edition, RevoGrid, Selection} from '../../interfaces';
+import {Edition, Observable, RevoGrid, Selection} from '../../interfaces';
 import { getRange } from '../../store/selection/selection.helpers';
 
 import BeforeSaveDataDetails = Edition.BeforeSaveDataDetails;
@@ -18,8 +17,8 @@ export interface ColumnServiceI {
   getCellData(r: number, c: number): string;
 }
 
-export type ColumnSource = ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
-export type RowSource = ObservableMap<DataSourceState<DataType, RevoGrid.DimensionRows>>;
+export type ColumnSource = Observable<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
+export type RowSource = Observable<DataSourceState<DataType, RevoGrid.DimensionRows>>;
 
 export default class ColumnService implements ColumnServiceI {
   get columns(): RevoGrid.ColumnRegular[] {
@@ -268,7 +267,7 @@ export default class ColumnService implements ColumnServiceI {
   copyRangeArray(
     range: Selection.RangeArea,
     rangeProps: RevoGrid.ColumnProp[],
-    store: ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>
+    store: Observable<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>
   ): RevoGrid.DataFormat[][] {
     const toCopy: RevoGrid.DataFormat[][] = [];
     for (let i = range.y; i < range.y1 + 1; i++) {

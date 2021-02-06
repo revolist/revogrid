@@ -1,8 +1,7 @@
 import {Component, Element, Event, EventEmitter, h, Host, Method, Prop} from '@stencil/core';
 import {getScrollbarWidth} from '../../utils/utils';
 import LocalScrollService from '../../services/localScrollService';
-import {RevoGrid} from "../../interfaces";
-import { ObservableMap } from '@stencil/store';
+import {Observable, RevoGrid} from "../../interfaces";
 
 @Component({
     tag: 'revogr-scroll-virtual',
@@ -17,8 +16,8 @@ export class RevogrScrollVirtual {
     @Element() element: HTMLElement;
 
     @Prop() dimension: RevoGrid.DimensionType = 'row';
-    @Prop() viewportStore: ObservableMap<RevoGrid.ViewportState>;
-    @Prop() dimensionStore: ObservableMap<RevoGrid.DimensionSettingsState>;
+    @Prop() viewportStore: Observable<RevoGrid.ViewportState>;
+    @Prop() dimensionStore: Observable<RevoGrid.DimensionSettingsState>;
 
     @Event() scrollVirtual: EventEmitter<RevoGrid.ViewPortScrollEvent>;
 

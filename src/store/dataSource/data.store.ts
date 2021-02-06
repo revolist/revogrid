@@ -1,10 +1,10 @@
-import {createStore, ObservableMap} from '@stencil/store';
+import {createStore} from '@stencil/store';
 import findIndex from 'lodash/findIndex';
 import range from 'lodash/range';
 
 import { Trimmed, trimmedPlugin } from '../../plugins/trimmed/trimmed.plugin';
 import {setStore} from '../../utils/store.utils';
-import {RevoGrid} from "../../interfaces";
+import {Observable, RevoGrid} from "../../interfaces";
 import {proxyPlugin} from './data.proxy';
 import DataType = RevoGrid.DataType;
 import ColumnRegular = RevoGrid.ColumnRegular;
@@ -37,8 +37,8 @@ export type DataSourceState<T extends GDataType, ST extends GDimension> = {
 };
 
 export default class DataStore<T extends GDataType, ST extends GDimension> {
-  private readonly dataStore: ObservableMap<DataSourceState<T, ST>>;
-  get store(): ObservableMap<DataSourceState<T, ST>> {
+  private readonly dataStore: Observable<DataSourceState<T, ST>>;
+  get store(): Observable<DataSourceState<T, ST>> {
     return this.dataStore;
   }
   constructor(type: ST) {
@@ -108,7 +108,7 @@ export default class DataStore<T extends GDataType, ST extends GDimension> {
  * get physical index by virtual
  * @param store - store to process
  */
-export function getPhysical(store: ObservableMap<DataSourceState<any, any>>, virtualIndex: number) {
+export function getPhysical(store: Observable<DataSourceState<any, any>>, virtualIndex: number) {
   const items = store.get('items');
   return items[virtualIndex];
 }
@@ -117,7 +117,7 @@ export function getPhysical(store: ObservableMap<DataSourceState<any, any>>, vir
  * get all visible items
  * @param store - store to process
  */
-export function getVisibleSourceItem(store: ObservableMap<DataSourceState<any, any>>) {
+export function getVisibleSourceItem(store: Observable<DataSourceState<any, any>>) {
   const source = store.get('source');
   return store.get('items').map(v => source[v]);
 }
@@ -127,7 +127,7 @@ export function getVisibleSourceItem(store: ObservableMap<DataSourceState<any, a
  * @param store - store to process
  * @param virtualIndex - virtual index to process
  */
-export function getSourceItem(store: ObservableMap<DataSourceState<any, any>>, virtualIndex: number) {
+export function getSourceItem(store: Observable<DataSourceState<any, any>>, virtualIndex: number) {
   const items = store.get('items');
   const source = store.get('source');
   return source[items[virtualIndex]];
@@ -138,7 +138,7 @@ export function getSourceItem(store: ObservableMap<DataSourceState<any, any>>, v
  * @param store  - store to process
  * @param modelByIndex - collection of rows with virtual indexes to setup
  */
-export function setSourceByVirtualIndex<T>(store: ObservableMap<DataSourceState<T, any>>, modelByIndex: Record<number, T>) {
+export function setSourceByVirtualIndex<T>(store: Observable<DataSourceState<T, any>>, modelByIndex: Record<number, T>) {
   const items = store.get('items');
   const source = store.get('source');
 
@@ -154,7 +154,7 @@ export function setSourceByVirtualIndex<T>(store: ObservableMap<DataSourceState<
  * @param store  - store to process
  * @param modelByIndex - collection of rows with physical indexes to setup
  */
-export function setSourceByPhysicalIndex<T>(store: ObservableMap<DataSourceState<T, any>>, modelByIndex: Record<number, T>) {
+export function setSourceByPhysicalIndex<T>(store: Observable<DataSourceState<T, any>>, modelByIndex: Record<number, T>) {
   const source = store.get('source');
   for (let index in modelByIndex) {
     source[index] = modelByIndex[index];
@@ -162,11 +162,11 @@ export function setSourceByPhysicalIndex<T>(store: ObservableMap<DataSourceState
   store.set('source', [...source]);
 }
 
-export function setItems<T>(store: ObservableMap<DataSourceState<T, any>>, items: number[]) {
+export function setItems<T>(store: Observable<DataSourceState<T, any>>, items: number[]) {
   store.set('items', items);
 }
 
-export function getSourceItemVirtualIndexByProp(store: ObservableMap<DataSourceState<any, any>>, prop: RevoGrid.ColumnProp) {
+export function getSourceItemVirtualIndexByProp(store: Observable<DataSourceState<any, any>>, prop: RevoGrid.ColumnProp) {
   const items = store.get('items');
   const source = store.get('source');
   const physicalIndex = findIndex(source, { prop });

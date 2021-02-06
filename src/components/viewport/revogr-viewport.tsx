@@ -1,5 +1,4 @@
 import {Component, Prop, h, Host, Listen, Element, Event, EventEmitter, VNode, Method} from '@stencil/core';
-import {ObservableMap} from '@stencil/store';
 import each from 'lodash/each';
 
 import '../../utils/closestPolifill';
@@ -9,7 +8,7 @@ import GridScrollingService from './gridScrollingService';
 import {ViewportSpace} from './viewport.interfaces';
 import {DataSourceState} from '../../store/dataSource/data.store';
 import SelectionStoreConnector from '../../services/selection.store.connector';
-import {Edition, Selection, RevoGrid} from '../../interfaces';
+import {Edition, Selection, RevoGrid, Observable} from '../../interfaces';
 import OrderRenderer, { OrdererService } from '../order/orderRenderer';
 import { columnTypes } from '../../store/storeTypes';
 
@@ -34,10 +33,10 @@ export class RevogrViewport {
   //
   // --------------------------------------------------------------------------
 
-  @Prop() columnStores: {[T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>};
-  @Prop() rowStores: {[T in RevoGrid.DimensionRows]: ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>};
-  @Prop() dimensions: {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.DimensionSettingsState>};
-  @Prop() viewports: {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.ViewportState>};
+  @Prop() columnStores: {[T in RevoGrid.DimensionCols]: Observable<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>};
+  @Prop() rowStores: {[T in RevoGrid.DimensionRows]: Observable<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>};
+  @Prop() dimensions: {[T in RevoGrid.MultiDimensionType]: Observable<RevoGrid.DimensionSettingsState>};
+  @Prop() viewports: {[T in RevoGrid.MultiDimensionType]: Observable<RevoGrid.ViewportState>};
   
   /** Custom editors register  */
   @Prop() editors: Edition.Editors;

@@ -1,11 +1,11 @@
-import { ObservableMap, Subscription } from "@stencil/store";
+import { Observable, PluginSubscribe } from "../../interfaces";
 import { DataSourceState } from "../../store/dataSource/data.store";
 
 type TrimmedEntity = Record<number, boolean>;
 export type Trimmed = Record<string, TrimmedEntity>;
 
 
-export const trimmedPlugin = <T>(store: ObservableMap<DataSourceState<T, any>>): Subscription<DataSourceState<T, any>> => ({
+export const trimmedPlugin = <T>(store: Observable<DataSourceState<T, any>>): PluginSubscribe<DataSourceState<T, any>> => ({
 	set(k, newVal) {
 		switch(k) {
 			case 'trimmed':

@@ -1,13 +1,12 @@
 import {Component, Prop, h, Watch, Element, Listen, Event, EventEmitter, Method, VNode, State} from '@stencil/core';
-import {ObservableMap} from '@stencil/store';
 import reduce from 'lodash/reduce';
 
 import ColumnDataProvider, { ColumnCollection } from '../../services/column.data.provider';
 import {DataProvider} from '../../services/data.provider';
-import {DataSourceState, getVisibleSourceItem} from '../../store/dataSource/data.store';
+import {getVisibleSourceItem} from '../../store/dataSource/data.store';
 import DimensionProvider from '../../services/dimension.provider';
 import ViewportProvider from '../../services/viewport.provider';
-import {Edition, Selection, RevoGrid, ThemeSpace, RevoPlugin} from '../../interfaces';
+import {Edition, Selection, RevoGrid, ThemeSpace, RevoPlugin, Observable} from '../../interfaces';
 import ThemeService from '../../themeManager/themeService';
 import { timeout } from '../../utils/utils';
 import { each } from 'lodash';
@@ -19,18 +18,19 @@ import ExportFilePlugin from '../../plugins/export/export.plugin';
 import { DataInput } from '../../plugins/export/types';
 import GroupingRowPlugin from '../../plugins/groupingRow/grouping.row.plugin';
 import { GroupingOptions } from '../../plugins/groupingRow/grouping.row.types';
+import { ColumnSource, RowSource } from '../data/columnService';
 
 type ColumnStores = {
-  [T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
+  [T in RevoGrid.DimensionCols]: ColumnSource;
 };
 type RowStores = {
-  [T in RevoGrid.DimensionRows]: ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
+  [T in RevoGrid.DimensionRows]: RowSource;
 };
 type DimensionStores = {
-  [T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.DimensionSettingsState>
+  [T in RevoGrid.MultiDimensionType]: Observable<RevoGrid.DimensionSettingsState>
 };
 type ViewportStores = {
-  [T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.ViewportState>
+  [T in RevoGrid.MultiDimensionType]: Observable<RevoGrid.ViewportState>
 };
 
 @Component({

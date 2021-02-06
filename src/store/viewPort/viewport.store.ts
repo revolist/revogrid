@@ -4,7 +4,7 @@
 * Redraw items during scrolling
 */
 
-import {createStore, ObservableMap} from '@stencil/store';
+import {createStore} from '@stencil/store';
 
 import {
   addMissingItems, DimensionDataViewport,
@@ -15,7 +15,7 @@ import {
 } from './viewport.helpers';
 
 import {setStore} from '../../utils/store.utils';
-import {RevoGrid} from '../../interfaces';
+import {Observable, RevoGrid} from '../../interfaces';
 
 
 function initialState(): RevoGrid.ViewportState {
@@ -39,7 +39,7 @@ function initialState(): RevoGrid.ViewportState {
 }
 
 export default class ViewportStore {
-  readonly store: ObservableMap<RevoGrid.ViewportState>;
+  readonly store: Observable<RevoGrid.ViewportState>;
   constructor() {
     this.store = createStore(initialState());
     this.store.onChange('realCount', () => this.clear());

@@ -1,8 +1,7 @@
 import {Component, Method, Event, EventEmitter, Prop, Listen} from '@stencil/core';
-import { ObservableMap } from '@stencil/store';
 import debounce from 'lodash/debounce';
 
-import { RevoGrid, Selection } from '../../interfaces';
+import { Observable, RevoGrid, Selection } from '../../interfaces';
 import { DataSourceState, setItems } from '../../store/dataSource/data.store';
 import { DRAGG_TEXT } from '../../utils/consts';
 import RowOrderService from './rowOrderService';
@@ -24,11 +23,11 @@ export class OrderEditor {
   //
 	// --------------------------------------------------------------------------
 	@Prop() parent: HTMLElement;
-	@Prop() dimensionRow: ObservableMap<RevoGrid.DimensionSettingsState>;
-	@Prop() dimensionCol: ObservableMap<RevoGrid.DimensionSettingsState>;
+	@Prop() dimensionRow: Observable<RevoGrid.DimensionSettingsState>;
+	@Prop() dimensionCol: Observable<RevoGrid.DimensionSettingsState>;
 
 	/** Static stores, not expected to change during component lifetime */
-	@Prop() dataStore: ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
+	@Prop() dataStore: Observable<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
 
 
   // --------------------------------------------------------------------------

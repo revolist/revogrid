@@ -1,7 +1,5 @@
 /** Collect data for pinned columns in required @ViewportProps format */
-import {ObservableMap} from '@stencil/store';
-
-import {RevoGrid, Selection} from '../../interfaces';
+import {Observable, RevoGrid, Selection} from '../../interfaces';
 import {UUID} from '../../utils/consts';
 import {ViewportSpace} from './viewport.interfaces';
 import {DataSourceState, getVisibleSourceItem} from '../../store/dataSource/data.store';
@@ -21,10 +19,10 @@ export interface ViewportColumn {
     uuid: string;
     fixWidth?: boolean;
 
-    viewports: {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.ViewportState>};
-    dimensions: {[T in RevoGrid.MultiDimensionType]: ObservableMap<RevoGrid.DimensionSettingsState>};
-    rowStores: {[T in RevoGrid.DimensionRows]: ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>};
-    colStore: ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
+    viewports: {[T in RevoGrid.MultiDimensionType]: Observable<RevoGrid.ViewportState>};
+    dimensions: {[T in RevoGrid.MultiDimensionType]: Observable<RevoGrid.DimensionSettingsState>};
+    rowStores: {[T in RevoGrid.DimensionRows]: Observable<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>};
+    colStore: Observable<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
     onHeaderResize?(e: CustomEvent<RevoGrid.ViewSettingSizeProp>): void;
     onResizeViewport?(e: CustomEvent<RevoGrid.ViewPortResizeEvent>): void;
 }
@@ -127,8 +125,8 @@ function getLastCell(
 
 
 export function getStoresCoordinates(
-    columnStores: {[T in RevoGrid.DimensionCols]: ObservableMap<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>},
-    rowStores: {[T in RevoGrid.DimensionRows]: ObservableMap<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>}
+    columnStores: {[T in RevoGrid.DimensionCols]: Observable<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>},
+    rowStores: {[T in RevoGrid.DimensionRows]: Observable<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>}
 ) {
     let x = 0;
     let y = 0;
