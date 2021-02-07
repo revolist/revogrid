@@ -5,7 +5,7 @@
 $header-height: 45px;
 $default-rows-size: 32px;
 
-revo-grid[theme="darkCompact"] {
-	@include revoGrid($header-height, $default-rows-size);
-	@include revoGridDark;
+revo-grid[theme='darkCompact'] {
+  @include revoGrid($header-height, $default-rows-size);
+  @include revoGridDark;
 }

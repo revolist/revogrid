@@ -1,11 +1,11 @@
-import {createStore} from '@stencil/store';
+import { createStore } from '@stencil/store';
 import findIndex from 'lodash/findIndex';
 import range from 'lodash/range';
 
 import { Trimmed, trimmedPlugin } from '../../plugins/trimmed/trimmed.plugin';
-import {setStore} from '../../utils/store.utils';
-import {Observable, RevoGrid} from "../../interfaces";
-import {proxyPlugin} from './data.proxy';
+import { setStore } from '../../utils/store.utils';
+import { Observable, RevoGrid } from '../../interfaces';
+import { proxyPlugin } from './data.proxy';
 import DataType = RevoGrid.DataType;
 import ColumnRegular = RevoGrid.ColumnRegular;
 import DimensionRows = RevoGrid.DimensionRows;
@@ -15,11 +15,11 @@ export interface Group extends RevoGrid.ColumnProperties {
   name: string;
   children: RevoGrid.ColumnRegular[];
   // props/ids
-  ids: (string|number)[];
+  ids: (string | number)[];
 }
 export type Groups = Record<any, any>;
-export type GDataType = DataType|ColumnRegular;
-export type GDimension = DimensionRows|DimensionCols;
+export type GDataType = DataType | ColumnRegular;
+export type GDimension = DimensionRows | DimensionCols;
 export type DataSourceState<T extends GDataType, ST extends GDimension> = {
   // items - index based array for mapping to source tree
   items: number[];
@@ -42,15 +42,15 @@ export default class DataStore<T extends GDataType, ST extends GDimension> {
     return this.dataStore;
   }
   constructor(type: ST) {
-    const store = this.dataStore = createStore({
+    const store = (this.dataStore = createStore({
       items: [],
       proxyItems: [],
       source: [],
       groupingDepth: 0,
       groups: {},
       type,
-      trimmed: {}
-    });
+      trimmed: {},
+    }));
     store.use(proxyPlugin(store));
     store.use(trimmedPlugin(store));
   }
@@ -61,7 +61,7 @@ export default class DataStore<T extends GDataType, ST extends GDimension> {
    * @param grouping - grouping information if present
    */
   updateData(source: T[], grouping?: { depth: number; groups?: Groups }, silent = false) {
-    // during full update we do drop trim 
+    // during full update we do drop trim
     if (!silent) {
       this.store.set('trimmed', {});
     }
@@ -72,7 +72,7 @@ export default class DataStore<T extends GDataType, ST extends GDimension> {
     // set proxy first
     setStore(this.store, {
       source,
-      proxyItems: [...items]
+      proxyItems: [...items],
     });
     // update data items
     this.store.set('items', items);
@@ -80,21 +80,21 @@ export default class DataStore<T extends GDataType, ST extends GDimension> {
     if (grouping) {
       setStore(this.store, {
         groupingDepth: grouping.depth,
-        groups: grouping.groups
+        groups: grouping.groups,
       });
     }
   }
 
   addTrimmed(some: Partial<Trimmed>) {
     let trimmed = this.store.get('trimmed');
-    trimmed = {...trimmed, ...some};
+    trimmed = { ...trimmed, ...some };
     setStore(this.store, { trimmed });
   }
 
   // local data update
   setData(input: Partial<DataSourceState<T, ST>>) {
     const data: Partial<DataSourceState<T, ST>> = {
-      ...input
+      ...input,
     };
     setStore(this.store, data);
   }
@@ -172,4 +172,3 @@ export function getSourceItemVirtualIndexByProp(store: Observable<DataSourceStat
   const physicalIndex = findIndex(source, { prop });
   return items.indexOf(physicalIndex);
 }
-

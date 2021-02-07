@@ -1,8 +1,7 @@
-import {Edition, Observable, Selection} from '../../interfaces';
-import {getRange} from './selection.helpers';
+import { Edition, Observable, Selection } from '../../interfaces';
+import { getRange } from './selection.helpers';
 import Cell = Selection.Cell;
 import Range = Selection.RangeArea;
-
 
 interface Config {
   changeRange(range: Range): boolean;
@@ -15,15 +14,15 @@ export default class SelectionStoreService {
     this.store = store;
   }
 
-  get edited(): Edition.EditCellStore|null {
+  get edited(): Edition.EditCellStore | null {
     return this.store.get('edit');
   }
 
-  get focused(): Cell|null {
+  get focused(): Cell | null {
     return this.store.get('focus');
   }
 
-  get ranged(): Range|null {
+  get ranged(): Range | null {
     return this.store.get('range');
   }
 
@@ -39,7 +38,7 @@ export default class SelectionStoreService {
 
     // range edit
     if (isMulti) {
-      let start: Cell|null = this.store.get('focus');
+      let start: Cell | null = this.store.get('focus');
       if (start) {
         return this.config.changeRange(getRange(start, end));
       }
@@ -48,7 +47,7 @@ export default class SelectionStoreService {
     // single focus
     return this.config.focus(cell, end);
   }
-  
+
   destroy(): void {
     this.config.unregister();
   }

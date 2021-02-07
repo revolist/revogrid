@@ -1,22 +1,21 @@
 revogr-edit {
-	display: block;
-	position: absolute;
-	background-color: #fff;
+  display: block;
+  position: absolute;
+  background-color: #fff;
 
-	input {
-		height: 100%;
-		width: 100%;
-		box-sizing: border-box;
-	}
+  input {
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box;
+  }
 
+  revo-dropdown {
+    height: 100%;
 
-	revo-dropdown {
-		height: 100%;
-
-		&.shrink {
-			fieldset legend > span {
-				display: none;
-			}
-		}
-	}
+    &.shrink {
+      fieldset legend > span {
+        display: none;
+      }
+    }
+  }
 }

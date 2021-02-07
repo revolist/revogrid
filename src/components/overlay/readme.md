@@ -1,9 +1,6 @@
 # revogr-overlay-selection
 
-
-
 <!-- Auto Generated Below -->
-
 
 ## Properties
 
@@ -19,7 +16,6 @@
 | `range`          | `range`    |                                                                 | `boolean`                                                      | `undefined` |
 | `readonly`       | `readonly` |                                                                 | `boolean`                                                      | `undefined` |
 | `selectionStore` | --         | Dynamic stores                                                  | `ObservableMap<SelectionStoreState>`                           | `undefined` |
-
 
 ## Events
 
@@ -37,12 +33,11 @@
 | `setTempRange`             |                         | `CustomEvent<{ x: number; y: number; x1: number; y1: number; }>`                                                                                                         |
 | `unregister`               |                         | `CustomEvent<any>`                                                                                                                                                       |
 
-
 ## Dependencies
 
 ### Used by
 
- - [revogr-viewport](../viewport)
+- [revogr-viewport](../viewport)
 
 ### Depends on
 
@@ -51,6 +46,7 @@
 - [revogr-order-editor](../order)
 
 ### Graph
+
 ```mermaid
 graph TD;
   revogr-overlay-selection --> revogr-edit
@@ -60,6 +56,6 @@ graph TD;
   style revogr-overlay-selection fill:#f9f,stroke:#333,stroke-width:4px
 ```
 
-----------------------------------------------
+---
 
-*Built with [StencilJS](https://stenciljs.com/)*
+_Built with [StencilJS](https://stenciljs.com/)_

@@ -1,31 +1,31 @@
 .revo-button {
-    $h: 34px;
-    position: relative;
-    overflow: hidden;
-    color: #fff;
-    background-color: #6200ee;
-    height: $h;
-    line-height: $h;
-    padding: 0 15px;
-    outline: 0;
-    border: 0;
-    border-radius: 7px;
-    box-sizing: border-box;
-    cursor: pointer;
+  $h: 34px;
+  position: relative;
+  overflow: hidden;
+  color: #fff;
+  background-color: #6200ee;
+  height: $h;
+  line-height: $h;
+  padding: 0 15px;
+  outline: 0;
+  border: 0;
+  border-radius: 7px;
+  box-sizing: border-box;
+  cursor: pointer;
 
-    &.green {
-        $bg: #2ee072;
-        background-color: $bg;
-        border: 1px solid darken($color: $bg, $amount: 5);
-    }
+  &.green {
+    $bg: #2ee072;
+    background-color: $bg;
+    border: 1px solid darken($color: $bg, $amount: 5);
+  }
 
-    &.light {
-        $br-color: #cedefa;
-        $color: #4876ca;
-        border: 2px solid $br-color;
-        line-height: $h - 2;
-        background: none;
-        color: $color;
-        box-shadow: none;
-    }
+  &.light {
+    $br-color: #cedefa;
+    $color: #4876ca;
+    border: 2px solid $br-color;
+    line-height: $h - 2;
+    background: none;
+    color: $color;
+    box-shadow: none;
+  }
 }

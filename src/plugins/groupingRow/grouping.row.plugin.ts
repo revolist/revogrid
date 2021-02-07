@@ -12,7 +12,7 @@ import { ExpandedOptions, gatherGrouping, isGrouping, isGroupingColumn } from '.
 const TRIMMED_GROUPING = 'grouping';
 
 export default class GroupingRowPlugin extends BasePlugin {
-  private options: GroupingOptions|undefined;
+  private options: GroupingOptions | undefined;
 
   get hasProps() {
     return this.options?.props && this.options?.props?.length;
@@ -24,10 +24,13 @@ export default class GroupingRowPlugin extends BasePlugin {
     return rowStore.get('items');
   }
 
-  constructor(protected revogrid: HTMLRevoGridElement, private providers: {
-    dataProvider: DataProvider,
-    columnProvider: ColumnDataProvider
-  }) {
+  constructor(
+    protected revogrid: HTMLRevoGridElement,
+    private providers: {
+      dataProvider: DataProvider;
+      columnProvider: ColumnDataProvider;
+    },
+  ) {
     super(revogrid);
   }
 
@@ -41,22 +44,22 @@ export default class GroupingRowPlugin extends BasePlugin {
   // expand event triggered
   private onExpand({ virtualIndex }: OnExpandEvent) {
     const rowStore = this.providers.dataProvider.stores.row.store;
-    const {source} = this.getSource();
+    const { source } = this.getSource();
     let newTrimmed = rowStore.get('trimmed')[TRIMMED_GROUPING];
 
     let i = getPhysical(rowStore, virtualIndex);
     const model = source[i];
     const prevExpanded = model[GROUP_EXPANDED];
     if (!prevExpanded) {
-      const {trimmed, items} = doExpand(i, virtualIndex, source, this.rowItems);
-      newTrimmed = {...newTrimmed, ...trimmed};
+      const { trimmed, items } = doExpand(i, virtualIndex, source, this.rowItems);
+      newTrimmed = { ...newTrimmed, ...trimmed };
       if (items) {
         const rowStore = this.providers.dataProvider.stores.row.store;
         setItems(rowStore, items);
       }
     } else {
-      const {trimmed} = doCollapse(i, source);
-      newTrimmed = {...newTrimmed, ...trimmed};
+      const { trimmed } = doCollapse(i, source);
+      newTrimmed = { ...newTrimmed, ...trimmed };
       this.revogrid.clearFocus();
     }
 
@@ -70,26 +73,29 @@ export default class GroupingRowPlugin extends BasePlugin {
     const source = rowStore.get('source');
     const items = rowStore.get('proxyItems');
     // order important here, expected parent is first, then others
-    return items.reduce((result: SourceGather, i) => {
-      const model = source[i];
-      if (!withoutGrouping) {
-        result.source.push(model);
-        return result;
-      }
-
-      // grouping filter
-      if (!isGrouping(model)) {
-        result.source.push(model);
-      } else {
-        if (model[GROUP_EXPANDED] ) {
-          result.prevExpanded[model[PSEUDO_GROUP_ITEM_VALUE]] = true;
+    return items.reduce(
+      (result: SourceGather, i) => {
+        const model = source[i];
+        if (!withoutGrouping) {
+          result.source.push(model);
+          return result;
         }
-      }
-      return result;
-    }, {
-      source: [],
-      prevExpanded: {}
-    });
+
+        // grouping filter
+        if (!isGrouping(model)) {
+          result.source.push(model);
+        } else {
+          if (model[GROUP_EXPANDED]) {
+            result.prevExpanded[model[PSEUDO_GROUP_ITEM_VALUE]] = true;
+          }
+        }
+        return result;
+      },
+      {
+        source: [],
+        prevExpanded: {},
+      },
+    );
   }
 
   // proxy for set source
@@ -107,7 +113,7 @@ export default class GroupingRowPlugin extends BasePlugin {
     return false;
   }
 
-  private setColumns({columns}: ColumnCollection) {
+  private setColumns({ columns }: ColumnCollection) {
     for (let type of columnTypes) {
       if (this.setColumnGrouping(columns[type])) {
         break;
@@ -116,10 +122,10 @@ export default class GroupingRowPlugin extends BasePlugin {
   }
 
   // evaluate drag between groups
-  private onDrag(e: CustomEvent<{from: number; to: number;}>) {
-    const {from, to} = e.detail;
-    const isDown = (to - from) >= 0;
-    const {source} = this.getSource();
+  private onDrag(e: CustomEvent<{ from: number; to: number }>) {
+    const { from, to } = e.detail;
+    const isDown = to - from >= 0;
+    const { source } = this.getSource();
     const items = this.rowItems;
     let i = isDown ? from : to;
     const end = isDown ? to : from;
@@ -136,24 +142,24 @@ export default class GroupingRowPlugin extends BasePlugin {
   // subscribe to grid events to process them accordingly
   private subscribe() {
     /** if grouping present and new data source arrived */
-    this.addEventListener('beforeSourceSet', ({detail}: CustomEvent<BeforeSourceSetEvent>) => this.onDataSet(detail));
-    this.addEventListener('beforeColumnsSet', ({detail}: CustomEvent<ColumnCollection>) => this.setColumns(detail));
+    this.addEventListener('beforeSourceSet', ({ detail }: CustomEvent<BeforeSourceSetEvent>) => this.onDataSet(detail));
+    this.addEventListener('beforeColumnsSet', ({ detail }: CustomEvent<ColumnCollection>) => this.setColumns(detail));
 
     /**
      * filter applied need to clear grouping and apply again
      * based on new results can be new grouping
      */
-    this.addEventListener('beforeFilterTrimmed', ({detail: { itemsToFilter, source }}) => this.beforeFilterApply(itemsToFilter, source));
+    this.addEventListener('beforeFilterTrimmed', ({ detail: { itemsToFilter, source } }) => this.beforeFilterApply(itemsToFilter, source));
     /**
      * sorting applied need to clear grouping and apply again
      * based on new results whole grouping order will changed
-    */
+     */
     this.addEventListener('afterSortingApply', () => this.doSourceUpdate());
 
     /**
      * Apply logic for focus inside of grouping
      * We can't focus on grouping rows, navigation only inside of groups for now
-     */ 
+     */
     this.addEventListener('beforeCellFocus', e => this.onFocus(e));
     /**
      * Prevent row drag outside the group
@@ -163,7 +169,7 @@ export default class GroupingRowPlugin extends BasePlugin {
     /**
      * When grouping expand icon was clicked
      */
-    this.addEventListener(GROUP_EXPAND_EVENT, ({detail}: CustomEvent<OnExpandEvent>) => this.onExpand(detail));
+    this.addEventListener(GROUP_EXPAND_EVENT, ({ detail }: CustomEvent<OnExpandEvent>) => this.onExpand(detail));
   }
 
   /** Before filter apply remove grouping filtering */
@@ -180,27 +186,23 @@ export default class GroupingRowPlugin extends BasePlugin {
     if (!this.hasProps) {
       return;
     }
-    const {source, prevExpanded} = this.getSource(true);
-    const {sourceWithGroups, depth, trimmed} = gatherGrouping(
-      source,
-      item => this.options?.props.map(key => item[key]),
-      {
-        prevExpanded,
-        ...options
-      }
-    );
+    const { source, prevExpanded } = this.getSource(true);
+    const { sourceWithGroups, depth, trimmed } = gatherGrouping(source, item => this.options?.props.map(key => item[key]), {
+      prevExpanded,
+      ...options,
+    });
     this.providers.dataProvider.setData(
       sourceWithGroups,
       'row',
       {
         depth,
       },
-      true
+      true,
     );
     this.revogrid.addTrimmed(trimmed, TRIMMED_GROUPING);
   }
 
-  /** 
+  /**
    * Apply grouping on data set
    * Clear grouping from source
    * If source came from other plugin
@@ -211,15 +213,11 @@ export default class GroupingRowPlugin extends BasePlugin {
     }
     const source = data.source.filter(s => !isGrouping(s));
     const expanded = this.revogrid.grouping || {};
-    const {sourceWithGroups, depth, trimmed} = gatherGrouping(
-      source,
-      item => this.options?.props.map(key => item[key]),
-      {
-        ...(expanded || {})
-      }
-    );
+    const { sourceWithGroups, depth, trimmed } = gatherGrouping(source, item => this.options?.props.map(key => item[key]), {
+      ...(expanded || {}),
+    });
     data.source = sourceWithGroups;
-    this.providers.dataProvider.setGrouping({depth});
+    this.providers.dataProvider.setGrouping({ depth });
     this.revogrid.addTrimmed(trimmed, TRIMMED_GROUPING);
   }
 
@@ -234,9 +232,9 @@ export default class GroupingRowPlugin extends BasePlugin {
       return;
     }
     // props exist and source inited
-    const {source} = this.getSource();
+    const { source } = this.getSource();
     if (source.length) {
-      this.doSourceUpdate({ ...(options) });
+      this.doSourceUpdate({ ...options });
     }
     // props exist and columns inited
     for (let t of columnTypes) {
@@ -249,7 +247,7 @@ export default class GroupingRowPlugin extends BasePlugin {
     // if has any grouping subscribe to events again
     this.subscribe();
   }
-  
+
   // clear grouping
   clearGrouping() {
     // clear columns
@@ -268,7 +266,7 @@ export default class GroupingRowPlugin extends BasePlugin {
       }
     });
     // clear rows
-    const {source} = this.getSource(true);
+    const { source } = this.getSource(true);
     this.providers.dataProvider.setData(source);
   }
 }

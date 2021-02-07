@@ -5,13 +5,13 @@
 $header-height: 45px;
 $default-rows-size: 32px;
 
-revo-grid[theme="compact"] {
-	@include revoGrid($header-height, $default-rows-size);
-	@include revoGridLight;
+revo-grid[theme='compact'] {
+  @include revoGrid($header-height, $default-rows-size);
+  @include revoGridLight;
 
-	revo-dropdown {
-		.rv-dr-root {
-			padding: 0px 9px;
-		}
-	}
+  revo-dropdown {
+    .rv-dr-root {
+      padding: 0px 9px;
+    }
+  }
 }

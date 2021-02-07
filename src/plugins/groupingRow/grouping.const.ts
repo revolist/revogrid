@@ -1,4 +1,4 @@
-import { GRID_INTERNALS } from "../../utils/consts";
+import { GRID_INTERNALS } from '../../utils/consts';
 
 export const GROUP_DEPTH = `${GRID_INTERNALS}-depth`;
 export const PSEUDO_GROUP_ITEM = `${GRID_INTERNALS}-name`;

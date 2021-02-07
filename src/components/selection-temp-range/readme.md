@@ -1,9 +1,6 @@
 # revogr-focus
 
-
-
 <!-- Auto Generated Below -->
-
 
 ## Properties
 
@@ -13,20 +10,20 @@
 | `dimensionRow`   | --        |                | `ObservableMap<DimensionSettingsState>` | `undefined` |
 | `selectionStore` | --        | Dynamic stores | `ObservableMap<SelectionStoreState>`    | `undefined` |
 
-
 ## Dependencies
 
 ### Used by
 
- - [revogr-viewport](../viewport)
+- [revogr-viewport](../viewport)
 
 ### Graph
+
 ```mermaid
 graph TD;
   revogr-viewport --> revogr-temp-range
   style revogr-temp-range fill:#f9f,stroke:#333,stroke-width:4px
 ```
 
-----------------------------------------------
+---
 
-*Built with [StencilJS](https://stenciljs.com/)*
+_Built with [StencilJS](https://stenciljs.com/)_

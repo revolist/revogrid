@@ -1,4 +1,4 @@
 enum osPlatform {
-    mac = 'Mac'
+  mac = 'Mac',
 }
 export default osPlatform;

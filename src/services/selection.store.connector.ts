@@ -1,21 +1,20 @@
-import {Edition, Selection} from '../interfaces';
-import {cropCellToMax, nextCell} from '../store/selection/selection.helpers';
+import { Edition, Selection } from '../interfaces';
+import { cropCellToMax, nextCell } from '../store/selection/selection.helpers';
 import { SelectionStore } from '../store/selection/selection.store';
 
 import Cell = Selection.Cell;
 import EditCellStore = Edition.EditCellStore;
 
-type StoresMatrix = {[y: number]: {[x: number]:  SelectionStore}};
+type StoresMatrix = { [y: number]: { [x: number]: SelectionStore } };
 
 export default class SelectionStoreConnector {
   private readonly stores: StoresMatrix = {};
 
-  readonly columnStores: {[x: number]:  SelectionStore} = {};
+  readonly columnStores: { [x: number]: SelectionStore } = {};
 
-  readonly rowStores: {[y: number]:  SelectionStore} = {};
-  
+  readonly rowStores: { [y: number]: SelectionStore } = {};
 
-  get focusedStore(): SelectionStore|null {
+  get focusedStore(): SelectionStore | null {
     for (let y in this.stores) {
       for (let x in this.stores[y]) {
         if (this.stores[y][x].store.get('focus')) {
@@ -42,7 +41,7 @@ export default class SelectionStoreConnector {
     return this.rowStores[y];
   }
 
-  register({x, y}: Selection.Cell): SelectionStore {
+  register({ x, y }: Selection.Cell): SelectionStore {
     if (!this.stores[y]) {
       this.stores[y] = {};
     }
@@ -51,20 +50,20 @@ export default class SelectionStoreConnector {
       return this.stores[y][x];
     }
     this.stores[y][x] = new SelectionStore();
-    this.stores[y][x]?.store.onChange('range', (c) => {
+    this.stores[y][x]?.store.onChange('range', c => {
       this.columnStores[x].setRangeArea(c);
       this.rowStores[y].setRangeArea(c);
     });
     return this.stores[y][x];
   }
 
-  setEditByCell({x, y}: Selection.Cell, editCell: Selection.Cell): void {
+  setEditByCell({ x, y }: Selection.Cell, editCell: Selection.Cell): void {
     const store = this.stores[y][x];
     this.focus(store, { focus: editCell, end: editCell });
     this.setEdit('');
   }
 
-  focus(store: SelectionStore, {focus, end}: {focus: Cell; end: Cell}): void {
+  focus(store: SelectionStore, { focus, end }: { focus: Cell; end: Cell }): void {
     let currentStorePointer: Selection.Cell;
     // clear all stores focus leave only active one
     for (let y in this.stores) {
@@ -84,12 +83,12 @@ export default class SelectionStoreConnector {
     // check is focus in next store
     const lastCell: Cell = store.store.get('lastCell');
     // item in new store
-    const nextItem: Partial<Cell>|null = nextCell(focus, lastCell);
+    const nextItem: Partial<Cell> | null = nextCell(focus, lastCell);
 
     let nextStore;
     if (nextItem) {
       for (let i in nextItem) {
-        let type: keyof Cell= i as keyof Cell;
+        let type: keyof Cell = i as keyof Cell;
         let stores;
         switch (type) {
           case 'x':
@@ -113,7 +112,7 @@ export default class SelectionStoreConnector {
 
     // if next store present - update
     if (nextStore) {
-      let item = {...focus, ...nextItem};
+      let item = { ...focus, ...nextItem };
       this.focus(nextStore, { focus: item, end: item });
       return;
     }
@@ -132,15 +131,15 @@ export default class SelectionStoreConnector {
     }
   }
 
-  get edit(): EditCellStore|undefined {
+  get edit(): EditCellStore | undefined {
     return this.focusedStore?.store.get('edit');
   }
 
-  get focused(): Cell|undefined {
+  get focused(): Cell | undefined {
     return this.focusedStore?.store.get('focus');
   }
 
-  setEdit(val: string|boolean): void {
+  setEdit(val: string | boolean): void {
     if (!this.focusedStore) {
       return;
     }
@@ -151,14 +150,13 @@ export default class SelectionStoreConnector {
     for (let y in this.stores) {
       for (let x in this.stores[y]) {
         if (this.stores[y][x] === store) {
-          delete this.stores[y][x]
+          delete this.stores[y][x];
           break;
         }
       }
     }
     store.dispose();
   }
-  
 
   private getXStores(y: number): { [p: number]: SelectionStore } {
     return this.stores[y];
@@ -172,4 +170,3 @@ export default class SelectionStoreConnector {
     return stores;
   }
 }
-

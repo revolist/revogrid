@@ -1,154 +1,154 @@
-
 revogr-header {
-	position: relative;
-	z-index: 5;
-	display: block;
+  position: relative;
+  z-index: 5;
+  display: block;
 
-	.data-header-cell {
-        display: flex;
+  .data-header-cell {
+    display: flex;
 
-        &.align-center {
-            text-align: center;
-        }
-        &.align-left {
-            text-align: left;
-        }
-        &.align-right {
-            text-align: right;
-        }
-		&.sortable {
-			cursor: pointer;
-		}
-        
-        i {
-            &.asc, &.desc {
-                &:after {
-                    font-size: 13px;
-                }
-            }
-            &.asc {
-                &:after {
-                    content: '↑';
-                }
-            }
-            &.desc {
-                &:after {
-                    content: '↓';
-                }
-            }
-        }
-	}
-
-	.data-header-cell,
-	.grouped-cell {
-		position: absolute;
-		box-sizing: border-box;
-		height: 100%;
-		z-index: 1;
-	}
-
-	.header-row {
-		display: block;
-		position: relative;
-
-		&.group {
-			z-index: 0;
-		}
-	}
-
-	.group-row {
-		position: relative;
-	}
-
-    .data-header-cell {
-        &.active {
-            z-index: 10;
-
-            .resizable {
-                background-color: deepskyblue;
-            }
-        }
-        .header-content {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            flex-grow: 1;
-        }
-        .resizable {
-            display: block;
-            position: absolute;
-            z-index: 90;
-            touch-action: none;
-            user-select: none;
-            &:hover {
-                background-color: deepskyblue;
-            }
-        }
-        $size: 6px;
-        > .resizable-r {
-            cursor: ew-resize;
-            width: $size;
-            right: 0;
-            top: 0;
-            height: 100%;
-        }
-        > .resizable-rb {
-            cursor: se-resize;
-            width: $size;
-            height: $size;
-            right: 0;
-            bottom: 0;
-        }
-
-        > .resizable-b {
-            cursor: s-resize;
-            height: $size;
-            bottom: 0;
-            width: 100%;
-            left: 0;
-        }
-
-        > .resizable-lb {
-            cursor: sw-resize;
-            width: $size;
-            height: $size;
-            left: 0;
-            bottom: 0;
-        }
-
-        > .resizable-l {
-            cursor: w-resize;
-            width: $size;
-            left: 0;
-            height: 100%;
-            top: 0;
-        }
-
-        > .resizable-lt {
-            cursor: nw-resize;
-            width: $size;
-            height: $size;
-            left: 0;
-            top: 0;
-        }
-
-        > .resizable-t {
-            cursor: n-resize;
-            height: $size;
-            top: 0;
-            width: 100%;
-            left: 0;
-        }
-
-        > .resizable-rt {
-            cursor: ne-resize;
-            width: $size;
-            height: $size;
-            right: 0;
-            top: 0;
-        }
-    } 
-    .rv-filter {
-        visibility: hidden;
+    &.align-center {
+      text-align: center;
     }
+    &.align-left {
+      text-align: left;
+    }
+    &.align-right {
+      text-align: right;
+    }
+    &.sortable {
+      cursor: pointer;
+    }
+
+    i {
+      &.asc,
+      &.desc {
+        &:after {
+          font-size: 13px;
+        }
+      }
+      &.asc {
+        &:after {
+          content: '↑';
+        }
+      }
+      &.desc {
+        &:after {
+          content: '↓';
+        }
+      }
+    }
+  }
+
+  .data-header-cell,
+  .grouped-cell {
+    position: absolute;
+    box-sizing: border-box;
+    height: 100%;
+    z-index: 1;
+  }
+
+  .header-row {
+    display: block;
+    position: relative;
+
+    &.group {
+      z-index: 0;
+    }
+  }
+
+  .group-row {
+    position: relative;
+  }
+
+  .data-header-cell {
+    &.active {
+      z-index: 10;
+
+      .resizable {
+        background-color: deepskyblue;
+      }
+    }
+    .header-content {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex-grow: 1;
+    }
+    .resizable {
+      display: block;
+      position: absolute;
+      z-index: 90;
+      touch-action: none;
+      user-select: none;
+      &:hover {
+        background-color: deepskyblue;
+      }
+    }
+    $size: 6px;
+    > .resizable-r {
+      cursor: ew-resize;
+      width: $size;
+      right: 0;
+      top: 0;
+      height: 100%;
+    }
+    > .resizable-rb {
+      cursor: se-resize;
+      width: $size;
+      height: $size;
+      right: 0;
+      bottom: 0;
+    }
+
+    > .resizable-b {
+      cursor: s-resize;
+      height: $size;
+      bottom: 0;
+      width: 100%;
+      left: 0;
+    }
+
+    > .resizable-lb {
+      cursor: sw-resize;
+      width: $size;
+      height: $size;
+      left: 0;
+      bottom: 0;
+    }
+
+    > .resizable-l {
+      cursor: w-resize;
+      width: $size;
+      left: 0;
+      height: 100%;
+      top: 0;
+    }
+
+    > .resizable-lt {
+      cursor: nw-resize;
+      width: $size;
+      height: $size;
+      left: 0;
+      top: 0;
+    }
+
+    > .resizable-t {
+      cursor: n-resize;
+      height: $size;
+      top: 0;
+      width: 100%;
+      left: 0;
+    }
+
+    > .resizable-rt {
+      cursor: ne-resize;
+      width: $size;
+      height: $size;
+      right: 0;
+      top: 0;
+    }
+  }
+  .rv-filter {
+    visibility: hidden;
+  }
 }

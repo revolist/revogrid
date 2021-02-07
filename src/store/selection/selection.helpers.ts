@@ -1,55 +1,57 @@
-import {Selection} from '../../interfaces';
+import { Selection } from '../../interfaces';
 import Cell = Selection.Cell;
 import RangeArea = Selection.RangeArea;
 
-export function nextCell(cell: Cell, lastCell: Cell): Partial<Cell>|null {
-    const nextItem: Partial<Cell> = {};
-    let types: (keyof Cell)[] = ['x', 'y'];
+export function nextCell(cell: Cell, lastCell: Cell): Partial<Cell> | null {
+  const nextItem: Partial<Cell> = {};
+  let types: (keyof Cell)[] = ['x', 'y'];
 
-    // previous item check
-    for (let t of types) {
-        if (cell[t] < 0) {
-            nextItem[t] = cell[t];
-            return nextItem;
-        }
+  // previous item check
+  for (let t of types) {
+    if (cell[t] < 0) {
+      nextItem[t] = cell[t];
+      return nextItem;
     }
-    // next item check
-    for (let t of types) {
-        if (cell[t] >= lastCell[t]) {
-            nextItem[t] = cell[t] - lastCell[t];
-            return nextItem;
-        }
+  }
+  // next item check
+  for (let t of types) {
+    if (cell[t] >= lastCell[t]) {
+      nextItem[t] = cell[t] - lastCell[t];
+      return nextItem;
     }
-    return null;
+  }
+  return null;
 }
 
 export function cropCellToMax(cell: Cell, lastCell: Cell): Cell {
-    const newCell: Cell = {...cell};
-    let types: (keyof Cell)[] = ['x', 'y'];
-    // previous item check
-    for (let t of types) {
-        if (cell[t] < 0) {
-            newCell[t] = 0;
-        }
+  const newCell: Cell = { ...cell };
+  let types: (keyof Cell)[] = ['x', 'y'];
+  // previous item check
+  for (let t of types) {
+    if (cell[t] < 0) {
+      newCell[t] = 0;
     }
-    // next item check
-    for (let t of types) {
-        if (cell[t] >= lastCell[t]) {
-            newCell[t] = lastCell[t] - 1;
-        }
+  }
+  // next item check
+  for (let t of types) {
+    if (cell[t] >= lastCell[t]) {
+      newCell[t] = lastCell[t] - 1;
     }
-    return newCell;
+  }
+  return newCell;
 }
 
-export function getRange(start?: Cell, end?: Cell): RangeArea|null {
-    return start && end ? {
+export function getRange(start?: Cell, end?: Cell): RangeArea | null {
+  return start && end
+    ? {
         x: Math.min(start.x, end.x),
         y: Math.min(start.y, end.y),
         x1: Math.max(start.x, end.x),
-        y1: Math.max(start.y, end.y)
-    } : null;
+        y1: Math.max(start.y, end.y),
+      }
+    : null;
 }
 
 export function isRangeSingleCell(a: RangeArea): boolean {
-    return a.x === a.x1 && a.y === a.y1;
+  return a.x === a.x1 && a.y === a.y1;
 }

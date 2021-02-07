@@ -1,10 +1,10 @@
-import { Observable, PluginSubscribe } from "../../interfaces";
-import { DataSourceState } from "../../store/dataSource/data.store";
+import { Observable, PluginSubscribe } from '../../interfaces';
+import { DataSourceState } from '../../store/dataSource/data.store';
 
 type State = DataSourceState<any, any>;
 
 export const proxyPlugin = (store: Observable<State>): PluginSubscribe<State> => ({
-	set(k, newVal) {
+  set(k, newVal) {
     if (!isProxy(k)) {
       return;
     }
@@ -19,7 +19,7 @@ export const proxyPlugin = (store: Observable<State>): PluginSubscribe<State> =>
       return r;
     }, []);
     store.set('items', newItems);
-	}
+  },
 });
 
 function isProxy(k: keyof State): k is 'proxyItems' {

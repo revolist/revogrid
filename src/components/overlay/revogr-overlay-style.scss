@@ -1,33 +1,33 @@
 revogr-overlay-selection {
-	display: block;
-	position: relative;
-	width: 100%;
+  display: block;
+  position: relative;
+  width: 100%;
 
-	.autofill-handle {
-		$handler-size: 10px;
-		position: absolute;
-		width: $handler-size;
-		height: $handler-size;
-		background: $selection-border;
-		margin-left: -$handler-size + 1;
-		margin-top: -$handler-size + 1;
-		border: 1px solid white;
-		box-sizing: border-box;
-		z-index: 10;
-		cursor: crosshair;
-	}
+  .autofill-handle {
+    $handler-size: 10px;
+    position: absolute;
+    width: $handler-size;
+    height: $handler-size;
+    background: $selection-border;
+    margin-left: -$handler-size + 1;
+    margin-top: -$handler-size + 1;
+    border: 1px solid white;
+    box-sizing: border-box;
+    z-index: 10;
+    cursor: crosshair;
+  }
 
-	.selection-border-range {
-		position: absolute;
-		pointer-events:none;
-		z-index: 9;
-	}
+  .selection-border-range {
+    position: absolute;
+    pointer-events: none;
+    z-index: 9;
+  }
 
-	.selection-border-range {
-		@include selection();
-	}
+  .selection-border-range {
+    @include selection();
+  }
 
-	revogr-edit {
-		z-index: 10;
-	}
+  revogr-edit {
+    z-index: 10;
+  }
 }

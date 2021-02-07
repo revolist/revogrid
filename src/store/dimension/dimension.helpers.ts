@@ -2,33 +2,26 @@ import each from 'lodash/each';
 import sortedIndex from 'lodash/sortedIndex';
 import reduce from 'lodash/reduce';
 
+import { mergeSortedArray } from '../../utils/utils';
+import { RevoGrid } from '../../interfaces';
 
-import {mergeSortedArray} from '../../utils/utils';
-import {RevoGrid} from "../../interfaces";
+export type DimensionPosition = Pick<RevoGrid.DimensionSettingsState, 'indexes' | 'positionIndexes' | 'originItemSize' | 'positionIndexToItem'>;
 
-export type DimensionPosition =
-    Pick<RevoGrid.DimensionSettingsState, 'indexes'|'positionIndexes'|'originItemSize'|'positionIndexToItem'>;
-
-export type DimensionSize = Pick<RevoGrid.DimensionSettingsState,
-'indexes'|'positionIndexes'|'positionIndexToItem'|'indexToItem'|'realSize'|'sizes'
->;
+export type DimensionSize = Pick<RevoGrid.DimensionSettingsState, 'indexes' | 'positionIndexes' | 'positionIndexToItem' | 'indexToItem' | 'realSize' | 'sizes'>;
 /**
-* Pre-calculation dimension sizes and sizes for each cell
-*/
-export function calculateDimensionData(
-  state: RevoGrid.DimensionSettingsState,
-  newSizes: RevoGrid.ViewSettingSizeProp
-): DimensionSize {
+ * Pre-calculation dimension sizes and sizes for each cell
+ */
+export function calculateDimensionData(state: RevoGrid.DimensionSettingsState, newSizes: RevoGrid.ViewSettingSizeProp): DimensionSize {
   let positionIndexes: number[] = [];
 
-  const positionIndexToItem: {[position: number]: RevoGrid.PositionItem} = {};
-  const indexToItem: {[index: number]: RevoGrid.PositionItem} = {};
+  const positionIndexToItem: { [position: number]: RevoGrid.PositionItem } = {};
+  const indexToItem: { [index: number]: RevoGrid.PositionItem } = {};
 
   // to compare how real width changed
   let newTotal: number = 0;
 
   // combine all sizes
-  const sizes: RevoGrid.ViewSettingSizeProp = {...state.sizes, ...newSizes};
+  const sizes: RevoGrid.ViewSettingSizeProp = { ...state.sizes, ...newSizes };
   // prepare order sorted new sizes and calculate changed real size
   let newIndexes: number[] = [];
   each(newSizes, (size: number, index: string) => {
@@ -45,45 +38,47 @@ export function calculateDimensionData(
   const updatedIndexesCache: number[] = mergeSortedArray(state.indexes, newIndexes);
 
   // fill new coordinates
-  reduce(updatedIndexesCache, (previous: RevoGrid.PositionItem|undefined, itemIndex: number, i: number) => {
-    const newItem: RevoGrid.PositionItem = {
-      itemIndex,
-      start: 0,
-      end: 0
-    };
-    if (previous) {
-      newItem.start = (itemIndex - previous.itemIndex - 1) * state.originItemSize + previous.end;
-    } else {
-      newItem.start = itemIndex * state.originItemSize;
-    }
-    newItem.end = newItem.start + sizes[itemIndex];
-    positionIndexes.push(newItem.start);
-    indexToItem[itemIndex] = positionIndexToItem[i] = newItem;
-    return newItem;
-  }, undefined);
+  reduce(
+    updatedIndexesCache,
+    (previous: RevoGrid.PositionItem | undefined, itemIndex: number, i: number) => {
+      const newItem: RevoGrid.PositionItem = {
+        itemIndex,
+        start: 0,
+        end: 0,
+      };
+      if (previous) {
+        newItem.start = (itemIndex - previous.itemIndex - 1) * state.originItemSize + previous.end;
+      } else {
+        newItem.start = itemIndex * state.originItemSize;
+      }
+      newItem.end = newItem.start + sizes[itemIndex];
+      positionIndexes.push(newItem.start);
+      indexToItem[itemIndex] = positionIndexToItem[i] = newItem;
+      return newItem;
+    },
+    undefined,
+  );
 
   return {
     indexes: updatedIndexesCache,
     positionIndexes: [...positionIndexes],
-    positionIndexToItem: {...positionIndexToItem},
+    positionIndexToItem: { ...positionIndexToItem },
     indexToItem,
     realSize: state.realSize + newTotal,
-    sizes
+    sizes,
   };
 }
 
-export function getItemByPosition(
-    {indexes, positionIndexes, originItemSize, positionIndexToItem}: DimensionPosition,
-    pos: number): RevoGrid.PositionItem {
+export function getItemByPosition({ indexes, positionIndexes, originItemSize, positionIndexToItem }: DimensionPosition, pos: number): RevoGrid.PositionItem {
   const item: RevoGrid.PositionItem = {
     itemIndex: 0,
     start: 0,
-    end: 0
+    end: 0,
   };
   const currentPlace: number = indexes.length ? sortedIndex(positionIndexes, pos) : 0;
   // not found or first index
   if (!currentPlace) {
-    item.itemIndex = Math.floor(pos/originItemSize);
+    item.itemIndex = Math.floor(pos / originItemSize);
     item.start = item.itemIndex * originItemSize;
     item.end = item.start + originItemSize;
     return item;
@@ -95,20 +90,18 @@ export function getItemByPosition(
   }
   // special size item was present before
   const relativePos: number = pos - positionItem.end;
-  const relativeIndex: number = Math.floor(relativePos/originItemSize);
+  const relativeIndex: number = Math.floor(relativePos / originItemSize);
   item.itemIndex = positionItem.itemIndex + 1 + relativeIndex;
   item.start = positionItem.end + relativeIndex * originItemSize;
   item.end = item.start + originItemSize;
   return item;
 }
 
-export function getItemByIndex(
-    dimension: Pick<RevoGrid.DimensionSettingsState, 'indexes'|'originItemSize'|'indexToItem'>,
-    index: number): RevoGrid.PositionItem {
+export function getItemByIndex(dimension: Pick<RevoGrid.DimensionSettingsState, 'indexes' | 'originItemSize' | 'indexToItem'>, index: number): RevoGrid.PositionItem {
   let item: RevoGrid.PositionItem = {
     itemIndex: index,
     start: 0,
-    end: 0
+    end: 0,
   };
   // if item has specified size
   if (dimension.indexToItem[index]) {

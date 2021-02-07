@@ -1,7 +1,7 @@
 @mixin noScroll {
   /* Hide scrollbar for IE and Edge */
   -ms-overflow-style: none;
-  scrollbar-width: none;  /* Firefox */
+  scrollbar-width: none; /* Firefox */
   /* Hide scrollbar for Chrome, Safari and Opera */
   &::-webkit-scrollbar {
     display: none;
@@ -18,7 +18,8 @@ revogr-viewport-scroll {
   z-index: 1;
   height: 100%;
 
-  &.colPinStart, &.colPinEnd {
+  &.colPinStart,
+  &.colPinEnd {
     z-index: 2;
   }
 
@@ -61,8 +62,8 @@ revogr-viewport-scroll {
     flex-grow: 1;
     @include noScroll;
 
-
-    revogr-data, revogr-overlay-selection {
+    revogr-data,
+    revogr-overlay-selection {
       height: 100%;
     }
   }

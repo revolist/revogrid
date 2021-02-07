@@ -3,34 +3,34 @@ on:
   workflow_dispatch:
     inputs:
       tags:
-        description: 'Documentation update' 
+        description: 'Documentation update'
         default: 'Doc update'
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2.3.1
+      - uses: actions/checkout@v2.3.1
 
-    # Checout submodule
-    - name: Checkout submodules
-      uses: textbook/git-checkout-submodule-action@master
-      with:
-        remote: true
-        
-    # Install
-    - name: Package update
-      working-directory: ./demo
-      run: npm install
-        
-    # Build
-    - name: Package build
-      working-directory: ./demo
-      run: sudo npm run build
+      # Checout submodule
+      - name: Checkout submodules
+        uses: textbook/git-checkout-submodule-action@master
+        with:
+          remote: true
 
-    - name: Deploy 🚀
-      uses: JamesIves/github-pages-deploy-action@3.7.1
-      with:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        BRANCH: gh-pages # The branch the action should deploy to.
-        FOLDER: ./demo/src/.vuepress/dist # The folder the action should deploy.
-        CLEAN: true # Automatically remove deleted files from the deploy branch
+      # Install
+      - name: Package update
+        working-directory: ./demo
+        run: npm install
+
+      # Build
+      - name: Package build
+        working-directory: ./demo
+        run: sudo npm run build
+
+      - name: Deploy 🚀
+        uses: JamesIves/github-pages-deploy-action@3.7.1
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BRANCH: gh-pages # The branch the action should deploy to.
+          FOLDER: ./demo/src/.vuepress/dist # The folder the action should deploy.
+          CLEAN: true # Automatically remove deleted files from the deploy branch

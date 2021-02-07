@@ -1,14 +1,14 @@
 /**
-* Storing pre-calculated
-* Dimension information and sizes
-*/
+ * Storing pre-calculated
+ * Dimension information and sizes
+ */
 
-import {createStore} from '@stencil/store';
+import { createStore } from '@stencil/store';
 import reduce from 'lodash/reduce';
 
-import {setStore} from '../../utils/store.utils';
-import {calculateDimensionData, DimensionSize} from './dimension.helpers';
-import {Observable, RevoGrid} from "../../interfaces";
+import { setStore } from '../../utils/store.utils';
+import { calculateDimensionData, DimensionSize } from './dimension.helpers';
+import { Observable, RevoGrid } from '../../interfaces';
 
 type Item = keyof RevoGrid.DimensionSettingsState;
 
@@ -31,7 +31,7 @@ function initialState(): RevoGrid.DimensionSettingsState {
 
     // initial item size if it wasn't changed
     originItemSize: 0,
-    frameOffset: 0
+    frameOffset: 0,
   };
 }
 
@@ -41,15 +41,18 @@ export default class DimensionStore {
     this.store = createStore(initialState());
   }
 
-
   getCurrentState(): RevoGrid.DimensionSettingsState {
     const state = initialState();
     const keys: Item[] = Object.keys(state) as Item[];
-    return reduce(keys, (r: RevoGrid.DimensionSettingsState, k: Item) => {
-      const data = this.store.get(k);
-      r[k] = data as never;
-      return r;
-    }, state);
+    return reduce(
+      keys,
+      (r: RevoGrid.DimensionSettingsState, k: Item) => {
+        const data = this.store.get(k);
+        r[k] = data as never;
+        return r;
+      },
+      state,
+    );
   }
 
   setRealSize(count: number): void {
@@ -60,7 +63,7 @@ export default class DimensionStore {
     setStore(this.store, { realSize });
   }
 
-  setStore<T extends {[key: string]: any}>(data: Partial<T>){
+  setStore<T extends { [key: string]: any }>(data: Partial<T>) {
     setStore(this.store, data);
   }
 

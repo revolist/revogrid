@@ -1,61 +1,62 @@
 <!DOCTYPE html>
 <html dir="ltr" lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0">
-  <title>Revo Grid Component Demo</title>
-  <style type="text/css">
-  	body, html {
-  	  height: 100%;
-      width: 100%;
-      padding: 20px;
-      box-sizing: border-box;
-      margin: 0;
-      overflow: hidden;
-      background-color: #f7f9fc;
-      text-align: center;
-	  }
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
+    <title>Revo Grid Component Demo</title>
+    <style type="text/css">
+      body,
+      html {
+        height: 100%;
+        width: 100%;
+        padding: 20px;
+        box-sizing: border-box;
+        margin: 0;
+        overflow: hidden;
+        background-color: #f7f9fc;
+        text-align: center;
+      }
 
-    revo-grid {
-      display: block;
-      width: 100%;
-      height: 100%;
-    }
+      revo-grid {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
 
-    .inner-cell {
-      width: 100%;
-      height: 100%;
-    }
+      .inner-cell {
+        width: 100%;
+        height: 100%;
+      }
 
-    .tile {
-      background-color: #fff;
-      display: flex;
-      margin: 0 auto;
-      padding: 20px 0;
-      box-shadow: 0 0 14px 0 rgba(53,64,82,.05);
-      border-radius: 10px;
-      overflow: hidden;
-    }
+      .tile {
+        background-color: #fff;
+        display: flex;
+        margin: 0 auto;
+        padding: 20px 0;
+        box-shadow: 0 0 14px 0 rgba(53, 64, 82, 0.05);
+        border-radius: 10px;
+        overflow: hidden;
+      }
 
-    .tile.dark {
-      background-color: #333;
-    }
+      .tile.dark {
+        background-color: #333;
+      }
 
-    .tile > div {
-      display: flex;
-      width: 100%;
-    }
+      .tile > div {
+        display: flex;
+        width: 100%;
+      }
 
-    .tile.large {
-      max-width: 1000px;
-      height: 600px;
-    }
-  </style>
+      .tile.large {
+        max-width: 1000px;
+        height: 600px;
+      }
+    </style>
 
-  <script type="module" src="/build/revo-grid.esm.js"></script>
-  <script nomodule src="/build/revo-grid.js"></script>
-</head>
-<body>
+    <script type="module" src="/build/revo-grid.esm.js"></script>
+    <script nomodule src="/build/revo-grid.js"></script>
+  </head>
+  <body>
     <button onclick="clearGrouping()">Clear grouping</button>
     <button onclick="setTrimmed()">Set trimmed</button>
     <button onclick="setGrouping()">Set grouping</button>
@@ -70,72 +71,68 @@
     </div>
 
     <script type="module">
-        import {generateFakeDataObject} from "/utilsExternal/generate-data.js";
-        const data = generateFakeDataObject(1000, 5000);
-        const grid = document.querySelector('revo-grid');
-        window.setEdit = function(x, y) {
-          grid.setCellEdit(1, 30);
+      import { generateFakeDataObject } from '/utilsExternal/generate-data.js';
+      const data = generateFakeDataObject(1000, 5000);
+      const grid = document.querySelector('revo-grid');
+      window.setEdit = function (x, y) {
+        grid.setCellEdit(1, 30);
+      };
+      window.scrollToCol = function (x) {
+        grid.scrollToColumnProp(x || 30);
+      };
+      window.clearGrouping = function () {
+        grid.grouping = {};
+      };
+      window.setGrouping = function () {
+        grid.grouping = {
+          props: ['key'],
+          expandedAll: true,
+          applyToProp: '6',
         };
-        window.scrollToCol = function(x) {
-          grid.scrollToColumnProp(x || 30);
+      };
+      window.setTrimmed = function () {
+        grid.trimmedRows = {
+          ['0']: true,
         };
-        window.clearGrouping = function() {
-          grid.grouping = {};
-        };
-        window.setGrouping = function() {
-          grid.grouping = {
-            props: ['key'],
-            expandedAll: true,
-            applyToProp: '6'
-          };
-        };
-        window.setTrimmed = function() {
-          grid.trimmedRows = {
-            ['0']: true
-          };
-        };
-        window.exportGrid = function() {
-          grid.getPlugins().then(plugins => {
-            plugins.forEach(p => {
-              if (p.exportFile) {
-                const exportPlugin = p;
-                exportPlugin.exportFile({
-                  filename: 'new file'
-                });
-              }
-            })
+      };
+      window.exportGrid = function () {
+        grid.getPlugins().then(plugins => {
+          plugins.forEach(p => {
+            if (p.exportFile) {
+              const exportPlugin = p;
+              exportPlugin.exportFile({
+                filename: 'new file',
+              });
+            }
           });
-        }
-
-
-        grid.columns = data.headers;
-        grid.source = data.rows;
-
-        grid.pinnedTopSource = data.pinnedTopRows;
-        grid.pinnedBottomSource = data.pinnedBottomRows;
-
-        grid.readonly = false;
-        grid.range = true;
-        grid.resize = true;
-        grid.filter = true;
-        grid.exporting = true;
-        grid.autoSizeColumn = {
-          mode: 'autoSizeAll'
-        };
-        // setGrouping();
-        setTrimmed();
-        grid.addEventListener('beforeExport', (e) => {
-          console.log(e.detail);
         });
+      };
 
-        
-        /* grid.rowDefinitions = [{
+      grid.columns = data.headers;
+      grid.source = data.rows;
+
+      grid.pinnedTopSource = data.pinnedTopRows;
+      grid.pinnedBottomSource = data.pinnedBottomRows;
+
+      grid.readonly = false;
+      grid.range = true;
+      grid.resize = true;
+      grid.filter = true;
+      grid.exporting = true;
+      grid.autoSizeColumn = {
+        mode: 'autoSizeAll',
+      };
+      // setGrouping();
+      setTrimmed();
+      grid.addEventListener('beforeExport', e => {
+        console.log(e.detail);
+      });
+
+      /* grid.rowDefinitions = [{
           type: 'row',
           index: 1,
           size: 100
         }]; */
-
-        
     </script>
-</body>
+  </body>
 </html>

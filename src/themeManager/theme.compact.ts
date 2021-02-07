@@ -1,5 +1,5 @@
-import { ThemeSpace } from "../interfaces";
+import { ThemeSpace } from '../interfaces';
 
 export default class ThemeCompact implements ThemeSpace.ThemePackage {
-    defaultRowSize: number = 32;
+  defaultRowSize: number = 32;
 }

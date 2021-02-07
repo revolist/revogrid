@@ -1,4 +1,4 @@
-name: "tweet-trigger-release"
+name: 'tweet-trigger-release'
 on:
   release:
     types: []

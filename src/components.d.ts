@@ -26,7 +26,7 @@ export namespace Components {
         /**
           * Autosize config Enable columns autoSize, for more details check @autoSizeColumn plugin By default disabled, hence operation is not resource efficient true to enable with default params (double header separator click for autosize) or provide config
          */
-        "autoSizeColumn": boolean|AutoSizeColumnConfig;
+        "autoSizeColumn": boolean | AutoSizeColumnConfig;
         /**
           * When true cell focus appear.
          */
@@ -42,11 +42,11 @@ export namespace Components {
         /**
           * Types Every type represent multiple column properties Types will be merged but can be replaced with column properties
          */
-        "columnTypes": {[name: string]: RevoGrid.ColumnType};
+        "columnTypes": { [name: string]: RevoGrid.ColumnType };
         /**
           * Columns - defines an array of grid columns. Can be column or grouped column.
          */
-        "columns": (RevoGrid.ColumnRegular|RevoGrid.ColumnGrouping)[];
+        "columns": (RevoGrid.ColumnRegular | RevoGrid.ColumnGrouping)[];
         /**
           * Custom editors register
          */
@@ -58,7 +58,7 @@ export namespace Components {
         /**
           * Enables filter plugin Can be boolean Can be filter collection
          */
-        "filter": boolean|ColumnFilterConfig;
+        "filter": boolean | ColumnFilterConfig;
         /**
           * Defines how many rows/columns should be rendered outside visible area.
          */
@@ -67,7 +67,7 @@ export namespace Components {
           * Provides access to column internal store observer Can be used for plugin support
           * @param type - type of column
          */
-        "getColumnStore": (type?: RevoGrid.DimensionCols) => Promise<Observable<import("/Users/maks/Projects/revogridjs/src/store/dataSource/data.store").DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>>;
+        "getColumnStore": (type?: RevoGrid.DimensionCols) => Promise<import("/Users/maks/Projects/revogridjs/src/interfaces").Observable<import("/Users/maks/Projects/revogridjs/src/store/dataSource/data.store").DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>>;
         /**
           * Receive all columns in data source
          */
@@ -84,7 +84,7 @@ export namespace Components {
           * Provides access to rows internal store observer Can be used for plugin support
           * @param type - type of source
          */
-        "getSourceStore": (type?: RevoGrid.DimensionRows) => Promise<Observable<import("/Users/maks/Projects/revogridjs/src/store/dataSource/data.store").DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>>;
+        "getSourceStore": (type?: RevoGrid.DimensionRows) => Promise<import("/Users/maks/Projects/revogridjs/src/interfaces").Observable<import("/Users/maks/Projects/revogridjs/src/store/dataSource/data.store").DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>>;
         /**
           * Get data from visible part of source Trimmed/filtered rows will be excluded
           * @param type - type of source
@@ -137,7 +137,7 @@ export namespace Components {
         /**
           * Excel like show row indexe per row
          */
-        "rowHeaders": RevoGrid.RowHeaders|boolean;
+        "rowHeaders": RevoGrid.RowHeaders | boolean;
         /**
           * Indicates default row size. By default 0, means theme package size will be applied
          */
@@ -206,12 +206,12 @@ export namespace Components {
         "viewportRow": Observable<RevoGrid.ViewportState>;
     }
     interface RevogrEdit {
-        "column": RevoGrid.ColumnRegular|null;
+        "column": RevoGrid.ColumnRegular | null;
         "editCell": Edition.EditCell;
         /**
           * Custom editors register
          */
-        "editor": Edition.EditorCtr|null;
+        "editor": Edition.EditorCtr | null;
     }
     interface RevogrFilterPanel {
         "filterEntities": Record<string, LogicFunction>;
@@ -297,8 +297,8 @@ export namespace Components {
          */
         "clearFocus": () => Promise<void>;
         "columnFilter": boolean;
-        "columnStores": {[T in RevoGrid.DimensionCols]: Observable<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>};
-        "dimensions": {[T in RevoGrid.MultiDimensionType]: Observable<RevoGrid.DimensionSettingsState>};
+        "columnStores": { [T in RevoGrid.DimensionCols]: Observable<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>> };
+        "dimensions": { [T in RevoGrid.MultiDimensionType]: Observable<RevoGrid.DimensionSettingsState> };
         /**
           * Custom editors register
          */
@@ -310,12 +310,12 @@ export namespace Components {
         /**
           * Show row indexes column
          */
-        "rowHeaders": RevoGrid.RowHeaders|boolean;
-        "rowStores": {[T in RevoGrid.DimensionRows]: Observable<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>};
+        "rowHeaders": RevoGrid.RowHeaders | boolean;
+        "rowStores": { [T in RevoGrid.DimensionRows]: Observable<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>> };
         "scrollToCoordinate": (cell: Partial<Selection.Cell>) => Promise<void>;
         "setEdit": (rowIndex: number, colIndex: number, colType: RevoGrid.DimensionCols, rowType: RevoGrid.DimensionRows) => Promise<void>;
-        "uuid": string|null;
-        "viewports": {[T in RevoGrid.MultiDimensionType]: Observable<RevoGrid.ViewportState>};
+        "uuid": string | null;
+        "viewports": { [T in RevoGrid.MultiDimensionType]: Observable<RevoGrid.ViewportState> };
     }
     interface RevogrViewportScroll {
         "changeScroll": (e: RevoGrid.ViewPortScrollEvent) => Promise<RevoGrid.ViewPortScrollEvent>;
@@ -424,7 +424,7 @@ declare namespace LocalJSX {
         /**
           * Autosize config Enable columns autoSize, for more details check @autoSizeColumn plugin By default disabled, hence operation is not resource efficient true to enable with default params (double header separator click for autosize) or provide config
          */
-        "autoSizeColumn"?: boolean|AutoSizeColumnConfig;
+        "autoSizeColumn"?: boolean | AutoSizeColumnConfig;
         /**
           * When true cell focus appear.
          */
@@ -436,11 +436,11 @@ declare namespace LocalJSX {
         /**
           * Types Every type represent multiple column properties Types will be merged but can be replaced with column properties
          */
-        "columnTypes"?: {[name: string]: RevoGrid.ColumnType};
+        "columnTypes"?: { [name: string]: RevoGrid.ColumnType };
         /**
           * Columns - defines an array of grid columns. Can be column or grouped column.
          */
-        "columns"?: (RevoGrid.ColumnRegular|RevoGrid.ColumnGrouping)[];
+        "columns"?: (RevoGrid.ColumnRegular | RevoGrid.ColumnGrouping)[];
         /**
           * Custom editors register
          */
@@ -452,7 +452,7 @@ declare namespace LocalJSX {
         /**
           * Enables filter plugin Can be boolean Can be filter collection
          */
-        "filter"?: boolean|ColumnFilterConfig;
+        "filter"?: boolean | ColumnFilterConfig;
         /**
           * Defines how many rows/columns should be rendered outside visible area.
          */
@@ -466,12 +466,12 @@ declare namespace LocalJSX {
          */
         "onAfterColumnsSet"?: (event: CustomEvent<{
     columns: ColumnCollection;
-    order: Record<RevoGrid.ColumnProp, 'asc'|'desc'>;
+    order: Record<RevoGrid.ColumnProp, 'asc' | 'desc'>;
   }>) => void;
         /**
           * After edit. Triggered when after data applied or Range changeged.
          */
-        "onAfterEdit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails|Edition.BeforeRangeSaveDataDetails>) => void;
+        "onAfterEdit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails | Edition.BeforeRangeSaveDataDetails>) => void;
         /**
           * After rows updated
          */
@@ -492,7 +492,7 @@ declare namespace LocalJSX {
          */
         "onBeforeColumnsSet"?: (event: CustomEvent<ColumnCollection>) => void;
         /**
-          * Before edit event. Triggered before edit data applied. Use e.preventDefault() to prevent edit data set and use you own.  Use e.val = {your value} to replace edit result with your own.
+          * Before edit event. Triggered before edit data applied. Use e.preventDefault() to prevent edit data set and use you own. Use e.val = {your value} to replace edit result with your own.
          */
         "onBeforeEdit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
         /**
@@ -506,11 +506,11 @@ declare namespace LocalJSX {
         /**
           * Before filter applied to data source Use e.preventDefault() to prevent cell focus change Update @collection if you wish to change filters
          */
-        "onBeforeFilterApply"?: (event: CustomEvent<{ collection: FilterCollection; }>) => void;
+        "onBeforeFilterApply"?: (event: CustomEvent<{ collection: FilterCollection }>) => void;
         /**
           * Before filter trimmed values Use e.preventDefault() to prevent value trimming and filter apply Update @collection if you wish to change filters Update @itemsToFilter if you wish to filter indexes of trimming
          */
-        "onBeforeFilterTrimmed"?: (event: CustomEvent<{ collection: FilterCollection; itemsToFilter: Record<number, boolean>}>) => void;
+        "onBeforeFilterTrimmed"?: (event: CustomEvent<{ collection: FilterCollection; itemsToFilter: Record<number, boolean> }>) => void;
         /**
           * Before range apply. Triggered before range applied. Use e.preventDefault() to prevent range.
          */
@@ -523,16 +523,16 @@ declare namespace LocalJSX {
           * Before sorting event. Initial sorting triggered, if this event stops no other event called. Use e.preventDefault() to prevent sorting.
          */
         "onBeforeSorting"?: (event: CustomEvent<{
-    column: RevoGrid.ColumnRegular,
-    order: 'desc'|'asc'
+    column: RevoGrid.ColumnRegular;
+    order: 'desc' | 'asc';
   }>) => void;
         /**
           * Before sorting apply. Use e.preventDefault() to prevent sorting data change.
          */
         "onBeforeSortingApply"?: (event: CustomEvent<{
-  column: RevoGrid.ColumnRegular,
-  order: 'desc'|'asc'
-}>) => void;
+    column: RevoGrid.ColumnRegular;
+    order: 'desc' | 'asc';
+  }>) => void;
         /**
           * Before data apply. You can override data source here
          */
@@ -549,13 +549,13 @@ declare namespace LocalJSX {
          */
         "onHeaderClick"?: (event: CustomEvent<RevoGrid.ColumnRegular>) => void;
         /**
-          * Row order change started. Use e.preventDefault() to prevent row order change.  Use e.text = 'new name' to change item name on start.
+          * Row order change started. Use e.preventDefault() to prevent row order change. Use e.text = 'new name' to change item name on start.
          */
-        "onRowDragStart"?: (event: CustomEvent<{pos: RevoGrid.PositionItem, text: string}>) => void;
+        "onRowDragStart"?: (event: CustomEvent<{ pos: RevoGrid.PositionItem; text: string }>) => void;
         /**
           * Before row order apply. Use e.preventDefault() to prevent row order change.
          */
-        "onRowOrderChanged"?: (event: CustomEvent<{from: number; to: number;}>) => void;
+        "onRowOrderChanged"?: (event: CustomEvent<{ from: number; to: number }>) => void;
         /**
           * Triggered when view port scrolled
          */
@@ -595,7 +595,7 @@ declare namespace LocalJSX {
         /**
           * Excel like show row indexe per row
          */
-        "rowHeaders"?: RevoGrid.RowHeaders|boolean;
+        "rowHeaders"?: RevoGrid.RowHeaders | boolean;
         /**
           * Indicates default row size. By default 0, means theme package size will be applied
          */
@@ -635,17 +635,17 @@ declare namespace LocalJSX {
         "viewportRow"?: Observable<RevoGrid.ViewportState>;
     }
     interface RevogrEdit {
-        "column"?: RevoGrid.ColumnRegular|null;
+        "column"?: RevoGrid.ColumnRegular | null;
         "editCell"?: Edition.EditCell;
         /**
           * Custom editors register
          */
-        "editor"?: Edition.EditorCtr|null;
+        "editor"?: Edition.EditorCtr | null;
         "onCellEdit"?: (event: CustomEvent<Edition.SaveDataDetails>) => void;
         /**
           * Close editor event
          */
-        "onCloseEdit"?: (event: CustomEvent<boolean|undefined>) => void;
+        "onCloseEdit"?: (event: CustomEvent<boolean | undefined>) => void;
     }
     interface RevogrFilterPanel {
         "filterEntities"?: Record<string, LogicFunction>;
@@ -686,7 +686,7 @@ declare namespace LocalJSX {
         /**
           * Row dragged, new range ready to be applied
          */
-        "onInitialRowDropped"?: (event: CustomEvent<{from: number; to: number;}>) => void;
+        "onInitialRowDropped"?: (event: CustomEvent<{ from: number; to: number }>) => void;
         /**
           * Row move
          */
@@ -699,8 +699,11 @@ declare namespace LocalJSX {
           * Row drag started
          */
         "onInternalRowDragStart"?: (event: CustomEvent<{
-		cell: Selection.Cell, text: string, pos: RevoGrid.PositionItem, event: MouseEvent
-	}>) => void;
+    cell: Selection.Cell;
+    text: string;
+    pos: RevoGrid.PositionItem;
+    event: MouseEvent;
+  }>) => void;
         /**
           * Row mouse move
          */
@@ -739,7 +742,7 @@ declare namespace LocalJSX {
         "onInternalSelectionChanged"?: (event: CustomEvent<Selection.ChangedRange>) => void;
         "onSetEdit"?: (event: CustomEvent<BeforeEdit>) => void;
         "onSetRange"?: (event: CustomEvent<Selection.RangeArea>) => void;
-        "onSetTempRange"?: (event: CustomEvent<Selection.RangeArea|null>) => void;
+        "onSetTempRange"?: (event: CustomEvent<Selection.RangeArea | null>) => void;
         "onUnregister"?: (event: CustomEvent<any>) => void;
         "range"?: boolean;
         "readonly"?: boolean;
@@ -764,15 +767,15 @@ declare namespace LocalJSX {
     }
     interface RevogrViewport {
         "columnFilter"?: boolean;
-        "columnStores"?: {[T in RevoGrid.DimensionCols]: Observable<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>};
-        "dimensions"?: {[T in RevoGrid.MultiDimensionType]: Observable<RevoGrid.DimensionSettingsState>};
+        "columnStores"?: { [T in RevoGrid.DimensionCols]: Observable<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>> };
+        "dimensions"?: { [T in RevoGrid.MultiDimensionType]: Observable<RevoGrid.DimensionSettingsState> };
         /**
           * Custom editors register
          */
         "editors"?: Edition.Editors;
         "onBeforeEditStart"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
-        "onInitialRowDragStart"?: (event: CustomEvent<{pos: RevoGrid.PositionItem, text: string}>) => void;
-        "onSetDimensionSize"?: (event: CustomEvent<{type: RevoGrid.MultiDimensionType, sizes: RevoGrid.ViewSettingSizeProp}>) => void;
+        "onInitialRowDragStart"?: (event: CustomEvent<{ pos: RevoGrid.PositionItem; text: string }>) => void;
+        "onSetDimensionSize"?: (event: CustomEvent<{ type: RevoGrid.MultiDimensionType; sizes: RevoGrid.ViewSettingSizeProp }>) => void;
         "onSetViewportCoordinate"?: (event: CustomEvent<RevoGrid.ViewPortScrollEvent>) => void;
         "onSetViewportSize"?: (event: CustomEvent<RevoGrid.ViewPortResizeEvent>) => void;
         "range"?: boolean;
@@ -782,10 +785,10 @@ declare namespace LocalJSX {
         /**
           * Show row indexes column
          */
-        "rowHeaders"?: RevoGrid.RowHeaders|boolean;
-        "rowStores"?: {[T in RevoGrid.DimensionRows]: Observable<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>};
-        "uuid"?: string|null;
-        "viewports"?: {[T in RevoGrid.MultiDimensionType]: Observable<RevoGrid.ViewportState>};
+        "rowHeaders"?: RevoGrid.RowHeaders | boolean;
+        "rowStores"?: { [T in RevoGrid.DimensionRows]: Observable<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>> };
+        "uuid"?: string | null;
+        "viewports"?: { [T in RevoGrid.MultiDimensionType]: Observable<RevoGrid.ViewportState> };
     }
     interface RevogrViewportScroll {
         "contentHeight"?: number;

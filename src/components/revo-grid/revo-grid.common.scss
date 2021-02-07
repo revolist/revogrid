@@ -17,14 +17,15 @@ revo-grid {
 
   @include noSelect;
 
-	.footer-wrapper, .header-wrapper {
-		width: 100%;
+  .footer-wrapper,
+  .header-wrapper {
+    width: 100%;
 
-		revogr-data {
-			z-index: 3;
-		}
+    revogr-data {
+      z-index: 3;
+    }
   }
-  
+
   revo-dropdown {
     width: 100%;
 
@@ -46,7 +47,8 @@ revo-grid {
 
   revogr-scroll-virtual {
     position: relative;
-    &.vertical, &.horizontal {
+    &.vertical,
+    &.horizontal {
       z-index: 3;
     }
   }

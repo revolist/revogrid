@@ -1,11 +1,11 @@
-import {Component, Element, Event, Prop, VNode, EventEmitter, h} from '@stencil/core';
-import {HTMLStencilElement} from '@stencil/core/internal';
+import { Component, Element, Event, Prop, VNode, EventEmitter, h } from '@stencil/core';
+import { HTMLStencilElement } from '@stencil/core/internal';
 
 import ColumnService, { ColumnSource, RowSource } from './columnService';
-import {DATA_COL, DATA_ROW} from '../../utils/consts';
+import { DATA_COL, DATA_ROW } from '../../utils/consts';
 
-import {getSourceItem} from '../../store/dataSource/data.store';
-import {Observable, RevoGrid, Selection} from '../../interfaces';
+import { getSourceItem } from '../../store/dataSource/data.store';
+import { Observable, RevoGrid, Selection } from '../../interfaces';
 import CellRenderer from './cellRenderer';
 import RowRenderer, { PADDING_DEPTH } from './rowRenderer';
 import GroupingRowRenderer from '../../plugins/groupingRow/grouping.row.renderer';
@@ -13,7 +13,7 @@ import { isGrouping } from '../../plugins/groupingRow/grouping.service';
 
 @Component({
   tag: 'revogr-data',
-  styleUrl: 'revogr-data-style.scss'
+  styleUrl: 'revogr-data-style.scss',
 })
 export class RevogrData {
   private columnService: ColumnService;
@@ -27,7 +27,7 @@ export class RevogrData {
   @Prop() rowClass: string;
   @Prop() rowSelectionStore: Observable<Selection.SelectionStoreState>;
   @Prop() viewportRow: Observable<RevoGrid.ViewportState>;
-  @Prop() viewportCol:  Observable<RevoGrid.ViewportState>;
+  @Prop() viewportCol: Observable<RevoGrid.ViewportState>;
 
   @Prop() dimensionRow: Observable<RevoGrid.DimensionSettingsState>;
 
@@ -55,12 +55,12 @@ export class RevogrData {
       const dataRow = getSourceItem(this.dataStore, row.itemIndex);
       /** grouping */
       if (isGrouping(dataRow)) {
-        rowsEls.push(<GroupingRowRenderer {...row} model={dataRow} hasExpand={this.columnService.hasGrouping}/>);
+        rowsEls.push(<GroupingRowRenderer {...row} model={dataRow} hasExpand={this.columnService.hasGrouping} />);
         continue;
       }
       /** grouping end */
 
-      const cells: (VNode|string|void)[] = [];
+      const cells: (VNode | string | void)[] = [];
       let rowClass = this.rowClass ? this.columnService.getRowClass(row.itemIndex, this.rowClass) : '';
       if (range && row.itemIndex >= range.y && row.itemIndex <= range.y1) {
         rowClass += ' focused-row';
@@ -69,29 +69,23 @@ export class RevogrData {
         cells.push(this.getCellRenderer(row, col, this.canDrag, /** grouping apply*/ this.columnService.hasGrouping ? depth : 0));
       }
       rowsEls.push(
-        <RowRenderer
-          rowClass={rowClass}
-          size={row.size}
-          start={row.start}>{cells}</RowRenderer>
+        <RowRenderer rowClass={rowClass} size={row.size} start={row.start}>
+          {cells}
+        </RowRenderer>,
       );
     }
     return rowsEls;
   }
 
-  private getCellRenderer(
-    row: RevoGrid.VirtualPositionItem,
-    col: RevoGrid.VirtualPositionItem,
-    draggable = false,
-    depth = 0
-  ) {
+  private getCellRenderer(row: RevoGrid.VirtualPositionItem, col: RevoGrid.VirtualPositionItem, draggable = false, depth = 0) {
     const model = this.columnService.rowDataModel(row.itemIndex, col.itemIndex);
     const defaultProps: RevoGrid.CellProps = {
       [DATA_COL]: col.itemIndex,
       [DATA_ROW]: row.itemIndex,
       style: {
         width: `${col.size}px`,
-        transform: `translateX(${col.start}px)`
-      }
+        transform: `translateX(${col.start}px)`,
+      },
     };
     if (depth && !col.itemIndex) {
       defaultProps.style.paddingLeft = `${PADDING_DEPTH * depth}px`;
@@ -111,11 +105,10 @@ export class RevogrData {
     }
 
     // if regular render
-    return <div {...props}>
-      <CellRenderer
-        model={model}
-        canDrag={draggable}
-        onDragStart={(e) => this.dragStartCell.emit(e)}/>
-    </div>;
+    return (
+      <div {...props}>
+        <CellRenderer model={model} canDrag={draggable} onDragStart={e => this.dragStartCell.emit(e)} />
+      </div>
+    );
   }
 }

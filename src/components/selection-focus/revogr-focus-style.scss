@@ -1,8 +1,8 @@
 revogr-focus.focused-cell {
-    @include selection(1px);
+  @include selection(1px);
 
-    position: absolute;
-    pointer-events:none;
-    z-index: 9;
-    display: block;
+  position: absolute;
+  pointer-events: none;
+  z-index: 9;
+  display: block;
 }

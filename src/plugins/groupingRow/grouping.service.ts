@@ -1,10 +1,10 @@
-import { RevoGrid } from "../../interfaces";
-import { GROUP_DEPTH, GROUP_EXPANDED, PSEUDO_GROUP_COLUMN, PSEUDO_GROUP_ITEM, PSEUDO_GROUP_ITEM_ID, PSEUDO_GROUP_ITEM_VALUE } from "./grouping.const";
+import { RevoGrid } from '../../interfaces';
+import { GROUP_DEPTH, GROUP_EXPANDED, PSEUDO_GROUP_COLUMN, PSEUDO_GROUP_ITEM, PSEUDO_GROUP_ITEM_ID, PSEUDO_GROUP_ITEM_VALUE } from './grouping.const';
 
 type Group<T> = {
-	id: string;
-	children: T[];
-	ids: number[];
+  id: string;
+  children: T[];
+  ids: number[];
 };
 
 export type ExpandedOptions = {
@@ -22,15 +22,15 @@ function groupBy<T>(array: T[], f: (v: T) => any) {
 
     // new group identification
     if (!groups[groupKeys]) {
-			groups[groupKeys] = [];
-			// store indexes order
-			groupIndexes[groupKeys] = [];
-			// create group parents
-			groupsOrder.push({
-				children: groups[groupKeys],
-				ids: groupIndexes[groupKeys],
-				id: groupKeys
-			});
+      groups[groupKeys] = [];
+      // store indexes order
+      groupIndexes[groupKeys] = [];
+      // create group parents
+      groupsOrder.push({
+        children: groups[groupKeys],
+        ids: groupIndexes[groupKeys],
+        id: groupKeys,
+      });
     }
     // save to group
     groups[groupKeys].push(item);
@@ -45,10 +45,7 @@ function groupBy<T>(array: T[], f: (v: T) => any) {
  * @param mapFunc - mapping function for stringify
  * @param expanded - potentially expanded items if present
  */
-export function gatherGrouping<T>(
-  array: T[],
-  mapFunc: (v: T) => any,
-  {prevExpanded, expandedAll}: ExpandedOptions) {
+export function gatherGrouping<T>(array: T[], mapFunc: (v: T) => any, { prevExpanded, expandedAll }: ExpandedOptions) {
   // build groups
   const groupsOrder = groupBy(array, mapFunc);
 
@@ -57,13 +54,13 @@ export function gatherGrouping<T>(
 
   let itemIndex = 0; // item index in source
   let groupingDepth = 0; // to save max group depth
-	const trimmed: Record<number, boolean> = {}; // collapse all groups in the beginning
+  const trimmed: Record<number, boolean> = {}; // collapse all groups in the beginning
   // go through groups
   groupsOrder.forEach(group => {
     const parseGroup = getParsedGroup(group.id);
     // extra precaution and type safe guard
     if (!parseGroup) {
-        return;
+      return;
     }
 
     // add group headers
@@ -75,19 +72,19 @@ export function gatherGrouping<T>(
       const newVal = prevVal.join(',');
       // if header not added, add new header
       if (!pseudoGroupTest[newVal]) {
-        isExpanded = expandedAll || prevExpanded && prevExpanded[newVal];
-				itemsMirror.push(getPseudoGroup(groupValue, newVal, depth, group.id, isExpanded));
+        isExpanded = expandedAll || (prevExpanded && prevExpanded[newVal]);
+        itemsMirror.push(getPseudoGroup(groupValue, newVal, depth, group.id, isExpanded));
 
         // if not first level auto collapse
         if (depth && !isExpanded && !skipTrim) {
           // check if parent expanded, expand this layer too
           const parent = prevVal.slice(0, prevVal.length - 1);
           if (!(prevExpanded && parent.length && prevExpanded[parent.join(',')])) {
-					  trimmed[itemIndex] = true;
+            trimmed[itemIndex] = true;
           }
         }
         itemIndex++;
-				pseudoGroupTest[newVal] = true;
+        pseudoGroupTest[newVal] = true;
       }
       // calculate depth
       depth++;
@@ -107,18 +104,18 @@ export function gatherGrouping<T>(
   return {
     sourceWithGroups: itemsMirror,
     depth: groupingDepth,
-    trimmed
+    trimmed,
   };
 }
 
 function getPseudoGroup(groupValue: string, value: string, depth: number, id: string, isExpanded = false) {
-	return {
-		[PSEUDO_GROUP_ITEM]: groupValue,
-		[GROUP_DEPTH]: depth,
+  return {
+    [PSEUDO_GROUP_ITEM]: groupValue,
+    [GROUP_DEPTH]: depth,
     [PSEUDO_GROUP_ITEM_ID]: id,
     [PSEUDO_GROUP_ITEM_VALUE]: value,
-    [GROUP_EXPANDED]: isExpanded
-	};
+    [GROUP_EXPANDED]: isExpanded,
+  };
 }
 
 export function getGroupingName(row?: RevoGrid.DataType) {
@@ -126,15 +123,15 @@ export function getGroupingName(row?: RevoGrid.DataType) {
 }
 
 export function isGrouping(row?: RevoGrid.DataType) {
-	return row && typeof row[PSEUDO_GROUP_ITEM] !== 'undefined';
+  return row && typeof row[PSEUDO_GROUP_ITEM] !== 'undefined';
 }
 
 export function isGroupingColumn(column?: RevoGrid.ColumnRegular) {
   return column && typeof column[PSEUDO_GROUP_COLUMN] !== 'undefined';
 }
 
-export function isArray<T>(data: any|T[]): data is T[] {
-	return typeof (data as T[]).push !== 'undefined';
+export function isArray<T>(data: any | T[]): data is T[] {
+  return typeof (data as T[]).push !== 'undefined';
 }
 
 export function measureEqualDepth<T>(groupA: T[], groupB: T[]) {
@@ -152,7 +149,7 @@ export function getParsedGroup(id: string): any[] {
   const parseGroup = JSON.parse(id);
   // extra precaution and type safe guard
   if (!isArray(parseGroup)) {
-      return null;
+    return null;
   }
   return parseGroup;
 }
@@ -163,7 +160,7 @@ export function isSameGroup(currentGroup: any[], currentModel: RevoGrid.DataType
   if (!nextGroup) {
     return false;
   }
-  
+
   const depth = measureEqualDepth(currentGroup, nextGroup);
   return currentModel[GROUP_DEPTH] < depth;
 }

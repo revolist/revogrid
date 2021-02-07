@@ -1,8 +1,8 @@
 import debounce from 'lodash/debounce';
 import each from 'lodash/each';
 
-import {Selection, RevoGrid} from '../../interfaces';
-import {getItemByIndex, getItemByPosition} from '../../store/dimension/dimension.helpers';
+import { Selection, RevoGrid } from '../../interfaces';
+import { getItemByIndex, getItemByPosition } from '../../store/dimension/dimension.helpers';
 import { getRange } from '../../store/selection/selection.helpers';
 import Cell = Selection.Cell;
 import Range = Selection.RangeArea;
@@ -13,7 +13,7 @@ interface Config {
   focus(cell: Cell, isMulti?: boolean): boolean;
   applyRange(start: Cell, end: Cell): void;
   tempRange(start: Cell, end: Cell): void;
-  autoFill(isAutofill: boolean): Cell|null;
+  autoFill(isAutofill: boolean): Cell | null;
 }
 
 type EventData = {
@@ -25,16 +25,15 @@ type EventData = {
 
 export default class CellSelectionService {
   public canRange: boolean = false;
-  private autoFillInitial: Cell|null = null;
-  private autoFillStart: Cell|null = null;
-  private autoFillLast: Cell|null = null;
+  private autoFillInitial: Cell | null = null;
+  private autoFillStart: Cell | null = null;
+  private autoFillLast: Cell | null = null;
 
   readonly onMouseMove = debounce((e: MouseEvent, data: EventData) => this.doMouseMove(e, data), 5);
 
   constructor(private config: Config) {
     this.canRange = config.canRange;
   }
-
 
   keyPositionChange(changes: Partial<Cell>, eData: EventData, range?: Range, focus?: Cell, isMulti = false) {
     if (!range || !focus) {
@@ -54,21 +53,20 @@ export default class CellSelectionService {
     return this.config.focus(data.start);
   }
 
-
-  onCellDown({shiftKey, x, y, defaultPrevented}: MouseEvent, data: EventData): void {
+  onCellDown({ shiftKey, x, y, defaultPrevented }: MouseEvent, data: EventData): void {
     if (defaultPrevented) {
       return;
     }
     /** Regular cell click */
-    const focusCell: Cell = getCurrentCell({x, y}, data);
+    const focusCell: Cell = getCurrentCell({ x, y }, data);
     this.config.focus(focusCell, this.canRange && shiftKey);
   }
 
   onAutoFillStart(e: MouseEvent, data: EventData): void {
     /** Get cell by autofill element */
-    const {top, left} = (e.target as HTMLElement).getBoundingClientRect();
+    const { top, left } = (e.target as HTMLElement).getBoundingClientRect();
     this.autoFillInitial = this.config.autoFill(true);
-    this.autoFillStart = getCurrentCell({x: left, y: top}, data);
+    this.autoFillStart = getCurrentCell({ x: left, y: top }, data);
     e.preventDefault();
   }
 
@@ -88,12 +86,12 @@ export default class CellSelectionService {
    * Autofill logic:
    * on mouse move apply based on previous direction (if present)
    */
-  doMouseMove({x, y}: MouseEvent, data: EventData): void {
+  doMouseMove({ x, y }: MouseEvent, data: EventData): void {
     if (!this.autoFillInitial) {
       return;
     }
-    let current = getCurrentCell({x, y}, data);
-    let direction: Partial<Cell>|null;
+    let current = getCurrentCell({ x, y }, data);
+    let direction: Partial<Cell> | null;
     if (this.autoFillLast) {
       direction = getDirectionCoordinate(this.autoFillStart, this.autoFillLast);
     }
@@ -127,18 +125,18 @@ export default class CellSelectionService {
 }
 
 /** check if out of range */
-function isAfterLast({x, y}: Cell, {lastCell}: EventData) {
-  return x >= lastCell.x || y >= lastCell.y
+function isAfterLast({ x, y }: Cell, { lastCell }: EventData) {
+  return x >= lastCell.x || y >= lastCell.y;
 }
 
 /** check if out of range */
-function isBeforeFirst({x, y}: Cell) {
-  return x < 0 || y < 0
+function isBeforeFirst({ x, y }: Cell) {
+  return x < 0 || y < 0;
 }
 
 /** Calculate cell based on x, y position */
-function getCurrentCell({x, y}: Cell, {el, rows, cols}: EventData): Cell {
-  const {top, left, height, width} = el.getBoundingClientRect();
+function getCurrentCell({ x, y }: Cell, { el, rows, cols }: EventData): Cell {
+  const { top, left, height, width } = el.getBoundingClientRect();
   let cellY = y - top;
 
   // limit to element height
@@ -165,17 +163,17 @@ function getCurrentCell({x, y}: Cell, {el, rows, cols}: EventData): Cell {
 }
 
 /** Compare cells, only 1 coordinate difference is possible */
-function getDirectionCoordinate(initial: Cell, last: Cell): Partial<Cell>|null {
+function getDirectionCoordinate(initial: Cell, last: Cell): Partial<Cell> | null {
   const c: (keyof Cell)[] = ['x', 'y'];
   for (let k of c) {
     if (initial[k] !== last[k]) {
-      return {[k]: 1};
+      return { [k]: 1 };
     }
   }
   return null;
 }
 
-function getLargestAxis(initial: Cell, last: Cell): Partial<Cell>|null {
+function getLargestAxis(initial: Cell, last: Cell): Partial<Cell> | null {
   const cell: Partial<Cell> = {};
   const c: (keyof Cell)[] = ['x', 'y'];
   for (let k of c) {
@@ -194,9 +192,9 @@ function getCoordinate(range: Range, focus: Cell, changes: Partial<Cell>, isMult
   const updateCoordinate = (c: keyof Cell) => {
     const start = { x: range.x, y: range.y };
     const end = isMulti ? { x: range.x1, y: range.y1 } : start;
-    const point = end[c] > focus[c]  ? end : start;
+    const point = end[c] > focus[c] ? end : start;
     point[c] += changes[c];
-    return {start, end};
+    return { start, end };
   };
 
   if (changes.x) {
@@ -208,36 +206,32 @@ function getCoordinate(range: Range, focus: Cell, changes: Partial<Cell>, isMult
   return null;
 }
 
-
-function styleByCellProps(styles: {[key: string]: number}): Selection.RangeAreaCss {
-  return  {
+function styleByCellProps(styles: { [key: string]: number }): Selection.RangeAreaCss {
+  return {
     left: `${styles.left}px`,
     top: `${styles.top}px`,
     width: `${styles.width}px`,
-    height: `${styles.height}px`
+    height: `${styles.height}px`,
   };
 }
 
-export function getCell({x, y, x1, y1}: Selection.RangeArea, dimensionRow: RevoGrid.DimensionSettingsState, dimensionCol: RevoGrid.DimensionSettingsState) {
+export function getCell({ x, y, x1, y1 }: Selection.RangeArea, dimensionRow: RevoGrid.DimensionSettingsState, dimensionCol: RevoGrid.DimensionSettingsState) {
   const top: number = getItemByIndex(dimensionRow, y).start;
   const left: number = getItemByIndex(dimensionCol, x).start;
   const bottom: number = getItemByIndex(dimensionRow, y1).end;
   const right: number = getItemByIndex(dimensionCol, x1).end;
 
-  return  {
+  return {
     left,
     right,
     top,
     bottom,
-    width: right-left,
-    height: bottom-top
+    width: right - left,
+    height: bottom - top,
   };
 }
 
-export function getElStyle(
-  range: Selection.RangeArea,
-  dimensionRow: RevoGrid.DimensionSettingsState,
-  dimensionCol: RevoGrid.DimensionSettingsState): Selection.RangeAreaCss {
+export function getElStyle(range: Selection.RangeArea, dimensionRow: RevoGrid.DimensionSettingsState, dimensionCol: RevoGrid.DimensionSettingsState): Selection.RangeAreaCss {
   const styles = getCell(range, dimensionRow, dimensionCol);
   return styleByCellProps(styles);
 }

@@ -13,14 +13,11 @@ export const config: Config = {
   namespace: 'revo-grid',
   taskQueue: 'async',
   globalScript: './src/global/global.ts',
-  plugins: [sass({
-    injectGlobalPaths: [
-      'src/global/_colors.scss',
-      'src/global/_icons.scss',
-      'src/global/_mixins.scss',
-      'src/global/_buttons.scss'
-    ]
-  })],
+  plugins: [
+    sass({
+      injectGlobalPaths: ['src/global/_colors.scss', 'src/global/_icons.scss', 'src/global/_mixins.scss', 'src/global/_buttons.scss'],
+    }),
+  ],
   outputTargets: [
     angularOutputTarget({
       componentCorePackage,
@@ -34,11 +31,13 @@ export const config: Config = {
     vueOutputTarget({
       componentCorePackage,
       proxiesFile: directivesProxyFile('vue'),
-      componentModels: [{
-        elements: 'revo-dropdown',
-        event: 'changeValue',
-        targetAttr: 'changeValue'
-      }]
+      componentModels: [
+        {
+          elements: 'revo-dropdown',
+          event: 'changeValue',
+          targetAttr: 'changeValue',
+        },
+      ],
     }),
     svelteOutputTarget({
       componentCorePackage,
@@ -49,14 +48,12 @@ export const config: Config = {
       esmLoaderPath: '../loader',
     },
     {
-      type: 'docs-readme'
+      type: 'docs-readme',
     },
     {
       type: 'www',
-      copy: [
-        { src: 'utilsExternal' },
-      ],
-      serviceWorker: null // disable service workers
+      copy: [{ src: 'utilsExternal' }],
+      serviceWorker: null, // disable service workers
     },
-  ]
+  ],
 };

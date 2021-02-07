@@ -3,7 +3,7 @@ interface CSSStyleDeclarationExtended extends CSSStyleDeclaration {
 }
 
 /* Generate range on size
-*/
+ */
 export function range(size: number, startAt: number = 0): number[] {
   const res: number[] = [];
   const end = startAt + size;
@@ -15,17 +15,17 @@ export function range(size: number, startAt: number = 0): number[] {
 
 /* Find index position in array */
 export function findPositionInArray<T>(this: T[], el: T, compareFn: (el: T, el2: T) => number): number {
-  return (function(arr): number {
+  return (function (arr): number {
     let m: number = 0;
     let n: number = arr.length - 1;
 
-    while(m <= n) {
+    while (m <= n) {
       const k: number = (n + m) >> 1;
       const cmp: number = compareFn(el, arr[k]);
 
-      if(cmp > 0) {
+      if (cmp > 0) {
         m = k + 1;
-      } else if(cmp < 0) {
+      } else if (cmp < 0) {
         n = k - 1;
       } else {
         return k;
@@ -52,7 +52,7 @@ export function mergeSortedArray<T>(arr1: T[], arr2: T[], compareFn: (el: T, el2
   let index2: number = 0;
   let current: number = 0;
 
-  while (current < (arr1.length + arr2.length)) {
+  while (current < arr1.length + arr2.length) {
     let isArr1Depleted = index1 >= arr1.length;
     let isArr2Depleted = index2 >= arr2.length;
 
@@ -70,7 +70,6 @@ export function mergeSortedArray<T>(arr1: T[], arr2: T[], compareFn: (el: T, el2
   return merged;
 }
 
-
 /* Calculate system scrollbar width */
 export function getScrollbarWidth(doc: Document): number {
   // Creating invisible container
@@ -86,7 +85,7 @@ export function getScrollbarWidth(doc: Document): number {
   outer.appendChild(inner);
 
   // Calculating difference between container's full width and the child width
-  const scrollbarWidth: number = (outer.offsetWidth - inner.offsetWidth);
+  const scrollbarWidth: number = outer.offsetWidth - inner.offsetWidth;
 
   // Removing temporary elements from the DOM
   outer.parentNode.removeChild(outer);
@@ -95,19 +94,19 @@ export function getScrollbarWidth(doc: Document): number {
 }
 
 /* Scale a value between 2 ranges
-*
-* Sample:
-* // 55 from a 0-100 range to a 0-1000 range (Ranges don't have to be positive)
-* const n = scaleValue(55, [0,100], [0,1000]);
-*
-* Ranges of two values
-* @from
-* @to
-*
-* ~~ return value does the equivalent of Math.floor but faster.
-*/
+ *
+ * Sample:
+ * // 55 from a 0-100 range to a 0-1000 range (Ranges don't have to be positive)
+ * const n = scaleValue(55, [0,100], [0,1000]);
+ *
+ * Ranges of two values
+ * @from
+ * @to
+ *
+ * ~~ return value does the equivalent of Math.floor but faster.
+ */
 export function scaleValue(value: number, from: [number, number], to: [number, number]): number {
-  return ((to[1] - to[0]) * (value - from[0]) / (from[1] - from[0])) + to[0];
+  return ((to[1] - to[0]) * (value - from[0])) / (from[1] - from[0]) + to[0];
 }
 
 export async function timeout(delay = 0): Promise<void> {

@@ -20,7 +20,6 @@ export const TMP_SELECTION_BG_CLASS = 'temp-bg-range';
 
 export const CELL_HANDLER_CLASS = 'autofill-handle';
 
-
 export const EDIT_INPUT_WR = 'edit-input-wrapper';
 
 export const DRAGG_TEXT = 'Draggable item';

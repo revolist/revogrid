@@ -1,44 +1,44 @@
 revogr-scroll-virtual {
-	&[auto-hide] {
-		position: absolute;
-		z-index: 100;
+  &[auto-hide] {
+    position: absolute;
+    z-index: 100;
 
-		&.vertical {
-			right: 0;
-			top: 0;
+    &.vertical {
+      right: 0;
+      top: 0;
 
-			&:hover {
-				min-width: 20px;
-			}
-		}
+      &:hover {
+        min-width: 20px;
+      }
+    }
 
-		&.horizontal {
-			bottom: 0;
-			left: 0;
+    &.horizontal {
+      bottom: 0;
+      left: 0;
 
-			&:hover {
-				min-height: 20px;
-			}
-		}
-	}
+      &:hover {
+        min-height: 20px;
+      }
+    }
+  }
 
-	&.vertical {
-		overflow-y: auto;
-		overflow-x: hidden;
-		height: 100%;
+  &.vertical {
+    overflow-y: auto;
+    overflow-x: hidden;
+    height: 100%;
 
-		> div {
-			width: 1px;
-		}
-	}
+    > div {
+      width: 1px;
+    }
+  }
 
-	&.horizontal {
-		overflow-x: auto;
-		overflow-y: hidden;
-		width: 100%;
+  &.horizontal {
+    overflow-x: auto;
+    overflow-y: hidden;
+    width: 100%;
 
-		> div {
-			height: 1px;
-		}
-	}
+    > div {
+      height: 1px;
+    }
+  }
 }

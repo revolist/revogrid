@@ -1,14 +1,14 @@
-import {Component, Prop, h, Host, Listen, Element, Event, EventEmitter, VNode, Method} from '@stencil/core';
+import { Component, Prop, h, Host, Listen, Element, Event, EventEmitter, VNode, Method } from '@stencil/core';
 import each from 'lodash/each';
 
 import '../../utils/closestPolifill';
-import {UUID} from '../../utils/consts';
-import {gatherColumnData, getStoresCoordinates, ViewportColumn} from './viewport.helpers';
+import { UUID } from '../../utils/consts';
+import { gatherColumnData, getStoresCoordinates, ViewportColumn } from './viewport.helpers';
 import GridScrollingService from './gridScrollingService';
-import {ViewportSpace} from './viewport.interfaces';
-import {DataSourceState} from '../../store/dataSource/data.store';
+import { ViewportSpace } from './viewport.interfaces';
+import { DataSourceState } from '../../store/dataSource/data.store';
 import SelectionStoreConnector from '../../services/selection.store.connector';
-import {Edition, Selection, RevoGrid, Observable} from '../../interfaces';
+import { Edition, Selection, RevoGrid, Observable } from '../../interfaces';
 import OrderRenderer, { OrdererService } from '../order/orderRenderer';
 import { columnTypes } from '../../store/storeTypes';
 
@@ -18,7 +18,7 @@ import ViewportProps = ViewportSpace.ViewportProps;
 
 @Component({
   tag: 'revogr-viewport',
-  styleUrl: 'revogr-viewport-style.scss'
+  styleUrl: 'revogr-viewport-style.scss',
 })
 export class RevogrViewport {
   @Element() element: HTMLElement;
@@ -33,21 +33,21 @@ export class RevogrViewport {
   //
   // --------------------------------------------------------------------------
 
-  @Prop() columnStores: {[T in RevoGrid.DimensionCols]: Observable<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>};
-  @Prop() rowStores: {[T in RevoGrid.DimensionRows]: Observable<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>};
-  @Prop() dimensions: {[T in RevoGrid.MultiDimensionType]: Observable<RevoGrid.DimensionSettingsState>};
-  @Prop() viewports: {[T in RevoGrid.MultiDimensionType]: Observable<RevoGrid.ViewportState>};
-  
+  @Prop() columnStores: { [T in RevoGrid.DimensionCols]: Observable<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>> };
+  @Prop() rowStores: { [T in RevoGrid.DimensionRows]: Observable<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>> };
+  @Prop() dimensions: { [T in RevoGrid.MultiDimensionType]: Observable<RevoGrid.DimensionSettingsState> };
+  @Prop() viewports: { [T in RevoGrid.MultiDimensionType]: Observable<RevoGrid.ViewportState> };
+
   /** Custom editors register  */
   @Prop() editors: Edition.Editors;
   @Prop() rowClass: string;
 
-  @Prop() uuid: string|null = null;
+  @Prop() uuid: string | null = null;
   @Prop() resize: boolean;
   @Prop() readonly: boolean;
   @Prop() range: boolean;
   /** Show row indexes column */
-  @Prop() rowHeaders: RevoGrid.RowHeaders|boolean;
+  @Prop() rowHeaders: RevoGrid.RowHeaders | boolean;
   @Prop() columnFilter: boolean;
 
   // --------------------------------------------------------------------------
@@ -56,15 +56,12 @@ export class RevogrViewport {
   //
   // --------------------------------------------------------------------------
 
-  @Event() setDimensionSize: EventEmitter<{type: RevoGrid.MultiDimensionType, sizes: RevoGrid.ViewSettingSizeProp}>;
+  @Event() setDimensionSize: EventEmitter<{ type: RevoGrid.MultiDimensionType; sizes: RevoGrid.ViewSettingSizeProp }>;
   @Event() setViewportCoordinate: EventEmitter<RevoGrid.ViewPortScrollEvent>;
   @Event() setViewportSize: EventEmitter<RevoGrid.ViewPortResizeEvent>;
-  @Event({ cancelable: true }) initialRowDragStart: EventEmitter<{pos: RevoGrid.PositionItem, text: string}>;
+  @Event({ cancelable: true }) initialRowDragStart: EventEmitter<{ pos: RevoGrid.PositionItem; text: string }>;
   @Event() beforeEditStart: EventEmitter<Edition.BeforeSaveDataDetails>;
 
-
-
-  
   // --------------------------------------------------------------------------
   //
   //  Listeners
@@ -74,7 +71,7 @@ export class RevogrViewport {
   /** Clear data which is outside of grid container */
   @Listen('click', { target: 'document' })
   handleOutsideClick(e: KeyboardEvent) {
-    const target: HTMLElement|null = e.target as HTMLElement;
+    const target: HTMLElement | null = e.target as HTMLElement;
     if (!target?.closest(`[${UUID}="${this.uuid}"]`)) {
       this.selectionStoreConnector.clearAll();
     }
@@ -82,7 +79,7 @@ export class RevogrViewport {
 
   /** DRAG AND DROP */
   @Listen('internalRowDragStart')
-  onRowDragStarted(e: CustomEvent<{pos: RevoGrid.PositionItem, text: string, event: MouseEvent}>) {
+  onRowDragStarted(e: CustomEvent<{ pos: RevoGrid.PositionItem; text: string; event: MouseEvent }>) {
     e.cancelBubble = true;
     const dragEvent = this.initialRowDragStart.emit({ ...e.detail });
     if (dragEvent.defaultPrevented) {
@@ -98,7 +95,7 @@ export class RevogrViewport {
   }
 
   @Listen('internalRowDrag')
-  onRowDrag({detail}: CustomEvent<RevoGrid.PositionItem>) {
+  onRowDrag({ detail }: CustomEvent<RevoGrid.PositionItem>) {
     this.orderService?.move(detail);
   }
 
@@ -107,8 +104,7 @@ export class RevogrViewport {
     e.cancelBubble = true;
     this.orderService?.moveTip(e.detail);
   }
-  
-  
+
   // --------------------------------------------------------------------------
   //
   //  Methods
@@ -124,7 +120,7 @@ export class RevogrViewport {
       }
     });
   }
-  
+
   /**
    * Clear current grid focus
    */
@@ -132,7 +128,7 @@ export class RevogrViewport {
     this.selectionStoreConnector.clearAll();
   }
 
-  @Method() async setEdit(rowIndex: number, colIndex: number, colType: RevoGrid.DimensionCols, rowType: RevoGrid.DimensionRows ): Promise<void> {
+  @Method() async setEdit(rowIndex: number, colIndex: number, colType: RevoGrid.DimensionCols, rowType: RevoGrid.DimensionRows): Promise<void> {
     const stores = getStoresCoordinates(this.columnStores, this.rowStores);
     const x = stores[colType];
     const y = stores[rowType];
@@ -142,8 +138,7 @@ export class RevogrViewport {
   /** Component */
   connectedCallback(): void {
     this.selectionStoreConnector = new SelectionStoreConnector();
-    this.scrollingService = new GridScrollingService(
-      (e: RevoGrid.ViewPortScrollEvent) => this.setViewportCoordinate.emit(e));
+    this.scrollingService = new GridScrollingService((e: RevoGrid.ViewPortScrollEvent) => this.setViewportCoordinate.emit(e));
   }
 
   private renderViewports(contentHeight: number): VNode[] {
@@ -151,7 +146,7 @@ export class RevogrViewport {
     const viewports: ViewportProps[] = [];
     let index: number = 0;
 
-    columnTypes.forEach((val) => {
+    columnTypes.forEach(val => {
       const colStore = this.columnStores[val];
       // only columns that have data show
       if (!colStore.get('items').length) {
@@ -160,7 +155,6 @@ export class RevogrViewport {
       const column: ViewportColumn = {
         colType: val,
         position: { x: index, y: 1 },
-
 
         contentHeight: contentHeight,
         fixWidth: val !== 'col',
@@ -171,12 +165,10 @@ export class RevogrViewport {
         rowStores: this.rowStores,
 
         colStore,
-        onHeaderResize: (e: CustomEvent<RevoGrid.ViewSettingSizeProp>) =>
-          this.setDimensionSize.emit({ type: val, sizes: e.detail })
+        onHeaderResize: (e: CustomEvent<RevoGrid.ViewSettingSizeProp>) => this.setDimensionSize.emit({ type: val, sizes: e.detail }),
       };
       if (val === 'col') {
-        column.onResizeViewport = (e: CustomEvent<RevoGrid.ViewPortResizeEvent>) =>
-          this.setViewportSize.emit(e.detail);
+        column.onResizeViewport = (e: CustomEvent<RevoGrid.ViewPortResizeEvent>) => this.setViewportSize.emit(e.detail);
       }
       viewports.push(gatherColumnData(column));
       index++;
@@ -185,14 +177,17 @@ export class RevogrViewport {
     const viewPortHtml: VNode[] = [];
 
     if (this.rowHeaders) {
-      viewPortHtml.push(<RevogrRowHeaders
-        selectionStoreConnector={this.selectionStoreConnector}
-        height={contentHeight}
-        anyView={viewports[0]}
-        resize={this.resize}
-        rowHeaderColumn={typeof this.rowHeaders === 'object' ? this.rowHeaders : undefined}
-        onScrollViewport={e => this.scrollingService.onScroll(e, 'headerRow')}
-        onElementToScroll={e => this.scrollingService.registerElement(e, 'headerRow')}/>);
+      viewPortHtml.push(
+        <RevogrRowHeaders
+          selectionStoreConnector={this.selectionStoreConnector}
+          height={contentHeight}
+          anyView={viewports[0]}
+          resize={this.resize}
+          rowHeaderColumn={typeof this.rowHeaders === 'object' ? this.rowHeaders : undefined}
+          onScrollViewport={e => this.scrollingService.onScroll(e, 'headerRow')}
+          onElementToScroll={e => this.scrollingService.registerElement(e, 'headerRow')}
+        />,
+      );
     }
 
     /** render viewports columns */
@@ -214,49 +209,51 @@ export class RevogrViewport {
             editors={this.editors}
             readonly={this.readonly}
             range={this.range}
-
-            onSetEdit={({detail}) => {
+            onSetEdit={({ detail }) => {
               const event = this.beforeEditStart.emit(detail);
               if (!event.defaultPrevented) {
                 this.selectionStoreConnector.setEdit(detail.isCancel ? false : detail.val);
               }
             }}
-            onSetRange={(e) => selectionStore.setRangeArea(e.detail)}
+            onSetRange={e => selectionStore.setRangeArea(e.detail)}
             onSetTempRange={e => selectionStore.setTempArea(e.detail)}
             onFocusCell={e => {
               selectionStore.clearFocus();
               this.selectionStoreConnector.focus(selectionStore, e.detail);
             }}
-            onUnregister={() => this.selectionStoreConnector.unregister(selectionStore)}>
-
+            onUnregister={() => this.selectionStoreConnector.unregister(selectionStore)}
+          >
             <revogr-data
               {...data}
-              {...{[UUID]: data.uuid}}
-              key={view.prop.key + (++j)}
+              {...{ [UUID]: data.uuid }}
+              key={view.prop.key + ++j}
               readonly={this.readonly}
               range={this.range}
               rowClass={this.rowClass}
               rowSelectionStore={rowSelectionStore.store}
-              slot='data'/>
-            <revogr-temp-range selectionStore={selectionStore.store} dimensionRow={data.dimensionRow} dimensionCol={data.dimensionCol}/>
-            <revogr-focus selectionStore={selectionStore.store} dimensionRow={data.dimensionRow} dimensionCol={data.dimensionCol}/>
-          </revogr-overlay-selection>
+              slot="data"
+            />
+            <revogr-temp-range selectionStore={selectionStore.store} dimensionRow={data.dimensionRow} dimensionCol={data.dimensionCol} />
+            <revogr-focus selectionStore={selectionStore.store} dimensionRow={data.dimensionRow} dimensionCol={data.dimensionCol} />
+          </revogr-overlay-selection>,
         );
       }
       viewPortHtml.push(
         <revogr-viewport-scroll
           {...view.prop}
           ref={el => this.scrollingService.registerElement(el, view.prop.key)}
-          onScrollViewport={e => this.scrollingService.onScroll(e.detail, view.prop.key)}>
+          onScrollViewport={e => this.scrollingService.onScroll(e.detail, view.prop.key)}
+        >
           <revogr-header
             viewportCol={view.viewportCol}
             {...view.headerProp}
             selectionStore={colSelectionStore.store}
-            slot='header'
+            slot="header"
             columnFilter={this.columnFilter}
-            canResize={this.resize}/>
+            canResize={this.resize}
+          />
           {dataViews}
-        </revogr-viewport-scroll>
+        </revogr-viewport-scroll>,
       );
     }
     return viewPortHtml;
@@ -265,28 +262,32 @@ export class RevogrViewport {
   render(): VNode {
     const contentHeight: number = this.dimensions['row'].get('realSize');
     const viewports: VNode[] = this.renderViewports(contentHeight);
-    return <Host{...{[`${UUID}`]: this.uuid}}>
-      <div class='main-viewport'>
-        <div class='viewports'>
-          {viewports}
+    return (
+      <Host {...{ [`${UUID}`]: this.uuid }}>
+        <div class="main-viewport">
+          <div class="viewports">
+            {viewports}
 
-          <revogr-scroll-virtual
-            class='vertical'
-            dimension='row'
-            viewportStore={this.viewports['row']}
-            dimensionStore={this.dimensions['row']}
-            ref={el => this.scrollingService.registerElement(el, 'rowScroll')}
-            onScrollVirtual={e => this.scrollingService.onScroll(e.detail)}/>
-          <OrderRenderer ref={e => this.orderService = e}/>
+            <revogr-scroll-virtual
+              class="vertical"
+              dimension="row"
+              viewportStore={this.viewports['row']}
+              dimensionStore={this.dimensions['row']}
+              ref={el => this.scrollingService.registerElement(el, 'rowScroll')}
+              onScrollVirtual={e => this.scrollingService.onScroll(e.detail)}
+            />
+            <OrderRenderer ref={e => (this.orderService = e)} />
+          </div>
         </div>
-      </div>
-      <revogr-scroll-virtual
-        class='horizontal'
-        dimension='col'
-        viewportStore={this.viewports['col']}
-        dimensionStore={this.dimensions['col']}
-        ref={el => this.scrollingService.registerElement(el, 'colScroll')}
-        onScrollVirtual={e => this.scrollingService.onScroll(e.detail)}/>
-    </Host>;
+        <revogr-scroll-virtual
+          class="horizontal"
+          dimension="col"
+          viewportStore={this.viewports['col']}
+          dimensionStore={this.dimensions['col']}
+          ref={el => this.scrollingService.registerElement(el, 'colScroll')}
+          onScrollVirtual={e => this.scrollingService.onScroll(e.detail)}
+        />
+      </Host>
+    );
   }
 }

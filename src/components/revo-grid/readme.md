@@ -1,9 +1,6 @@
 # revo-grid
 
-
-
 <!-- Auto Generated Below -->
-
 
 ## Properties
 
@@ -33,7 +30,6 @@
 | `theme`              | `theme`            | Theme name                                                                                                                                                                                                                                              | `"compact" \| "darkCompact" \| "darkMaterial" \| "default" \| "material"`                                                                 | `'default'` |
 | `trimmedRows`        | --                 | Trimmed rows Functionality which allows to hide rows from main data set                                                                                                                                                                                 | `{ [x: number]: boolean; }`                                                                                                               | `{}`        |
 
-
 ## Events
 
 | Event                      | Description                                                                                                                                                                                                     | Type                                                                                                                                                                                                |
@@ -44,7 +40,7 @@
 | `beforeAutofill`           | Before autofill. Triggered before autofill applied. Use e.preventDefault() to prevent edit data apply.                                                                                                          | `CustomEvent<{ type: DimensionRows; newRange: RangeArea; oldRange: RangeArea; newProps: ColumnProp[]; oldProps: ColumnProp[]; newData: { [key: number]: DataType; }; }>`                            |
 | `beforeCellFocus`          | Before cell focus changed. Use e.preventDefault() to prevent cell focus change.                                                                                                                                 | `CustomEvent<{ prop: ColumnProp; model: DataType; val?: string; rowIndex: number; type: DimensionRows; }>`                                                                                          |
 | `beforeColumnsSet`         | Before column update                                                                                                                                                                                            | `CustomEvent<{ columns: Record<DimensionCols, ColumnRegular[]>; columnGrouping: Record<DimensionCols, Group[]>; maxLevel: number; sort: Record<ColumnProp, ColumnRegular>; }>`                      |
-| `beforeEdit`               | Before edit event. Triggered before edit data applied. Use e.preventDefault() to prevent edit data set and use you own.  Use e.val = {your value} to replace edit result with your own.                         | `CustomEvent<{ prop: ColumnProp; model: DataType; val?: string; rowIndex: number; type: DimensionRows; }>`                                                                                          |
+| `beforeEdit`               | Before edit event. Triggered before edit data applied. Use e.preventDefault() to prevent edit data set and use you own. Use e.val = {your value} to replace edit result with your own.                          | `CustomEvent<{ prop: ColumnProp; model: DataType; val?: string; rowIndex: number; type: DimensionRows; }>`                                                                                          |
 | `beforeEditStart`          | Before edit started Use e.preventDefault() to prevent edit                                                                                                                                                      | `CustomEvent<{ prop: ColumnProp; model: DataType; val?: string; rowIndex: number; type: DimensionRows; }>`                                                                                          |
 | `beforeExport`             | Before export Use e.preventDefault() to prevent export Replace data in Event in case you want to modify it in export                                                                                            | `CustomEvent<{ data: DataType[]; } & ColSource>`                                                                                                                                                    |
 | `beforeFilterApply`        | Before filter applied to data source Use e.preventDefault() to prevent cell focus change Update @collection if you wish to change filters                                                                       | `CustomEvent<{ collection: Record<ColumnProp, FilterCollectionItem>; }>`                                                                                                                            |
@@ -56,10 +52,9 @@
 | `beforeSourceSet`          | Before data apply. You can override data source here                                                                                                                                                            | `CustomEvent<{ type: DimensionRows; source: DataType[]; }>`                                                                                                                                         |
 | `beforeSourceSortingApply` | Before source update sorting apply. Use this event if you intended to prevent sorting on data update. Use e.preventDefault() to prevent sorting data change during rows source update.                          | `CustomEvent<any>`                                                                                                                                                                                  |
 | `headerClick`              | On header click.                                                                                                                                                                                                | `CustomEvent<ColumnRegular>`                                                                                                                                                                        |
-| `rowDragStart`             | Row order change started. Use e.preventDefault() to prevent row order change.  Use e.text = 'new name' to change item name on start.                                                                            | `CustomEvent<{ pos: PositionItem; text: string; }>`                                                                                                                                                 |
+| `rowDragStart`             | Row order change started. Use e.preventDefault() to prevent row order change. Use e.text = 'new name' to change item name on start.                                                                             | `CustomEvent<{ pos: PositionItem; text: string; }>`                                                                                                                                                 |
 | `rowOrderChanged`          | Before row order apply. Use e.preventDefault() to prevent row order change.                                                                                                                                     | `CustomEvent<{ from: number; to: number; }>`                                                                                                                                                        |
 | `viewportScroll`           | Triggered when view port scrolled                                                                                                                                                                               | `CustomEvent<{ dimension: DimensionType; coordinate: number; delta?: number; }>`                                                                                                                    |
-
 
 ## Methods
 
@@ -71,8 +66,6 @@ Add trimmed by type
 
 Type: `Promise<void>`
 
-
-
 ### `clearFocus() => Promise<void>`
 
 Clear current grid focus
@@ -80,8 +73,6 @@ Clear current grid focus
 #### Returns
 
 Type: `Promise<void>`
-
-
 
 ### `getColumnStore(type?: RevoGrid.DimensionCols) => Promise<Observable<import("/Users/maks/Projects/revogridjs/src/store/dataSource/data.store").DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>>`
 
@@ -92,8 +83,6 @@ Can be used for plugin support
 
 Type: `Promise<Observable<DataSourceState<ColumnRegular, DimensionCols>>>`
 
-
-
 ### `getColumns() => Promise<RevoGrid.ColumnRegular[]>`
 
 Receive all columns in data source
@@ -101,8 +90,6 @@ Receive all columns in data source
 #### Returns
 
 Type: `Promise<ColumnRegular[]>`
-
-
 
 ### `getPlugins() => Promise<RevoPlugin.Plugin[]>`
 
@@ -112,8 +99,6 @@ Get all active plugins instances
 
 Type: `Promise<Plugin[]>`
 
-
-
 ### `getSource(type?: RevoGrid.DimensionRows) => Promise<RevoGrid.DataType[]>`
 
 Get data from source
@@ -121,8 +106,6 @@ Get data from source
 #### Returns
 
 Type: `Promise<DataType[]>`
-
-
 
 ### `getSourceStore(type?: RevoGrid.DimensionRows) => Promise<Observable<import("/Users/maks/Projects/revogridjs/src/store/dataSource/data.store").DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>>`
 
@@ -133,8 +116,6 @@ Can be used for plugin support
 
 Type: `Promise<Observable<DataSourceState<DataType, DimensionRows>>>`
 
-
-
 ### `getVisibleSource(type?: RevoGrid.DimensionRows) => Promise<any[]>`
 
 Get data from visible part of source
@@ -143,8 +124,6 @@ Trimmed/filtered rows will be excluded
 #### Returns
 
 Type: `Promise<any[]>`
-
-
 
 ### `refresh(type?: RevoGrid.DimensionRows | 'all') => Promise<void>`
 
@@ -155,8 +134,6 @@ Can be specific part as row or pinned row or 'all' by default.
 
 Type: `Promise<void>`
 
-
-
 ### `registerVNode(elements: VNode[]) => Promise<void>`
 
 Register new virtual node inside of grid
@@ -166,8 +143,6 @@ Used for additional items creation such as plugin elements
 
 Type: `Promise<void>`
 
-
-
 ### `scrollToColumnIndex(coordinate?: number) => Promise<void>`
 
 Scrolls view port to specified column index
@@ -175,8 +150,6 @@ Scrolls view port to specified column index
 #### Returns
 
 Type: `Promise<void>`
-
-
 
 ### `scrollToColumnProp(prop: RevoGrid.ColumnProp) => Promise<void>`
 
@@ -186,8 +159,6 @@ Scrolls view port to specified column prop
 
 Type: `Promise<void>`
 
-
-
 ### `scrollToCoordinate(cell: Partial<Selection.Cell>) => Promise<void>`
 
 Scrolls view port to coordinate
@@ -195,8 +166,6 @@ Scrolls view port to coordinate
 #### Returns
 
 Type: `Promise<void>`
-
-
 
 ### `scrollToRow(coordinate?: number) => Promise<void>`
 
@@ -206,8 +175,6 @@ Scrolls view port to specified row index
 
 Type: `Promise<void>`
 
-
-
 ### `setCellEdit(row: number, prop: RevoGrid.ColumnProp, rowSource?: RevoGrid.DimensionRows) => Promise<void>`
 
 Bring cell to edit mode
@@ -215,8 +182,6 @@ Bring cell to edit mode
 #### Returns
 
 Type: `Promise<void>`
-
-
 
 ### `updateColumnSorting(column: RevoGrid.ColumnRegular, index: number, order: 'asc' | 'desc') => Promise<RevoGrid.ColumnRegular>`
 
@@ -226,8 +191,6 @@ Update column sorting
 
 Type: `Promise<ColumnRegular>`
 
-
-
 ### `updateColumns(cols: RevoGrid.ColumnRegular[]) => Promise<void>`
 
 Update columns
@@ -236,9 +199,6 @@ Update columns
 
 Type: `Promise<void>`
 
-
-
-
 ## Dependencies
 
 ### Depends on
@@ -246,6 +206,7 @@ Type: `Promise<void>`
 - [revogr-viewport](../viewport)
 
 ### Graph
+
 ```mermaid
 graph TD;
   revo-grid --> revogr-viewport
@@ -262,6 +223,6 @@ graph TD;
   style revo-grid fill:#f9f,stroke:#333,stroke-width:4px
 ```
 
-----------------------------------------------
+---
 
-*Built with [StencilJS](https://stenciljs.com/)*
+_Built with [StencilJS](https://stenciljs.com/)_

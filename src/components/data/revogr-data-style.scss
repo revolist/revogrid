@@ -1,77 +1,75 @@
 revogr-data {
-	display: block;
-	width: 100%;
-	position: relative;
+  display: block;
+  width: 100%;
+  position: relative;
 
-	.row {
-		position: absolute;
-		width: 100%;
-		left: 0;
+  .row {
+    position: absolute;
+    width: 100%;
+    left: 0;
 
-		&.groupingRow {
-			font-weight: 600;
+    &.groupingRow {
+      font-weight: 600;
 
-			.group-expand {
-				width: 25px;
-				height: 100%;
-				max-height: 25px;
-				margin-right: 2px;
-				background-color: transparent;
-				border-color: transparent;
+      .group-expand {
+        width: 25px;
+        height: 100%;
+        max-height: 25px;
+        margin-right: 2px;
+        background-color: transparent;
+        border-color: transparent;
 
-				svg {
-					width: 7px;
-				}
-			}
-		}
-	}
-
-	.revo-draggable {
-		$w: 24px;
-
-
-
-		border: none;
-		height: 32px;
-		display: inline-flex;
-		outline: 0;
-		padding: 0;
-		font-size: 0.8125rem;
-		box-sizing: border-box;
-		align-items: center;
-		white-space: nowrap;
-		vertical-align: middle;
-		justify-content: center;
-		text-decoration: none;
-		width: $w;
-		height: 100%;
-		cursor: pointer;
-
-		> .revo-drag-icon {
-			vertical-align: middle;
-			display: inline-block;
-			pointer-events: none;
-			transition: background-color 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
-		}
-	}
-
-	.data-cell {
-		top: 0;
-		position: absolute;
-		box-sizing: border-box;
-		height: 100%;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
-
-		&.align-center {
-            text-align: center;
+        svg {
+          width: 7px;
         }
-        &.align-left {
-            text-align: left;
-        }
-        &.align-right {
-            text-align: right;
-		}
-	}
+      }
+    }
+  }
+
+  .revo-draggable {
+    $w: 24px;
+
+    border: none;
+    height: 32px;
+    display: inline-flex;
+    outline: 0;
+    padding: 0;
+    font-size: 0.8125rem;
+    box-sizing: border-box;
+    align-items: center;
+    white-space: nowrap;
+    vertical-align: middle;
+    justify-content: center;
+    text-decoration: none;
+    width: $w;
+    height: 100%;
+    cursor: pointer;
+
+    > .revo-drag-icon {
+      vertical-align: middle;
+      display: inline-block;
+      pointer-events: none;
+      transition: background-color 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+    }
+  }
+
+  .data-cell {
+    top: 0;
+    position: absolute;
+    box-sizing: border-box;
+    height: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    &.align-center {
+      text-align: center;
+    }
+    &.align-left {
+      text-align: left;
+    }
+    &.align-right {
+      text-align: right;
+    }
+  }
 }

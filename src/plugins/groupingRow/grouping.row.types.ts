@@ -10,17 +10,17 @@ export type GroupingOptions = {
    * if not defined first column in grid
    */
   // applyToProp?: RevoGrid.ColumnProp;
-  /** 
+  /**
    * todo
    * choose if render cells in grouping row
    * true by default
-  */
+   */
   // fullRow?: boolean;
 };
 
 export type BeforeSourceSetEvent = {
-    type: RevoGrid.DimensionRows;
-    source: RevoGrid.DataType[];
+  type: RevoGrid.DimensionRows;
+  source: RevoGrid.DataType[];
 };
 
 export type OnExpandEvent = {
