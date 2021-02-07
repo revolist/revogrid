@@ -1,7 +1,7 @@
 import { Component, Prop, h, Host, Element } from '@stencil/core';
 import { Observable, RevoGrid, Selection } from '../../interfaces';
 import { FOCUS_CLASS } from '../../utils/consts';
-import { getElStyle } from '../overlay/cellSelectionService';
+import { getElStyle } from '../overlay/selection.utils';
 
 @Component({
   tag: 'revogr-focus',
