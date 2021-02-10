@@ -85,9 +85,8 @@
       };
       window.setGrouping = function () {
         grid.grouping = {
-          props: ['key'],
-          expandedAll: true,
-          applyToProp: '6',
+          props: [1],
+          expandedAll: true
         };
       };
       window.setTrimmed = function () {
@@ -122,7 +121,7 @@
       grid.autoSizeColumn = {
         mode: 'autoSizeAll',
       };
-      // setGrouping();
+      setGrouping();
       setTrimmed();
       grid.addEventListener('beforeExport', e => {
         console.log(e.detail);

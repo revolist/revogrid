@@ -211,11 +211,16 @@ export default class FilterPlugin extends BasePlugin {
       }
     });
     const itemsToFilter = this.getRowFilter(items, collection);
+    // check is filter event prevented
     const { defaultPrevented, detail } = this.emit('beforeFilterTrimmed', { collection, itemsToFilter, source: items });
     if (defaultPrevented) {
       return;
     }
-    await this.revogrid.addTrimmed(detail.itemsToFilter, 'filter');
+    // check is trimmed event prevented
+    const isAddedEvent = await this.revogrid.addTrimmed(detail.itemsToFilter, 'filter');
+    if (isAddedEvent.defaultPrevented) {
+      return;
+    }
     await this.revogrid.updateColumns(columnsToUpdate);
     this.emit('afterFilterApply');
   }

@@ -22,7 +22,7 @@ export namespace Components {
         /**
           * Add trimmed by type
          */
-        "addTrimmed": (newVal: Record<number, boolean>, trimmedType?: string, type?: RevoGrid.DimensionRows) => Promise<void>;
+        "addTrimmed": (trimmed: Record<number, boolean>, trimmedType?: string, type?: RevoGrid.DimensionRows) => Promise<CustomEvent<{ trimmed: Record<number, boolean>; trimmedType: string; type: string; }>>;
         /**
           * Autosize config Enable columns autoSize, for more details check @autoSizeColumn plugin By default disabled, hence operation is not resource efficient true to enable with default params (double header separator click for autosize) or provide config
          */
@@ -544,6 +544,10 @@ declare namespace LocalJSX {
           * Before source update sorting apply. Use this event if you intended to prevent sorting on data update. Use e.preventDefault() to prevent sorting data change during rows source update.
          */
         "onBeforeSourceSortingApply"?: (event: CustomEvent<any>) => void;
+        /**
+          * Before trimmed values Use e.preventDefault() to prevent value trimming Update @trimmed if you wish to filter indexes of trimming
+         */
+        "onBeforeTrimmed"?: (event: CustomEvent<{ trimmed: Record<number, boolean>, trimmedType: string, type: string }>) => void;
         /**
           * On header click.
          */
