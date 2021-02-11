@@ -83,7 +83,7 @@ Type: `Promise<void>`
 
 
 
-### `getColumnStore(type?: RevoGrid.DimensionCols) => Promise<import("/Users/maks/Projects/revogridjs/src/interfaces").Observable<import("/Users/maks/Projects/revogridjs/src/store/dataSource/data.store").DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>>`
+### `getColumnStore(type?: RevoGrid.DimensionCols) => Promise<ColumnSource>`
 
 Provides access to column internal store observer
 Can be used for plugin support
@@ -124,7 +124,7 @@ Type: `Promise<DataType[]>`
 
 
 
-### `getSourceStore(type?: RevoGrid.DimensionRows) => Promise<import("/Users/maks/Projects/revogridjs/src/interfaces").Observable<import("/Users/maks/Projects/revogridjs/src/store/dataSource/data.store").DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>>`
+### `getSourceStore(type?: RevoGrid.DimensionRows) => Promise<RowSource>`
 
 Provides access to rows internal store observer
 Can be used for plugin support

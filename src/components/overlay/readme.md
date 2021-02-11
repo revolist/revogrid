@@ -44,7 +44,7 @@
 
 ### Depends on
 
-- [revogr-edit](editors)
+- [revogr-edit](.)
 - [revogr-order-editor](../order)
 
 ### Graph

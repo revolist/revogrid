@@ -18,7 +18,7 @@ import ExportFilePlugin from '../../plugins/export/export.plugin';
 import { DataInput } from '../../plugins/export/types';
 import GroupingRowPlugin from '../../plugins/groupingRow/grouping.row.plugin';
 import { GroupingOptions } from '../../plugins/groupingRow/grouping.row.types';
-import { ColumnStores, RowStores } from '../data/columnService';
+import { ColumnSource, ColumnStores, RowSource, RowStores } from '../data/columnService';
 
 @Component({
   tag: 'revo-grid',
@@ -403,7 +403,7 @@ export class RevoGridComponent {
    * Can be used for plugin support
    * @param type - type of source
    */
-  @Method() async getSourceStore(type: RevoGrid.DimensionRows = 'row') {
+  @Method() async getSourceStore(type: RevoGrid.DimensionRows = 'row'): Promise<RowSource> {
     return this.rowStores[type];
   }
   /**
@@ -411,7 +411,7 @@ export class RevoGridComponent {
    * Can be used for plugin support
    * @param type - type of column
    */
-  @Method() async getColumnStore(type: RevoGrid.DimensionCols = 'col') {
+  @Method() async getColumnStore(type: RevoGrid.DimensionCols = 'col'): Promise<ColumnSource> {
     return this.columnStores[type];
   }
 

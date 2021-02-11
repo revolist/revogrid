@@ -1,8 +1,8 @@
 import { Component, Event, EventEmitter, Prop, h, Element, Host } from '@stencil/core';
 
-import { Edition, RevoGrid } from '../../../interfaces';
-import { EDIT_INPUT_WR } from '../../../utils/consts';
-import { TextEditor } from './text';
+import { Edition, RevoGrid } from '../../interfaces';
+import { EDIT_INPUT_WR } from '../../utils/consts';
+import { TextEditor } from './editors/text';
 
 @Component({
   tag: 'revogr-edit',

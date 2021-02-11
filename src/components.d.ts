@@ -67,7 +67,7 @@ export namespace Components {
           * Provides access to column internal store observer Can be used for plugin support
           * @param type - type of column
          */
-        "getColumnStore": (type?: RevoGrid.DimensionCols) => Promise<import("/Users/maks/Projects/revogridjs/src/interfaces").Observable<import("/Users/maks/Projects/revogridjs/src/store/dataSource/data.store").DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>>;
+        "getColumnStore": (type?: RevoGrid.DimensionCols) => Promise<ColumnSource>;
         /**
           * Receive all columns in data source
          */
@@ -84,7 +84,7 @@ export namespace Components {
           * Provides access to rows internal store observer Can be used for plugin support
           * @param type - type of source
          */
-        "getSourceStore": (type?: RevoGrid.DimensionRows) => Promise<import("/Users/maks/Projects/revogridjs/src/interfaces").Observable<import("/Users/maks/Projects/revogridjs/src/store/dataSource/data.store").DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>>;
+        "getSourceStore": (type?: RevoGrid.DimensionRows) => Promise<RowSource>;
         /**
           * Get data from visible part of source Trimmed/filtered rows will be excluded
           * @param type - type of source
