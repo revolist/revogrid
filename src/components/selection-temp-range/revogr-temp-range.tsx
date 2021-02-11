@@ -2,7 +2,7 @@ import { Component, Prop, h, Host } from '@stencil/core';
 import { throttle } from 'lodash';
 import { Observable, RevoGrid, Selection } from '../../interfaces';
 import { TMP_SELECTION_BG_CLASS } from '../../utils/consts';
-import { getElStyle } from '../overlay/cellSelectionService';
+import { getElStyle } from '../overlay/selection.utils';
 
 @Component({
   tag: 'revogr-temp-range',

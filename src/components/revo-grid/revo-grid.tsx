@@ -1,5 +1,6 @@
 import { Component, Prop, h, Watch, Element, Listen, Event, EventEmitter, Method, VNode, State } from '@stencil/core';
 import reduce from 'lodash/reduce';
+import each from 'lodash/each';
 
 import ColumnDataProvider, { ColumnCollection } from '../../services/column.data.provider';
 import { DataProvider } from '../../services/data.provider';
@@ -9,7 +10,6 @@ import ViewportProvider from '../../services/viewport.provider';
 import { Edition, Selection, RevoGrid, ThemeSpace, RevoPlugin, DimensionStores, ViewportStores } from '../../interfaces';
 import ThemeService from '../../themeManager/themeService';
 import { timeout } from '../../utils/utils';
-import { each } from 'lodash';
 import AutoSize, { AutoSizeColumnConfig } from '../../plugins/autoSizeColumn';
 import { columnTypes } from '../../store/storeTypes';
 import FilterPlugin, { ColumnFilterConfig, FilterCollection } from '../../plugins/filter/filter.plugin';
@@ -267,6 +267,20 @@ export class RevoGridComponent {
   @Event() beforeFilterTrimmed: EventEmitter<{ collection: FilterCollection; itemsToFilter: Record<number, boolean> }>;
 
   /**
+   * Before trimmed values
+   * Use e.preventDefault() to prevent value trimming
+   * Update @trimmed if you wish to filter indexes of trimming
+   */
+  @Event() beforeTrimmed: EventEmitter<{ trimmed: Record<number, boolean>, trimmedType: string, type: string }>;
+
+
+  /**
+   * Notify trimmed applied
+   */
+  @Event() afterTrimmed: EventEmitter;
+
+  
+  /**
    * Triggered when view port scrolled
    */
   @Event() viewportScroll: EventEmitter<RevoGrid.ViewPortScrollEvent>;
@@ -334,8 +348,18 @@ export class RevoGridComponent {
   }
 
   /** Add trimmed by type */
-  @Method() async addTrimmed(newVal: Record<number, boolean>, trimmedType = 'external', type: RevoGrid.DimensionRows = 'row') {
-    this.dataProvider.setTrimmed({ [trimmedType]: newVal }, type);
+  @Method() async addTrimmed(trimmed: Record<number, boolean>, trimmedType = 'external', type: RevoGrid.DimensionRows = 'row') {
+    const event = this.beforeTrimmed.emit({
+      trimmed,
+      trimmedType,
+      type
+    });
+    if (event.defaultPrevented) {
+      return event;
+    }
+    this.dataProvider.setTrimmed({ [trimmedType]: event.detail.trimmed }, type);
+    this.afterTrimmed.emit();
+    return event;
   }
 
   /**  Scrolls view port to coordinate */
@@ -614,7 +638,7 @@ export class RevoGridComponent {
   }
 
   @Watch('trimmedRows') trimmedRowsChanged(newVal: Record<number, boolean>) {
-    this.dataProvider.setTrimmed({ external: newVal }, 'row');
+    this.addTrimmed(newVal);
   }
 
   @Watch('grouping') groupingChanged(newVal: GroupingOptions = {}) {
@@ -718,14 +742,14 @@ export class RevoGridComponent {
         columnProvider: this.columnProvider,
       }),
     );
-    this.groupingChanged(this.grouping);
     this.themeChanged(this.theme);
     this.columnChanged(this.columns);
     this.dataChanged(this.source);
     this.dataTopChanged(this.pinnedTopSource);
     this.dataBottomChanged(this.pinnedBottomSource);
-    this.rowDefChanged(this.rowDefinitions);
     this.trimmedRowsChanged(this.trimmedRows);
+    this.rowDefChanged(this.rowDefinitions);
+    this.groupingChanged(this.grouping);
   }
 
   disconnectedCallback() {

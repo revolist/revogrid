@@ -8,3 +8,5 @@ export const PSEUDO_GROUP_COLUMN = `${GRID_INTERNALS}-column`;
 export const GROUP_EXPANDED = `${GRID_INTERNALS}-expanded`;
 export const GROUP_EXPAND_BTN = `group-expand`;
 export const GROUP_EXPAND_EVENT = `groupExpandClick`;
+export const GROUPING_ROW_TYPE = 'row';
+

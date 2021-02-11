@@ -4,12 +4,14 @@ import { DataProvider } from '../../services/data.provider';
 import { getPhysical, setItems } from '../../store/dataSource/data.store';
 import { columnTypes } from '../../store/storeTypes';
 import BasePlugin from '../basePlugin';
-import { GROUP_EXPANDED, GROUP_EXPAND_EVENT, PSEUDO_GROUP_COLUMN, PSEUDO_GROUP_ITEM_VALUE } from './grouping.const';
+import { FILTER_TRIMMED_TYPE } from '../filter/filter.plugin';
+import { TrimmedEntity } from '../trimmed/trimmed.plugin';
+import { GROUPING_ROW_TYPE, GROUP_EXPANDED, GROUP_EXPAND_EVENT, PSEUDO_GROUP_COLUMN, PSEUDO_GROUP_ITEM_VALUE } from './grouping.const';
 import { doExpand, doCollapse } from './grouping.row.expand.service';
 import { BeforeSourceSetEvent, GroupingOptions, OnExpandEvent, SourceGather } from './grouping.row.types';
 import { ExpandedOptions, gatherGrouping, isGrouping, isGroupingColumn } from './grouping.service';
+import { processDoubleConversionTrimmed, TRIMMED_GROUPING } from './grouping.trimmed.service';
 
-const TRIMMED_GROUPING = 'grouping';
 
 export default class GroupingRowPlugin extends BasePlugin {
   private options: GroupingOptions | undefined;
@@ -18,10 +20,17 @@ export default class GroupingRowPlugin extends BasePlugin {
     return this.options?.props && this.options?.props?.length;
   }
 
+  get store() {
+    return this.providers.dataProvider.stores[GROUPING_ROW_TYPE].store;
+  }
+
   // proxy for items get
   get rowItems() {
-    const rowStore = this.providers.dataProvider.stores.row.store;
-    return rowStore.get('items');
+    return this.store.get('items');
+  }
+
+  get trimmed() {
+    return this.store.get('trimmed');
   }
 
   constructor(
@@ -43,19 +52,17 @@ export default class GroupingRowPlugin extends BasePlugin {
 
   // expand event triggered
   private onExpand({ virtualIndex }: OnExpandEvent) {
-    const rowStore = this.providers.dataProvider.stores.row.store;
     const { source } = this.getSource();
-    let newTrimmed = rowStore.get('trimmed')[TRIMMED_GROUPING];
+    let newTrimmed = this.trimmed[TRIMMED_GROUPING];
 
-    let i = getPhysical(rowStore, virtualIndex);
+    let i = getPhysical(this.store, virtualIndex);
     const model = source[i];
     const prevExpanded = model[GROUP_EXPANDED];
     if (!prevExpanded) {
-      const { trimmed, items } = doExpand(i, virtualIndex, source, this.rowItems);
+      const { trimmed, items } = doExpand(virtualIndex, source, this.rowItems);
       newTrimmed = { ...newTrimmed, ...trimmed };
       if (items) {
-        const rowStore = this.providers.dataProvider.stores.row.store;
-        setItems(rowStore, items);
+        setItems(this.store, items);
       }
     } else {
       const { trimmed } = doCollapse(i, source);
@@ -63,15 +70,15 @@ export default class GroupingRowPlugin extends BasePlugin {
       this.revogrid.clearFocus();
     }
 
-    this.setSource(source);
+    this.store.set('source', source);
     this.revogrid.addTrimmed(newTrimmed, TRIMMED_GROUPING);
   }
 
   // get source based on proxy item collection to preserve row order
   private getSource(withoutGrouping = false) {
-    const rowStore = this.providers.dataProvider.stores.row.store;
-    const source = rowStore.get('source');
-    const items = rowStore.get('proxyItems');
+    const source = this.store.get('source');
+    const items = this.store.get('proxyItems');
+    let index = 0;
     // order important here, expected parent is first, then others
     return items.reduce(
       (result: SourceGather, i) => {
@@ -84,6 +91,8 @@ export default class GroupingRowPlugin extends BasePlugin {
         // grouping filter
         if (!isGrouping(model)) {
           result.source.push(model);
+          result.oldNewIndexes[i] = index;
+          index++;
         } else {
           if (model[GROUP_EXPANDED]) {
             result.prevExpanded[model[PSEUDO_GROUP_ITEM_VALUE]] = true;
@@ -94,14 +103,9 @@ export default class GroupingRowPlugin extends BasePlugin {
       {
         source: [],
         prevExpanded: {},
+        oldNewIndexes: {}
       },
     );
-  }
-
-  // proxy for set source
-  private setSource(data: RevoGrid.DataType[]) {
-    const rowStore = this.providers.dataProvider.stores.row.store;
-    rowStore.set('source', data);
   }
 
   private setColumnGrouping(cols?: RevoGrid.ColumnRegular[]) {
@@ -139,6 +143,18 @@ export default class GroupingRowPlugin extends BasePlugin {
     }
   }
 
+  private beforeTrimmedApply(trimmed: Record<number, boolean>, type: string) {
+    /** Before filter apply remove grouping filtering */
+    if (type === FILTER_TRIMMED_TYPE) {
+      const source = this.store.get('source');
+      for (let index in trimmed) {
+        if (trimmed[index] && isGrouping(source[index])) {
+          trimmed[index] = false;
+        }
+      }
+    }
+  }
+
   // subscribe to grid events to process them accordingly
   private subscribe() {
     /** if grouping present and new data source arrived */
@@ -149,7 +165,7 @@ export default class GroupingRowPlugin extends BasePlugin {
      * filter applied need to clear grouping and apply again
      * based on new results can be new grouping
      */
-    this.addEventListener('beforeFilterTrimmed', ({ detail: { itemsToFilter, source } }) => this.beforeFilterApply(itemsToFilter, source));
+    this.addEventListener('beforeTrimmed', ({ detail: { trimmed, trimmedType } }) => this.beforeTrimmedApply(trimmed, trimmedType));
     /**
      * sorting applied need to clear grouping and apply again
      * based on new results whole grouping order will changed
@@ -172,34 +188,41 @@ export default class GroupingRowPlugin extends BasePlugin {
     this.addEventListener(GROUP_EXPAND_EVENT, ({ detail }: CustomEvent<OnExpandEvent>) => this.onExpand(detail));
   }
 
-  /** Before filter apply remove grouping filtering */
-  private beforeFilterApply(itemsToFilter: Record<number, boolean>, source: RevoGrid.DataType[]) {
-    for (let index in itemsToFilter) {
-      if (itemsToFilter[index] && isGrouping(source[index])) {
-        itemsToFilter[index] = false;
-      }
-    }
-  }
-
-  /** Start global source update with group clearing and applying new one */
+  /** 
+   * Starts global source update with group clearing and applying new one
+   * Initiated when need to reapply grouping
+   */
   private doSourceUpdate(options?: ExpandedOptions) {
     if (!this.hasProps) {
       return;
     }
-    const { source, prevExpanded } = this.getSource(true);
-    const { sourceWithGroups, depth, trimmed } = gatherGrouping(source, item => this.options?.props.map(key => item[key]), {
-      prevExpanded,
-      ...options,
-    });
+    /**
+     * Get source without grouping
+     * @param newOldIndexMap - provides us mapping with new indexes vs old indexes, we would use it for trimmed mapping
+     */
+    const { source, prevExpanded, oldNewIndexes } = this.getSource(true);
+    /** 
+     * Group again
+     * @param oldNewIndexMap - provides us mapping with new indexes vs old indexes
+     */
+    const { sourceWithGroups, depth, trimmed, oldNewIndexMap, childrenByGroup } = gatherGrouping(
+      source,
+      // filter
+      item => this.options?.props.map(key => item[key]),
+      {
+        prevExpanded,
+        ...options,
+      }
+    );
+    
+    // setup source
     this.providers.dataProvider.setData(
       sourceWithGroups,
-      'row',
-      {
-        depth,
-      },
+      GROUPING_ROW_TYPE,
+      { depth, },
       true,
     );
-    this.revogrid.addTrimmed(trimmed, TRIMMED_GROUPING);
+    this.updateTrimmed(trimmed, childrenByGroup, oldNewIndexes, oldNewIndexMap);
   }
 
   /**
@@ -213,12 +236,17 @@ export default class GroupingRowPlugin extends BasePlugin {
     }
     const source = data.source.filter(s => !isGrouping(s));
     const expanded = this.revogrid.grouping || {};
-    const { sourceWithGroups, depth, trimmed } = gatherGrouping(source, item => this.options?.props.map(key => item[key]), {
-      ...(expanded || {}),
-    });
+    const { sourceWithGroups, depth, trimmed, oldNewIndexMap, childrenByGroup } = gatherGrouping(
+      source,
+      // filter
+      item => this.options?.props.map(key => item[key]),
+      {
+        ...(expanded || {}),
+      }
+    );
     data.source = sourceWithGroups;
     this.providers.dataProvider.setGrouping({ depth });
-    this.revogrid.addTrimmed(trimmed, TRIMMED_GROUPING);
+    this.updateTrimmed(trimmed, childrenByGroup, oldNewIndexMap);
   }
 
   // apply grouping
@@ -266,7 +294,27 @@ export default class GroupingRowPlugin extends BasePlugin {
       }
     });
     // clear rows
-    const { source } = this.getSource(true);
-    this.providers.dataProvider.setData(source);
+    const { source, oldNewIndexes } = this.getSource(true);
+    this.providers.dataProvider.setData(source, GROUPING_ROW_TYPE, undefined, true);
+    this.updateTrimmed(undefined, undefined, oldNewIndexes);
+  }
+
+  private updateTrimmed(
+    trimmedGroup: TrimmedEntity = {},
+    _childrenByGroup: Record<number, number[]> = {},
+    firstLevelMap: Record<number, number>,
+    secondLevelMap?: Record<number, number>
+  ) {
+
+    // map previously trimmed data
+    const trimemedOptionsToUpgrade = processDoubleConversionTrimmed(this.trimmed, firstLevelMap, secondLevelMap);
+    for (let type in trimemedOptionsToUpgrade) {
+      this.revogrid.addTrimmed(trimemedOptionsToUpgrade[type], type);
+    }
+
+    // const emptyGroups = this.filterOutEmptyGroups(trimemedOptionsToUpgrade, childrenByGroup);
+
+    // setup trimmed data for grouping
+    this.revogrid.addTrimmed({ ...trimmedGroup }, TRIMMED_GROUPING);
   }
 }

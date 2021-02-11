@@ -1,19 +1,18 @@
-import { Component, Event, EventEmitter, h, Host, Listen, Prop, VNode, Watch, Element, State } from '@stencil/core';
-import slice from 'lodash/slice';
+import { Component, Event, EventEmitter, h, Host, Listen, Prop, VNode, Element } from '@stencil/core';
 
 import { Edition, Observable, RevoGrid, Selection } from '../../interfaces';
 import ColumnService from '../data/columnService';
-import CellSelectionService, { getCell, getElStyle } from './cellSelectionService';
 import SelectionStoreService from '../../store/selection/selection.store.service';
 import { codesLetter } from '../../utils/keyCodes';
-import { isClear, isLetterKey } from '../../utils/keyCodes.utils';
-import { CELL_HANDLER_CLASS, EDIT_INPUT_WR, SELECTION_BORDER_CLASS } from '../../utils/consts';
-import { DataSourceState, getSourceItem } from '../../store/dataSource/data.store';
-import { getRange, isRangeSingleCell } from '../../store/selection/selection.helpers';
-import { timeout } from '../../utils/utils';
-import KeyService from './keyService';
-
-import RangeAreaCss = Selection.RangeAreaCss;
+import { SELECTION_BORDER_CLASS } from '../../utils/consts';
+import { DataSourceState } from '../../store/dataSource/data.store';
+import { isRangeSingleCell } from '../../store/selection/selection.helpers';
+import { applyMixins } from '../../utils/utils';
+import { KeyboardService } from './keyboardService';
+import { AutoFillService } from './autofillService';
+import { getCurrentCell, getElStyle } from './selection.utils';
+import { ClipboardService } from './clipboardService';
+import { isEditInput } from './editors/edit.utils';
 
 export type BeforeEdit = {
   isCancel: boolean;
@@ -24,16 +23,12 @@ export type BeforeEdit = {
   styleUrl: 'revogr-overlay-style.scss',
 })
 export class OverlaySelection {
-  private selectionService: CellSelectionService;
-  private columnService: ColumnService;
+  protected columnService: ColumnService;
 
-  private selectionStoreService: SelectionStoreService;
-  private keyService: KeyService;
+  protected selectionStoreService: SelectionStoreService;
   private orderEditor: HTMLRevogrOrderEditorElement;
-  private clipboard: HTMLRevogrClipboardElement;
 
   @Element() element: HTMLElement;
-  @State() autoFill: boolean = false;
 
   // --------------------------------------------------------------------------
   //
@@ -90,111 +85,35 @@ export class OverlaySelection {
   //
   // --------------------------------------------------------------------------
 
-  /** Pointer left document, clear any active operation */
-  @Listen('mousemove', { target: 'document' })
-  onMouseMove(e: MouseEvent) {
-    if (this.autoFill && this.selectionStoreService.focused) {
-      this.selectionService.onMouseMove(e, this.getData());
+  @Listen('mousemove', { target: 'document' }) onMouseMove(e: MouseEvent) {
+    if (this.selectionStoreService.focused) {
+      this.selectionMouseMove(e);
     }
   }
 
   /** Pointer left document, clear any active operation */
-  @Listen('mouseleave', { target: 'document' })
-  onMouseOut() {
-    this.selectionService.clearSelection();
+  @Listen('mouseleave', { target: 'document' }) onMouseOut() {
+    this.clearAutoFillSelection();
   }
 
   /** Action finished inside of the document */
-  @Listen('mouseup', { target: 'document' })
-  onMouseUp() {
-    this.selectionService.clearSelection();
+  @Listen('mouseup', { target: 'document' }) onMouseUp() {
+    this.clearAutoFillSelection();
   }
 
   /** Row drag started */
-  @Listen('dragStartCell')
-  onCellDrag(e: CustomEvent<MouseEvent>) {
+  @Listen('dragStartCell') onCellDrag(e: CustomEvent<MouseEvent>) {
     this.orderEditor?.dragStart(e.detail);
   }
 
   /** Recived keyboard down from element */
-  @Listen('keyup', { target: 'document' })
-  onKeyUp(e: KeyboardEvent) {
-    this.keyService.keyUp(e);
+  @Listen('keyup', { target: 'document' }) onKeyUp(e: KeyboardEvent) {
+    this.keyUp(e);
   }
 
   /** Recived keyboard down from element */
-  @Listen('keydown', { target: 'document' })
-  async onKeyDown(e: KeyboardEvent): Promise<void> {
-    if (!this.selectionStoreService.focused) {
-      return;
-    }
-    this.keyService.keyDown(e);
-
-    // tab key means same as arrow right
-    if (codesLetter.TAB === e.code) {
-      this.keyChangeSelection(e);
-      return;
-    }
-
-    /**
-     *  IF EDIT MODE
-     */
-    if (this.selectionStoreService.edited) {
-      switch (e.code) {
-        case codesLetter.ESCAPE:
-          this.doEdit(undefined, true);
-          break;
-      }
-      return;
-    }
-
-    /**
-     *  IF NOT EDIT MODE
-     */
-
-    // pressed clear key
-    if (isClear(e.code)) {
-      if (this.selectionStoreService.ranged && !isRangeSingleCell(this.selectionStoreService.ranged)) {
-        const data = this.columnService.getRangeStaticData(this.selectionStoreService.ranged, '');
-        this.onRangeApply(data, this.selectionStoreService.ranged);
-      } else if (this.canEdit()) {
-        const focused = this.selectionStoreService.focused;
-        this.onCellEdit({ row: focused.y, col: focused.x, val: '' }, true);
-      }
-      return;
-    }
-
-    // pressed enter
-    if (codesLetter.ENTER === e.code) {
-      this.doEdit();
-      return;
-    }
-
-    // copy operation
-    if (this.keyService.isCopy(e)) {
-      return;
-    }
-
-    // paste operation
-    if (this.keyService.isPaste(e)) {
-      this.internalPaste.emit();
-      return;
-    }
-
-    // pressed letter key
-    if (isLetterKey(e.keyCode)) {
-      this.doEdit(e.key);
-      return;
-    }
-
-    // pressed arrow, change selection position
-    if (await this.keyChangeSelection(e)) {
-      return;
-    }
-  }
-
-  @Watch('range') onRange(canRange: boolean) {
-    this.selectionService.canRange = canRange;
+  @Listen('keydown', { target: 'document' }) onKeyDown(e: KeyboardEvent) {
+    this.keyDown(e);
   }
 
   connectedCallback() {
@@ -213,53 +132,6 @@ export class OverlaySelection {
       },
       unregister: () => this.unregister?.emit(),
     });
-    this.selectionService = new CellSelectionService({
-      canRange: this.range,
-      changeRange: range => this.selectionStoreService.changeRange(range),
-      focus: (cell, isMulti?) => this.selectionStoreService.focus(cell, isMulti),
-      applyRange: (start?, end?) => {
-        // no changes to apply
-        if (!start || !end) {
-          return;
-        }
-
-        const oldRange = this.selectionStoreService.ranged;
-        const newRange = getRange(start, end);
-        const columns = [...this.columnService.columns];
-        const rangeData: Selection.ChangedRange = {
-          type: this.dataStore.get('type'),
-          newData: {},
-          newRange,
-          oldRange,
-          newProps: slice(columns, newRange.x, newRange.x1 + 1).map(v => v.prop),
-          oldProps: slice(columns, oldRange.x, oldRange.x1 + 1).map(v => v.prop),
-        };
-
-        rangeData.newData = this.columnService.getRangeData(rangeData);
-        const selectionEndEvent = this.internalSelectionChanged.emit(rangeData);
-        if (selectionEndEvent.defaultPrevented) {
-          this.setTempRange.emit(null);
-          return;
-        }
-        this.onRangeApply(rangeData.newData, newRange);
-      },
-      tempRange: (start, end) => {
-        this.setTempRange.emit(getRange(start, end));
-      },
-      autoFill: isAutofill => {
-        let focus = this.selectionStoreService.focused;
-        const range = this.selectionStoreService.ranged;
-        if (range) {
-          focus = { x: range.x, y: range.y };
-        }
-        if (!focus && !range) {
-          return null;
-        }
-        this.autoFill = isAutofill;
-        return focus;
-      },
-    });
-    this.keyService = new KeyService();
   }
 
   disconnectedCallback() {
@@ -267,34 +139,11 @@ export class OverlaySelection {
   }
 
   private renderRange(range: Selection.RangeArea): VNode[] {
-    const style: RangeAreaCss = getElStyle(range, this.dimensionRow.state, this.dimensionCol.state);
+    const style = getElStyle(range, this.dimensionRow.state, this.dimensionCol.state);
     return [<div class={SELECTION_BORDER_CLASS} style={style} />];
   }
 
-  private renderAutofill(range: Selection.RangeArea, selectionFocus: Selection.Cell): VNode {
-    let handlerStyle;
-    if (range) {
-      handlerStyle = getCell(range, this.dimensionRow.state, this.dimensionCol.state);
-    } else {
-      handlerStyle = getCell(
-        {
-          ...selectionFocus,
-          x1: selectionFocus.x,
-          y1: selectionFocus.y,
-        },
-        this.dimensionRow.state,
-        this.dimensionCol.state,
-      );
-    }
-    const props = {
-      class: CELL_HANDLER_CLASS,
-      onMouseDown: (e: MouseEvent) => this.selectionService.onAutoFillStart(e, this.getData()),
-      style: { left: `${handlerStyle.right}px`, top: `${handlerStyle.bottom}px` },
-    };
-    return <div {...props} />;
-  }
-
-  private renderEditCell(): VNode | void {
+  private renderEditCell() {
     // if can edit
     const editCell = this.selectionStore.get('edit');
     if (this.readonly || !editCell) {
@@ -309,7 +158,6 @@ export class OverlaySelection {
     const style = getElStyle({ ...editCell, x1: editCell.x, y1: editCell.y }, this.dimensionRow.state, this.dimensionCol.state);
     return (
       <revogr-edit
-        class={EDIT_INPUT_WR}
         onCellEdit={e => this.onCellEdit(e.detail)}
         onCloseEdit={e => this.closeEdit(e)}
         editCell={editable}
@@ -326,7 +174,7 @@ export class OverlaySelection {
     const els: VNode[] = [];
 
     if (range || selectionFocus) {
-      els.push(<revogr-clipboard onCopyRegion={e => this.onCopy(e.detail)} ref={e => (this.clipboard = e)} onPasteRegion={e => this.onPaste(e.detail)} />);
+      els.push(this.renderClipboard());
     }
 
     if (range) {
@@ -355,14 +203,31 @@ export class OverlaySelection {
       );
     }
     return (
-      <Host onDblClick={() => this.doEdit()} onMouseDown={(e: MouseEvent) => this.onMouseDown(e)}>
+      <Host onDblClick={() => this.doEdit()} onMouseDown={(e: MouseEvent) => this.onElementMouseDown(e)}>
         {els}
         <slot name="data" />
       </Host>
     );
   }
 
-  private doEdit(val = '', isCancel = false) {
+  protected onElementMouseDown(e: MouseEvent) {
+    // Ignore focus if clicked input
+    if (isEditInput(e.target as HTMLElement | undefined)) {
+      return;
+    }
+    const data = this.getData();
+    if (e.defaultPrevented) {
+      return;
+    }
+    // Regular cell click
+    const focusCell = getCurrentCell({ x: e.x, y: e.y }, data);
+    this.selectionStoreService.focus(focusCell, this.range && e.shiftKey);
+
+    // Initiate autofill selection
+    this.selectionStart(e, data);
+  }
+
+  protected doEdit(val = '', isCancel = false) {
     if (this.canEdit()) {
       const editCell = this.selectionStore.get('focus');
       const data = this.columnService.getSaveData(editCell.y, editCell.x);
@@ -392,65 +257,18 @@ export class OverlaySelection {
     }
   }
 
-  private async keyChangeSelection(e: KeyboardEvent) {
-    const data = this.keyService.changeDirectionKey(e, this.range);
-    if (!data) {
-      return false;
+  protected clearCell() {
+    if (this.selectionStoreService.ranged && !isRangeSingleCell(this.selectionStoreService.ranged)) {
+      const data = this.columnService.getRangeStaticData(this.selectionStoreService.ranged, '');
+      this.onRangeApply(data, this.selectionStoreService.ranged);
+    } else if (this.canEdit()) {
+      const focused = this.selectionStoreService.focused;
+      this.onCellEdit({ row: focused.y, col: focused.x, val: '' }, true);
     }
-    await timeout();
-
-    const range = this.selectionStore.get('range');
-    const focus = this.selectionStore.get('focus');
-    return this.selectionService.keyPositionChange(data.changes, this.getData(), range, focus, data.isMulti);
-  }
-
-  private onPaste(data: string[][]) {
-    const focus = this.selectionStoreService.focused;
-    if (!focus) {
-      return;
-    }
-    const { changed, range } = this.columnService.getTransformedDataToApply(focus, data);
-    this.onRangeApply(changed, range);
-  }
-
-  private onCopy(e: DataTransfer) {
-    const canCopy = this.internalCopy.emit();
-    if (canCopy.defaultPrevented) {
-      return false;
-    }
-    let focus = this.selectionStoreService.focused;
-    let range = this.selectionStoreService.ranged;
-    let data: RevoGrid.DataFormat[][];
-    if (!range) {
-      range = getRange(focus, focus);
-    }
-    if (range) {
-      const columns = [...this.columnService.columns];
-      const props = slice(columns, range.x, range.x1 + 1).map(v => v.prop);
-      data = this.columnService.copyRangeArray(range, props, this.dataStore);
-    }
-    this.clipboard.doCopy(e, data);
-    return true;
-  }
-
-  private onRangeApply(data: RevoGrid.DataLookup, range: Selection.RangeArea) {
-    const models: RevoGrid.DataLookup = {};
-    for (let rowIndex in data) {
-      models[rowIndex] = getSourceItem(this.dataStore, parseInt(rowIndex, 10));
-    }
-    const dataEvent = this.internalRangeDataApply.emit({
-      data,
-      models,
-      type: this.dataStore.get('type'),
-    });
-    if (!dataEvent.defaultPrevented) {
-      this.columnService.applyRangeData(data);
-    }
-    this.setRange.emit(range);
   }
 
   /** Edit finished, close cell and save */
-  private onCellEdit(e: Edition.SaveDataDetails, clear = false) {
+  protected onCellEdit(e: Edition.SaveDataDetails, clear = false) {
     const dataToSave = this.columnService.getSaveData(e.row, e.col, e.val);
     this.internalCellEdit.emit(dataToSave);
     // if not clear navigate to next cell after edit
@@ -459,20 +277,12 @@ export class OverlaySelection {
     }
   }
 
-  private onMouseDown(e: MouseEvent) {
-    /** ignore focus if clicked input */
-    if ((e.target as HTMLElement | undefined)?.closest(`.${EDIT_INPUT_WR}`)) {
-      return;
-    }
-    this.selectionService.onCellDown(e, this.getData());
-  }
-
   private onRowDragStart({ detail }: CustomEvent<{ cell: Selection.Cell; text: string }>) {
     detail.text = this.columnService.getCellData(detail.cell.y, detail.cell.x);
   }
 
   /** Check if edit possible */
-  private canEdit(): boolean {
+  protected canEdit() {
     if (this.readonly) {
       return false;
     }
@@ -481,7 +291,7 @@ export class OverlaySelection {
   }
 
   /** Collect data from element */
-  private getData() {
+  protected getData() {
     return {
       el: this.element,
       rows: this.dimensionRow.state,
@@ -490,3 +300,6 @@ export class OverlaySelection {
     };
   }
 }
+
+export interface OverlaySelection extends KeyboardService, AutoFillService, ClipboardService {}
+applyMixins(OverlaySelection, [KeyboardService, AutoFillService, ClipboardService]);

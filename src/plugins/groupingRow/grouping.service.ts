@@ -3,8 +3,8 @@ import { GROUP_DEPTH, GROUP_EXPANDED, PSEUDO_GROUP_COLUMN, PSEUDO_GROUP_ITEM, PS
 
 type Group<T> = {
   id: string;
-  children: T[];
-  ids: number[];
+  // Map with Previous index / item format
+  children: Map<number, T>;
 };
 
 export type ExpandedOptions = {
@@ -12,29 +12,31 @@ export type ExpandedOptions = {
   expandedAll?: boolean; // skip trim
 };
 
+/**
+ * Do actual grouping
+ * @param array - items to group
+ * @param f - function responsible for grouping, returns property to group by
+ */
+
 function groupBy<T>(array: T[], f: (v: T) => any) {
   const groupsOrder: Group<T>[] = [];
-  const groups: Record<string, any> = {};
-  const groupIndexes: Record<string, number[]> = {};
+
+  const itemsByGroup: Record<string, Map<number, T>> = {};
   array.forEach((item, i) => {
     // get grouping values
     const groupKeys = JSON.stringify(f(item));
 
     // new group identification
-    if (!groups[groupKeys]) {
-      groups[groupKeys] = [];
-      // store indexes order
-      groupIndexes[groupKeys] = [];
+    if (!itemsByGroup[groupKeys]) {
+      itemsByGroup[groupKeys] = new Map();
       // create group parents
       groupsOrder.push({
-        children: groups[groupKeys],
-        ids: groupIndexes[groupKeys],
+        children: itemsByGroup[groupKeys],
         id: groupKeys,
       });
     }
-    // save to group
-    groups[groupKeys].push(item);
-    groupIndexes[groupKeys].push(i);
+    // save to group with previous index
+    itemsByGroup[groupKeys].set(i, item);
   });
   return groupsOrder;
 }
@@ -45,16 +47,25 @@ function groupBy<T>(array: T[], f: (v: T) => any) {
  * @param mapFunc - mapping function for stringify
  * @param expanded - potentially expanded items if present
  */
-export function gatherGrouping<T>(array: T[], mapFunc: (v: T) => any, { prevExpanded, expandedAll }: ExpandedOptions) {
+export function gatherGrouping<T>(
+  array: T[],
+  mapFunc: (v: T) => any,
+  { prevExpanded, expandedAll }: ExpandedOptions
+) {
   // build groups
   const groupsOrder = groupBy(array, mapFunc);
 
   const itemsMirror: RevoGrid.DataType[] = []; // grouped source
   const pseudoGroupTest: Record<string, any> = {}; // check if group header exists
 
-  let itemIndex = 0; // item index in source
-  let groupingDepth = 0; // to save max group depth
-  const trimmed: Record<number, boolean> = {}; // collapse all groups in the beginning
+  // item index in source
+  let itemIndex = 0;
+  // to save max group depth
+  let groupingDepth = 0;
+  // collapse all groups in the beginning
+  const trimmed: Record<number, boolean> = {};
+  // index mapping
+  const oldNewIndexMap: Record<number, number> = {};
   // go through groups
   groupsOrder.forEach(group => {
     const parseGroup = getParsedGroup(group.id);
@@ -63,10 +74,11 @@ export function gatherGrouping<T>(array: T[], mapFunc: (v: T) => any, { prevExpa
       return;
     }
 
-    // add group headers
     let depth = 0;
     let skipTrim = !!expandedAll;
     let isExpanded = skipTrim;
+    const children: number[] = [];
+    // add group headers
     parseGroup.reduce((prevVal: string[], groupValue: string) => {
       prevVal.push(groupValue);
       const newVal = prevVal.join(',');
@@ -84,7 +96,7 @@ export function gatherGrouping<T>(array: T[], mapFunc: (v: T) => any, { prevExpa
           }
         }
         itemIndex++;
-        pseudoGroupTest[newVal] = true;
+        pseudoGroupTest[newVal] = children;
       }
       // calculate depth
       depth++;
@@ -93,18 +105,30 @@ export function gatherGrouping<T>(array: T[], mapFunc: (v: T) => any, { prevExpa
     }, []);
 
     // add regular items
-    group.children.forEach(item => {
+    group.children.forEach((item, oldIndex) => {
+      // hide items if group colapsed
       if (!isExpanded && !skipTrim) {
-        trimmed[itemIndex] = true; // collapse row
+        // collapse row
+        trimmed[itemIndex] = true;
       }
+      // add items to new source
       itemsMirror.push(item);
+      oldNewIndexMap[oldIndex] = itemIndex;
+      children.push(itemIndex);
       itemIndex++;
     });
   });
   return {
+    // updates source mirror
     sourceWithGroups: itemsMirror,
+    // largest depth for grouping
     depth: groupingDepth,
+    // used for expand/collapse grouping values
     trimmed,
+    // used for mapping old values to new
+    oldNewIndexMap,
+    // used to get child items in group
+    childrenByGroup: pseudoGroupTest
   };
 }
 

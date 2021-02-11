@@ -1,7 +1,8 @@
-import { Component, Event, EventEmitter, Prop, h, VNode, Element } from '@stencil/core';
+import { Component, Event, EventEmitter, Prop, h, Element, Host } from '@stencil/core';
 
-import { Edition, RevoGrid } from '../../interfaces';
-import { TextEditor } from './editors/text';
+import { Edition, RevoGrid } from '../../../interfaces';
+import { EDIT_INPUT_WR } from '../../../utils/consts';
+import { TextEditor } from './text';
 
 @Component({
   tag: 'revogr-edit',
@@ -70,7 +71,7 @@ export class Edit {
   render() {
     if (this.currentEditor) {
       this.currentEditor.editCell = this.editCell;
-      return this.currentEditor.render((h as unknown) as RevoGrid.HyperFunc<VNode>);
+      return <Host class={EDIT_INPUT_WR}>{this.currentEditor.render(h)}</Host>;
     }
     return '';
   }
