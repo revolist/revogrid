@@ -58,7 +58,8 @@
   </head>
   <body>
     <button onclick="clearGrouping()">Clear grouping</button>
-    <button onclick="setTrimmed()">Set trimmed</button>
+    <button onclick="setTrimmed([3])">Set trimmed 3</button>
+    <button onclick="setTrimmed([])">Clear trimmed</button>
     <button onclick="setGrouping()">Set grouping</button>
     <button onclick="exportGrid()">Export</button>
     <button onclick="scrollToCol()">Scroll to column 30</button>
@@ -89,10 +90,11 @@
           expandedAll: true
         };
       };
-      window.setTrimmed = function () {
-        grid.trimmedRows = {
-          ['0']: true,
-        };
+      window.setTrimmed = function (rows = []) {
+        grid.trimmedRows = rows.reduce((r, v) => {
+          r[v] = true;
+          return r;
+        }, {});
       };
       window.exportGrid = function () {
         grid.getPlugins().then(plugins => {
@@ -122,7 +124,7 @@
         mode: 'autoSizeAll',
       };
       setGrouping();
-      setTrimmed();
+      setTrimmed([0]);
       grid.addEventListener('beforeExport', e => {
         console.log(e.detail);
       });

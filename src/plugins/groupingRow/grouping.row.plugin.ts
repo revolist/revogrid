@@ -5,7 +5,7 @@ import { getPhysical, setItems } from '../../store/dataSource/data.store';
 import { columnTypes } from '../../store/storeTypes';
 import BasePlugin from '../basePlugin';
 import { FILTER_TRIMMED_TYPE } from '../filter/filter.plugin';
-import { gatherTrimmedItems, Trimmed, TrimmedEntity } from '../trimmed/trimmed.plugin';
+import { TrimmedEntity } from '../trimmed/trimmed.plugin';
 import { GROUPING_ROW_TYPE, GROUP_EXPANDED, GROUP_EXPAND_EVENT, PSEUDO_GROUP_COLUMN, PSEUDO_GROUP_ITEM_VALUE } from './grouping.const';
 import { doExpand, doCollapse } from './grouping.row.expand.service';
 import { BeforeSourceSetEvent, GroupingOptions, OnExpandEvent, SourceGather } from './grouping.row.types';
@@ -301,7 +301,7 @@ export default class GroupingRowPlugin extends BasePlugin {
 
   private updateTrimmed(
     trimmedGroup: TrimmedEntity = {},
-    childrenByGroup: Record<number, number[]> = {},
+    _childrenByGroup: Record<number, number[]> = {},
     firstLevelMap: Record<number, number>,
     secondLevelMap?: Record<number, number>
   ) {
@@ -312,22 +312,9 @@ export default class GroupingRowPlugin extends BasePlugin {
       this.revogrid.addTrimmed(trimemedOptionsToUpgrade[type], type);
     }
 
-    const emptyGroups = this.filterOutEmptyGroups(trimemedOptionsToUpgrade, childrenByGroup);
+    // const emptyGroups = this.filterOutEmptyGroups(trimemedOptionsToUpgrade, childrenByGroup);
 
     // setup trimmed data for grouping
-    this.revogrid.addTrimmed({ ...trimmedGroup, ...emptyGroups }, TRIMMED_GROUPING);
-  }
-
-  private filterOutEmptyGroups(allTrimmedGroups: Trimmed, childrenByGroup: Record<number, number[]> = {}) {
-    const trimmedGroup: TrimmedEntity = {};
-    const allTrimmed = gatherTrimmedItems(allTrimmedGroups);
-    // find is groups are filled
-    for (let groupIndex in childrenByGroup) {
-      const hasChidlren = childrenByGroup[groupIndex].filter(childIndex => !allTrimmed[childIndex]).length > 0;
-      if (!hasChidlren) {
-        trimmedGroup[groupIndex] = true;
-      }
-    }
-    return trimmedGroup;
+    this.revogrid.addTrimmed({ ...trimmedGroup }, TRIMMED_GROUPING);
   }
 }

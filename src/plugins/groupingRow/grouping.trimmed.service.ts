@@ -1,4 +1,4 @@
-import { Trimmed, TrimmedEntity } from "../trimmed/trimmed.plugin";
+import { gatherTrimmedItems, Trimmed, TrimmedEntity } from "../trimmed/trimmed.plugin";
 
 export const TRIMMED_GROUPING = 'grouping';
 
@@ -51,3 +51,16 @@ export function processDoubleConversionTrimmed(
 	}
 	return trimemedOptionsToUpgrade;
 }
+
+export function filterOutEmptyGroups(allTrimmedGroups: Trimmed, childrenByGroup: Record<number, number[]> = {}) {
+	const trimmedGroup: TrimmedEntity = {};
+	const allTrimmed = gatherTrimmedItems(allTrimmedGroups);
+	// find is groups are filled
+	for (let groupIndex in childrenByGroup) {	
+		const hasChidlren = childrenByGroup[groupIndex].filter(childIndex => !allTrimmed[childIndex]).length > 0;
+		if (!hasChidlren) {
+			trimmedGroup[groupIndex] = true;
+		}
+	}
+	return trimmedGroup;
+} 
