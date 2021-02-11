@@ -31,4 +31,5 @@ export type OnExpandEvent = {
 export type SourceGather = {
   source: RevoGrid.DataType[];
   prevExpanded: Record<string, boolean>;
+  oldNewIndexes?: Record<number, number>;
 };

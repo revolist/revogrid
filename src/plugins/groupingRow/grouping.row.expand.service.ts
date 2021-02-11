@@ -24,9 +24,16 @@ export function doCollapse(pIndex: number, source: RevoGrid.DataType[]) {
   return { trimmed };
 }
 
-// provide expand data
-export function doExpand(pIndex: number, vIndex: number, source: RevoGrid.DataType[], rowItemsIndexes: number[]) {
-  const model = source[pIndex];
+/**
+ * 
+ * @param pIndex - physical index
+ * @param vIndex - virtual index, need to update item collection
+ * @param source - data source
+ * @param rowItemsIndexes - row indexes
+ */
+export function doExpand(vIndex: number, source: RevoGrid.DataType[], rowItemsIndexes: number[]) {
+  const physicalIndex = rowItemsIndexes[vIndex];
+  const model = source[physicalIndex];
   const currentGroup = getParsedGroup(model[PSEUDO_GROUP_ITEM_ID]);
   const trimmed: Record<number, boolean> = {};
 
@@ -37,12 +44,15 @@ export function doExpand(pIndex: number, vIndex: number, source: RevoGrid.DataTy
 
   const groupItems: number[] = [];
   model[GROUP_EXPANDED] = true;
-  let i = pIndex + 1;
+  let i = physicalIndex + 1;
   const total = source.length;
   let groupLevelOnly = 0;
+
+  // go through all rows
   while (i < total) {
     const currentModel = source[i];
     const isGroup = isGrouping(currentModel);
+    // group found
     if (isGroup) {
       if (!isSameGroup(currentGroup, model, currentModel)) {
         break;
@@ -51,6 +61,7 @@ export function doExpand(pIndex: number, vIndex: number, source: RevoGrid.DataTy
         groupLevelOnly = currentModel[GROUP_DEPTH];
       }
     }
+    // level 0 or same depth
     if (!groupLevelOnly || (isGroup && groupLevelOnly === currentModel[GROUP_DEPTH])) {
       trimmed[i] = false;
       groupItems.push(i);
