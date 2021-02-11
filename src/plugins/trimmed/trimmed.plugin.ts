@@ -29,7 +29,7 @@ export const trimmedPlugin = <T>(store: Observable<DataSourceState<T, any>>): Pl
   },
 });
 
-function gatherTrimmedItems(trimmedItems: Trimmed) {
+export function gatherTrimmedItems(trimmedItems: Trimmed) {
   const trimmed: TrimmedEntity = {};
 
   for (let trimmedKey in trimmedItems) {

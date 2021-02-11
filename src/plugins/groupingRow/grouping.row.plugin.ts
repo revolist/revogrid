@@ -4,14 +4,14 @@ import { DataProvider } from '../../services/data.provider';
 import { getPhysical, setItems } from '../../store/dataSource/data.store';
 import { columnTypes } from '../../store/storeTypes';
 import BasePlugin from '../basePlugin';
-import { TrimmedEntity } from '../trimmed/trimmed.plugin';
-import { GROUP_EXPANDED, GROUP_EXPAND_EVENT, PSEUDO_GROUP_COLUMN, PSEUDO_GROUP_ITEM_VALUE } from './grouping.const';
+import { FILTER_TRIMMED_TYPE } from '../filter/filter.plugin';
+import { gatherTrimmedItems, Trimmed, TrimmedEntity } from '../trimmed/trimmed.plugin';
+import { GROUPING_ROW_TYPE, GROUP_EXPANDED, GROUP_EXPAND_EVENT, PSEUDO_GROUP_COLUMN, PSEUDO_GROUP_ITEM_VALUE } from './grouping.const';
 import { doExpand, doCollapse } from './grouping.row.expand.service';
 import { BeforeSourceSetEvent, GroupingOptions, OnExpandEvent, SourceGather } from './grouping.row.types';
 import { ExpandedOptions, gatherGrouping, isGrouping, isGroupingColumn } from './grouping.service';
 import { processDoubleConversionTrimmed, TRIMMED_GROUPING } from './grouping.trimmed.service';
 
-const GROUPING_ROW_TYPE = 'row';
 
 export default class GroupingRowPlugin extends BasePlugin {
   private options: GroupingOptions | undefined;
@@ -59,7 +59,7 @@ export default class GroupingRowPlugin extends BasePlugin {
     const model = source[i];
     const prevExpanded = model[GROUP_EXPANDED];
     if (!prevExpanded) {
-      const { trimmed, items } = doExpand(i, virtualIndex, source, this.rowItems);
+      const { trimmed, items } = doExpand(virtualIndex, source, this.rowItems);
       newTrimmed = { ...newTrimmed, ...trimmed };
       if (items) {
         setItems(this.store, items);
@@ -91,7 +91,7 @@ export default class GroupingRowPlugin extends BasePlugin {
         // grouping filter
         if (!isGrouping(model)) {
           result.source.push(model);
-          result.oldNewIndexes[index] = i;
+          result.oldNewIndexes[i] = index;
           index++;
         } else {
           if (model[GROUP_EXPANDED]) {
@@ -143,6 +143,18 @@ export default class GroupingRowPlugin extends BasePlugin {
     }
   }
 
+  private beforeTrimmedApply(trimmed: Record<number, boolean>, type: string) {
+    /** Before filter apply remove grouping filtering */
+    if (type === FILTER_TRIMMED_TYPE) {
+      const source = this.store.get('source');
+      for (let index in trimmed) {
+        if (trimmed[index] && isGrouping(source[index])) {
+          trimmed[index] = false;
+        }
+      }
+    }
+  }
+
   // subscribe to grid events to process them accordingly
   private subscribe() {
     /** if grouping present and new data source arrived */
@@ -176,16 +188,6 @@ export default class GroupingRowPlugin extends BasePlugin {
     this.addEventListener(GROUP_EXPAND_EVENT, ({ detail }: CustomEvent<OnExpandEvent>) => this.onExpand(detail));
   }
 
-  /** Before filter apply remove grouping filtering */
-  private beforeTrimmedApply(_trimmed: Record<number, boolean>, _type: string) {
-    /*
-    for (let index in itemsToFilter) {
-      if (itemsToFilter[index] && isGrouping(source[index])) {
-        itemsToFilter[index] = false;
-      }
-    } */
-  }
-
   /** 
    * Starts global source update with group clearing and applying new one
    * Initiated when need to reapply grouping
@@ -203,8 +205,9 @@ export default class GroupingRowPlugin extends BasePlugin {
      * Group again
      * @param oldNewIndexMap - provides us mapping with new indexes vs old indexes
      */
-    const { sourceWithGroups, depth, trimmed, oldNewIndexMap } = gatherGrouping(
+    const { sourceWithGroups, depth, trimmed, oldNewIndexMap, childrenByGroup } = gatherGrouping(
       source,
+      // filter
       item => this.options?.props.map(key => item[key]),
       {
         prevExpanded,
@@ -219,7 +222,7 @@ export default class GroupingRowPlugin extends BasePlugin {
       { depth, },
       true,
     );
-    this.updateTrimmed(trimmed, oldNewIndexes, oldNewIndexMap);
+    this.updateTrimmed(trimmed, childrenByGroup, oldNewIndexes, oldNewIndexMap);
   }
 
   /**
@@ -233,12 +236,17 @@ export default class GroupingRowPlugin extends BasePlugin {
     }
     const source = data.source.filter(s => !isGrouping(s));
     const expanded = this.revogrid.grouping || {};
-    const { sourceWithGroups, depth, trimmed, oldNewIndexMap } = gatherGrouping(source, item => this.options?.props.map(key => item[key]), {
-      ...(expanded || {}),
-    });
+    const { sourceWithGroups, depth, trimmed, oldNewIndexMap, childrenByGroup } = gatherGrouping(
+      source,
+      // filter
+      item => this.options?.props.map(key => item[key]),
+      {
+        ...(expanded || {}),
+      }
+    );
     data.source = sourceWithGroups;
     this.providers.dataProvider.setGrouping({ depth });
-    this.updateTrimmed(trimmed, oldNewIndexMap);
+    this.updateTrimmed(trimmed, childrenByGroup, oldNewIndexMap);
   }
 
   // apply grouping
@@ -288,22 +296,38 @@ export default class GroupingRowPlugin extends BasePlugin {
     // clear rows
     const { source, oldNewIndexes } = this.getSource(true);
     this.providers.dataProvider.setData(source, GROUPING_ROW_TYPE, undefined, true);
-    this.updateTrimmed({}, oldNewIndexes);
+    this.updateTrimmed(undefined, undefined, oldNewIndexes);
   }
 
   private updateTrimmed(
-    trimmedGroup: TrimmedEntity,
+    trimmedGroup: TrimmedEntity = {},
+    childrenByGroup: Record<number, number[]> = {},
     firstLevelMap: Record<number, number>,
-    secondLevelMap?: Record<number, number>) {
+    secondLevelMap?: Record<number, number>
+  ) {
 
     // map previously trimmed data
     const trimemedOptionsToUpgrade = processDoubleConversionTrimmed(this.trimmed, firstLevelMap, secondLevelMap);
-    console.log(trimemedOptionsToUpgrade);
     for (let type in trimemedOptionsToUpgrade) {
       this.revogrid.addTrimmed(trimemedOptionsToUpgrade[type], type);
     }
 
+    const emptyGroups = this.filterOutEmptyGroups(trimemedOptionsToUpgrade, childrenByGroup);
+
     // setup trimmed data for grouping
-    this.revogrid.addTrimmed(trimmedGroup, TRIMMED_GROUPING);
+    this.revogrid.addTrimmed({ ...trimmedGroup, ...emptyGroups }, TRIMMED_GROUPING);
+  }
+
+  private filterOutEmptyGroups(allTrimmedGroups: Trimmed, childrenByGroup: Record<number, number[]> = {}) {
+    const trimmedGroup: TrimmedEntity = {};
+    const allTrimmed = gatherTrimmedItems(allTrimmedGroups);
+    // find is groups are filled
+    for (let groupIndex in childrenByGroup) {
+      const hasChidlren = childrenByGroup[groupIndex].filter(childIndex => !allTrimmed[childIndex]).length > 0;
+      if (!hasChidlren) {
+        trimmedGroup[groupIndex] = true;
+      }
+    }
+    return trimmedGroup;
   }
 }

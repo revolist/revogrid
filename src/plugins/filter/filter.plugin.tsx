@@ -34,6 +34,8 @@ type FilterCollectionItem = {
 
 export type FilterCollection = Record<RevoGrid.ColumnProp, FilterCollectionItem>;
 
+export const FILTER_TRIMMED_TYPE = 'filter';
+
 export default class FilterPlugin extends BasePlugin {
   private pop: HTMLRevogrFilterPanelElement;
   private filterCollection: FilterCollection = {};
@@ -217,7 +219,7 @@ export default class FilterPlugin extends BasePlugin {
       return;
     }
     // check is trimmed event prevented
-    const isAddedEvent = await this.revogrid.addTrimmed(detail.itemsToFilter, 'filter');
+    const isAddedEvent = await this.revogrid.addTrimmed(detail.itemsToFilter, FILTER_TRIMMED_TYPE);
     if (isAddedEvent.defaultPrevented) {
       return;
     }

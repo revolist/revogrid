@@ -480,6 +480,10 @@ declare namespace LocalJSX {
     source: RevoGrid.DataType[];
   }>) => void;
         /**
+          * Notify trimmed applied
+         */
+        "onAfterTrimmed"?: (event: CustomEvent<any>) => void;
+        /**
           * Before autofill. Triggered before autofill applied. Use e.preventDefault() to prevent edit data apply.
          */
         "onBeforeAutofill"?: (event: CustomEvent<Selection.ChangedRange>) => void;

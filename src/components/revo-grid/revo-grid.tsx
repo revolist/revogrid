@@ -272,6 +272,14 @@ export class RevoGridComponent {
    * Update @trimmed if you wish to filter indexes of trimming
    */
   @Event() beforeTrimmed: EventEmitter<{ trimmed: Record<number, boolean>, trimmedType: string, type: string }>;
+
+
+  /**
+   * Notify trimmed applied
+   */
+  @Event() afterTrimmed: EventEmitter;
+
+  
   /**
    * Triggered when view port scrolled
    */
@@ -350,6 +358,7 @@ export class RevoGridComponent {
       return event;
     }
     this.dataProvider.setTrimmed({ [trimmedType]: event.detail.trimmed }, type);
+    this.afterTrimmed.emit();
     return event;
   }
 
