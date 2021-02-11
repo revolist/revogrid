@@ -4,13 +4,16 @@ const beginsWith: LogicFunction = (value: LogicFunctionParam, extra?: LogicFunct
   if (!value) {
     return false;
   }
-  if (extra) {
-    if (typeof value !== 'string') {
-      value = JSON.stringify(value);
-    }
-    return value.toLocaleLowerCase().indexOf(extra) === 0;
+  if (!extra) {
+    return true;
   }
-  return true;
+  if (typeof value !== 'string') {
+    value = JSON.stringify(value);
+  }
+  if (typeof extra !== 'string') {
+    extra = JSON.stringify(extra);
+  }
+  return value.toLocaleLowerCase().indexOf(extra.toLocaleLowerCase()) === 0;
 };
 
 beginsWith.extra = 'input';

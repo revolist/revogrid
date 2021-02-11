@@ -31,8 +31,11 @@ export function generateFakeDataObject(rowsNumber, colsNumber) {
         sortable: true,
       };
     }
-    result[row][col] = row % 5 ? col : row % 3 ? (col % 3 ? 2 : 3) : row; // row + ':' + col;
-
+    if (col === 1) {
+      result[row][col] = 'A';
+    } else {
+      result[row][col] = row % 5 ? col : row % 3 ? (col % 3 ? 2 : 3) : row; // row + ':' + col;
+    }  
     if (col === 0) {
       columns[col].rowDrag = true;
       // columns[col].order = 'asc';
