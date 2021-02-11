@@ -12,7 +12,6 @@ import { BeforeSourceSetEvent, GroupingOptions, OnExpandEvent, SourceGather } fr
 import { ExpandedOptions, gatherGrouping, isGrouping, isGroupingColumn } from './grouping.service';
 import { processDoubleConversionTrimmed, TRIMMED_GROUPING } from './grouping.trimmed.service';
 
-
 export default class GroupingRowPlugin extends BasePlugin {
   private options: GroupingOptions | undefined;
 
@@ -103,7 +102,7 @@ export default class GroupingRowPlugin extends BasePlugin {
       {
         source: [],
         prevExpanded: {},
-        oldNewIndexes: {}
+        oldNewIndexes: {},
       },
     );
   }
@@ -188,7 +187,7 @@ export default class GroupingRowPlugin extends BasePlugin {
     this.addEventListener(GROUP_EXPAND_EVENT, ({ detail }: CustomEvent<OnExpandEvent>) => this.onExpand(detail));
   }
 
-  /** 
+  /**
    * Starts global source update with group clearing and applying new one
    * Initiated when need to reapply grouping
    */
@@ -201,7 +200,7 @@ export default class GroupingRowPlugin extends BasePlugin {
      * @param newOldIndexMap - provides us mapping with new indexes vs old indexes, we would use it for trimmed mapping
      */
     const { source, prevExpanded, oldNewIndexes } = this.getSource(true);
-    /** 
+    /**
      * Group again
      * @param oldNewIndexMap - provides us mapping with new indexes vs old indexes
      */
@@ -212,16 +211,11 @@ export default class GroupingRowPlugin extends BasePlugin {
       {
         prevExpanded,
         ...options,
-      }
+      },
     );
-    
+
     // setup source
-    this.providers.dataProvider.setData(
-      sourceWithGroups,
-      GROUPING_ROW_TYPE,
-      { depth, },
-      true,
-    );
+    this.providers.dataProvider.setData(sourceWithGroups, GROUPING_ROW_TYPE, { depth }, true);
     this.updateTrimmed(trimmed, childrenByGroup, oldNewIndexes, oldNewIndexMap);
   }
 
@@ -242,7 +236,7 @@ export default class GroupingRowPlugin extends BasePlugin {
       item => this.options?.props.map(key => item[key]),
       {
         ...(expanded || {}),
-      }
+      },
     );
     data.source = sourceWithGroups;
     this.providers.dataProvider.setGrouping({ depth });
@@ -303,9 +297,8 @@ export default class GroupingRowPlugin extends BasePlugin {
     trimmedGroup: TrimmedEntity = {},
     _childrenByGroup: Record<number, number[]> = {},
     firstLevelMap: Record<number, number>,
-    secondLevelMap?: Record<number, number>
+    secondLevelMap?: Record<number, number>,
   ) {
-
     // map previously trimmed data
     const trimemedOptionsToUpgrade = processDoubleConversionTrimmed(this.trimmed, firstLevelMap, secondLevelMap);
     for (let type in trimemedOptionsToUpgrade) {

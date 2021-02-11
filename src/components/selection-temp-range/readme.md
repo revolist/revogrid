@@ -2,6 +2,7 @@
 
 <!-- Auto Generated Below -->
 
+
 ## Properties
 
 | Property         | Attribute | Description    | Type                                    | Default     |
@@ -10,20 +11,20 @@
 | `dimensionRow`   | --        |                | `ObservableMap<DimensionSettingsState>` | `undefined` |
 | `selectionStore` | --        | Dynamic stores | `ObservableMap<SelectionStoreState>`    | `undefined` |
 
+
 ## Dependencies
 
 ### Used by
 
-- [revogr-viewport](../viewport)
+ - [revogr-viewport](../viewport)
 
 ### Graph
-
 ```mermaid
 graph TD;
   revogr-viewport --> revogr-temp-range
   style revogr-temp-range fill:#f9f,stroke:#333,stroke-width:4px
 ```
 
----
+----------------------------------------------
 
-_Built with [StencilJS](https://stenciljs.com/)_
+*Built with [StencilJS](https://stenciljs.com/)*

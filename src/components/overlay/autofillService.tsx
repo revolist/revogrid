@@ -13,8 +13,8 @@ import ColumnService from '../data/columnService';
 import { DataSourceState, getSourceItem } from '../../store/dataSource/data.store';
 
 enum AutoFillType {
-	selection = 'Selection',
-	autoFill = 'AutoFill'
+  selection = 'Selection',
+  autoFill = 'AutoFill',
 }
 
 export abstract class AutoFillService {
@@ -31,7 +31,7 @@ export abstract class AutoFillService {
 
   protected abstract getData(): any;
 
-  private autoFillType: AutoFillType|null = null;
+  private autoFillType: AutoFillType | null = null;
   private autoFillInitial: Selection.Cell | null = null;
   private autoFillStart: Selection.Cell | null = null;
   private autoFillLast: Selection.Cell | null = null;
@@ -132,27 +132,27 @@ export abstract class AutoFillService {
     /** Get cell by autofill element */
     const { top, left } = (e.target as HTMLElement).getBoundingClientRect();
     this.autoFillInitial = this.doAutoFill();
-    this.autoFillType = type
+    this.autoFillType = type;
     this.autoFillStart = getCurrentCell({ x: left, y: top }, data);
     e.preventDefault();
   }
 
   protected clearAutoFillSelection() {
     // Apply autofill values on mouse up
-		if (this.autoFillInitial) {
-			// Get latest
-			this.autoFillInitial = this.doAutoFill();
-			if (this.autoFillType === AutoFillType.autoFill) {
-				this.applyRangeWithData(this.autoFillInitial, this.autoFillLast);
-			} else {
-				this.applyRangeOnly(this.autoFillInitial, this.autoFillLast);
-			}
+    if (this.autoFillInitial) {
+      // Get latest
+      this.autoFillInitial = this.doAutoFill();
+      if (this.autoFillType === AutoFillType.autoFill) {
+        this.applyRangeWithData(this.autoFillInitial, this.autoFillLast);
+      } else {
+        this.applyRangeOnly(this.autoFillInitial, this.autoFillLast);
+      }
     }
 
-		this.autoFillType = null;
-		this.autoFillInitial = null;
-		this.autoFillLast = null;
-		this.autoFillStart = null;
+    this.autoFillType = null;
+    this.autoFillInitial = null;
+    this.autoFillLast = null;
+    this.autoFillStart = null;
   }
 
   private applyRangeWithData(start?: Selection.Cell, end?: Selection.Cell) {
@@ -196,9 +196,9 @@ export abstract class AutoFillService {
       this.columnService.applyRangeData(data);
     }
     this.setRange.emit(range);
-	}
-	
-	private applyRangeOnly(start?: Selection.Cell, end?: Selection.Cell) {
+  }
+
+  private applyRangeOnly(start?: Selection.Cell, end?: Selection.Cell) {
     // no changes to apply
     if (!start || !end) {
       return;
@@ -206,6 +206,5 @@ export abstract class AutoFillService {
 
     const newRange = getRange(start, end);
     this.setRange.emit(newRange);
-    
   }
 }

@@ -551,7 +551,7 @@ declare namespace LocalJSX {
         /**
           * Before trimmed values Use e.preventDefault() to prevent value trimming Update @trimmed if you wish to filter indexes of trimming
          */
-        "onBeforeTrimmed"?: (event: CustomEvent<{ trimmed: Record<number, boolean>, trimmedType: string, type: string }>) => void;
+        "onBeforeTrimmed"?: (event: CustomEvent<{ trimmed: Record<number, boolean>; trimmedType: string; type: string }>) => void;
         /**
           * On header click.
          */

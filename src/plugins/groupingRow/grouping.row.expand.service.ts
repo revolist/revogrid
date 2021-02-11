@@ -25,7 +25,7 @@ export function doCollapse(pIndex: number, source: RevoGrid.DataType[]) {
 }
 
 /**
- * 
+ *
  * @param pIndex - physical index
  * @param vIndex - virtual index, need to update item collection
  * @param source - data source

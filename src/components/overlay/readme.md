@@ -2,6 +2,7 @@
 
 <!-- Auto Generated Below -->
 
+
 ## Properties
 
 | Property         | Attribute  | Description                                                     | Type                                                           | Default     |
@@ -16,6 +17,7 @@
 | `range`          | `range`    |                                                                 | `boolean`                                                      | `undefined` |
 | `readonly`       | `readonly` |                                                                 | `boolean`                                                      | `undefined` |
 | `selectionStore` | --         | Dynamic stores                                                  | `ObservableMap<SelectionStoreState>`                           | `undefined` |
+
 
 ## Events
 
@@ -33,29 +35,27 @@
 | `setTempRange`             |                         | `CustomEvent<{ x: number; y: number; x1: number; y1: number; }>`                                                                                                         |
 | `unregister`               |                         | `CustomEvent<any>`                                                                                                                                                       |
 
+
 ## Dependencies
 
 ### Used by
 
-- [revogr-viewport](../viewport)
+ - [revogr-viewport](../viewport)
 
 ### Depends on
 
-- [revogr-edit](.)
-- [revogr-clipboard](../clipboard)
+- [revogr-edit](editors)
 - [revogr-order-editor](../order)
 
 ### Graph
-
 ```mermaid
 graph TD;
   revogr-overlay-selection --> revogr-edit
-  revogr-overlay-selection --> revogr-clipboard
   revogr-overlay-selection --> revogr-order-editor
   revogr-viewport --> revogr-overlay-selection
   style revogr-overlay-selection fill:#f9f,stroke:#333,stroke-width:4px
 ```
 
----
+----------------------------------------------
 
-_Built with [StencilJS](https://stenciljs.com/)_
+*Built with [StencilJS](https://stenciljs.com/)*

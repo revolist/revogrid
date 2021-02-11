@@ -47,11 +47,7 @@ function groupBy<T>(array: T[], f: (v: T) => any) {
  * @param mapFunc - mapping function for stringify
  * @param expanded - potentially expanded items if present
  */
-export function gatherGrouping<T>(
-  array: T[],
-  mapFunc: (v: T) => any,
-  { prevExpanded, expandedAll }: ExpandedOptions
-) {
+export function gatherGrouping<T>(array: T[], mapFunc: (v: T) => any, { prevExpanded, expandedAll }: ExpandedOptions) {
   // build groups
   const groupsOrder = groupBy(array, mapFunc);
 
@@ -128,7 +124,7 @@ export function gatherGrouping<T>(
     // used for mapping old values to new
     oldNewIndexMap,
     // used to get child items in group
-    childrenByGroup: pseudoGroupTest
+    childrenByGroup: pseudoGroupTest,
   };
 }
 

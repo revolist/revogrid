@@ -271,15 +271,13 @@ export class RevoGridComponent {
    * Use e.preventDefault() to prevent value trimming
    * Update @trimmed if you wish to filter indexes of trimming
    */
-  @Event() beforeTrimmed: EventEmitter<{ trimmed: Record<number, boolean>, trimmedType: string, type: string }>;
-
+  @Event() beforeTrimmed: EventEmitter<{ trimmed: Record<number, boolean>; trimmedType: string; type: string }>;
 
   /**
    * Notify trimmed applied
    */
   @Event() afterTrimmed: EventEmitter;
 
-  
   /**
    * Triggered when view port scrolled
    */
@@ -352,7 +350,7 @@ export class RevoGridComponent {
     const event = this.beforeTrimmed.emit({
       trimmed,
       trimmedType,
-      type
+      type,
     });
     if (event.defaultPrevented) {
       return event;
