@@ -69,3 +69,7 @@ export function isClear(code: string): boolean {
 export function isTab(code: string): boolean {
   return codesLetter.TAB === code;
 }
+
+export function isEnterKey(code: string): boolean {
+  return code === codesLetter.ENTER || code === codesLetter.ENTER_NUM
+}

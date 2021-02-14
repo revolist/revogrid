@@ -3,7 +3,7 @@ import { Observable, Selection, Edition } from '../../interfaces';
 import { getRange } from '../../store/selection/selection.helpers';
 import SelectionStoreService from '../../store/selection/selection.store.service';
 import { codesLetter } from '../../utils/keyCodes';
-import { isClear, isCtrlKey, isLetterKey } from '../../utils/keyCodes.utils';
+import { isClear, isCtrlKey, isEnterKey, isLetterKey } from '../../utils/keyCodes.utils';
 import { timeout } from '../../utils/utils';
 import ColumnService from '../data/columnService';
 import { EventData, getCoordinate, isAfterLast, isBeforeFirst } from './selection.utils';
@@ -60,7 +60,7 @@ export abstract class KeyboardService {
     }
 
     // pressed enter
-    if (codesLetter.ENTER === e.code) {
+    if (isEnterKey(e.code)) {
       this.doEdit();
       return;
     }

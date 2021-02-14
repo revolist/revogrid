@@ -1,8 +1,9 @@
-import { h, VNode } from '@stencil/core';
-import { codesLetter } from '../../../utils/keyCodes';
-import { isTab } from '../../../utils/keyCodes.utils';
+import { h } from '@stencil/core';
+import { isEnterKey, isTab } from '../../../utils/keyCodes.utils';
 import { Edition, RevoGrid } from '../../../interfaces';
 import { timeout } from '../../../utils/utils';
+
+export type SaveCallback = (value: Edition.SaveData, preventFocus: boolean) => void;
 
 export class TextEditor implements Edition.EditorBase {
   private editInput!: HTMLInputElement;
@@ -10,7 +11,7 @@ export class TextEditor implements Edition.EditorBase {
   public element: Element | null = null;
   public editCell: Edition.EditCell | null = null;
 
-  constructor(public column: RevoGrid.ColumnRegular, private saveCallback?: (value: Edition.SaveData, preventFocus: boolean) => void) {}
+  constructor(public column: RevoGrid.ColumnRegular, private saveCallback?: SaveCallback) {}
 
   async componentDidRender(): Promise<void> {
     if (this.editInput) {
@@ -22,8 +23,8 @@ export class TextEditor implements Edition.EditorBase {
   disconnectedCallback(): void {}
 
   private onKeyDown(e: KeyboardEvent): void {
-    const isEnter: boolean = codesLetter.ENTER === e.code;
-    const isKeyTab: boolean = isTab(e.code);
+    const isEnter = isEnterKey(e.code);
+    const isKeyTab = isTab(e.code);
 
     if ((isKeyTab || isEnter) && e.target && this.saveCallback) {
       // blur is needed to avoid autoscroll
@@ -34,16 +35,7 @@ export class TextEditor implements Edition.EditorBase {
   }
 
   // required
-  render(): VNode {
-    return (
-      <input
-        type="text"
-        value={this.editCell?.val || ''}
-        ref={el => {
-          this.editInput = el;
-        }}
-        onKeyDown={e => this.onKeyDown(e)}
-      />
-    );
+  render() {
+    return <input type="text" value={this.editCell?.val || ''} ref={el => { this.editInput = el; }} onKeyDown={e => this.onKeyDown(e)} />;
   }
 }
