@@ -68,7 +68,7 @@ export class OverlaySelection {
 
   @Event({ bubbles: false }) setEdit: EventEmitter<BeforeEdit>;
   @Event({ bubbles: false }) setRange: EventEmitter<Selection.RangeArea>;
-  @Event({ bubbles: false }) setTempRange: EventEmitter<Selection.RangeArea | null>;
+  @Event({ bubbles: false }) setTempRange: EventEmitter<Selection.TempRange | null>;
 
   @Event({ bubbles: false }) focusCell: EventEmitter<Selection.FocusedCells>;
   @Event({ bubbles: false }) unregister: EventEmitter;

@@ -7,6 +7,7 @@ function defaultState(): Selection.SelectionStoreState {
   return {
     range: null,
     tempRange: null,
+    tempRangeType: null,
     focus: null,
     edit: null,
     lastCell: null,
@@ -17,6 +18,11 @@ export class SelectionStore {
   readonly store: Observable<Selection.SelectionStoreState>;
   constructor() {
     this.store = createStore(defaultState());
+    this.store.on('set', (key, newVal) => {
+      if (key === 'tempRange' && !newVal) {
+        this.store.set('tempRangeType', null);
+      }
+    });
   }
 
   clearFocus(): void {
@@ -32,12 +38,8 @@ export class SelectionStore {
     });
   }
 
-  setTempArea(tempRange: Selection.RangeArea | null): void {
-    setStore(this.store, { tempRange, edit: null });
-  }
-
-  setTempRange(start: Selection.Cell, end: Selection.Cell): void {
-    this.setTempArea(getRange(start, end));
+  setTempArea(range: Selection.TempRange | null): void {
+    setStore(this.store, { tempRange: range?.area, tempRangeType: range?.type, edit: null });
   }
 
   clearTemp(): void {

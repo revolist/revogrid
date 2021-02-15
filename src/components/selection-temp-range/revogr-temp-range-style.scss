@@ -3,8 +3,12 @@
   position: absolute;
   pointer-events: none;
   z-index: 9;
-  border: 1px solid red;
+  border: 1px solid rgb(255, 94, 0);
   box-sizing: border-box;
+
+  &.Selection {
+    border: 1px dashed gray;
+  }
 
   > div {
     width: 1px;

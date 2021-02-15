@@ -24,7 +24,7 @@ export abstract class AutoFillService {
   protected abstract columnService: ColumnService;
   abstract dataStore: Observable<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
 
-  abstract setTempRange: EventEmitter<Selection.RangeArea | null>;
+  abstract setTempRange: EventEmitter<Selection.TempRange | null>;
   abstract internalSelectionChanged: EventEmitter<Selection.ChangedRange>;
   abstract internalRangeDataApply: EventEmitter<Edition.BeforeRangeSaveDataDetails>;
   abstract setRange: EventEmitter<Selection.RangeArea>;
@@ -38,6 +38,11 @@ export abstract class AutoFillService {
 
   private onMouseMoveAutofill: DebouncedFunc<(e: MouseEvent, data: EventData) => void>;
 
+  /**
+   * Render autofill box
+   * @param range 
+   * @param selectionFocus 
+   */
   protected renderAutofill(range: Selection.RangeArea, selectionFocus: Selection.Cell): VNode {
     let handlerStyle;
     if (range) {
@@ -53,18 +58,14 @@ export abstract class AutoFillService {
         this.dimensionCol.state,
       );
     }
-    const props = {
-      class: CELL_HANDLER_CLASS,
-      onMouseDown: (e: MouseEvent) => this.selectionStart(e, this.getData(), AutoFillType.autoFill),
-      style: { left: `${handlerStyle.right}px`, top: `${handlerStyle.bottom}px` },
-    };
-    return <div {...props} />;
+    return <div class={CELL_HANDLER_CLASS} style={{ left: `${handlerStyle.right}px`, top: `${handlerStyle.bottom}px` }} onMouseDown={(e: MouseEvent) => this.selectionStart(e, this.getData(), AutoFillType.autoFill)}/>;
   }
 
   get isAutoFill() {
     return !!this.autoFillType;
   }
 
+  /** Process mouse move events */
   protected selectionMouseMove(e: MouseEvent) {
     // initiate mouse move debounce if not present
     if (!this.onMouseMoveAutofill) {
@@ -75,7 +76,7 @@ export abstract class AutoFillService {
     }
   }
 
-  private doAutoFill() {
+  private getFocus() {
     let focus = this.selectionStoreService.focused;
     const range = this.selectionStoreService.ranged;
     if (range) {
@@ -125,23 +126,33 @@ export abstract class AutoFillService {
       return;
     }
     this.autoFillLast = current;
-    this.setTempRange.emit(getRange(this.autoFillInitial, this.autoFillLast));
+    this.setTempRange.emit({
+      area: getRange(this.autoFillInitial, this.autoFillLast),
+      type: this.autoFillType
+    });
   }
 
+  /**
+   * Range selection started
+   * Mode @param type:
+   * Can be triggered from MouseDown selection on element
+   * Or can be triggered on corner square drag
+   */
   protected selectionStart(e: MouseEvent, data: EventData, type = AutoFillType.selection) {
     /** Get cell by autofill element */
     const { top, left } = (e.target as HTMLElement).getBoundingClientRect();
-    this.autoFillInitial = this.doAutoFill();
+    this.autoFillInitial = this.getFocus();
     this.autoFillType = type;
     this.autoFillStart = getCurrentCell({ x: left, y: top }, data);
     e.preventDefault();
   }
 
+  /** Clear current range selection */
   protected clearAutoFillSelection() {
     // Apply autofill values on mouse up
     if (this.autoFillInitial) {
       // Get latest
-      this.autoFillInitial = this.doAutoFill();
+      this.autoFillInitial = this.getFocus();
       if (this.autoFillType === AutoFillType.autoFill) {
         this.applyRangeWithData(this.autoFillInitial, this.autoFillLast);
       } else {
@@ -155,6 +166,24 @@ export abstract class AutoFillService {
     this.autoFillStart = null;
   }
 
+  /** Trigger range apply events and handle responses */
+  onRangeApply(data: RevoGrid.DataLookup, range: Selection.RangeArea): void {
+    const models: RevoGrid.DataLookup = {};
+    for (let rowIndex in data) {
+      models[rowIndex] = getSourceItem(this.dataStore, parseInt(rowIndex, 10));
+    }
+    const dataEvent = this.internalRangeDataApply.emit({
+      data,
+      models,
+      type: this.dataStore.get('type'),
+    });
+    if (!dataEvent.defaultPrevented) {
+      this.columnService.applyRangeData(data);
+    }
+    this.setRange.emit(range);
+  }
+
+  /** Apply range and copy data during range application */
   private applyRangeWithData(start?: Selection.Cell, end?: Selection.Cell) {
     // no changes to apply
     if (!start || !end) {
@@ -182,22 +211,7 @@ export abstract class AutoFillService {
     this.onRangeApply(rangeData.newData, newRange);
   }
 
-  onRangeApply(data: RevoGrid.DataLookup, range: Selection.RangeArea): void {
-    const models: RevoGrid.DataLookup = {};
-    for (let rowIndex in data) {
-      models[rowIndex] = getSourceItem(this.dataStore, parseInt(rowIndex, 10));
-    }
-    const dataEvent = this.internalRangeDataApply.emit({
-      data,
-      models,
-      type: this.dataStore.get('type'),
-    });
-    if (!dataEvent.defaultPrevented) {
-      this.columnService.applyRangeData(data);
-    }
-    this.setRange.emit(range);
-  }
-
+  /** Update range selection ony, no data change (mouse selection) */
   private applyRangeOnly(start?: Selection.Cell, end?: Selection.Cell) {
     // no changes to apply
     if (!start || !end) {

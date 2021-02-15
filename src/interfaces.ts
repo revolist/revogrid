@@ -282,6 +282,7 @@ export declare namespace Selection {
   type SelectionStoreState = {
     range: RangeArea | null;
     tempRange: RangeArea | null;
+    tempRangeType: string | null;
     focus: Cell | null;
 
     edit: Edition.EditCellStore | null;
@@ -293,6 +294,11 @@ export declare namespace Selection {
     y: RowIndex;
     x1: ColIndex;
     y1: RowIndex;
+  };
+
+  type TempRange = {
+    type: string;
+    area: RangeArea;
   };
 
   type ChangedRange = {

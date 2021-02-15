@@ -32,6 +32,7 @@ export class RevogrFocus {
 
   render() {
     const data = this.selectionStore.get('tempRange');
+    const type = this.selectionStore.get('tempRangeType');
     if (!data) {
       return;
     }
@@ -47,12 +48,14 @@ export class RevogrFocus {
     if (data.x < range.x) {
       derectionX = 'left';
     }
-    const style: Selection.RangeAreaCss = getElStyle(data, this.dimensionRow.state, this.dimensionCol.state);
-    return (
-      <Host class={TMP_SELECTION_BG_CLASS} style={style}>
-        <div class={`${derectionX} ${directionY}`} ref={(e: HTMLElement) => (this.el = e)} />
-      </Host>
-    );
+    const directionClass = `${derectionX} ${directionY}`;
+    const style = getElStyle(data, this.dimensionRow.state, this.dimensionCol.state);
+    return <Host class={{
+      [TMP_SELECTION_BG_CLASS]: true,
+      [type||'']: true
+    }} style={style}>
+      <div class={ directionClass } ref={(e: HTMLElement) => (this.el = e)} />
+    </Host>;
   }
 
   private getRange(): Selection.RangeArea | null {

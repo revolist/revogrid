@@ -20,8 +20,6 @@ export class TextEditor implements Edition.EditorBase {
     }
   }
 
-  disconnectedCallback(): void {}
-
   private onKeyDown(e: KeyboardEvent): void {
     const isEnter = isEnterKey(e.code);
     const isKeyTab = isTab(e.code);
