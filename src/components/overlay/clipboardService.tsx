@@ -40,7 +40,8 @@ export abstract class ClipboardService {
 
   private onPaste(data: string[][]) {
     const focus = this.selectionStoreService.focused;
-    if (!focus) {
+    const isEditing = this.selectionStoreService.edited !== null;
+    if (!focus || isEditing) {
       return;
     }
     const { changed, range } = this.columnService.getTransformedDataToApply(focus, data);

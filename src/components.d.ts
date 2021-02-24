@@ -186,6 +186,10 @@ export namespace Components {
           * Update columns
          */
         "updateColumns": (cols: RevoGrid.ColumnRegular[]) => Promise<void>;
+        /**
+          * When true enable clipboard.
+         */
+        "useClipboard": boolean;
     }
     interface RevogrClipboard {
         "doCopy": (e: DataTransfer, data?: RevoGrid.DataFormat[][]) => Promise<void>;
@@ -275,6 +279,7 @@ export namespace Components {
           * Dynamic stores
          */
         "selectionStore": Observable<Selection.SelectionStoreState>;
+        "useClipboard": boolean;
     }
     interface RevogrScrollVirtual {
         "changeScroll": (e: RevoGrid.ViewPortScrollEvent) => Promise<RevoGrid.ViewPortScrollEvent>;
@@ -314,6 +319,7 @@ export namespace Components {
         "rowStores": { [T in RevoGrid.DimensionRows]: Observable<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>> };
         "scrollToCoordinate": (cell: Partial<Selection.Cell>) => Promise<void>;
         "setEdit": (rowIndex: number, colIndex: number, colType: RevoGrid.DimensionCols, rowType: RevoGrid.DimensionRows) => Promise<void>;
+        "useClipboard": boolean;
         "uuid": string | null;
         "viewports": { [T in RevoGrid.MultiDimensionType]: Observable<RevoGrid.ViewportState> };
     }
@@ -621,6 +627,10 @@ declare namespace LocalJSX {
           * @trimmedRows are physical row indexes to hide
          */
         "trimmedRows"?: Record<number, boolean>;
+        /**
+          * When true enable clipboard.
+         */
+        "useClipboard"?: boolean;
     }
     interface RevogrClipboard {
         "onCopyRegion"?: (event: CustomEvent<DataTransfer>) => void;
@@ -758,6 +768,7 @@ declare namespace LocalJSX {
           * Dynamic stores
          */
         "selectionStore"?: Observable<Selection.SelectionStoreState>;
+        "useClipboard"?: boolean;
     }
     interface RevogrScrollVirtual {
         "dimension"?: RevoGrid.DimensionType;
@@ -795,6 +806,7 @@ declare namespace LocalJSX {
          */
         "rowHeaders"?: RevoGrid.RowHeaders | boolean;
         "rowStores"?: { [T in RevoGrid.DimensionRows]: Observable<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>> };
+        "useClipboard"?: boolean;
         "uuid"?: string | null;
         "viewports"?: { [T in RevoGrid.MultiDimensionType]: Observable<RevoGrid.ViewportState> };
     }

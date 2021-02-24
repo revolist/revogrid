@@ -59,6 +59,8 @@ export class RevoGridComponent {
   @Prop() resize: boolean = false;
   /** When true cell focus appear. */
   @Prop() canFocus: boolean = true;
+  /** When true enable clipboard. */
+  @Prop() useClipboard: boolean = false;
   /**
    * Columns - defines an array of grid columns.
    * Can be column or grouped column.
@@ -780,6 +782,7 @@ export class RevoGridComponent {
         rowHeaders={this.rowHeaders}
         columnFilter={!!this.filter}
         editors={this.editors}
+        useClipboard={this.useClipboard}
       />,
       this.extraElements,
     ];
