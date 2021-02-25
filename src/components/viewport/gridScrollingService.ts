@@ -45,7 +45,7 @@ export default class GridScrollingService {
    * @param el - can be null if holder removed
    * @param key - element key
    */
-  registerElement(el: ElementScroll|null, key: string): void {
+  registerElement(el: ElementScroll | null, key: string): void {
     if (!this.elements[key]) {
       this.elements[key] = [];
     }

@@ -2,7 +2,6 @@
 
 <!-- Auto Generated Below -->
 
-
 ## Properties
 
 | Property            | Attribute   | Description                                                     | Type                                                           | Default     |
@@ -18,27 +17,26 @@
 | `viewportCol`       | --          |                                                                 | `ObservableMap<ViewportState>`                                 | `undefined` |
 | `viewportRow`       | --          |                                                                 | `ObservableMap<ViewportState>`                                 | `undefined` |
 
-
 ## Events
 
 | Event           | Description | Type                      |
 | --------------- | ----------- | ------------------------- |
 | `dragStartCell` |             | `CustomEvent<MouseEvent>` |
 
-
 ## Dependencies
 
 ### Used by
 
- - [revogr-viewport](../viewport)
+- [revogr-viewport](../viewport)
 
 ### Graph
+
 ```mermaid
 graph TD;
   revogr-viewport --> revogr-data
   style revogr-data fill:#f9f,stroke:#333,stroke-width:4px
 ```
 
-----------------------------------------------
+---
 
-*Built with [StencilJS](https://stenciljs.com/)*
+_Built with [StencilJS](https://stenciljs.com/)_

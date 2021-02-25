@@ -63,7 +63,6 @@
     <script nomodule src="/build/revo-grid.js"></script>
   </head>
   <body>
-
     <section class="content">
       <div class="tile large">
         <!-- Grid init-->
@@ -80,10 +79,10 @@
       <button onclick="exportGrid()">Export to csv</button>
       <button onclick="scrollToCol(30)">Scroll to column 30</button>
       <button onclick="setEdit(30, 10)">Set edit 30:1</button>
-      <hr>
+      <hr />
       <div>
         <strong>Set data</strong>
-        <br>
+        <br />
         <button onclick="setData(2, 5)">2x5</button>
         <button onclick="setData(100, 100)">100x100</button>
         <button onclick="setData(1000, 1000)">1Kx1K</button>
@@ -132,9 +131,8 @@
 
         grid.pinnedTopSource = data.pinnedTopRows;
         grid.pinnedBottomSource = data.pinnedBottomRows;
-      }
+      };
     </script>
-
 
     <!-- Grid data apply -->
     <script type="module">
@@ -148,9 +146,9 @@
 
       /**
        * Defaults
-      */
+       */
       setData(2, 5, {
-        colPinStart: [0]
+        colPinStart: [0],
       });
       // setGrouping();
       // setTrimmed([0]);

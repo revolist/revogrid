@@ -6,10 +6,11 @@ export class Clipboard {
   @Event({ bubbles: false }) copyRegion: EventEmitter<DataTransfer>;
   @Event({ bubbles: false }) pasteRegion: EventEmitter<string[][]>;
   @Listen('paste', { target: 'document' }) onPaste(e: ClipboardEvent) {
-    const clipboardData = this.getData(e)
-    const isHTML = clipboardData.types.indexOf('text/html') > -1
+    const clipboardData = this.getData(e);
+    const isHTML = clipboardData.types.indexOf('text/html') > -1;
     const data = isHTML ? clipboardData.getData('text/html') : clipboardData.getData('text');
-    this.pasteRegion.emit(this.parserPaste(data, isHTML));
+    const parsedData = isHTML ? this.htmlParse(data) : this.textParse(data);
+    this.pasteRegion.emit(parsedData);
     e.preventDefault();
   }
   @Listen('copy', { target: 'document' }) copyStarted(e: ClipboardEvent) {
@@ -24,21 +25,22 @@ export class Clipboard {
     return data.map(row => row.join('\t')).join('\n');
   }
 
-  parserPaste(data: string, isHTML: boolean) {
+  private textParse(data: string) {
     const result: string[][] = [];
-    if(isHTML) {
-      const table = document.createRange().createContextualFragment(data).querySelector('table')
-      for (const row of Array.from(table.rows)) {
-        result.push(Array.from(row.cells).map(cell => cell.innerText))
-      }
-      return result
-    } else {
-      const rows = data.split(/\r\n|\n|\r/);
+    const rows = data.split(/\r\n|\n|\r/);
       for (let y in rows) {
         result.push(rows[y].split('\t'));
       }
       return result;
+  }
+
+  private htmlParse(data: string) {
+    const result: string[][] = [];
+    const table = document.createRange().createContextualFragment(data).querySelector('table');
+    for (const row of Array.from(table.rows)) {
+      result.push(Array.from(row.cells).map(cell => cell.innerText));
     }
+    return result;
   }
 
   private getData(e: ClipboardEvent) {

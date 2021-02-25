@@ -18,22 +18,14 @@ const DEFAULT_CONFIG = {
   colPinStart: [],
   colPinEnd: [],
   rowDrag: 0,
-  order: undefined
+  order: undefined,
 };
 
 export function generateFakeDataObject(rowsNumber = 0, colsNumber = 0, config = {}) {
-  const {
-    topPinned,
-    bottomPinned,
-    colPinStart,
-    colPinEnd,
-    rowDrag,
-    order
-  } = {
+  const { topPinned, bottomPinned, colPinStart, colPinEnd, rowDrag, order } = {
     ...DEFAULT_CONFIG,
-    ...config
+    ...config,
   };
-
 
   const result = [];
   const columns = {};
@@ -51,7 +43,7 @@ export function generateFakeDataObject(rowsNumber = 0, colsNumber = 0, config = 
         prop: col,
         sortable: true,
       };
-      
+
       // apply config
       if (colPinStart.indexOf(j) > -1) {
         columns[col].pin = 'colPinStart';

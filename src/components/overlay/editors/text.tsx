@@ -34,6 +34,15 @@ export class TextEditor implements Edition.EditorBase {
 
   // required
   render() {
-    return <input type="text" value={this.editCell?.val || ''} ref={el => { this.editInput = el; }} onKeyDown={e => this.onKeyDown(e)} />;
+    return (
+      <input
+        type="text"
+        value={this.editCell?.val || ''}
+        ref={el => {
+          this.editInput = el;
+        }}
+        onKeyDown={e => this.onKeyDown(e)}
+      />
+    );
   }
 }

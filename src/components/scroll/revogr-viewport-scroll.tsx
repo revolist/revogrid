@@ -180,10 +180,7 @@ export class RevogrViewportScroll {
           <div class="header-wrapper" ref={e => (this.header = e)}>
             <slot name="header" />
           </div>
-          <div
-            class="vertical-inner"
-            ref={el => (this.verticalScroll = el)}
-            onScroll={(e: MouseEvent) => this.onScroll('row', e)}>
+          <div class="vertical-inner" ref={el => (this.verticalScroll = el)} onScroll={(e: MouseEvent) => this.onScroll('row', e)}>
             <div class="content-wrapper" style={{ height: `${this.contentHeight}px` }}>
               <slot name="content" />
             </div>

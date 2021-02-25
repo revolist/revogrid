@@ -61,6 +61,7 @@
     "build:react": "npm run compile-framework --type=react",
     "build:angular": "npm run compile-framework --type=angular",
     "build:svelte": "npm run compile-framework --type=svelte",
+    "prettier": "npx prettier --write ./src",
     "compile-framework": "cp tsconfig.fw.json ../revogrid-proxy/$npm_config_type/tsconfig.json"
   },
   "devDependencies": {

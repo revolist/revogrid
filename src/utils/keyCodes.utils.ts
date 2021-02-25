@@ -71,5 +71,5 @@ export function isTab(code: string): boolean {
 }
 
 export function isEnterKey(code: string): boolean {
-  return code === codesLetter.ENTER || code === codesLetter.ENTER_NUM
+  return code === codesLetter.ENTER || code === codesLetter.ENTER_NUM;
 }

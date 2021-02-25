@@ -2,22 +2,21 @@
 
 <!-- Auto Generated Below -->
 
-
 ## Properties
 
-| Property         | Attribute  | Description                                                     | Type                                                           | Default     |
-| ---------------- | ---------- | --------------------------------------------------------------- | -------------------------------------------------------------- | ----------- |
-| `canDrag`        | `can-drag` |                                                                 | `boolean`                                                      | `undefined` |
-| `colData`        | --         |                                                                 | `ObservableMap<DataSourceState<ColumnRegular, DimensionCols>>` | `undefined` |
-| `dataStore`      | --         | Static stores, not expected to change during component lifetime | `ObservableMap<DataSourceState<DataType, DimensionRows>>`      | `undefined` |
-| `dimensionCol`   | --         |                                                                 | `ObservableMap<DimensionSettingsState>`                        | `undefined` |
-| `dimensionRow`   | --         |                                                                 | `ObservableMap<DimensionSettingsState>`                        | `undefined` |
-| `editors`        | --         | Custom editors register                                         | `{ [name: string]: EditorCtr; }`                               | `undefined` |
-| `lastCell`       | --         | Last cell position                                              | `Cell`                                                         | `undefined` |
-| `range`          | `range`    |                                                                 | `boolean`                                                      | `undefined` |
-| `readonly`       | `readonly` |                                                                 | `boolean`                                                      | `undefined` |
-| `selectionStore` | --         | Dynamic stores                                                  | `ObservableMap<SelectionStoreState>`                           | `undefined` |
-
+| Property         | Attribute       | Description                                                     | Type                                                           | Default     |
+| ---------------- | --------------- | --------------------------------------------------------------- | -------------------------------------------------------------- | ----------- |
+| `canDrag`        | `can-drag`      |                                                                 | `boolean`                                                      | `undefined` |
+| `colData`        | --              |                                                                 | `ObservableMap<DataSourceState<ColumnRegular, DimensionCols>>` | `undefined` |
+| `dataStore`      | --              | Static stores, not expected to change during component lifetime | `ObservableMap<DataSourceState<DataType, DimensionRows>>`      | `undefined` |
+| `dimensionCol`   | --              |                                                                 | `ObservableMap<DimensionSettingsState>`                        | `undefined` |
+| `dimensionRow`   | --              |                                                                 | `ObservableMap<DimensionSettingsState>`                        | `undefined` |
+| `editors`        | --              | Custom editors register                                         | `{ [name: string]: EditorCtr; }`                               | `undefined` |
+| `lastCell`       | --              | Last cell position                                              | `Cell`                                                         | `undefined` |
+| `range`          | `range`         |                                                                 | `boolean`                                                      | `undefined` |
+| `readonly`       | `readonly`      |                                                                 | `boolean`                                                      | `undefined` |
+| `selectionStore` | --              | Dynamic stores                                                  | `ObservableMap<SelectionStoreState>`                           | `undefined` |
+| `useClipboard`   | `use-clipboard` |                                                                 | `boolean`                                                      | `undefined` |
 
 ## Events
 
@@ -35,12 +34,11 @@
 | `setTempRange`             |                         | `CustomEvent<{ type: string; area: RangeArea; }>`                                                                                                                        |
 | `unregister`               |                         | `CustomEvent<any>`                                                                                                                                                       |
 
-
 ## Dependencies
 
 ### Used by
 
- - [revogr-viewport](../viewport)
+- [revogr-viewport](../viewport)
 
 ### Depends on
 
@@ -48,6 +46,7 @@
 - [revogr-order-editor](../order)
 
 ### Graph
+
 ```mermaid
 graph TD;
   revogr-overlay-selection --> revogr-edit
@@ -56,6 +55,6 @@ graph TD;
   style revogr-overlay-selection fill:#f9f,stroke:#333,stroke-width:4px
 ```
 
-----------------------------------------------
+---
 
-*Built with [StencilJS](https://stenciljs.com/)*
+_Built with [StencilJS](https://stenciljs.com/)_

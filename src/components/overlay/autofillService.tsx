@@ -40,8 +40,8 @@ export abstract class AutoFillService {
 
   /**
    * Render autofill box
-   * @param range 
-   * @param selectionFocus 
+   * @param range
+   * @param selectionFocus
    */
   protected renderAutofill(range: Selection.RangeArea, selectionFocus: Selection.Cell): VNode {
     let handlerStyle;
@@ -58,7 +58,13 @@ export abstract class AutoFillService {
         this.dimensionCol.state,
       );
     }
-    return <div class={CELL_HANDLER_CLASS} style={{ left: `${handlerStyle.right}px`, top: `${handlerStyle.bottom}px` }} onMouseDown={(e: MouseEvent) => this.selectionStart(e, this.getData(), AutoFillType.autoFill)}/>;
+    return (
+      <div
+        class={CELL_HANDLER_CLASS}
+        style={{ left: `${handlerStyle.right}px`, top: `${handlerStyle.bottom}px` }}
+        onMouseDown={(e: MouseEvent) => this.selectionStart(e, this.getData(), AutoFillType.autoFill)}
+      />
+    );
   }
 
   get isAutoFill() {
@@ -128,7 +134,7 @@ export abstract class AutoFillService {
     this.autoFillLast = current;
     this.setTempRange.emit({
       area: getRange(this.autoFillInitial, this.autoFillLast),
-      type: this.autoFillType
+      type: this.autoFillType,
     });
   }
 
