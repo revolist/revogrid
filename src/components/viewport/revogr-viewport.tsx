@@ -43,6 +43,7 @@ export class RevogrViewport {
   @Prop() rowClass: string;
 
   @Prop() uuid: string | null = null;
+  @Prop() useClipboard: boolean;
   @Prop() resize: boolean;
   @Prop() readonly: boolean;
   @Prop() range: boolean;
@@ -209,6 +210,7 @@ export class RevogrViewport {
             editors={this.editors}
             readonly={this.readonly}
             range={this.range}
+            useClipboard={this.useClipboard}
             onSetEdit={({ detail }) => {
               const event = this.beforeEditStart.emit(detail);
               if (!event.defaultPrevented) {

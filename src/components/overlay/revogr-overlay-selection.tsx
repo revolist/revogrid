@@ -39,6 +39,7 @@ export class OverlaySelection {
   @Prop() readonly: boolean;
   @Prop() range: boolean;
   @Prop() canDrag: boolean;
+  @Prop() useClipboard: boolean;
 
   /** Dynamic stores */
   @Prop() selectionStore: Observable<Selection.SelectionStoreState>;
@@ -172,8 +173,7 @@ export class OverlaySelection {
     const range = this.selectionStoreService.ranged;
     const selectionFocus = this.selectionStoreService.focused;
     const els: VNode[] = [];
-
-    if (range || selectionFocus) {
+    if ((range || selectionFocus) && this.useClipboard) {
       els.push(this.renderClipboard());
     }
 
