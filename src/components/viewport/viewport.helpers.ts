@@ -92,6 +92,7 @@ function dataViewPort(data: ViewportColumn): ViewportData[] {
   };
   let y: number = 0;
   rowTypes.forEach(type => {
+    // filter out empty sources
     if (data.viewports[type].get('realCount') || type === 'row') {
       viewports.push(
         dataPartition(

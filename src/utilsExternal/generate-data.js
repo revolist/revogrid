@@ -58,7 +58,7 @@ export function generateFakeDataObject(rowsNumber = 0, colsNumber = 0, config = 
       result[row][col] = 'A';
     }
     */
-    result[row][col] = row % 5 ? col : row % 3 ? (col % 3 ? 2 : 3) : row; // row + ':' + col;
+    result[row][col] = `${row}:${col}`; // row % 5 ? col : row % 3 ? (col % 3 ? 2 : 3) : row; // row + ':' + col;
     // apply config
     if (col === rowDrag) {
       columns[col].rowDrag = true;

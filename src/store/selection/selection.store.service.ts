@@ -5,7 +5,6 @@ import Range = Selection.RangeArea;
 
 interface Config {
   changeRange(range: Range): boolean;
-  unregister(): void;
   focus(focus: Cell, end: Cell): boolean;
 }
 
@@ -46,9 +45,5 @@ export default class SelectionStoreService {
 
     // single focus
     return this.config.focus(cell, end);
-  }
-
-  destroy(): void {
-    this.config.unregister();
   }
 }

@@ -84,8 +84,20 @@
         <strong>Set data</strong>
         <br />
         <button onclick="setData(2, 5)">2x5</button>
-        <button onclick="setData(100, 100)">100x100</button>
-        <button onclick="setData(1000, 1000)">1Kx1K</button>
+        <button
+          onclick="setData(100, 100, {
+          colPinStart: [0],
+        })"
+        >
+          100x100
+        </button>
+        <button
+          onclick="setData(1000, 1000, {
+          colPinStart: [0],
+        })"
+        >
+          1Kx1K
+        </button>
         <button onclick="setData(10000, 10000)">10Kx10K</button>
       </div>
     </section>
@@ -147,7 +159,7 @@
       /**
        * Defaults
        */
-      setData(2, 5, {
+      setData(1000, 1000, {
         colPinStart: [0],
       });
       // setGrouping();

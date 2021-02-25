@@ -28,6 +28,7 @@ export type RowStores = {
 };
 
 export default class ColumnService implements ColumnServiceI {
+  private unsubscribe: { (): void }[] = [];
   get columns(): RevoGrid.ColumnRegular[] {
     return getVisibleSourceItem(this.source);
   }
@@ -35,7 +36,7 @@ export default class ColumnService implements ColumnServiceI {
   hasGrouping = false;
 
   constructor(private dataStore: RowSource, private source: ColumnSource) {
-    source.onChange('source', s => this.checkGrouping(s));
+    this.unsubscribe.push(source.onChange('source', s => this.checkGrouping(s)));
     this.checkGrouping(source.get('source'));
   }
 
@@ -290,5 +291,9 @@ export default class ColumnService implements ColumnServiceI {
       return '';
     }
     return val.toString();
+  }
+
+  destroy() {
+    this.unsubscribe.forEach(f => f());
   }
 }

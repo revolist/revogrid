@@ -6,12 +6,14 @@ import Cell = Selection.Cell;
 import EditCellStore = Edition.EditCellStore;
 
 type StoresMatrix = { [y: number]: { [x: number]: SelectionStore } };
+type StoreByDimension = Record<number, SelectionStore>;
 
 export default class SelectionStoreConnector {
+  // dirty flag required to cleanup whole store in case visibility of panels changed
+  private dirty = false;
   private readonly stores: StoresMatrix = {};
 
-  readonly columnStores: { [x: number]: SelectionStore } = {};
-
+  readonly columnStores: StoreByDimension = {};
   readonly rowStores: { [y: number]: SelectionStore } = {};
 
   get focusedStore(): SelectionStore | null {
@@ -23,6 +25,18 @@ export default class SelectionStoreConnector {
       }
     }
     return null;
+  }
+
+  // check if require to cleanup all stores
+  beforeUpdate() {
+    if (this.dirty) {
+      for (let y in this.stores) {
+        for (let x in this.stores[y]) {
+          this.unregister(this.stores[y][x]);
+        }
+      }
+      this.dirty = false;
+    }
   }
 
   registerColumn(x: number): SelectionStore {
@@ -41,6 +55,9 @@ export default class SelectionStoreConnector {
     return this.rowStores[y];
   }
 
+  /**
+   * Cross store proxy, based on multiple dimensions
+   */
   register({ x, y }: Selection.Cell): SelectionStore {
     if (!this.stores[y]) {
       this.stores[y] = {};
@@ -50,9 +67,22 @@ export default class SelectionStoreConnector {
       return this.stores[y][x];
     }
     this.stores[y][x] = new SelectionStore();
-    this.stores[y][x]?.store.onChange('range', c => {
+    // proxy update
+    this.stores[y][x]?.onChange('range', c => {
       this.columnStores[x].setRangeArea(c);
       this.rowStores[y].setRangeArea(c);
+    });
+    // clean up on remove
+    this.stores[y][x]?.store.on('dispose', () => {
+      this.columnStores[x]?.dispose();
+      this.rowStores[y]?.dispose();
+      delete this.rowStores[y];
+      delete this.columnStores[x];
+      delete this.stores[y][x];
+      if (!Object.keys(this.stores[y] || {}).length) {
+        delete this.stores[y];
+      }
+      this.dirty = true;
     });
     return this.stores[y][x];
   }
@@ -146,15 +176,7 @@ export default class SelectionStoreConnector {
     this.focusedStore.setEdit(val);
   }
 
-  unregister(store: SelectionStore): void {
-    for (let y in this.stores) {
-      for (let x in this.stores[y]) {
-        if (this.stores[y][x] === store) {
-          delete this.stores[y][x];
-          break;
-        }
-      }
-    }
+  unregister(store: SelectionStore) {
     store.dispose();
   }
 

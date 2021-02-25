@@ -144,6 +144,7 @@ export class RevogrViewport {
 
   private renderViewports(contentHeight: number): VNode[] {
     this.scrollingService?.unregister();
+    this.selectionStoreConnector?.beforeUpdate();
     const viewports: ViewportProps[] = [];
     let index: number = 0;
 
@@ -261,7 +262,7 @@ export class RevogrViewport {
     return viewPortHtml;
   }
 
-  render(): VNode {
+  render() {
     const contentHeight: number = this.dimensions['row'].get('realSize');
     const viewports: VNode[] = this.renderViewports(contentHeight);
     return (

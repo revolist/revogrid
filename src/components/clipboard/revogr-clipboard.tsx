@@ -28,10 +28,10 @@ export class Clipboard {
   private textParse(data: string) {
     const result: string[][] = [];
     const rows = data.split(/\r\n|\n|\r/);
-      for (let y in rows) {
-        result.push(rows[y].split('\t'));
-      }
-      return result;
+    for (let y in rows) {
+      result.push(rows[y].split('\t'));
+    }
+    return result;
   }
 
   private htmlParse(data: string) {

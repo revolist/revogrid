@@ -82,24 +82,14 @@ export class RevogrViewportScroll {
     });
   }
 
-  private hasScroll(el: HTMLElement) {
-    return el.clientHeight < el.scrollHeight;
-  }
-
   componentDidLoad(): void {
     this.verticalMouseWheel = e => {
-      if (!this.hasScroll(this.verticalScroll)) {
-        return;
-      }
       e.preventDefault();
       const y = this.verticalScroll.scrollTop + e.deltaY;
       this.scrollService?.scroll(y, 'row', undefined, e.deltaY);
       this.latestScrollUpdate('row');
     };
     this.horizontalMouseWheel = e => {
-      if (!this.hasScroll(this.horizontalScroll)) {
-        return;
-      }
       e.preventDefault();
       const x = this.horizontalScroll.scrollLeft + e.deltaX;
       this.scrollService?.scroll(x, 'col', undefined, e.deltaX);

@@ -1,4 +1,4 @@
-import { Component, Event, EventEmitter, h, Host, Listen, Prop, VNode, Element } from '@stencil/core';
+import { Component, Event, EventEmitter, h, Host, Listen, Prop, VNode, Element, Watch } from '@stencil/core';
 
 import { Edition, Observable, RevoGrid, Selection } from '../../interfaces';
 import ColumnService from '../data/columnService';
@@ -117,9 +117,8 @@ export class OverlaySelection {
     this.keyDown(e);
   }
 
-  connectedCallback() {
-    this.columnService = new ColumnService(this.dataStore, this.colData);
-    this.selectionStoreService = new SelectionStoreService(this.selectionStore, {
+  @Watch('selectionStore') selectionServiceSet(s: Observable<Selection.SelectionStoreState>) {
+    this.selectionStoreService = new SelectionStoreService(s, {
       changeRange: range => {
         return !this.setRange.emit(range)?.defaultPrevented;
       },
@@ -131,12 +130,24 @@ export class OverlaySelection {
         }
         return !this.focusCell.emit(focused)?.defaultPrevented;
       },
-      unregister: () => this.unregister?.emit(),
     });
   }
 
+  @Watch('dataStore')
+  @Watch('colData')
+  columnServiceSet() {
+    this.columnService?.destroy();
+    this.columnService = new ColumnService(this.dataStore, this.colData);
+  }
+
+  connectedCallback() {
+    this.columnServiceSet();
+    this.selectionServiceSet(this.selectionStore);
+  }
+
   disconnectedCallback() {
-    this.selectionStoreService.destroy();
+    this.columnService?.destroy();
+    this.unregister?.emit();
   }
 
   private renderRange(range: Selection.RangeArea): VNode[] {
@@ -185,7 +196,6 @@ export class OverlaySelection {
     if (editCell) {
       els.push(editCell);
     }
-
     if (selectionFocus && !this.readonly && !editCell && this.range) {
       els.push(this.renderAutofill(range, selectionFocus));
     }
