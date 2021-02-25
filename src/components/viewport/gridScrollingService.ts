@@ -40,11 +40,22 @@ export default class GridScrollingService {
     this.elements = els;
   }
 
-  registerElement(el: ElementScroll, key: string): void {
+  /**
+   * Register new element for farther scroll support
+   * @param el - can be null if holder removed
+   * @param key - element key
+   */
+  registerElement(el: ElementScroll|null, key: string): void {
     if (!this.elements[key]) {
       this.elements[key] = [];
     }
-    this.elements[key].push(el);
+    // new element added
+    if (el) {
+      this.elements[key].push(el);
+    } else if (this.elements[key]) {
+      // element removed
+      delete this.elements[key];
+    }
   }
 
   unregister(): void {

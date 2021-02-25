@@ -319,7 +319,13 @@ export namespace Components {
     }
     interface RevogrViewportScroll {
         "changeScroll": (e: RevoGrid.ViewPortScrollEvent) => Promise<RevoGrid.ViewPortScrollEvent>;
+        /**
+          * Height of inner content
+         */
         "contentHeight": number;
+        /**
+          * Width of inner content
+         */
         "contentWidth": number;
         "setScroll": (e: RevoGrid.ViewPortScrollEvent) => Promise<void>;
     }
@@ -799,7 +805,13 @@ declare namespace LocalJSX {
         "viewports"?: { [T in RevoGrid.MultiDimensionType]: Observable<RevoGrid.ViewportState> };
     }
     interface RevogrViewportScroll {
+        /**
+          * Height of inner content
+         */
         "contentHeight"?: number;
+        /**
+          * Width of inner content
+         */
         "contentWidth"?: number;
         "onResizeViewport"?: (event: CustomEvent<RevoGrid.ViewPortResizeEvent>) => void;
         "onScrollViewport"?: (event: CustomEvent<RevoGrid.ViewPortScrollEvent>) => void;

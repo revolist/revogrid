@@ -44,6 +44,9 @@ export const config: Config = {
       proxiesFile: directivesProxyFile('svelte'),
     }),
     {
+      type: 'dist-custom-elements-bundle',
+    },
+    {
       type: 'dist',
       esmLoaderPath: '../loader',
     },

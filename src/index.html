@@ -15,11 +15,21 @@
         overflow: hidden;
         background-color: #f7f9fc;
         text-align: center;
+        display: flex;
+      }
+
+      .content {
+        flex-grow: 1;
+      }
+
+      .sidebar {
+        display: flex;
+        flex-direction: column;
+        text-align: left;
       }
 
       revo-grid {
         display: block;
-        width: 100%;
         height: 100%;
       }
 
@@ -31,8 +41,8 @@
       .tile {
         background-color: #fff;
         display: flex;
+        flex-direction: column;
         margin: 0 auto;
-        padding: 20px 0;
         box-shadow: 0 0 14px 0 rgba(53, 64, 82, 0.05);
         border-radius: 10px;
         overflow: hidden;
@@ -42,14 +52,10 @@
         background-color: #333;
       }
 
-      .tile > div {
-        display: flex;
-        width: 100%;
-      }
-
       .tile.large {
         max-width: 1000px;
         height: 600px;
+        max-height: 100%;
       }
     </style>
 
@@ -57,38 +63,48 @@
     <script nomodule src="/build/revo-grid.js"></script>
   </head>
   <body>
-    <button onclick="clearGrouping()">Clear grouping</button>
-    <button onclick="setTrimmed([3])">Set trimmed 3</button>
-    <button onclick="setTrimmed([])">Clear trimmed</button>
-    <button onclick="setGrouping()">Set grouping</button>
-    <button onclick="exportGrid()">Export</button>
-    <button onclick="scrollToCol()">Scroll to column 30</button>
-    <button onclick="setEdit()">Set edit 30:1</button>
 
-    <div class="tile large">
-      <div>
-        <revo-grid style="height: 100%" theme="material"></revo-grid>
+    <section class="content">
+      <div class="tile large">
+        <!-- Grid init-->
+        <revo-grid theme="material"></revo-grid>
       </div>
-    </div>
+    </section>
 
+    <!--Helper section for testing-->
+    <section class="sidebar">
+      <button onclick="clearGrouping()">Clear grouping</button>
+      <button onclick="setTrimmed([3])">Set trimmed 3</button>
+      <button onclick="setTrimmed([])">Clear trimmed</button>
+      <button onclick="setGrouping()">Set grouping by '1'</button>
+      <button onclick="exportGrid()">Export to csv</button>
+      <button onclick="scrollToCol(30)">Scroll to column 30</button>
+      <button onclick="setEdit(30, 10)">Set edit 30:1</button>
+      <hr>
+      <div>
+        <strong>Set data</strong>
+        <br>
+        <button onclick="setData(2, 5)">2x5</button>
+        <button onclick="setData(100, 100)">100x100</button>
+        <button onclick="setData(1000, 1000)">1Kx1K</button>
+        <button onclick="setData(10000, 10000)">10Kx10K</button>
+      </div>
+    </section>
+
+    <!-- Define help function -->
     <script type="module">
-      import { generateFakeDataObject } from '/utilsExternal/generate-data.js';
-      const data = generateFakeDataObject(1000, 5000);
       const grid = document.querySelector('revo-grid');
-      window.setEdit = function (x, y) {
-        grid.setCellEdit(1, 30);
+      window.setEdit = function (row, prop) {
+        grid.setCellEdit(row, prop);
       };
-      window.scrollToCol = function (x) {
-        grid.scrollToColumnProp(x || 30);
+      window.scrollToCol = function (x = 30) {
+        grid.scrollToColumnProp(x);
       };
       window.clearGrouping = function () {
         grid.grouping = {};
       };
-      window.setGrouping = function () {
-        grid.grouping = {
-          props: [1],
-          expandedAll: true,
-        };
+      window.setGrouping = function (props = [], expandedAll = false) {
+        grid.grouping = { props, expandedAll };
       };
       window.setTrimmed = function (rows = []) {
         grid.trimmedRows = rows.reduce((r, v) => {
@@ -96,40 +112,55 @@
           return r;
         }, {});
       };
-      window.exportGrid = function () {
+
+      window.exportGrid = function (filename = 'new file') {
         grid.getPlugins().then(plugins => {
           plugins.forEach(p => {
             if (p.exportFile) {
               const exportPlugin = p;
-              exportPlugin.exportFile({
-                filename: 'new file',
-              });
+              exportPlugin.exportFile({ filename });
             }
           });
         });
       };
+      import { generateFakeDataObject } from '/utilsExternal/generate-data.js';
+      window.setData = function (rows, cols, config = {}) {
+        const data = generateFakeDataObject(rows, cols, config);
 
-      grid.columns = data.headers;
-      grid.source = data.rows;
+        grid.columns = data.headers;
+        grid.source = data.rows;
 
-      grid.pinnedTopSource = data.pinnedTopRows;
-      grid.pinnedBottomSource = data.pinnedBottomRows;
+        grid.pinnedTopSource = data.pinnedTopRows;
+        grid.pinnedBottomSource = data.pinnedBottomRows;
+      }
+    </script>
+
+
+    <!-- Grid data apply -->
+    <script type="module">
+      const grid = document.querySelector('revo-grid');
 
       grid.readonly = false;
       grid.range = true;
       grid.resize = true;
       grid.filter = true;
       grid.exporting = true;
-      grid.autoSizeColumn = {
-        mode: 'autoSizeAll',
-      };
-      setGrouping();
-      setTrimmed([0]);
-      grid.addEventListener('beforeExport', e => {
-        console.log(e.detail);
-      });
 
-      /* grid.rowDefinitions = [{
+      /**
+       * Defaults
+      */
+      setData(2, 5, {
+        colPinStart: [0]
+      });
+      // setGrouping();
+      // setTrimmed([0]);
+
+      /* 
+        grid.autoSizeColumn = {
+          mode: 'autoSizeAll',
+        };
+
+        grid.rowDefinitions = [{
           type: 'row',
           index: 1,
           size: 100

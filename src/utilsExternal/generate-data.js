@@ -1,4 +1,4 @@
-export function generateHeader(index) {
+function generateHeader(index) {
   const asciiFirstLetter = 65;
   const lettersCount = 26;
   let div = index + 1;
@@ -12,7 +12,29 @@ export function generateHeader(index) {
   return label.toLowerCase();
 }
 
-export function generateFakeDataObject(rowsNumber, colsNumber) {
+const DEFAULT_CONFIG = {
+  topPinned: [],
+  bottomPinned: [],
+  colPinStart: [],
+  colPinEnd: [],
+  rowDrag: 0,
+  order: undefined
+};
+
+export function generateFakeDataObject(rowsNumber = 0, colsNumber = 0, config = {}) {
+  const {
+    topPinned,
+    bottomPinned,
+    colPinStart,
+    colPinEnd,
+    rowDrag,
+    order
+  } = {
+    ...DEFAULT_CONFIG,
+    ...config
+  };
+
+
   const result = [];
   const columns = {};
   const all = colsNumber * rowsNumber;
@@ -27,56 +49,64 @@ export function generateFakeDataObject(rowsNumber, colsNumber) {
       columns[col] = {
         name: generateHeader(col),
         prop: col,
-        pin: j === 0 ? 'colPinStart' : j === 20 ? 'colPinEnd' : undefined,
         sortable: true,
       };
+      
+      // apply config
+      if (colPinStart.indexOf(j) > -1) {
+        columns[col].pin = 'colPinStart';
+      }
+      // apply config
+      if (colPinEnd.indexOf(j) > -1) {
+        columns[col].pin = 'colPinEnd';
+      }
     }
+    /** grouping by hidden field
     if (col === 1) {
       result[row][col] = 'A';
-    } else {
-      result[row][col] = row % 5 ? col : row % 3 ? (col % 3 ? 2 : 3) : row; // row + ':' + col;
     }
-    if (col === 0) {
+    */
+    result[row][col] = row % 5 ? col : row % 3 ? (col % 3 ? 2 : 3) : row; // row + ':' + col;
+    // apply config
+    if (col === rowDrag) {
       columns[col].rowDrag = true;
-      // columns[col].order = 'asc';
     }
-    if (col === 5) {
-      columns[col].autoSize = true;
+    // apply config
+    if (col === order) {
+      columns[col].order = 'asc';
     }
   }
-  const pinnedTopRows = (result[3] && [{ ...result[3] }]) || [];
-  const pinnedBottomRows = (result[1] && [result[1]]) || [];
+  // apply config
+  const pinnedTopRows = topPinned.map(i => ({ ...result[i] }));
+  // apply config
+  const pinnedBottomRows = bottomPinned.map(i => ({ ...result[i] }));
   let headers = Object.keys(columns).map(k => columns[k]);
 
-  const grouped = headers.splice(1, 4);
-  const grouped2 = grouped.splice(0, 2);
-  grouped.push({
-    name: 'Grouped2',
-    children: grouped2,
-  });
-  headers.splice(
-    6,
-    0,
-    ...[
-      {
-        name: 'Grouped',
-        children: grouped,
-      },
-    ],
-  );
-  /* 
+  /* const grouped = headers.splice(1, 4);
+    const grouped2 = grouped.splice(0, 2);
+    grouped.push({
+      name: 'Grouped2',
+      children: grouped2,
+    });
+    headers.splice(
+      6,
+      0,
+      ...[
+        {
+          name: 'Grouped',
+          children: grouped,
+        },
+      ],
+    );
     const grouped4 = headers.splice(1, 3);
-    */
-  /*  */
-  /*
     headers.splice(1, 0, ...[{
         name: 'Grouped3',
         children: grouped4
     }]); */
   return {
     rows: result,
-    // pinnedTopRows,
-    // pinnedBottomRows,
+    pinnedTopRows,
+    pinnedBottomRows,
     headers,
   };
 }

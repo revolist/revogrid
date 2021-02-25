@@ -63,7 +63,7 @@ export default class SelectionStoreConnector {
     this.setEdit('');
   }
 
-  focus(store: SelectionStore, { focus, end }: { focus: Cell; end: Cell }): void {
+  focus(store: SelectionStore, { focus, end }: { focus: Cell; end: Cell }) {
     let currentStorePointer: Selection.Cell;
     // clear all stores focus leave only active one
     for (let y in this.stores) {
@@ -77,7 +77,7 @@ export default class SelectionStoreConnector {
       }
     }
     if (!currentStorePointer) {
-      throw new Error('Store not found');
+      return;
     }
 
     // check is focus in next store
