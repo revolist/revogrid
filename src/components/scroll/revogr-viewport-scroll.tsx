@@ -4,6 +4,7 @@ import each from 'lodash/each';
 import GridResizeService from '../viewport/gridResizeService';
 import LocalScrollService from '../../services/localScrollService';
 import { RevoGrid } from '../../interfaces';
+import { CONTENT_SLOT, FOOTER_SLOT, HEADER_SLOT } from '../viewport/viewport.helpers';
 
 /**
  * Service for tracking grid scrolling
@@ -202,24 +203,22 @@ export class RevogrViewportScroll {
   }
 
   render() {
-    return (
-      <Host onScroll={(e: MouseEvent) => this.onScroll('col', e)}>
-        <div class="inner-content-table" style={{ width: `${this.contentWidth}px` }}>
-          <div class="header-wrapper" ref={e => (this.header = e)}>
-            <slot name="header" />
-          </div>
-          <div class="vertical-inner" ref={el => (this.verticalScroll = el)} onScroll={(e: MouseEvent) => this.onScroll('row', e)}>
-            <div class="content-wrapper" style={{ height: `${this.contentHeight}px` }}>
-              <slot name="content" />
-            </div>
-          </div>
-          <div class="footer-wrapper" ref={e => (this.footer = e)}>
-            <slot name="footer" />
+    return <Host onScroll={(e: MouseEvent) => this.onScroll('col', e)}>
+      <div class="inner-content-table" style={{ width: `${this.contentWidth}px` }}>
+        <div class="header-wrapper" ref={e => (this.header = e)}>
+          <slot name={HEADER_SLOT} />
+        </div>
+        <div class="vertical-inner" ref={el => (this.verticalScroll = el)} onScroll={(e: MouseEvent) => this.onScroll('row', e)}>
+          <div class="content-wrapper" style={{ height: `${this.contentHeight}px` }}>
+            <slot name={CONTENT_SLOT} />
           </div>
         </div>
-      </Host>
-    );
-  }
+        <div class="footer-wrapper" ref={e => (this.footer = e)}>
+          <slot name={FOOTER_SLOT} />
+        </div>
+      </div>
+    </Host>;
+}
 
   /**
    * Extra layer for scroll event monitoring, where MouseWheel event is not passing

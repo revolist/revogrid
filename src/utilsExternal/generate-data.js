@@ -18,21 +18,33 @@ const DEFAULT_CONFIG = {
   colPinStart: [],
   colPinEnd: [],
   rowDrag: 0,
+  rows: 0,
+  cols: 0,
   order: undefined,
 };
 
-export function generateFakeDataObject(rowsNumber = 0, colsNumber = 0, config = {}) {
-  const { topPinned, bottomPinned, colPinStart, colPinEnd, rowDrag, order } = {
+export function generateFakeDataObject(config = {}) {
+  const {
+    topPinned,
+    bottomPinned,
+    colPinStart,
+    colPinEnd,
+  
+    rowDrag,
+    rows,
+    cols,
+    order
+  } = {
     ...DEFAULT_CONFIG,
     ...config,
   };
 
   const result = [];
   const columns = {};
-  const all = colsNumber * rowsNumber;
+  const all = cols * rows;
   for (let j = 0; j < all; j++) {
-    let col = j % colsNumber;
-    let row = (j / colsNumber) | 0;
+    let col = j % cols;
+    let row = (j / cols) | 0;
     if (!result[row]) {
       result[row] = {};
       result[row]['key'] = 'a';

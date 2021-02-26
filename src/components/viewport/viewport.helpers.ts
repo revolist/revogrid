@@ -26,6 +26,11 @@ export interface ViewportColumn {
   onResizeViewport?(e: CustomEvent<RevoGrid.ViewPortResizeEvent>): void;
 }
 
+export const HEADER_SLOT = 'header';
+export const FOOTER_SLOT = 'footer';
+export const CONTENT_SLOT = 'content';
+
+
 export function gatherColumnData(data: ViewportColumn): ViewportProps {
   const parent: string = data.uuid;
   const realSize = data.dimensions[data.colType].get('realSize');
@@ -86,25 +91,28 @@ function dataPartition(data: ViewportColumn, type: RevoGrid.DimensionRows, slot:
 function dataViewPort(data: ViewportColumn): ViewportData[] {
   const viewports: ViewportData[] = [];
   const slots: { [key in RevoGrid.DimensionRows]: SlotType } = {
-    rowPinStart: 'header',
-    row: 'content',
-    rowPinEnd: 'footer',
+    rowPinStart: HEADER_SLOT,
+    row: CONTENT_SLOT,
+    rowPinEnd: FOOTER_SLOT,
   };
-  let y: number = 0;
+
+  // y position for selection
+  let y = 0;
   rowTypes.forEach(type => {
-    // filter out empty sources
-    if (data.viewports[type].get('realCount') || type === 'row') {
-      viewports.push(
-        dataPartition(
-          {
-            ...data,
-            position: { ...data.position, y },
-          },
-          type,
-          slots[type],
-          type !== 'row',
-        ),
-      );
+    // filter out empty sources, we still need to return source to keep slot working
+    const isPresent = data.viewports[type].get('realCount') || type === 'row';
+    viewports.push(
+      dataPartition(
+        {
+          ...data,
+          position: { ...data.position, y: isPresent ? y : -1 },
+        },
+        type,
+        slots[type],
+        type !== 'row',
+      ),
+    );
+    if (isPresent) {
       y++;
     }
   });
