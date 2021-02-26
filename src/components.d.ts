@@ -324,6 +324,10 @@ export namespace Components {
         "viewports": { [T in RevoGrid.MultiDimensionType]: Observable<RevoGrid.ViewportState> };
     }
     interface RevogrViewportScroll {
+        /**
+          * update on delta in case we don't know existing position or external change
+          * @param e
+         */
         "changeScroll": (e: RevoGrid.ViewPortScrollEvent) => Promise<RevoGrid.ViewPortScrollEvent>;
         /**
           * Height of inner content

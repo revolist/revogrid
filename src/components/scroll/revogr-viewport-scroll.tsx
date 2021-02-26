@@ -4,7 +4,11 @@ import each from 'lodash/each';
 import GridResizeService from '../viewport/gridResizeService';
 import LocalScrollService from '../../services/localScrollService';
 import { RevoGrid } from '../../interfaces';
+import { CONTENT_SLOT, FOOTER_SLOT, HEADER_SLOT } from '../viewport/viewport.helpers';
 
+/**
+ * Service for tracking grid scrolling
+ */
 @Component({
   tag: 'revogr-viewport-scroll',
   styleUrl: 'revogr-viewport-scroll-style.scss',
@@ -49,9 +53,11 @@ export class RevogrViewportScroll {
     this.scrollService?.setScroll(e);
   }
 
-  // update on delta in case we don't know existing position or external change
-  @Method()
-  async changeScroll(e: RevoGrid.ViewPortScrollEvent): Promise<RevoGrid.ViewPortScrollEvent> {
+  /**
+   * update on delta in case we don't know existing position or external change
+   * @param e
+   */
+  @Method() async changeScroll(e: RevoGrid.ViewPortScrollEvent): Promise<RevoGrid.ViewPortScrollEvent> {
     if (e.delta) {
       switch (e.dimension) {
         case 'col':
@@ -67,6 +73,14 @@ export class RevogrViewportScroll {
   }
 
   connectedCallback(): void {
+    /**
+     * Bind scroll functions for farther usage
+     */
+    this.verticalMouseWheel = this.onVerticalMouseWheel.bind(this, 'row', 'deltaY');
+    this.horizontalMouseWheel = this.onHorizontalMouseWheel.bind(this, 'col', 'deltaX');
+    /**
+     * Create local scroll service
+     */
     this.scrollService = new LocalScrollService({
       beforeScroll: e => this.scrollViewport.emit(e),
       afterScroll: e => {
@@ -83,18 +97,6 @@ export class RevogrViewportScroll {
   }
 
   componentDidLoad(): void {
-    this.verticalMouseWheel = e => {
-      e.preventDefault();
-      const y = this.verticalScroll.scrollTop + e.deltaY;
-      this.scrollService?.scroll(y, 'row', undefined, e.deltaY);
-      this.latestScrollUpdate('row');
-    };
-    this.horizontalMouseWheel = e => {
-      e.preventDefault();
-      const x = this.horizontalScroll.scrollLeft + e.deltaX;
-      this.scrollService?.scroll(x, 'col', undefined, e.deltaX);
-      this.latestScrollUpdate('col');
-    };
 
     /**
      * Track horizontal viewport resize
@@ -108,21 +110,57 @@ export class RevogrViewportScroll {
         const els = {
           row: {
             size: height,
+            contentSize: this.contentHeight,
             scroll: this.verticalScroll.scrollTop,
           },
           col: {
             size: entries[0]?.contentRect.width || 0,
+            contentSize: this.contentWidth,
             scroll: this.horizontalScroll.scrollLeft,
           },
         };
         each(els, (item, dimension: RevoGrid.DimensionType) => {
           this.resizeViewport.emit({ dimension, size: item.size });
           this.scrollService?.scroll(item.scroll, dimension, true);
+          // track scroll visibility on outer element change
+          this.setScrollVisibility(dimension, item.size, item.contentSize);
         });
       },
     });
-    this.verticalScroll.addEventListener('mousewheel', this.verticalMouseWheel);
-    this.horizontalScroll.addEventListener('mousewheel', this.horizontalMouseWheel);
+  }
+
+  /**
+   * Check if scroll present or not per type
+   * Trigger this method on inner content size change or on outer element size change
+   * If inner content bigger then outer size then scroll is present and mousewheel binding required
+   * @param type - dimension type 'row/y' or 'col/x'
+   * @param size - outer content size
+   * @param innerContentSize - inner content size
+   */
+  setScrollVisibility(type: RevoGrid.DimensionType, size: number, innerContentSize: number) {
+    // test if scroll present
+    const hasScroll = size < innerContentSize;
+    let el: HTMLElement;
+    // event reference for binding
+    let event: {(e: MouseEvent): void};
+    switch (type) {
+      case 'col':
+        el = this.horizontalScroll;
+        event = this.horizontalMouseWheel;
+        break;
+      case 'row':
+        el = this.verticalScroll;
+        event = this.verticalMouseWheel;
+        break;
+    }
+    // based on scroll visibility assign or remove class and event
+    if (hasScroll) {
+      el.classList.add('scroll');
+      el.addEventListener('mousewheel', event);
+    } else {
+      el.classList.remove('scroll');
+      el.removeEventListener('mousewheel', event);
+    }
   }
 
   disconnectedCallback(): void {
@@ -131,7 +169,7 @@ export class RevogrViewportScroll {
     this.horisontalResize.destroy();
   }
 
-  async componentDidRender(): Promise<void> {
+  async componentDidRender() {
     // scroll update if number of rows changed
     if (this.contentHeight < this.oldValY && this.verticalScroll) {
       this.verticalScroll.scrollTop += this.contentHeight - this.oldValY;
@@ -144,8 +182,7 @@ export class RevogrViewportScroll {
     }
     this.oldValX = this.contentWidth;
 
-    this.scrollService.setParams(
-      {
+    this.scrollService.setParams({
         contentSize: this.contentHeight,
         clientSize: this.verticalScroll.clientHeight,
         virtualSize: 0,
@@ -161,27 +198,27 @@ export class RevogrViewportScroll {
       },
       'col',
     );
+    this.setScrollVisibility('row', this.verticalScroll.clientHeight, this.contentHeight);
+    this.setScrollVisibility('col', this.horizontalScroll.clientWidth, this.contentWidth);
   }
 
   render() {
-    return (
-      <Host onScroll={(e: MouseEvent) => this.onScroll('col', e)}>
-        <div class="inner-content-table" style={{ width: `${this.contentWidth}px` }}>
-          <div class="header-wrapper" ref={e => (this.header = e)}>
-            <slot name="header" />
-          </div>
-          <div class="vertical-inner" ref={el => (this.verticalScroll = el)} onScroll={(e: MouseEvent) => this.onScroll('row', e)}>
-            <div class="content-wrapper" style={{ height: `${this.contentHeight}px` }}>
-              <slot name="content" />
-            </div>
-          </div>
-          <div class="footer-wrapper" ref={e => (this.footer = e)}>
-            <slot name="footer" />
+    return <Host onScroll={(e: MouseEvent) => this.onScroll('col', e)}>
+      <div class="inner-content-table" style={{ width: `${this.contentWidth}px` }}>
+        <div class="header-wrapper" ref={e => (this.header = e)}>
+          <slot name={HEADER_SLOT} />
+        </div>
+        <div class="vertical-inner" ref={el => (this.verticalScroll = el)} onScroll={(e: MouseEvent) => this.onScroll('row', e)}>
+          <div class="content-wrapper" style={{ height: `${this.contentHeight}px` }}>
+            <slot name={CONTENT_SLOT} />
           </div>
         </div>
-      </Host>
-    );
-  }
+        <div class="footer-wrapper" ref={e => (this.footer = e)}>
+          <slot name={FOOTER_SLOT} />
+        </div>
+      </div>
+    </Host>;
+}
 
   /**
    * Extra layer for scroll event monitoring, where MouseWheel event is not passing
@@ -207,5 +244,31 @@ export class RevogrViewportScroll {
   /** remember last mw event time */
   private latestScrollUpdate(dimension: RevoGrid.DimensionType): void {
     this.mouseWheelScroll[dimension] = new Date().getTime();
+  }
+
+  /**
+   * On vertical mousewheel event
+   * @param type 
+   * @param delta 
+   * @param e 
+   */
+  private onVerticalMouseWheel(type: RevoGrid.DimensionType, delta: 'deltaX' | 'deltaY', e: WheelEvent) {
+    e.preventDefault();
+    const pos = this.verticalScroll.scrollTop + e[delta];
+    this.scrollService?.scroll(pos, type, undefined, e[delta]);
+    this.latestScrollUpdate(type);
+  }
+
+  /**
+   * On horizontal mousewheel event
+   * @param type 
+   * @param delta 
+   * @param e 
+   */
+  private onHorizontalMouseWheel(type: RevoGrid.DimensionType, delta: 'deltaX'|'deltaY', e: WheelEvent) {
+    e.preventDefault();
+    const pos = this.horizontalScroll.scrollLeft + e[delta];
+    this.scrollService?.scroll(pos, type, undefined, e[delta]);
+    this.latestScrollUpdate(type);
   }
 }

@@ -18,6 +18,11 @@
         display: flex;
       }
 
+      ul {
+        list-style: none;
+        padding-left: 0;
+      }
+
       .content {
         flex-grow: 1;
       }
@@ -57,12 +62,26 @@
         height: 600px;
         max-height: 100%;
       }
+      .loader {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        line-height: calc(60vh);
+        text-align: center;
+        background-color: rgba(255, 255, 255, 0.8);
+        z-index: 1000;
+        font-weight: 600;
+        font-family: sans-serif;
+      }
     </style>
 
     <script type="module" src="/build/revo-grid.esm.js"></script>
     <script nomodule src="/build/revo-grid.js"></script>
   </head>
   <body>
+    <div class="loader" style="display: none;">Please wait. Cooking data...</div>
     <section class="content">
       <div class="tile large">
         <!-- Grid init-->
@@ -82,29 +101,29 @@
       <hr />
       <div>
         <strong>Set data</strong>
-        <br />
-        <button onclick="setData(2, 5)">2x5</button>
-        <button
-          onclick="setData(100, 100, {
-          colPinStart: [0],
-        })"
-        >
-          100x100
-        </button>
-        <button
-          onclick="setData(1000, 1000, {
-          colPinStart: [0],
-        })"
-        >
-          1Kx1K
-        </button>
-        <button onclick="setData(10000, 10000)">10Kx10K</button>
+        <hr>
+        <ul>
+          <li><label><input type="checkbox" onchange="setPinned('topPinned', event.target.checked)"/>Pinned top</label></li>
+          <li><label><input type="checkbox" onchange="setPinned('bottomPinned', event.target.checked)"/>Pinned bottom</label></li>
+          <li><label><input type="checkbox" onchange="setPinned('colPinStart', event.target.checked)"/>Pinned left</label></li>
+          <li><label><input type="checkbox" onchange="setPinned('colPinEnd', event.target.checked)"/>Pinned right</label></li>
+        </ul>
+        <hr>
+        <button onclick="setData({ rows: 2, cols: 5 })">2x5</button>
+        <button onclick="setData({ rows: 100, cols: 100 })">100x100</button>
+        <button onclick="setData({ rows: 1000, cols: 1000 })" >1Kx1K</button>
+        <button onclick="setData({ rows: 10000, cols: 5000 })">10Kx5K</button>
+        <hr>
       </div>
     </section>
 
     <!-- Define help function -->
     <script type="module">
       const grid = document.querySelector('revo-grid');
+      /**
+       * Defaults
+       */
+
       window.setEdit = function (row, prop) {
         grid.setCellEdit(row, prop);
       };
@@ -135,14 +154,50 @@
         });
       };
       import { generateFakeDataObject } from '/utilsExternal/generate-data.js';
-      window.setData = function (rows, cols, config = {}) {
-        const data = generateFakeDataObject(rows, cols, config);
+      let defaultData = {
+        rows: 0,
+        cols: 0,
+        topPinned: [],
+        bottomPinned: [],
+        colPinEnd: [],
+        colPinStart: []
+      };
+      window.setData = function (config = {}) {
+        defaultData = {...defaultData, ...config};
+        const $loader = document.querySelector('.loader');
+        $loader.style.display = 'block';
+        setTimeout(() => {
+          const data = generateFakeDataObject(defaultData);
 
-        grid.columns = data.headers;
-        grid.source = data.rows;
+          grid.columns = data.headers;
+          grid.source = data.rows;
 
-        grid.pinnedTopSource = data.pinnedTopRows;
-        grid.pinnedBottomSource = data.pinnedBottomRows;
+          grid.pinnedTopSource = data.pinnedTopRows;
+          grid.pinnedBottomSource = data.pinnedBottomRows;
+          $loader.style.display = 'none';
+        }, 0);
+      };
+      window.setPinned = function(type, checked) {
+        const val = [];
+        if (checked) {
+          switch (type) {
+            case 'colPinStart':
+              val.push(0);
+              break;
+            case 'colPinEnd':
+              val.push(1);
+              break;
+            case 'topPinned':
+              val.push(0);
+              break;
+            case 'bottomPinned':
+              val.push(1);
+              break;
+          }
+        }
+        setData({
+          [type]: val
+        });
       };
     </script>
 
@@ -155,13 +210,6 @@
       grid.resize = true;
       grid.filter = true;
       grid.exporting = true;
-
-      /**
-       * Defaults
-       */
-      setData(1000, 1000, {
-        colPinStart: [0],
-      });
       // setGrouping();
       // setTrimmed([0]);
 
@@ -175,6 +223,8 @@
           index: 1,
           size: 100
         }]; */
+      // default
+      setData({ rows: 100, cols: 100 });
     </script>
   </body>
 </html>
