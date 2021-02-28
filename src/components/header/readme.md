@@ -2,6 +2,7 @@
 
 <!-- Auto Generated Below -->
 
+
 ## Properties
 
 | Property         | Attribute        | Description | Type                                    | Default     |
@@ -16,6 +17,7 @@
 | `selectionStore` | --               |             | `ObservableMap<SelectionStoreState>`    | `undefined` |
 | `viewportCol`    | --               |             | `ObservableMap<ViewportState>`          | `undefined` |
 
+
 ## Events
 
 | Event                | Description | Type                                                                                |
@@ -24,20 +26,20 @@
 | `headerResize`       |             | `CustomEvent<{ [x: string]: number; }>`                                             |
 | `initialHeaderClick` |             | `CustomEvent<{ index: number; originalEvent: MouseEvent; column: ColumnRegular; }>` |
 
+
 ## Dependencies
 
 ### Used by
 
-- [revogr-viewport](../viewport)
+ - [revogr-viewport](../viewport)
 
 ### Graph
-
 ```mermaid
 graph TD;
   revogr-viewport --> revogr-header
   style revogr-header fill:#f9f,stroke:#333,stroke-width:4px
 ```
 
----
+----------------------------------------------
 
-_Built with [StencilJS](https://stenciljs.com/)_
+*Built with [StencilJS](https://stenciljs.com/)*

@@ -2,6 +2,7 @@
 
 <!-- Auto Generated Below -->
 
+
 ## Properties
 
 | Property       | Attribute       | Description             | Type                                                                                                                                                                                                                                                                                    | Default     |
@@ -20,6 +21,7 @@
 | `uuid`         | `uuid`          |                         | `string`                                                                                                                                                                                                                                                                                | `null`      |
 | `viewports`    | --              |                         | `{ row: Observable<ViewportState>; rowPinStart: Observable<ViewportState>; rowPinEnd: Observable<ViewportState>; colPinStart: Observable<ViewportState>; colPinEnd: Observable<ViewportState>; col: Observable<ViewportState>; }`                                                       | `undefined` |
 
+
 ## Events
 
 | Event                   | Description | Type                                                                                                       |
@@ -29,6 +31,7 @@
 | `setDimensionSize`      |             | `CustomEvent<{ type: MultiDimensionType; sizes: Record<string, number>; }>`                                |
 | `setViewportCoordinate` |             | `CustomEvent<{ dimension: DimensionType; coordinate: number; delta?: number; }>`                           |
 | `setViewportSize`       |             | `CustomEvent<{ dimension: DimensionType; size: number; }>`                                                 |
+
 
 ## Methods
 
@@ -40,23 +43,34 @@ Clear current grid focus
 
 Type: `Promise<void>`
 
+
+
 ### `scrollToCoordinate(cell: Partial<Selection.Cell>) => Promise<void>`
+
+
 
 #### Returns
 
 Type: `Promise<void>`
+
+
 
 ### `setEdit(rowIndex: number, colIndex: number, colType: RevoGrid.DimensionCols, rowType: RevoGrid.DimensionRows) => Promise<void>`
 
+
+
 #### Returns
 
 Type: `Promise<void>`
+
+
+
 
 ## Dependencies
 
 ### Used by
 
-- [revo-grid](../revo-grid)
+ - [revo-grid](../revo-grid)
 
 ### Depends on
 
@@ -69,7 +83,6 @@ Type: `Promise<void>`
 - [revogr-scroll-virtual](../scrollable)
 
 ### Graph
-
 ```mermaid
 graph TD;
   revogr-viewport --> revogr-overlay-selection
@@ -85,6 +98,6 @@ graph TD;
   style revogr-viewport fill:#f9f,stroke:#333,stroke-width:4px
 ```
 
----
+----------------------------------------------
 
-_Built with [StencilJS](https://stenciljs.com/)_
+*Built with [StencilJS](https://stenciljs.com/)*
