@@ -1,7 +1,8 @@
 /* eslint-disable */
 /* tslint:disable */
-
+// @ts-ignore
 import { VNode } from '@stencil/core';
+// @ts-ignore
 import { ObservableMap, Subscription } from '@stencil/store';
 
 export type Observable<T> = ObservableMap<T>;
