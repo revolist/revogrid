@@ -119,10 +119,11 @@ export declare namespace RevoGrid {
   type ColumnProp = string | number;
   type DataFormat = any;
 
+  type CellProp = string | number | object | boolean | undefined;
   type CellProps = {
     style?: { [key: string]: string | undefined };
     class?: { [key: string]: boolean } | string;
-    [attr: string]: string | number | object | boolean;
+    [attr: string]: CellProp;
   };
 
   // --------------------------------------------------------------------------
