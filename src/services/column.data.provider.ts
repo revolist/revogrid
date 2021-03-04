@@ -18,7 +18,7 @@ export type ColumnCollection = {
   sort: Record<ColumnProp, ColumnRegular>;
 };
 
-type ColumnDataSources = Record<DimensionCols, DataStore<ColumnRegular, DimensionCols>>;
+export type ColumnDataSources = Record<DimensionCols, DataStore<ColumnRegular, DimensionCols>>;
 type Sorting = Record<ColumnProp, ColumnRegular>;
 type SortingOrder = Record<ColumnProp, 'asc' | 'desc'>;
 

@@ -21,7 +21,7 @@ type ColumnSetEvent = {
  * 2) @metod updateColumnSorting - column sorting icon applied to grid and column get updated, data still untiuched
  * 3) @event beforeSortingApply - before we applied sorting data to data source, you can prevent data apply from here
  * 4) @event afterSortingApply - sorting applied, just finished event
- * 
+ *
  * If you prevent event it'll not reach farther steps
  */
 

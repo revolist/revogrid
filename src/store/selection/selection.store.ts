@@ -17,7 +17,7 @@ function defaultState(): StoreState {
 }
 
 export class SelectionStore {
-  readonly store: Observable<StoreState>;
+  readonly store: Observable<Selection.SelectionStoreState>;
   private unsubscribe: { (): void }[] = [];
   constructor() {
     this.store = createStore(defaultState());

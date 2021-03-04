@@ -1,7 +1,7 @@
 import { h, VNode } from '@stencil/core';
 import { RevoGrid, Selection } from '../../interfaces';
 
-type Props = { ref: (e: OrdererService) => void };
+type Props = { ref: { (e: OrdererService): void } };
 
 /**
  * Draw drag

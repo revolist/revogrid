@@ -16,12 +16,12 @@
 
 ### Used by
 
- - [revogr-viewport](../viewport)
+ - [revo-grid](../revo-grid)
 
 ### Graph
 ```mermaid
 graph TD;
-  revogr-viewport --> revogr-focus
+  revo-grid --> revogr-focus
   style revogr-focus fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

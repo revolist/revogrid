@@ -46,12 +46,12 @@ Type: `Promise<void>`
 
 ### Used by
 
- - [revogr-viewport](../viewport)
+ - [revo-grid](../revo-grid)
 
 ### Graph
 ```mermaid
 graph TD;
-  revogr-viewport --> revogr-scroll-virtual
+  revo-grid --> revogr-scroll-virtual
   style revogr-scroll-virtual fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

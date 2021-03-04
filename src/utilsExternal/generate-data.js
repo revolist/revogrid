@@ -29,11 +29,11 @@ export function generateFakeDataObject(config = {}) {
     bottomPinned,
     colPinStart,
     colPinEnd,
-  
+
     rowDrag,
     rows,
     cols,
-    order
+    order,
   } = {
     ...DEFAULT_CONFIG,
     ...config,

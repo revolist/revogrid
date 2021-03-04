@@ -1,10 +1,10 @@
 import { Component, Event, EventEmitter, h, Method, Element, Prop, Host } from '@stencil/core';
 import each from 'lodash/each';
 
-import GridResizeService from '../viewport/gridResizeService';
+import GridResizeService from '../revo-grid/viewport.resize.service';
 import LocalScrollService from '../../services/localScrollService';
 import { RevoGrid } from '../../interfaces';
-import { CONTENT_SLOT, FOOTER_SLOT, HEADER_SLOT } from '../viewport/viewport.helpers';
+import { CONTENT_SLOT, FOOTER_SLOT, HEADER_SLOT } from '../revo-grid/viewport.helpers';
 
 /**
  * Service for tracking grid scrolling
@@ -97,7 +97,6 @@ export class RevogrViewportScroll {
   }
 
   componentDidLoad(): void {
-
     /**
      * Track horizontal viewport resize
      */
@@ -142,7 +141,7 @@ export class RevogrViewportScroll {
     const hasScroll = size < innerContentSize;
     let el: HTMLElement;
     // event reference for binding
-    let event: {(e: MouseEvent): void};
+    let event: { (e: MouseEvent): void };
     switch (type) {
       case 'col':
         el = this.horizontalScroll;
@@ -182,7 +181,8 @@ export class RevogrViewportScroll {
     }
     this.oldValX = this.contentWidth;
 
-    this.scrollService.setParams({
+    this.scrollService.setParams(
+      {
         contentSize: this.contentHeight,
         clientSize: this.verticalScroll.clientHeight,
         virtualSize: 0,
@@ -203,22 +203,24 @@ export class RevogrViewportScroll {
   }
 
   render() {
-    return <Host onScroll={(e: MouseEvent) => this.onScroll('col', e)}>
-      <div class="inner-content-table" style={{ width: `${this.contentWidth}px` }}>
-        <div class="header-wrapper" ref={e => (this.header = e)}>
-          <slot name={HEADER_SLOT} />
-        </div>
-        <div class="vertical-inner" ref={el => (this.verticalScroll = el)} onScroll={(e: MouseEvent) => this.onScroll('row', e)}>
-          <div class="content-wrapper" style={{ height: `${this.contentHeight}px` }}>
-            <slot name={CONTENT_SLOT} />
+    return (
+      <Host onScroll={(e: MouseEvent) => this.onScroll('col', e)}>
+        <div class="inner-content-table" style={{ width: `${this.contentWidth}px` }}>
+          <div class="header-wrapper" ref={e => (this.header = e)}>
+            <slot name={HEADER_SLOT} />
+          </div>
+          <div class="vertical-inner" ref={el => (this.verticalScroll = el)} onScroll={(e: MouseEvent) => this.onScroll('row', e)}>
+            <div class="content-wrapper" style={{ height: `${this.contentHeight}px` }}>
+              <slot name={CONTENT_SLOT} />
+            </div>
+          </div>
+          <div class="footer-wrapper" ref={e => (this.footer = e)}>
+            <slot name={FOOTER_SLOT} />
           </div>
         </div>
-        <div class="footer-wrapper" ref={e => (this.footer = e)}>
-          <slot name={FOOTER_SLOT} />
-        </div>
-      </div>
-    </Host>;
-}
+      </Host>
+    );
+  }
 
   /**
    * Extra layer for scroll event monitoring, where MouseWheel event is not passing
@@ -248,9 +250,9 @@ export class RevogrViewportScroll {
 
   /**
    * On vertical mousewheel event
-   * @param type 
-   * @param delta 
-   * @param e 
+   * @param type
+   * @param delta
+   * @param e
    */
   private onVerticalMouseWheel(type: RevoGrid.DimensionType, delta: 'deltaX' | 'deltaY', e: WheelEvent) {
     e.preventDefault();
@@ -261,11 +263,11 @@ export class RevogrViewportScroll {
 
   /**
    * On horizontal mousewheel event
-   * @param type 
-   * @param delta 
-   * @param e 
+   * @param type
+   * @param delta
+   * @param e
    */
-  private onHorizontalMouseWheel(type: RevoGrid.DimensionType, delta: 'deltaX'|'deltaY', e: WheelEvent) {
+  private onHorizontalMouseWheel(type: RevoGrid.DimensionType, delta: 'deltaX' | 'deltaY', e: WheelEvent) {
     e.preventDefault();
     const pos = this.horizontalScroll.scrollLeft + e[delta];
     this.scrollService?.scroll(pos, type, undefined, e[delta]);

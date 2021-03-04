@@ -1,36 +1,34 @@
 @mixin revoGrid($header-height, $default-rows-size) {
   font-family: Nunito, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
-  revogr-viewport {
-    revogr-header {
-      line-height: $header-height;
-      font-weight: 600;
-      text-align: left;
+  revogr-header {
+    line-height: $header-height;
+    font-weight: 600;
+    text-align: left;
 
-      .data-header-cell {
-        padding: 0 15px;
-        text-overflow: ellipsis;
-      }
-
-      .header-row {
-        height: $header-height;
-      }
+    .data-header-cell {
+      padding: 0 15px;
+      text-overflow: ellipsis;
     }
 
-    revogr-data {
-      text-align: left;
+    .header-row {
+      height: $header-height;
+    }
+  }
 
-      .row {
-        line-height: $default-rows-size;
-      }
+  revogr-data {
+    text-align: left;
 
-      .data-cell {
-        padding: 0 15px;
-      }
+    .row {
+      line-height: $default-rows-size;
     }
 
-    // properties to auto-stretch grid
-    .viewports {
-      width: 100%;
+    .data-cell {
+      padding: 0 15px;
     }
+  }
+
+  // properties to auto-stretch grid
+  .viewports {
+    width: 100%;
   }
 }

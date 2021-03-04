@@ -11,10 +11,6 @@ $focused-header: rgba(#e9eaed, 0.5);
 
 revo-grid[theme='default'] {
   font-size: 12px;
-  revogr-viewport {
-    $shadow-top: 0 -1px 0 0 $header-border-color;
-    box-shadow: $shadow-top;
-  }
 
   revogr-header {
     text-align: center;

@@ -8,15 +8,11 @@ import { SELECTION_BORDER_CLASS } from '../../utils/consts';
 import { DataSourceState } from '../../store/dataSource/data.store';
 import { isRangeSingleCell } from '../../store/selection/selection.helpers';
 import { applyMixins } from '../../utils/utils';
-import { KeyboardService } from './keyboardService';
-import { AutoFillService } from './autofillService';
 import { getCurrentCell, getElStyle } from './selection.utils';
-import { ClipboardService } from './clipboardService';
 import { isEditInput } from './editors/edit.utils';
-
-export type BeforeEdit = {
-  isCancel: boolean;
-} & Edition.BeforeSaveDataDetails;
+import { KeyboardService } from './keyboard.service';
+import { AutoFillService } from './autofill.service';
+import { ClipboardService } from './clipboard.service';
 
 @Component({
   tag: 'revogr-overlay-selection',
@@ -67,9 +63,9 @@ export class OverlaySelection {
   @Event({ cancelable: true }) internalCellEdit: EventEmitter<Edition.BeforeSaveDataDetails>;
   @Event({ cancelable: true }) internalFocusCell: EventEmitter<Edition.BeforeSaveDataDetails>;
 
-  @Event({ bubbles: false }) setEdit: EventEmitter<BeforeEdit>;
-  @Event({ bubbles: false }) setRange: EventEmitter<Selection.RangeArea>;
-  @Event({ bubbles: false }) setTempRange: EventEmitter<Selection.TempRange | null>;
+  @Event({ bubbles: false }) setEdit: EventEmitter<Edition.BeforeEdit>;
+  @Event() setRange: EventEmitter<Selection.RangeArea>;
+  @Event() setTempRange: EventEmitter<Selection.TempRange | null>;
 
   @Event({ bubbles: false }) focusCell: EventEmitter<Selection.FocusedCells>;
   @Event({ bubbles: false }) unregister: EventEmitter;
@@ -119,9 +115,7 @@ export class OverlaySelection {
 
   @Watch('selectionStore') selectionServiceSet(s: Observable<Selection.SelectionStoreState>) {
     this.selectionStoreService = new SelectionStoreService(s, {
-      changeRange: range => {
-        return !this.setRange.emit(range)?.defaultPrevented;
-      },
+      changeRange: range => !this.setRange.emit(range)?.defaultPrevented,
       focus: (focus, end) => {
         const focused = { focus, end };
         const { defaultPrevented } = this.internalFocusCell.emit(this.columnService.getSaveData(focus.y, focus.x));
