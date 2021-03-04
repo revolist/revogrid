@@ -6,7 +6,7 @@ import BasePlugin from '../basePlugin';
 
 import DimensionRows = RevoGrid.DimensionRows;
 
-export type SortingOrder = Record<RevoGrid.ColumnProp, 'asc' | 'desc'>;
+export type SortingOrder = Record<RevoGrid.ColumnProp, RevoGrid.Order>;
 type SourceSetEvent = {
   type: DimensionRows;
   source: RevoGrid.DataType[];
@@ -21,7 +21,7 @@ type ColumnSetEvent = {
  * 2) @metod updateColumnSorting - column sorting icon applied to grid and column get updated, data still untiuched
  * 3) @event beforeSortingApply - before we applied sorting data to data source, you can prevent data apply from here
  * 4) @event afterSortingApply - sorting applied, just finished event
- * 
+ *
  * If you prevent event it'll not reach farther steps
  */
 
@@ -68,7 +68,7 @@ export default class SortingPlugin extends BasePlugin {
   }
 
   private async headerClick(column: RevoGrid.ColumnRegular, index: number) {
-    let order: RevoGrid.Order = column.order && column.order === 'asc' ? 'desc' : 'asc';
+    let order: RevoGrid.Order = this.getNextOrder(column.order);
     const beforeEvent = this.emit('beforeSorting', { column, order });
     if (beforeEvent.defaultPrevented) {
       return;
@@ -125,6 +125,13 @@ export default class SortingPlugin extends BasePlugin {
   }
 
   private sortIndexByItems(indexes: number[], source: RevoGrid.DataType[], sorting: SortingOrder): number[] {
+    // TODO - is there a situation where multiple kvps in the `sorting` object would cause this to break?
+    for (let prop in sorting) {
+      if (typeof sorting[prop] === 'undefined') {
+        // Unsort indexes
+        return [...Array(indexes.length).keys()];
+      }
+    }
     return indexes.sort((a, b) => {
       let sorted = 0;
       for (let prop in sorting) {
@@ -148,5 +155,16 @@ export default class SortingPlugin extends BasePlugin {
       }
       return sorted;
     });
+  }
+
+  private getNextOrder(currentOrder: RevoGrid.Order): RevoGrid.Order {
+    switch (currentOrder) {
+      case undefined:
+        return 'asc';
+      case 'asc':
+        return 'desc';
+      case 'desc':
+        return undefined;
+    }
   }
 }
