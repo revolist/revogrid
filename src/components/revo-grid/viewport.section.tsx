@@ -22,30 +22,25 @@ type Props = {
  * First we render vertical parts - pinned start, data, pinned end
  * Per each column we render data collections: headers, pinned top, center data, pinned bottom
  */
-export const ViewPortSections = ({
-  resize,
-  editors,
-  rowClass,
-  readonly,
-  range,
-  columns,
-  useClipboard,
-  columnFilter,
-  registerElement,
-  onEdit,
-  onScroll
-}: Props) => {
+export const ViewPortSections = ({ resize, editors, rowClass, readonly, range, columns, useClipboard, columnFilter, registerElement, onEdit, onScroll }: Props) => {
   const viewPortHtml: VNode[] = [];
   /** render viewports columns */
   for (let view of columns) {
     /** render viewports rows */
     const dataViews: HTMLElement[] = [
-      <revogr-header viewportCol={view.viewportCol} {...view.headerProp} selectionStore={view.columnSelectionStore} slot={HEADER_SLOT} columnFilter={columnFilter} canResize={resize} />,
+      <revogr-header
+        viewportCol={view.viewportCol}
+        {...view.headerProp}
+        selectionStore={view.columnSelectionStore}
+        slot={HEADER_SLOT}
+        columnFilter={columnFilter}
+        canResize={resize}
+      />,
     ];
     view.dataPorts.forEach((data, j) => {
       const key = view.prop.key + (j + 1);
 
-      const dataView =
+      const dataView = (
         <revogr-overlay-selection
           {...data}
           slot={data.slot}
@@ -68,7 +63,8 @@ export const ViewPortSections = ({
           />
           <revogr-temp-range selectionStore={data.segmentSelectionStore} dimensionRow={data.dimensionRow} dimensionCol={data.dimensionCol} />
           <revogr-focus selectionStore={data.segmentSelectionStore} dimensionRow={data.dimensionRow} dimensionCol={data.dimensionCol} />
-        </revogr-overlay-selection>;
+        </revogr-overlay-selection>
+      );
       dataViews.push(dataView);
     });
     viewPortHtml.push(

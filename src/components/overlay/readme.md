@@ -2,7 +2,6 @@
 
 <!-- Auto Generated Below -->
 
-
 ## Properties
 
 | Property         | Attribute       | Description                                                     | Type                                                           | Default     |
@@ -18,7 +17,6 @@
 | `readonly`       | `readonly`      |                                                                 | `boolean`                                                      | `undefined` |
 | `selectionStore` | --              | Dynamic stores                                                  | `ObservableMap<SelectionStoreState>`                           | `undefined` |
 | `useClipboard`   | `use-clipboard` |                                                                 | `boolean`                                                      | `undefined` |
-
 
 ## Events
 
@@ -36,12 +34,11 @@
 | `setTempRange`             |                         | `CustomEvent<{ type: string; area: RangeArea; }>`                                                                                                                        |
 | `unregister`               |                         | `CustomEvent<any>`                                                                                                                                                       |
 
-
 ## Dependencies
 
 ### Used by
 
- - [revo-grid](../revo-grid)
+- [revo-grid](../revo-grid)
 
 ### Depends on
 
@@ -49,6 +46,7 @@
 - [revogr-order-editor](../order)
 
 ### Graph
+
 ```mermaid
 graph TD;
   revogr-overlay-selection --> revogr-edit
@@ -57,6 +55,6 @@ graph TD;
   style revogr-overlay-selection fill:#f9f,stroke:#333,stroke-width:4px
 ```
 
-----------------------------------------------
+---
 
-*Built with [StencilJS](https://stenciljs.com/)*
+_Built with [StencilJS](https://stenciljs.com/)_

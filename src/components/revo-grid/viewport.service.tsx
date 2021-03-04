@@ -75,14 +75,14 @@ export default abstract class GridRenderService {
           onFocusCell: e => {
             segmentSelection.clearFocus();
             this.selectionStoreConnector.focus(segmentSelection, e.detail);
-          }
+          },
         });
         return r;
       }, []);
       columns.push({
         ...colData,
         columnSelectionStore,
-        dataPorts
+        dataPorts,
       });
       x++;
     });
@@ -116,13 +116,13 @@ export default abstract class GridRenderService {
       groupingDepth: data.colStore.get('groupingDepth'),
       onHeaderResize: data.onHeaderResize,
     };
-  
+
     return {
       prop,
       position: data.position,
       headerProp,
       parent,
-      viewportCol: data.viewports[data.colType].store
+      viewportCol: data.viewports[data.colType].store,
     };
   }
 
@@ -143,12 +143,14 @@ export default abstract class GridRenderService {
         ...data,
         position: { ...data.position, y: isPresent ? y : -1 },
       };
-      r.push(this.dataPartition(
-        col,
-        type,
-        slots[type],
-        type !== 'row', // is fixed
-      ));
+      r.push(
+        this.dataPartition(
+          col,
+          type,
+          slots[type],
+          type !== 'row', // is fixed
+        ),
+      );
       if (isPresent) {
         y++;
       }
@@ -170,14 +172,11 @@ export default abstract class GridRenderService {
       dataStore: data.rowStores[type].store,
       dimensionCol: data.dimensions[data.colType].store,
       dimensionRow: data.dimensions[type].store,
-      style: fixed ? { height: `${data.dimensions[type].store.get('realSize')}px` } : undefined
+      style: fixed ? { height: `${data.dimensions[type].store.get('realSize')}px` } : undefined,
     };
   }
 
-  private getStoresCoordinates(
-    columnStores: ColumnDataSources,
-    rowStores: RowDataSources,
-  ) {
+  private getStoresCoordinates(columnStores: ColumnDataSources, rowStores: RowDataSources) {
     let x = 0;
     let y = 0;
     let stores: Partial<Record<RevoGrid.MultiDimensionType, number>> = {};
@@ -188,7 +187,7 @@ export default abstract class GridRenderService {
         x++;
       }
     });
-  
+
     rowTypes.forEach(v => {
       const rowStore = rowStores[v].store;
       if (rowStore.get('items').length) {
@@ -217,7 +216,7 @@ export default abstract class GridRenderService {
     const stores = this.getStoresCoordinates(this.columnProvider.stores, this.dataProvider.stores);
     const storeCoordinate = {
       x: stores[colType],
-      y: stores[rowType]
+      y: stores[rowType],
     };
     this.selectionStoreConnector?.setEditByCell(storeCoordinate, { x: colIndex, y: rowIndex });
   }

@@ -349,7 +349,7 @@ export declare namespace Edition {
   type BeforeEdit = {
     isCancel: boolean;
   } & Edition.BeforeSaveDataDetails;
-  
+
   type BeforeSaveDataDetails = {
     prop: RevoGrid.ColumnProp;
     model: RevoGrid.DataType;

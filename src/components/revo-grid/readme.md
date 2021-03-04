@@ -2,7 +2,6 @@
 
 <!-- Auto Generated Below -->
 
-
 ## Properties
 
 | Property             | Attribute          | Description                                                                                                                                                                                                                                             | Type                                                                                                                                      | Default     |
@@ -32,7 +31,6 @@
 | `trimmedRows`        | --                 | Trimmed rows Functionality which allows to hide rows from main data set                                                                                                                                                                                 | `{ [x: number]: boolean; }`                                                                                                               | `{}`        |
 | `useClipboard`       | `use-clipboard`    | When true enable clipboard.                                                                                                                                                                                                                             | `boolean`                                                                                                                                 | `true`      |
 
-
 ## Events
 
 | Event                      | Description                                                                                                                                                                                                     | Type                                                                                                                                                                                                |
@@ -61,7 +59,6 @@
 | `rowOrderChanged`          | Before row order apply. Use e.preventDefault() to prevent row order change.                                                                                                                                     | `CustomEvent<{ from: number; to: number; }>`                                                                                                                                                        |
 | `viewportScroll`           | Triggered when view port scrolled                                                                                                                                                                               | `CustomEvent<{ dimension: DimensionType; coordinate: number; delta?: number; }>`                                                                                                                    |
 
-
 ## Methods
 
 ### `addTrimmed(trimmed: Record<number, boolean>, trimmedType?: string, type?: RevoGrid.DimensionRows) => Promise<CustomEvent<{ trimmed: Record<number, boolean>; trimmedType: string; type: string; }>>`
@@ -72,8 +69,6 @@ Add trimmed by type
 
 Type: `Promise<CustomEvent<{ trimmed: Record<number, boolean>; trimmedType: string; type: string; }>>`
 
-
-
 ### `clearFocus() => Promise<void>`
 
 Clear current grid focus
@@ -81,8 +76,6 @@ Clear current grid focus
 #### Returns
 
 Type: `Promise<void>`
-
-
 
 ### `getColumnStore(type?: RevoGrid.DimensionCols) => Promise<ColumnSource>`
 
@@ -93,8 +86,6 @@ Can be used for plugin support
 
 Type: `Promise<Observable<DataSourceState<ColumnRegular, DimensionCols>>>`
 
-
-
 ### `getColumns() => Promise<RevoGrid.ColumnRegular[]>`
 
 Receive all columns in data source
@@ -102,8 +93,6 @@ Receive all columns in data source
 #### Returns
 
 Type: `Promise<ColumnRegular[]>`
-
-
 
 ### `getPlugins() => Promise<RevoPlugin.Plugin[]>`
 
@@ -113,8 +102,6 @@ Get all active plugins instances
 
 Type: `Promise<Plugin[]>`
 
-
-
 ### `getSource(type?: RevoGrid.DimensionRows) => Promise<RevoGrid.DataType[]>`
 
 Get data from source
@@ -122,8 +109,6 @@ Get data from source
 #### Returns
 
 Type: `Promise<DataType[]>`
-
-
 
 ### `getSourceStore(type?: RevoGrid.DimensionRows) => Promise<RowSource>`
 
@@ -134,8 +119,6 @@ Can be used for plugin support
 
 Type: `Promise<Observable<DataSourceState<DataType, DimensionRows>>>`
 
-
-
 ### `getVisibleSource(type?: RevoGrid.DimensionRows) => Promise<any[]>`
 
 Get data from visible part of source
@@ -144,8 +127,6 @@ Trimmed/filtered rows will be excluded
 #### Returns
 
 Type: `Promise<any[]>`
-
-
 
 ### `refresh(type?: RevoGrid.DimensionRows | 'all') => Promise<void>`
 
@@ -156,8 +137,6 @@ Can be specific part as row or pinned row or 'all' by default.
 
 Type: `Promise<void>`
 
-
-
 ### `registerVNode(elements: VNode[]) => Promise<void>`
 
 Register new virtual node inside of grid
@@ -167,8 +146,6 @@ Used for additional items creation such as plugin elements
 
 Type: `Promise<void>`
 
-
-
 ### `scrollToColumnIndex(coordinate?: number) => Promise<void>`
 
 Scrolls view port to specified column index
@@ -176,8 +153,6 @@ Scrolls view port to specified column index
 #### Returns
 
 Type: `Promise<void>`
-
-
 
 ### `scrollToColumnProp(prop: RevoGrid.ColumnProp) => Promise<void>`
 
@@ -187,8 +162,6 @@ Scrolls view port to specified column prop
 
 Type: `Promise<void>`
 
-
-
 ### `scrollToCoordinate(cell: Partial<Selection.Cell>) => Promise<void>`
 
 Scrolls view port to coordinate
@@ -196,8 +169,6 @@ Scrolls view port to coordinate
 #### Returns
 
 Type: `Promise<void>`
-
-
 
 ### `scrollToRow(coordinate?: number) => Promise<void>`
 
@@ -207,8 +178,6 @@ Scrolls view port to specified row index
 
 Type: `Promise<void>`
 
-
-
 ### `setCellEdit(row: number, prop: RevoGrid.ColumnProp, rowSource?: RevoGrid.DimensionRows) => Promise<void>`
 
 Bring cell to edit mode
@@ -216,8 +185,6 @@ Bring cell to edit mode
 #### Returns
 
 Type: `Promise<void>`
-
-
 
 ### `updateColumnSorting(column: RevoGrid.ColumnRegular, index: number, order: 'asc' | 'desc') => Promise<RevoGrid.ColumnRegular>`
 
@@ -227,8 +194,6 @@ Update column sorting
 
 Type: `Promise<ColumnRegular>`
 
-
-
 ### `updateColumns(cols: RevoGrid.ColumnRegular[]) => Promise<void>`
 
 Update columns
@@ -236,9 +201,6 @@ Update columns
 #### Returns
 
 Type: `Promise<void>`
-
-
-
 
 ## Dependencies
 
@@ -253,6 +215,7 @@ Type: `Promise<void>`
 - [revogr-viewport-scroll](../scroll)
 
 ### Graph
+
 ```mermaid
 graph TD;
   revo-grid --> revogr-scroll-virtual
@@ -267,6 +230,6 @@ graph TD;
   style revo-grid fill:#f9f,stroke:#333,stroke-width:4px
 ```
 
-----------------------------------------------
+---
 
-*Built with [StencilJS](https://stenciljs.com/)*
+_Built with [StencilJS](https://stenciljs.com/)_
