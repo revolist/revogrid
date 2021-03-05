@@ -736,7 +736,6 @@ declare namespace LocalJSX {
         "onSetEdit"?: (event: CustomEvent<Edition.BeforeEdit>) => void;
         "onSetRange"?: (event: CustomEvent<Selection.RangeArea>) => void;
         "onSetTempRange"?: (event: CustomEvent<Selection.TempRange | null>) => void;
-        "onUnregister"?: (event: CustomEvent<any>) => void;
         "range"?: boolean;
         "readonly"?: boolean;
         /**

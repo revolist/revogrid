@@ -758,10 +758,10 @@ export class RevoGridComponent {
   }
 
   render() {
+    this.selectionStoreConnector?.beforeUpdate();
     const contentHeight = this.dimensionProvider.stores['row'].store.get('realSize');
     const columns = this.getViewportColumnData(contentHeight);
     this.scrollingService?.unregister();
-    this.selectionStoreConnector?.beforeUpdate();
 
     return (
       <Host {...{ [`${UUID}`]: this.uuid }}>

@@ -69,7 +69,7 @@ export default abstract class GridRenderService {
           ...row,
           rowSelectionStore,
           segmentSelectionStore: segmentSelection.store,
-          onUnregister: () => this.selectionStoreConnector.unregister(segmentSelection),
+          ref: (e: Element) => this.selectionStoreConnector.registerSection(e),
           onSetRange: e => segmentSelection.setRangeArea(e.detail),
           onSetTempRange: e => segmentSelection.setTempArea(e.detail),
           onFocusCell: e => {

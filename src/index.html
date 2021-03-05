@@ -85,7 +85,7 @@
     <section class="content">
       <div class="tile large grid-holder">
         <!-- Grid init-->
-        <revo-grid theme="material" class="my"></revo-grid>
+        <revo-grid theme="material" class="my" key="1"></revo-grid>
       </div>
     </section>
 
@@ -139,28 +139,33 @@
 
     <!-- Define help function -->
     <script type="module">
-      const grid = document.querySelector('revo-grid');
       /**
        * Defaults
        */
 
       window.eventsPrevented = {};
       window.showRowHeaders = function (isShow) {
+        const grid = document.querySelector('revo-grid');
         grid.rowHeaders = isShow;
       };
       window.setEdit = function (row, prop) {
+        const grid = document.querySelector('revo-grid');
         grid.setCellEdit(row, prop);
       };
       window.scrollToCol = function (x = 30) {
+        const grid = document.querySelector('revo-grid');
         grid.scrollToColumnProp(x);
       };
       window.clearGrouping = function () {
+        const grid = document.querySelector('revo-grid');
         grid.grouping = {};
       };
       window.setGrouping = function (props = [], expandedAll = false) {
+        const grid = document.querySelector('revo-grid');
         grid.grouping = { props, expandedAll };
       };
       window.setTrimmed = function (rows = []) {
+        const grid = document.querySelector('revo-grid');
         grid.trimmedRows = rows.reduce((r, v) => {
           r[v] = true;
           return r;
@@ -168,6 +173,7 @@
       };
 
       window.exportGrid = function (filename = 'new file') {
+        const grid = document.querySelector('revo-grid');
         grid.getPlugins().then(plugins => {
           plugins.forEach(p => {
             if (p.exportFile) {
@@ -191,6 +197,7 @@
         const $loader = document.querySelector('.loader');
         $loader.style.display = 'block';
         setTimeout(() => {
+          const grid = document.querySelector('revo-grid');
           const data = generateFakeDataObject(defaultData);
 
           grid.columns = data.headers;
@@ -226,13 +233,16 @@
       window.preventEvent = function (name, checked) {
         eventsPrevented[name] = checked;
       };
+      let keys = 2;
       window.toggleVisibility = function (checked) {
         if (!checked) {
           const grid = document.querySelector('revo-grid');
           grid.remove();
         } else {
-          const grid = document.querySelector('.grid-holder');
-          grid.appendChild(document.createElement('revo-grid'));
+          const holder = document.querySelector('.grid-holder');
+          const grid = document.createElement('revo-grid', { is : 'revo-grid' });
+          grid.setAttribute('key', keys++);
+          holder.appendChild(grid);
           setData();
         }
       };

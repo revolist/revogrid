@@ -68,8 +68,6 @@ export class OverlaySelection {
   @Event() setTempRange: EventEmitter<Selection.TempRange | null>;
 
   @Event({ bubbles: false }) focusCell: EventEmitter<Selection.FocusedCells>;
-  @Event({ bubbles: false }) unregister: EventEmitter;
-
   /** Selection range changed */
   @Event({ cancelable: true }) internalSelectionChanged: EventEmitter<Selection.ChangedRange>;
 
@@ -141,10 +139,9 @@ export class OverlaySelection {
 
   disconnectedCallback() {
     this.columnService?.destroy();
-    this.unregister?.emit();
   }
 
-  private renderRange(range: Selection.RangeArea): VNode[] {
+  private renderRange(range: Selection.RangeArea) {
     const style = getElStyle(range, this.dimensionRow.state, this.dimensionCol.state);
     return [<div class={SELECTION_BORDER_CLASS} style={style} />];
   }

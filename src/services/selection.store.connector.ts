@@ -27,12 +27,25 @@ export default class SelectionStoreConnector {
     return null;
   }
 
+  private readonly sections: Element[] = [];
+  registerSection(e?: Element) {
+    if (!e) {
+      this.sections.length = 0;
+      // some elements removed, rebuild stores
+      this.dirty = true;
+      return;
+    }
+    if (this.sections.indexOf(e) === -1) {
+      this.sections.push(e);
+    }
+  }
+
   // check if require to cleanup all stores
   beforeUpdate() {
     if (this.dirty) {
       for (let y in this.stores) {
         for (let x in this.stores[y]) {
-          this.unregister(this.stores[y][x]);
+          this.stores[y][x].dispose();
         }
       }
       this.dirty = false;
@@ -85,12 +98,11 @@ export default class SelectionStoreConnector {
       if (!Object.keys(this.stores[y] || {}).length) {
         delete this.stores[y];
       }
-      this.dirty = true;
     });
     return this.stores[y][x];
   }
 
-  setEditByCell({ x, y }: Selection.Cell, editCell: Selection.Cell): void {
+  setEditByCell({ x, y }: Selection.Cell, editCell: Selection.Cell) {
     const store = this.stores[y][x];
     this.focus(store, { focus: editCell, end: editCell });
     this.setEdit('');
@@ -172,22 +184,18 @@ export default class SelectionStoreConnector {
     return this.focusedStore?.store.get('focus');
   }
 
-  setEdit(val: string | boolean): void {
+  setEdit(val: string | boolean) {
     if (!this.focusedStore) {
       return;
     }
     this.focusedStore.setEdit(val);
   }
 
-  unregister(store: SelectionStore) {
-    store.dispose();
-  }
-
-  private getXStores(y: number): { [p: number]: SelectionStore } {
+  private getXStores(y: number) {
     return this.stores[y];
   }
 
-  private getYStores(x: number): { [p: number]: SelectionStore } {
+  private getYStores(x: number) {
     const stores: { [p: number]: SelectionStore } = {};
     for (let i in this.stores) {
       stores[i] = this.stores[i][x];
