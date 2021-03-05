@@ -78,7 +78,10 @@ export default class SelectionStoreConnector {
       this.rowStores[y]?.dispose();
       delete this.rowStores[y];
       delete this.columnStores[x];
-      delete this.stores[y][x];
+      if (this.stores[y]) {
+        delete this.stores[y][x];
+      }
+      // clear empty rows
       if (!Object.keys(this.stores[y] || {}).length) {
         delete this.stores[y];
       }

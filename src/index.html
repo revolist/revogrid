@@ -83,7 +83,7 @@
   <body>
     <div class="loader" style="display: none">Please wait. Cooking data...</div>
     <section class="content">
-      <div class="tile large">
+      <div class="tile large grid-holder">
         <!-- Grid init-->
         <revo-grid theme="material" class="my"></revo-grid>
       </div>
@@ -125,6 +125,10 @@
         <button onclick="setData({ rows: 1000, cols: 1000 })">1Kx1K</button>
         <button onclick="setData({ rows: 10000, cols: 5000 })">10Kx5K</button>
         <hr />
+      </div>
+      <strong>Others</strong>
+        <hr />
+        <label><input type="checkbox" onchange="toggleVisibility(event.target.checked)" checked="true"/>Toggle Visibility</label>
       </div>
       <div>
         <strong>Prevent events</strong>
@@ -221,6 +225,16 @@
       };
       window.preventEvent = function (name, checked) {
         eventsPrevented[name] = checked;
+      };
+      window.toggleVisibility = function (checked) {
+        if (!checked) {
+          const grid = document.querySelector('revo-grid');
+          grid.remove();
+        } else {
+          const grid = document.querySelector('.grid-holder');
+          grid.appendChild(document.createElement('revo-grid'));
+          setData();
+        }
       };
     </script>
 
