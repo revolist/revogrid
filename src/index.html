@@ -81,11 +81,11 @@
     <script nomodule src="/build/revo-grid.js"></script>
   </head>
   <body>
-    <div class="loader" style="display: none;">Please wait. Cooking data...</div>
+    <div class="loader" style="display: none">Please wait. Cooking data...</div>
     <section class="content">
-      <div class="tile large">
+      <div class="tile large grid-holder">
         <!-- Grid init-->
-        <revo-grid theme="material"></revo-grid>
+        <revo-grid theme="material" class="my" key="1"></revo-grid>
       </div>
     </section>
 
@@ -94,49 +94,80 @@
       <button onclick="clearGrouping()">Clear grouping</button>
       <button onclick="setTrimmed([3])">Set trimmed 3</button>
       <button onclick="setTrimmed([])">Clear trimmed</button>
-      <button onclick="setGrouping()">Set grouping by '1'</button>
+      <button onclick="setGrouping(['key'])">Set grouping by 'key'</button>
       <button onclick="exportGrid()">Export to csv</button>
       <button onclick="scrollToCol(30)">Scroll to column 30</button>
       <button onclick="setEdit(30, 10)">Set edit 30:1</button>
       <hr />
       <div>
         <strong>Set data</strong>
-        <hr>
+
+        <hr />
+        <label><input type="checkbox" onchange="showRowHeaders(event.target.checked)" />Show row headers</label>
+        <hr />
         <ul>
-          <li><label><input type="checkbox" onchange="setPinned('topPinned', event.target.checked)"/>Pinned top</label></li>
-          <li><label><input type="checkbox" onchange="setPinned('bottomPinned', event.target.checked)"/>Pinned bottom</label></li>
-          <li><label><input type="checkbox" onchange="setPinned('colPinStart', event.target.checked)"/>Pinned left</label></li>
-          <li><label><input type="checkbox" onchange="setPinned('colPinEnd', event.target.checked)"/>Pinned right</label></li>
+          <li>
+            <label><input type="checkbox" onchange="setPinned('topPinned', event.target.checked)" />Pinned top</label>
+          </li>
+          <li>
+            <label><input type="checkbox" onchange="setPinned('bottomPinned', event.target.checked)" />Pinned bottom</label>
+          </li>
+          <li>
+            <label><input type="checkbox" onchange="setPinned('colPinStart', event.target.checked)" />Pinned left</label>
+          </li>
+          <li>
+            <label><input type="checkbox" onchange="setPinned('colPinEnd', event.target.checked)" />Pinned right</label>
+          </li>
         </ul>
-        <hr>
+        <hr />
         <button onclick="setData({ rows: 2, cols: 5 })">2x5</button>
         <button onclick="setData({ rows: 100, cols: 100 })">100x100</button>
-        <button onclick="setData({ rows: 1000, cols: 1000 })" >1Kx1K</button>
+        <button onclick="setData({ rows: 1000, cols: 1000 })">1Kx1K</button>
         <button onclick="setData({ rows: 10000, cols: 5000 })">10Kx5K</button>
-        <hr>
+        <hr />
+      </div>
+      <strong>Others</strong>
+        <hr />
+        <label><input type="checkbox" onchange="toggleVisibility(event.target.checked)" checked="true"/>Toggle Visibility</label>
+
+        <hr />
+      </div>
+      <div>
+        <strong>Prevent events</strong>
+        <hr />
+        <label><input type="checkbox" onchange="preventEvent('beforeRange', event.target.checked)" />beforeRange</label>
       </div>
     </section>
 
     <!-- Define help function -->
     <script type="module">
-      const grid = document.querySelector('revo-grid');
       /**
        * Defaults
        */
 
+      window.eventsPrevented = {};
+      window.showRowHeaders = function (isShow) {
+        const grid = document.querySelector('revo-grid');
+        grid.rowHeaders = isShow;
+      };
       window.setEdit = function (row, prop) {
+        const grid = document.querySelector('revo-grid');
         grid.setCellEdit(row, prop);
       };
       window.scrollToCol = function (x = 30) {
+        const grid = document.querySelector('revo-grid');
         grid.scrollToColumnProp(x);
       };
       window.clearGrouping = function () {
+        const grid = document.querySelector('revo-grid');
         grid.grouping = {};
       };
       window.setGrouping = function (props = [], expandedAll = false) {
+        const grid = document.querySelector('revo-grid');
         grid.grouping = { props, expandedAll };
       };
       window.setTrimmed = function (rows = []) {
+        const grid = document.querySelector('revo-grid');
         grid.trimmedRows = rows.reduce((r, v) => {
           r[v] = true;
           return r;
@@ -144,6 +175,7 @@
       };
 
       window.exportGrid = function (filename = 'new file') {
+        const grid = document.querySelector('revo-grid');
         grid.getPlugins().then(plugins => {
           plugins.forEach(p => {
             if (p.exportFile) {
@@ -160,13 +192,14 @@
         topPinned: [],
         bottomPinned: [],
         colPinEnd: [],
-        colPinStart: []
+        colPinStart: [],
       };
       window.setData = function (config = {}) {
-        defaultData = {...defaultData, ...config};
+        defaultData = { ...defaultData, ...config };
         const $loader = document.querySelector('.loader');
         $loader.style.display = 'block';
         setTimeout(() => {
+          const grid = document.querySelector('revo-grid');
           const data = generateFakeDataObject(defaultData);
 
           grid.columns = data.headers;
@@ -177,7 +210,7 @@
           $loader.style.display = 'none';
         }, 0);
       };
-      window.setPinned = function(type, checked) {
+      window.setPinned = function (type, checked) {
         const val = [];
         if (checked) {
           switch (type) {
@@ -196,8 +229,24 @@
           }
         }
         setData({
-          [type]: val
+          [type]: val,
         });
+      };
+      window.preventEvent = function (name, checked) {
+        eventsPrevented[name] = checked;
+      };
+      let keys = 2;
+      window.toggleVisibility = function (checked) {
+        if (!checked) {
+          const grid = document.querySelector('revo-grid');
+          grid.remove();
+        } else {
+          const holder = document.querySelector('.grid-holder');
+          const grid = document.createElement('revo-grid', { is : 'revo-grid' });
+          grid.setAttribute('key', keys++);
+          holder.appendChild(grid);
+          setData();
+        }
       };
     </script>
 
@@ -225,6 +274,17 @@
         }]; */
       // default
       setData({ rows: 100, cols: 100 });
+
+      // events testing
+      const events = []; // 'beforeRange', 'setRange'
+      events.forEach(e => {
+        grid.addEventListener(e, $e => {
+          if (window.eventsPrevented[e]) {
+            $e.preventDefault();
+          }
+          console.log(`%c${e}`, 'background: #50d260; color: #fff; border-radius: 3px; padding: 2px 5px;', $e);
+        });
+      });
     </script>
   </body>
 </html>

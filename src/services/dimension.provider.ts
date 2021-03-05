@@ -7,7 +7,7 @@ import { getItemByIndex } from '../store/dimension/dimension.helpers';
 
 export type ColumnItems = Record<RevoGrid.DimensionCols, RevoGrid.ColumnRegular[]>;
 
-type DimensionStores = { [T in RevoGrid.MultiDimensionType]: DimensionStore };
+export type DimensionStores = { [T in RevoGrid.MultiDimensionType]: DimensionStore };
 export default class DimensionProvider {
   public readonly stores: DimensionStores;
   constructor(private viewports: ViewportProvider) {

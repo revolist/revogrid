@@ -3,7 +3,7 @@ import { columnTypes, rowTypes } from '../store/storeTypes';
 import ViewportStore from '../store/viewPort/viewport.store';
 import { RevoGrid } from '../interfaces';
 
-type ViewportStores = { [T in RevoGrid.MultiDimensionType]: ViewportStore };
+export type ViewportStores = { [T in RevoGrid.MultiDimensionType]: ViewportStore };
 export default class ViewportProvider {
   readonly stores: ViewportStores;
   constructor() {

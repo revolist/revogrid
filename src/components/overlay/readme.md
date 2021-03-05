@@ -34,14 +34,13 @@
 | `setEdit`                  |                         | `CustomEvent<{ isCancel: boolean; } & BeforeSaveDataDetails>`                                                                                                            |
 | `setRange`                 |                         | `CustomEvent<{ x: number; y: number; x1: number; y1: number; }>`                                                                                                         |
 | `setTempRange`             |                         | `CustomEvent<{ type: string; area: RangeArea; }>`                                                                                                                        |
-| `unregister`               |                         | `CustomEvent<any>`                                                                                                                                                       |
 
 
 ## Dependencies
 
 ### Used by
 
- - [revogr-viewport](../viewport)
+ - [revo-grid](../revo-grid)
 
 ### Depends on
 
@@ -53,7 +52,7 @@
 graph TD;
   revogr-overlay-selection --> revogr-edit
   revogr-overlay-selection --> revogr-order-editor
-  revogr-viewport --> revogr-overlay-selection
+  revo-grid --> revogr-overlay-selection
   style revogr-overlay-selection fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

@@ -16,7 +16,6 @@ import { ColumnSource, RowSource } from "./components/data/columnService";
 import { LogicFunction } from "./plugins/filter/filter.types";
 import { FilterItem, ShowData } from "./plugins/filter/filter.pop";
 import { DataSourceState, Groups } from "./store/dataSource/data.store";
-import { BeforeEdit } from "./components/overlay/revogr-overlay-selection";
 export namespace Components {
     interface RevoGrid {
         /**
@@ -296,33 +295,6 @@ export namespace Components {
          */
         "selectionStore": Observable<Selection.SelectionStoreState>;
     }
-    interface RevogrViewport {
-        /**
-          * Clear current grid focus
-         */
-        "clearFocus": () => Promise<void>;
-        "columnFilter": boolean;
-        "columnStores": { [T in RevoGrid.DimensionCols]: Observable<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>> };
-        "dimensions": { [T in RevoGrid.MultiDimensionType]: Observable<RevoGrid.DimensionSettingsState> };
-        /**
-          * Custom editors register
-         */
-        "editors": Edition.Editors;
-        "range": boolean;
-        "readonly": boolean;
-        "resize": boolean;
-        "rowClass": string;
-        /**
-          * Show row indexes column
-         */
-        "rowHeaders": RevoGrid.RowHeaders | boolean;
-        "rowStores": { [T in RevoGrid.DimensionRows]: Observable<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>> };
-        "scrollToCoordinate": (cell: Partial<Selection.Cell>) => Promise<void>;
-        "setEdit": (rowIndex: number, colIndex: number, colType: RevoGrid.DimensionCols, rowType: RevoGrid.DimensionRows) => Promise<void>;
-        "useClipboard": boolean;
-        "uuid": string | null;
-        "viewports": { [T in RevoGrid.MultiDimensionType]: Observable<RevoGrid.ViewportState> };
-    }
     interface RevogrViewportScroll {
         /**
           * update on delta in case we don't know existing position or external change
@@ -407,12 +379,6 @@ declare global {
         prototype: HTMLRevogrTempRangeElement;
         new (): HTMLRevogrTempRangeElement;
     };
-    interface HTMLRevogrViewportElement extends Components.RevogrViewport, HTMLStencilElement {
-    }
-    var HTMLRevogrViewportElement: {
-        prototype: HTMLRevogrViewportElement;
-        new (): HTMLRevogrViewportElement;
-    };
     interface HTMLRevogrViewportScrollElement extends Components.RevogrViewportScroll, HTMLStencilElement {
     }
     var HTMLRevogrViewportScrollElement: {
@@ -431,7 +397,6 @@ declare global {
         "revogr-overlay-selection": HTMLRevogrOverlaySelectionElement;
         "revogr-scroll-virtual": HTMLRevogrScrollVirtualElement;
         "revogr-temp-range": HTMLRevogrTempRangeElement;
-        "revogr-viewport": HTMLRevogrViewportElement;
         "revogr-viewport-scroll": HTMLRevogrViewportScrollElement;
     }
 }
@@ -768,10 +733,9 @@ declare namespace LocalJSX {
           * Selection range changed
          */
         "onInternalSelectionChanged"?: (event: CustomEvent<Selection.ChangedRange>) => void;
-        "onSetEdit"?: (event: CustomEvent<BeforeEdit>) => void;
+        "onSetEdit"?: (event: CustomEvent<Edition.BeforeEdit>) => void;
         "onSetRange"?: (event: CustomEvent<Selection.RangeArea>) => void;
         "onSetTempRange"?: (event: CustomEvent<Selection.TempRange | null>) => void;
-        "onUnregister"?: (event: CustomEvent<any>) => void;
         "range"?: boolean;
         "readonly"?: boolean;
         /**
@@ -793,32 +757,6 @@ declare namespace LocalJSX {
           * Dynamic stores
          */
         "selectionStore"?: Observable<Selection.SelectionStoreState>;
-    }
-    interface RevogrViewport {
-        "columnFilter"?: boolean;
-        "columnStores"?: { [T in RevoGrid.DimensionCols]: Observable<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>> };
-        "dimensions"?: { [T in RevoGrid.MultiDimensionType]: Observable<RevoGrid.DimensionSettingsState> };
-        /**
-          * Custom editors register
-         */
-        "editors"?: Edition.Editors;
-        "onBeforeEditStart"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
-        "onInitialRowDragStart"?: (event: CustomEvent<{ pos: RevoGrid.PositionItem; text: string }>) => void;
-        "onSetDimensionSize"?: (event: CustomEvent<{ type: RevoGrid.MultiDimensionType; sizes: RevoGrid.ViewSettingSizeProp }>) => void;
-        "onSetViewportCoordinate"?: (event: CustomEvent<RevoGrid.ViewPortScrollEvent>) => void;
-        "onSetViewportSize"?: (event: CustomEvent<RevoGrid.ViewPortResizeEvent>) => void;
-        "range"?: boolean;
-        "readonly"?: boolean;
-        "resize"?: boolean;
-        "rowClass"?: string;
-        /**
-          * Show row indexes column
-         */
-        "rowHeaders"?: RevoGrid.RowHeaders | boolean;
-        "rowStores"?: { [T in RevoGrid.DimensionRows]: Observable<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>> };
-        "useClipboard"?: boolean;
-        "uuid"?: string | null;
-        "viewports"?: { [T in RevoGrid.MultiDimensionType]: Observable<RevoGrid.ViewportState> };
     }
     interface RevogrViewportScroll {
         /**
@@ -844,7 +782,6 @@ declare namespace LocalJSX {
         "revogr-overlay-selection": RevogrOverlaySelection;
         "revogr-scroll-virtual": RevogrScrollVirtual;
         "revogr-temp-range": RevogrTempRange;
-        "revogr-viewport": RevogrViewport;
         "revogr-viewport-scroll": RevogrViewportScroll;
     }
 }
@@ -863,7 +800,6 @@ declare module "@stencil/core" {
             "revogr-overlay-selection": LocalJSX.RevogrOverlaySelection & JSXBase.HTMLAttributes<HTMLRevogrOverlaySelectionElement>;
             "revogr-scroll-virtual": LocalJSX.RevogrScrollVirtual & JSXBase.HTMLAttributes<HTMLRevogrScrollVirtualElement>;
             "revogr-temp-range": LocalJSX.RevogrTempRange & JSXBase.HTMLAttributes<HTMLRevogrTempRangeElement>;
-            "revogr-viewport": LocalJSX.RevogrViewport & JSXBase.HTMLAttributes<HTMLRevogrViewportElement>;
             "revogr-viewport-scroll": LocalJSX.RevogrViewportScroll & JSXBase.HTMLAttributes<HTMLRevogrViewportScrollElement>;
         }
     }

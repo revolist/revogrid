@@ -1,27 +1,27 @@
 import { h, VNode } from '@stencil/core';
 
 import { RevoGrid } from '../../interfaces';
-import SelectionStoreConnector from '../../services/selection.store.connector';
 import DataStore from '../../store/dataSource/data.store';
+import { SelectionStore } from '../../store/selection/selection.store';
 import ViewportStore from '../../store/viewPort/viewport.store';
 import { UUID } from '../../utils/consts';
-import { ElementScroll } from '../viewport/gridScrollingService';
-import { ViewportSpace } from '../viewport/viewport.interfaces';
+import { ElementScroll } from '../revo-grid/viewport.scrolling.service';
+import { ViewportProps } from '../revo-grid/viewport.interfaces';
 import { RowHeaderRender } from './row-header-render';
 
 type Props = {
   height: number;
-  anyView: ViewportSpace.ViewportProps;
+  anyView: ViewportProps;
   resize: boolean;
-  selectionStoreConnector: SelectionStoreConnector;
   rowHeaderColumn?: RevoGrid.RowHeaders;
+  beforeRowAdd(y: number): SelectionStore;
   onScrollViewport(e: RevoGrid.ViewPortScrollEvent): void;
   onElementToScroll(e: ElementScroll): void;
 };
 
 const LETTER_BLOCK_SIZE = 10;
 
-const RevogrRowHeaders = ({ anyView, height, selectionStoreConnector, rowHeaderColumn, onScrollViewport, onElementToScroll }: Props): VNode => {
+const RevogrRowHeaders = ({ anyView, height, rowHeaderColumn, beforeRowAdd, onScrollViewport, onElementToScroll }: Props): VNode => {
   const dataViews: HTMLElement[] = [];
   const viewport = new ViewportStore();
 
@@ -30,7 +30,7 @@ const RevogrRowHeaders = ({ anyView, height, selectionStoreConnector, rowHeaderC
 
   for (let data of anyView.dataPorts) {
     const colData = new DataStore<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>('colPinStart');
-    const rowSelectionStore = selectionStoreConnector.registerRow(data.position.y);
+    const rowSelectionStore = beforeRowAdd(data.position.y);
 
     const dataStore = new DataStore<RevoGrid.DataType, RevoGrid.DimensionRows>(data.type);
     dataStore.updateData(data.dataStore.get('source'));

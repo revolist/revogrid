@@ -244,19 +244,24 @@ Type: `Promise<void>`
 
 ### Depends on
 
-- [revogr-viewport](../viewport)
+- [revogr-scroll-virtual](../scrollable)
+- [revogr-header](../header)
+- [revogr-overlay-selection](../overlay)
+- [revogr-data](../data)
+- [revogr-temp-range](../selection-temp-range)
+- [revogr-focus](../selection-focus)
+- [revogr-viewport-scroll](../scroll)
 
 ### Graph
 ```mermaid
 graph TD;
-  revo-grid --> revogr-viewport
-  revogr-viewport --> revogr-overlay-selection
-  revogr-viewport --> revogr-data
-  revogr-viewport --> revogr-temp-range
-  revogr-viewport --> revogr-focus
-  revogr-viewport --> revogr-viewport-scroll
-  revogr-viewport --> revogr-header
-  revogr-viewport --> revogr-scroll-virtual
+  revo-grid --> revogr-scroll-virtual
+  revo-grid --> revogr-header
+  revo-grid --> revogr-overlay-selection
+  revo-grid --> revogr-data
+  revo-grid --> revogr-temp-range
+  revo-grid --> revogr-focus
+  revo-grid --> revogr-viewport-scroll
   revogr-overlay-selection --> revogr-edit
   revogr-overlay-selection --> revogr-order-editor
   style revo-grid fill:#f9f,stroke:#333,stroke-width:4px

@@ -345,6 +345,11 @@ export declare namespace Edition {
     val: any;
     preventFocus?: boolean;
   };
+
+  type BeforeEdit = {
+    isCancel: boolean;
+  } & Edition.BeforeSaveDataDetails;
+
   type BeforeSaveDataDetails = {
     prop: RevoGrid.ColumnProp;
     model: RevoGrid.DataType;

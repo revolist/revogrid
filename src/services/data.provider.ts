@@ -8,7 +8,7 @@ import { Trimmed } from '../plugins/trimmed/trimmed.plugin';
 import DimensionRows = RevoGrid.DimensionRows;
 import DataType = RevoGrid.DataType;
 
-type RowDataSources = { [T in DimensionRows]: DataStore<DataType, DimensionRows> };
+export type RowDataSources = { [T in DimensionRows]: DataStore<DataType, DimensionRows> };
 
 export class DataProvider {
   public readonly stores: RowDataSources;
