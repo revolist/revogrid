@@ -1,6 +1,6 @@
 import { RevoGrid, Selection } from '../../interfaces';
 import DimensionProvider from '../../services/dimension.provider';
-import SelectionStoreConnector from '../../services/selection.store.connector';
+import SelectionStoreConnector, { EMPTY_INDEX } from '../../services/selection.store.connector';
 import ViewportProvider from '../../services/viewport.provider';
 import { getVisibleSourceItem } from '../../store/dataSource/data.store';
 import { columnTypes, rowTypes } from '../../store/storeTypes';
@@ -141,7 +141,7 @@ export default abstract class GridRenderService {
       const isPresent = data.viewports[type].store.get('realCount') || type === 'row';
       const col = {
         ...data,
-        position: { ...data.position, y: isPresent ? y : -1 },
+        position: { ...data.position, y: isPresent ? y : EMPTY_INDEX },
       };
       r.push(
         this.dataPartition(

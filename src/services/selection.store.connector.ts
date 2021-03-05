@@ -1,5 +1,5 @@
 import { Edition, Selection } from '../interfaces';
-import { cropCellToMax, nextCell } from '../store/selection/selection.helpers';
+import { cropCellToMax, isHiddenStore, nextCell } from '../store/selection/selection.helpers';
 import { SelectionStore } from '../store/selection/selection.store';
 
 import Cell = Selection.Cell;
@@ -7,6 +7,8 @@ import EditCellStore = Edition.EditCellStore;
 
 type StoresMatrix = { [y: number]: { [x: number]: SelectionStore } };
 type StoreByDimension = Record<number, SelectionStore>;
+
+export const EMPTY_INDEX = -1;
 
 export default class SelectionStoreConnector {
   // dirty flag required to cleanup whole store in case visibility of panels changed
@@ -53,6 +55,10 @@ export default class SelectionStoreConnector {
   }
 
   registerColumn(x: number): SelectionStore {
+    // if hidden just create store
+    if (isHiddenStore(x)) {
+      return new SelectionStore();
+    }
     if (this.columnStores[x]) {
       return this.columnStores[x];
     }
@@ -61,6 +67,10 @@ export default class SelectionStoreConnector {
   }
 
   registerRow(y: number): SelectionStore {
+    // if hidden just create store
+    if (isHiddenStore(y)) {
+      return new SelectionStore();
+    }
     if (this.rowStores[y]) {
       return this.rowStores[y];
     }
@@ -72,6 +82,10 @@ export default class SelectionStoreConnector {
    * Cross store proxy, based on multiple dimensions
    */
   register({ x, y }: Selection.Cell): SelectionStore {
+    // if hidden just create store
+    if (isHiddenStore(x) || isHiddenStore(y)) {
+      return new SelectionStore();
+    }
     if (!this.stores[y]) {
       this.stores[y] = {};
     }
@@ -114,6 +128,7 @@ export default class SelectionStoreConnector {
     for (let y in this.stores) {
       for (let x in this.stores[y]) {
         const s = this.stores[y][x];
+        // clear other stores, only one area can be selected
         if (s !== store) {
           s.clearFocus();
         } else {
@@ -121,12 +136,13 @@ export default class SelectionStoreConnector {
         }
       }
     }
+    console.log(currentStorePointer, this.stores);
     if (!currentStorePointer) {
       return;
     }
 
     // check is focus in next store
-    const lastCell: Cell = store.store.get('lastCell');
+    const lastCell = store.store.get('lastCell');
     // item in new store
     const nextItem: Partial<Cell> | null = nextCell(focus, lastCell);
 

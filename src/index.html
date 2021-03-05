@@ -94,7 +94,7 @@
       <button onclick="clearGrouping()">Clear grouping</button>
       <button onclick="setTrimmed([3])">Set trimmed 3</button>
       <button onclick="setTrimmed([])">Clear trimmed</button>
-      <button onclick="setGrouping()">Set grouping by '1'</button>
+      <button onclick="setGrouping(['key'])">Set grouping by 'key'</button>
       <button onclick="exportGrid()">Export to csv</button>
       <button onclick="scrollToCol(30)">Scroll to column 30</button>
       <button onclick="setEdit(30, 10)">Set edit 30:1</button>
@@ -129,6 +129,8 @@
       <strong>Others</strong>
         <hr />
         <label><input type="checkbox" onchange="toggleVisibility(event.target.checked)" checked="true"/>Toggle Visibility</label>
+
+        <hr />
       </div>
       <div>
         <strong>Prevent events</strong>
@@ -272,7 +274,9 @@
         }]; */
       // default
       setData({ rows: 100, cols: 100 });
-      const events = ['beforeRange', 'setRange'];
+
+      // events testing
+      const events = []; // 'beforeRange', 'setRange'
       events.forEach(e => {
         grid.addEventListener(e, $e => {
           if (window.eventsPrevented[e]) {

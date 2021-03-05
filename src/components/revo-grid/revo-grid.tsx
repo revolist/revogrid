@@ -585,8 +585,7 @@ export class RevoGridComponent {
 
   @Element() element: HTMLRevoGridElement;
 
-  @Watch('columns')
-  columnChanged(newVal: RevoGrid.ColumnData) {
+  @Watch('columns') columnChanged(newVal: RevoGrid.ColumnData) {
     const columnGather = ColumnDataProvider.getColumns(newVal, 0, this.columnTypes);
     this.beforeColumnsSet.emit(columnGather);
     for (let type of columnTypes) {
@@ -601,15 +600,13 @@ export class RevoGridComponent {
     });
   }
 
-  @Watch('theme')
-  themeChanged(t: ThemeSpace.Theme) {
+  @Watch('theme') themeChanged(t: ThemeSpace.Theme) {
     this.themeService.register(t);
     this.dimensionProvider.setSettings({ originItemSize: this.themeService.rowSize, frameOffset: this.frameSize || 0 }, 'row');
     this.dimensionProvider.setSettings({ originItemSize: this.colSize, frameOffset: this.frameSize || 0 }, 'col');
   }
 
-  @Watch('source')
-  dataChanged(source: RevoGrid.DataType[]) {
+  @Watch('source') dataChanged(source: RevoGrid.DataType[]) {
     let newSource = [...source];
     const beforeSourceSet = this.beforeSourceSet.emit({
       type: 'row',
@@ -624,18 +621,15 @@ export class RevoGridComponent {
     });
   }
 
-  @Watch('pinnedBottomSource')
-  dataBottomChanged(newVal: RevoGrid.DataType[]) {
+  @Watch('pinnedBottomSource') dataBottomChanged(newVal: RevoGrid.DataType[]) {
     this.dataProvider.setData(newVal, 'rowPinEnd');
   }
 
-  @Watch('pinnedTopSource')
-  dataTopChanged(newVal: RevoGrid.DataType[]) {
+  @Watch('pinnedTopSource') dataTopChanged(newVal: RevoGrid.DataType[]) {
     this.dataProvider.setData(newVal, 'rowPinStart');
   }
 
-  @Watch('rowDefinitions')
-  rowDefChanged(newVal: RevoGrid.RowDefinition[]) {
+  @Watch('rowDefinitions') rowDefChanged(newVal: RevoGrid.RowDefinition[]) {
     if (!newVal.length) {
       return;
     }

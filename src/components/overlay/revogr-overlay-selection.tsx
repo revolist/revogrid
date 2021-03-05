@@ -225,7 +225,9 @@ export class OverlaySelection {
     this.selectionStoreService.focus(focusCell, this.range && e.shiftKey);
 
     // Initiate autofill selection
-    this.selectionStart(e, data);
+    if (this.range) {
+      this.selectionStart(e, data);
+    }
   }
 
   protected doEdit(val = '', isCancel = false) {

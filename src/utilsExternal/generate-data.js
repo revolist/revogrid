@@ -47,7 +47,12 @@ export function generateFakeDataObject(config = {}) {
     let row = (j / cols) | 0;
     if (!result[row]) {
       result[row] = {};
-      result[row]['key'] = 'a';
+
+      if (row % 2) {
+        result[row].key = 'a';
+      } else {
+        result[row].key = 'b';
+      }
     }
     if (!columns[col]) {
       columns[col] = {
@@ -114,3 +119,4 @@ export function generateFakeDataObject(config = {}) {
     headers,
   };
 }
+
