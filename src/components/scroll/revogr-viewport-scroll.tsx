@@ -155,7 +155,7 @@ export class RevogrViewportScroll {
     // based on scroll visibility assign or remove class and event
     if (hasScroll) {
       el.classList.add('scroll');
-      el.addEventListener('mousewheel', event);
+      el.addEventListener('mousewheel', event, {passive: true});
     } else {
       el.classList.remove('scroll');
       el.removeEventListener('mousewheel', event);
