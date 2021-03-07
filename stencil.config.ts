@@ -7,7 +7,8 @@ import { svelteOutputTarget } from '@stencil/svelte-output-target';
 
 const componentCorePackage = '@revolist/revogrid';
 const parent = '../revogrid-proxy';
-const directivesProxyFile = (name: string) => `${parent}/${name}/src/revogrid.ts`;
+const entry = 'revogrid.ts';
+const directivesProxyFile = (name: string, filepath = entry) => `${parent}/${name}/src/${filepath}`;
 // proxies
 export const config: Config = {
   buildEs5: 'prod',
@@ -22,7 +23,7 @@ export const config: Config = {
   outputTargets: [
     angularOutputTarget({
       componentCorePackage,
-      directivesProxyFile: directivesProxyFile('angular'),
+      directivesProxyFile: directivesProxyFile('angular', `proxies/${entry}`),
       valueAccessorConfigs: [],
     }),
     reactOutputTarget({
