@@ -1,15 +1,14 @@
-@import './revo-grid.common.scss';
-
-$header-size: 30px;
-$header-bg: #f8f9fa;
-$header-color: #61656a;
-$header-border-color: #c0c0c0;
-$default-rows-size: 27px;
-$cell-border-color: #e2e3e3;
-
-$focused-header: rgba(#e9eaed, 0.5);
+@import './revo-grid.mixin.scss';
 
 revo-grid[theme='default'] {
+  $header-size: 30px;
+  $header-bg: #f8f9fa;
+  $header-color: #61656a;
+  $header-border-color: #c0c0c0;
+  $default-rows-size: 27px;
+  $cell-border-color: #e2e3e3;
+  $focused-header: rgba(#e9eaed, 0.5);
+
   font-size: 12px;
 
   revogr-header {

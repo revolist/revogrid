@@ -1,11 +1,11 @@
-$cell-border-color: #f1f1f1;
-$header-border-color: $cell-border-color;
-
-$cell-shadow-cell: 0 -1px 0 0 $cell-border-color inset;
-
-$focused-header: rgba(#e9eaed, 0.5);
-
 @mixin revoGridLight() {
+  $cell-border-color: #f1f1f1;
+  $header-border-color: $cell-border-color;
+
+  $cell-shadow-cell: 0 -1px 0 0 $cell-border-color inset;
+
+  $focused-header: rgba(#e9eaed, 0.5);
+
   .rowHeaders {
     background-color: #f7faff;
     revogr-data .data-cell {

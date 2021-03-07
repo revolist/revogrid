@@ -28,14 +28,7 @@ import { UUID } from '../../utils/consts';
 
 @Component({
   tag: 'revo-grid',
-  styleUrl: 'revo-grid.common.scss',
-  styleUrls: {
-    default: 'revo-grid.default.scss',
-    material: 'revo-grid.material.scss',
-    compact: 'revo-grid.compact.scss',
-    darkMaterial: 'revo-grid.dark.material.scss',
-    darkCompact: 'revo-grid.dark.compact.scss',
-  },
+  styleUrl: 'revo-grid.scss'
 })
 export class RevoGridComponent {
   // --------------------------------------------------------------------------
