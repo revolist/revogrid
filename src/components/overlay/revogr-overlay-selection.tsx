@@ -7,7 +7,6 @@ import { codesLetter } from '../../utils/keyCodes';
 import { SELECTION_BORDER_CLASS } from '../../utils/consts';
 import { DataSourceState } from '../../store/dataSource/data.store';
 import { isRangeSingleCell } from '../../store/selection/selection.helpers';
-import { applyMixins } from '../../utils/utils';
 import { getCurrentCell, getElStyle } from './selection.utils';
 import { isEditInput } from './editors/edit.utils';
 import { KeyboardService } from './keyboard.service';
@@ -22,6 +21,9 @@ export class OverlaySelection {
   protected columnService: ColumnService;
 
   protected selectionStoreService: SelectionStoreService;
+  private keyboardService: KeyboardService | null = null;
+  private autoFillService: AutoFillService | null = null;
+  private clipboardService: ClipboardService | null = null;
   private orderEditor: HTMLRevogrOrderEditorElement;
 
   @Element() element: HTMLElement;
@@ -82,18 +84,18 @@ export class OverlaySelection {
 
   @Listen('mousemove', { target: 'document' }) onMouseMove(e: MouseEvent) {
     if (this.selectionStoreService.focused) {
-      this.selectionMouseMove(e);
+      this.autoFillService.selectionMouseMove(e);
     }
   }
 
   /** Pointer left document, clear any active operation */
   @Listen('mouseleave', { target: 'document' }) onMouseOut() {
-    this.clearAutoFillSelection();
+    this.autoFillService.clearAutoFillSelection();
   }
 
   /** Action finished inside of the document */
   @Listen('mouseup', { target: 'document' }) onMouseUp() {
-    this.clearAutoFillSelection();
+    this.autoFillService.clearAutoFillSelection();
   }
 
   /** Row drag started */
@@ -103,14 +105,15 @@ export class OverlaySelection {
 
   /** Recived keyboard down from element */
   @Listen('keyup', { target: 'document' }) onKeyUp(e: KeyboardEvent) {
-    this.keyUp(e);
+    this.keyboardService?.keyUp(e);
   }
 
   /** Recived keyboard down from element */
   @Listen('keydown', { target: 'document' }) onKeyDown(e: KeyboardEvent) {
-    this.keyDown(e);
+    this.keyboardService?.keyDown(e, this.range);
   }
 
+  /** Create selection store */
   @Watch('selectionStore') selectionServiceSet(s: Observable<Selection.SelectionStoreState>) {
     this.selectionStoreService = new SelectionStoreService(s, {
       changeRange: range => !this.setRange.emit(range)?.defaultPrevented,
@@ -123,6 +126,35 @@ export class OverlaySelection {
         return !this.focusCell.emit(focused)?.defaultPrevented;
       },
     });
+
+    this.keyboardService = new KeyboardService({
+      selectionStoreService: this.selectionStoreService,
+      selectionStore: s,
+      doEdit: (v, c) => this.doEdit(v, c),
+      clearCell: () => this.clearCell(),
+      getData: () => this.getData(),
+      internalPaste: () => this.internalPaste.emit()
+    });
+    this.createAutoFillService();
+    this.createClipboardService();
+  }
+
+  @Watch('dimensionRow')
+  @Watch('dimensionCol')
+  createAutoFillService() {
+    this.autoFillService = new AutoFillService({
+      selectionStoreService: this.selectionStoreService,
+      dimensionRow: this.dimensionRow,
+      dimensionCol: this.dimensionCol,
+      columnService: this.columnService,
+      dataStore: this.dataStore,
+
+      setTempRange: (e) => this.setTempRange.emit(e),
+      internalSelectionChanged: (e) => this.internalSelectionChanged.emit(e),
+      internalRangeDataApply: (e) => this.internalRangeDataApply.emit(e),
+      setRange: (e) => this.setRange.emit(e),
+      getData: () => this.getData(),
+    });
   }
 
   @Watch('dataStore')
@@ -130,6 +162,18 @@ export class OverlaySelection {
   columnServiceSet() {
     this.columnService?.destroy();
     this.columnService = new ColumnService(this.dataStore, this.colData);
+    this.createAutoFillService();
+    this.createClipboardService();
+  }
+
+  createClipboardService() {
+    this.clipboardService = new ClipboardService({
+      selectionStoreService: this.selectionStoreService,
+      columnService: this.columnService,
+      dataStore: this.dataStore,
+      onRangeApply: (d, r) => this.autoFillService.onRangeApply(d, r),
+      internalCopy: () => this.internalCopy.emit()
+    });
   }
 
   connectedCallback() {
@@ -176,7 +220,7 @@ export class OverlaySelection {
     const selectionFocus = this.selectionStoreService.focused;
     const els: VNode[] = [];
     if ((range || selectionFocus) && this.useClipboard) {
-      els.push(this.renderClipboard());
+      els.push(this.clipboardService.renderClipboard());
     }
 
     if (range) {
@@ -188,7 +232,7 @@ export class OverlaySelection {
       els.push(editCell);
     }
     if (selectionFocus && !this.readonly && !editCell && this.range) {
-      els.push(this.renderAutofill(range, selectionFocus));
+      els.push(this.autoFillService.renderAutofill(range, selectionFocus));
     }
 
     if (this.canDrag) {
@@ -226,7 +270,7 @@ export class OverlaySelection {
 
     // Initiate autofill selection
     if (this.range) {
-      this.selectionStart(e, data);
+      this.autoFillService.selectionStart(e, data);
     }
   }
 
@@ -250,10 +294,11 @@ export class OverlaySelection {
   }
 
   private async focusNext() {
-    const canFocus = await this.keyChangeSelection(
+    const canFocus = await this.keyboardService.keyChangeSelection(
       new KeyboardEvent('keydown', {
         code: codesLetter.ARROW_DOWN,
       }),
+      this.range
     );
     if (!canFocus) {
       this.closeEdit();
@@ -263,7 +308,7 @@ export class OverlaySelection {
   protected clearCell() {
     if (this.selectionStoreService.ranged && !isRangeSingleCell(this.selectionStoreService.ranged)) {
       const data = this.columnService.getRangeStaticData(this.selectionStoreService.ranged, '');
-      this.onRangeApply(data, this.selectionStoreService.ranged);
+      this.autoFillService.onRangeApply(data, this.selectionStoreService.ranged);
     } else if (this.canEdit()) {
       const focused = this.selectionStoreService.focused;
       this.onCellEdit({ row: focused.y, col: focused.x, val: '' }, true);
@@ -303,6 +348,3 @@ export class OverlaySelection {
     };
   }
 }
-
-export interface OverlaySelection extends KeyboardService, AutoFillService, ClipboardService {}
-applyMixins(OverlaySelection, [KeyboardService, AutoFillService, ClipboardService]);

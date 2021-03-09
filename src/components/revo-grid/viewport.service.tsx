@@ -12,25 +12,33 @@ import { HeaderProperties, SlotType, ViewportColumn, ViewportData, ViewportProps
 import ColumnDataProvider, { ColumnDataSources } from '../../services/column.data.provider';
 import { DataProvider, RowDataSources } from '../../services/data.provider';
 
-export default abstract class GridRenderService {
-  abstract columnProvider: ColumnDataProvider;
-  abstract dataProvider: DataProvider;
-  abstract dimensionProvider: DimensionProvider;
-  abstract viewportProvider: ViewportProvider;
-  protected abstract uuid: string | null;
+type Config = {
+  columnProvider: ColumnDataProvider;
+  dataProvider: DataProvider;
+  dimensionProvider: DimensionProvider;
+  viewportProvider: ViewportProvider;
+  uuid: string | null;
+  scrollingService: GridScrollingService;
+  orderService: OrdererService;
+  selectionStoreConnector: SelectionStoreConnector;
+};
 
-  protected abstract scrollingService: GridScrollingService;
-  protected orderService: OrdererService;
-  protected selectionStoreConnector: SelectionStoreConnector;
+export default class ViewportService {
+  readonly columns: ViewportProps[];
+  constructor(private sv: Config, contentHeight: number) {
+    this.sv.selectionStoreConnector?.beforeUpdate();
+    this.columns = this.getViewportColumnData(contentHeight);
+    this.sv.scrollingService?.unregister();
+  }
 
   /**
    * Transform data from stores and apply it to different components
    */
-  protected getViewportColumnData(contentHeight: number): ViewportProps[] {
+  getViewportColumnData(contentHeight: number): ViewportProps[] {
     const columns: ViewportProps[] = [];
     let x = 0; // we increase x only if column present
     columnTypes.forEach(val => {
-      const colStore = this.columnProvider.stores[val].store;
+      const colStore = this.sv.columnProvider.stores[val].store;
       // only columns that have data show
       if (!colStore.get('items').length) {
         return;
@@ -41,40 +49,40 @@ export default abstract class GridRenderService {
 
         contentHeight,
         fixWidth: val !== 'col',
-        uuid: `${this.uuid}-${x}`,
+        uuid: `${this.sv.uuid}-${x}`,
 
-        viewports: this.viewportProvider.stores,
-        dimensions: this.dimensionProvider.stores,
-        rowStores: this.dataProvider.stores,
+        viewports: this.sv.viewportProvider.stores,
+        dimensions: this.sv.dimensionProvider.stores,
+        rowStores: this.sv.dataProvider.stores,
 
         colStore,
-        onHeaderResize: (e: CustomEvent<RevoGrid.ViewSettingSizeProp>) => this.dimensionProvider?.setDimensionSize(val, e.detail),
+        onHeaderResize: (e: CustomEvent<RevoGrid.ViewSettingSizeProp>) => this.sv.dimensionProvider?.setDimensionSize(val, e.detail),
       };
       if (val === 'col') {
-        column.onResizeViewport = (e: CustomEvent<RevoGrid.ViewPortResizeEvent>) => this.viewportProvider?.setViewport(e.detail.dimension, { virtualSize: e.detail.size });
+        column.onResizeViewport = (e: CustomEvent<RevoGrid.ViewPortResizeEvent>) => this.sv.viewportProvider?.setViewport(e.detail.dimension, { virtualSize: e.detail.size });
       }
       const colData = this.gatherColumnData(column);
       // register selection store for column
-      const columnSelectionStore = this.selectionStoreConnector.registerColumn(colData.position.x).store;
+      const columnSelectionStore = this.sv.selectionStoreConnector.registerColumn(colData.position.x).store;
 
       // render per each column data collections vertically
       const dataPorts = this.dataViewPort(column).reduce<ViewportData[]>((r, row) => {
         // register selection store for segment
-        const segmentSelection = this.selectionStoreConnector.register(row.position);
+        const segmentSelection = this.sv.selectionStoreConnector.register(row.position);
         segmentSelection.setLastCell(row.lastCell);
 
         // register selection store for row
-        const rowSelectionStore = this.selectionStoreConnector.registerRow(row.position.y).store;
+        const rowSelectionStore = this.sv.selectionStoreConnector.registerRow(row.position.y).store;
         r.push({
           ...row,
           rowSelectionStore,
           segmentSelectionStore: segmentSelection.store,
-          ref: (e: Element) => this.selectionStoreConnector.registerSection(e),
+          ref: (e: Element) => this.sv.selectionStoreConnector.registerSection(e),
           onSetRange: e => segmentSelection.setRangeArea(e.detail),
           onSetTempRange: e => segmentSelection.setTempArea(e.detail),
           onFocusCell: e => {
             segmentSelection.clearFocus();
-            this.selectionStoreConnector.focus(segmentSelection, e.detail);
+            this.sv.selectionStoreConnector.focus(segmentSelection, e.detail);
           },
         });
         return r;
@@ -87,10 +95,6 @@ export default abstract class GridRenderService {
       x++;
     });
     return columns;
-  }
-
-  viewportConnectedCallback() {
-    this.selectionStoreConnector = new SelectionStoreConnector();
   }
 
   /** Collect Column data */
@@ -201,7 +205,7 @@ export default abstract class GridRenderService {
   scrollToCell(cell: Partial<Selection.Cell>) {
     for (let key in cell) {
       const coordinate = cell[key as keyof Selection.Cell];
-      this.scrollingService.onScroll({ dimension: key === 'x' ? 'col' : 'row', coordinate });
+      this.sv.scrollingService.onScroll({ dimension: key === 'x' ? 'col' : 'row', coordinate });
     }
   }
 
@@ -209,15 +213,15 @@ export default abstract class GridRenderService {
    * Clear current grid focus
    */
   clearFocused() {
-    this.selectionStoreConnector.clearAll();
+    this.sv.selectionStoreConnector.clearAll();
   }
 
   setEdit(rowIndex: number, colIndex: number, colType: RevoGrid.DimensionCols, rowType: RevoGrid.DimensionRows) {
-    const stores = this.getStoresCoordinates(this.columnProvider.stores, this.dataProvider.stores);
+    const stores = this.getStoresCoordinates(this.sv.columnProvider.stores, this.sv.dataProvider.stores);
     const storeCoordinate = {
       x: stores[colType],
       y: stores[rowType],
     };
-    this.selectionStoreConnector?.setEditByCell(storeCoordinate, { x: colIndex, y: rowIndex });
+    this.sv.selectionStoreConnector?.setEditByCell(storeCoordinate, { x: colIndex, y: rowIndex });
   }
 }

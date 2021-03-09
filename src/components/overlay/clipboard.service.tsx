@@ -1,34 +1,37 @@
 import slice from 'lodash/slice';
-import { EventEmitter, h } from '@stencil/core';
+import { h } from '@stencil/core';
 import SelectionStoreService from '../../store/selection/selection.store.service';
 import { Observable, RevoGrid, Selection } from '../../interfaces';
 import { getRange } from '../../store/selection/selection.helpers';
 import ColumnService from '../data/columnService';
 import { DataSourceState } from '../../store/dataSource/data.store';
 
-export abstract class ClipboardService {
-  protected abstract selectionStoreService: SelectionStoreService;
-  protected abstract columnService: ColumnService;
-  abstract onRangeApply(data: RevoGrid.DataLookup, range: Selection.RangeArea): void;
-  abstract dataStore: Observable<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
-  abstract internalCopy: EventEmitter;
+type Config = {
+  selectionStoreService: SelectionStoreService;
+  columnService: ColumnService;
+  dataStore: Observable<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
+  onRangeApply(data: RevoGrid.DataLookup, range: Selection.RangeArea): void;
+  internalCopy(): Event;
+};
 
+export class ClipboardService {
   private clipboard: HTMLRevogrClipboardElement;
+  constructor(private sv: Config) {}
   private onCopy(e: DataTransfer) {
-    const canCopy = this.internalCopy.emit();
+    const canCopy = this.sv.internalCopy();
     if (canCopy.defaultPrevented) {
       return false;
     }
-    let focus = this.selectionStoreService.focused;
-    let range = this.selectionStoreService.ranged;
+    let focus = this.sv.selectionStoreService.focused;
+    let range = this.sv.selectionStoreService.ranged;
     let data: RevoGrid.DataFormat[][];
     if (!range) {
       range = getRange(focus, focus);
     }
     if (range) {
-      const columns = [...this.columnService.columns];
+      const columns = [...this.sv.columnService.columns];
       const props = slice(columns, range.x, range.x1 + 1).map(v => v.prop);
-      data = this.columnService.copyRangeArray(range, props, this.dataStore);
+      data = this.sv.columnService.copyRangeArray(range, props, this.sv.dataStore);
     }
     this.clipboard.doCopy(e, data);
     return true;
@@ -39,12 +42,12 @@ export abstract class ClipboardService {
   }
 
   private onPaste(data: string[][]) {
-    const focus = this.selectionStoreService.focused;
-    const isEditing = this.selectionStoreService.edited !== null;
+    const focus = this.sv.selectionStoreService.focused;
+    const isEditing = this.sv.selectionStoreService.edited !== null;
     if (!focus || isEditing) {
       return;
     }
-    const { changed, range } = this.columnService.getTransformedDataToApply(focus, data);
-    this.onRangeApply(changed, range);
+    const { changed, range } = this.sv.columnService.getTransformedDataToApply(focus, data);
+    this.sv.onRangeApply(changed, range);
   }
 }

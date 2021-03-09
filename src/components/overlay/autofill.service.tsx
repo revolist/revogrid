@@ -3,7 +3,7 @@ import { DebouncedFunc } from 'lodash';
 import each from 'lodash/each';
 import slice from 'lodash/slice';
 
-import { EventEmitter, h, VNode } from '@stencil/core';
+import { h } from '@stencil/core';
 import { CELL_HANDLER_CLASS } from '../../utils/consts';
 import { Observable, Selection, RevoGrid, Edition } from '../../interfaces';
 import { EventData, getCell, getCurrentCell, getDirectionCoordinate, getLargestAxis, isAfterLast } from './selection.utils';
@@ -12,25 +12,27 @@ import SelectionStoreService from '../../store/selection/selection.store.service
 import ColumnService from '../data/columnService';
 import { DataSourceState, getSourceItem } from '../../store/dataSource/data.store';
 
+type Config = {
+  selectionStoreService: SelectionStoreService;
+  dimensionRow: Observable<RevoGrid.DimensionSettingsState>;
+  dimensionCol: Observable<RevoGrid.DimensionSettingsState>;
+  columnService: ColumnService;
+  dataStore: Observable<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
+
+  setTempRange(e: Selection.TempRange | null): Event;
+  internalSelectionChanged(e: Selection.ChangedRange): Event;
+  internalRangeDataApply(e: Edition.BeforeRangeSaveDataDetails): Event;
+  setRange(e: Selection.RangeArea): Event;
+
+  getData(): any;
+};
+
 enum AutoFillType {
   selection = 'Selection',
   autoFill = 'AutoFill',
 }
 
-export abstract class AutoFillService {
-  abstract dimensionRow: Observable<RevoGrid.DimensionSettingsState>;
-  abstract dimensionCol: Observable<RevoGrid.DimensionSettingsState>;
-  protected abstract selectionStoreService: SelectionStoreService;
-  protected abstract columnService: ColumnService;
-  abstract dataStore: Observable<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
-
-  abstract setTempRange: EventEmitter<Selection.TempRange | null>;
-  abstract internalSelectionChanged: EventEmitter<Selection.ChangedRange>;
-  abstract internalRangeDataApply: EventEmitter<Edition.BeforeRangeSaveDataDetails>;
-  abstract setRange: EventEmitter<Selection.RangeArea>;
-
-  protected abstract getData(): any;
-
+export class AutoFillService {
   private autoFillType: AutoFillType | null = null;
   private autoFillInitial: Selection.Cell | null = null;
   private autoFillStart: Selection.Cell | null = null;
@@ -38,15 +40,19 @@ export abstract class AutoFillService {
 
   private onMouseMoveAutofill: DebouncedFunc<(e: MouseEvent, data: EventData) => void>;
 
+  constructor(private sv: Config) {
+
+  }
+
   /**
    * Render autofill box
    * @param range
    * @param selectionFocus
    */
-  protected renderAutofill(range: Selection.RangeArea, selectionFocus: Selection.Cell): VNode {
+  renderAutofill(range: Selection.RangeArea, selectionFocus: Selection.Cell) {
     let handlerStyle;
     if (range) {
-      handlerStyle = getCell(range, this.dimensionRow.state, this.dimensionCol.state);
+      handlerStyle = getCell(range, this.sv.dimensionRow.state, this.sv.dimensionCol.state);
     } else {
       handlerStyle = getCell(
         {
@@ -54,15 +60,15 @@ export abstract class AutoFillService {
           x1: selectionFocus.x,
           y1: selectionFocus.y,
         },
-        this.dimensionRow.state,
-        this.dimensionCol.state,
+        this.sv.dimensionRow.state,
+        this.sv.dimensionCol.state,
       );
     }
     return (
       <div
         class={CELL_HANDLER_CLASS}
         style={{ left: `${handlerStyle.right}px`, top: `${handlerStyle.bottom}px` }}
-        onMouseDown={(e: MouseEvent) => this.selectionStart(e, this.getData(), AutoFillType.autoFill)}
+        onMouseDown={(e: MouseEvent) => this.selectionStart(e, this.sv.getData(), AutoFillType.autoFill)}
       />
     );
   }
@@ -72,19 +78,19 @@ export abstract class AutoFillService {
   }
 
   /** Process mouse move events */
-  protected selectionMouseMove(e: MouseEvent) {
+  selectionMouseMove(e: MouseEvent) {
     // initiate mouse move debounce if not present
     if (!this.onMouseMoveAutofill) {
       this.onMouseMoveAutofill = debounce((e: MouseEvent, data: EventData) => this.doAutofillMouseMove(e, data), 5);
     }
     if (this.isAutoFill) {
-      this.onMouseMoveAutofill(e, this.getData());
+      this.onMouseMoveAutofill(e, this.sv.getData());
     }
   }
 
   private getFocus() {
-    let focus = this.selectionStoreService.focused;
-    const range = this.selectionStoreService.ranged;
+    let focus = this.sv.selectionStoreService.focused;
+    const range = this.sv.selectionStoreService.ranged;
     if (range) {
       focus = { x: range.x, y: range.y };
     }
@@ -132,7 +138,7 @@ export abstract class AutoFillService {
       return;
     }
     this.autoFillLast = current;
-    this.setTempRange.emit({
+    this.sv.setTempRange({
       area: getRange(this.autoFillInitial, this.autoFillLast),
       type: this.autoFillType,
     });
@@ -144,7 +150,7 @@ export abstract class AutoFillService {
    * Can be triggered from MouseDown selection on element
    * Or can be triggered on corner square drag
    */
-  protected selectionStart(e: MouseEvent, data: EventData, type = AutoFillType.selection) {
+  selectionStart(e: MouseEvent, data: EventData, type = AutoFillType.selection) {
     /** Get cell by autofill element */
     const { top, left } = (e.target as HTMLElement).getBoundingClientRect();
     this.autoFillInitial = this.getFocus();
@@ -154,7 +160,7 @@ export abstract class AutoFillService {
   }
 
   /** Clear current range selection */
-  protected clearAutoFillSelection() {
+  clearAutoFillSelection() {
     // Apply autofill values on mouse up
     if (this.autoFillInitial) {
       // Get latest
@@ -176,17 +182,17 @@ export abstract class AutoFillService {
   onRangeApply(data: RevoGrid.DataLookup, range: Selection.RangeArea): void {
     const models: RevoGrid.DataLookup = {};
     for (let rowIndex in data) {
-      models[rowIndex] = getSourceItem(this.dataStore, parseInt(rowIndex, 10));
+      models[rowIndex] = getSourceItem(this.sv.dataStore, parseInt(rowIndex, 10));
     }
-    const dataEvent = this.internalRangeDataApply.emit({
+    const dataEvent = this.sv.internalRangeDataApply({
       data,
       models,
-      type: this.dataStore.get('type'),
+      type: this.sv.dataStore.get('type'),
     });
     if (!dataEvent.defaultPrevented) {
-      this.columnService.applyRangeData(data);
+      this.sv.columnService.applyRangeData(data);
     }
-    this.setRange.emit(range);
+    this.sv.setRange(range);
   }
 
   /** Apply range and copy data during range application */
@@ -196,11 +202,11 @@ export abstract class AutoFillService {
       return;
     }
 
-    const oldRange = this.selectionStoreService.ranged;
+    const oldRange = this.sv.selectionStoreService.ranged;
     const newRange = getRange(start, end);
-    const columns = [...this.columnService.columns];
+    const columns = [...this.sv.columnService.columns];
     const rangeData: Selection.ChangedRange = {
-      type: this.dataStore.get('type'),
+      type: this.sv.dataStore.get('type'),
       newData: {},
       newRange,
       oldRange,
@@ -208,10 +214,10 @@ export abstract class AutoFillService {
       oldProps: slice(columns, oldRange.x, oldRange.x1 + 1).map(v => v.prop),
     };
 
-    rangeData.newData = this.columnService.getRangeData(rangeData);
-    const selectionEndEvent = this.internalSelectionChanged.emit(rangeData);
+    rangeData.newData = this.sv.columnService.getRangeData(rangeData);
+    const selectionEndEvent = this.sv.internalSelectionChanged(rangeData);
     if (selectionEndEvent.defaultPrevented) {
-      this.setTempRange.emit(null);
+      this.sv.setTempRange(null);
       return;
     }
     this.onRangeApply(rangeData.newData, newRange);
@@ -225,6 +231,6 @@ export abstract class AutoFillService {
     }
 
     const newRange = getRange(start, end);
-    this.setRange.emit(newRange);
+    this.sv.setRange(newRange);
   }
 }

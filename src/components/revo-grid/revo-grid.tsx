@@ -9,7 +9,7 @@ import DimensionProvider from '../../services/dimension.provider';
 import ViewportProvider from '../../services/viewport.provider';
 import { Edition, Selection, RevoGrid, ThemeSpace, RevoPlugin } from '../../interfaces';
 import ThemeService from '../../themeManager/themeService';
-import { applyMixins, timeout } from '../../utils/utils';
+import { timeout } from '../../utils/utils';
 import AutoSize, { AutoSizeColumnConfig } from '../../plugins/autoSizeColumn';
 import { columnTypes } from '../../store/storeTypes';
 import FilterPlugin, { ColumnFilterConfig, FilterCollection } from '../../plugins/filter/filter.plugin';
@@ -20,15 +20,17 @@ import GroupingRowPlugin from '../../plugins/groupingRow/grouping.row.plugin';
 import { GroupingOptions } from '../../plugins/groupingRow/grouping.row.types';
 import { ColumnSource, RowSource } from '../data/columnService';
 import { RevoViewPort } from './viewport';
-import GridRenderService from './viewport.service';
+import ViewportService from './viewport.service';
 import { ViewPortSections } from './viewport.section';
 import RevogrRowHeaders from '../rowHeaders/revogr-row-headers';
 import GridScrollingService from './viewport.scrolling.service';
 import { UUID } from '../../utils/consts';
+import SelectionStoreConnector from '../../services/selection.store.connector';
+import { OrdererService } from '../order/orderRenderer';
 
 @Component({
   tag: 'revo-grid',
-  styleUrl: 'revo-grid.scss'
+  styleUrl: 'revo-grid-style.scss'
 })
 export class RevoGridComponent {
   // --------------------------------------------------------------------------
@@ -363,7 +365,7 @@ export class RevoGridComponent {
 
   /**  Scrolls view port to coordinate */
   @Method() async scrollToCoordinate(cell: Partial<Selection.Cell>) {
-    this.scrollToCell(cell);
+    this.viewport?.scrollToCell(cell);
   }
 
   /**  Bring cell to edit mode */
@@ -373,7 +375,7 @@ export class RevoGridComponent {
       return;
     }
     await timeout();
-    this.setEdit(row, this.columnProvider.getColumnIndexByProp(prop, 'col'), col.pin || 'col', rowSource);
+    this.viewport?.setEdit(row, this.columnProvider.getColumnIndexByProp(prop, 'col'), col.pin || 'col', rowSource);
   }
 
   /**
@@ -437,7 +439,7 @@ export class RevoGridComponent {
    * Clear current grid focus
    */
   @Method() async clearFocus() {
-    return this.clearFocused();
+    return this.viewport?.clearFocused();
   }
 
   /**
@@ -569,6 +571,11 @@ export class RevoGridComponent {
   dimensionProvider: DimensionProvider;
   viewportProvider: ViewportProvider;
   private themeService: ThemeService;
+  private viewport: ViewportService | null = null;
+
+  private orderService: OrdererService;
+  private selectionStoreConnector: SelectionStoreConnector;
+  private scrollingService: GridScrollingService;
 
   /**
    * Plugins
@@ -727,8 +734,8 @@ export class RevoGridComponent {
     this.trimmedRowsChanged(this.trimmedRows);
     this.rowDefChanged(this.rowDefinitions);
     this.groupingChanged(this.grouping);
-    this.viewportConnectedCallback();
-
+    
+    this.selectionStoreConnector = new SelectionStoreConnector();
     this.scrollingService = new GridScrollingService((e: RevoGrid.ViewPortScrollEvent) => {
       this.dimensionProvider.setViewPortCoordinate({
         coordinate: e.coordinate,
@@ -745,11 +752,17 @@ export class RevoGridComponent {
   }
 
   render() {
-    this.selectionStoreConnector?.beforeUpdate();
     const contentHeight = this.dimensionProvider.stores['row'].store.get('realSize');
-    const columns = this.getViewportColumnData(contentHeight);
-    this.scrollingService?.unregister();
-
+    this.viewport = new ViewportService({
+      columnProvider: this.columnProvider,
+      dataProvider: this.dataProvider,
+      dimensionProvider: this.dimensionProvider,
+      viewportProvider: this.viewportProvider,
+      uuid: this.uuid,
+      scrollingService: this.scrollingService,
+      orderService: this.orderService,
+      selectionStoreConnector: this.selectionStoreConnector,
+    }, contentHeight);
     return (
       <Host {...{ [`${UUID}`]: this.uuid }}>
         <RevoViewPort
@@ -762,7 +775,7 @@ export class RevoGridComponent {
           {this.rowHeaders ? (
             <RevogrRowHeaders
               height={contentHeight}
-              anyView={columns[0]}
+              anyView={this.viewport.columns[0]}
               resize={this.resize}
               rowHeaderColumn={typeof this.rowHeaders === 'object' ? this.rowHeaders : undefined}
               beforeRowAdd={y => this.selectionStoreConnector.registerRow(y)}
@@ -780,7 +793,7 @@ export class RevoGridComponent {
             rowClass={this.rowClass}
             editors={this.editors}
             useClipboard={this.useClipboard}
-            columns={columns}
+            columns={this.viewport.columns}
             onEdit={detail => {
               const event = this.beforeEditStart.emit(detail);
               if (!event.defaultPrevented) {
@@ -796,6 +809,3 @@ export class RevoGridComponent {
     );
   }
 }
-
-export interface RevoGridComponent extends GridRenderService {}
-applyMixins(RevoGridComponent, [GridRenderService]);
