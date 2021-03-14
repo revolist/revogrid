@@ -148,9 +148,7 @@
       window.eventsPrevented = {};
       window.showRowHeaders = function (isShow) {
         const grid = document.querySelector('revo-grid');
-        grid.rowHeaders = {
-          size: 200
-        };
+        grid.rowHeaders = isShow;
       };
       window.setEdit = function (rgRow, prop) {
         const grid = document.querySelector('revo-grid');
