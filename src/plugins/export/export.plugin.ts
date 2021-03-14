@@ -131,8 +131,8 @@ export default class ExportFilePlugin extends BasePlugin {
     const rows: string[][] = [];
     const template = fill(new Array(items.length), '');
     for (let d = 0; d < depth; d++) {
-      const row = [...template];
-      rows.push(row);
+      const rgRow = [...template];
+      rows.push(rgRow);
       if (!groups[d]) {
         continue;
       }
@@ -142,7 +142,7 @@ export default class ExportFilePlugin extends BasePlugin {
       levelGroups.forEach((group: Group) => {
         const minIndex = this.findGroupStartIndex(group.ids, visibleItems);
         if (typeof minIndex === 'number') {
-          row[minIndex] = group.name;
+          rgRow[minIndex] = group.name;
         }
       });
     }

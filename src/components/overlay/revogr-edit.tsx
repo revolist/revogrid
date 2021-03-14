@@ -26,8 +26,8 @@ export class Edit {
   onSave(val: Edition.SaveData, preventFocus?: boolean): void {
     if (this.editCell) {
       this.cellEdit.emit({
-        col: this.editCell.x,
-        row: this.editCell.y,
+        rgCol: this.editCell.x,
+        rgRow: this.editCell.y,
         val,
         preventFocus,
       });

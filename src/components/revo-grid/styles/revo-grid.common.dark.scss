@@ -9,12 +9,12 @@
   .rowHeaders {
     $el-color: #28272b;
     background-color: rgba($el-color, 0.8);
-    revogr-data .data-cell {
+    revogr-data .rgCell {
       color: rgba($font-color, 0.8);
     }
   }
   revogr-header {
-    .header-row {
+    .header-rgRow {
       &.group {
         $shadow-bottom: 0 -1px 0 0 $cell-border-color inset;
         box-shadow: $shadow-bottom;
@@ -27,7 +27,7 @@
       }
     }
 
-    .data-header-cell {
+    .rgHeaderCell {
       &.sortable {
         &:hover {
           background-color: rgba($cell-border-color, 0.5);
@@ -44,14 +44,14 @@
   }
 
   revogr-data {
-    .data-cell {
+    .rgCell {
       color: rgba($font-color, 0.9);
     }
 
-    .row {
+    .rgRow {
       box-shadow: $cell-shadow-cell;
 
-      &.focused-row {
+      &.focused-rgRow {
         background-color: $focused-header;
       }
     }

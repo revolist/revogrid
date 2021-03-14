@@ -39,14 +39,14 @@ export class RevoGridComponent {
   //
   // --------------------------------------------------------------------------
 
-  /** Excel like show row indexe per row */
+  /** Excel like show rgRow indexe per rgRow */
   @Prop() rowHeaders: RevoGrid.RowHeaders | boolean;
   /**
    * Defines how many rows/columns should be rendered outside visible area.
    */
   @Prop() frameSize: number = 1;
   /**
-   * Indicates default row size.
+   * Indicates default rgRow size.
    * By default 0, means theme package size will be applied
    */
   @Prop() rowSize: number = 0;
@@ -101,7 +101,7 @@ export class RevoGridComponent {
 
   /**
    * Row class property
-   * Define this property in row object and this will be mapped as row class
+   * Define this property in rgRow object and this will be mapped as rgRow class
    */
   @Prop({ reflect: true }) rowClass: string = '';
 
@@ -124,7 +124,7 @@ export class RevoGridComponent {
   /**
    * Trimmed rows
    * Functionality which allows to hide rows from main data set
-   * @trimmedRows are physical row indexes to hide
+   * @trimmedRows are physical rgRow indexes to hide
    */
   @Prop() trimmedRows: Record<number, boolean> = {};
 
@@ -183,8 +183,8 @@ export class RevoGridComponent {
   @Event() beforeRange: EventEmitter<Selection.ChangedRange>;
 
   /**
-   * Before row order apply.
-   * Use e.preventDefault() to prevent row order change.
+   * Before rgRow order apply.
+   * Use e.preventDefault() to prevent rgRow order change.
    */
   @Event() rowOrderChanged: EventEmitter<{ from: number; to: number }>;
 
@@ -215,7 +215,7 @@ export class RevoGridComponent {
 
   /**
    * Row order change started.
-   * Use e.preventDefault() to prevent row order change.
+   * Use e.preventDefault() to prevent rgRow order change.
    * Use e.text = 'new name' to change item name on start.
    */
   @Event() rowDragStart: EventEmitter<{ pos: RevoGrid.PositionItem; text: string }>;
@@ -305,17 +305,17 @@ export class RevoGridComponent {
   // --------------------------------------------------------------------------
   /**
    * Refreshes data viewport.
-   * Can be specific part as row or pinned row or 'all' by default.
+   * Can be specific part as rgRow or pinned rgRow or 'all' by default.
    */
   @Method() async refresh(type: RevoGrid.DimensionRows | 'all' = 'all') {
     this.dataProvider.refresh(type);
   }
 
-  /**  Scrolls view port to specified row index */
+  /**  Scrolls view port to specified rgRow index */
   @Method() async scrollToRow(coordinate: number = 0) {
     const y = this.dimensionProvider.getViewPortPos({
       coordinate,
-      dimension: 'row',
+      dimension: 'rgRow',
     });
     await this.scrollToCoordinate({ y });
   }
@@ -324,21 +324,21 @@ export class RevoGridComponent {
   @Method() async scrollToColumnIndex(coordinate: number = 0) {
     const x = this.dimensionProvider.getViewPortPos({
       coordinate,
-      dimension: 'col',
+      dimension: 'rgCol',
     });
     await this.scrollToCoordinate({ x });
   }
 
   /**  Scrolls view port to specified column prop */
   @Method() async scrollToColumnProp(prop: RevoGrid.ColumnProp) {
-    const coordinate = this.columnProvider.getColumnIndexByProp(prop, 'col');
+    const coordinate = this.columnProvider.getColumnIndexByProp(prop, 'rgCol');
     if (coordinate < 0) {
       // already on the screen
       return;
     }
     const x = this.dimensionProvider.getViewPortPos({
       coordinate,
-      dimension: 'col',
+      dimension: 'rgCol',
     });
     await this.scrollToCoordinate({ x });
   }
@@ -349,7 +349,7 @@ export class RevoGridComponent {
   }
 
   /** Add trimmed by type */
-  @Method() async addTrimmed(trimmed: Record<number, boolean>, trimmedType = 'external', type: RevoGrid.DimensionRows = 'row') {
+  @Method() async addTrimmed(trimmed: Record<number, boolean>, trimmedType = 'external', type: RevoGrid.DimensionRows = 'rgRow') {
     const event = this.beforeTrimmed.emit({
       trimmed,
       trimmedType,
@@ -369,13 +369,13 @@ export class RevoGridComponent {
   }
 
   /**  Bring cell to edit mode */
-  @Method() async setCellEdit(row: number, prop: RevoGrid.ColumnProp, rowSource: RevoGrid.DimensionRows = 'row') {
-    const col = ColumnDataProvider.getColumnByProp(this.columns, prop);
-    if (!col) {
+  @Method() async setCellEdit(rgRow: number, prop: RevoGrid.ColumnProp, rowSource: RevoGrid.DimensionRows = 'rgRow') {
+    const rgCol = ColumnDataProvider.getColumnByProp(this.columns, prop);
+    if (!rgCol) {
       return;
     }
     await timeout();
-    this.viewport?.setEdit(row, this.columnProvider.getColumnIndexByProp(prop, 'col'), col.pin || 'col', rowSource);
+    this.viewport?.setEdit(rgRow, this.columnProvider.getColumnIndexByProp(prop, 'rgCol'), rgCol.pin || 'rgCol', rowSource);
   }
 
   /**
@@ -388,7 +388,7 @@ export class RevoGridComponent {
   }
 
   /**  Get data from source */
-  @Method() async getSource(type: RevoGrid.DimensionRows = 'row') {
+  @Method() async getSource(type: RevoGrid.DimensionRows = 'rgRow') {
     return this.dataProvider.stores[type].store.get('source');
   }
 
@@ -397,7 +397,7 @@ export class RevoGridComponent {
    * Trimmed/filtered rows will be excluded
    * @param type - type of source
    */
-  @Method() async getVisibleSource(type: RevoGrid.DimensionRows = 'row') {
+  @Method() async getVisibleSource(type: RevoGrid.DimensionRows = 'rgRow') {
     return getVisibleSourceItem(this.dataProvider.stores[type].store);
   }
 
@@ -406,7 +406,7 @@ export class RevoGridComponent {
    * Can be used for plugin support
    * @param type - type of source
    */
-  @Method() async getSourceStore(type: RevoGrid.DimensionRows = 'row'): Promise<RowSource> {
+  @Method() async getSourceStore(type: RevoGrid.DimensionRows = 'rgRow'): Promise<RowSource> {
     return this.dataProvider.stores[type].store;
   }
   /**
@@ -414,7 +414,7 @@ export class RevoGridComponent {
    * Can be used for plugin support
    * @param type - type of column
    */
-  @Method() async getColumnStore(type: RevoGrid.DimensionCols = 'col'): Promise<ColumnSource> {
+  @Method() async getColumnStore(type: RevoGrid.DimensionCols = 'rgCol'): Promise<ColumnSource> {
     return this.columnProvider.stores[type].store;
   }
 
@@ -591,7 +591,7 @@ export class RevoGridComponent {
     for (let type of columnTypes) {
       const items = columnGather.columns[type];
       this.dimensionProvider.setRealSize(items.length, type);
-      this.dimensionProvider.setColumns(type, ColumnDataProvider.getSizes(items), type !== 'col');
+      this.dimensionProvider.setColumns(type, ColumnDataProvider.getSizes(items), type !== 'rgCol');
     }
     const columns = this.columnProvider.setColumns(columnGather);
     this.afterColumnsSet.emit({
@@ -602,21 +602,21 @@ export class RevoGridComponent {
 
   @Watch('theme') themeChanged(t: ThemeSpace.Theme) {
     this.themeService.register(t);
-    this.dimensionProvider.setSettings({ originItemSize: this.themeService.rowSize, frameOffset: this.frameSize || 0 }, 'row');
-    this.dimensionProvider.setSettings({ originItemSize: this.colSize, frameOffset: this.frameSize || 0 }, 'col');
+    this.dimensionProvider.setSettings({ originItemSize: this.themeService.rowSize, frameOffset: this.frameSize || 0 }, 'rgRow');
+    this.dimensionProvider.setSettings({ originItemSize: this.colSize, frameOffset: this.frameSize || 0 }, 'rgCol');
   }
 
   @Watch('source') dataChanged(source: RevoGrid.DataType[]) {
     let newSource = [...source];
     const beforeSourceSet = this.beforeSourceSet.emit({
-      type: 'row',
+      type: 'rgRow',
       source: newSource,
     });
     newSource = beforeSourceSet.detail.source;
 
-    newSource = this.dataProvider.setData(newSource, 'row');
+    newSource = this.dataProvider.setData(newSource, 'rgRow');
     this.afterSourceSet.emit({
-      type: 'row',
+      type: 'rgRow',
       source: newSource,
     });
   }
@@ -752,7 +752,7 @@ export class RevoGridComponent {
   }
 
   render() {
-    const contentHeight = this.dimensionProvider.stores['row'].store.get('realSize');
+    const contentHeight = this.dimensionProvider.stores['rgRow'].store.get('realSize');
     this.viewport = new ViewportService({
       columnProvider: this.columnProvider,
       dataProvider: this.dataProvider,

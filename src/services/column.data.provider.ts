@@ -52,7 +52,7 @@ export default class ColumnDataProvider {
   }
 
   column(c: number, pin?: RevoGrid.DimensionColPin): ColumnRegular | undefined {
-    return this.getColumn(c, pin || 'col');
+    return this.getColumn(c, pin || 'rgCol');
   }
 
   getColumn(virtualIndex: number, type: DimensionCols): ColumnRegular | undefined {
@@ -125,8 +125,8 @@ export default class ColumnDataProvider {
     const colByIndex: Partial<Record<DimensionCols, Record<number, ColumnRegular>>> = {};
     each(columnByKey, (colsToUpdate, type: DimensionCols) => {
       const items = this.dataSources[type].store.get('source');
-      colByIndex[type] = items.reduce((result: Record<number, ColumnRegular>, col, index) => {
-        const colToUpdateIfExists = colsToUpdate[col.pro];
+      colByIndex[type] = items.reduce((result: Record<number, ColumnRegular>, rgCol, index) => {
+        const colToUpdateIfExists = colsToUpdate[rgCol.pro];
         if (colToUpdateIfExists) {
           result[index] = colToUpdateIfExists;
         }
@@ -206,7 +206,7 @@ export default class ColumnDataProvider {
         };
         // not pin
         if (!regularColumn.pin) {
-          res.columns.col.push(regularColumn);
+          res.columns.rgCol.push(regularColumn);
           // pin
         } else {
           res.columns[regularColumn.pin].push(regularColumn);
@@ -221,12 +221,12 @@ export default class ColumnDataProvider {
       },
       {
         columns: {
-          col: [],
+          rgCol: [],
           colPinStart: [],
           colPinEnd: [],
         },
         columnGrouping: {
-          col: [],
+          rgCol: [],
           colPinStart: [],
           colPinEnd: [],
         },
@@ -236,10 +236,10 @@ export default class ColumnDataProvider {
     );
   }
 
-  static getColumnType(col: ColumnRegular): DimensionCols {
-    if (col.pin) {
-      return col.pin;
+  static getColumnType(rgCol: ColumnRegular): DimensionCols {
+    if (rgCol.pin) {
+      return rgCol.pin;
     }
-    return 'col';
+    return 'rgCol';
   }
 }

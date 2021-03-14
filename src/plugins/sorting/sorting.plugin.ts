@@ -87,16 +87,16 @@ export default class SortingPlugin extends BasePlugin {
   }
 
   private setData(data: RevoGrid.DataType[], type: DimensionRows): RevoGrid.DataType[] | void {
-    // sorting available for row type only
-    if (type === 'row' && this.sorting) {
+    // sorting available for rgRow type only
+    if (type === 'rgRow' && this.sorting) {
       return this.sortItems(data, this.sorting);
     }
   }
 
   /**
-   * Sorting apply, available for row type only
+   * Sorting apply, available for rgRow type only
    * @param sorting - per column sorting
-   * @param data - this.stores['row'].store.get('source')
+   * @param data - this.stores['rgRow'].store.get('source')
    */
   private async sort(sorting: SortingOrder) {
     if (!size(sorting)) {

@@ -21,11 +21,11 @@ export default class RowOrderService {
 
     // if position changed
     if (newRow.y !== this.currentCell.y) {
-      // row dragged out table
+      // rgRow dragged out table
       if (newRow.y < 0) {
         newRow.y = 0;
       }
-      // row dragged to the top
+      // rgRow dragged to the top
       else if (newRow.y < this.currentCell.y) {
         newRow.y++;
       }
@@ -41,13 +41,13 @@ export default class RowOrderService {
   }
 
   move(y: number, data: EventData): RevoGrid.PositionItem | null {
-    const row = this.getRow(y, data);
-    // if row same as previous or below range (-1 = 0) do nothing
-    if (this.previousRow === row.itemIndex || row.itemIndex < -1) {
+    const rgRow = this.getRow(y, data);
+    // if rgRow same as previous or below range (-1 = 0) do nothing
+    if (this.previousRow === rgRow.itemIndex || rgRow.itemIndex < -1) {
       return null;
     }
-    this.previousRow = row.itemIndex;
-    return row;
+    this.previousRow = rgRow.itemIndex;
+    return rgRow;
   }
 
   /** Drag stopped, probably cursor outside of document area */
@@ -60,11 +60,11 @@ export default class RowOrderService {
   getRow(y: number, { el, rows }: EventData): RevoGrid.PositionItem {
     const { top } = el.getBoundingClientRect();
     const topRelative = y - top;
-    const row = getItemByPosition(rows, topRelative);
+    const rgRow = getItemByPosition(rows, topRelative);
     const absolutePosition = {
-      itemIndex: row.itemIndex,
-      start: row.start + top,
-      end: row.end + top,
+      itemIndex: rgRow.itemIndex,
+      start: rgRow.start + top,
+      end: rgRow.end + top,
     };
     return absolutePosition;
   }
@@ -74,8 +74,8 @@ export default class RowOrderService {
     const { top, left } = el.getBoundingClientRect();
     const topRelative = y - top;
     const leftRelative = x - left;
-    const row = getItemByPosition(rows, topRelative);
-    const col = getItemByPosition(cols, leftRelative);
-    return { x: col.itemIndex, y: row.itemIndex };
+    const rgRow = getItemByPosition(rows, topRelative);
+    const rgCol = getItemByPosition(cols, leftRelative);
+    return { x: rgCol.itemIndex, y: rgRow.itemIndex };
   }
 }

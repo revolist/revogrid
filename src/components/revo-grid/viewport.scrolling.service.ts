@@ -12,7 +12,7 @@ export default class GridScrollingService {
   async onScroll(e: RevoGrid.ViewPortScrollEvent, key?: RevoGrid.DimensionColPin | string): Promise<void> {
     let newEvent: Promise<RevoGrid.ViewPortScrollEvent>;
     for (let elKey in this.elements) {
-      if (this.isPinnedColumn(key) && e.dimension === 'col') {
+      if (this.isPinnedColumn(key) && e.dimension === 'rgCol') {
         if (elKey === key || !e.delta) {
           continue;
         }

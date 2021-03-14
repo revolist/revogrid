@@ -73,7 +73,7 @@ export default class GroupingRowPlugin extends BasePlugin {
     this.revogrid.addTrimmed(newTrimmed, TRIMMED_GROUPING);
   }
 
-  // get source based on proxy item collection to preserve row order
+  // get source based on proxy item collection to preserve rgRow order
   private getSource(withoutGrouping = false) {
     const source = this.store.get('source');
     const items = this.store.get('proxyItems');
@@ -177,7 +177,7 @@ export default class GroupingRowPlugin extends BasePlugin {
      */
     this.addEventListener('beforeCellFocus', e => this.onFocus(e));
     /**
-     * Prevent row drag outside the group
+     * Prevent rgRow drag outside the group
      */
     this.addEventListener('rowOrderChanged', e => this.onDrag(e));
 

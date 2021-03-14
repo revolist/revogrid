@@ -142,9 +142,9 @@ export default class AutoSizeColumn extends BasePlugin {
     // calculate sizes
     each(autoSize, (_v, type: RevoGrid.DimensionCols) => {
       const sizes: RevoGrid.ViewSettingSizeProp = {};
-      each(autoSize[type], col => {
+      each(autoSize[type], rgCol => {
         // calculate size
-        col.size = sizes[col.index] = source.reduce((prev, row) => Math.max(prev, this.getLength(row[col.prop])), 0);
+        rgCol.size = sizes[rgCol.index] = source.reduce((prev, rgRow) => Math.max(prev, this.getLength(rgRow[rgCol.prop])), 0);
       });
       this.providers.dimensionProvider.setDimensionSize(type, sizes);
     });
@@ -179,21 +179,21 @@ export default class AutoSizeColumn extends BasePlugin {
     each(this.autoSizeColumns, (columns, type: RevoGrid.DimensionCols) => {
       const sizes: RevoGrid.ViewSettingSizeProp = {};
 
-      each(columns, col => {
+      each(columns, rgCol => {
         // calculate size
         const size = reduce(
           data,
-          (prev: number | undefined, row) => {
-            if (typeof row[col.prop] === 'undefined') {
+          (prev: number | undefined, rgRow) => {
+            if (typeof rgRow[rgCol.prop] === 'undefined') {
               return prev;
             }
-            return Math.max(prev || 0, this.getLength(row[col.prop]));
+            return Math.max(prev || 0, this.getLength(rgRow[rgCol.prop]));
           },
           undefined,
         );
 
-        if (size && col.size < size) {
-          col.size = sizes[col.index] = size;
+        if (size && rgCol.size < size) {
+          rgCol.size = sizes[rgCol.index] = size;
         }
       });
 
@@ -211,11 +211,11 @@ export default class AutoSizeColumn extends BasePlugin {
     each(this.autoSizeColumns, (columns, type: RevoGrid.DimensionCols) => {
       const sizes: RevoGrid.ViewSettingSizeProp = {};
 
-      each(columns, col => {
-        if (props[col.prop]) {
-          const size = this.getColumnSize(col.index, type);
+      each(columns, rgCol => {
+        if (props[rgCol.prop]) {
+          const size = this.getColumnSize(rgCol.index, type);
           if (size) {
-            sizes[col.index] = size;
+            sizes[rgCol.index] = size;
           }
         }
       });
@@ -224,8 +224,8 @@ export default class AutoSizeColumn extends BasePlugin {
   }
 
   private getColumnSize(index: number, type: RevoGrid.DimensionCols): number {
-    const col = this.autoSizeColumns[type][index];
-    if (!col) {
+    const rgCol = this.autoSizeColumns[type][index];
+    if (!rgCol) {
       return 0;
     }
     return reduce(
@@ -235,13 +235,13 @@ export default class AutoSizeColumn extends BasePlugin {
           s.store.get('items'),
           (prev, _row, i) => {
             const item = getSourceItem(s.store, i);
-            return Math.max(prev || 0, this.getLength(item[col.prop]));
+            return Math.max(prev || 0, this.getLength(item[rgCol.prop]));
           },
           0,
         );
         return Math.max(r, perStore);
       },
-      col.size || 0,
+      rgCol.size || 0,
     );
   }
 

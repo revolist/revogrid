@@ -103,7 +103,7 @@
         <strong>Set data</strong>
 
         <hr />
-        <label><input type="checkbox" onchange="showRowHeaders(event.target.checked)" />Show row headers</label>
+        <label><input type="checkbox" onchange="showRowHeaders(event.target.checked)" />Show rgRow headers</label>
         <hr />
         <ul>
           <li>
@@ -152,9 +152,9 @@
           size: 200
         };
       };
-      window.setEdit = function (row, prop) {
+      window.setEdit = function (rgRow, prop) {
         const grid = document.querySelector('revo-grid');
-        grid.setCellEdit(row, prop);
+        grid.setCellEdit(rgRow, prop);
       };
       window.scrollToCol = function (x = 30) {
         const grid = document.querySelector('revo-grid');
@@ -270,7 +270,7 @@
         };
 
         grid.rowDefinitions = [{
-          type: 'row',
+          type: 'rgRow',
           index: 1,
           size: 100
         }]; */

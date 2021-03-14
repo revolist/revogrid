@@ -15,8 +15,8 @@ export declare namespace RevoGrid {
   //
   // --------------------------------------------------------------------------
 
-  type DimensionTypeRow = 'row';
-  type DimensionTypeCol = 'col';
+  type DimensionTypeRow = 'rgRow';
+  type DimensionTypeCol = 'rgCol';
 
   type DimensionColPin = 'colPinStart' | 'colPinEnd';
   type DimensionRowPin = 'rowPinStart' | 'rowPinEnd';
@@ -37,7 +37,7 @@ export declare namespace RevoGrid {
   type ColumnDataSchemaModel = {
     // property
     prop: ColumnProp;
-    // row model
+    // rgRow model
     model: DataType;
     // column data
     column: ColumnRegular;
@@ -108,7 +108,7 @@ export declare namespace RevoGrid {
     /** represents type defined in @columnTypes property */
     columnType?: string;
 
-    beforeSetup?(col: ColumnRegular): void;
+    beforeSetup?(rgCol: ColumnRegular): void;
 
     [key: string]: any;
   }
@@ -340,8 +340,8 @@ export declare namespace Edition {
   import HyperFunc = RevoGrid.HyperFunc;
   type SaveData = string;
   type SaveDataDetails = {
-    row: Selection.RowIndex;
-    col: Selection.ColIndex;
+    rgRow: Selection.RowIndex;
+    rgCol: Selection.ColIndex;
     val: any;
     preventFocus?: boolean;
   };

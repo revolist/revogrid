@@ -51,25 +51,25 @@ export class RevogrData {
     const rowsEls: VNode[] = [];
 
     const depth = this.dataStore.get('groupingDepth');
-    for (let row of rows) {
-      const dataRow = getSourceItem(this.dataStore, row.itemIndex);
+    for (let rgRow of rows) {
+      const dataRow = getSourceItem(this.dataStore, rgRow.itemIndex);
       /** grouping */
       if (isGrouping(dataRow)) {
-        rowsEls.push(<GroupingRowRenderer {...row} model={dataRow} hasExpand={this.columnService.hasGrouping} />);
+        rowsEls.push(<GroupingRowRenderer {...rgRow} model={dataRow} hasExpand={this.columnService.hasGrouping} />);
         continue;
       }
       /** grouping end */
 
       const cells: (VNode | string | void)[] = [];
-      let rowClass = this.rowClass ? this.columnService.getRowClass(row.itemIndex, this.rowClass) : '';
-      if (range && row.itemIndex >= range.y && row.itemIndex <= range.y1) {
-        rowClass += ' focused-row';
+      let rowClass = this.rowClass ? this.columnService.getRowClass(rgRow.itemIndex, this.rowClass) : '';
+      if (range && rgRow.itemIndex >= range.y && rgRow.itemIndex <= range.y1) {
+        rowClass += ' focused-rgRow';
       }
-      for (let col of cols) {
-        cells.push(this.getCellRenderer(row, col, this.canDrag, /** grouping apply*/ this.columnService.hasGrouping ? depth : 0));
+      for (let rgCol of cols) {
+        cells.push(this.getCellRenderer(rgRow, rgCol, this.canDrag, /** grouping apply*/ this.columnService.hasGrouping ? depth : 0));
       }
       rowsEls.push(
-        <RowRenderer rowClass={rowClass} size={row.size} start={row.start}>
+        <RowRenderer rowClass={rowClass} size={rgRow.size} start={rgRow.start}>
           {cells}
         </RowRenderer>,
       );
@@ -77,21 +77,21 @@ export class RevogrData {
     return rowsEls;
   }
 
-  private getCellRenderer(row: RevoGrid.VirtualPositionItem, col: RevoGrid.VirtualPositionItem, draggable = false, depth = 0) {
-    const model = this.columnService.rowDataModel(row.itemIndex, col.itemIndex);
+  private getCellRenderer(rgRow: RevoGrid.VirtualPositionItem, rgCol: RevoGrid.VirtualPositionItem, draggable = false, depth = 0) {
+    const model = this.columnService.rowDataModel(rgRow.itemIndex, rgCol.itemIndex);
     const defaultProps: RevoGrid.CellProps = {
-      [DATA_COL]: col.itemIndex,
-      [DATA_ROW]: row.itemIndex,
+      [DATA_COL]: rgCol.itemIndex,
+      [DATA_ROW]: rgRow.itemIndex,
       style: {
-        width: `${col.size}px`,
-        transform: `translateX(${col.start}px)`,
+        width: `${rgCol.size}px`,
+        transform: `translateX(${rgCol.start}px)`,
       },
     };
-    if (depth && !col.itemIndex) {
+    if (depth && !rgCol.itemIndex) {
       defaultProps.style.paddingLeft = `${PADDING_DEPTH * depth}px`;
     }
-    const props = this.columnService.mergeProperties(row.itemIndex, col.itemIndex, defaultProps);
-    const custom = this.columnService.customRenderer(row.itemIndex, col.itemIndex, model);
+    const props = this.columnService.mergeProperties(rgRow.itemIndex, rgCol.itemIndex, defaultProps);
+    const custom = this.columnService.customRenderer(rgRow.itemIndex, rgCol.itemIndex, model);
 
     // if custom render
     if (typeof custom !== 'undefined') {

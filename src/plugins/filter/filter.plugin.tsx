@@ -200,8 +200,8 @@ export default class FilterPlugin extends BasePlugin {
   async doFiltering(collection: FilterCollection, items: RevoGrid.DataType[], columns: RevoGrid.ColumnRegular[]) {
     const columnsToUpdate: RevoGrid.ColumnRegular[] = [];
     // todo improvement: loop through collection of props
-    columns.forEach(col => {
-      const column = { ...col };
+    columns.forEach(rgCol => {
+      const column = { ...rgCol };
       const hasFilter = collection[column.prop];
       if (column[FILTER_PROP] && !hasFilter) {
         delete column[FILTER_PROP];

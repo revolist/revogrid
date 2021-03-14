@@ -7,7 +7,7 @@
 
 | Property         | Attribute   | Description | Type                                    | Default     |
 | ---------------- | ----------- | ----------- | --------------------------------------- | ----------- |
-| `dimension`      | `dimension` |             | `"col" \| "row"`                        | `'row'`     |
+| `dimension`      | `dimension` |             | `"rgCol" \| "rgRow"`                        | `'rgRow'`     |
 | `dimensionStore` | --          |             | `ObservableMap<DimensionSettingsState>` | `undefined` |
 | `viewportStore`  | --          |             | `ObservableMap<ViewportState>`          | `undefined` |
 

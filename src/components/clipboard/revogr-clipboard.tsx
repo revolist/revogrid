@@ -22,7 +22,7 @@ export class Clipboard {
   }
 
   parserCopy(data: RevoGrid.DataFormat[][]) {
-    return data.map(row => row.join('\t')).join('\n');
+    return data.map(rgRow => rgRow.join('\t')).join('\n');
   }
 
   private textParse(data: string) {
@@ -37,8 +37,8 @@ export class Clipboard {
   private htmlParse(data: string) {
     const result: string[][] = [];
     const table = document.createRange().createContextualFragment(data).querySelector('table');
-    for (const row of Array.from(table.rows)) {
-      result.push(Array.from(row.cells).map(cell => cell.innerText));
+    for (const rgRow of Array.from(table.rows)) {
+      result.push(Array.from(rgRow.cells).map(cell => cell.innerText));
     }
     return result;
   }

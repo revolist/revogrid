@@ -11,9 +11,9 @@ export class OrderEditor {
   private rowOrderService: RowOrderService;
   private moveFunc: ((e: Selection.Cell) => void) | null;
   private rowMoveFunc = debounce((y: number) => {
-    const row = this.rowOrderService.move(y, this.getData());
-    if (row !== null) {
-      this.internalRowDrag.emit(row);
+    const rgRow = this.rowOrderService.move(y, this.getData());
+    if (rgRow !== null) {
+      this.internalRowDrag.emit(rgRow);
     }
   }, 5);
 

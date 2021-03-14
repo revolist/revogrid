@@ -311,13 +311,13 @@ export class OverlaySelection {
       this.autoFillService.onRangeApply(data, this.selectionStoreService.ranged);
     } else if (this.canEdit()) {
       const focused = this.selectionStoreService.focused;
-      this.onCellEdit({ row: focused.y, col: focused.x, val: '' }, true);
+      this.onCellEdit({ rgRow: focused.y, rgCol: focused.x, val: '' }, true);
     }
   }
 
   /** Edit finished, close cell and save */
   protected onCellEdit(e: Edition.SaveDataDetails, clear = false) {
-    const dataToSave = this.columnService.getSaveData(e.row, e.col, e.val);
+    const dataToSave = this.columnService.getSaveData(e.rgRow, e.rgCol, e.val);
     this.internalCellEdit.emit(dataToSave);
     // if not clear navigate to next cell after edit
     if (!clear && !e.preventFocus) {

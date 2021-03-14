@@ -24,9 +24,9 @@ export const RevoViewPort = ({ viewports, dimensions, orderRef, registerElement,
         {children}
         <revogr-scroll-virtual
           class="vertical"
-          dimension="row"
-          viewportStore={viewports['row'].store}
-          dimensionStore={dimensions['row'].store}
+          dimension="rgRow"
+          viewportStore={viewports['rgRow'].store}
+          dimensionStore={dimensions['rgRow'].store}
           ref={el => registerElement(el, 'rowScroll')}
           onScrollVirtual={e => onScroll(e.detail)}
         />
@@ -35,9 +35,9 @@ export const RevoViewPort = ({ viewports, dimensions, orderRef, registerElement,
     </div>,
     <revogr-scroll-virtual
       class="horizontal"
-      dimension="col"
-      viewportStore={viewports['col'].store}
-      dimensionStore={dimensions['col'].store}
+      dimension="rgCol"
+      viewportStore={viewports['rgCol'].store}
+      dimensionStore={dimensions['rgCol'].store}
       ref={el => registerElement(el, 'colScroll')}
       onScrollVirtual={e => onScroll(e.detail)}
     />,

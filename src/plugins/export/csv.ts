@@ -42,16 +42,16 @@ export default class ExportCsv implements Formatter {
       });
     }
 
-    data.forEach((row, index) => {
+    data.forEach((rgRow, index) => {
       if (index > 0) {
         result += this.options.rowDelimiter;
       }
       // support grouping
-      if (isGrouping(row)) {
-        result += this.parseCell(getGroupingName(row), this.options.columnDelimiter);
+      if (isGrouping(rgRow)) {
+        result += this.parseCell(getGroupingName(rgRow), this.options.columnDelimiter);
         return;
       }
-      result += props.map(p => this.parseCell(row[p], this.options.columnDelimiter)).join(this.options.columnDelimiter);
+      result += props.map(p => this.parseCell(rgRow[p], this.options.columnDelimiter)).join(this.options.columnDelimiter);
     });
 
     return result;

@@ -15,7 +15,7 @@ export class RevogrScrollVirtual {
 
   @Element() element: HTMLElement;
 
-  @Prop() dimension: RevoGrid.DimensionType = 'row';
+  @Prop() dimension: RevoGrid.DimensionType = 'rgRow';
   @Prop() viewportStore: Observable<RevoGrid.ViewportState>;
   @Prop() dimensionStore: Observable<RevoGrid.DimensionSettingsState>;
 
@@ -34,10 +34,10 @@ export class RevogrScrollVirtual {
   async changeScroll(e: RevoGrid.ViewPortScrollEvent): Promise<RevoGrid.ViewPortScrollEvent> {
     if (e.delta) {
       switch (e.dimension) {
-        case 'col':
+        case 'rgCol':
           e.coordinate = this.element.scrollLeft + e.delta;
           break;
-        case 'row':
+        case 'rgRow':
           e.coordinate = this.element.scrollTop + e.delta;
           break;
       }
@@ -47,7 +47,7 @@ export class RevogrScrollVirtual {
   }
 
   set size(s: number) {
-    if (this.dimension === 'row') {
+    if (this.dimension === 'rgRow') {
       this.element.style.minWidth = `${s}px`;
       return;
     }
@@ -55,7 +55,7 @@ export class RevogrScrollVirtual {
   }
 
   get size(): number {
-    if (this.dimension === 'row') {
+    if (this.dimension === 'rgRow') {
       return this.element.clientHeight;
     }
     return this.element.clientWidth;
@@ -65,7 +65,7 @@ export class RevogrScrollVirtual {
     this.scrollService = new LocalScrollService({
       beforeScroll: e => this.scrollVirtual.emit(e),
       afterScroll: e => {
-        const type = e.dimension === 'row' ? 'scrollTop' : 'scrollLeft';
+        const type = e.dimension === 'rgRow' ? 'scrollTop' : 'scrollLeft';
         this.element[type] = e.coordinate;
       },
     });
@@ -81,7 +81,7 @@ export class RevogrScrollVirtual {
   }
 
   componentDidRender(): void {
-    const type = this.dimension === 'row' ? 'scrollHeight' : 'scrollWidth';
+    const type = this.dimension === 'rgRow' ? 'scrollHeight' : 'scrollWidth';
     if (this.element[type] > this.size) {
       this.size = this.scrollSize;
     } else {
@@ -99,7 +99,7 @@ export class RevogrScrollVirtual {
 
   onScroll(e: MouseEvent): void {
     let type: 'scrollLeft' | 'scrollTop' = 'scrollLeft';
-    if (this.dimension === 'row') {
+    if (this.dimension === 'rgRow') {
       type = 'scrollTop';
     }
     if (this.isAutoHide) {
@@ -118,7 +118,7 @@ export class RevogrScrollVirtual {
   }
 
   render() {
-    const sizeType = this.dimension === 'row' ? 'height' : 'width';
+    const sizeType = this.dimension === 'rgRow' ? 'height' : 'width';
     return (
       <Host {...{ 'auto-hide': this.isAutoHide }} onScroll={(e: MouseEvent) => this.onScroll(e)}>
         <div style={{ [sizeType]: `${this.extContentSize(this.viewportStore.get('virtualSize'), this.dimensionStore.get('realSize'))}px` }} />

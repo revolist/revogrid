@@ -29,7 +29,7 @@ export function doCollapse(pIndex: number, source: RevoGrid.DataType[]) {
  * @param pIndex - physical index
  * @param vIndex - virtual index, need to update item collection
  * @param source - data source
- * @param rowItemsIndexes - row indexes
+ * @param rowItemsIndexes - rgRow indexes
  */
 export function doExpand(vIndex: number, source: RevoGrid.DataType[], rowItemsIndexes: number[]) {
   const physicalIndex = rowItemsIndexes[vIndex];

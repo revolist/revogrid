@@ -114,7 +114,7 @@ export namespace Components {
          */
         "readonly": boolean;
         /**
-          * Refreshes data viewport. Can be specific part as row or pinned row or 'all' by default.
+          * Refreshes data viewport. Can be specific part as rgRow or pinned rgRow or 'all' by default.
          */
         "refresh": (type?: RevoGrid.DimensionRows | 'all') => Promise<void>;
         /**
@@ -126,7 +126,7 @@ export namespace Components {
          */
         "resize": boolean;
         /**
-          * Row class property Define this property in row object and this will be mapped as row class
+          * Row class property Define this property in rgRow object and this will be mapped as rgRow class
          */
         "rowClass": string;
         /**
@@ -134,11 +134,11 @@ export namespace Components {
          */
         "rowDefinitions": RevoGrid.RowDefinition[];
         /**
-          * Excel like show row indexe per row
+          * Excel like show rgRow indexe per rgRow
          */
         "rowHeaders": RevoGrid.RowHeaders | boolean;
         /**
-          * Indicates default row size. By default 0, means theme package size will be applied
+          * Indicates default rgRow size. By default 0, means theme package size will be applied
          */
         "rowSize": number;
         /**
@@ -154,13 +154,13 @@ export namespace Components {
          */
         "scrollToCoordinate": (cell: Partial<Selection.Cell>) => Promise<void>;
         /**
-          * Scrolls view port to specified row index
+          * Scrolls view port to specified rgRow index
          */
         "scrollToRow": (coordinate?: number) => Promise<void>;
         /**
           * Bring cell to edit mode
          */
-        "setCellEdit": (row: number, prop: RevoGrid.ColumnProp, rowSource?: RevoGrid.DimensionRows) => Promise<void>;
+        "setCellEdit": (rgRow: number, prop: RevoGrid.ColumnProp, rowSource?: RevoGrid.DimensionRows) => Promise<void>;
         /**
           * Source - defines main data source. Can be an Object or 2 dimensional array([][]); Keys/indexes referenced from columns Prop
          */
@@ -171,7 +171,7 @@ export namespace Components {
         "theme": ThemeSpace.Theme;
         /**
           * Trimmed rows Functionality which allows to hide rows from main data set
-          * @trimmedRows are physical row indexes to hide
+          * @trimmedRows are physical rgRow indexes to hide
          */
         "trimmedRows": Record<number, boolean>;
         /**
@@ -538,11 +538,11 @@ declare namespace LocalJSX {
          */
         "onHeaderClick"?: (event: CustomEvent<RevoGrid.ColumnRegular>) => void;
         /**
-          * Row order change started. Use e.preventDefault() to prevent row order change. Use e.text = 'new name' to change item name on start.
+          * Row order change started. Use e.preventDefault() to prevent rgRow order change. Use e.text = 'new name' to change item name on start.
          */
         "onRowDragStart"?: (event: CustomEvent<{ pos: RevoGrid.PositionItem; text: string }>) => void;
         /**
-          * Before row order apply. Use e.preventDefault() to prevent row order change.
+          * Before rgRow order apply. Use e.preventDefault() to prevent rgRow order change.
          */
         "onRowOrderChanged"?: (event: CustomEvent<{ from: number; to: number }>) => void;
         /**
@@ -574,7 +574,7 @@ declare namespace LocalJSX {
          */
         "resize"?: boolean;
         /**
-          * Row class property Define this property in row object and this will be mapped as row class
+          * Row class property Define this property in rgRow object and this will be mapped as rgRow class
          */
         "rowClass"?: string;
         /**
@@ -582,11 +582,11 @@ declare namespace LocalJSX {
          */
         "rowDefinitions"?: RevoGrid.RowDefinition[];
         /**
-          * Excel like show row indexe per row
+          * Excel like show rgRow indexe per rgRow
          */
         "rowHeaders"?: RevoGrid.RowHeaders | boolean;
         /**
-          * Indicates default row size. By default 0, means theme package size will be applied
+          * Indicates default rgRow size. By default 0, means theme package size will be applied
          */
         "rowSize"?: number;
         /**
@@ -599,7 +599,7 @@ declare namespace LocalJSX {
         "theme"?: ThemeSpace.Theme;
         /**
           * Trimmed rows Functionality which allows to hide rows from main data set
-          * @trimmedRows are physical row indexes to hide
+          * @trimmedRows are physical rgRow indexes to hide
          */
         "trimmedRows"?: Record<number, boolean>;
         /**

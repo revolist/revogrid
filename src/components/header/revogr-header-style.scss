@@ -3,7 +3,7 @@ revogr-header {
   z-index: 5;
   display: block;
 
-  .data-header-cell {
+  .rgHeaderCell {
     display: flex;
 
     &.align-center {
@@ -39,7 +39,7 @@ revogr-header {
     }
   }
 
-  .data-header-cell,
+  .rgHeaderCell,
   .grouped-cell {
     position: absolute;
     box-sizing: border-box;
@@ -47,7 +47,7 @@ revogr-header {
     z-index: 1;
   }
 
-  .header-row {
+  .header-rgRow {
     display: block;
     position: relative;
 
@@ -56,11 +56,11 @@ revogr-header {
     }
   }
 
-  .group-row {
+  .group-rgRow {
     position: relative;
   }
 
-  .data-header-cell {
+  .rgHeaderCell {
     &.active {
       z-index: 10;
 

@@ -48,7 +48,7 @@ export default class ViewportService {
         position: { x, y: 1 },
 
         contentHeight,
-        fixWidth: val !== 'col',
+        fixWidth: val !== 'rgCol',
         uuid: `${this.sv.uuid}-${x}`,
 
         viewports: this.sv.viewportProvider.stores,
@@ -58,7 +58,7 @@ export default class ViewportService {
         colStore,
         onHeaderResize: (e: CustomEvent<RevoGrid.ViewSettingSizeProp>) => this.sv.dimensionProvider?.setDimensionSize(val, e.detail),
       };
-      if (val === 'col') {
+      if (val === 'rgCol') {
         column.onResizeViewport = (e: CustomEvent<RevoGrid.ViewPortResizeEvent>) => this.sv.viewportProvider?.setViewport(e.detail.dimension, { virtualSize: e.detail.size });
       }
       const colData = this.gatherColumnData(column);
@@ -66,15 +66,15 @@ export default class ViewportService {
       const columnSelectionStore = this.sv.selectionStoreConnector.registerColumn(colData.position.x).store;
 
       // render per each column data collections vertically
-      const dataPorts = this.dataViewPort(column).reduce<ViewportData[]>((r, row) => {
+      const dataPorts = this.dataViewPort(column).reduce<ViewportData[]>((r, rgRow) => {
         // register selection store for segment
-        const segmentSelection = this.sv.selectionStoreConnector.register(row.position);
-        segmentSelection.setLastCell(row.lastCell);
+        const segmentSelection = this.sv.selectionStoreConnector.register(rgRow.position);
+        segmentSelection.setLastCell(rgRow.lastCell);
 
-        // register selection store for row
-        const rowSelectionStore = this.sv.selectionStoreConnector.registerRow(row.position.y).store;
+        // register selection store for rgRow
+        const rowSelectionStore = this.sv.selectionStoreConnector.registerRow(rgRow.position.y).store;
         r.push({
-          ...row,
+          ...rgRow,
           rowSelectionStore,
           segmentSelectionStore: segmentSelection.store,
           ref: (e: Element) => this.sv.selectionStoreConnector.registerSection(e),
@@ -134,7 +134,7 @@ export default class ViewportService {
   private dataViewPort(data: ViewportColumn) {
     const slots: { [key in RevoGrid.DimensionRows]: SlotType } = {
       rowPinStart: HEADER_SLOT,
-      row: CONTENT_SLOT,
+      rgRow: CONTENT_SLOT,
       rowPinEnd: FOOTER_SLOT,
     };
 
@@ -142,17 +142,17 @@ export default class ViewportService {
     let y = 0;
     return rowTypes.reduce((r, type) => {
       // filter out empty sources, we still need to return source to keep slot working
-      const isPresent = data.viewports[type].store.get('realCount') || type === 'row';
-      const col = {
+      const isPresent = data.viewports[type].store.get('realCount') || type === 'rgRow';
+      const rgCol = {
         ...data,
         position: { ...data.position, y: isPresent ? y : EMPTY_INDEX },
       };
       r.push(
         this.dataPartition(
-          col,
+          rgCol,
           type,
           slots[type],
-          type !== 'row', // is fixed
+          type !== 'rgRow', // is fixed
         ),
       );
       if (isPresent) {
@@ -205,7 +205,7 @@ export default class ViewportService {
   scrollToCell(cell: Partial<Selection.Cell>) {
     for (let key in cell) {
       const coordinate = cell[key as keyof Selection.Cell];
-      this.sv.scrollingService.onScroll({ dimension: key === 'x' ? 'col' : 'row', coordinate });
+      this.sv.scrollingService.onScroll({ dimension: key === 'x' ? 'rgCol' : 'rgRow', coordinate });
     }
   }
 
