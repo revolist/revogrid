@@ -278,7 +278,8 @@
       setData({ rows: 100, cols: 100 });
 
       // events testing
-      const events = []; // 'beforeRange', 'setRange'
+      // 'beforeRange', 'setRange', 'beforeFocusLost'
+      const events = ['beforeFocusLost'];
       events.forEach(e => {
         grid.addEventListener(e, $e => {
           if (window.eventsPrevented[e]) {

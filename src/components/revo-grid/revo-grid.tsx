@@ -20,7 +20,7 @@ import GroupingRowPlugin from '../../plugins/groupingRow/grouping.row.plugin';
 import { GroupingOptions } from '../../plugins/groupingRow/grouping.row.types';
 import { ColumnSource, RowSource } from '../data/columnService';
 import { RevoViewPort } from './viewport';
-import ViewportService from './viewport.service';
+import ViewportService, { FocusedData } from './viewport.service';
 import { ViewPortSections } from './viewport.section';
 import RevogrRowHeaders from '../rowHeaders/revogr-row-headers';
 import GridScrollingService from './viewport.scrolling.service';
@@ -230,6 +230,12 @@ export class RevoGridComponent {
    * Use e.preventDefault() to prevent cell focus change.
    */
   @Event() beforeCellFocus: EventEmitter<Edition.BeforeSaveDataDetails>;
+
+  /**
+   * Before grid focus lost happened.
+   * Use e.preventDefault() to prevent cell focus change.
+   */
+  @Event() beforeFocusLost: EventEmitter<FocusedData|null>;
   /**
    * Before data apply.
    * You can override data source here
@@ -439,7 +445,13 @@ export class RevoGridComponent {
    * Clear current grid focus
    */
   @Method() async clearFocus() {
-    return this.viewport?.clearFocused();
+    const focused = await this.getFocused();
+    const event = this.beforeFocusLost.emit(focused);
+    if (event.defaultPrevented) {
+      return;
+    }
+    this.selectionStoreConnector.clearAll();
+    this.viewport?.clearFocused();
   }
 
   /**
@@ -447,6 +459,13 @@ export class RevoGridComponent {
    */
   @Method() async getPlugins(): Promise<RevoPlugin.Plugin[]> {
     return [...this.internalPlugins];
+  }
+
+  /**
+   * Get all active plugins instances
+   */
+  @Method() async getFocused(): Promise<FocusedData|null> {
+    return this.viewport?.getFocused();
   }
 
   // --------------------------------------------------------------------------
@@ -459,7 +478,7 @@ export class RevoGridComponent {
   @Listen('click', { target: 'document' })
   handleOutsideClick({ target }: { target: HTMLElement | null }) {
     if (!target?.closest(`[${UUID}="${this.uuid}"]`)) {
-      this.selectionStoreConnector.clearAll();
+      this.clearFocus();
     }
   }
 

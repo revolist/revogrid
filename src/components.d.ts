@@ -9,6 +9,7 @@ import { Edition, Observable, RevoGrid, RevoPlugin, Selection, ThemeSpace } from
 import { AutoSizeColumnConfig } from "./plugins/autoSizeColumn";
 import { ColumnFilterConfig, FilterCollection } from "./plugins/filter/filter.plugin";
 import { GroupingOptions } from "./plugins/groupingRow/grouping.row.types";
+import { FocusedData } from "./components/revo-grid/viewport.service";
 import { ColumnCollection } from "./services/column.data.provider";
 import { DataInput } from "./plugins/export/types";
 import { VNode } from "@stencil/core";
@@ -71,6 +72,10 @@ export namespace Components {
           * Receive all columns in data source
          */
         "getColumns": () => Promise<RevoGrid.ColumnRegular[]>;
+        /**
+          * Get all active plugins instances
+         */
+        "getFocused": () => Promise<FocusedData | null>;
         /**
           * Get all active plugins instances
          */
@@ -496,6 +501,10 @@ declare namespace LocalJSX {
           * Before filter trimmed values Use e.preventDefault() to prevent value trimming and filter apply Update @collection if you wish to change filters Update @itemsToFilter if you wish to filter indexes of trimming
          */
         "onBeforeFilterTrimmed"?: (event: CustomEvent<{ collection: FilterCollection; itemsToFilter: Record<number, boolean> }>) => void;
+        /**
+          * Before grid focus lost happened. Use e.preventDefault() to prevent cell focus change.
+         */
+        "onBeforeFocusLost"?: (event: CustomEvent<FocusedData|null>) => void;
         /**
           * Before range apply. Triggered before range applied. Use e.preventDefault() to prevent range.
          */

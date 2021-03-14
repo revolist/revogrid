@@ -7,6 +7,11 @@ import EditCellStore = Edition.EditCellStore;
 
 type StoresMatrix = { [y: number]: { [x: number]: SelectionStore } };
 type StoreByDimension = Record<number, SelectionStore>;
+type FocusedStore = {
+  entity: SelectionStore;
+  cell: Selection.Cell;
+  position: Selection.Cell;
+};
 
 export const EMPTY_INDEX = -1;
 
@@ -18,15 +23,31 @@ export default class SelectionStoreConnector {
   readonly columnStores: StoreByDimension = {};
   readonly rowStores: { [y: number]: SelectionStore } = {};
 
-  get focusedStore(): SelectionStore | null {
+  get focusedStore(): FocusedStore | null {
     for (let y in this.stores) {
       for (let x in this.stores[y]) {
-        if (this.stores[y][x].store.get('focus')) {
-          return this.stores[y][x];
+        const focused = this.stores[y][x]?.store.get('focus');
+        if (focused) {
+          return {
+            entity: this.stores[y][x],
+            cell: focused,
+            position: {
+              x: parseInt(x, 10),
+              y: parseInt(y, 10)
+            }
+          };
         }
       }
     }
     return null;
+  }
+
+  get edit(): EditCellStore | undefined {
+    return this.focusedStore?.entity.store.get('edit');
+  }
+
+  get focused(): Cell | undefined {
+    return this.focusedStore?.entity.store.get('focus');
   }
 
   private readonly sections: Element[] = [];
@@ -136,7 +157,6 @@ export default class SelectionStoreConnector {
         }
       }
     }
-    console.log(currentStorePointer, this.stores);
     if (!currentStorePointer) {
       return;
     }
@@ -192,19 +212,11 @@ export default class SelectionStoreConnector {
     }
   }
 
-  get edit(): EditCellStore | undefined {
-    return this.focusedStore?.store.get('edit');
-  }
-
-  get focused(): Cell | undefined {
-    return this.focusedStore?.store.get('focus');
-  }
-
   setEdit(val: string | boolean) {
     if (!this.focusedStore) {
       return;
     }
-    this.focusedStore.setEdit(val);
+    this.focusedStore.entity.setEdit(val);
   }
 
   private getXStores(y: number) {

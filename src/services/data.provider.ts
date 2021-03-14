@@ -30,11 +30,15 @@ export class DataProvider {
     return data;
   }
 
-  setCellData({ type, rowIndex, prop, val }: Edition.BeforeSaveDataDetails) {
+  getModel(virtualIndex: number, type: DimensionRows = 'rgRow') {
     const store = this.stores[type].store;
-    const model = getSourceItem(store, rowIndex);
+    return getSourceItem(store, virtualIndex);
+  }
+
+  setCellData({ type, rowIndex, prop, val }: Edition.BeforeSaveDataDetails) {
+    const model = this.getModel(rowIndex, type);
     model[prop] = val;
-    setSourceByVirtualIndex(store, { [rowIndex]: model });
+    setSourceByVirtualIndex(this.stores[type].store, { [rowIndex]: model });
   }
 
   refresh(type: DimensionRows | 'all' = 'all') {
