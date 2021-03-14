@@ -135,7 +135,7 @@
       <div>
         <strong>Prevent events</strong>
         <hr />
-        <label><input type="checkbox" onchange="preventEvent('beforeRange', event.target.checked)" />beforeRange</label>
+        <label><input type="checkbox" onchange="preventEvent('beforerange', event.target.checked)" />beforerange</label>
       </div>
     </section>
 
@@ -278,8 +278,8 @@
       setData({ rows: 100, cols: 100 });
 
       // events testing
-      // 'beforeRange', 'setRange', 'beforeFocusLost'
-      const events = ['beforeFocusLost'];
+      // 'beforerange', 'setRange', 'beforefocuslost', 'beforecellfocus', 'beforeedit'
+      const events = ['beforeedit'];
       events.forEach(e => {
         grid.addEventListener(e, $e => {
           if (window.eventsPrevented[e]) {

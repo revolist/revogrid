@@ -4,3 +4,4 @@
     - col -> rgCol
     - data-cell -> rgCell
     - data-header-cell -> rgHeaderCell
+- All methods migrated to lowercase in order to support modern approach

@@ -13,7 +13,7 @@
 | `dimensionRow`      | --          |                                                                 | `ObservableMap<DimensionSettingsState>`                        | `undefined` |
 | `range`             | `range`     |                                                                 | `boolean`                                                      | `undefined` |
 | `readonly`          | `readonly`  |                                                                 | `boolean`                                                      | `undefined` |
-| `rowClass`          | `rgRow-class` |                                                                 | `string`                                                       | `undefined` |
+| `rowClass`          | `row-class` |                                                                 | `string`                                                       | `undefined` |
 | `rowSelectionStore` | --          |                                                                 | `ObservableMap<SelectionStoreState>`                           | `undefined` |
 | `viewportCol`       | --          |                                                                 | `ObservableMap<ViewportState>`                                 | `undefined` |
 | `viewportRow`       | --          |                                                                 | `ObservableMap<ViewportState>`                                 | `undefined` |

@@ -17,9 +17,9 @@ type ColumnSetEvent = {
 
 /**
  * lifecycle
- * 1) @event beforeSorting - sorting just started, nothing happened yet
+ * 1) @event beforesorting - sorting just started, nothing happened yet
  * 2) @metod updateColumnSorting - column sorting icon applied to grid and column get updated, data still untiuched
- * 3) @event beforeSortingApply - before we applied sorting data to data source, you can prevent data apply from here
+ * 3) @event beforesortingapply - before we applied sorting data to data source, you can prevent data apply from here
  * 4) @event afterSortingApply - sorting applied, just finished event
  *
  * If you prevent event it'll not reach farther steps
@@ -35,10 +35,10 @@ export default class SortingPlugin extends BasePlugin {
   constructor(protected revogrid: HTMLRevoGridElement) {
     super(revogrid);
 
-    const beforeSourceSet = ({ detail }: CustomEvent<SourceSetEvent>) => {
+    const beforesourceset = ({ detail }: CustomEvent<SourceSetEvent>) => {
       if (this.hasSorting) {
         // is sorting allowed
-        const event = this.emit('beforeSourceSortingApply');
+        const event = this.emit('beforesourcesortingapply');
         // sorting prevented
         if (event.defaultPrevented) {
           return;
@@ -49,8 +49,8 @@ export default class SortingPlugin extends BasePlugin {
         detail.source = data;
       }
     };
-    const afterColumnsSet = async ({ detail: { order } }: CustomEvent<ColumnSetEvent>) => this.sort(order);
-    const headerClick = async (e: CustomEvent<RevoGrid.InitialHeaderClick>) => {
+    const aftercolumnsset = async ({ detail: { order } }: CustomEvent<ColumnSetEvent>) => this.sort(order);
+    const headerclick = async (e: CustomEvent<RevoGrid.InitialHeaderClick>) => {
       if (e.defaultPrevented) {
         return;
       }
@@ -59,17 +59,17 @@ export default class SortingPlugin extends BasePlugin {
         return;
       }
 
-      this.headerClick(e.detail.column, e.detail.index);
+      this.headerclick(e.detail.column, e.detail.index);
     };
 
-    this.addEventListener('beforeSourceSet', beforeSourceSet);
-    this.addEventListener('afterColumnsSet', afterColumnsSet);
-    this.addEventListener('initialHeaderClick', headerClick);
+    this.addEventListener('beforesourceset', beforesourceset);
+    this.addEventListener('aftercolumnsset', aftercolumnsset);
+    this.addEventListener('initialHeaderClick', headerclick);
   }
 
-  private async headerClick(column: RevoGrid.ColumnRegular, index: number) {
+  private async headerclick(column: RevoGrid.ColumnRegular, index: number) {
     let order: RevoGrid.Order = this.getNextOrder(column.order);
-    const beforeEvent = this.emit('beforeSorting', { column, order });
+    const beforeEvent = this.emit('beforesorting', { column, order });
     if (beforeEvent.defaultPrevented) {
       return;
     }
@@ -77,7 +77,7 @@ export default class SortingPlugin extends BasePlugin {
     const newCol = await this.revogrid.updateColumnSorting(beforeEvent.detail.column, index, order);
 
     // apply sort data
-    const beforeApplyEvent = this.emit('beforeSortingApply', { column: newCol, order });
+    const beforeApplyEvent = this.emit('beforesortingapply', { column: newCol, order });
     if (beforeApplyEvent.defaultPrevented) {
       return;
     }

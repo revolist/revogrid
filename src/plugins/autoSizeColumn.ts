@@ -82,16 +82,16 @@ export default class AutoSizeColumn extends BasePlugin {
       revogrid.appendChild(this.precsizeCalculationArea);
     }
 
-    const afterSourceSet = ({ detail: { source } }: CustomEvent<SourceSetEvent>) => {
+    const aftersourceset = ({ detail: { source } }: CustomEvent<SourceSetEvent>) => {
       this.setSource(source);
     };
-    const afterEdit = ({ detail }: CustomEvent<EditEvent>) => {
-      this.afterEdit(detail);
+    const afteredit = ({ detail }: CustomEvent<EditEvent>) => {
+      this.afteredit(detail);
     };
     const afterEditAll = ({ detail }: CustomEvent<EditEvent>) => {
       this.afterEditAll(detail);
     };
-    const beforeColumnsSet = ({ detail: { columns } }: CustomEvent<ColumnCollection>) => {
+    const beforecolumnsset = ({ detail: { columns } }: CustomEvent<ColumnCollection>) => {
       this.columnSet(columns);
     };
     const headerDblClick = ({ detail }: CustomEvent<RevoGrid.InitialHeaderClick>) => {
@@ -103,15 +103,15 @@ export default class AutoSizeColumn extends BasePlugin {
         });
       }
     };
-    this.addEventListener('beforeColumnsSet', beforeColumnsSet);
+    this.addEventListener('beforecolumnsset', beforecolumnsset);
     switch (config?.mode) {
       case ColumnAutoSizeMode.autoSizeOnTextOverlap:
-        this.addEventListener('afterSourceSet', afterSourceSet);
-        this.addEventListener('afterEdit', afterEdit);
+        this.addEventListener('aftersourceset', aftersourceset);
+        this.addEventListener('afteredit', afteredit);
         break;
       case ColumnAutoSizeMode.autoSizeAll:
-        this.addEventListener('afterSourceSet', afterSourceSet);
-        this.addEventListener('afterEdit', afterEditAll);
+        this.addEventListener('aftersourceset', aftersourceset);
+        this.addEventListener('afteredit', afterEditAll);
         break;
       default:
         this.addEventListener('headerDblClick', headerDblClick);
@@ -169,7 +169,7 @@ export default class AutoSizeColumn extends BasePlugin {
     }
   }
 
-  private afterEdit(e: EditEvent): void {
+  private afteredit(e: EditEvent): void {
     let data: Record<string, RevoGrid.DataType>;
     if (this.isRangeEdit(e)) {
       data = e.data;
