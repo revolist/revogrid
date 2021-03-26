@@ -22,10 +22,10 @@ const initialParams: Params = {
 };
 
 export default class LocalScrollService {
-  private preventArtificialScroll: { [T in RevoGrid.DimensionType]: number | null } = { row: null, col: null };
+  private preventArtificialScroll: { [T in RevoGrid.DimensionType]: number | null } = { rgRow: null, rgCol: null };
   // to check if scroll changed
-  private previousScroll: { [T in RevoGrid.DimensionType]: number } = { row: 0, col: 0 };
-  private params: { [T in RevoGrid.DimensionType]: Params } = { row: { ...initialParams }, col: { ...initialParams } };
+  private previousScroll: { [T in RevoGrid.DimensionType]: number } = { rgRow: 0, rgCol: 0 };
+  private params: { [T in RevoGrid.DimensionType]: Params } = { rgRow: { ...initialParams }, rgCol: { ...initialParams } };
 
   constructor(private cfg: Config) {}
 

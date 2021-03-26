@@ -12,7 +12,7 @@ export type GroupingOptions = {
   // applyToProp?: RevoGrid.ColumnProp;
   /**
    * todo
-   * choose if render cells in grouping row
+   * choose if render cells in grouping rgRow
    * true by default
    */
   // fullRow?: boolean;

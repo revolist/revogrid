@@ -1,30 +1,27 @@
-import { EventEmitter } from '@stencil/core';
-import { Observable, Selection, Edition } from '../../interfaces';
+import { Observable, Selection } from '../../interfaces';
 import { getRange } from '../../store/selection/selection.helpers';
 import SelectionStoreService from '../../store/selection/selection.store.service';
 import { codesLetter } from '../../utils/keyCodes';
 import { isClear, isCtrlKey, isEnterKey, isLetterKey } from '../../utils/keyCodes.utils';
 import { timeout } from '../../utils/utils';
-import ColumnService from '../data/columnService';
 import { EventData, getCoordinate, isAfterLast, isBeforeFirst } from './selection.utils';
 
-export abstract class KeyboardService {
-  protected abstract selectionStoreService: SelectionStoreService;
-  protected abstract columnService: ColumnService;
-  abstract selectionStore: Observable<Selection.SelectionStoreState>;
-  abstract range: boolean;
-  abstract internalPaste: EventEmitter;
+type Config = {
+  selectionStoreService: SelectionStoreService;
+  selectionStore: Observable<Selection.SelectionStoreState>;
+  doEdit(val?: any, isCancel?: boolean): void;
+  clearCell(): void;
+  getData(): any;
+  internalPaste(): void;
+};
 
-  protected abstract doEdit(val?: any, isCancel?: boolean): void;
-  protected abstract clearCell(): void;
-  protected abstract canEdit(): boolean;
-  protected abstract onCellEdit(e: Edition.SaveDataDetails, clear?: boolean): void;
-  protected abstract getData(): any;
-
+export class KeyboardService {
   private ctrlDown = false;
 
-  async keyDown(e: KeyboardEvent) {
-    if (!this.selectionStoreService.focused) {
+  constructor(private sv: Config) {}
+
+  async keyDown(e: KeyboardEvent, canRange: boolean) {
+    if (!this.sv.selectionStoreService.focused) {
       return;
     }
     if (isCtrlKey(e.keyCode, navigator.platform)) {
@@ -33,17 +30,17 @@ export abstract class KeyboardService {
 
     // tab key means same as arrow right
     if (codesLetter.TAB === e.code) {
-      this.keyChangeSelection(e);
+      this.keyChangeSelection(e, canRange);
       return;
     }
 
     /**
      *  IF EDIT MODE
      */
-    if (this.selectionStoreService.edited) {
+    if (this.sv.selectionStoreService.edited) {
       switch (e.code) {
         case codesLetter.ESCAPE:
-          this.doEdit(undefined, true);
+          this.sv.doEdit(undefined, true);
           break;
       }
       return;
@@ -55,13 +52,13 @@ export abstract class KeyboardService {
 
     // pressed clear key
     if (isClear(e.code)) {
-      this.clearCell();
+      this.sv.clearCell();
       return;
     }
 
     // pressed enter
     if (isEnterKey(e.code)) {
-      this.doEdit();
+      this.sv.doEdit();
       return;
     }
 
@@ -72,32 +69,32 @@ export abstract class KeyboardService {
 
     // paste operation
     if (this.isPaste(e)) {
-      this.internalPaste.emit();
+      this.sv.internalPaste();
       return;
     }
 
     // pressed letter key
     if (isLetterKey(e.keyCode)) {
-      this.doEdit(e.key);
+      this.sv.doEdit(e.key);
       return;
     }
 
     // pressed arrow, change selection position
-    if (await this.keyChangeSelection(e)) {
+    if (await this.keyChangeSelection(e, canRange)) {
       return;
     }
   }
 
-  protected async keyChangeSelection(e: KeyboardEvent) {
-    const data = this.changeDirectionKey(e, this.range);
+  async keyChangeSelection(e: KeyboardEvent, canRange: boolean) {
+    const data = this.changeDirectionKey(e, canRange);
     if (!data) {
       return false;
     }
     await timeout();
 
-    const range = this.selectionStore.get('range');
-    const focus = this.selectionStore.get('focus');
-    return this.keyPositionChange(data.changes, this.getData(), range, focus, data.isMulti);
+    const range = this.sv.selectionStore.get('range');
+    const focus = this.sv.selectionStore.get('focus');
+    return this.keyPositionChange(data.changes, this.sv.getData(), range, focus, data.isMulti);
   }
 
   keyPositionChange(changes: Partial<Selection.Cell>, eData: EventData, range?: Selection.RangeArea, focus?: Selection.Cell, isMulti = false) {
@@ -113,9 +110,9 @@ export abstract class KeyboardService {
         return false;
       }
       const range = getRange(data.start, data.end);
-      return this.selectionStoreService.changeRange(range);
+      return this.sv.selectionStoreService.changeRange(range);
     }
-    return this.selectionStoreService.focus(data.start);
+    return this.sv.selectionStoreService.focus(data.start);
   }
 
   keyUp(e: KeyboardEvent): void {

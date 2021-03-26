@@ -103,7 +103,7 @@
         <strong>Set data</strong>
 
         <hr />
-        <label><input type="checkbox" onchange="showRowHeaders(event.target.checked)" />Show row headers</label>
+        <label><input type="checkbox" onchange="showRowHeaders(event.target.checked)" />Show rgRow headers</label>
         <hr />
         <ul>
           <li>
@@ -135,7 +135,7 @@
       <div>
         <strong>Prevent events</strong>
         <hr />
-        <label><input type="checkbox" onchange="preventEvent('beforeRange', event.target.checked)" />beforeRange</label>
+        <label><input type="checkbox" onchange="preventEvent('beforerange', event.target.checked)" />beforerange</label>
       </div>
     </section>
 
@@ -150,9 +150,9 @@
         const grid = document.querySelector('revo-grid');
         grid.rowHeaders = isShow;
       };
-      window.setEdit = function (row, prop) {
+      window.setEdit = function (rgRow, prop) {
         const grid = document.querySelector('revo-grid');
-        grid.setCellEdit(row, prop);
+        grid.setCellEdit(rgRow, prop);
       };
       window.scrollToCol = function (x = 30) {
         const grid = document.querySelector('revo-grid');
@@ -268,7 +268,7 @@
         };
 
         grid.rowDefinitions = [{
-          type: 'row',
+          type: 'rgRow',
           index: 1,
           size: 100
         }]; */
@@ -276,7 +276,8 @@
       setData({ rows: 100, cols: 100 });
 
       // events testing
-      const events = []; // 'beforeRange', 'setRange'
+      // 'beforerange', 'setRange', 'beforefocuslost', 'beforecellfocus', 'beforeedit'
+      const events = ['beforeedit'];
       events.forEach(e => {
         grid.addEventListener(e, $e => {
           if (window.eventsPrevented[e]) {

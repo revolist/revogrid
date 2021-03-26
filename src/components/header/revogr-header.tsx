@@ -53,25 +53,25 @@ export class RevogrHeaderComponent {
     const visibleProps: { [prop: string]: number } = {};
 
     // render header columns
-    for (let col of cols) {
-      const colData = this.colData[col.itemIndex];
+    for (let rgCol of cols) {
+      const colData = this.colData[rgCol.itemIndex];
       cells.push(
         <HeaderRenderer
           range={range}
-          column={col}
+          column={rgCol}
           data={colData}
           canFilter={!!this.columnFilter}
           canResize={this.canResize}
-          onResize={e => this.onResize(e, col.itemIndex)}
+          onResize={e => this.onResize(e, rgCol.itemIndex)}
           onDoubleClick={e => this.headerDblClick.emit(e)}
           onClick={e => this.initialHeaderClick.emit(e)}
         />,
       );
-      visibleProps[colData?.prop] = col.itemIndex;
+      visibleProps[colData?.prop] = rgCol.itemIndex;
     }
 
     return [
-      <div class="group-row">
+      <div class="group-rgRow">
         <ColumnGroupsRenderer
           canResize={this.canResize}
           visibleProps={visibleProps}

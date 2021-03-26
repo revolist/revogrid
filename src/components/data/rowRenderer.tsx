@@ -13,7 +13,7 @@ export const PADDING_DEPTH = 10;
 const RowRenderer = ({ rowClass, size, start, style, depth }: RowProps, cells: VNode[]) => {
   return (
     <div
-      class={`row ${rowClass || ''}`}
+      class={`rgRow ${rowClass || ''}`}
       style={{
         ...style,
         height: `${size}px`,

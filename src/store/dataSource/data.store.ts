@@ -57,7 +57,7 @@ export default class DataStore<T extends GDataType, ST extends GDimension> {
 
   /**
    * full data source update
-   * @param source - data column/row source
+   * @param source - data column/rgRow source
    * @param grouping - grouping information if present
    */
   updateData(source: T[], grouping?: { depth: number; groups?: Groups }, silent = false) {

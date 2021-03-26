@@ -5,12 +5,12 @@
     font-weight: 600;
     text-align: left;
 
-    .data-header-cell {
+    .rgHeaderCell {
       padding: 0 15px;
       text-overflow: ellipsis;
     }
 
-    .header-row {
+    .header-rgRow {
       height: $header-height;
     }
   }
@@ -18,11 +18,11 @@
   revogr-data {
     text-align: left;
 
-    .row {
+    .rgRow {
       line-height: $default-rows-size;
     }
 
-    .data-cell {
+    .rgCell {
       padding: 0 15px;
     }
   }

@@ -9,8 +9,33 @@ const componentCorePackage = '@revolist/revogrid';
 const parent = '../revogrid-proxy';
 const entry = 'revogrid.ts';
 const directivesProxyFile = (name: string, filepath = entry) => `${parent}/${name}/src/${filepath}`;
-// proxies
+
 export const config: Config = {
+  // https://github.com/ionic-team/stencil/blob/master/src/declarations/stencil-public-compiler.ts
+  enableCache: true,
+  hashFileNames: false,
+  autoprefixCss: false,
+  minifyCss: true,
+  preamble: 'Built by RevoList',
+  hashedFileNameLength: 8,
+
+  extras: {
+    // We need the following for IE11 and old Edge:
+    cssVarsShim: true,
+    dynamicImportShim: true,
+    // We don’t use shadow DOM so this is not needed:
+    shadowDomShim: false,
+    // Setting the below option to “true” will actually break Safari 10 support:
+    safari10: false,
+    // This is to tackle an Angular specific performance issue:
+    initializeNextTick: true,
+    // Don’t need any of these so setting them to “false”:
+    scriptDataOpts: false,
+    appendChildSlotFix: false,
+    cloneNodeFix: false,
+    slotChildNodesFix: false,
+  },
+
   buildEs5: 'prod',
   namespace: 'revo-grid',
   taskQueue: 'async',
@@ -20,6 +45,7 @@ export const config: Config = {
       injectGlobalPaths: ['src/global/_colors.scss', 'src/global/_icons.scss', 'src/global/_mixins.scss', 'src/global/_buttons.scss'],
     }),
   ],
+  // proxies
   outputTargets: [
     angularOutputTarget({
       componentCorePackage,
@@ -33,21 +59,19 @@ export const config: Config = {
     vueOutputTarget({
       componentCorePackage,
       proxiesFile: directivesProxyFile('vue'),
-      componentModels: [
-        {
-          elements: 'revo-dropdown',
-          event: 'changeValue',
-          targetAttr: 'changeValue',
-        },
-      ],
+      componentModels: [],
     }),
     svelteOutputTarget({
       componentCorePackage,
       proxiesFile: directivesProxyFile('svelte'),
     }),
+    // custom element, no polifil
     {
       type: 'dist-custom-elements-bundle',
+      dir: 'custom-element',
+      empty: true,
     },
+    // lazy loading
     {
       type: 'dist',
       esmLoaderPath: '../loader',

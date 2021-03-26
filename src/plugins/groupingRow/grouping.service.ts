@@ -104,7 +104,7 @@ export function gatherGrouping<T>(array: T[], mapFunc: (v: T) => any, { prevExpa
     group.children.forEach((item, oldIndex) => {
       // hide items if group colapsed
       if (!isExpanded && !skipTrim) {
-        // collapse row
+        // collapse rgRow
         trimmed[itemIndex] = true;
       }
       // add items to new source
@@ -138,12 +138,12 @@ function getPseudoGroup(groupValue: string, value: string, depth: number, id: st
   };
 }
 
-export function getGroupingName(row?: RevoGrid.DataType) {
-  return row && row[PSEUDO_GROUP_ITEM];
+export function getGroupingName(rgRow?: RevoGrid.DataType) {
+  return rgRow && rgRow[PSEUDO_GROUP_ITEM];
 }
 
-export function isGrouping(row?: RevoGrid.DataType) {
-  return row && typeof row[PSEUDO_GROUP_ITEM] !== 'undefined';
+export function isGrouping(rgRow?: RevoGrid.DataType) {
+  return rgRow && typeof rgRow[PSEUDO_GROUP_ITEM] !== 'undefined';
 }
 
 export function isGroupingColumn(column?: RevoGrid.ColumnRegular) {

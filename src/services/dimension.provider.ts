@@ -79,10 +79,10 @@ export default class DimensionProvider {
   setSettings(data: Partial<RevoGrid.DimensionSettingsState>, dimensionType: RevoGrid.DimensionType): void {
     let stores: RevoGrid.MultiDimensionType[] = [];
     switch (dimensionType) {
-      case 'col':
+      case 'rgCol':
         stores = columnTypes;
         break;
-      case 'row':
+      case 'rgRow':
         stores = rowTypes;
         break;
     }

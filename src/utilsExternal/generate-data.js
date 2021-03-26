@@ -43,46 +43,46 @@ export function generateFakeDataObject(config = {}) {
   const columns = {};
   const all = cols * rows;
   for (let j = 0; j < all; j++) {
-    let col = j % cols;
-    let row = (j / cols) | 0;
-    if (!result[row]) {
-      result[row] = {};
+    let rgCol = j % cols;
+    let rgRow = (j / cols) | 0;
+    if (!result[rgRow]) {
+      result[rgRow] = {};
 
-      if (row % 2) {
-        result[row].key = 'a';
+      if (rgRow % 2) {
+        result[rgRow].key = 'a';
       } else {
-        result[row].key = 'b';
+        result[rgRow].key = 'b';
       }
     }
-    if (!columns[col]) {
-      columns[col] = {
-        name: generateHeader(col),
-        prop: col,
+    if (!columns[rgCol]) {
+      columns[rgCol] = {
+        name: generateHeader(rgCol),
+        prop: rgCol,
         sortable: true,
       };
 
       // apply config
       if (colPinStart.indexOf(j) > -1) {
-        columns[col].pin = 'colPinStart';
+        columns[rgCol].pin = 'colPinStart';
       }
       // apply config
       if (colPinEnd.indexOf(j) > -1) {
-        columns[col].pin = 'colPinEnd';
+        columns[rgCol].pin = 'colPinEnd';
       }
     }
     /** grouping by hidden field
-    if (col === 1) {
-      result[row][col] = 'A';
+    if (rgCol === 1) {
+      result[rgRow][rgCol] = 'A';
     }
     */
-    result[row][col] = `${row}:${col}`; // row % 5 ? col : row % 3 ? (col % 3 ? 2 : 3) : row; // row + ':' + col;
+    result[rgRow][rgCol] = `${rgRow}:${rgCol}`; // rgRow % 5 ? rgCol : rgRow % 3 ? (rgCol % 3 ? 2 : 3) : rgRow; // rgRow + ':' + rgCol;
     // apply config
-    if (col === rowDrag) {
-      columns[col].rowDrag = true;
+    if (rgCol === rowDrag) {
+      columns[rgCol].rowDrag = true;
     }
     // apply config
-    if (col === order) {
-      columns[col].order = 'asc';
+    if (rgCol === order) {
+      columns[rgCol].order = 'asc';
     }
   }
   // apply config

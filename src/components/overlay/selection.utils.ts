@@ -24,17 +24,17 @@ export function getCurrentCell({ x, y }: Cell, { el, rows, cols }: EventData): C
   if (cellX >= width) {
     cellX = width - 1;
   }
-  const row = getItemByPosition(rows, cellY);
-  const col = getItemByPosition(cols, cellX);
+  const rgRow = getItemByPosition(rows, cellY);
+  const rgCol = getItemByPosition(cols, cellX);
   // before first
-  if (col.itemIndex < 0) {
-    col.itemIndex = 0;
+  if (rgCol.itemIndex < 0) {
+    rgCol.itemIndex = 0;
   }
   // before first
-  if (row.itemIndex < 0) {
-    row.itemIndex = 0;
+  if (rgRow.itemIndex < 0) {
+    rgRow.itemIndex = 0;
   }
-  return { x: col.itemIndex, y: row.itemIndex };
+  return { x: rgCol.itemIndex, y: rgRow.itemIndex };
 }
 
 export function getCoordinate(range: Selection.RangeArea, focus: Cell, changes: Partial<Cell>, isMulti = false) {

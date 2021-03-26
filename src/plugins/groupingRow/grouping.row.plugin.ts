@@ -73,7 +73,7 @@ export default class GroupingRowPlugin extends BasePlugin {
     this.revogrid.addTrimmed(newTrimmed, TRIMMED_GROUPING);
   }
 
-  // get source based on proxy item collection to preserve row order
+  // get source based on proxy item collection to preserve rgRow order
   private getSource(withoutGrouping = false) {
     const source = this.store.get('source');
     const items = this.store.get('proxyItems');
@@ -157,14 +157,14 @@ export default class GroupingRowPlugin extends BasePlugin {
   // subscribe to grid events to process them accordingly
   private subscribe() {
     /** if grouping present and new data source arrived */
-    this.addEventListener('beforeSourceSet', ({ detail }: CustomEvent<BeforeSourceSetEvent>) => this.onDataSet(detail));
-    this.addEventListener('beforeColumnsSet', ({ detail }: CustomEvent<ColumnCollection>) => this.setColumns(detail));
+    this.addEventListener('beforesourceset', ({ detail }: CustomEvent<BeforeSourceSetEvent>) => this.onDataSet(detail));
+    this.addEventListener('beforecolumnsset', ({ detail }: CustomEvent<ColumnCollection>) => this.setColumns(detail));
 
     /**
      * filter applied need to clear grouping and apply again
      * based on new results can be new grouping
      */
-    this.addEventListener('beforeTrimmed', ({ detail: { trimmed, trimmedType } }) => this.beforeTrimmedApply(trimmed, trimmedType));
+    this.addEventListener('beforetrimmed', ({ detail: { trimmed, trimmedType } }) => this.beforeTrimmedApply(trimmed, trimmedType));
     /**
      * sorting applied need to clear grouping and apply again
      * based on new results whole grouping order will changed
@@ -175,11 +175,11 @@ export default class GroupingRowPlugin extends BasePlugin {
      * Apply logic for focus inside of grouping
      * We can't focus on grouping rows, navigation only inside of groups for now
      */
-    this.addEventListener('beforeCellFocus', e => this.onFocus(e));
+    this.addEventListener('beforecellfocus', e => this.onFocus(e));
     /**
-     * Prevent row drag outside the group
+     * Prevent rgRow drag outside the group
      */
-    this.addEventListener('rowOrderChanged', e => this.onDrag(e));
+    this.addEventListener('roworderchanged', e => this.onDrag(e));
 
     /**
      * When grouping expand icon was clicked

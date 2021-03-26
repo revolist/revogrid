@@ -14,7 +14,7 @@
 
 | Event       | Description        | Type                                                                           |
 | ----------- | ------------------ | ------------------------------------------------------------------------------ |
-| `cellEdit`  |                    | `CustomEvent<{ row: number; col: number; val: any; preventFocus?: boolean; }>` |
+| `cellEdit`  |                    | `CustomEvent<{ rgRow: number; rgCol: number; val: any; preventFocus?: boolean; }>` |
 | `closeEdit` | Close editor event | `CustomEvent<boolean>`                                                         |
 
 ## Dependencies

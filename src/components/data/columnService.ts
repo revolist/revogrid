@@ -41,8 +41,8 @@ export default class ColumnService implements ColumnServiceI {
   }
 
   private checkGrouping(cols: RevoGrid.ColumnRegular[]) {
-    for (let col of cols) {
-      if (isGroupingColumn(col)) {
+    for (let rgCol of cols) {
+      if (isGroupingColumn(rgCol)) {
         this.hasGrouping = true;
         return;
       }
@@ -276,12 +276,12 @@ export default class ColumnService implements ColumnServiceI {
   ): RevoGrid.DataFormat[][] {
     const toCopy: RevoGrid.DataFormat[][] = [];
     for (let i = range.y; i < range.y1 + 1; i++) {
-      const row: RevoGrid.DataFormat[] = [];
+      const rgRow: RevoGrid.DataFormat[] = [];
       for (let prop of rangeProps) {
         const item = getSourceItem(store, i);
-        row.push(item[prop]);
+        rgRow.push(item[prop]);
       }
-      toCopy.push(row);
+      toCopy.push(rgRow);
     }
     return toCopy;
   }

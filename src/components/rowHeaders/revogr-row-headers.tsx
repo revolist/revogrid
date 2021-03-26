@@ -78,7 +78,11 @@ const RevogrRowHeaders = ({ anyView, height, rowHeaderColumn, beforeRowAdd, onSc
       ref={el => onElementToScroll(el)}
       onScrollViewport={e => onScrollViewport(e.detail)}
     >
-      <revogr-header {...anyView.headerProp} viewportCol={viewport.store} parent={parent} slot="header" canResize={false} />
+      <revogr-header {...{
+          ...anyView.headerProp,
+          colData: typeof rowHeaderColumn === 'object' ? [rowHeaderColumn] : []
+        }}
+        viewportCol={viewport.store} parent={parent} slot="header" canResize={false} />
       {dataViews}
     </revogr-viewport-scroll>
   );

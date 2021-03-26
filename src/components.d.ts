@@ -9,6 +9,7 @@ import { Edition, Observable, RevoGrid, RevoPlugin, Selection, ThemeSpace } from
 import { AutoSizeColumnConfig } from "./plugins/autoSizeColumn";
 import { ColumnFilterConfig, FilterCollection } from "./plugins/filter/filter.plugin";
 import { GroupingOptions } from "./plugins/groupingRow/grouping.row.types";
+import { FocusedData } from "./components/revo-grid/viewport.service";
 import { ColumnCollection } from "./services/column.data.provider";
 import { DataInput } from "./plugins/export/types";
 import { VNode } from "@stencil/core";
@@ -74,6 +75,10 @@ export namespace Components {
         /**
           * Get all active plugins instances
          */
+        "getFocused": () => Promise<FocusedData | null>;
+        /**
+          * Get all active plugins instances
+         */
         "getPlugins": () => Promise<RevoPlugin.Plugin[]>;
         /**
           * Get data from source
@@ -114,7 +119,7 @@ export namespace Components {
          */
         "readonly": boolean;
         /**
-          * Refreshes data viewport. Can be specific part as row or pinned row or 'all' by default.
+          * Refreshes data viewport. Can be specific part as rgRow or pinned rgRow or 'all' by default.
          */
         "refresh": (type?: RevoGrid.DimensionRows | 'all') => Promise<void>;
         /**
@@ -126,7 +131,7 @@ export namespace Components {
          */
         "resize": boolean;
         /**
-          * Row class property Define this property in row object and this will be mapped as row class
+          * Row class property Define this property in rgRow object and this will be mapped as rgRow class
          */
         "rowClass": string;
         /**
@@ -134,11 +139,11 @@ export namespace Components {
          */
         "rowDefinitions": RevoGrid.RowDefinition[];
         /**
-          * Excel like show row indexe per row
+          * Excel like show rgRow indexe per rgRow
          */
         "rowHeaders": RevoGrid.RowHeaders | boolean;
         /**
-          * Indicates default row size. By default 0, means theme package size will be applied
+          * Indicates default rgRow size. By default 0, means theme package size will be applied
          */
         "rowSize": number;
         /**
@@ -154,13 +159,13 @@ export namespace Components {
          */
         "scrollToCoordinate": (cell: Partial<Selection.Cell>) => Promise<void>;
         /**
-          * Scrolls view port to specified row index
+          * Scrolls view port to specified rgRow index
          */
         "scrollToRow": (coordinate?: number) => Promise<void>;
         /**
           * Bring cell to edit mode
          */
-        "setCellEdit": (row: number, prop: RevoGrid.ColumnProp, rowSource?: RevoGrid.DimensionRows) => Promise<void>;
+        "setCellEdit": (rgRow: number, prop: RevoGrid.ColumnProp, rowSource?: RevoGrid.DimensionRows) => Promise<void>;
         /**
           * Source - defines main data source. Can be an Object or 2 dimensional array([][]); Keys/indexes referenced from columns Prop
          */
@@ -171,7 +176,7 @@ export namespace Components {
         "theme": ThemeSpace.Theme;
         /**
           * Trimmed rows Functionality which allows to hide rows from main data set
-          * @trimmedRows are physical row indexes to hide
+          * @trimmedRows are physical rgRow indexes to hide
          */
         "trimmedRows": Record<number, boolean>;
         /**
@@ -445,110 +450,114 @@ declare namespace LocalJSX {
         /**
           * Column updated
          */
-        "onAfterColumnsSet"?: (event: CustomEvent<{
+        "onAftercolumnsset"?: (event: CustomEvent<{
     columns: ColumnCollection;
     order: Record<RevoGrid.ColumnProp, 'asc' | 'desc'>;
   }>) => void;
         /**
           * After edit. Triggered when after data applied or Range changeged.
          */
-        "onAfterEdit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails | Edition.BeforeRangeSaveDataDetails>) => void;
+        "onAfteredit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails | Edition.BeforeRangeSaveDataDetails>) => void;
         /**
           * After rows updated
          */
-        "onAfterSourceSet"?: (event: CustomEvent<{
+        "onAftersourceset"?: (event: CustomEvent<{
     type: RevoGrid.DimensionRows;
     source: RevoGrid.DataType[];
   }>) => void;
         /**
           * Notify trimmed applied
          */
-        "onAfterTrimmed"?: (event: CustomEvent<any>) => void;
-        /**
-          * Before autofill. Triggered before autofill applied. Use e.preventDefault() to prevent edit data apply.
-         */
-        "onBeforeAutofill"?: (event: CustomEvent<Selection.ChangedRange>) => void;
-        /**
-          * Before cell focus changed. Use e.preventDefault() to prevent cell focus change.
-         */
-        "onBeforeCellFocus"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
-        /**
-          * Before column update
-         */
-        "onBeforeColumnsSet"?: (event: CustomEvent<ColumnCollection>) => void;
-        /**
-          * Before edit event. Triggered before edit data applied. Use e.preventDefault() to prevent edit data set and use you own. Use e.val = {your value} to replace edit result with your own.
-         */
-        "onBeforeEdit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
-        /**
-          * Before edit started Use e.preventDefault() to prevent edit
-         */
-        "onBeforeEditStart"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
-        /**
-          * Before export Use e.preventDefault() to prevent export Replace data in Event in case you want to modify it in export
-         */
-        "onBeforeExport"?: (event: CustomEvent<DataInput>) => void;
-        /**
-          * Before filter applied to data source Use e.preventDefault() to prevent cell focus change Update @collection if you wish to change filters
-         */
-        "onBeforeFilterApply"?: (event: CustomEvent<{ collection: FilterCollection }>) => void;
-        /**
-          * Before filter trimmed values Use e.preventDefault() to prevent value trimming and filter apply Update @collection if you wish to change filters Update @itemsToFilter if you wish to filter indexes of trimming
-         */
-        "onBeforeFilterTrimmed"?: (event: CustomEvent<{ collection: FilterCollection; itemsToFilter: Record<number, boolean> }>) => void;
+        "onAftertrimmed"?: (event: CustomEvent<any>) => void;
         /**
           * Before range apply. Triggered before range applied. Use e.preventDefault() to prevent range.
          */
-        "onBeforeRange"?: (event: CustomEvent<Selection.ChangedRange>) => void;
+        "onBeforeaange"?: (event: CustomEvent<Selection.ChangedRange>) => void;
+        /**
+          * Before autofill. Triggered before autofill applied. Use e.preventDefault() to prevent edit data apply.
+         */
+        "onBeforeautofill"?: (event: CustomEvent<Selection.ChangedRange>) => void;
+        /**
+          * Before cell focus changed. Use e.preventDefault() to prevent cell focus change.
+         */
+        "onBeforecellfocus"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
+        /**
+          * Before column update
+         */
+        "onBeforecolumnsset"?: (event: CustomEvent<ColumnCollection>) => void;
+        /**
+          * Before edit event. Triggered before edit data applied. Use e.preventDefault() to prevent edit data set and use you own. Use e.val = {your value} to replace edit result with your own.
+         */
+        "onBeforeedit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
+        /**
+          * Before edit started Use e.preventDefault() to prevent edit
+         */
+        "onBeforeeditstart"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
+        /**
+          * Before export Use e.preventDefault() to prevent export Replace data in Event in case you want to modify it in export
+         */
+        "onBeforeexport"?: (event: CustomEvent<DataInput>) => void;
+        /**
+          * Before filter applied to data source Use e.preventDefault() to prevent cell focus change Update @collection if you wish to change filters
+         */
+        "onBeforefilterapply"?: (event: CustomEvent<{ collection: FilterCollection }>) => void;
+        /**
+          * Before filter trimmed values Use e.preventDefault() to prevent value trimming and filter apply Update @collection if you wish to change filters Update @itemsToFilter if you wish to filter indexes of trimming
+         */
+        "onBeforefiltertrimmed"?: (event: CustomEvent<{ collection: FilterCollection; itemsToFilter: Record<number, boolean> }>) => void;
+        /**
+          * Before grid focus lost happened. Use e.preventDefault() to prevent cell focus change.
+         */
+        "onBeforefocuslost"?: (event: CustomEvent<FocusedData|null>) => void;
         /**
           * Before range edit event. Triggered before range data applied, when range selection happened. Use e.preventDefault() to prevent edit data set and use you own.
          */
-        "onBeforeRangeEdit"?: (event: CustomEvent<Edition.BeforeRangeSaveDataDetails>) => void;
+        "onBeforerangeedit"?: (event: CustomEvent<Edition.BeforeRangeSaveDataDetails>) => void;
         /**
           * Before sorting event. Initial sorting triggered, if this event stops no other event called. Use e.preventDefault() to prevent sorting.
          */
-        "onBeforeSorting"?: (event: CustomEvent<{
+        "onBeforesorting"?: (event: CustomEvent<{
     column: RevoGrid.ColumnRegular;
     order: 'desc' | 'asc';
   }>) => void;
         /**
           * Before sorting apply. Use e.preventDefault() to prevent sorting data change.
          */
-        "onBeforeSortingApply"?: (event: CustomEvent<{
+        "onBeforesortingapply"?: (event: CustomEvent<{
     column: RevoGrid.ColumnRegular;
     order: 'desc' | 'asc';
   }>) => void;
         /**
           * Before data apply. You can override data source here
          */
-        "onBeforeSourceSet"?: (event: CustomEvent<{
+        "onBeforesourceset"?: (event: CustomEvent<{
     type: RevoGrid.DimensionRows;
     source: RevoGrid.DataType[];
   }>) => void;
         /**
           * Before source update sorting apply. Use this event if you intended to prevent sorting on data update. Use e.preventDefault() to prevent sorting data change during rows source update.
          */
-        "onBeforeSourceSortingApply"?: (event: CustomEvent<any>) => void;
+        "onBeforesourcesortingapply"?: (event: CustomEvent<any>) => void;
         /**
           * Before trimmed values Use e.preventDefault() to prevent value trimming Update @trimmed if you wish to filter indexes of trimming
          */
-        "onBeforeTrimmed"?: (event: CustomEvent<{ trimmed: Record<number, boolean>; trimmedType: string; type: string }>) => void;
+        "onBeforetrimmed"?: (event: CustomEvent<{ trimmed: Record<number, boolean>; trimmedType: string; type: string }>) => void;
         /**
           * On header click.
          */
-        "onHeaderClick"?: (event: CustomEvent<RevoGrid.ColumnRegular>) => void;
+        "onHeaderclick"?: (event: CustomEvent<RevoGrid.ColumnRegular>) => void;
         /**
-          * Row order change started. Use e.preventDefault() to prevent row order change. Use e.text = 'new name' to change item name on start.
+          * Row order change started. Use e.preventDefault() to prevent rgRow order change. Use e.text = 'new name' to change item name on start.
          */
-        "onRowDragStart"?: (event: CustomEvent<{ pos: RevoGrid.PositionItem; text: string }>) => void;
+        "onRowdragstart"?: (event: CustomEvent<{ pos: RevoGrid.PositionItem; text: string }>) => void;
         /**
-          * Before row order apply. Use e.preventDefault() to prevent row order change.
+          * Before rgRow order apply. Use e.preventDefault() to prevent rgRow order change.
          */
-        "onRowOrderChanged"?: (event: CustomEvent<{ from: number; to: number }>) => void;
+        "onRoworderchanged"?: (event: CustomEvent<{ from: number; to: number }>) => void;
         /**
           * Triggered when view port scrolled
          */
-        "onViewportScroll"?: (event: CustomEvent<RevoGrid.ViewPortScrollEvent>) => void;
+        "onViewportscroll"?: (event: CustomEvent<RevoGrid.ViewPortScrollEvent>) => void;
         /**
           * Pinned bottom Source: {[T in ColumnProp]: any} - defines pinned bottom rows data source.
          */
@@ -574,7 +583,7 @@ declare namespace LocalJSX {
          */
         "resize"?: boolean;
         /**
-          * Row class property Define this property in row object and this will be mapped as row class
+          * Row class property Define this property in rgRow object and this will be mapped as rgRow class
          */
         "rowClass"?: string;
         /**
@@ -582,11 +591,11 @@ declare namespace LocalJSX {
          */
         "rowDefinitions"?: RevoGrid.RowDefinition[];
         /**
-          * Excel like show row indexe per row
+          * Excel like show rgRow indexe per rgRow
          */
         "rowHeaders"?: RevoGrid.RowHeaders | boolean;
         /**
-          * Indicates default row size. By default 0, means theme package size will be applied
+          * Indicates default rgRow size. By default 0, means theme package size will be applied
          */
         "rowSize"?: number;
         /**
@@ -599,7 +608,7 @@ declare namespace LocalJSX {
         "theme"?: ThemeSpace.Theme;
         /**
           * Trimmed rows Functionality which allows to hide rows from main data set
-          * @trimmedRows are physical row indexes to hide
+          * @trimmedRows are physical rgRow indexes to hide
          */
         "trimmedRows"?: Record<number, boolean>;
         /**

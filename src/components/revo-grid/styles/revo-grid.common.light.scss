@@ -8,12 +8,12 @@
 
   .rowHeaders {
     background-color: #f7faff;
-    revogr-data .data-cell {
+    revogr-data .rgCell {
       color: #757a82;
     }
   }
   revogr-header {
-    .header-row {
+    .header-rgRow {
       &.group {
         $shadow-bottom: 0 -1px 0 0 $header-border-color inset;
         box-shadow: $shadow-bottom;
@@ -25,7 +25,7 @@
         box-shadow: $shadow-top, $shadow-bottom;
       }
     }
-    .data-header-cell {
+    .rgHeaderCell {
       &.sortable {
         &:hover {
           background-color: #f1f1f1;
@@ -52,15 +52,15 @@
   }
 
   revogr-data {
-    .row {
+    .rgRow {
       box-shadow: $cell-shadow-cell;
 
-      &.focused-row {
+      &.focused-rgRow {
         background-color: $focused-header;
       }
     }
 
-    .data-cell {
+    .rgCell {
       color: rgba(black, 0.87);
 
       &.disabled {

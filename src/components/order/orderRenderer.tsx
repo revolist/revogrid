@@ -9,7 +9,7 @@ type Props = { ref: { (e: OrdererService): void } };
 export class OrdererService {
   private parentY: number = 0;
   el!: HTMLElement;
-  row!: HTMLElement;
+  rgRow!: HTMLElement;
   text!: HTMLElement;
   draggable!: HTMLElement;
 
@@ -38,10 +38,10 @@ export class OrdererService {
   }
 
   private moveElement(y: number): void {
-    if (!this.row) {
+    if (!this.rgRow) {
       return;
     }
-    this.row.style.transform = `translateY(${y}px)`;
+    this.rgRow.style.transform = `translateY(${y}px)`;
   }
 }
 
@@ -54,7 +54,7 @@ const OrderRenderer = ({ ref }: Props): VNode[] => {
         <span class="revo-alt-icon" />
         <span ref={e => (service.text = e)} />
       </div>
-      <div class="drag-position" ref={e => (service.row = e)} />
+      <div class="drag-position" ref={e => (service.rgRow = e)} />
     </div>
   );
 };

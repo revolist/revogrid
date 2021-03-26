@@ -47,7 +47,7 @@ export type ViewportData = {
   dimensionRow: Observable<RevoGrid.DimensionSettingsState>;
   dimensionCol: Observable<RevoGrid.DimensionSettingsState>;
 
-  /** We use this store to define is row selected */
+  /** We use this store to define is rgRow selected */
   rowSelectionStore: Observable<Selection.SelectionStoreState>;
   /** Selection connection */
   segmentSelectionStore: Observable<Selection.SelectionStoreState>;

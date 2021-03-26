@@ -3,7 +3,7 @@ revogr-data {
   width: 100%;
   position: relative;
 
-  .row {
+  .rgRow {
     position: absolute;
     width: 100%;
     left: 0;
@@ -53,7 +53,7 @@ revogr-data {
     }
   }
 
-  .data-cell {
+  .rgCell {
     top: 0;
     position: absolute;
     box-sizing: border-box;

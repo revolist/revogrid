@@ -27,17 +27,17 @@ revogr-viewport-scroll {
     z-index: 2;
     font-size: 10px;
 
-    revogr-data .data-cell {
+    revogr-data .rgCell {
       text-align: center;
     }
 
-    .data-cell {
+    .rgCell {
       padding: 0 1em !important;
       min-width: 100%;
     }
   }
 
-  &.col {
+  &.rgCol {
     flex-grow: 1;
   }
 

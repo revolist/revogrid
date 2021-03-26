@@ -48,14 +48,14 @@ export default class FilterPlugin extends BasePlugin {
     if (config) {
       this.initConfig(config);
     }
-    const headerClick = (e: HeaderEvent) => this.headerClick(e);
-    const afterSourceSet = () => {
+    const headerclick = (e: HeaderEvent) => this.headerclick(e);
+    const aftersourceset = () => {
       if (Object.keys(this.filterCollection).length) {
         this.filterByProps(this.filterCollection);
       }
     };
-    this.addEventListener('headerClick', headerClick);
-    this.addEventListener('afterSourceSet', afterSourceSet);
+    this.addEventListener('headerclick', headerclick);
+    this.addEventListener('aftersourceset', aftersourceset);
 
     this.revogrid.registerVNode([
       <revogr-filter-panel
@@ -105,7 +105,7 @@ export default class FilterPlugin extends BasePlugin {
     }
   }
 
-  private async headerClick(e: HeaderEvent) {
+  private async headerclick(e: HeaderEvent) {
     const el = e.detail.originalEvent?.target as HTMLElement;
     if (!isFilterBtn(el)) {
       return;
@@ -187,7 +187,7 @@ export default class FilterPlugin extends BasePlugin {
     }
     const source = await this.revogrid.getSource();
     const columns = await this.revogrid.getColumns();
-    const { defaultPrevented, detail } = this.emit('beforeFilterApply', { collection: this.filterCollection, source, columns });
+    const { defaultPrevented, detail } = this.emit('beforefilterapply', { collection: this.filterCollection, source, columns });
     if (defaultPrevented) {
       return;
     }
@@ -200,8 +200,8 @@ export default class FilterPlugin extends BasePlugin {
   async doFiltering(collection: FilterCollection, items: RevoGrid.DataType[], columns: RevoGrid.ColumnRegular[]) {
     const columnsToUpdate: RevoGrid.ColumnRegular[] = [];
     // todo improvement: loop through collection of props
-    columns.forEach(col => {
-      const column = { ...col };
+    columns.forEach(rgCol => {
+      const column = { ...rgCol };
       const hasFilter = collection[column.prop];
       if (column[FILTER_PROP] && !hasFilter) {
         delete column[FILTER_PROP];
@@ -214,7 +214,7 @@ export default class FilterPlugin extends BasePlugin {
     });
     const itemsToFilter = this.getRowFilter(items, collection);
     // check is filter event prevented
-    const { defaultPrevented, detail } = this.emit('beforeFilterTrimmed', { collection, itemsToFilter, source: items });
+    const { defaultPrevented, detail } = this.emit('beforefiltertrimmed', { collection, itemsToFilter, source: items });
     if (defaultPrevented) {
       return;
     }

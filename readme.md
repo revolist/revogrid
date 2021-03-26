@@ -36,7 +36,7 @@ Support Millions of cells and thousands of columns easy and efficiently for fast
 - Millions of cells viewport with a powerful core in-build by default;
 - Keyboard support with excel like focus;
 - Super light initial starter <img src="https://badgen.net/bundlephobia/min/@revolist/revogrid@latest" alt="Min size"/>. Can be imported with polifill or as module for modern browsers;
-- Intelligent Virtual DOM and smart row recombination in order to achieve less redraws;
+- Intelligent Virtual DOM and smart rgRow recombination in order to achieve less redraws;
 - Sorting (multiple options, can be customized per column and advanced with events);
 - Filtering
   - Predefined system filters;
@@ -118,122 +118,66 @@ yarn add @revolist/revogrid;
 
 Grid works as web component.
 All you have to do just to place component on the page and access it properties as an element.
+We provide many ways to integrate our grid in your project:
 
-### Add component to your project with index.html:
+- [Import grid to your index.html file](./docs/indexhtml.md);
+- [Import as module with lazy loading](./docs/indexmodule.md);
+- [Import inside builders like webpack using lazy loading module](./docs/webpack.md);
+- [Import as esm module without lazy loading](./docs/custom.element.md);
 
-```html
-<!DOCTYPE html>
-<html>
-  <head>
-    // Import from node modules
-    <script src="node_modules/@revolist/revogrid/dist/revo-grid/revo-grid.js"></script>
 
-    // With unpkg
-    <script src="https://cdn.jsdelivr.net/npm/@revolist/revogrid@latest/dist/revo-grid/revo-grid.js"></script>
-  </head>
-  <body>
-    // after you imported file to your project simply define component
-    <revo-grid class="grid-component" />
-  </body>
-</html>
-```
-
-### Or import as module:
-
-Alternatively, if you wanted to take advantage of ES Modules, you could include the components using an import statement.
-Note that in this scenario applyPolyfills is needed if you are targeting Edge or IE11.
-
-```html
-<script type="module">
-  import { defineCustomElements, applyPolyfills } from 'https://unpkg.com/@revolist/revogrid@latest/loader/index.es2017.js';
-  defineCustomElements();
-</script>
-```
-
-### Or import with webpack:
-
-```javascript
-import { defineCustomElements } from '@revolist/revogrid/loader';
-defineCustomElements(); // let browser know new component registered
-```
+### Vanilla Js grid usage
 
 ```javascript
 const grid = document.querySelector('revo-grid');
 const columns = [
-  {
-    prop: 'name',
-    name: 'First column',
-  },
+  { prop: 'name', name: 'First column' },
   {
     prop: 'details',
     name: 'Second column',
     cellTemplate: (createElement, props) => {
-      return createElement(
-        'div',
+      return createElement('div',
         {
-          style: {
-            backgroundColor: 'red',
-          },
-          class: {
-            'inner-cell': true,
-          },
+          style: { backgroundColor: 'red' },
+          class: { 'inner-cell': true },
         },
         props.model[props.prop] || '',
       );
     },
   },
 ];
-const items = [
-  {
-    name: 'New item',
-    details: 'Item description',
-  },
-];
-
+const items = [{ name: 'New item', details: 'Item description' }];
 grid.columns = columns;
 grid.source = items;
 ```
 
-## Usage VueJs
+## Framework usage VueJs example
 
 ```vue
 <template>
-  <div id="app">
-    <v-grid v-if="grid === 1" key="1" theme="compact" :source="rows" :columns="columns"></v-grid>
-  </div>
+  <v-grid :source="rows" :columns="columns"/>
 </template>
 
 <script>
 import VGrid from '@revolist/vue-datagrid';
-// vue 3 @revolist/vue3-datagrid;
 export default {
   name: 'App',
-  data() {
-    return {
+  data() => ({
       columns: [
-        {
-          prop: 'name',
-          name: 'First',
-        },
-        {
-          prop: 'details',
-          name: 'Second',
-        },
+        { prop: 'name', name: 'First' },
+        { prop: 'details', name: 'Second' },
       ],
-      rows: [
-        {
-          name: '1',
-          details: 'Item 1',
-        },
-      ],
+      rows: [{ name: '1', details: 'Item 1' }],
     };
-  },
-  components: {
-    VGrid,
-  },
+  }),
+  components: { VGrid },
 };
 </script>
 ```
+
+## Versions
+- 2.0+ Introduced plugin system, grouping, sorting and filtering.
+- 3.0+ Breaking changes introduced [version](./docs//migration.3.0.md). New component loading and esm modules. Bootstrap support and much [more](./docs/migration.3.0.md).
 
 ## Contributing
 
