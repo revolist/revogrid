@@ -235,6 +235,10 @@ export default {
 </script>
 ```
 
+## Versions
+- 2.0+ Introduced plugin system, grouping, sorting and filtering.
+- 3.0+ Breaking changes introduced [version](./migration.3.0.md). New component loading and esm modules. Bootstrap support and much [more](./migration.3.0.md).
+
 ## Contributing
 
 If you have any idea, feel free to open an issue to discuss a new feature, or fork RevoGrid and submit your changes back to me.
