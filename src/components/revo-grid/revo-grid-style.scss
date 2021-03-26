@@ -37,7 +37,7 @@ revo-grid {
   .viewports {
     max-height: 100%;
     display: flex;
-    flex-direction: rgRow;
+    flex-direction: row;
     align-items: flex-start;
     max-width: 100%;
   }
@@ -51,7 +51,7 @@ revo-grid {
     flex-grow: 1;
     height: 0;
     display: flex;
-    flex-direction: rgRow;
+    flex-direction: row;
   }
 
   .draggable {
