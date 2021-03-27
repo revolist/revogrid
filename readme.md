@@ -75,6 +75,7 @@ Support Millions of cells and thousands of columns easy and efficiently for fast
 - Easy extenation and support with modern VNode features and tsx support;
 - Trimmed rows (hide rows on demand);
 - Plugin system (create your own plugins or extend existing one, it's transparent and easy);
+- Automated size calculation;
 - Hundred others small customizations and improvements [RevoGrid](https://revolist.github.io/revogrid).
 
 ## Overview
