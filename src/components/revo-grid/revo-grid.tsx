@@ -468,23 +468,30 @@ export class RevoGridComponent {
     return this.viewport?.getFocused();
   }
 
+
+  // --------------------------------------------------------------------------
+  //
+  //  Listeners outside scope
+  //
+  // --------------------------------------------------------------------------
+  
+  /** Clear data which is outside of grid container */
+  private handleOutsideClick({ target }: { target: HTMLElement | null }) {
+    if (!target?.closest(`[${UUID}="${this.uuid}"]`)) {
+      this.clearFocus();
+    }
+  }
+
   // --------------------------------------------------------------------------
   //
   //  Listeners
   //
   // --------------------------------------------------------------------------
 
-  /** Clear data which is outside of grid container */
-  @Listen('click', { target: 'document' })
-  handleOutsideClick({ target }: { target: HTMLElement | null }) {
-    if (!target?.closest(`[${UUID}="${this.uuid}"]`)) {
-      this.clearFocus();
-    }
-  }
+
 
   /** DRAG AND DROP */
-  @Listen('internalRowDragStart')
-  onRowDragStarted(e: CustomEvent<{ pos: RevoGrid.PositionItem; text: string; event: MouseEvent }>) {
+  @Listen('internalRowDragStart') onRowDragStarted(e: CustomEvent<{ pos: RevoGrid.PositionItem; text: string; event: MouseEvent }>) {
     e.cancelBubble = true;
     const dragStart = this.rowdragstart.emit(e.detail);
     if (dragStart.defaultPrevented) {
@@ -494,24 +501,20 @@ export class RevoGridComponent {
     this.orderService?.start(this.element, { ...e.detail, ...dragStart.detail });
   }
 
-  @Listen('internalRowDragEnd')
-  onRowDragEnd() {
+  @Listen('internalRowDragEnd') onRowDragEnd() {
     this.orderService?.end();
   }
 
-  @Listen('internalRowDrag')
-  onRowDrag({ detail }: CustomEvent<RevoGrid.PositionItem>) {
+  @Listen('internalRowDrag') onRowDrag({ detail }: CustomEvent<RevoGrid.PositionItem>) {
     this.orderService?.move(detail);
   }
 
-  @Listen('internalRowMouseMove')
-  onRowMouseMove(e: CustomEvent<Selection.Cell>): void {
+  @Listen('internalRowMouseMove') onRowMouseMove(e: CustomEvent<Selection.Cell>): void {
     e.cancelBubble = true;
     this.orderService?.moveTip(e.detail);
   }
 
-  @Listen('internalCellEdit')
-  async onBeforeEdit(e: CustomEvent<Edition.BeforeSaveDataDetails>) {
+  @Listen('internalCellEdit') async onBeforeEdit(e: CustomEvent<Edition.BeforeSaveDataDetails>) {
     e.cancelBubble = true;
     const { defaultPrevented, detail } = this.beforeedit.emit(e.detail);
     await timeout();
@@ -522,8 +525,7 @@ export class RevoGridComponent {
     }
   }
 
-  @Listen('internalRangeDataApply')
-  onBeforeRangeEdit(e: CustomEvent<Edition.BeforeRangeSaveDataDetails>) {
+  @Listen('internalRangeDataApply') onBeforeRangeEdit(e: CustomEvent<Edition.BeforeRangeSaveDataDetails>) {
     e.cancelBubble = true;
     const { defaultPrevented } = this.beforerangeedit.emit(e.detail);
     if (defaultPrevented) {
@@ -533,8 +535,7 @@ export class RevoGridComponent {
     this.afteredit.emit(e.detail);
   }
 
-  @Listen('internalSelectionChanged')
-  onRangeChanged(e: CustomEvent<Selection.ChangedRange>) {
+  @Listen('internalSelectionChanged') onRangeChanged(e: CustomEvent<Selection.ChangedRange>) {
     e.cancelBubble = true;
     const beforeaange = this.beforeaange.emit(e.detail);
     if (beforeaange.defaultPrevented) {
@@ -546,8 +547,7 @@ export class RevoGridComponent {
     }
   }
 
-  @Listen('initialRowDropped')
-  onRowDropped(e: CustomEvent<{ from: number; to: number }>) {
+  @Listen('initialRowDropped') onRowDropped(e: CustomEvent<{ from: number; to: number }>) {
     e.cancelBubble = true;
     const { defaultPrevented } = this.roworderchanged.emit(e.detail);
     if (defaultPrevented) {
@@ -555,8 +555,7 @@ export class RevoGridComponent {
     }
   }
 
-  @Listen('initialHeaderClick')
-  onHeaderClick(e: CustomEvent<RevoGrid.InitialHeaderClick>) {
+  @Listen('initialHeaderClick') onHeaderClick(e: CustomEvent<RevoGrid.InitialHeaderClick>) {
     const { defaultPrevented } = this.headerclick.emit({
       ...e.detail.column,
       originalEvent: e.detail.originalEvent,
@@ -566,8 +565,7 @@ export class RevoGridComponent {
     }
   }
 
-  @Listen('internalFocusCell')
-  onCellFocus(e: CustomEvent<Edition.BeforeSaveDataDetails>) {
+  @Listen('internalFocusCell') onCellFocus(e: CustomEvent<Edition.BeforeSaveDataDetails>) {
     e.cancelBubble = true;
     const { defaultPrevented } = this.beforecellfocus.emit(e.detail);
     if (!this.canFocus || defaultPrevented) {
@@ -584,7 +582,7 @@ export class RevoGridComponent {
   // for internal plugin usage
   @State() extraElements: VNode[] = [];
 
-  protected uuid: string | null = null;
+  uuid: string | null = null;
   columnProvider: ColumnDataProvider;
   dataProvider: DataProvider;
   dimensionProvider: DimensionProvider;
@@ -601,6 +599,7 @@ export class RevoGridComponent {
    * Define plugins collection
    */
   private internalPlugins: RevoPlugin.Plugin[] = [];
+  private subscribers: Record<string, () => void> = {};
 
   @Element() element: HTMLRevoGridElement;
 
@@ -762,12 +761,21 @@ export class RevoGridComponent {
       });
       this.viewportscroll.emit(e);
     });
+    this.subscribers = { 'click': this.handleOutsideClick.bind(this) };
+    for (let type in this.subscribers) {
+      document.addEventListener(type, this.subscribers[type]);
+    }
   }
 
   disconnectedCallback() {
     // destroy plugins on element disconnect
     each(this.internalPlugins, p => p.destroy());
     this.internalPlugins = [];
+    // clear events
+    for (let type in this.subscribers) {
+      document.removeEventListener(type, this.subscribers[type]);
+      delete this.subscribers[type];
+    }
   }
 
   render() {

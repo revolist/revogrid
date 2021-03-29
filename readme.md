@@ -177,7 +177,7 @@ export default {
 
 ## Versions
 - 2.0+ Introduced plugin system, grouping, sorting and filtering.
-- 3.0+ Breaking changes introduced [version](./docs//migration.3.0.md). New component loading and esm modules. Bootstrap support and much [more](./docs/migration.3.0.md).
+- 3.0+ Breaking changes introduced [version](./docs/migration.3.0.md). New component loading and esm modules. Bootstrap support and much [more](./docs/migration.3.0.md).
 
 ## Contributing
 
