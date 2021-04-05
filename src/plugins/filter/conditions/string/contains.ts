@@ -8,7 +8,7 @@ const contains: LogicFunction = (value: LogicFunctionParam, extra?: LogicFunctio
     if (typeof value !== 'string') {
       value = JSON.stringify(value);
     }
-    return value.toLocaleLowerCase().indexOf(extra) > -1;
+    return value.toLocaleLowerCase().indexOf(extra.toString().toLowerCase()) > -1;
   }
   return true;
 };
