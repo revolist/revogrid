@@ -27,6 +27,7 @@ import GridScrollingService from './viewport.scrolling.service';
 import { UUID } from '../../utils/consts';
 import SelectionStoreConnector from '../../services/selection.store.connector';
 import { OrdererService } from '../order/orderRenderer';
+import StretchColumn, { isStretchPlugin } from '../../plugins/stretchPlugin';
 
 @Component({
   tag: 'revo-grid',
@@ -133,13 +134,19 @@ export class RevoGridComponent {
    * Can be boolean
    * Can be export options
    */
-  @Prop() exporting: boolean = false;
+  @Prop() exporting = false;
 
   /**
    * Group models by provided properties
    * Define properties to be groped by
    */
   @Prop() grouping: GroupingOptions;
+
+  /**
+   * Defines stretch strategy for columns with @StretchColumn plugin
+   * if there are more space on the right last column size would be increased
+   */
+  @Prop() stretch: boolean|string = false;
 
   // --------------------------------------------------------------------------
   //
@@ -253,6 +260,10 @@ export class RevoGridComponent {
 
   /**  Before column update */
   @Event() beforecolumnsset: EventEmitter<ColumnCollection>;
+
+  /**  Before column applied but after column set gathered and viewport updated */
+  @Event() beforecolumnapplied: EventEmitter<ColumnCollection>;
+  
 
   /**  Column updated */
   @Event() aftercolumnsset: EventEmitter<{
@@ -611,6 +622,7 @@ export class RevoGridComponent {
       this.dimensionProvider.setRealSize(items.length, type);
       this.dimensionProvider.setColumns(type, ColumnDataProvider.getSizes(items), type !== 'rgCol');
     }
+    this.beforecolumnapplied.emit(columnGather);
     const columns = this.columnProvider.setColumns(columnGather);
     this.aftercolumnsset.emit({
       columns,
@@ -702,6 +714,20 @@ export class RevoGridComponent {
     grPlugin.setGrouping(newVal || {});
   }
 
+  @Watch('stretch') applyStretch(isStretch: boolean|string) {
+    let stretch = this.internalPlugins.filter(p => isStretchPlugin(p))[0];
+    if (isStretch) {
+      if(!stretch) {
+        this.internalPlugins.push(new StretchColumn(this.element, this.dimensionProvider));
+      } else {
+        (stretch as StretchColumn).applyStretch(this.columnProvider.getRawColumns());
+      }
+    } else if (stretch) {
+      const index = this.internalPlugins.indexOf(stretch);
+      this.internalPlugins.splice(index, 1);
+    }
+  }
+
   connectedCallback() {
     this.viewportProvider = new ViewportProvider();
     this.themeService = new ThemeService({
@@ -744,6 +770,7 @@ export class RevoGridComponent {
         columnProvider: this.columnProvider,
       }),
     );
+    this.applyStretch(this.stretch);
     this.themeChanged(this.theme);
     this.columnChanged(this.columns);
     this.dataChanged(this.source);

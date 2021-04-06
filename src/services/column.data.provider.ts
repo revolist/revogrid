@@ -59,6 +59,17 @@ export default class ColumnDataProvider {
     return getSourceItem(this.dataSources[type].store, virtualIndex);
   }
 
+  getRawColumns() {
+    return reduce(this.dataSources, (result: ColumnItems, item, type: RevoGrid.DimensionCols) => {
+      result[type] = item.store.get('source');
+      return result;
+    }, {
+      rgCol: [],
+      colPinStart: [],
+      colPinEnd: []
+    });
+  }
+
   getColumns(type: DimensionCols | 'all' = 'all') {
     if (type !== 'all') {
       return this.dataSources[type].store.get('source');

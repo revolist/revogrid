@@ -27,7 +27,7 @@ export class RevogrHeaderComponent {
 
   @Event() initialHeaderClick: EventEmitter<RevoGrid.InitialHeaderClick>;
   @Event() headerResize: EventEmitter<RevoGrid.ViewSettingSizeProp>;
-  @Event() headerDblClick: EventEmitter<RevoGrid.InitialHeaderClick>;
+  @Event() headerdblClick: EventEmitter<RevoGrid.InitialHeaderClick>;
 
   private onResize({ width }: { width?: number }, index: number): void {
     this.headerResize.emit({ [index]: width || 0 });
@@ -63,7 +63,7 @@ export class RevogrHeaderComponent {
           canFilter={!!this.columnFilter}
           canResize={this.canResize}
           onResize={e => this.onResize(e, rgCol.itemIndex)}
-          onDoubleClick={e => this.headerDblClick.emit(e)}
+          onDoubleClick={e => this.headerdblClick.emit(e)}
           onClick={e => this.initialHeaderClick.emit(e)}
         />,
       );

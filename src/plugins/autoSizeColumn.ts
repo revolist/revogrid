@@ -114,7 +114,7 @@ export default class AutoSizeColumn extends BasePlugin {
         this.addEventListener('afteredit', afterEditAll);
         break;
       default:
-        this.addEventListener('headerDblClick', headerDblClick);
+        this.addEventListener('headerdblClick', headerDblClick);
         break;
     }
   }

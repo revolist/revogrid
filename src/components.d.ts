@@ -171,6 +171,10 @@ export namespace Components {
          */
         "source": RevoGrid.DataType[];
         /**
+          * Defines stretch strategy for columns with @StretchColumn plugin if there are more space on the right last column size would be increased
+         */
+        "stretch": boolean|string;
+        /**
           * Theme name
          */
         "theme": ThemeSpace.Theme;
@@ -482,6 +486,10 @@ declare namespace LocalJSX {
          */
         "onBeforecellfocus"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
         /**
+          * Before column applied but after column set gathered and viewport updated
+         */
+        "onBeforecolumnapplied"?: (event: CustomEvent<ColumnCollection>) => void;
+        /**
           * Before column update
          */
         "onBeforecolumnsset"?: (event: CustomEvent<ColumnCollection>) => void;
@@ -603,6 +611,10 @@ declare namespace LocalJSX {
          */
         "source"?: RevoGrid.DataType[];
         /**
+          * Defines stretch strategy for columns with @StretchColumn plugin if there are more space on the right last column size would be increased
+         */
+        "stretch"?: boolean|string;
+        /**
           * Theme name
          */
         "theme"?: ThemeSpace.Theme;
@@ -671,8 +683,8 @@ declare namespace LocalJSX {
         "dimensionCol"?: Observable<RevoGrid.DimensionSettingsState>;
         "groupingDepth"?: number;
         "groups"?: Groups;
-        "onHeaderDblClick"?: (event: CustomEvent<RevoGrid.InitialHeaderClick>) => void;
         "onHeaderResize"?: (event: CustomEvent<RevoGrid.ViewSettingSizeProp>) => void;
+        "onHeaderdblClick"?: (event: CustomEvent<RevoGrid.InitialHeaderClick>) => void;
         "onInitialHeaderClick"?: (event: CustomEvent<RevoGrid.InitialHeaderClick>) => void;
         "parent"?: string;
         "selectionStore"?: Observable<Selection.SelectionStoreState>;

@@ -6,19 +6,22 @@ import { mergeSortedArray } from '../../utils/utils';
 import { RevoGrid } from '../../interfaces';
 
 export type DimensionPosition = Pick<RevoGrid.DimensionSettingsState, 'indexes' | 'positionIndexes' | 'originItemSize' | 'positionIndexToItem'>;
-
+type DimensionIndexInput = Pick<RevoGrid.DimensionSettingsState, 'indexes' | 'originItemSize' | 'indexToItem'>;
 export type DimensionSize = Pick<RevoGrid.DimensionSettingsState, 'indexes' | 'positionIndexes' | 'positionIndexToItem' | 'indexToItem' | 'realSize' | 'sizes'>;
 /**
- * Pre-calculation dimension sizes and sizes for each cell
+ * Pre-calculation
+ * Dimension sizes for each cell
  */
-export function calculateDimensionData(state: RevoGrid.DimensionSettingsState, newSizes: RevoGrid.ViewSettingSizeProp): DimensionSize {
+export function calculateDimensionData(
+  state: RevoGrid.DimensionSettingsState,
+  newSizes: RevoGrid.ViewSettingSizeProp): DimensionSize {
   let positionIndexes: number[] = [];
 
   const positionIndexToItem: { [position: number]: RevoGrid.PositionItem } = {};
   const indexToItem: { [index: number]: RevoGrid.PositionItem } = {};
 
   // to compare how real width changed
-  let newTotal: number = 0;
+  let newTotal = 0;
 
   // combine all sizes
   const sizes: RevoGrid.ViewSettingSizeProp = { ...state.sizes, ...newSizes };
@@ -69,7 +72,7 @@ export function calculateDimensionData(state: RevoGrid.DimensionSettingsState, n
   };
 }
 
-export function getItemByPosition({ indexes, positionIndexes, originItemSize, positionIndexToItem }: DimensionPosition, pos: number): RevoGrid.PositionItem {
+export function getItemByPosition({ indexes, positionIndexes, originItemSize, positionIndexToItem }: DimensionPosition, pos: number) {
   const item: RevoGrid.PositionItem = {
     itemIndex: 0,
     start: 0,
@@ -97,7 +100,8 @@ export function getItemByPosition({ indexes, positionIndexes, originItemSize, po
   return item;
 }
 
-export function getItemByIndex(dimension: Pick<RevoGrid.DimensionSettingsState, 'indexes' | 'originItemSize' | 'indexToItem'>, index: number): RevoGrid.PositionItem {
+
+export function getItemByIndex(dimension: DimensionIndexInput, index: number) {
   let item: RevoGrid.PositionItem = {
     itemIndex: index,
     start: 0,

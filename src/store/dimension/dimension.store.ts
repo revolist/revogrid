@@ -56,8 +56,8 @@ export default class DimensionStore {
   }
 
   setRealSize(count: number): void {
-    let realSize: number = 0;
-    for (let i: number = 0; i < count; i++) {
+    let realSize = 0;
+    for (let i = 0; i < count; i++) {
       realSize += this.store.get('sizes')[i] || this.store.get('originItemSize');
     }
     setStore(this.store, { realSize });
@@ -67,7 +67,7 @@ export default class DimensionStore {
     setStore(this.store, data);
   }
 
-  setDimensionSize(sizes: RevoGrid.ViewSettingSizeProp): DimensionSize {
+  setDimensionSize(sizes: RevoGrid.ViewSettingSizeProp) {
     const dimensionData: DimensionSize = calculateDimensionData(this.getCurrentState(), sizes);
     setStore(this.store, dimensionData);
     return dimensionData;
