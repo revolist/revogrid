@@ -8,6 +8,11 @@ export default abstract class BasePlugin implements RevoPlugin.Plugin {
     this.subscriptions[name] = func;
   }
 
+  protected removeEventListener(type: string) {
+    this.revogrid.removeEventListener(type, this.subscriptions[type]);
+    delete this.subscriptions[type];
+  }
+
   protected emit(eventName: string, detail?: any) {
     const event = new CustomEvent(eventName, { detail: detail, cancelable: true });
     this.revogrid.dispatchEvent(event);
@@ -16,8 +21,7 @@ export default abstract class BasePlugin implements RevoPlugin.Plugin {
 
   protected clearSubscriptions() {
     for (let type in this.subscriptions) {
-      this.revogrid.removeEventListener(type, this.subscriptions[type]);
-      delete this.subscriptions[type];
+      this.removeEventListener(type);
     }
   }
 

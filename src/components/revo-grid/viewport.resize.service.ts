@@ -1,4 +1,5 @@
 import throttle from 'lodash/throttle';
+import { resizeObserver } from '../../utils/resizeObserver';
 interface Events {
   resize(entries: ReadonlyArray<ResizeObserverEntry>, observer: ResizeObserver): void;
 }
@@ -10,11 +11,7 @@ export default class GridResizeService {
   }
 
   async init(el: HTMLElement): Promise<void> {
-    if (!('ResizeObserver' in window)) {
-      const module = await import('@juggle/resize-observer');
-      window.ResizeObserver = (module.ResizeObserver as unknown) as typeof ResizeObserver;
-    }
-
+    await resizeObserver();
     this.resizeObserver = new ResizeObserver(this.resize);
     this.resizeObserver?.observe(el);
   }

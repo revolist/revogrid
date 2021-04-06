@@ -16,15 +16,19 @@ import { CONTENT_SLOT, FOOTER_SLOT, HEADER_SLOT } from '../revo-grid/viewport.he
 export class RevogrViewportScroll {
   @Event({ bubbles: false }) scrollViewport: EventEmitter<RevoGrid.ViewPortScrollEvent>;
   @Event() resizeViewport: EventEmitter<RevoGrid.ViewPortResizeEvent>;
+  @Event() scrollchange: EventEmitter<{
+    type: RevoGrid.DimensionType;
+    hasScroll: boolean;
+  }>;
 
   /**
    * Width of inner content
    */
-  @Prop() contentWidth: number = 0;
+  @Prop() contentWidth = 0;
   /**
    * Height of inner content
    */
-  @Prop() contentHeight: number = 0;
+  @Prop() contentHeight = 0;
 
   private oldValY = this.contentHeight;
   private oldValX = this.contentWidth;
@@ -72,7 +76,7 @@ export class RevogrViewportScroll {
     return e;
   }
 
-  connectedCallback(): void {
+  connectedCallback() {
     /**
      * Bind scroll functions for farther usage
      */
@@ -96,7 +100,7 @@ export class RevogrViewportScroll {
     });
   }
 
-  componentDidLoad(): void {
+  componentDidLoad() {
     /**
      * Track horizontal viewport resize
      */
@@ -141,7 +145,7 @@ export class RevogrViewportScroll {
     const hasScroll = size < innerContentSize;
     let el: HTMLElement;
     // event reference for binding
-    let event: { (e: MouseEvent): void };
+    let event: (e: MouseEvent) => void;
     switch (type) {
       case 'rgCol':
         el = this.horizontalScroll;
@@ -154,15 +158,16 @@ export class RevogrViewportScroll {
     }
     // based on scroll visibility assign or remove class and event
     if (hasScroll) {
-      el.classList.add('scroll');
+      el.classList.add(`scroll-${type}`);
       el.addEventListener('mousewheel', event);
     } else {
-      el.classList.remove('scroll');
+      el.classList.remove(`scroll-${type}`);
       el.removeEventListener('mousewheel', event);
     }
+    this.scrollchange.emit({ type, hasScroll });
   }
 
-  disconnectedCallback(): void {
+  disconnectedCallback() {
     this.verticalScroll.removeEventListener('mousewheel', this.verticalMouseWheel);
     this.horizontalScroll.removeEventListener('mousewheel', this.horizontalMouseWheel);
     this.horisontalResize.destroy();
@@ -226,7 +231,7 @@ export class RevogrViewportScroll {
    * Extra layer for scroll event monitoring, where MouseWheel event is not passing
    * We need to trigger scroll event in case there is no mousewheel event
    */
-  private onScroll(dimension: RevoGrid.DimensionType, e: MouseEvent): void {
+  private onScroll(dimension: RevoGrid.DimensionType, e: MouseEvent) {
     const target = e.target as HTMLElement | undefined;
     let scroll = 0;
     switch (dimension) {
@@ -244,7 +249,7 @@ export class RevogrViewportScroll {
   }
 
   /** remember last mw event time */
-  private latestScrollUpdate(dimension: RevoGrid.DimensionType): void {
+  private latestScrollUpdate(dimension: RevoGrid.DimensionType) {
     this.mouseWheelScroll[dimension] = new Date().getTime();
   }
 

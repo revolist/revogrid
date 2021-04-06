@@ -12,20 +12,22 @@ import { Observable, RevoGrid } from '../../interfaces';
 
 type Item = keyof RevoGrid.DimensionSettingsState;
 
-function initialState(): RevoGrid.DimensionSettingsState {
+function initialBase(): RevoGrid.DimensionCalc {
   return {
     indexes: [],
-
     // item index to size
     sizes: {},
-
     // order in indexes[] to coordinate
     positionIndexToItem: {},
-
     // initial element to coordinate ^
     indexToItem: {},
-    positionIndexes: [],
+    positionIndexes: []
+  };
+}
 
+function initialState(): RevoGrid.DimensionSettingsState {
+  return {
+    ...initialBase(),
     // size which all items can take
     realSize: 0,
 
@@ -65,6 +67,10 @@ export default class DimensionStore {
 
   setStore<T extends { [key: string]: any }>(data: Partial<T>) {
     setStore(this.store, data);
+  }
+
+  drop() {
+    setStore(this.store, initialBase());
   }
 
   setDimensionSize(sizes: RevoGrid.ViewSettingSizeProp) {

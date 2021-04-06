@@ -245,12 +245,14 @@ export declare namespace RevoGrid {
   //
   // --------------------------------------------------------------------------
 
-  interface DimensionSettingsState {
+  interface DimensionCalc {
     indexes: number[];
     positionIndexes: number[];
     positionIndexToItem: { [position: number]: PositionItem };
     indexToItem: { [index: number]: PositionItem };
     sizes: ViewSettingSizeProp;
+  }
+  interface DimensionSettingsState extends DimensionCalc {
     frameOffset: number;
     realSize: number;
     originItemSize: number;
