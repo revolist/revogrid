@@ -59,6 +59,7 @@ export function generateFakeDataObject(config = {}) {
         name: generateHeader(rgCol),
         prop: rgCol,
         sortable: true,
+        size: 200
       };
 
       // apply config
