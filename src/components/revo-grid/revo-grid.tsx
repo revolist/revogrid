@@ -146,7 +146,7 @@ export class RevoGridComponent {
    * Defines stretch strategy for columns with @StretchColumn plugin
    * if there are more space on the right last column size would be increased
    */
-  @Prop() stretch: boolean|string = false;
+  @Prop() stretch: boolean|string = true;
 
   // --------------------------------------------------------------------------
   //
@@ -825,6 +825,7 @@ export class RevoGridComponent {
           dimensions={this.dimensionProvider.stores}
           orderRef={e => (this.orderService = e)}
           registerElement={(e, k) => this.scrollingService.registerElement(e, k)}
+          nakedClick={() => this.viewport.clearEdit()}
           onScroll={details => this.scrollingService.onScroll(details)}
         >
           {this.rowHeaders ? (

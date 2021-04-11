@@ -85,7 +85,7 @@
     <section class="content">
       <div class="tile large grid-holder">
         <!-- Grid init-->
-        <revo-grid theme="compact" class="my" key="1"></revo-grid>
+        <revo-grid class="my" key="1"></revo-grid>
       </div>
     </section>
 
@@ -258,7 +258,7 @@
       grid.range = true;
       grid.resize = true;
       grid.filter = true;
-      grid.stretch = true;
+      // grid.stretch = true;
       grid.exporting = true;
       grid.rowDefinitions = [{
           type: 'rgRow',
@@ -279,7 +279,7 @@
           size: 100
         }]; */
       // default
-      setData({ rows: 100, cols: 3, 'colPinEnd': [2] });
+      setData({ rows: 100, cols: 2, 'colPinEnd': [2] });
 
       // events testing
       // 'beforerange', 'setRange', 'beforefocuslost', 'beforecellfocus', 'beforeedit'

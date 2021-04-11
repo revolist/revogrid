@@ -231,6 +231,10 @@ export default class ViewportService {
     this.sv.selectionStoreConnector.clearAll();
   }
 
+  clearEdit() {
+    this.sv.selectionStoreConnector.setEdit(false);
+  }
+
   getFocused(): FocusedData | null {
     const focused = this.sv.selectionStoreConnector.focusedStore;
     if (!focused) {

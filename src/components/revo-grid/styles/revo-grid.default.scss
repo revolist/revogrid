@@ -12,6 +12,11 @@ revo-grid[theme='default'] {
   font-size: 12px;
 
   revogr-header {
+    $shadow-left: -1px 0 0 0 $header-border-color;
+    $shadow-right: -1px 0 0 0 $header-border-color inset;
+    $shadow-bottom: 0 -1px 0 0 $header-border-color inset;
+    $shadow-top: 0 -1px 0 0 $header-border-color;
+
     text-align: center;
     line-height: $header-size;
     background-color: $header-bg;
@@ -27,13 +32,10 @@ revo-grid[theme='default'] {
     }
     .header-rgRow {
       height: $header-size;
+      box-shadow: $shadow-bottom;
     }
 
     .rgHeaderCell {
-      $shadow-left: -1px 0 0 0 $header-border-color;
-      $shadow-right: -1px 0 0 0 $header-border-color inset;
-      $shadow-bottom: 0 -1px 0 0 $header-border-color inset;
-      $shadow-top: 0 -1px 0 0 $header-border-color;
       box-shadow: $shadow-left, $shadow-right, $shadow-top, $shadow-bottom;
 
       &.focused-cell {
@@ -90,6 +92,7 @@ revo-grid[theme='default'] {
     text-align: center;
     .rgRow {
       line-height: $default-rows-size;
+      box-shadow: $cell-shadow-bottom, $cell-shadow-right;
 
       &.focused-rgRow {
         background-color: $focused-header;
