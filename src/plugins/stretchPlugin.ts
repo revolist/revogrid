@@ -74,7 +74,7 @@ export default class StretchColumn extends BasePlugin {
       // has column
       // no auto size applied
       // size for column shouldn't be defined
-      const colSize = last.size || this.revogrid.colSize;
+      const colSize = last?.size || this.revogrid.colSize || 0;
       const size = sizeDifference + colSize - 1;
       if (last && !last.autoSize && (colSize < size)) {
         this.stretchedColumn = {
