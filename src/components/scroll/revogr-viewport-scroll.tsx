@@ -16,10 +16,8 @@ import { CONTENT_SLOT, FOOTER_SLOT, HEADER_SLOT } from '../revo-grid/viewport.he
 export class RevogrViewportScroll {
   @Event({ bubbles: false }) scrollViewport: EventEmitter<RevoGrid.ViewPortScrollEvent>;
   @Event() resizeViewport: EventEmitter<RevoGrid.ViewPortResizeEvent>;
-  @Event() scrollchange: EventEmitter<{
-    type: RevoGrid.DimensionType;
-    hasScroll: boolean;
-  }>;
+  @Event() scrollchange: EventEmitter<{ type: RevoGrid.DimensionType; hasScroll: boolean; }>;
+  private scrollThrottling = 30;
 
   /**
    * Width of inner content
@@ -80,8 +78,13 @@ export class RevogrViewportScroll {
     /**
      * Bind scroll functions for farther usage
      */
-    this.verticalMouseWheel = this.onVerticalMouseWheel.bind(this, 'rgRow', 'deltaY');
-    this.horizontalMouseWheel = this.onHorizontalMouseWheel.bind(this, 'rgCol', 'deltaX');
+
+    if ('ontouchstart' in document.documentElement) {
+      this.scrollThrottling = 0;
+    } else {
+      this.verticalMouseWheel = this.onVerticalMouseWheel.bind(this, 'rgRow', 'deltaY');
+      this.horizontalMouseWheel = this.onHorizontalMouseWheel.bind(this, 'rgCol', 'deltaX');
+    }
     /**
      * Create local scroll service
      */
@@ -243,7 +246,7 @@ export class RevogrViewportScroll {
         break;
     }
     const change = new Date().getTime() - this.mouseWheelScroll[dimension];
-    if (change > 30) {
+    if (change > this.scrollThrottling) {
       this.scrollService?.scroll(scroll, dimension);
     }
   }

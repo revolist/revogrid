@@ -22,10 +22,10 @@ const initialParams: Params = {
 };
 
 export default class LocalScrollService {
-  private preventArtificialScroll: { [T in RevoGrid.DimensionType]: number | null } = { rgRow: null, rgCol: null };
+  private preventArtificialScroll: Record<RevoGrid.DimensionType, number|null> = { rgRow: null, rgCol: null };
   // to check if scroll changed
-  private previousScroll: { [T in RevoGrid.DimensionType]: number } = { rgRow: 0, rgCol: 0 };
-  private params: { [T in RevoGrid.DimensionType]: Params } = { rgRow: { ...initialParams }, rgCol: { ...initialParams } };
+  private previousScroll: Record<RevoGrid.DimensionType, number> = { rgRow: 0, rgCol: 0 };
+  private params: Record<RevoGrid.DimensionType, Params> = { rgRow: { ...initialParams }, rgCol: { ...initialParams } };
 
   constructor(private cfg: Config) {}
 
@@ -33,7 +33,7 @@ export default class LocalScrollService {
     return contentSize + (virtualSize ? clientSize - virtualSize : 0);
   }
 
-  setParams(params: Params, dimension: RevoGrid.DimensionType): void {
+  setParams(params: Params, dimension: RevoGrid.DimensionType) {
     const virtualContentSize = LocalScrollService.getVirtualContentSize(params.contentSize, params.clientSize, params.virtualSize);
     this.params[dimension] = {
       ...params,
@@ -43,7 +43,7 @@ export default class LocalScrollService {
   }
 
   // apply scroll values after scroll done
-  setScroll(e: RevoGrid.ViewPortScrollEvent): void {
+  setScroll(e: RevoGrid.ViewPortScrollEvent) {
     this.cancelScroll(e.dimension);
     this.preventArtificialScroll[e.dimension] = window.requestAnimationFrame(() => {
       const params = this.getParams(e.dimension);
@@ -58,7 +58,7 @@ export default class LocalScrollService {
   }
 
   // initiate scrolling event
-  scroll(coordinate: number, dimension: RevoGrid.DimensionType, force: boolean = false, delta?: number): void {
+  scroll(coordinate: number, dimension: RevoGrid.DimensionType, force: boolean = false, delta?: number) {
     this.cancelScroll(dimension);
     if (!force && this.previousScroll[dimension] === coordinate) {
       this.previousScroll[dimension] = 0;

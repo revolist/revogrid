@@ -790,10 +790,7 @@ declare namespace LocalJSX {
         "contentWidth"?: number;
         "onResizeViewport"?: (event: CustomEvent<RevoGrid.ViewPortResizeEvent>) => void;
         "onScrollViewport"?: (event: CustomEvent<RevoGrid.ViewPortScrollEvent>) => void;
-        "onScrollchange"?: (event: CustomEvent<{
-    type: RevoGrid.DimensionType;
-    hasScroll: boolean;
-  }>) => void;
+        "onScrollchange"?: (event: CustomEvent<{ type: RevoGrid.DimensionType; hasScroll: boolean; }>) => void;
     }
     interface IntrinsicElements {
         "revo-grid": RevoGrid;
