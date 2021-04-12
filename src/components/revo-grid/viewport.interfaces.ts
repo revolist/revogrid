@@ -1,25 +1,19 @@
-import { DataSourceState, Groups } from '../../store/dataSource/data.store';
+import { DataSourceState } from '../../store/dataSource/data.store';
 import { Observable, RevoGrid, Selection } from '../../interfaces';
 import { ViewportStores } from '../../services/viewport.provider';
 import { DimensionStores } from '../../services/dimension.provider';
 import { RowDataSources } from '../../services/data.provider';
+import { JSX } from '../..';
 
 export type SlotType = 'content' | 'header' | 'footer';
 
 export type HeaderProperties = {
-  parent: string;
-  colData: RevoGrid.ColumnRegular[];
-  dimensionCol: Observable<RevoGrid.DimensionSettingsState>;
-  groups: Groups;
-  groupingDepth: number;
-  onHeaderResize?(e: CustomEvent<RevoGrid.ViewSettingSizeProp>): void;
-};
+} & Partial<JSX.RevogrHeader>;
 
-export interface ViewportColumn {
+export type ViewportColumn = {
   colType: RevoGrid.DimensionCols;
   position: Selection.Cell;
 
-  contentHeight: number;
   uuid: string;
   fixWidth?: boolean;
 
@@ -29,9 +23,7 @@ export interface ViewportColumn {
   rowStores: RowDataSources;
   colStore: Observable<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
 
-  onHeaderResize?(e: CustomEvent<RevoGrid.ViewSettingSizeProp>): void;
-  onResizeViewport?(e: CustomEvent<RevoGrid.ViewPortResizeEvent>): void;
-}
+} & Partial<JSX.RevogrViewportScroll> & Partial<JSX.RevogrHeader>;
 
 export type ViewportData = {
   /** Last cell in data viewport. Indicates borders of viewport */

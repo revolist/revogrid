@@ -14,7 +14,7 @@ export const FilterButton = ({ column }: Props) => {
       <button
         class={{
           [FILTER_BUTTON_CLASS]: true,
-          [FILTER_BUTTON_ACTIVE]: !!column[FILTER_PROP],
+          [FILTER_BUTTON_ACTIVE]: column && !!column[FILTER_PROP],
         }}
       >
         <svg class="filter-img" viewBox="0 0 64 64">

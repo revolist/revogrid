@@ -279,11 +279,11 @@
           size: 100
         }]; */
       // default
-      setData({ rows: 100, cols: 2, 'colPinEnd': [2] });
+      setData({ rows: 100, cols: 10, 'colPinEnd': [2] });
 
       // events testing
       // 'beforerange', 'setRange', 'beforefocuslost', 'beforecellfocus', 'beforeedit'
-      const events = ['beforeedit'];
+      const events = ['beforeedit', 'aftercolumnresize'];
       events.forEach(e => {
         grid.addEventListener(e, $e => {
           if (window.eventsPrevented[e]) {

@@ -452,6 +452,10 @@ declare namespace LocalJSX {
          */
         "grouping"?: GroupingOptions;
         /**
+          * After column resize Get resized columns
+         */
+        "onAftercolumnresize"?: (event: CustomEvent<Record<RevoGrid.ColumnProp, RevoGrid.ColumnRegular>>) => void;
+        /**
           * Column updated
          */
         "onAftercolumnsset"?: (event: CustomEvent<{
@@ -683,8 +687,8 @@ declare namespace LocalJSX {
         "dimensionCol"?: Observable<RevoGrid.DimensionSettingsState>;
         "groupingDepth"?: number;
         "groups"?: Groups;
-        "onHeaderResize"?: (event: CustomEvent<RevoGrid.ViewSettingSizeProp>) => void;
         "onHeaderdblClick"?: (event: CustomEvent<RevoGrid.InitialHeaderClick>) => void;
+        "onHeaderresize"?: (event: CustomEvent<RevoGrid.ViewSettingSizeProp>) => void;
         "onInitialHeaderClick"?: (event: CustomEvent<RevoGrid.InitialHeaderClick>) => void;
         "parent"?: string;
         "selectionStore"?: Observable<Selection.SelectionStoreState>;

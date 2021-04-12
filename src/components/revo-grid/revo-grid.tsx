@@ -314,6 +314,11 @@ export class RevoGridComponent {
    * Use e.preventDefault() to prevent edit
    */
   @Event() beforeeditstart: EventEmitter<Edition.BeforeSaveDataDetails>;
+  /**
+   * After column resize
+   * Get resized columns
+   */
+  @Event() aftercolumnresize: EventEmitter<Record<RevoGrid.ColumnProp, RevoGrid.ColumnRegular>>;
 
   // --------------------------------------------------------------------------
   //
@@ -817,6 +822,7 @@ export class RevoGridComponent {
       scrollingService: this.scrollingService,
       orderService: this.orderService,
       selectionStoreConnector: this.selectionStoreConnector,
+      resize: c => this.aftercolumnresize.emit(c)
     }, contentHeight);
     return (
       <Host {...{ [`${UUID}`]: this.uuid }}>

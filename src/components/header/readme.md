@@ -23,7 +23,7 @@
 | Event                | Description | Type                                                                                |
 | -------------------- | ----------- | ----------------------------------------------------------------------------------- |
 | `headerdblClick`     |             | `CustomEvent<{ index: number; originalEvent: MouseEvent; column: ColumnRegular; }>` |
-| `headerResize`       |             | `CustomEvent<{ [x: string]: number; }>`                                             |
+| `headerresize`       |             | `CustomEvent<{ [x: string]: number; }>`                                             |
 | `initialHeaderClick` |             | `CustomEvent<{ index: number; originalEvent: MouseEvent; column: ColumnRegular; }>` |
 
 

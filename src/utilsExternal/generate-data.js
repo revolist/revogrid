@@ -91,7 +91,7 @@ export function generateFakeDataObject(config = {}) {
   const pinnedBottomRows = bottomPinned.map(i => ({ ...result[i] }));
   let headers = Object.keys(columns).map(k => columns[k]);
 
-  /* const grouped = headers.splice(1, 4);
+  const grouped = headers.splice(1, 4);
     const grouped2 = grouped.splice(0, 2);
     grouped.push({
       name: 'Grouped2',
@@ -111,7 +111,7 @@ export function generateFakeDataObject(config = {}) {
     headers.splice(1, 0, ...[{
         name: 'Grouped3',
         children: grouped4
-    }]); */
+    }]);
   return {
     rows: result,
     pinnedTopRows,

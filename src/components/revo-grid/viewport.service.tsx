@@ -1,8 +1,8 @@
-import { RevoGrid, Selection } from '../../interfaces';
+import { Observable, RevoGrid, Selection } from '../../interfaces';
 import DimensionProvider from '../../services/dimension.provider';
 import SelectionStoreConnector, { EMPTY_INDEX } from '../../services/selection.store.connector';
 import ViewportProvider from '../../services/viewport.provider';
-import { getVisibleSourceItem } from '../../store/dataSource/data.store';
+import { DataSourceState, getSourceItem, getVisibleSourceItem } from '../../store/dataSource/data.store';
 import { columnTypes, rowTypes } from '../../store/storeTypes';
 import { UUID } from '../../utils/consts';
 import { OrdererService } from '../order/orderRenderer';
@@ -11,6 +11,7 @@ import { CONTENT_SLOT, FOOTER_SLOT, getLastCell, HEADER_SLOT } from './viewport.
 import { HeaderProperties, SlotType, ViewportColumn, ViewportData, ViewportProps } from './viewport.interfaces';
 import ColumnDataProvider from '../../services/column.data.provider';
 import { DataProvider } from '../../services/data.provider';
+import { reduce } from 'lodash';
 
 type StoresMapping<T> = { [xOrY: number]: Partial<T> };
 
@@ -23,6 +24,7 @@ type Config = {
   scrollingService: GridScrollingService;
   orderService: OrdererService;
   selectionStoreConnector: SelectionStoreConnector;
+  resize(r: Record<RevoGrid.ColumnProp, RevoGrid.ColumnRegular>): void;
 };
 
 
@@ -45,6 +47,22 @@ export default class ViewportService {
     this.sv.selectionStoreConnector?.beforeUpdate();
     this.columns = this.getViewportColumnData(contentHeight);
     this.sv.scrollingService?.unregister();
+  }
+
+  private onColumnResize(
+    type: RevoGrid.DimensionCols,
+    e: CustomEvent<RevoGrid.ViewSettingSizeProp>,
+    store: Observable<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>
+  ) {
+    this.sv.dimensionProvider?.setDimensionSize(type, e.detail);
+    const changedItems = reduce(e.detail|| {}, (r: Record<RevoGrid.ColumnProp, RevoGrid.ColumnRegular>, size, index) => {
+      const item: RevoGrid.ColumnRegular = getSourceItem(store, parseInt(index, 10));
+      if (item) {
+        r[item.prop] = {...item, size};
+      }
+      return r;
+    }, {});
+    this.sv.resize(changedItems);
   }
 
   /**
@@ -72,10 +90,11 @@ export default class ViewportService {
         rowStores: this.sv.dataProvider.stores,
 
         colStore,
-        onHeaderResize: (e: CustomEvent<RevoGrid.ViewSettingSizeProp>) => this.sv.dimensionProvider?.setDimensionSize(val, e.detail),
+        onHeaderresize: e => this.onColumnResize(val, e, colStore)
       };
       if (val === 'rgCol') {
-        column.onResizeViewport = (e: CustomEvent<RevoGrid.ViewPortResizeEvent>) => this.sv.viewportProvider?.setViewport(e.detail.dimension, { virtualSize: e.detail.size });
+        column.onResizeViewport = (e: CustomEvent<RevoGrid.ViewPortResizeEvent>) =>
+          this.sv.viewportProvider?.setViewport(e.detail.dimension, { virtualSize: e.detail.size });
       }
       const colData = this.gatherColumnData(column);
       const columnSelectionStore = this.registerCol(colData.position.x, val);
@@ -155,7 +174,7 @@ export default class ViewportService {
       dimensionCol: data.dimensions[data.colType].store,
       groups: data.colStore.get('groups'),
       groupingDepth: data.colStore.get('groupingDepth'),
-      onHeaderResize: data.onHeaderResize,
+      onHeaderresize: data.onHeaderresize,
     };
 
     return {

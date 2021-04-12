@@ -26,11 +26,11 @@ export class RevogrHeaderComponent {
   @Prop() columnFilter: boolean;
 
   @Event() initialHeaderClick: EventEmitter<RevoGrid.InitialHeaderClick>;
-  @Event() headerResize: EventEmitter<RevoGrid.ViewSettingSizeProp>;
+  @Event() headerresize: EventEmitter<RevoGrid.ViewSettingSizeProp>;
   @Event() headerdblClick: EventEmitter<RevoGrid.InitialHeaderClick>;
 
   private onResize({ width }: { width?: number }, index: number): void {
-    this.headerResize.emit({ [index]: width || 0 });
+    this.headerresize.emit({ [index]: width || 0 });
   }
 
   private onResizeGroup(changedX: number, startIndex: number, endIndex: number): void {
@@ -43,10 +43,10 @@ export class RevogrHeaderComponent {
         sizes[i] = item.size + change;
       }
     }
-    this.headerResize.emit(sizes);
+    this.headerresize.emit(sizes);
   }
 
-  render(): VNode[] {
+  render() {
     const cols = this.viewportCol.get('items');
     const range = this.selectionStore?.get('range');
     const cells: VNode[] = [];
