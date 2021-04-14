@@ -137,7 +137,7 @@ export default class ColumnDataProvider {
     each(columnByKey, (colsToUpdate, type: DimensionCols) => {
       const items = this.dataSources[type].store.get('source');
       colByIndex[type] = items.reduce((result: Record<number, ColumnRegular>, rgCol, index) => {
-        const colToUpdateIfExists = colsToUpdate[rgCol.pro];
+        const colToUpdateIfExists = colsToUpdate[rgCol.prop];
         if (colToUpdateIfExists) {
           result[index] = colToUpdateIfExists;
         }
