@@ -117,11 +117,12 @@ export default class SortingPlugin extends BasePlugin {
   }
 
   private keySort(a: any, b: any, dir: 'asc' | 'desc') {
-    const d = dir === 'asc' ? 1 : -1;
+    const directionIndex = dir === 'asc' ? 1 : -1;
     if (a === b) {
       return 0;
     }
-    return a > b ? 1 * d : -1 * d;
+    return a?.toString().toLowerCase() > b?.toString().toLowerCase() ?
+      1 * directionIndex : -1 * directionIndex;
   }
 
   private sortIndexByItems(indexes: number[], source: RevoGrid.DataType[], sorting: SortingOrder): number[] {
