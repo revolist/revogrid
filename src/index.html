@@ -85,7 +85,7 @@
     <section class="content">
       <div class="tile large grid-holder">
         <!-- Grid init-->
-        <revo-grid class="my" key="1"></revo-grid>
+        <revo-grid theme="material" stretch="false" class="my" key="1"></revo-grid>
       </div>
     </section>
 
@@ -124,6 +124,7 @@
           </li>
         </ul>
         <hr />
+        <button onclick="setData({ rows: 1, cols: 1 })">1x1</button>
         <button onclick="setData({ rows: 2, cols: 5 })">2x5</button>
         <button onclick="setData({ rows: 100, cols: 100 })">100x100</button>
         <button onclick="setData({ rows: 1000, cols: 1000 })">1Kx1K</button>

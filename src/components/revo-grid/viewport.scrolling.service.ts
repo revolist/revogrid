@@ -19,6 +19,8 @@ export default class GridScrollingService {
         for (let el of this.elements[elKey]) {
           el.changeScroll && (newEvent = el.changeScroll(e));
         }
+      } else if (e.dimension === 'rgCol' && elKey === 'headerRow') {
+        continue;
       } else {
         for (let el of this.elements[elKey]) {
           el.setScroll(e);
