@@ -32,10 +32,11 @@ export class RevogrRowHeaders {
 
     /** render viewports rows */
     let totalLength = 1;
-
     for (let data of this.dataPorts) {
       const itemCount = data.dataStore.get('items').length;
+      // initiate row data
       const dataStore = new DataStore<RevoGrid.DataType, RevoGrid.DimensionRows>(data.type);
+      dataStore.updateData(data.dataStore.get('source'));
       // initiate column data
       const colData = new DataStore<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>('colPinStart');
       const column = {
