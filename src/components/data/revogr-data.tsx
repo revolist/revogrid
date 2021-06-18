@@ -1,5 +1,5 @@
 import { Component, Element, Event, Prop, VNode, EventEmitter, h } from '@stencil/core';
-import { HTMLStencilElement } from '@stencil/core/internal';
+import { HTMLStencilElement, Watch } from '@stencil/core/internal';
 
 import ColumnService, { ColumnSource, RowSource } from './columnService';
 import { DATA_COL, DATA_ROW } from '../../utils/consts';
@@ -37,8 +37,19 @@ export class RevogrData {
 
   @Event() dragStartCell: EventEmitter<MouseEvent>;
 
-  connectedCallback() {
+  @Watch('dataStore')
+  @Watch('colData')
+  onStoreChange() {
+    this.columnService?.destroy();
     this.columnService = new ColumnService(this.dataStore, this.colData);
+  }
+
+  connectedCallback() {
+    this.onStoreChange();
+  }
+
+  disconnectedCallback() {
+    this.columnService?.destroy();
   }
 
   render() {
