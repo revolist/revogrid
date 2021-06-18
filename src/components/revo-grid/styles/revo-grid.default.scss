@@ -44,22 +44,23 @@ revo-grid[theme='default'] {
     }
   }
 
-  revogr-viewport-scroll {
-    &.rowHeaders {
-      background-color: $header-bg;
-      revogr-data .rgCell {
-        $cell-shadow-bottom: 0 -1px 0 0 $header-border-color inset;
-        $cell-shadow-right: -1px 0 0 0 $header-border-color inset;
-        color: $header-color;
-        box-shadow: $cell-shadow-bottom, $cell-shadow-right;
-      }
-
-      revogr-header {
-        $cell-shadow-right: -1px 0 0 0 $header-border-color inset;
-        $shadow-bottom: 0 -1px 0 0 $header-border-color inset;
-        box-shadow: $shadow-bottom, $cell-shadow-right;
-      }
+  .rowHeaders {
+    background-color: $header-bg;
+    revogr-data .rgCell {
+      $cell-shadow-bottom: 0 -1px 0 0 $header-border-color inset;
+      $cell-shadow-right: -1px 0 0 0 $header-border-color inset;
+      color: $header-color;
+      box-shadow: $cell-shadow-bottom, $cell-shadow-right;
     }
+
+    revogr-header {
+      $cell-shadow-right: -1px 0 0 0 $header-border-color inset;
+      $shadow-bottom: 0 -1px 0 0 $header-border-color inset;
+      box-shadow: $shadow-bottom, $cell-shadow-right;
+    }
+  }
+
+  revogr-viewport-scroll {
     &.colPinStart {
       revogr-data .rgRow .rgCell:last-child {
         $cell-shadow-cell: 0 -1px 0 0 $cell-border-color inset, -1px 0 0 0 $header-border-color inset;

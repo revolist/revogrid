@@ -1,91 +1,97 @@
-import { h, VNode } from '@stencil/core';
-
+import { h, Host } from '@stencil/core';
+import { Component, Prop, Event, EventEmitter } from '@stencil/core';
 import { RevoGrid } from '../../interfaces';
 import DataStore from '../../store/dataSource/data.store';
-import { SelectionStore } from '../../store/selection/selection.store';
 import ViewportStore from '../../store/viewPort/viewport.store';
 import { UUID } from '../../utils/consts';
 import { ElementScroll } from '../revo-grid/viewport.scrolling.service';
-import { ViewportProps } from '../revo-grid/viewport.interfaces';
+import { ViewportData } from '../revo-grid/viewport.interfaces';
 import { RowHeaderRender } from './row-header-render';
 
-type Props = {
-  height: number;
-  anyView: ViewportProps;
-  resize: boolean;
-  rowHeaderColumn?: RevoGrid.RowHeaders;
-  beforeRowAdd(y: number): SelectionStore;
-  onScrollViewport(e: RevoGrid.ViewPortScrollEvent): void;
-  onElementToScroll(e: ElementScroll): void;
-};
+
 
 const LETTER_BLOCK_SIZE = 10;
 
-const RevogrRowHeaders = ({ anyView, height, rowHeaderColumn, beforeRowAdd, onScrollViewport, onElementToScroll }: Props): VNode => {
-  const dataViews: HTMLElement[] = [];
-  const viewport = new ViewportStore();
+@Component({ tag: 'revogr-row-headers' })
+export class RevogrRowHeaders {
+  @Prop() height: number;
 
-  /** render viewports rows */
-  let totalLength = 1;
+  @Prop() dataPorts: ViewportData[];
+  @Prop() headerProp: Record<string, any>;
+  @Prop() uiid: string;
 
-  for (let data of anyView.dataPorts) {
-    const colData = new DataStore<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>('colPinStart');
-    const rowSelectionStore = beforeRowAdd(data.position.y);
+  @Prop() resize: boolean;
+  @Prop() rowHeaderColumn: RevoGrid.RowHeaders;
+  // @Event({ bubbles: false }) beforeRowAdd(y: number): EventEmitter<SelectionStore>;
+  @Event({ bubbles: false }) scrollViewport: EventEmitter<RevoGrid.ViewPortScrollEvent>;
+  @Event({ bubbles: false }) elementToScroll: EventEmitter<ElementScroll>;
 
-    const dataStore = new DataStore<RevoGrid.DataType, RevoGrid.DimensionRows>(data.type);
-    dataStore.updateData(data.dataStore.get('source'));
-    // initiate column data
-    const column = { cellTemplate: RowHeaderRender(totalLength), ...rowHeaderColumn };
-    colData.updateData([column]);
-    dataViews.push(
-      <revogr-data
-        slot="content"
-        {...data}
-        dataStore={dataStore.store}
-        colData={colData.store}
-        viewportCol={viewport.store}
-        readonly={true}
-        range={false}
-        rowSelectionStore={rowSelectionStore.store}
-      />,
-    );
-    totalLength += data.dataStore.get('items').length;
-  }
+  render() {
+    const dataViews: HTMLElement[] = [];
+    const viewport = new ViewportStore();
 
-  const colSize = rowHeaderColumn?.size || (totalLength.toString().length + 1) * LETTER_BLOCK_SIZE;
-  viewport.setViewport({
-    realCount: 1,
-    virtualSize: 0,
-    items: [
-      {
-        size: colSize,
-        start: 0,
-        end: colSize,
-        itemIndex: 0,
-      },
-    ],
-  });
+    /** render viewports rows */
+    let totalLength = 1;
 
-  const parent = `${anyView.prop[UUID]}-rowHeaders`;
-  return (
-    <revogr-viewport-scroll
-      {...{ [UUID]: parent }}
-      contentHeight={height}
-      contentWidth={0}
-      class="rowHeaders"
-      key="rowHeaders"
-      style={{ minWidth: `${colSize}px` }}
-      ref={el => onElementToScroll(el)}
-      onScrollViewport={e => onScrollViewport(e.detail)}
-    >
-      <revogr-header {...{
-          ...anyView.headerProp,
-          colData: typeof rowHeaderColumn === 'object' ? [rowHeaderColumn] : []
-        }}
-        viewportCol={viewport.store} parent={parent} slot="header" canResize={false} />
-      {dataViews}
-    </revogr-viewport-scroll>
-  );
-};
+    for (let data of this.dataPorts) {
+      const itemCount = data.dataStore.get('items').length;
+      const dataStore = new DataStore<RevoGrid.DataType, RevoGrid.DimensionRows>(data.type);
+      // initiate column data
+      const colData = new DataStore<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>('colPinStart');
+      const column = {
+        cellTemplate: RowHeaderRender(totalLength),
+        ...this.rowHeaderColumn,
+      };
+      colData.updateData([column]);
 
-export default RevogrRowHeaders;
+      const viewData = {
+        ...data,
+        dataStore: dataStore.store,
+        colData: colData.store,
+        viewportCol: viewport.store,
+        readonly: true,
+        range: false,
+      };
+      dataViews.push(<revogr-data {...viewData} />);
+      totalLength += itemCount;
+    }
+
+    const colSize = this.rowHeaderColumn?.size || (totalLength.toString().length + 1) * LETTER_BLOCK_SIZE;
+    viewport.setViewport({
+      realCount: 1,
+      virtualSize: 0,
+      items: [
+        {
+          size: colSize,
+          start: 0,
+          end: colSize,
+          itemIndex: 0,
+        },
+      ],
+    });
+
+    const parent = `${this.uiid}-rowHeaders`;
+    const viewportScroll = {
+      [UUID]: parent,
+      contentHeight: this.height,
+      contentWidth: 0,
+      style: { minWidth: `${colSize}px` },
+      ref: (el: ElementScroll) => this.elementToScroll.emit(el),
+      onScrollViewport: (e: CustomEvent) => this.scrollViewport.emit(e.detail),
+    };
+    const viewportHeader = {
+      ...this.headerProp,
+      colData: typeof this.rowHeaderColumn === 'object' ? [this.rowHeaderColumn] : [],
+      viewportCol: viewport.store,
+      canResize: false,
+      parent,
+      slot: 'header',
+    }
+    return <Host class="rowHeaders" key="rowHeaders">
+      <revogr-viewport-scroll {...viewportScroll}>
+        <revogr-header {...viewportHeader} />
+        {dataViews}
+      </revogr-viewport-scroll>
+    </Host>;
+    }
+}

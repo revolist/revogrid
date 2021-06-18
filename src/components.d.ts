@@ -17,6 +17,8 @@ import { ColumnSource, RowSource } from "./components/data/columnService";
 import { LogicFunction } from "./plugins/filter/filter.types";
 import { FilterItem, ShowData } from "./plugins/filter/filter.pop";
 import { DataSourceState, Groups } from "./store/dataSource/data.store";
+import { ViewportData } from "./components/revo-grid/viewport.interfaces";
+import { ElementScroll } from "./components/revo-grid/viewport.scrolling.service";
 export namespace Components {
     interface RevoGrid {
         /**
@@ -289,6 +291,14 @@ export namespace Components {
         "selectionStore": Observable<Selection.SelectionStoreState>;
         "useClipboard": boolean;
     }
+    interface RevogrRowHeaders {
+        "dataPorts": ViewportData[];
+        "headerProp": Record<string, any>;
+        "height": number;
+        "resize": boolean;
+        "rowHeaderColumn": RevoGrid.RowHeaders;
+        "uiid": string;
+    }
     interface RevogrScrollVirtual {
         "changeScroll": (e: RevoGrid.ViewPortScrollEvent) => Promise<RevoGrid.ViewPortScrollEvent>;
         "dimension": RevoGrid.DimensionType;
@@ -376,6 +386,12 @@ declare global {
         prototype: HTMLRevogrOverlaySelectionElement;
         new (): HTMLRevogrOverlaySelectionElement;
     };
+    interface HTMLRevogrRowHeadersElement extends Components.RevogrRowHeaders, HTMLStencilElement {
+    }
+    var HTMLRevogrRowHeadersElement: {
+        prototype: HTMLRevogrRowHeadersElement;
+        new (): HTMLRevogrRowHeadersElement;
+    };
     interface HTMLRevogrScrollVirtualElement extends Components.RevogrScrollVirtual, HTMLStencilElement {
     }
     var HTMLRevogrScrollVirtualElement: {
@@ -404,6 +420,7 @@ declare global {
         "revogr-header": HTMLRevogrHeaderElement;
         "revogr-order-editor": HTMLRevogrOrderEditorElement;
         "revogr-overlay-selection": HTMLRevogrOverlaySelectionElement;
+        "revogr-row-headers": HTMLRevogrRowHeadersElement;
         "revogr-scroll-virtual": HTMLRevogrScrollVirtualElement;
         "revogr-temp-range": HTMLRevogrTempRangeElement;
         "revogr-viewport-scroll": HTMLRevogrViewportScrollElement;
@@ -769,6 +786,16 @@ declare namespace LocalJSX {
         "selectionStore"?: Observable<Selection.SelectionStoreState>;
         "useClipboard"?: boolean;
     }
+    interface RevogrRowHeaders {
+        "dataPorts"?: ViewportData[];
+        "headerProp"?: Record<string, any>;
+        "height"?: number;
+        "onElementToScroll"?: (event: CustomEvent<ElementScroll>) => void;
+        "onScrollViewport"?: (event: CustomEvent<RevoGrid.ViewPortScrollEvent>) => void;
+        "resize"?: boolean;
+        "rowHeaderColumn"?: RevoGrid.RowHeaders;
+        "uiid"?: string;
+    }
     interface RevogrScrollVirtual {
         "dimension"?: RevoGrid.DimensionType;
         "dimensionStore"?: Observable<RevoGrid.DimensionSettingsState>;
@@ -806,6 +833,7 @@ declare namespace LocalJSX {
         "revogr-header": RevogrHeader;
         "revogr-order-editor": RevogrOrderEditor;
         "revogr-overlay-selection": RevogrOverlaySelection;
+        "revogr-row-headers": RevogrRowHeaders;
         "revogr-scroll-virtual": RevogrScrollVirtual;
         "revogr-temp-range": RevogrTempRange;
         "revogr-viewport-scroll": RevogrViewportScroll;
@@ -824,6 +852,7 @@ declare module "@stencil/core" {
             "revogr-header": LocalJSX.RevogrHeader & JSXBase.HTMLAttributes<HTMLRevogrHeaderElement>;
             "revogr-order-editor": LocalJSX.RevogrOrderEditor & JSXBase.HTMLAttributes<HTMLRevogrOrderEditorElement>;
             "revogr-overlay-selection": LocalJSX.RevogrOverlaySelection & JSXBase.HTMLAttributes<HTMLRevogrOverlaySelectionElement>;
+            "revogr-row-headers": LocalJSX.RevogrRowHeaders & JSXBase.HTMLAttributes<HTMLRevogrRowHeadersElement>;
             "revogr-scroll-virtual": LocalJSX.RevogrScrollVirtual & JSXBase.HTMLAttributes<HTMLRevogrScrollVirtualElement>;
             "revogr-temp-range": LocalJSX.RevogrTempRange & JSXBase.HTMLAttributes<HTMLRevogrTempRangeElement>;
             "revogr-viewport-scroll": LocalJSX.RevogrViewportScroll & JSXBase.HTMLAttributes<HTMLRevogrViewportScrollElement>;

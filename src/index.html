@@ -105,6 +105,10 @@
         <hr />
         <label><input type="checkbox" onchange="showRowHeaders(event.target.checked)" />Show rgRow headers</label>
         <hr />
+
+        <hr />
+        <label><input type="checkbox" onchange="showColGrouping(event.target.checked)" />Show col grouping</label>
+        <hr />
         <ul>
           <li>
             <label><input type="checkbox" onchange="setPinned('topPinned', event.target.checked)" />Pinned top</label>
@@ -150,6 +154,11 @@
         const grid = document.querySelector('revo-grid');
         grid.rowHeaders = isShow;
       };
+      window.showColGrouping = function (isShow) {
+        setData({
+          groupedHeader: isShow
+        });
+      };
       window.setEdit = function (rgRow, prop) {
         const grid = document.querySelector('revo-grid');
         grid.setCellEdit(rgRow, prop);
@@ -193,6 +202,7 @@
         bottomPinned: [],
         colPinEnd: [],
         colPinStart: [],
+        groupedHeader: false,
       };
       window.setData = function (config = {}) {
         defaultData = { ...defaultData, ...config };
@@ -265,19 +275,10 @@
           index: 1,
           size: 100
       }];
-      // setGrouping();
-      // setTrimmed([0]);
-
       /* 
         grid.autoSizeColumn = {
           mode: 'autoSizeAll',
-        };
-
-        grid.rowDefinitions = [{
-          type: 'rgRow',
-          index: 1,
-          size: 100
-        }]; */
+        };*/
       // default
       setData({ rows: 100, cols: 10, 'colPinEnd': [2] });
 

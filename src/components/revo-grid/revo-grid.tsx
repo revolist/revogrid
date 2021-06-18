@@ -22,7 +22,6 @@ import { ColumnSource, RowSource } from '../data/columnService';
 import { RevoViewPort } from './viewport';
 import ViewportService, { FocusedData } from './viewport.service';
 import { ViewPortSections } from './viewport.section';
-import RevogrRowHeaders from '../rowHeaders/revogr-row-headers';
 import GridScrollingService from './viewport.scrolling.service';
 import { UUID } from '../../utils/consts';
 import SelectionStoreConnector from '../../services/selection.store.connector';
@@ -824,6 +823,39 @@ export class RevoGridComponent {
       selectionStoreConnector: this.selectionStoreConnector,
       resize: c => this.aftercolumnresize.emit(c)
     }, contentHeight);
+
+    const views: VNode[] = [];
+    if (this.rowHeaders) {
+      const anyView = this.viewport.columns[0];
+      views.push(<revogr-row-headers
+        height={contentHeight}
+        resize={this.resize}
+        dataPorts={anyView.dataPorts}
+        headerProp={anyView.headerProp}
+        uiid={anyView.prop[UUID]}
+        rowHeaderColumn={typeof this.rowHeaders === 'object' ? this.rowHeaders : undefined}
+        onScrollViewport={({ detail: e }: CustomEvent) => this.scrollingService.onScroll(e, 'headerRow')}
+        onElementToScroll={({ detail: e }: CustomEvent) => this.scrollingService.registerElement(e, 'headerRow')}
+      />);
+    }
+    views.push(<ViewPortSections
+      columnFilter={!!this.filter}
+      resize={this.resize}
+      readonly={this.readonly}
+      range={this.range}
+      rowClass={this.rowClass}
+      editors={this.editors}
+      useClipboard={this.useClipboard}
+      columns={this.viewport.columns}
+      onEdit={detail => {
+        const event = this.beforeeditstart.emit(detail);
+        if (!event.defaultPrevented) {
+          this.selectionStoreConnector.setEdit(detail.isCancel ? false : detail.val);
+        }
+      }}
+      registerElement={(e, k) => this.scrollingService.registerElement(e, k)}
+      onScroll={details => this.scrollingService.onScroll(details)}
+    />);
     return (
       <Host {...{ [`${UUID}`]: this.uuid }}>
         <RevoViewPort
@@ -833,39 +865,7 @@ export class RevoGridComponent {
           registerElement={(e, k) => this.scrollingService.registerElement(e, k)}
           nakedClick={() => this.viewport.clearEdit()}
           onScroll={details => this.scrollingService.onScroll(details)}
-        >
-          {this.rowHeaders ? (
-            <RevogrRowHeaders
-              height={contentHeight}
-              anyView={this.viewport.columns[0]}
-              resize={this.resize}
-              rowHeaderColumn={typeof this.rowHeaders === 'object' ? this.rowHeaders : undefined}
-              beforeRowAdd={y => this.selectionStoreConnector.registerRow(y)}
-              onScrollViewport={e => this.scrollingService.onScroll(e, 'headerRow')}
-              onElementToScroll={e => this.scrollingService.registerElement(e, 'headerRow')}
-            />
-          ) : (
-            ''
-          )}
-          <ViewPortSections
-            columnFilter={!!this.filter}
-            resize={this.resize}
-            readonly={this.readonly}
-            range={this.range}
-            rowClass={this.rowClass}
-            editors={this.editors}
-            useClipboard={this.useClipboard}
-            columns={this.viewport.columns}
-            onEdit={detail => {
-              const event = this.beforeeditstart.emit(detail);
-              if (!event.defaultPrevented) {
-                this.selectionStoreConnector.setEdit(detail.isCancel ? false : detail.val);
-              }
-            }}
-            registerElement={(e, k) => this.scrollingService.registerElement(e, k)}
-            onScroll={details => this.scrollingService.onScroll(details)}
-          />
-        </RevoViewPort>
+        >{views}</RevoViewPort>
         {this.extraElements}
       </Host>
     );
