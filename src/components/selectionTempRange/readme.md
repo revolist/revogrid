@@ -16,13 +16,13 @@
 
 ### Used by
 
- - [revo-grid](../revo-grid)
+ - [revo-grid](../revoGrid)
 
 ### Graph
 ```mermaid
 graph TD;
-  revo-grid --> revogr-focus
-  style revogr-focus fill:#f9f,stroke:#333,stroke-width:4px
+  revo-grid --> revogr-temp-range
+  style revogr-temp-range fill:#f9f,stroke:#333,stroke-width:4px
 ```
 
 ----------------------------------------------

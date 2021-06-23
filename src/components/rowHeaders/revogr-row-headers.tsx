@@ -4,8 +4,8 @@ import { RevoGrid } from '../../interfaces';
 import DataStore from '../../store/dataSource/data.store';
 import ViewportStore from '../../store/viewPort/viewport.store';
 import { UUID } from '../../utils/consts';
-import { ElementScroll } from '../revo-grid/viewport.scrolling.service';
-import { ViewportData } from '../revo-grid/viewport.interfaces';
+import { ElementScroll } from '../revoGrid/viewport.scrolling.service';
+import { ViewportData } from '../revoGrid/viewport.interfaces';
 import { RowHeaderRender } from './row-header-render';
 
 

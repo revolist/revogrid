@@ -1,10 +1,10 @@
 import { Component, Event, EventEmitter, h, Method, Element, Prop, Host } from '@stencil/core';
 import each from 'lodash/each';
 
-import GridResizeService from '../revo-grid/viewport.resize.service';
+import GridResizeService from '../revoGrid/viewport.resize.service';
 import LocalScrollService from '../../services/localScrollService';
 import { RevoGrid } from '../../interfaces';
-import { CONTENT_SLOT, FOOTER_SLOT, HEADER_SLOT } from '../revo-grid/viewport.helpers';
+import { CONTENT_SLOT, FOOTER_SLOT, HEADER_SLOT } from '../revoGrid/viewport.helpers';
 
 /**
  * Service for tracking grid scrolling

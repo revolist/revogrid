@@ -46,7 +46,7 @@ Type: `Promise<void>`
 
 ### Used by
 
- - [revo-grid](../revo-grid)
+ - [revo-grid](../revoGrid)
 
 ### Graph
 ```mermaid

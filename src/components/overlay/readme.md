@@ -40,7 +40,7 @@
 
 ### Used by
 
- - [revo-grid](../revo-grid)
+ - [revo-grid](../revoGrid)
 
 ### Depends on
 

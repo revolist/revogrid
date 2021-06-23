@@ -9,7 +9,7 @@ import { Edition, Observable, RevoGrid, RevoPlugin, Selection, ThemeSpace } from
 import { AutoSizeColumnConfig } from "./plugins/autoSizeColumn";
 import { ColumnFilterConfig, FilterCollection } from "./plugins/filter/filter.plugin";
 import { GroupingOptions } from "./plugins/groupingRow/grouping.row.types";
-import { FocusedData } from "./components/revo-grid/viewport.service";
+import { FocusedData } from "./components/revoGrid/viewport.service";
 import { ColumnCollection } from "./services/column.data.provider";
 import { DataInput } from "./plugins/export/types";
 import { VNode } from "@stencil/core";
@@ -17,8 +17,8 @@ import { ColumnSource, RowSource } from "./components/data/columnService";
 import { LogicFunction } from "./plugins/filter/filter.types";
 import { FilterItem, ShowData } from "./plugins/filter/filter.pop";
 import { DataSourceState, Groups } from "./store/dataSource/data.store";
-import { ViewportData } from "./components/revo-grid/viewport.interfaces";
-import { ElementScroll } from "./components/revo-grid/viewport.scrolling.service";
+import { ViewportData } from "./components/revoGrid/viewport.interfaces";
+import { ElementScroll } from "./components/revoGrid/viewport.scrolling.service";
 export namespace Components {
     interface RevoGrid {
         /**
@@ -74,6 +74,7 @@ export namespace Components {
           * Receive all columns in data source
          */
         "getColumns": () => Promise<RevoGrid.ColumnRegular[]>;
+        "getContentSize": () => Promise<Selection.Cell>;
         /**
           * Get all active plugins instances
          */
@@ -571,6 +572,10 @@ declare namespace LocalJSX {
           * Before trimmed values Use e.preventDefault() to prevent value trimming Update @trimmed if you wish to filter indexes of trimming
          */
         "onBeforetrimmed"?: (event: CustomEvent<{ trimmed: Record<number, boolean>; trimmedType: string; type: string }>) => void;
+        /**
+          * contentsizechanged event. Triggered when new content size applied. Not including header size Event is not returning size To get actual size use getContentSize after event triggered
+         */
+        "onContentsizechanged"?: (event: CustomEvent<any>) => void;
         /**
           * On header click.
          */

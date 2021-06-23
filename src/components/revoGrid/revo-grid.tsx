@@ -5,7 +5,7 @@ import each from 'lodash/each';
 import ColumnDataProvider, { ColumnCollection } from '../../services/column.data.provider';
 import { DataProvider } from '../../services/data.provider';
 import { getVisibleSourceItem } from '../../store/dataSource/data.store';
-import DimensionProvider from '../../services/dimension.provider';
+import DimensionProvider, { DimensionConfig } from '../../services/dimension.provider';
 import ViewportProvider from '../../services/viewport.provider';
 import { Edition, Selection, RevoGrid, ThemeSpace, RevoPlugin } from '../../interfaces';
 import ThemeService from '../../themeManager/themeService';
@@ -153,6 +153,15 @@ export class RevoGridComponent {
   //
   // --------------------------------------------------------------------------
 
+
+  /**
+   * contentsizechanged event.
+   * Triggered when new content size applied.
+   * Not including header size
+   * Event is not returning size
+   * To get actual size use getContentSize after event triggered
+   */
+  @Event() contentsizechanged: EventEmitter;
   /**
    * Before edit event.
    * Triggered before edit data applied.
@@ -483,6 +492,9 @@ export class RevoGridComponent {
     return this.viewport?.getFocused();
   }
 
+  @Method() async getContentSize(): Promise<Selection.Cell> {
+    return this.dimensionProvider?.getFullSize();
+  }
 
   // --------------------------------------------------------------------------
   //
@@ -738,7 +750,10 @@ export class RevoGridComponent {
     this.themeService = new ThemeService({
       rowSize: this.rowSize,
     });
-    this.dimensionProvider = new DimensionProvider(this.viewportProvider);
+    const dimensionProviderConfig: DimensionConfig = {
+      realSizeChanged: () => this.contentsizechanged.emit()
+    };
+    this.dimensionProvider = new DimensionProvider(this.viewportProvider, dimensionProviderConfig);
     this.columnProvider = new ColumnDataProvider();
     this.dataProvider = new DataProvider(this.dimensionProvider);
     this.uuid = `${new Date().getTime()}-rvgrid`;

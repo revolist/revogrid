@@ -4,22 +4,29 @@ import DimensionStore from '../store/dimension/dimension.store';
 import ViewportProvider from './viewport.provider';
 import { RevoGrid } from '../interfaces';
 import { getItemByIndex } from '../store/dimension/dimension.helpers';
+import { debounce } from 'lodash';
 
 export type ColumnItems = Record<RevoGrid.DimensionCols, RevoGrid.ColumnRegular[]>;
 
 export type DimensionStores = { [T in RevoGrid.MultiDimensionType]: DimensionStore };
+export type DimensionConfig = {
+  realSizeChanged(): void;
+};
 export default class DimensionProvider {
   public readonly stores: DimensionStores;
-  constructor(private viewports: ViewportProvider) {
+  constructor(private viewports: ViewportProvider, config: DimensionConfig) {
+    const sizeChanged = debounce(() => config.realSizeChanged(), 100);
     this.stores = reduce(
       [...rowTypes, ...columnTypes],
       (sources: Partial<DimensionStores>, k: RevoGrid.MultiDimensionType) => {
         sources[k] = new DimensionStore();
+        sources[k].store.onChange('realSize', () => sizeChanged());
         return sources;
       },
       {},
     ) as DimensionStores;
   }
+
 
   setDimensionSize(dimensionType: RevoGrid.MultiDimensionType, sizes: RevoGrid.ViewSettingSizeProp): void {
     this.stores[dimensionType].setDimensionSize(sizes);
@@ -56,6 +63,18 @@ export default class DimensionProvider {
     for (let type of columnTypes) {
       this.stores[type].drop();  
     }
+  }
+
+  getFullSize(): { x: number, y: number } {
+    let x = 0;
+    let y = 0;
+    for (let type of columnTypes) {
+      x += this.stores[type]?.store.get('realSize') || 0;
+    }
+    for (let type of rowTypes) {
+      y += this.stores[type]?.store.get('realSize') || 0;
+    }
+    return { y, x };
   }
 
   setColumns(
