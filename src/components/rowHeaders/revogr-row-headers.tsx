@@ -7,10 +7,12 @@ import { UUID } from '../../utils/consts';
 import { ElementScroll } from '../revoGrid/viewport.scrolling.service';
 import { ViewportData } from '../revoGrid/viewport.interfaces';
 import { RowHeaderRender } from './row-header-render';
+import { calculateRowHeaderSize } from './row-header-utils';
 
-
-
-const LETTER_BLOCK_SIZE = 10;
+/**
+ * Row headers component
+ * Visible on the left side of the table
+ */
 
 @Component({ tag: 'revogr-row-headers' })
 export class RevogrRowHeaders {
@@ -57,7 +59,7 @@ export class RevogrRowHeaders {
       totalLength += itemCount;
     }
 
-    const colSize = this.rowHeaderColumn?.size || (totalLength.toString().length + 1) * LETTER_BLOCK_SIZE;
+    const colSize = calculateRowHeaderSize(totalLength, this.rowHeaderColumn);
     viewport.setViewport({
       realCount: 1,
       virtualSize: 0,

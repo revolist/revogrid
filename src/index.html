@@ -85,7 +85,7 @@
     <section class="content">
       <div class="tile large grid-holder">
         <!-- Grid init-->
-        <revo-grid theme="material" stretch="false" class="my" key="1"></revo-grid>
+        <revo-grid theme="material" stretch="true" class="my" key="1"></revo-grid>
       </div>
     </section>
 
@@ -281,7 +281,9 @@
           mode: 'autoSizeAll',
         };*/
       // default
-      setData({ rows: 100, cols: 10, 'colPinEnd': [2] });
+      // setData({ rows: 100, cols: 10, 'colPinEnd': [2] });
+      grid.rowHeaders = true;
+      setData({ rows: 1, cols: 1 });
 
       // events testing
       // 'beforerange', 'setRange', 'beforefocuslost', 'beforecellfocus', 'beforeedit'

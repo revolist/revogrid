@@ -42,6 +42,12 @@ export type AutoSizeColumnConfig = {
   preciseSize?: boolean;
 };
 
+type Providers = {
+  dataProvider: DataProvider;
+  dimensionProvider: DimensionProvider;
+  columnProvider: ColumnDataProvider;
+};
+
 const LETTER_BLOCK_SIZE = 7;
 
 enum ColumnAutoSizeMode {
@@ -66,11 +72,7 @@ export default class AutoSizeColumn extends BasePlugin {
 
   constructor(
     revogrid: HTMLRevoGridElement,
-    private providers: {
-      dataProvider: DataProvider;
-      dimensionProvider: DimensionProvider;
-      columnProvider: ColumnDataProvider;
-    },
+    private providers: Providers,
     private config?: AutoSizeColumnConfig,
   ) {
     super(revogrid);

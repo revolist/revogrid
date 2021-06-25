@@ -145,7 +145,7 @@ export class RevoGridComponent {
    * Defines stretch strategy for columns with @StretchColumn plugin
    * if there are more space on the right last column size would be increased
    */
-  @Prop() stretch: boolean|string = true;
+  @Prop() stretch: boolean|string = false;
 
   // --------------------------------------------------------------------------
   //
@@ -715,7 +715,9 @@ export class RevoGridComponent {
   @Watch('trimmedRows') trimmedRowsChanged(newVal: Record<number, boolean> = {}) {
     this.addTrimmed(newVal);
   }
-
+  /**
+   * Grouping
+   */
   @Watch('grouping') groupingChanged(newVal: GroupingOptions = {}) {
     let grPlugin: GroupingRowPlugin | undefined;
     for (let p of this.internalPlugins) {
@@ -731,13 +733,20 @@ export class RevoGridComponent {
     grPlugin.setGrouping(newVal || {});
   }
 
+  /**
+   * Stretch Plugin Apply
+   */
   @Watch('stretch') applyStretch(isStretch: boolean|string) {
     let stretch = this.internalPlugins.filter(p => isStretchPlugin(p))[0];
-    if (isStretch) {
+    if (typeof isStretch === 'boolean' && isStretch || isStretch === 'true') {
       if(!stretch) {
-        this.internalPlugins.push(new StretchColumn(this.element, this.dimensionProvider));
-      } else {
-        (stretch as StretchColumn).applyStretch(this.columnProvider.getRawColumns());
+        this.internalPlugins.push(new StretchColumn(this.element, {
+          dataProvider: this.dataProvider,
+          columnProvider: this.columnProvider,
+          dimensionProvider: this.dimensionProvider,
+        }));
+      } else if (isStretchPlugin(stretch)) {
+        stretch.applyStretch(this.columnProvider.getRawColumns());
       }
     } else if (stretch) {
       const index = this.internalPlugins.indexOf(stretch);
