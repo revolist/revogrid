@@ -507,7 +507,6 @@ export class RevoGridComponent {
 
   /** DRAG AND DROP */
   @Listen('internalRowDragStart') onRowDragStarted(e: CustomEvent<{ pos: RevoGrid.PositionItem; text: string; event: MouseEvent }>) {
-    console.log("onRowDragStarted",e)
     e.cancelBubble = true;
     const dragStart = this.rowdragstart.emit(e.detail);
     if (dragStart.defaultPrevented) {
@@ -531,7 +530,6 @@ export class RevoGridComponent {
   }
 
   @Listen('internalCellEdit') async onBeforeEdit(e: CustomEvent<Edition.BeforeSaveDataDetails>) {
-    console.log("onBeforeEdit",e)
     e.cancelBubble = true;
     const { defaultPrevented, detail } = this.beforeedit.emit(e.detail);
     await timeout();
@@ -850,9 +848,10 @@ export class RevoGridComponent {
       useClipboard={this.useClipboard}
       columns={this.viewport.columns}
       onEdit={detail => {
-        console.log("onEdit",detail)
+        if (detail.val == "Alphanumeric" || detail.val == "Hankaku" || detail.val == "Hiragana" || detail.val == "Process" || detail.val == "Zenkaku"){
+          detail.val = ""
+        }
         const event = this.beforeeditstart.emit(detail);
-        console.log("onEdit",event)
         if (!event.defaultPrevented) {
           this.selectionStoreConnector.setEdit(detail.isCancel ? false : detail.val);
         }
