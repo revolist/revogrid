@@ -112,11 +112,13 @@ export default class ColumnService implements ColumnServiceI {
   }
 
   getCellData(r: number, c: number): string {
+    console.log(r,c)
     const data = this.rowDataModel(r, c);
     return ColumnService.getData(data.model[data.prop as number]);
   }
 
   getSaveData(rowIndex: number, c: number, val?: string): BeforeSaveDataDetails {
+    console.log(val,c)
     if (typeof val === 'undefined') {
       val = this.getCellData(rowIndex, c);
     }
@@ -131,6 +133,7 @@ export default class ColumnService implements ColumnServiceI {
   }
 
   getCellEditor(_r: number, c: number, editors: Edition.Editors): Edition.EditorCtr | undefined {
+    console.log("getCellEditor",_r,c,editors)
     const editor = this.columns[c]?.editor;
     if (!editor) {
       return undefined;
@@ -146,6 +149,8 @@ export default class ColumnService implements ColumnServiceI {
     const column = this.columns[c];
     const prop: ColumnProp | undefined = column?.prop;
     const model = getSourceItem(this.dataStore, rowIndex) || {};
+
+    console.log("rowDataModel",prop,c,model)
     return {
       prop,
       model,
