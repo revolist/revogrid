@@ -6,7 +6,7 @@ import { getElStyle } from '../overlay/selection.utils';
 
 @Component({
   tag: 'revogr-temp-range',
-  styleUrl: 'revogr-temp-range-style.scss',
+  styleUrl: 'revogr-temp-range-style.scss'
 })
 export class RevogrFocus {
   el: HTMLElement;
@@ -57,6 +57,7 @@ export class RevogrFocus {
           [type || '']: true,
         }}
         style={style}
+        hidden={false}
       >
         <div class={directionClass} ref={(e: HTMLElement) => (this.el = e)} />
       </Host>

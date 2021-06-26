@@ -1,8 +1,9 @@
+const asciiFirstLetter = 65;
+const lettersCount = 26;
+
 export function generateHeader(index: number): string {
-  const asciiFirstLetter: number = 65;
-  const lettersCount: number = 26;
-  let div: number = index + 1;
-  let label: string = '';
+  let div = index + 1;
+  let label = '';
   let pos: number;
   while (div > 0) {
     pos = (div - 1) % lettersCount;
