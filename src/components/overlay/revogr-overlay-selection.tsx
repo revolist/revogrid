@@ -25,6 +25,7 @@ export class OverlaySelection {
   private autoFillService: AutoFillService | null = null;
   private clipboardService: ClipboardService | null = null;
   private orderEditor: HTMLRevogrOrderEditorElement;
+  private oldTime: number;;
 
   @Element() element: HTMLElement;
 
@@ -197,6 +198,7 @@ export class OverlaySelection {
       return;
     }
     const val = editCell.val || this.columnService.getCellData(editCell.y, editCell.x);
+    console.log("renderEditCell",val)
     const editable = {
       ...editCell,
       ...this.columnService.getSaveData(editCell.y, editCell.x, val),
@@ -317,6 +319,13 @@ export class OverlaySelection {
 
   /** Edit finished, close cell and save */
   protected onCellEdit(e: Edition.SaveDataDetails, clear = false) {
+    let current_time  = new Date().getTime();
+    let gap_time = current_time - this.oldTime;
+    console.log(gap_time)  
+    if(gap_time < 50) {
+      return;
+    }
+
     const dataToSave = this.columnService.getSaveData(e.rgRow, e.rgCol, e.val);
     this.internalCellEdit.emit(dataToSave);
     // if not clear navigate to next cell after edit

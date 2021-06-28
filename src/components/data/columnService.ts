@@ -112,13 +112,25 @@ export default class ColumnService implements ColumnServiceI {
   }
 
   getCellData(r: number, c: number): string {
-    console.log(r,c)
+    console.log("getCellData",r,c)
     const data = this.rowDataModel(r, c);
     return ColumnService.getData(data.model[data.prop as number]);
   }
 
   getSaveData(rowIndex: number, c: number, val?: string): BeforeSaveDataDetails {
-    console.log(val,c)
+    console.log("getSaveData",val,c)
+    let reg = /[ a-zA-Z0-9ｧ-ﾝﾞﾟ\-]+/g;
+        
+    let str = val;
+    if(val != null && val.length > 0 ){
+      let res = reg.exec(str);
+      if (typeof res == null || res == null ) {
+        val = undefined
+      }else{
+        val = res[0]
+      }
+    }
+
     if (typeof val === 'undefined') {
       val = this.getCellData(rowIndex, c);
     }
@@ -150,7 +162,6 @@ export default class ColumnService implements ColumnServiceI {
     const prop: ColumnProp | undefined = column?.prop;
     const model = getSourceItem(this.dataStore, rowIndex) || {};
 
-    console.log("rowDataModel",prop,c,model)
     return {
       prop,
       model,
