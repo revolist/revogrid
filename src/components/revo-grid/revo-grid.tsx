@@ -532,9 +532,6 @@ export class RevoGridComponent {
 
   @Listen('internalCellEdit') async onBeforeEdit(e: CustomEvent<Edition.BeforeSaveDataDetails>) {
     console.log("onBeforeEdit",e)
-    
-    e.detail.model["code"] =  "111"
-    e.detail.val = "111"
     e.cancelBubble = true
     const { defaultPrevented, detail } = this.beforeedit.emit(e.detail);
     await timeout();

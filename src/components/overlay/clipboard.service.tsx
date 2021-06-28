@@ -45,19 +45,23 @@ export class ClipboardService {
   private onPaste(data: string[][]) {
     console.log("onPaste",data)
     
-    // data.forEach(function(_array,index){
-    //   _array.forEach(function(value,index){
-    //     let reg = /[a-zA-Z0-9ｧ-ﾝﾞﾟ\-]+/g;
+    for (let index = 0; index < data.length; index++) {
+      const _array = data[index];
+      console.log("onPaste _array",_array);
+      for (let index = 0; index < _array.length; index++) {
+        let value = _array[index];
+        console.log("onPaste _array value",value);
+        let reg = /[ a-zA-Z0-9ｧ-ﾝﾞﾟ\-]+/g;
         
-    //     let res = reg.exec(value);
-    //     console.log("getSaveData-zhengze",res);
-    //     if (typeof res == null) {
-    //       value = undefined
-    //     }else{
-    //       value = res[0]
-    //     }
-    //   })
-    // });
+        let res = reg.exec(value);
+        console.log("getSaveData-zhengze res",res);
+        if (typeof res == null) {
+          value = undefined
+        }else{
+          value = res[0]
+        }
+      }
+    }
 
     const focus = this.sv.selectionStoreService.focused;
     const isEditing = this.sv.selectionStoreService.edited !== null;
