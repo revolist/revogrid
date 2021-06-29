@@ -355,9 +355,6 @@ export class OverlaySelection {
         this.focusNext();
       }
     }
-    if(e.val == "Aｱｱｱあｱｱｱあ"){
-      console.log("onCellEdit 11",e.val)
-    }
   }
 
   private onRowDragStart({ detail }: CustomEvent<{ cell: Selection.Cell; text: string }>) {
