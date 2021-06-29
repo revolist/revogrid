@@ -14,7 +14,6 @@ export class Clipboard {
     e.preventDefault();
   }
   @Listen('copy', { target: 'document' }) copyStarted(e: ClipboardEvent) {
-    console.log("ClipboardEvent",e)
     this.copyRegion.emit(this.getData(e));
     e.preventDefault();
   }

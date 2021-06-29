@@ -850,27 +850,6 @@ export class RevoGridComponent {
       useClipboard={this.useClipboard}
       columns={this.viewport.columns}
       onEdit={detail => {
-        console.log("onEdit",detail,detail.val)
-        if (detail.val == "Alphanumeric" || detail.val == "Hankaku" || detail.val == "Hiragana" || detail.val == "Process" || detail.val == "Zenkaku"){
-          detail.val = ""
-        }
-
-
-        let reg = /[^a-zA-Z0-9ｧ-ﾝﾞﾟ\-]+/g;
-        
-        let str = detail.val;
-        let res = reg.exec(str);
-        // zhengze
-        console.log("zhengze",res);
-        if(res != undefined){
-          console.log(res.length);
-        
-          res.forEach(function(value,index){
-            console.log(index);
-            console.log(value);
-          });
-        }
-
         const event = this.beforeeditstart.emit(detail);
         if (!event.defaultPrevented) {
           this.selectionStoreConnector.setEdit(detail.isCancel ? false : detail.val);

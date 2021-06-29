@@ -18,7 +18,6 @@ export class ClipboardService {
   private clipboard: HTMLRevogrClipboardElement;
   constructor(private sv: Config) {}
   private onCopy(e: DataTransfer) {
-    console.log("onCopy",e)
     const canCopy = this.sv.internalCopy();
     if (canCopy.defaultPrevented) {
       return false;
@@ -43,26 +42,6 @@ export class ClipboardService {
   }
 
   private onPaste(data: string[][]) {
-    console.log("onPaste",data)
-    
-    for (let index = 0; index < data.length; index++) {
-      const _array = data[index];
-      console.log("onPaste _array",_array);
-      for (let index = 0; index < _array.length; index++) {
-        let value = _array[index];
-        console.log("onPaste _array value",value);
-        let reg = /[ a-zA-Z0-9ｧ-ﾝﾞﾟ\-]+/g;
-        
-        let res = reg.exec(value);
-        console.log("getSaveData-zhengze res",res);
-        if (typeof res == null) {
-          value = undefined
-        }else{
-          value = res[0]
-        }
-      }
-    }
-
     const focus = this.sv.selectionStoreService.focused;
     const isEditing = this.sv.selectionStoreService.edited !== null;
     if (!focus || isEditing) {
