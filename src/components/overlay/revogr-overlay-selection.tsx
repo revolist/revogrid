@@ -200,7 +200,6 @@ export class OverlaySelection {
       return;
     }
     const val = editCell.val || this.columnService.getCellData(editCell.y, editCell.x);
-    console.log("renderEditCell",val)
     const editable = {
       ...editCell,
       ...this.columnService.getSaveData(editCell.y, editCell.x, val),
@@ -282,7 +281,6 @@ export class OverlaySelection {
     if (this.canEdit()) {
       const editCell = this.selectionStore.get('focus');
       const data = this.columnService.getSaveData(editCell.y, editCell.x);
-      console.log("doEdit2",data,editCell,this.setEdit)
       val = ""
       this.setEdit?.emit({
         ...data,
@@ -337,7 +335,6 @@ export class OverlaySelection {
     let current_time  = new Date().getTime();
     let gap_time = current_time - this.oldTime;
     const dataToSave = this.columnService.getSaveData(e.rgRow, e.rgCol, e.val);
-    console.log("dataToSave",dataToSave, e.val , this.oldValue)
     if(gap_time < 50) {
       if(this.oldValue.length > 0){
         e.val =  this.oldValue
