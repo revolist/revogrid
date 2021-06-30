@@ -8,7 +8,7 @@ import { HeaderCellRenderer } from './headerCellRenderer';
 
 type Props = {
   column: RevoGrid.VirtualPositionItem;
-  data?: RevoGrid.ColumnRegular;
+  data?: RevoGrid.ColumnTemplateProp;
   range?: Selection.RangeArea;
   canResize?: boolean;
   canFilter?: boolean;

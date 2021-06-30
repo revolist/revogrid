@@ -115,7 +115,7 @@ export default class SelectionStoreConnector {
       return this.stores[y][x];
     }
     this.stores[y][x] = new SelectionStore();
-    // proxy update
+    // proxy update, column store trigger only range area
     this.stores[y][x]?.onChange('range', c => {
       this.columnStores[x].setRangeArea(c);
       this.rowStores[y].setRangeArea(c);
@@ -137,10 +137,14 @@ export default class SelectionStoreConnector {
     return this.stores[y][x];
   }
 
-  setEditByCell({ x, y }: Selection.Cell, editCell: Selection.Cell) {
-    const store = this.stores[y][x];
-    this.focus(store, { focus: editCell, end: editCell });
+  setEditByCell<T extends Selection.Cell>(storePos: T, editCell: T) {
+    this.focusByCell(storePos, editCell, editCell);
     this.setEdit('');
+  }
+
+  focusByCell<T extends Selection.Cell>(storePos: T, start: T, end: T) {
+    const store = this.stores[storePos.y][storePos.x];
+    this.focus(store, { focus: start, end });
   }
 
   focus(store: SelectionStore, { focus, end }: { focus: Cell; end: Cell }) {
@@ -190,7 +194,6 @@ export default class SelectionStoreConnector {
         }
       }
     }
-
     // if next store present - update
     if (nextStore) {
       let item = { ...focus, ...nextItem };
@@ -199,7 +202,7 @@ export default class SelectionStoreConnector {
     }
 
     focus = cropCellToMax(focus, lastCell);
-    end = cropCellToMax(focus, lastCell);
+    end = cropCellToMax(end, lastCell);
 
     store.setFocus(focus, end);
   }

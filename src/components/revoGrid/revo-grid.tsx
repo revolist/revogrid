@@ -408,6 +408,16 @@ export class RevoGridComponent {
     this.viewport?.setEdit(rgRow, this.columnProvider.getColumnIndexByProp(prop, 'rgCol'), rgCol.pin || 'rgCol', rowSource);
   }
 
+  /**  Bring cell to edit mode */
+  @Method() async setCellsFocus(
+    cellStart: Selection.Cell = { x: 0, y: 0 },
+    cellEnd: Selection.Cell = { x: 0, y: 0 },
+    colType: RevoGrid.DimensionCols = 'rgCol',
+    rowType: RevoGrid.DimensionRows = 'rgRow',
+  ) {
+    this.viewport?.setFocus(colType, rowType, cellStart, cellEnd);
+  }
+
   /**
    * Register new virtual node inside of grid
    * Used for additional items creation such as plugin elements
@@ -764,6 +774,7 @@ export class RevoGridComponent {
     };
     this.dimensionProvider = new DimensionProvider(this.viewportProvider, dimensionProviderConfig);
     this.columnProvider = new ColumnDataProvider();
+    this.selectionStoreConnector = new SelectionStoreConnector();
     this.dataProvider = new DataProvider(this.dimensionProvider);
     this.uuid = `${new Date().getTime()}-rvgrid`;
 
@@ -787,11 +798,6 @@ export class RevoGridComponent {
       this.internalPlugins.push(new ExportFilePlugin(this.element));
     }
     this.internalPlugins.push(new SortingPlugin(this.element));
-    if (this.plugins) {
-      this.plugins.forEach(p => {
-        this.internalPlugins.push(new p(this.element));
-      });
-    }
 
     this.internalPlugins.push(
       new GroupingRowPlugin(this.element, {
@@ -799,6 +805,17 @@ export class RevoGridComponent {
         columnProvider: this.columnProvider,
       }),
     );
+    if (this.plugins) {
+      this.plugins.forEach(p => {
+        this.internalPlugins.push(new p(this.element, {
+          data: this.dataProvider,
+          column: this.columnProvider,
+          dimension: this.dimensionProvider,
+          viewport: this.viewportProvider,
+          selection: this.selectionStoreConnector
+        }));
+      });
+    }
     this.applyStretch(this.stretch);
     this.themeChanged(this.theme);
     this.columnChanged(this.columns);
@@ -809,7 +826,6 @@ export class RevoGridComponent {
     this.rowDefChanged(this.rowDefinitions);
     this.groupingChanged(this.grouping);
     
-    this.selectionStoreConnector = new SelectionStoreConnector();
     this.scrollingService = new GridScrollingService((e: RevoGrid.ViewPortScrollEvent) => {
       this.dimensionProvider.setViewPortCoordinate({
         coordinate: e.coordinate,
@@ -849,7 +865,7 @@ export class RevoGridComponent {
     }, contentHeight);
 
     const views: VNode[] = [];
-    if (this.rowHeaders) {
+    if (this.rowHeaders &&  this.viewport.columns.length) {
       const anyView = this.viewport.columns[0];
       views.push(<revogr-row-headers
         height={contentHeight}

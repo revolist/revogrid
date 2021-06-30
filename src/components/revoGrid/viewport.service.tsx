@@ -272,12 +272,29 @@ export default class ViewportService {
     };
   }
 
-  setEdit(rowIndex: number, colIndex: number, colType: RevoGrid.DimensionCols, rowType: RevoGrid.DimensionRows) {
+  getStoreCoordinateByType(colType: RevoGrid.DimensionCols, rowType: RevoGrid.DimensionRows) {
     const stores = this.storesByType;
     const storeCoordinate = {
       x: stores[colType],
       y: stores[rowType],
     };
-    this.sv.selectionStoreConnector?.setEditByCell(storeCoordinate, { x: colIndex, y: rowIndex });
+    return storeCoordinate;
+  }
+
+  setFocus(
+    colType: RevoGrid.DimensionCols,
+    rowType: RevoGrid.DimensionRows,
+    start: Selection.Cell,
+    end: Selection.Cell
+  ) {
+    this.sv.selectionStoreConnector?.focusByCell(
+      this.getStoreCoordinateByType(colType, rowType), start, end
+    );
+  }
+
+  setEdit(rowIndex: number, colIndex: number, colType: RevoGrid.DimensionCols, rowType: RevoGrid.DimensionRows) {
+    this.sv.selectionStoreConnector?.setEditByCell(
+      this.getStoreCoordinateByType(colType, rowType), { x: colIndex, y: rowIndex }
+    );
   }
 }

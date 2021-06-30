@@ -42,7 +42,12 @@ export const config: Config = {
   globalScript: './src/global/global.ts',
   plugins: [
     sass({
-      injectGlobalPaths: ['src/global/_colors.scss', 'src/global/_icons.scss', 'src/global/_mixins.scss', 'src/global/_buttons.scss'],
+      injectGlobalPaths: [
+        'src/global/_colors.scss',
+        'src/global/_icons.scss',
+        'src/global/_mixins.scss',
+        'src/global/_buttons.scss'
+      ],
     }),
   ],
   // proxies
@@ -75,6 +80,7 @@ export const config: Config = {
     {
       type: 'dist',
       esmLoaderPath: '../loader',
+      copy: [{ src: '../dist/types/plugins', dest: './plugins' }],
     },
     {
       type: 'docs-readme',

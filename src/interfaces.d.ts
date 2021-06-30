@@ -115,6 +115,11 @@ export declare namespace RevoGrid {
 
   type ColumnDataSchema = ColumnGrouping | ColumnRegular;
   type ColumnData = ColumnDataSchema[];
+  type ColumnTemplateProp = ColumnRegular & {
+    providers: Providers;
+    index: number;
+  };
+  type ColumnPropProp = ColumnGrouping | ColumnTemplateProp;
 
   type ColumnProp = string | number;
   type DataFormat = any;
@@ -124,6 +129,12 @@ export declare namespace RevoGrid {
     style?: { [key: string]: string | undefined };
     class?: { [key: string]: boolean } | string;
     [attr: string]: CellProp;
+  };
+
+  type Providers = {
+    viewport: Object;
+    dimension: Object;
+    selection: Object;
   };
 
   // --------------------------------------------------------------------------
@@ -155,9 +166,9 @@ export declare namespace RevoGrid {
   }
 
   type CellTemplateFunc<T> = (createElement: HyperFunc<T>, props: ColumnDataSchemaModel) => any;
-  type ColumnTemplateFunc<T> = (createElement: HyperFunc<T>, props: ColumnRegular) => T | T[] | string;
+  type ColumnTemplateFunc<T> = (createElement: HyperFunc<T>, props: ColumnTemplateProp) => T | T[] | string;
   type PropertiesFunc = (props: ColumnDataSchemaModel) => CellProps | void | undefined;
-  type ColPropertiesFunc = (props: ColumnDataSchema) => CellProps | void | undefined;
+  type ColPropertiesFunc = (props: ColumnPropProp) => CellProps | void | undefined;
 
   // --------------------------------------------------------------------------
   //
@@ -270,6 +281,10 @@ export declare namespace RevoPlugin {
     destroy(): void;
   }
 
+  class PluginExternal extends Plugin {
+    constructor(revogrid: HTMLRevoGridElement, providers: Record<string, any>, ...[]);
+  }
+
   type PluginClass = typeof Plugin;
 }
 
@@ -284,6 +299,7 @@ export declare namespace Selection {
   type ColIndex = number;
 
   type SelectionStoreState = {
+    // responsible for main range frame, can take focus from here
     range: RangeArea | null;
     tempRange: RangeArea | null;
     tempRangeType: string | null;

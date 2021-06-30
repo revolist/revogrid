@@ -4,7 +4,7 @@ import { ResizableElement } from '../../services/resizable.directive';
 import ColumnService from '../data/columnService';
 
 type Props = {
-  data?: RevoGrid.ColumnRegular;
+  data?: RevoGrid.ColumnTemplateProp;
   props: RevoGrid.CellProps;
 };
 
@@ -22,7 +22,7 @@ export const HeaderCellRenderer = ({ data, props }: Props, children: VNode[]): V
   }
   return (
     <ResizableElement {...cellProps}>
-      <div class="header-content">{colTemplate}</div>
+      <div class='header-content'>{colTemplate}</div>
       {children}
     </ResizableElement>
   );

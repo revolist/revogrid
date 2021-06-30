@@ -12,10 +12,11 @@ type Props = {
   dimensionCol: Pick<RevoGrid.DimensionSettingsState, 'indexes' | 'originItemSize' | 'indexToItem'>;
   depth: number;
   canResize: boolean;
+  providers: RevoGrid.Providers;
   onResize(changedX: number, startIndex: number, endIndex: number): void;
 };
 
-const ColumnGroupsRenderer = ({ depth, groups, visibleProps, dimensionCol, canResize, onResize }: Props): VNode[] => {
+const ColumnGroupsRenderer = ({ providers, depth, groups, visibleProps, dimensionCol, canResize, onResize }: Props): VNode[] => {
   // render group columns
   const groupRow: VNode[] = [];
   for (let i = 0; i < depth; i++) {
@@ -33,7 +34,7 @@ const ColumnGroupsRenderer = ({ depth, groups, visibleProps, dimensionCol, canRe
           const groupStart = getItemByIndex(dimensionCol, groupStartIndex).start;
           const groupEnd = getItemByIndex(dimensionCol, groupEndIndex).end;
           groupRow.push(
-            <GroupHeaderRenderer start={groupStart} end={groupEnd} group={group} canResize={canResize} onResize={e => onResize(e.changedX, groupStartIndex, groupEndIndex)} />,
+            <GroupHeaderRenderer providers={providers} start={groupStart} end={groupEnd} group={group} canResize={canResize} onResize={e => onResize(e.changedX, groupStartIndex, groupEndIndex)} />,
           );
         }
       }

@@ -3,11 +3,13 @@ import { ResizeEvent } from '../../services/resizable.directive';
 import { Group } from '../../store/dataSource/data.store';
 import { HEADER_CLASS, MIN_COL_SIZE } from '../../utils/consts';
 import { HeaderCellRenderer } from '../../components/header/headerCellRenderer';
+import { RevoGrid } from '../../interfaces';
 
 type Props = {
   start: number;
   end: number;
   group: Group;
+  providers: RevoGrid.Providers;
   canResize?: boolean;
   onResize?(e: ResizeEvent): void;
 };
@@ -28,7 +30,11 @@ const GroupHeaderRenderer = (p: Props): VNode[] => {
     },
     onResize: p.onResize,
   };
-  return <HeaderCellRenderer data={p.group} props={groupProps} />;
+  return <HeaderCellRenderer data={{
+    ...p.group,
+    providers: p.providers,
+    index: p.start
+  }} props={groupProps} />;
 };
 
 export default GroupHeaderRenderer;

@@ -59,7 +59,11 @@ export class RevogrHeaderComponent {
         <HeaderRenderer
           range={range}
           column={rgCol}
-          data={colData}
+          data={{
+            ...colData,
+            index: rgCol.itemIndex,
+            providers: this.providers
+          }}
           canFilter={!!this.columnFilter}
           canResize={this.canResize}
           onResize={e => this.onResize(e, rgCol.itemIndex)}
@@ -75,6 +79,7 @@ export class RevogrHeaderComponent {
         <ColumnGroupsRenderer
           canResize={this.canResize}
           visibleProps={visibleProps}
+          providers={this.providers}
           groups={this.groups}
           dimensionCol={this.dimensionCol.state}
           depth={this.groupingDepth}
@@ -83,5 +88,13 @@ export class RevogrHeaderComponent {
       </div>,
       <div class={`${HEADER_ROW_CLASS} ${HEADER_ACTUAL_ROW_CLASS}`}>{cells}</div>,
     ];
+  }
+
+  get providers() {
+    return {
+      viewport: this.viewportCol,
+      dimension: this.dimensionCol,
+      selection: this.selectionStore
+    };
   }
 }

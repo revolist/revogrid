@@ -78,7 +78,6 @@ export default class StretchColumn extends BasePlugin {
   applyStretch(columns: ColumnItems) {
     // unsubscribe from all events
     this.dropChanges();
-
     // calculate grid size
     let sizeDifference = this.revogrid.clientWidth - 1;
     each(columns, (_, type: RevoGrid.DimensionCols) => {
@@ -104,7 +103,6 @@ export default class StretchColumn extends BasePlugin {
        */
       const colSize = last?.size || this.revogrid.colSize || 0;
       const size = sizeDifference + colSize - 1;
-      console.log(size, this.revogrid.clientWidth, sizeDifference);
 
       if (last && !last.autoSize && (colSize < size)) {
         this.stretchedColumn = {

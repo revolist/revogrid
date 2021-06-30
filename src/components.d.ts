@@ -170,6 +170,10 @@ export namespace Components {
          */
         "setCellEdit": (rgRow: number, prop: RevoGrid.ColumnProp, rowSource?: RevoGrid.DimensionRows) => Promise<void>;
         /**
+          * Bring cell to edit mode
+         */
+        "setCellsFocus": (cellStart?: Selection.Cell, cellEnd?: Selection.Cell, colType?: RevoGrid.DimensionCols, rowType?: RevoGrid.DimensionRows) => Promise<void>;
+        /**
           * Source - defines main data source. Can be an Object or 2 dimensional array([][]); Keys/indexes referenced from columns Prop
          */
         "source": RevoGrid.DataType[];

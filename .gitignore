@@ -1,6 +1,7 @@
 dist/
 custom-element/
 www/
+plugins/
 loader/
 demo/
 demo/node_modules
