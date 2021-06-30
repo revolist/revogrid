@@ -282,8 +282,8 @@ export class OverlaySelection {
     if (this.canEdit()) {
       const editCell = this.selectionStore.get('focus');
       const data = this.columnService.getSaveData(editCell.y, editCell.x);
-      console.log("doEdit2",data)
-      this.clearCell();
+      console.log("doEdit2",data,editCell,this.setEdit)
+      val = ""
       this.setEdit?.emit({
         ...data,
         isCancel,
