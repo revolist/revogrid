@@ -530,7 +530,7 @@ export class RevoGridComponent {
   }
 
   @Listen('internalCellEdit') async onBeforeEdit(e: CustomEvent<Edition.BeforeSaveDataDetails>) {
-    e.cancelBubble = true;
+    e.cancelBubble = true
     const { defaultPrevented, detail } = this.beforeedit.emit(e.detail);
     await timeout();
     // apply data
@@ -848,6 +848,9 @@ export class RevoGridComponent {
       useClipboard={this.useClipboard}
       columns={this.viewport.columns}
       onEdit={detail => {
+          if (detail.val == "Alphanumeric" || detail.val == "Hankaku" || detail.val == "Hiragana" || detail.val == "Process" || detail.val == "Zenkaku"){
+            detail.val = ""
+          }
         const event = this.beforeeditstart.emit(detail);
         if (!event.defaultPrevented) {
           this.selectionStoreConnector.setEdit(detail.isCancel ? false : detail.val);

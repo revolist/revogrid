@@ -25,6 +25,9 @@ export class OverlaySelection {
   private autoFillService: AutoFillService | null = null;
   private clipboardService: ClipboardService | null = null;
   private orderEditor: HTMLRevogrOrderEditorElement;
+  private oldTime: number = 0;
+  private oldValue: string = "";
+  
 
   @Element() element: HTMLElement;
 
@@ -278,6 +281,7 @@ export class OverlaySelection {
     if (this.canEdit()) {
       const editCell = this.selectionStore.get('focus');
       const data = this.columnService.getSaveData(editCell.y, editCell.x);
+      val = ""
       this.setEdit?.emit({
         ...data,
         isCancel,
@@ -305,6 +309,18 @@ export class OverlaySelection {
     }
   }
 
+  private async focusBefore() {
+    const canFocus = await this.keyboardService.keyChangeSelection(
+      new KeyboardEvent('keydown', {
+        code: codesLetter.ARROW_UP,
+      }),
+      this.range
+    );
+    if (!canFocus) {
+      this.closeEdit();
+    }
+  }
+
   protected clearCell() {
     if (this.selectionStoreService.ranged && !isRangeSingleCell(this.selectionStoreService.ranged)) {
       const data = this.columnService.getRangeStaticData(this.selectionStoreService.ranged, '');
@@ -314,14 +330,27 @@ export class OverlaySelection {
       this.onCellEdit({ rgRow: focused.y, rgCol: focused.x, val: '' }, true);
     }
   }
-
   /** Edit finished, close cell and save */
   protected onCellEdit(e: Edition.SaveDataDetails, clear = false) {
+    let current_time  = new Date().getTime();
+    let gap_time = current_time - this.oldTime;
     const dataToSave = this.columnService.getSaveData(e.rgRow, e.rgCol, e.val);
-    this.internalCellEdit.emit(dataToSave);
-    // if not clear navigate to next cell after edit
-    if (!clear && !e.preventFocus) {
-      this.focusNext();
+    if(gap_time < 50) {
+      if(this.oldValue.length > 0){
+        e.val =  this.oldValue
+        this.focusNext();
+        this.focusBefore();
+      }
+      // if not clear navigate to next cell after edit
+    }else{
+      this.oldTime = current_time
+      this.oldValue = dataToSave.val
+      this.internalCellEdit.emit(dataToSave);
+  
+      // if not clear navigate to next cell after edit
+      if (!clear && !e.preventFocus) {
+        this.focusNext();
+      }
     }
   }
 
