@@ -185,13 +185,7 @@ export default class FilterPlugin extends BasePlugin {
         };
       }
     }
-    const source = await this.revogrid.getSource();
-    const columns = await this.revogrid.getColumns();
-    const { defaultPrevented, detail } = this.emit('beforefilterapply', { collection: this.filterCollection, source, columns });
-    if (defaultPrevented) {
-      return;
-    }
-    this.doFiltering(detail.collection, detail.source, detail.columns);
+    await this.runFiltering();
   }
 
   /**
@@ -225,6 +219,29 @@ export default class FilterPlugin extends BasePlugin {
     }
     await this.revogrid.updateColumns(columnsToUpdate);
     this.emit('afterFilterApply');
+  }
+
+  async clearFiltering() {
+    this.filterCollection = {};
+    await this.runFiltering();
+  }
+
+  private async runFiltering() {
+    const { source, columns } = await this.getData();
+    const { defaultPrevented, detail } = this.emit('beforefilterapply', { collection: this.filterCollection, source, columns });
+    if (defaultPrevented) {
+      return;
+    }
+    this.doFiltering(detail.collection, detail.source, detail.columns);
+  }
+
+  private async getData() {
+    const source = await this.revogrid.getSource();
+    const columns = await this.revogrid.getColumns();
+    return {
+      source,
+      columns
+    };
   }
 
   private getRowFilter(rows: RevoGrid.DataType[], collection: FilterCollection) {
