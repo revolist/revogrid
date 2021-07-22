@@ -160,7 +160,7 @@ export default class ColumnDataProvider {
     return column;
   }
 
-  private clearSorting(): void {
+  clearSorting(): void {
     const types = reduce(
       this.sorting,
       (r: { [key in Partial<DimensionCols>]: boolean }, c: ColumnRegular) => {

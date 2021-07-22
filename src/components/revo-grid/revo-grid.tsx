@@ -450,6 +450,13 @@ export class RevoGridComponent {
   }
 
   /**
+   * Clears column sorting
+   */
+  @Method() async clearSorting() {
+    this.columnProvider.clearSorting();
+  }
+
+  /**
    * Receive all columns in data source
    */
   @Method() async getColumns(): Promise<RevoGrid.ColumnRegular[]> {

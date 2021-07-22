@@ -38,6 +38,10 @@ export namespace Components {
          */
         "clearFocus": () => Promise<void>;
         /**
+          * Clears column sorting
+         */
+        "clearSorting": () => Promise<void>;
+        /**
           * Indicates default column size.
          */
         "colSize": number;
