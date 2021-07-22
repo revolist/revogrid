@@ -191,7 +191,7 @@ export namespace Components {
           * @param index - virtual column index
           * @param order - order to apply
          */
-        "updateColumnSorting": (column: RevoGrid.ColumnRegular, index: number, order: 'asc' | 'desc') => Promise<RevoGrid.ColumnRegular>;
+        "updateColumnSorting": (column: RevoGrid.ColumnRegular, index: number, order: 'asc' | 'desc', additive: boolean) => Promise<RevoGrid.ColumnRegular>;
         /**
           * Update columns
          */
@@ -548,6 +548,7 @@ declare namespace LocalJSX {
         "onBeforesorting"?: (event: CustomEvent<{
     column: RevoGrid.ColumnRegular;
     order: 'desc' | 'asc';
+    additive: boolean;
   }>) => void;
         /**
           * Before sorting apply. Use e.preventDefault() to prevent sorting data change.
@@ -555,6 +556,7 @@ declare namespace LocalJSX {
         "onBeforesortingapply"?: (event: CustomEvent<{
     column: RevoGrid.ColumnRegular;
     order: 'desc' | 'asc';
+    additive: boolean;
   }>) => void;
         /**
           * Before data apply. You can override data source here

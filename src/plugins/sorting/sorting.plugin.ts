@@ -74,7 +74,7 @@ export default class SortingPlugin extends BasePlugin {
         return;
       }
 
-      this.headerclick(e.detail.column, e.detail.index);
+      this.headerclick(e.detail.column, e.detail.index, e.detail?.originalEvent?.shiftKey);
     };
 
     this.addEventListener('beforesourceset', beforesourceset);
@@ -82,28 +82,50 @@ export default class SortingPlugin extends BasePlugin {
     this.addEventListener('initialHeaderClick', headerclick);
   }
 
-  private async headerclick(column: RevoGrid.ColumnRegular, index: number) {
+  private async headerclick(column: RevoGrid.ColumnRegular, index: number, additive: boolean) {
     let order: RevoGrid.Order = this.getNextOrder(column.order);
-    const beforeEvent = this.emit('beforesorting', { column, order });
+    const beforeEvent = this.emit('beforesorting', { column, order, additive });
     if (beforeEvent.defaultPrevented) {
       return;
     }
     order = beforeEvent.detail.order;
-    const newCol = await this.revogrid.updateColumnSorting(beforeEvent.detail.column, index, order);
+    const newCol = await this.revogrid.updateColumnSorting(beforeEvent.detail.column, index, order, additive);
 
     // apply sort data
-    const beforeApplyEvent = this.emit('beforesortingapply', { column: newCol, order });
+    const beforeApplyEvent = this.emit('beforesortingapply', { column: newCol, order, additive });
     if (beforeApplyEvent.defaultPrevented) {
       return;
     }
     order = beforeApplyEvent.detail.order;
 
-    const cmp : RevoGrid.CellCompareFunc = column?.cellCompare || this.defaultCellCompare;
+    const cellCmp : RevoGrid.CellCompareFunc = column?.cellCompare || this.defaultCellCompare;
+    const cmp  : RevoGrid.CellCompareFunc = order == 'asc' ? cellCmp : order == 'desc' ? this.descCellCompare(cellCmp) : undefined;
 
-    this.sort(
-      { [column.prop]: order },
-      { [column.prop]: order == 'desc' ? this.descCellCompare(cmp) : cmp }
-    );
+    if (additive && this.sorting) {
+
+      const sorting : SortingOrder = {};
+      const sortingFunc : SortingOrderFunction = {};
+
+      Object.assign(sorting,this.sorting);
+      Object.assign(sortingFunc,this.sortingFunc);
+
+      if (column.prop in sorting && size(sorting) > 1 && order === undefined) {
+         delete sorting[column.prop];
+         delete sortingFunc[column.prop];
+      }
+      else {
+         sorting[column.prop] = order;
+         sortingFunc[column.prop] = cmp;
+      }
+
+      this.sort(sorting, sortingFunc);
+    }
+    else {
+      this.sort(
+        { [column.prop]: order },
+        { [column.prop]: cmp }
+      );
+    }
   }
 
   private setData(data: RevoGrid.DataType[], type: DimensionRows): RevoGrid.DataType[] | void {
@@ -139,10 +161,10 @@ export default class SortingPlugin extends BasePlugin {
   }
 
   private defaultCellCompare(prop: RevoGrid.ColumnProp, a: RevoGrid.DataType, b: RevoGrid.DataType){
-    const av = a[prop];
-    const bv = b[prop];
+    const av = a[prop]?.toString().toLowerCase();
+    const bv = b[prop]?.toString().toLowerCase();
     
-    return av?.toString().toLowerCase() > bv?.toString().toLowerCase() ? 1 : -1;
+    return av == bv ? 0 : av > bv ?  1 : -1;
   }
 
   private descCellCompare(cmp: RevoGrid.CellCompareFunc) {
@@ -173,8 +195,6 @@ export default class SortingPlugin extends BasePlugin {
   }
 
   private sortItems(source: RevoGrid.DataType[], sortingFunc: SortingOrderFunction): RevoGrid.DataType[] {
-    let order: RevoGrid.Order
-
     return source.sort((a, b) => {
       let sorted = 0;
       for (let prop in sortingFunc) {
