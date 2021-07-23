@@ -152,8 +152,10 @@ export default class ColumnDataProvider {
     setSourceByVirtualIndex(this.dataSources[type].store, { [index]: column });
   }
 
-  updateColumnSorting(column: ColumnRegular, index: number, sorting: 'asc' | 'desc'): ColumnRegular {
-    this.clearSorting();
+  updateColumnSorting(column: ColumnRegular, index: number, sorting: 'asc' | 'desc', additive: boolean): ColumnRegular {
+    if (!additive) {
+      this.clearSorting();
+    }
     column.order = sorting;
     this.sorting[column.prop] = column;
     this.updateColumn(column, index);

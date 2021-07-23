@@ -208,6 +208,7 @@ export class RevoGridComponent {
   @Event() beforesortingapply: EventEmitter<{
     column: RevoGrid.ColumnRegular;
     order: 'desc' | 'asc';
+    additive: boolean;
   }>;
   /**
    * Before sorting event.
@@ -217,6 +218,7 @@ export class RevoGridComponent {
   @Event() beforesorting: EventEmitter<{
     column: RevoGrid.ColumnRegular;
     order: 'desc' | 'asc';
+    additive: boolean;
   }>;
 
   /**
@@ -445,8 +447,8 @@ export class RevoGridComponent {
    * @param index - virtual column index
    * @param order - order to apply
    */
-  @Method() async updateColumnSorting(column: RevoGrid.ColumnRegular, index: number, order: 'asc' | 'desc') {
-    return this.columnProvider.updateColumnSorting(column, index, order);
+  @Method() async updateColumnSorting(column: RevoGrid.ColumnRegular, index: number, order: 'asc' | 'desc', additive: boolean) {
+    return this.columnProvider.updateColumnSorting(column, index, order, additive);
   }
 
   /**
