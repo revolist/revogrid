@@ -82,7 +82,7 @@ export class FilterPanel {
           <input
             type="text"
             value={value}
-            onInput={e => (this.changes.value = (e.target as HTMLInputElement).value)}
+            onInput={ (e: InputEvent) => this.onInput(e) }
             onKeyDown={e => this.onKeyDown(e)}
             ref={e => (this.extraElement = e)}
           />
@@ -128,6 +128,12 @@ export class FilterPanel {
       ...this.changes,
       type,
     };
+  }
+
+  private onInput(e: InputEvent) {
+    this.changes.value = (e.target as HTMLInputElement).value;
+    // prevent grid focus and other unexpected events
+    e.preventDefault();
   }
 
   private onKeyDown(e: KeyboardEvent) {

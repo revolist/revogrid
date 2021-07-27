@@ -12,6 +12,11 @@ function generateHeader(index) {
   return label.toLowerCase();
 }
 
+function naturalSort(prop,a,b) {
+
+  return a[prop].localeCompare(b[prop],"en",{numeric:true})
+}
+
 const DEFAULT_CONFIG = {
   topPinned: [],
   groupedHeader: false,
@@ -61,7 +66,8 @@ export function generateFakeDataObject(config = {}) {
         name: generateHeader(rgCol),
         prop: rgCol,
         sortable: true,
-        size: 200
+        size: 200,
+        cellCompare: (rgCol % 2) == 0 ? naturalSort : undefined
       };
 
       // apply config

@@ -210,10 +210,16 @@
         const $loader = document.querySelector('.loader');
         $loader.style.display = 'block';
         setTimeout(() => {
+
           const grid = document.querySelector('revo-grid');
           const data = generateFakeDataObject(defaultData);
 
-          grid.columns = data.headers;
+          // don't re-set columns in order to allow testing
+          // of sorting plugin's sortItems() method.
+          if (!grid.columns || grid.columns.length != data.headers.length) {
+            grid.columns = data.headers;
+          }
+          
           grid.source = data.rows;
 
           grid.pinnedTopSource = data.pinnedTopRows;
