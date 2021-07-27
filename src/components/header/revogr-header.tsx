@@ -50,7 +50,7 @@ export class RevogrHeaderComponent {
     const cols = this.viewportCol.get('items');
     const range = this.selectionStore?.get('range');
     const cells: VNode[] = [];
-    const visibleProps: { [prop: string]: number } = {};
+    const visibleProps: Record<string, number> = {};
 
     // render header columns
     for (let rgCol of cols) {

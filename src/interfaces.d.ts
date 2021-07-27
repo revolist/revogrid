@@ -132,9 +132,9 @@ export declare namespace RevoGrid {
   };
 
   type Providers = {
-    viewport: Object;
-    dimension: Object;
-    selection: Object;
+    viewport: Observable<ViewportState>;
+    dimension: Observable<DimensionSettingsState>;
+    selection: Observable<Selection.SelectionStoreState>;
   };
 
   // --------------------------------------------------------------------------
