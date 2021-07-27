@@ -106,7 +106,8 @@ export class RevogrData {
       this.columnService.customRenderer(
         rgRow.itemIndex,
         rgCol.itemIndex,
-        model
+        model,
+        this.providers
       );
 
     // if custom render

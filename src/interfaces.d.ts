@@ -47,6 +47,10 @@ export declare namespace RevoGrid {
     data: DataSource;
   };
 
+  type CellTemplateProp = {
+    providers: Providers;
+  } & ColumnDataSchemaModel;
+
   type ReadOnlyFormat = boolean | ((params: ColumnDataSchemaModel) => boolean);
   type RowDrag = boolean | { (params: ColumnDataSchemaModel): boolean };
 
@@ -167,10 +171,9 @@ export declare namespace RevoGrid {
     (sel: any, data: any, children: T): T;
   }
 
-  type CellTemplateFunc<T> = (createElement: HyperFunc<T>, props: ColumnDataSchemaModel) => any;
-  type ColumnTemplateFunc<T> = (createElement: HyperFunc<T>, props: ColumnTemplateProp) => T | T[] | string;
+  type CellTemplateFunc<T> = (createElement: HyperFunc<T>, props: CellTemplateProp) => any;
   type CellCompareFunc = (prop: ColumnProp, a: DataType, b: DataType) => number;
-  type ColumnTemplateFunc<T> = (createElement: HyperFunc<T>, props: ColumnRegular) => T | T[] | string;
+  type ColumnTemplateFunc<T> = (createElement: HyperFunc<T>, props: ColumnTemplateProp) => T | T[] | string;
   type PropertiesFunc = (props: ColumnDataSchemaModel) => CellProps | void | undefined;
   type ColPropertiesFunc = (props: ColumnPropProp) => CellProps | void | undefined;
 

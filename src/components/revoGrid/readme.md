@@ -55,8 +55,8 @@
 | `beforefiltertrimmed`      | Before filter trimmed values Use e.preventDefault() to prevent value trimming and filter apply Update @collection if you wish to change filters Update @itemsToFilter if you wish to filter indexes of trimming | `CustomEvent<{ collection: FilterCollection; itemsToFilter: Record<number, boolean>; }>`                                                                                                            |
 | `beforefocuslost`          | Before grid focus lost happened. Use e.preventDefault() to prevent cell focus change.                                                                                                                           | `CustomEvent<{ model: any; cell: Cell; colType: DimensionCols; rowType: DimensionRows; column?: ColumnRegular; }>`                                                                                  |
 | `beforerangeedit`          | Before range edit event. Triggered before range data applied, when range selection happened. Use e.preventDefault() to prevent edit data set and use you own.                                                   | `CustomEvent<{ data: DataLookup; models: { [rowIndex: number]: DataType; }; type: DimensionRows; }>`                                                                                                |
-| `beforesorting`            | Before sorting event. Initial sorting triggered, if this event stops no other event called. Use e.preventDefault() to prevent sorting.                                                                          | `CustomEvent<{ column: ColumnRegular; order: "desc" \| "asc"; }>`                                                                                                                                   |
-| `beforesortingapply`       | Before sorting apply. Use e.preventDefault() to prevent sorting data change.                                                                                                                                    | `CustomEvent<{ column: ColumnRegular; order: "desc" \| "asc"; }>`                                                                                                                                   |
+| `beforesorting`            | Before sorting event. Initial sorting triggered, if this event stops no other event called. Use e.preventDefault() to prevent sorting.                                                                          | `CustomEvent<{ column: ColumnRegular; order: "desc" \| "asc"; additive: boolean; }>`                                                                                                                |
+| `beforesortingapply`       | Before sorting apply. Use e.preventDefault() to prevent sorting data change.                                                                                                                                    | `CustomEvent<{ column: ColumnRegular; order: "desc" \| "asc"; additive: boolean; }>`                                                                                                                |
 | `beforesourceset`          | Before data apply. You can override data source here                                                                                                                                                            | `CustomEvent<{ type: DimensionRows; source: DataType[]; }>`                                                                                                                                         |
 | `beforesourcesortingapply` | Before source update sorting apply. Use this event if you intended to prevent sorting on data update. Use e.preventDefault() to prevent sorting data change during rows source update.                          | `CustomEvent<any>`                                                                                                                                                                                  |
 | `beforetrimmed`            | Before trimmed values Use e.preventDefault() to prevent value trimming Update @trimmed if you wish to filter indexes of trimming                                                                                | `CustomEvent<{ trimmed: Record<number, boolean>; trimmedType: string; type: string; }>`                                                                                                             |
@@ -82,6 +82,16 @@ Type: `Promise<CustomEvent<{ trimmed: Record<number, boolean>; trimmedType: stri
 ### `clearFocus() => Promise<void>`
 
 Clear current grid focus
+
+#### Returns
+
+Type: `Promise<void>`
+
+
+
+### `clearSorting() => Promise<void>`
+
+Clears column sorting
 
 #### Returns
 
@@ -254,7 +264,7 @@ Type: `Promise<void>`
 
 
 
-### `updateColumnSorting(column: RevoGrid.ColumnRegular, index: number, order: 'asc' | 'desc') => Promise<RevoGrid.ColumnRegular>`
+### `updateColumnSorting(column: RevoGrid.ColumnRegular, index: number, order: 'asc' | 'desc', additive: boolean) => Promise<RevoGrid.ColumnRegular>`
 
 Update column sorting
 

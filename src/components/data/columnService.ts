@@ -10,12 +10,6 @@ import ColumnProp = RevoGrid.ColumnProp;
 import DataType = RevoGrid.DataType;
 import { isGroupingColumn } from '../../plugins/groupingRow/grouping.service';
 
-export interface ColumnServiceI {
-  columns: RevoGrid.ColumnRegular[];
-  customRenderer(r: number, c: number, model: ColumnDataSchemaModel): VNode | string | void;
-  isReadOnly(r: number, c: number): boolean;
-  getCellData(r: number, c: number): string;
-}
 
 export type ColumnSource = Observable<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
 export type RowSource = Observable<DataSourceState<DataType, RevoGrid.DimensionRows>>;
@@ -27,7 +21,7 @@ export type RowStores = {
   [T in RevoGrid.DimensionRows]: RowSource;
 };
 
-export default class ColumnService implements ColumnServiceI {
+export default class ColumnService {
   private unsubscribe: { (): void }[] = [];
   get columns(): RevoGrid.ColumnRegular[] {
     return getVisibleSourceItem(this.source);
@@ -98,10 +92,15 @@ export default class ColumnService implements ColumnServiceI {
     return props;
   }
 
-  customRenderer(_r: number, c: number, model: ColumnDataSchemaModel): VNode | string | void {
+  customRenderer(
+    _r: number,
+    c: number,
+    model: ColumnDataSchemaModel,
+    providers: RevoGrid.Providers
+  ): VNode | string | void {
     const tpl = this.columns[c]?.cellTemplate;
     if (tpl) {
-      return tpl((h as unknown) as RevoGrid.HyperFunc<VNode>, model);
+      return tpl(h, { ...model, providers });
     }
     return;
   }
