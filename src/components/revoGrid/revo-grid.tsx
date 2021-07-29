@@ -410,7 +410,7 @@ export class RevoGridComponent {
     this.viewport?.setEdit(rgRow, this.columnProvider.getColumnIndexByProp(prop, 'rgCol'), rgCol.pin || 'rgCol', rowSource);
   }
 
-  /**  Bring cell to edit mode */
+  /**  Set focus range */
   @Method() async setCellsFocus(
     cellStart: Selection.Cell = { x: 0, y: 0 },
     cellEnd: Selection.Cell = { x: 0, y: 0 },
@@ -522,10 +522,13 @@ export class RevoGridComponent {
   // --------------------------------------------------------------------------
   
   /** Clear data which is outside of grid container */
-  private handleOutsideClick({ target }: { target: HTMLElement | null }) {
-    if (!target?.closest(`[${UUID}="${this.uuid}"]`)) {
-      this.clearFocus();
+  private handleOutsideClick(e: MouseEvent) {
+    const target = (e.target as HTMLElement | null);
+    // if event prevented or it is a table where we click at
+    if (e.defaultPrevented || target?.closest(`[${UUID}="${this.uuid}"]`)) {
+      return;
     }
+    this.clearFocus();
   }
 
   // --------------------------------------------------------------------------
