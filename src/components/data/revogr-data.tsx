@@ -11,6 +11,7 @@ import RowRenderer, { PADDING_DEPTH } from './rowRenderer';
 import GroupingRowRenderer from '../../plugins/groupingRow/grouping.row.renderer';
 import { isGrouping } from '../../plugins/groupingRow/grouping.service';
 
+const DRAG_START_EVENT = 'dragStartCell';
 @Component({
   tag: 'revogr-data',
   styleUrl: 'revogr-data-style.scss',
@@ -22,7 +23,6 @@ export class RevogrData {
 
   @Prop() readonly: boolean;
   @Prop() range: boolean;
-  @Prop() canDrag: boolean;
 
   @Prop() rowClass: string;
   @Prop() rowSelectionStore: Observable<Selection.SelectionStoreState>;
@@ -35,7 +35,7 @@ export class RevogrData {
   @Prop() colData: ColumnSource;
   @Prop() dataStore: RowSource;
 
-  @Event() dragStartCell: EventEmitter<MouseEvent>;
+  @Event({ eventName: DRAG_START_EVENT }) dragStartCell: EventEmitter<MouseEvent>;
 
   @Watch('dataStore')
   @Watch('colData')
@@ -77,7 +77,7 @@ export class RevogrData {
         rowClass += ' focused-rgRow';
       }
       for (let rgCol of cols) {
-        cells.push(this.getCellRenderer(rgRow, rgCol, this.canDrag, /** grouping apply*/ this.columnService.hasGrouping ? depth : 0));
+        cells.push(this.getCellRenderer(rgRow, rgCol, /** grouping apply*/ this.columnService.hasGrouping ? depth : 0));
       }
       rowsEls.push(
         <RowRenderer rowClass={rowClass} size={rgRow.size} start={rgRow.start}>
@@ -88,7 +88,7 @@ export class RevogrData {
     return rowsEls;
   }
 
-  private getCellRenderer(rgRow: RevoGrid.VirtualPositionItem, rgCol: RevoGrid.VirtualPositionItem, draggable = false, depth = 0) {
+  private getCellRenderer(rgRow: RevoGrid.VirtualPositionItem, rgCol: RevoGrid.VirtualPositionItem, depth = 0) {
     const model = this.columnService.rowDataModel(rgRow.itemIndex, rgCol.itemIndex);
     const defaultProps: RevoGrid.CellProps = {
       [DATA_COL]: rgCol.itemIndex,
@@ -124,7 +124,7 @@ export class RevogrData {
     // if regular render
     return (
       <div {...props}>
-        <CellRenderer model={model} canDrag={draggable} onDragStart={e => this.dragStartCell.emit(e)} />
+        <CellRenderer model={model} onDragStart={e => this.dragStartCell.emit(e)} />
       </div>
     );
   }

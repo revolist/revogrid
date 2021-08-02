@@ -1,5 +1,4 @@
 import { Component, Prop, h, Watch, Element, Listen, Event, EventEmitter, Method, VNode, State, Host } from '@stencil/core';
-import reduce from 'lodash/reduce';
 import each from 'lodash/each';
 
 import ColumnDataProvider, { ColumnCollection } from '../../services/column.data.provider';
@@ -11,7 +10,7 @@ import { Edition, Selection, RevoGrid, ThemeSpace, RevoPlugin } from '../../inte
 import ThemeService from '../../themeManager/themeService';
 import { timeout } from '../../utils/utils';
 import AutoSize, { AutoSizeColumnConfig } from '../../plugins/autoSizeColumn';
-import { columnTypes } from '../../store/storeTypes';
+import { columnTypes, rowTypes } from '../../store/storeTypes';
 import FilterPlugin, { ColumnFilterConfig, FilterCollection } from '../../plugins/filter/filter.plugin';
 import SortingPlugin from '../../plugins/sorting/sorting.plugin';
 import ExportFilePlugin from '../../plugins/export/export.plugin';
@@ -27,6 +26,7 @@ import { UUID } from '../../utils/consts';
 import SelectionStoreConnector from '../../services/selection.store.connector';
 import { OrdererService } from '../order/orderRenderer';
 import StretchColumn, { isStretchPlugin } from '../../plugins/stretchPlugin';
+import { rowDefinitionByType } from './grid.helpers';
 
 @Component({
   tag: 'revo-grid',
@@ -699,39 +699,15 @@ export class RevoGridComponent {
   }
 
   @Watch('rowDefinitions') rowDefChanged(newVal: RevoGrid.RowDefinition[] = []) {
+    // clear current defs
+    each(rowTypes, t => this.dimensionProvider.setDimensionSize(t, {}));
     if (!newVal.length) {
       return;
     }
-    const rows = reduce(
-      newVal,
-      (
-        r: Partial<
-          {
-            [T in RevoGrid.DimensionRows]: {
-              sizes?: Record<number, number>;
-            };
-          }
-        >,
-        v,
-      ) => {
-        if (!r[v.type]) {
-          r[v.type] = {};
-        }
-        if (v.size) {
-          if (!r[v.type].sizes) {
-            r[v.type].sizes = {};
-          }
-          r[v.type].sizes[v.index] = v.size;
-        }
-        return r;
-      },
-      {},
+    const rows = rowDefinitionByType(newVal);
+    each(rows, (r, k: RevoGrid.DimensionRows) => 
+      this.dimensionProvider.setDimensionSize(k, r.sizes || {})
     );
-    each(rows, (r, k: RevoGrid.DimensionRows) => {
-      if (r.sizes) {
-        this.dimensionProvider.setDimensionSize(k, r.sizes);
-      }
-    });
   }
 
   @Watch('trimmedRows') trimmedRowsChanged(newVal: Record<number, boolean> = {}) {

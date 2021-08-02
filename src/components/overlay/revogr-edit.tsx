@@ -35,17 +35,22 @@ export class Edit {
   }
 
   componentWillRender(): void {
-    if (!this.currentEditor) {
-      if (this.editor) {
-        this.currentEditor = new this.editor(
-          this.column,
-          (e, preventFocus) => this.onSave(e, preventFocus),
-          focusNext => this.closeEdit.emit(focusNext),
-        );
-      } else {
-        this.currentEditor = new TextEditor(this.column, (e, preventFocus) => this.onSave(e, preventFocus));
-      }
+    // we have active editor
+    if (this.currentEditor) {
+      return;
     }
+    // fresh run
+    // editor defined for the column
+    if (this.editor) {
+      this.currentEditor = new this.editor(
+        this.column,
+        (e, preventFocus) => this.onSave(e, preventFocus),
+        focusNext => this.closeEdit.emit(focusNext),
+      );
+      return;
+    }
+    // default text editor usage
+    this.currentEditor = new TextEditor(this.column, (e, preventFocus) => this.onSave(e, preventFocus));
   }
 
   componentDidRender(): void {

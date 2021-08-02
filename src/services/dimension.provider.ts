@@ -3,7 +3,7 @@ import { columnTypes, rowTypes } from '../store/storeTypes';
 import DimensionStore from '../store/dimension/dimension.store';
 import ViewportProvider from './viewport.provider';
 import { RevoGrid } from '../interfaces';
-import { getItemByIndex } from '../store/dimension/dimension.helpers';
+import { getItemByIndex, getItemByPosition } from '../store/dimension/dimension.helpers';
 import { debounce } from 'lodash';
 
 export type ColumnItems = Record<RevoGrid.DimensionCols, RevoGrid.ColumnRegular[]>;
@@ -13,7 +13,8 @@ export type DimensionConfig = {
   realSizeChanged(): void;
 };
 export default class DimensionProvider {
-  public readonly stores: DimensionStores;
+  readonly stores: DimensionStores;
+  readonly getItemByPosition = getItemByPosition;
   constructor(private viewports: ViewportProvider, config: DimensionConfig) {
     const sizeChanged = debounce(() => config.realSizeChanged(), 100);
     this.stores = reduce(

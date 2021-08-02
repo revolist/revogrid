@@ -5,22 +5,17 @@ import { DRAG_ICON_CLASS, DRAGGABLE_CLASS } from '../../utils/consts';
 
 type Props = {
   model: RevoGrid.ColumnDataSchemaModel;
-  canDrag?: boolean;
   onDragStart?(e: MouseEvent): void;
 };
 
-const CellRenderer = ({ model, canDrag, onDragStart }: Props) => {
+const CellRenderer = ({ model, onDragStart }: Props) => {
   const els: (VNode | string)[] = [];
   if (model.column.rowDrag && isRowDragService(model.column.rowDrag, model)) {
-    if (canDrag) {
-      els.push(
-        <span class={DRAGGABLE_CLASS} onMouseDown={e => onDragStart(e)}>
-          <span class={DRAG_ICON_CLASS} />
-        </span>,
-      );
-    } else {
-      els.push(<span class={DRAGGABLE_CLASS} />);
-    }
+    els.push(
+      <span class={DRAGGABLE_CLASS} onMouseDown={e => onDragStart(e)}>
+        <span class={DRAG_ICON_CLASS} />
+      </span>,
+    );
   }
   els.push(`${ColumnService.getData(model.model[model.prop])}`);
   return els;

@@ -5,7 +5,7 @@ import { RevoPlugin } from '../interfaces';
  * Provide minimal starting core
  */
 export default abstract class BasePlugin implements RevoPlugin.Plugin {
-  private readonly subscriptions: Record<string, (e: CustomEvent) => void> = {};
+  protected readonly subscriptions: Record<string, (e?: any) => void> = {};
   constructor(protected revogrid: HTMLRevoGridElement) { }
   /**
    * 

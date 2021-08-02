@@ -256,7 +256,7 @@ Type: `Promise<void>`
 
 ### `setCellsFocus(cellStart?: Selection.Cell, cellEnd?: Selection.Cell, colType?: RevoGrid.DimensionCols, rowType?: RevoGrid.DimensionRows) => Promise<void>`
 
-Bring cell to edit mode
+Set focus range
 
 #### Returns
 
