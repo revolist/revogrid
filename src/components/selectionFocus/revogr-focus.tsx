@@ -38,7 +38,7 @@ export class RevogrFocus {
         this.dimensionRow.state,
         this.dimensionCol.state,
       );
-      return <Host class={FOCUS_CLASS} style={style} hidden={false}/>;
+      return <Host class={FOCUS_CLASS} style={style} hidden={false} />;
     }
   }
 }

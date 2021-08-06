@@ -12,9 +12,8 @@ function generateHeader(index) {
   return label.toLowerCase();
 }
 
-function naturalSort(prop,a,b) {
-
-  return a[prop].localeCompare(b[prop],"en",{numeric:true})
+function naturalSort(prop, a, b) {
+  return a[prop].localeCompare(b[prop], 'en', { numeric: true });
 }
 
 const DEFAULT_CONFIG = {
@@ -67,7 +66,7 @@ export function generateFakeDataObject(config = {}) {
         prop: rgCol,
         sortable: true,
         size: 200,
-        cellCompare: (rgCol % 2) == 0 ? naturalSort : undefined
+        cellCompare: rgCol % 2 == 0 ? naturalSort : undefined,
       };
 
       // apply config
@@ -84,7 +83,7 @@ export function generateFakeDataObject(config = {}) {
     if (rgCol === 1) {
       result[rgRow][rgCol] = 'A';
     }
-   // apply config
+    // apply config
     if (rgCol === rowDrag) {
       columns[rgCol].rowDrag = true;
     }
@@ -101,26 +100,32 @@ export function generateFakeDataObject(config = {}) {
 
   if (groupedHeader) {
     const grouped = headers.splice(1, 4);
-      const grouped2 = grouped.splice(0, 2);
-      grouped.push({
-        name: 'Grouped2',
-        children: grouped2,
-      });
-      headers.splice(
-        6,
-        0,
-        ...[
-          {
-            name: 'Grouped',
-            children: grouped,
-          },
-        ],
-      );
-      const grouped4 = headers.splice(1, 3);
-      headers.splice(1, 0, ...[{
+    const grouped2 = grouped.splice(0, 2);
+    grouped.push({
+      name: 'Grouped2',
+      children: grouped2,
+    });
+    headers.splice(
+      6,
+      0,
+      ...[
+        {
+          name: 'Grouped',
+          children: grouped,
+        },
+      ],
+    );
+    const grouped4 = headers.splice(1, 3);
+    headers.splice(
+      1,
+      0,
+      ...[
+        {
           name: 'Grouped3',
-          children: grouped4
-      }]);
+          children: grouped4,
+        },
+      ],
+    );
   }
   return {
     rows: result,
@@ -129,4 +134,3 @@ export function generateFakeDataObject(config = {}) {
     headers,
   };
 }
-

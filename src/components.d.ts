@@ -184,7 +184,7 @@ export namespace Components {
         /**
           * Defines stretch strategy for columns with @StretchColumn plugin if there are more space on the right last column size would be increased
          */
-        "stretch": boolean|string;
+        "stretch": boolean | string;
         /**
           * Theme name
          */
@@ -545,7 +545,7 @@ declare namespace LocalJSX {
         /**
           * Before grid focus lost happened. Use e.preventDefault() to prevent cell focus change.
          */
-        "onBeforefocuslost"?: (event: CustomEvent<FocusedData|null>) => void;
+        "onBeforefocuslost"?: (event: CustomEvent<FocusedData | null>) => void;
         /**
           * Before range edit event. Triggered before range data applied, when range selection happened. Use e.preventDefault() to prevent edit data set and use you own.
          */
@@ -648,7 +648,7 @@ declare namespace LocalJSX {
         /**
           * Defines stretch strategy for columns with @StretchColumn plugin if there are more space on the right last column size would be increased
          */
-        "stretch"?: boolean|string;
+        "stretch"?: boolean | string;
         /**
           * Theme name
          */
@@ -834,7 +834,7 @@ declare namespace LocalJSX {
         "contentWidth"?: number;
         "onResizeViewport"?: (event: CustomEvent<RevoGrid.ViewPortResizeEvent>) => void;
         "onScrollViewport"?: (event: CustomEvent<RevoGrid.ViewPortScrollEvent>) => void;
-        "onScrollchange"?: (event: CustomEvent<{ type: RevoGrid.DimensionType; hasScroll: boolean; }>) => void;
+        "onScrollchange"?: (event: CustomEvent<{ type: RevoGrid.DimensionType; hasScroll: boolean }>) => void;
     }
     interface IntrinsicElements {
         "revo-grid": RevoGrid;

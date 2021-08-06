@@ -62,7 +62,7 @@ export class RevogrHeaderComponent {
           data={{
             ...colData,
             index: rgCol.itemIndex,
-            providers: this.providers
+            providers: this.providers,
           }}
           canFilter={!!this.columnFilter}
           canResize={this.canResize}
@@ -94,7 +94,7 @@ export class RevogrHeaderComponent {
     return {
       viewport: this.viewportCol,
       dimension: this.dimensionCol,
-      selection: this.selectionStore
+      selection: this.selectionStore,
     };
   }
 }

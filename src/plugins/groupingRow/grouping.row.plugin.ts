@@ -34,7 +34,7 @@ export default class GroupingRowPlugin extends BasePlugin {
 
   constructor(
     protected revogrid: HTMLRevoGridElement,
-    private providers: {
+    protected providers: {
       dataProvider: DataProvider;
       columnProvider: ColumnDataProvider;
     },

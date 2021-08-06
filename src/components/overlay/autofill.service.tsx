@@ -40,9 +40,7 @@ export class AutoFillService {
 
   private onMouseMoveAutofill: DebouncedFunc<(e: MouseEvent, data: EventData) => void>;
 
-  constructor(private sv: Config) {
-
-  }
+  constructor(private sv: Config) {}
 
   /**
    * Render autofill box

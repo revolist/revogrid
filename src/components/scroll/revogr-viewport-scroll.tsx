@@ -16,7 +16,7 @@ import { CONTENT_SLOT, FOOTER_SLOT, HEADER_SLOT } from '../revoGrid/viewport.hel
 export class RevogrViewportScroll {
   @Event({ bubbles: false }) scrollViewport: EventEmitter<RevoGrid.ViewPortScrollEvent>;
   @Event() resizeViewport: EventEmitter<RevoGrid.ViewPortResizeEvent>;
-  @Event() scrollchange: EventEmitter<{ type: RevoGrid.DimensionType; hasScroll: boolean; }>;
+  @Event() scrollchange: EventEmitter<{ type: RevoGrid.DimensionType; hasScroll: boolean }>;
   private scrollThrottling = 30;
 
   /**

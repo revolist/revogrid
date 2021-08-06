@@ -27,16 +27,13 @@ type Config = {
   resize(r: Record<RevoGrid.ColumnProp, RevoGrid.ColumnRegular>): void;
 };
 
-
-
 export type FocusedData = {
-  model: any,
+  model: any;
   cell: Selection.Cell;
   colType: RevoGrid.DimensionCols;
   rowType: RevoGrid.DimensionRows;
   column?: RevoGrid.ColumnRegular;
 };
-
 
 export default class ViewportService {
   readonly columns: ViewportProps[];
@@ -52,16 +49,20 @@ export default class ViewportService {
   private onColumnResize(
     type: RevoGrid.DimensionCols,
     e: CustomEvent<RevoGrid.ViewSettingSizeProp>,
-    store: Observable<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>
+    store: Observable<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>,
   ) {
     this.sv.dimensionProvider?.setDimensionSize(type, e.detail);
-    const changedItems = reduce(e.detail|| {}, (r: Record<RevoGrid.ColumnProp, RevoGrid.ColumnRegular>, size, index) => {
-      const item: RevoGrid.ColumnRegular = getSourceItem(store, parseInt(index, 10));
-      if (item) {
-        r[item.prop] = {...item, size};
-      }
-      return r;
-    }, {});
+    const changedItems = reduce(
+      e.detail || {},
+      (r: Record<RevoGrid.ColumnProp, RevoGrid.ColumnRegular>, size, index) => {
+        const item: RevoGrid.ColumnRegular = getSourceItem(store, parseInt(index, 10));
+        if (item) {
+          r[item.prop] = { ...item, size };
+        }
+        return r;
+      },
+      {},
+    );
     this.sv.resize(changedItems);
   }
 
@@ -90,11 +91,10 @@ export default class ViewportService {
         rowStores: this.sv.dataProvider.stores,
 
         colStore,
-        onHeaderresize: e => this.onColumnResize(val, e, colStore)
+        onHeaderresize: e => this.onColumnResize(val, e, colStore),
       };
       if (val === 'rgCol') {
-        column.onResizeViewport = (e: CustomEvent<RevoGrid.ViewPortResizeEvent>) =>
-          this.sv.viewportProvider?.setViewport(e.detail.dimension, { virtualSize: e.detail.size });
+        column.onResizeViewport = (e: CustomEvent<RevoGrid.ViewPortResizeEvent>) => this.sv.viewportProvider?.setViewport(e.detail.dimension, { virtualSize: e.detail.size });
       }
       const colData = this.gatherColumnData(column);
       const columnSelectionStore = this.registerCol(colData.position.x, val);
@@ -150,7 +150,7 @@ export default class ViewportService {
     // link to position
     this.storesByType[type] = x;
     this.storesXToType[x] = type;
-    return this.sv.selectionStoreConnector.registerColumn(x).store
+    return this.sv.selectionStoreConnector.registerColumn(x).store;
   }
 
   /** Collect Column data */
@@ -268,7 +268,7 @@ export default class ViewportService {
       model,
       cell: focused.cell,
       colType,
-      rowType
+      rowType,
     };
   }
 
@@ -281,20 +281,11 @@ export default class ViewportService {
     return storeCoordinate;
   }
 
-  setFocus(
-    colType: RevoGrid.DimensionCols,
-    rowType: RevoGrid.DimensionRows,
-    start: Selection.Cell,
-    end: Selection.Cell
-  ) {
-    this.sv.selectionStoreConnector?.focusByCell(
-      this.getStoreCoordinateByType(colType, rowType), start, end
-    );
+  setFocus(colType: RevoGrid.DimensionCols, rowType: RevoGrid.DimensionRows, start: Selection.Cell, end: Selection.Cell) {
+    this.sv.selectionStoreConnector?.focusByCell(this.getStoreCoordinateByType(colType, rowType), start, end);
   }
 
   setEdit(rowIndex: number, colIndex: number, colType: RevoGrid.DimensionCols, rowType: RevoGrid.DimensionRows) {
-    this.sv.selectionStoreConnector?.setEditByCell(
-      this.getStoreCoordinateByType(colType, rowType), { x: colIndex, y: rowIndex }
-    );
+    this.sv.selectionStoreConnector?.setEditByCell(this.getStoreCoordinateByType(colType, rowType), { x: colIndex, y: rowIndex });
   }
 }

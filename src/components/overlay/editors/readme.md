@@ -12,10 +12,10 @@
 
 ## Events
 
-| Event       | Description        | Type                                                                           |
-| ----------- | ------------------ | ------------------------------------------------------------------------------ |
+| Event       | Description        | Type                                                                               |
+| ----------- | ------------------ | ---------------------------------------------------------------------------------- |
 | `cellEdit`  |                    | `CustomEvent<{ rgRow: number; rgCol: number; val: any; preventFocus?: boolean; }>` |
-| `closeEdit` | Close editor event | `CustomEvent<boolean>`                                                         |
+| `closeEdit` | Close editor event | `CustomEvent<boolean>`                                                             |
 
 ## Dependencies
 

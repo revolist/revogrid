@@ -133,7 +133,7 @@ export class OverlaySelection {
       doEdit: (v, c) => this.doEdit(v, c),
       clearCell: () => this.clearCell(),
       getData: () => this.getData(),
-      internalPaste: () => this.internalPaste.emit()
+      internalPaste: () => this.internalPaste.emit(),
     });
     this.createAutoFillService();
     this.createClipboardService();
@@ -149,10 +149,10 @@ export class OverlaySelection {
       columnService: this.columnService,
       dataStore: this.dataStore,
 
-      setTempRange: (e) => this.setTempRange.emit(e),
-      internalSelectionChanged: (e) => this.internalSelectionChanged.emit(e),
-      internalRangeDataApply: (e) => this.internalRangeDataApply.emit(e),
-      setRange: (e) => this.setRange.emit(e),
+      setTempRange: e => this.setTempRange.emit(e),
+      internalSelectionChanged: e => this.internalSelectionChanged.emit(e),
+      internalRangeDataApply: e => this.internalRangeDataApply.emit(e),
+      setRange: e => this.setRange.emit(e),
       getData: () => this.getData(),
     });
   }
@@ -172,7 +172,7 @@ export class OverlaySelection {
       columnService: this.columnService,
       dataStore: this.dataStore,
       onRangeApply: (d, r) => this.autoFillService.onRangeApply(d, r),
-      internalCopy: () => this.internalCopy.emit()
+      internalCopy: () => this.internalCopy.emit(),
     });
   }
 
@@ -298,7 +298,7 @@ export class OverlaySelection {
       new KeyboardEvent('keydown', {
         code: codesLetter.ARROW_DOWN,
       }),
-      this.range
+      this.range,
     );
     if (!canFocus) {
       this.closeEdit();

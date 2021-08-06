@@ -52,6 +52,7 @@ export const config: Config = {
   ],
   // proxies
   outputTargets: [
+    /*
     angularOutputTarget({
       componentCorePackage,
       directivesProxyFile: directivesProxyFile('angular', `proxies/${entry}`),
@@ -69,7 +70,7 @@ export const config: Config = {
     svelteOutputTarget({
       componentCorePackage,
       proxiesFile: directivesProxyFile('svelte'),
-    }),
+    }), */
     // custom element, no polifil
     {
       type: 'dist-custom-elements-bundle',

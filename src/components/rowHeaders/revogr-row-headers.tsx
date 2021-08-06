@@ -89,12 +89,14 @@ export class RevogrRowHeaders {
       canResize: false,
       parent,
       slot: 'header',
-    }
-    return <Host class="rowHeaders" key="rowHeaders">
-      <revogr-viewport-scroll {...viewportScroll}>
-        <revogr-header {...viewportHeader} />
-        {dataViews}
-      </revogr-viewport-scroll>
-    </Host>;
-    }
+    };
+    return (
+      <Host class="rowHeaders" key="rowHeaders">
+        <revogr-viewport-scroll {...viewportScroll}>
+          <revogr-header {...viewportHeader} />
+          {dataViews}
+        </revogr-viewport-scroll>
+      </Host>
+    );
+  }
 }

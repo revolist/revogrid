@@ -22,7 +22,7 @@ export const HeaderCellRenderer = ({ data, props }: Props, children: VNode[]): V
   }
   return (
     <ResizableElement {...cellProps}>
-      <div class='header-content'>{colTemplate}</div>
+      <div class="header-content">{colTemplate}</div>
       {children}
     </ResizableElement>
   );

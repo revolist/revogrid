@@ -53,18 +53,17 @@ export default class SortingPlugin extends BasePlugin {
       }
     };
     const aftercolumnsset = async ({ detail: { order } }: CustomEvent<ColumnSetEvent>) => {
-
       const columns = await this.revogrid.getColumns();
-      const sortingFunc : SortingOrderFunction = {};
+      const sortingFunc: SortingOrderFunction = {};
 
       for (let prop in order) {
         const column = ColumnDataProvider.getColumnByProp(columns, prop);
-        const cmp : RevoGrid.CellCompareFunc = column?.cellCompare || this.defaultCellCompare;
-      
+        const cmp: RevoGrid.CellCompareFunc = column?.cellCompare || this.defaultCellCompare;
+
         sortingFunc[prop] = order[prop] == 'desc' ? this.descCellCompare(cmp) : cmp;
       }
-      this.sort(order,sortingFunc);
-    }
+      this.sort(order, sortingFunc);
+    };
     const headerclick = async (e: CustomEvent<RevoGrid.InitialHeaderClick>) => {
       if (e.defaultPrevented) {
         return;
@@ -98,33 +97,27 @@ export default class SortingPlugin extends BasePlugin {
     }
     order = beforeApplyEvent.detail.order;
 
-    const cellCmp : RevoGrid.CellCompareFunc = column?.cellCompare || this.defaultCellCompare;
-    const cmp  : RevoGrid.CellCompareFunc = order == 'asc' ? cellCmp : order == 'desc' ? this.descCellCompare(cellCmp) : undefined;
+    const cellCmp: RevoGrid.CellCompareFunc = column?.cellCompare || this.defaultCellCompare;
+    const cmp: RevoGrid.CellCompareFunc = order == 'asc' ? cellCmp : order == 'desc' ? this.descCellCompare(cellCmp) : undefined;
 
     if (additive && this.sorting) {
+      const sorting: SortingOrder = {};
+      const sortingFunc: SortingOrderFunction = {};
 
-      const sorting : SortingOrder = {};
-      const sortingFunc : SortingOrderFunction = {};
-
-      Object.assign(sorting,this.sorting);
-      Object.assign(sortingFunc,this.sortingFunc);
+      Object.assign(sorting, this.sorting);
+      Object.assign(sortingFunc, this.sortingFunc);
 
       if (column.prop in sorting && size(sorting) > 1 && order === undefined) {
-         delete sorting[column.prop];
-         delete sortingFunc[column.prop];
-      }
-      else {
-         sorting[column.prop] = order;
-         sortingFunc[column.prop] = cmp;
+        delete sorting[column.prop];
+        delete sortingFunc[column.prop];
+      } else {
+        sorting[column.prop] = order;
+        sortingFunc[column.prop] = cmp;
       }
 
       this.sort(sorting, sortingFunc);
-    }
-    else {
-      this.sort(
-        { [column.prop]: order },
-        { [column.prop]: cmp }
-      );
+    } else {
+      this.sort({ [column.prop]: order }, { [column.prop]: cmp });
     }
   }
 
@@ -160,15 +153,17 @@ export default class SortingPlugin extends BasePlugin {
     this.emit('afterSortingApply');
   }
 
-  private defaultCellCompare(prop: RevoGrid.ColumnProp, a: RevoGrid.DataType, b: RevoGrid.DataType){
+  private defaultCellCompare(prop: RevoGrid.ColumnProp, a: RevoGrid.DataType, b: RevoGrid.DataType) {
     const av = a[prop]?.toString().toLowerCase();
     const bv = b[prop]?.toString().toLowerCase();
-    
-    return av == bv ? 0 : av > bv ?  1 : -1;
+
+    return av == bv ? 0 : av > bv ? 1 : -1;
   }
 
   private descCellCompare(cmp: RevoGrid.CellCompareFunc) {
-    return (prop: RevoGrid.ColumnProp, a: RevoGrid.DataType, b: RevoGrid.DataType) : number => { return -1 * cmp(prop,a,b) }
+    return (prop: RevoGrid.ColumnProp, a: RevoGrid.DataType, b: RevoGrid.DataType): number => {
+      return -1 * cmp(prop, a, b);
+    };
   }
 
   private sortIndexByItems(indexes: number[], source: RevoGrid.DataType[], sortingFunc: SortingOrderFunction): number[] {
@@ -187,7 +182,7 @@ export default class SortingPlugin extends BasePlugin {
         const itemB = source[b];
         sorted = cmp(prop, itemA, itemB);
         if (sorted) {
-           break;
+          break;
         }
       }
       return sorted;
@@ -201,7 +196,7 @@ export default class SortingPlugin extends BasePlugin {
         const cmp = sortingFunc[prop];
         sorted = cmp(prop, a, b);
         if (sorted) {
-           break;
+          break;
         }
       }
       return sorted;

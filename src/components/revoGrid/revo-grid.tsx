@@ -30,7 +30,7 @@ import { rowDefinitionByType } from './grid.helpers';
 
 @Component({
   tag: 'revo-grid',
-  styleUrl: 'revo-grid-style.scss'
+  styleUrl: 'revo-grid-style.scss',
 })
 export class RevoGridComponent {
   // --------------------------------------------------------------------------
@@ -145,14 +145,13 @@ export class RevoGridComponent {
    * Defines stretch strategy for columns with @StretchColumn plugin
    * if there are more space on the right last column size would be increased
    */
-  @Prop() stretch: boolean|string = false;
+  @Prop() stretch: boolean | string = false;
 
   // --------------------------------------------------------------------------
   //
   //  Events
   //
   // --------------------------------------------------------------------------
-
 
   /**
    * contentsizechanged event.
@@ -252,7 +251,7 @@ export class RevoGridComponent {
    * Before grid focus lost happened.
    * Use e.preventDefault() to prevent cell focus change.
    */
-  @Event() beforefocuslost: EventEmitter<FocusedData|null>;
+  @Event() beforefocuslost: EventEmitter<FocusedData | null>;
   /**
    * Before data apply.
    * You can override data source here
@@ -273,7 +272,6 @@ export class RevoGridComponent {
 
   /**  Before column applied but after column set gathered and viewport updated */
   @Event() beforecolumnapplied: EventEmitter<ColumnCollection>;
-  
 
   /**  Column updated */
   @Event() aftercolumnsset: EventEmitter<{
@@ -507,7 +505,7 @@ export class RevoGridComponent {
   /**
    * Get all active plugins instances
    */
-  @Method() async getFocused(): Promise<FocusedData|null> {
+  @Method() async getFocused(): Promise<FocusedData | null> {
     return this.viewport?.getFocused();
   }
 
@@ -520,10 +518,10 @@ export class RevoGridComponent {
   //  Listeners outside scope
   //
   // --------------------------------------------------------------------------
-  
+
   /** Clear data which is outside of grid container */
   private handleOutsideClick(e: MouseEvent) {
-    const target = (e.target as HTMLElement | null);
+    const target = e.target as HTMLElement | null;
     // if event prevented or it is a table where we click at
     if (e.defaultPrevented || target?.closest(`[${UUID}="${this.uuid}"]`)) {
       return;
@@ -536,8 +534,6 @@ export class RevoGridComponent {
   //  Listeners
   //
   // --------------------------------------------------------------------------
-
-
 
   /** DRAG AND DROP */
   @Listen('internalRowDragStart') onRowDragStarted(e: CustomEvent<{ pos: RevoGrid.PositionItem; text: string; event: MouseEvent }>) {
@@ -705,9 +701,7 @@ export class RevoGridComponent {
       return;
     }
     const rows = rowDefinitionByType(newVal);
-    each(rows, (r, k: RevoGrid.DimensionRows) => 
-      this.dimensionProvider.setDimensionSize(k, r.sizes || {})
-    );
+    each(rows, (r, k: RevoGrid.DimensionRows) => this.dimensionProvider.setDimensionSize(k, r.sizes || {}));
   }
 
   @Watch('trimmedRows') trimmedRowsChanged(newVal: Record<number, boolean> = {}) {
@@ -734,15 +728,17 @@ export class RevoGridComponent {
   /**
    * Stretch Plugin Apply
    */
-  @Watch('stretch') applyStretch(isStretch: boolean|string) {
+  @Watch('stretch') applyStretch(isStretch: boolean | string) {
     let stretch = this.internalPlugins.filter(p => isStretchPlugin(p))[0];
-    if (typeof isStretch === 'boolean' && isStretch || isStretch === 'true') {
-      if(!stretch) {
-        this.internalPlugins.push(new StretchColumn(this.element, {
-          dataProvider: this.dataProvider,
-          columnProvider: this.columnProvider,
-          dimensionProvider: this.dimensionProvider,
-        }));
+    if ((typeof isStretch === 'boolean' && isStretch) || isStretch === 'true') {
+      if (!stretch) {
+        this.internalPlugins.push(
+          new StretchColumn(this.element, {
+            dataProvider: this.dataProvider,
+            columnProvider: this.columnProvider,
+            dimensionProvider: this.dimensionProvider,
+          }),
+        );
       } else if (isStretchPlugin(stretch)) {
         stretch.applyStretch(this.columnProvider.getRawColumns());
       }
@@ -758,7 +754,7 @@ export class RevoGridComponent {
       rowSize: this.rowSize,
     });
     const dimensionProviderConfig: DimensionConfig = {
-      realSizeChanged: () => this.contentsizechanged.emit()
+      realSizeChanged: () => this.contentsizechanged.emit(),
     };
     this.dimensionProvider = new DimensionProvider(this.viewportProvider, dimensionProviderConfig);
     this.columnProvider = new ColumnDataProvider();
@@ -795,13 +791,15 @@ export class RevoGridComponent {
     );
     if (this.plugins) {
       this.plugins.forEach(p => {
-        this.internalPlugins.push(new p(this.element, {
-          data: this.dataProvider,
-          column: this.columnProvider,
-          dimension: this.dimensionProvider,
-          viewport: this.viewportProvider,
-          selection: this.selectionStoreConnector
-        }));
+        this.internalPlugins.push(
+          new p(this.element, {
+            data: this.dataProvider,
+            column: this.columnProvider,
+            dimension: this.dimensionProvider,
+            viewport: this.viewportProvider,
+            selection: this.selectionStoreConnector,
+          }),
+        );
       });
     }
     this.applyStretch(this.stretch);
@@ -813,7 +811,7 @@ export class RevoGridComponent {
     this.trimmedRowsChanged(this.trimmedRows);
     this.rowDefChanged(this.rowDefinitions);
     this.groupingChanged(this.grouping);
-    
+
     this.scrollingService = new GridScrollingService((e: RevoGrid.ViewPortScrollEvent) => {
       this.dimensionProvider.setViewPortCoordinate({
         coordinate: e.coordinate,
@@ -821,7 +819,7 @@ export class RevoGridComponent {
       });
       this.viewportscroll.emit(e);
     });
-    this.subscribers = { 'click': this.handleOutsideClick.bind(this) };
+    this.subscribers = { click: this.handleOutsideClick.bind(this) };
     for (let type in this.subscribers) {
       document.addEventListener(type, this.subscribers[type]);
     }
@@ -840,50 +838,57 @@ export class RevoGridComponent {
 
   render() {
     const contentHeight = this.dimensionProvider.stores['rgRow'].store.get('realSize');
-    this.viewport = new ViewportService({
-      columnProvider: this.columnProvider,
-      dataProvider: this.dataProvider,
-      dimensionProvider: this.dimensionProvider,
-      viewportProvider: this.viewportProvider,
-      uuid: this.uuid,
-      scrollingService: this.scrollingService,
-      orderService: this.orderService,
-      selectionStoreConnector: this.selectionStoreConnector,
-      resize: c => this.aftercolumnresize.emit(c)
-    }, contentHeight);
+    this.viewport = new ViewportService(
+      {
+        columnProvider: this.columnProvider,
+        dataProvider: this.dataProvider,
+        dimensionProvider: this.dimensionProvider,
+        viewportProvider: this.viewportProvider,
+        uuid: this.uuid,
+        scrollingService: this.scrollingService,
+        orderService: this.orderService,
+        selectionStoreConnector: this.selectionStoreConnector,
+        resize: c => this.aftercolumnresize.emit(c),
+      },
+      contentHeight,
+    );
 
     const views: VNode[] = [];
-    if (this.rowHeaders &&  this.viewport.columns.length) {
+    if (this.rowHeaders && this.viewport.columns.length) {
       const anyView = this.viewport.columns[0];
-      views.push(<revogr-row-headers
-        height={contentHeight}
-        resize={this.resize}
-        dataPorts={anyView.dataPorts}
-        headerProp={anyView.headerProp}
-        uiid={anyView.prop[UUID]}
-        rowHeaderColumn={typeof this.rowHeaders === 'object' ? this.rowHeaders : undefined}
-        onScrollViewport={({ detail: e }: CustomEvent) => this.scrollingService.onScroll(e, 'headerRow')}
-        onElementToScroll={({ detail: e }: CustomEvent) => this.scrollingService.registerElement(e, 'headerRow')}
-      />);
+      views.push(
+        <revogr-row-headers
+          height={contentHeight}
+          resize={this.resize}
+          dataPorts={anyView.dataPorts}
+          headerProp={anyView.headerProp}
+          uiid={anyView.prop[UUID]}
+          rowHeaderColumn={typeof this.rowHeaders === 'object' ? this.rowHeaders : undefined}
+          onScrollViewport={({ detail: e }: CustomEvent) => this.scrollingService.onScroll(e, 'headerRow')}
+          onElementToScroll={({ detail: e }: CustomEvent) => this.scrollingService.registerElement(e, 'headerRow')}
+        />,
+      );
     }
-    views.push(<ViewPortSections
-      columnFilter={!!this.filter}
-      resize={this.resize}
-      readonly={this.readonly}
-      range={this.range}
-      rowClass={this.rowClass}
-      editors={this.editors}
-      useClipboard={this.useClipboard}
-      columns={this.viewport.columns}
-      onEdit={detail => {
-        const event = this.beforeeditstart.emit(detail);
-        if (!event.defaultPrevented) {
-          this.selectionStoreConnector.setEdit(detail.isCancel ? false : detail.val);
-        }
-      }}
-      registerElement={(e, k) => this.scrollingService.registerElement(e, k)}
-      onScroll={details => this.scrollingService.onScroll(details)}
-    />);
+    views.push(
+      <ViewPortSections
+        columnFilter={!!this.filter}
+        resize={this.resize}
+        readonly={this.readonly}
+        range={this.range}
+        rowClass={this.rowClass}
+        editors={this.editors}
+        useClipboard={this.useClipboard}
+        columns={this.viewport.columns}
+        onEdit={detail => {
+          const event = this.beforeeditstart.emit(detail);
+          if (!event.defaultPrevented) {
+            this.selectionStoreConnector.setEdit(detail.isCancel ? false : detail.val);
+          }
+        }}
+        registerElement={(e, k) => this.scrollingService.registerElement(e, k)}
+        onScroll={details => this.scrollingService.onScroll(details)}
+      />,
+    );
     return (
       <Host {...{ [`${UUID}`]: this.uuid }}>
         <RevoViewPort
@@ -893,7 +898,9 @@ export class RevoGridComponent {
           registerElement={(e, k) => this.scrollingService.registerElement(e, k)}
           nakedClick={() => this.viewport.clearEdit()}
           onScroll={details => this.scrollingService.onScroll(details)}
-        >{views}</RevoViewPort>
+        >
+          {views}
+        </RevoViewPort>
         {this.extraElements}
       </Host>
     );

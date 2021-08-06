@@ -18,7 +18,6 @@ type Props = {
   nakedClick(e: MouseEvent): void;
 };
 
-
 export const RevoViewPort = ({ viewports, dimensions, orderRef, nakedClick, registerElement, onScroll }: Props, children: VNode[]) => {
   const viewPortClick = (e: MouseEvent, el?: HTMLElement) => {
     if (el === e.target) {
@@ -28,7 +27,7 @@ export const RevoViewPort = ({ viewports, dimensions, orderRef, nakedClick, regi
 
   let el: HTMLElement;
   return [
-    <div class="main-viewport" ref={ e => el = e } onClick={e => viewPortClick(e, el)}>
+    <div class="main-viewport" ref={e => (el = e)} onClick={e => viewPortClick(e, el)}>
       <div class="viewports">
         {children}
         <revogr-scroll-virtual

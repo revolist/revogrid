@@ -240,7 +240,7 @@ export default class FilterPlugin extends BasePlugin {
     const columns = await this.revogrid.getColumns();
     return {
       source,
-      columns
+      columns,
     };
   }
 

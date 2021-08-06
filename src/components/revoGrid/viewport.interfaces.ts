@@ -7,8 +7,7 @@ import { JSX } from '../..';
 
 export type SlotType = 'content' | 'header' | 'footer';
 
-export type HeaderProperties = {
-} & Partial<JSX.RevogrHeader>;
+export type HeaderProperties = {} & Partial<JSX.RevogrHeader>;
 
 export type ViewportColumn = {
   colType: RevoGrid.DimensionCols;
@@ -22,8 +21,8 @@ export type ViewportColumn = {
 
   rowStores: RowDataSources;
   colStore: Observable<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
-
-} & Partial<JSX.RevogrViewportScroll> & Partial<JSX.RevogrHeader>;
+} & Partial<JSX.RevogrViewportScroll> &
+  Partial<JSX.RevogrHeader>;
 
 export type ViewportData = {
   /** Last cell in data viewport. Indicates borders of viewport */

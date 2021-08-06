@@ -22,7 +22,7 @@ const initialParams: Params = {
 };
 
 export default class LocalScrollService {
-  private preventArtificialScroll: Record<RevoGrid.DimensionType, number|null> = { rgRow: null, rgCol: null };
+  private preventArtificialScroll: Record<RevoGrid.DimensionType, number | null> = { rgRow: null, rgCol: null };
   // to check if scroll changed
   private previousScroll: Record<RevoGrid.DimensionType, number> = { rgRow: 0, rgCol: 0 };
   private params: Record<RevoGrid.DimensionType, Params> = { rgRow: { ...initialParams }, rgCol: { ...initialParams } };

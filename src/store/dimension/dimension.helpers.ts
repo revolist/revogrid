@@ -12,9 +12,7 @@ export type DimensionSize = Pick<RevoGrid.DimensionSettingsState, 'indexes' | 'p
  * Pre-calculation
  * Dimension sizes for each cell
  */
-export function calculateDimensionData(
-  state: RevoGrid.DimensionSettingsState,
-  newSizes: RevoGrid.ViewSettingSizeProp): DimensionSize {
+export function calculateDimensionData(state: RevoGrid.DimensionSettingsState, newSizes: RevoGrid.ViewSettingSizeProp): DimensionSize {
   let positionIndexes: number[] = [];
 
   const positionIndexToItem: { [position: number]: RevoGrid.PositionItem } = {};
@@ -99,7 +97,6 @@ export function getItemByPosition({ indexes, positionIndexes, originItemSize, po
   item.end = item.start + originItemSize;
   return item;
 }
-
 
 export function getItemByIndex(dimension: DimensionIndexInput, index: number) {
   let item: RevoGrid.PositionItem = {

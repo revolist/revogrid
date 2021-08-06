@@ -33,8 +33,8 @@ export default class SelectionStoreConnector {
             cell: focused,
             position: {
               x: parseInt(x, 10),
-              y: parseInt(y, 10)
-            }
+              y: parseInt(y, 10),
+            },
           };
         }
       }

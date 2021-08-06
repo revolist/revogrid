@@ -30,11 +30,16 @@ const GroupHeaderRenderer = (p: Props): VNode[] => {
     },
     onResize: p.onResize,
   };
-  return <HeaderCellRenderer data={{
-    ...p.group,
-    providers: p.providers,
-    index: p.start
-  }} props={groupProps} />;
+  return (
+    <HeaderCellRenderer
+      data={{
+        ...p.group,
+        providers: p.providers,
+        index: p.start,
+      }}
+      props={groupProps}
+    />
+  );
 };
 
 export default GroupHeaderRenderer;

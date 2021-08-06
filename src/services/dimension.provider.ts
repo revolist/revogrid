@@ -3,7 +3,7 @@ import { columnTypes, rowTypes } from '../store/storeTypes';
 import DimensionStore from '../store/dimension/dimension.store';
 import ViewportProvider from './viewport.provider';
 import { RevoGrid } from '../interfaces';
-import { getItemByIndex, getItemByPosition } from '../store/dimension/dimension.helpers';
+import { DimensionPosition, getItemByIndex, getItemByPosition } from '../store/dimension/dimension.helpers';
 import { debounce } from 'lodash';
 
 export type ColumnItems = Record<RevoGrid.DimensionCols, RevoGrid.ColumnRegular[]>;
@@ -14,7 +14,6 @@ export type DimensionConfig = {
 };
 export default class DimensionProvider {
   readonly stores: DimensionStores;
-  readonly getItemByPosition = getItemByPosition;
   constructor(private viewports: ViewportProvider, config: DimensionConfig) {
     const sizeChanged = debounce(() => config.realSizeChanged(), 100);
     this.stores = reduce(
@@ -28,6 +27,9 @@ export default class DimensionProvider {
     ) as DimensionStores;
   }
 
+  getItemByPosition(data: DimensionPosition, pos: number) {
+    return getItemByPosition(data, pos);
+  }
 
   setDimensionSize(dimensionType: RevoGrid.MultiDimensionType, sizes: RevoGrid.ViewSettingSizeProp): void {
     this.stores[dimensionType].setDimensionSize(sizes);
@@ -62,11 +64,11 @@ export default class DimensionProvider {
 
   drop() {
     for (let type of columnTypes) {
-      this.stores[type].drop();  
+      this.stores[type].drop();
     }
   }
 
-  getFullSize(): { x: number, y: number } {
+  getFullSize(): { x: number; y: number } {
     let x = 0;
     let y = 0;
     for (let type of columnTypes) {
@@ -78,10 +80,7 @@ export default class DimensionProvider {
     return { y, x };
   }
 
-  setColumns(
-    type: RevoGrid.MultiDimensionType,
-    sizes?: RevoGrid.ViewSettingSizeProp,
-    noVirtual = false): void {
+  setColumns(type: RevoGrid.MultiDimensionType, sizes?: RevoGrid.ViewSettingSizeProp, noVirtual = false): void {
     this.stores[type].setDimensionSize(sizes);
 
     if (noVirtual) {

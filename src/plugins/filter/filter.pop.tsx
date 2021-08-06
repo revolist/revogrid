@@ -78,15 +78,7 @@ export class FilterPanel {
     this.extraElement = undefined;
     switch (extra) {
       case 'input':
-        return (
-          <input
-            type="text"
-            value={value}
-            onInput={ (e: InputEvent) => this.onInput(e) }
-            onKeyDown={e => this.onKeyDown(e)}
-            ref={e => (this.extraElement = e)}
-          />
-        );
+        return <input type="text" value={value} onInput={(e: InputEvent) => this.onInput(e)} onKeyDown={e => this.onKeyDown(e)} ref={e => (this.extraElement = e)} />;
       default:
         return '';
     }

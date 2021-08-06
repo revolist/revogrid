@@ -21,7 +21,7 @@ function initialBase(): RevoGrid.DimensionCalc {
     positionIndexToItem: {},
     // initial element to coordinate ^
     indexToItem: {},
-    positionIndexes: []
+    positionIndexes: [],
   };
 }
 

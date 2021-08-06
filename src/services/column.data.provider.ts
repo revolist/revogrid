@@ -60,14 +60,18 @@ export default class ColumnDataProvider {
   }
 
   getRawColumns() {
-    return reduce(this.dataSources, (result: ColumnItems, item, type: RevoGrid.DimensionCols) => {
-      result[type] = item.store.get('source');
-      return result;
-    }, {
-      rgCol: [],
-      colPinStart: [],
-      colPinEnd: []
-    });
+    return reduce(
+      this.dataSources,
+      (result: ColumnItems, item, type: RevoGrid.DimensionCols) => {
+        result[type] = item.store.get('source');
+        return result;
+      },
+      {
+        rgCol: [],
+        colPinStart: [],
+        colPinEnd: [],
+      },
+    );
   }
 
   getColumns(type: DimensionCols | 'all' = 'all') {

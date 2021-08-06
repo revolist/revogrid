@@ -34,7 +34,14 @@ const ColumnGroupsRenderer = ({ providers, depth, groups, visibleProps, dimensio
           const groupStart = getItemByIndex(dimensionCol, groupStartIndex).start;
           const groupEnd = getItemByIndex(dimensionCol, groupEndIndex).end;
           groupRow.push(
-            <GroupHeaderRenderer providers={providers} start={groupStart} end={groupEnd} group={group} canResize={canResize} onResize={e => onResize(e.changedX, groupStartIndex, groupEndIndex)} />,
+            <GroupHeaderRenderer
+              providers={providers}
+              start={groupStart}
+              end={groupEnd}
+              group={group}
+              canResize={canResize}
+              onResize={e => onResize(e.changedX, groupStartIndex, groupEndIndex)}
+            />,
           );
         }
       }

@@ -2,7 +2,6 @@
 
 <!-- Auto Generated Below -->
 
-
 ## Properties
 
 | Property         | Attribute        | Description | Type                                    | Default     |
@@ -17,7 +16,6 @@
 | `selectionStore` | --               |             | `ObservableMap<SelectionStoreState>`    | `undefined` |
 | `viewportCol`    | --               |             | `ObservableMap<ViewportState>`          | `undefined` |
 
-
 ## Events
 
 | Event                | Description | Type                                                                                |
@@ -26,15 +24,15 @@
 | `headerresize`       |             | `CustomEvent<{ [x: string]: number; }>`                                             |
 | `initialHeaderClick` |             | `CustomEvent<{ index: number; originalEvent: MouseEvent; column: ColumnRegular; }>` |
 
-
 ## Dependencies
 
 ### Used by
 
- - [revo-grid](../revoGrid)
- - [revogr-row-headers](../rowHeaders)
+- [revo-grid](../revoGrid)
+- [revogr-row-headers](../rowHeaders)
 
 ### Graph
+
 ```mermaid
 graph TD;
   revo-grid --> revogr-header
@@ -42,6 +40,6 @@ graph TD;
   style revogr-header fill:#f9f,stroke:#333,stroke-width:4px
 ```
 
-----------------------------------------------
+---
 
-*Built with [StencilJS](https://stenciljs.com/)*
+_Built with [StencilJS](https://stenciljs.com/)_

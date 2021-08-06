@@ -27,12 +27,9 @@ type StretchedData = {
 };
 
 export default class StretchColumn extends BasePlugin {
-  private stretchedColumn: StretchedData|null = null;
+  private stretchedColumn: StretchedData | null = null;
   private readonly scrollSize;
-  constructor(
-    revogrid: HTMLRevoGridElement,
-    private providers: Providers,
-  ) {
+  constructor(revogrid: HTMLRevoGridElement, protected providers: Providers) {
     super(revogrid);
 
     // calculate scroll bar size for current user session
@@ -68,8 +65,7 @@ export default class StretchColumn extends BasePlugin {
       return;
     }
     const type: RevoGrid.DimensionCols = 'rgCol';
-    this.providers.dimensionProvider
-      .setDimensionSize(type, { [this.stretchedColumn.index]: this.stretchedColumn.size });
+    this.providers.dimensionProvider.setDimensionSize(type, { [this.stretchedColumn.index]: this.stretchedColumn.size });
   }
 
   /**
@@ -104,11 +100,11 @@ export default class StretchColumn extends BasePlugin {
       const colSize = last?.size || this.revogrid.colSize || 0;
       const size = sizeDifference + colSize - 1;
 
-      if (last && !last.autoSize && (colSize < size)) {
+      if (last && !last.autoSize && colSize < size) {
         this.stretchedColumn = {
           initialSize: size,
           index,
-          size
+          size,
         };
         this.apply();
         this.activateChanges();
@@ -120,6 +116,6 @@ export default class StretchColumn extends BasePlugin {
 /**
  * Check plugin type is Stretch
  */
-export function isStretchPlugin(plugin: RevoPlugin.Plugin|StretchColumn): plugin is StretchColumn {
+export function isStretchPlugin(plugin: RevoPlugin.Plugin | StretchColumn): plugin is StretchColumn {
   return !!(plugin as StretchColumn).applyStretch;
 }

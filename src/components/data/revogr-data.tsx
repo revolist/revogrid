@@ -102,13 +102,7 @@ export class RevogrData {
       defaultProps.style.paddingLeft = `${PADDING_DEPTH * depth}px`;
     }
     const props = this.columnService.mergeProperties(rgRow.itemIndex, rgCol.itemIndex, defaultProps);
-    const custom =
-      this.columnService.customRenderer(
-        rgRow.itemIndex,
-        rgCol.itemIndex,
-        model,
-        this.providers
-      );
+    const custom = this.columnService.customRenderer(rgRow.itemIndex, rgCol.itemIndex, model, this.providers);
 
     // if custom render
     if (typeof custom !== 'undefined') {
@@ -129,12 +123,11 @@ export class RevogrData {
     );
   }
 
-
   get providers() {
     return {
       viewport: this.viewportCol,
       dimension: this.dimensionRow,
-      selection: this.rowSelectionStore
+      selection: this.rowSelectionStore,
     };
   }
 }

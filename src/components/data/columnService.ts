@@ -10,7 +10,6 @@ import ColumnProp = RevoGrid.ColumnProp;
 import DataType = RevoGrid.DataType;
 import { isGroupingColumn } from '../../plugins/groupingRow/grouping.service';
 
-
 export type ColumnSource = Observable<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
 export type RowSource = Observable<DataSourceState<DataType, RevoGrid.DimensionRows>>;
 
@@ -92,12 +91,7 @@ export default class ColumnService {
     return props;
   }
 
-  customRenderer(
-    _r: number,
-    c: number,
-    model: ColumnDataSchemaModel,
-    providers: RevoGrid.Providers
-  ): VNode | string | void {
+  customRenderer(_r: number, c: number, model: ColumnDataSchemaModel, providers: RevoGrid.Providers): VNode | string | void {
     const tpl = this.columns[c]?.cellTemplate;
     if (tpl) {
       return tpl(h, { ...model, providers });

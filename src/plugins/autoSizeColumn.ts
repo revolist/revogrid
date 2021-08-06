@@ -70,11 +70,7 @@ export default class AutoSizeColumn extends BasePlugin {
   private dataResolve: Resolve | null = null;
   private dataReject: Reject | null = null;
 
-  constructor(
-    revogrid: HTMLRevoGridElement,
-    private providers: Providers,
-    private config?: AutoSizeColumnConfig,
-  ) {
+  constructor(revogrid: HTMLRevoGridElement, protected providers: Providers, private config?: AutoSizeColumnConfig) {
     super(revogrid);
     this.letterBlockSize = config?.letterBlockSize || LETTER_BLOCK_SIZE;
 
