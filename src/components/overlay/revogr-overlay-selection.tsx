@@ -219,7 +219,8 @@ export class OverlaySelection {
     const range = this.selectionStoreService.ranged;
     const selectionFocus = this.selectionStoreService.focused;
     const els: VNode[] = [];
-    if ((range || selectionFocus) && this.useClipboard) {
+    const editCell = this.renderEditCell();
+    if ((range || selectionFocus)&& !editCell && this.useClipboard) {
       els.push(this.clipboardService.renderClipboard());
     }
 
@@ -227,7 +228,6 @@ export class OverlaySelection {
       els.push(...this.renderRange(range));
     }
 
-    const editCell = this.renderEditCell();
     if (editCell) {
       els.push(editCell);
     }

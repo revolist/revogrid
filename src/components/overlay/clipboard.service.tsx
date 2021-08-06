@@ -38,7 +38,10 @@ export class ClipboardService {
   }
 
   renderClipboard() {
-    return <revogr-clipboard onCopyRegion={e => this.onCopy(e.detail)} ref={e => (this.clipboard = e)} onPasteRegion={e => this.onPaste(e.detail)} />;
+    return <revogr-clipboard
+      onCopyRegion={e => this.onCopy(e.detail)}
+      ref={e => (this.clipboard = e)}
+      onPasteRegion={e => this.onPaste(e.detail)} />;
   }
 
   private onPaste(data: string[][]) {
