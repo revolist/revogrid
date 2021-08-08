@@ -10,7 +10,7 @@ import { Edition, Selection, RevoGrid, ThemeSpace, RevoPlugin } from '../../inte
 import ThemeService from '../../themeManager/themeService';
 import { timeout } from '../../utils/utils';
 import AutoSize, { AutoSizeColumnConfig } from '../../plugins/autoSizeColumn';
-import { columnTypes, rowTypes } from '../../store/storeTypes';
+import { columnTypes } from '../../store/storeTypes';
 import FilterPlugin, { ColumnFilterConfig, FilterCollection } from '../../plugins/filter/filter.plugin';
 import SortingPlugin from '../../plugins/sorting/sorting.plugin';
 import ExportFilePlugin from '../../plugins/export/export.plugin';
@@ -694,14 +694,21 @@ export class RevoGridComponent {
     this.dataProvider.setData(newVal, 'rowPinStart');
   }
 
-  @Watch('rowDefinitions') rowDefChanged(newVal: RevoGrid.RowDefinition[] = []) {
+  @Watch('rowDefinitions') rowDefChanged(newVal: RevoGrid.RowDefinition[] = [], oldVal?: RevoGrid.RowDefinition[]) {
     // clear current defs
-    each(rowTypes, t => this.dimensionProvider.setDimensionSize(t, {}));
+    if (oldVal) {
+      let oldRows = rowDefinitionByType(oldVal.map(v => ({
+        ...v,
+        size: this.rowSize
+      })));
+      each(oldRows, (r, k: RevoGrid.DimensionRows) => this.dimensionProvider.setDimensionSize(k, r.sizes || {}));
+    }
     if (!newVal.length) {
       return;
     }
-    const rows = rowDefinitionByType(newVal);
-    each(rows, (r, k: RevoGrid.DimensionRows) => this.dimensionProvider.setDimensionSize(k, r.sizes || {}));
+    // apply new vals
+    const newRows = rowDefinitionByType(newVal);
+    each(newRows, (r, k: RevoGrid.DimensionRows) => this.dimensionProvider.setDimensionSize(k, r.sizes || {}));
   }
 
   @Watch('trimmedRows') trimmedRowsChanged(newVal: Record<number, boolean> = {}) {
