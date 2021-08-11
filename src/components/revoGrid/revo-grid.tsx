@@ -492,7 +492,6 @@ export class RevoGridComponent {
       return;
     }
     this.selectionStoreConnector.clearAll();
-    this.viewport?.clearFocused();
   }
 
   /**
@@ -826,7 +825,7 @@ export class RevoGridComponent {
       });
       this.viewportscroll.emit(e);
     });
-    this.subscribers = { click: this.handleOutsideClick.bind(this) };
+    this.subscribers = { mouseup: this.handleOutsideClick.bind(this) };
     for (let type in this.subscribers) {
       document.addEventListener(type, this.subscribers[type]);
     }

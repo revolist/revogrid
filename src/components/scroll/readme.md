@@ -2,12 +2,14 @@
 
 <!-- Auto Generated Below -->
 
+
 ## Properties
 
 | Property        | Attribute        | Description             | Type     | Default |
 | --------------- | ---------------- | ----------------------- | -------- | ------- |
 | `contentHeight` | `content-height` | Height of inner content | `number` | `0`     |
 | `contentWidth`  | `content-width`  | Width of inner content  | `number` | `0`     |
+
 
 ## Events
 
@@ -16,6 +18,7 @@
 | `resizeViewport` |             | `CustomEvent<{ dimension: DimensionType; size: number; }>`                       |
 | `scrollchange`   |             | `CustomEvent<{ type: DimensionType; hasScroll: boolean; }>`                      |
 | `scrollViewport` |             | `CustomEvent<{ dimension: DimensionType; coordinate: number; delta?: number; }>` |
+
 
 ## Methods
 
@@ -27,21 +30,27 @@ update on delta in case we don't know existing position or external change
 
 Type: `Promise<ViewPortScrollEvent>`
 
+
+
 ### `setScroll(e: RevoGrid.ViewPortScrollEvent) => Promise<void>`
+
+
 
 #### Returns
 
 Type: `Promise<void>`
 
+
+
+
 ## Dependencies
 
 ### Used by
 
-- [revo-grid](../revoGrid)
-- [revogr-row-headers](../rowHeaders)
+ - [revo-grid](../revoGrid)
+ - [revogr-row-headers](../rowHeaders)
 
 ### Graph
-
 ```mermaid
 graph TD;
   revo-grid --> revogr-viewport-scroll
@@ -49,6 +58,6 @@ graph TD;
   style revogr-viewport-scroll fill:#f9f,stroke:#333,stroke-width:4px
 ```
 
----
+----------------------------------------------
 
-_Built with [StencilJS](https://stenciljs.com/)_
+*Built with [StencilJS](https://stenciljs.com/)*
