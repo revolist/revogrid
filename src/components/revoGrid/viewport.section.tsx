@@ -27,15 +27,16 @@ export const ViewPortSections = ({ resize, editors, rowClass, readonly, range, c
   /** render viewports columns */
   for (let view of columns) {
     /** render viewports rows */
+    const headerProperties = {
+      ...view.headerProp,
+      type: view.type,
+      viewportCol: view.viewportCol,
+      selectionStore: view.columnSelectionStore,
+      canResize: resize,
+      columnFilter,
+    };
     const dataViews: HTMLElement[] = [
-      <revogr-header
-        viewportCol={view.viewportCol}
-        {...view.headerProp}
-        selectionStore={view.columnSelectionStore}
-        slot={HEADER_SLOT}
-        columnFilter={columnFilter}
-        canResize={resize}
-      />,
+      <revogr-header {...headerProperties} slot={HEADER_SLOT} />,
     ];
     view.dataPorts.forEach((data, j) => {
       const key = view.prop.key + (j + 1);

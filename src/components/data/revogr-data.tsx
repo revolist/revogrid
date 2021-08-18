@@ -25,15 +25,16 @@ export class RevogrData {
   @Prop() range: boolean;
 
   @Prop() rowClass: string;
-  @Prop() rowSelectionStore: Observable<Selection.SelectionStoreState>;
-  @Prop() viewportRow: Observable<RevoGrid.ViewportState>;
-  @Prop() viewportCol: Observable<RevoGrid.ViewportState>;
+  @Prop() rowSelectionStore!: Observable<Selection.SelectionStoreState>;
+  @Prop() viewportRow!: Observable<RevoGrid.ViewportState>;
+  @Prop() viewportCol!: Observable<RevoGrid.ViewportState>;
 
-  @Prop() dimensionRow: Observable<RevoGrid.DimensionSettingsState>;
+  @Prop() dimensionRow!: Observable<RevoGrid.DimensionSettingsState>;
 
   /** Static stores, not expected to change during component lifetime */
-  @Prop() colData: ColumnSource;
-  @Prop() dataStore: RowSource;
+  @Prop() colData!: ColumnSource;
+  @Prop() dataStore!: RowSource;
+  @Prop() type!: string;
 
   @Event({ eventName: DRAG_START_EVENT }) dragStartCell: EventEmitter<MouseEvent>;
 
@@ -125,6 +126,7 @@ export class RevogrData {
 
   get providers() {
     return {
+      type: this.type,
       viewport: this.viewportCol,
       dimension: this.dimensionRow,
       selection: this.rowSelectionStore,

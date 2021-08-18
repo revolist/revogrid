@@ -7,7 +7,7 @@ import { JSX } from '../..';
 
 export type SlotType = 'content' | 'header' | 'footer';
 
-export type HeaderProperties = {} & Partial<JSX.RevogrHeader>;
+export type HeaderProperties = Partial<JSX.RevogrHeader>;
 
 export type ViewportColumn = {
   colType: RevoGrid.DimensionCols;
@@ -67,11 +67,12 @@ export type ViewportData = {
 export type ViewportProps = {
   prop: Record<string, any>;
   position: Selection.Cell;
+  type: RevoGrid.DimensionCols;
   /** Cols dataset */
   viewportCol: Observable<RevoGrid.ViewportState>;
 
   /** header container props */
-  headerProp: Record<string, any>;
+  headerProp: HeaderProperties;
 
   /** parent selector link */
   parent: string;

@@ -3,11 +3,12 @@ import { Component, Prop, Event, EventEmitter } from '@stencil/core';
 import { RevoGrid } from '../../interfaces';
 import DataStore from '../../store/dataSource/data.store';
 import ViewportStore from '../../store/viewPort/viewport.store';
-import { UUID } from '../../utils/consts';
+import { ROW_HEADER_TYPE, UUID } from '../../utils/consts';
 import { ElementScroll } from '../revoGrid/viewport.scrolling.service';
 import { ViewportData } from '../revoGrid/viewport.interfaces';
 import { RowHeaderRender } from './row-header-render';
 import { calculateRowHeaderSize } from './row-header-utils';
+import { HEADER_SLOT } from '../revoGrid/viewport.helpers';
 
 /**
  * Row headers component
@@ -87,11 +88,12 @@ export class RevogrRowHeaders {
       colData: typeof this.rowHeaderColumn === 'object' ? [this.rowHeaderColumn] : [],
       viewportCol: viewport.store,
       canResize: false,
+      type: ROW_HEADER_TYPE,
       parent,
-      slot: 'header',
+      slot: HEADER_SLOT,
     };
     return (
-      <Host class="rowHeaders" key="rowHeaders">
+      <Host class={ { [ROW_HEADER_TYPE]: true } } key={ROW_HEADER_TYPE}>
         <revogr-viewport-scroll {...viewportScroll}>
           <revogr-header {...viewportHeader} />
           {dataViews}

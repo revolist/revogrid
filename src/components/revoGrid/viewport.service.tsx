@@ -13,8 +13,6 @@ import ColumnDataProvider from '../../services/column.data.provider';
 import { DataProvider } from '../../services/data.provider';
 import { reduce } from 'lodash';
 
-type StoresMapping<T> = { [xOrY: number]: Partial<T> };
-
 type Config = {
   columnProvider: ColumnDataProvider;
   dataProvider: DataProvider;
@@ -37,9 +35,6 @@ export type FocusedData = {
 
 export default class ViewportService {
   readonly columns: ViewportProps[];
-  readonly storesByType: Partial<Record<RevoGrid.MultiDimensionType, number>> = {};
-  readonly storesXToType: StoresMapping<RevoGrid.DimensionCols> = {};
-  readonly storesYToType: StoresMapping<RevoGrid.DimensionRows> = {};
   constructor(private sv: Config, contentHeight: number) {
     this.sv.selectionStoreConnector?.beforeUpdate();
     this.columns = this.getViewportColumnData(contentHeight);
@@ -139,23 +134,17 @@ export default class ViewportService {
 
   /** register selection store for Row */
   private registerRow(y: number, type: RevoGrid.DimensionRows) {
-    // link to position
-    this.storesByType[type] = y;
-    this.storesYToType[y] = type;
-    return this.sv.selectionStoreConnector.registerRow(y).store;
+    return this.sv.selectionStoreConnector.registerRow(y, type).store;
   }
 
   /** register selection store for Column */
   private registerCol(x: number, type: RevoGrid.DimensionCols) {
-    // link to position
-    this.storesByType[type] = x;
-    this.storesXToType[x] = type;
-    return this.sv.selectionStoreConnector.registerColumn(x).store;
+    return this.sv.selectionStoreConnector.registerColumn(x, type).store;
   }
 
   /** Collect Column data */
   private gatherColumnData(data: ViewportColumn) {
-    const parent: string = data.uuid;
+    const parent = data.uuid;
     const realSize = data.dimensions[data.colType].store.get('realSize');
     const prop: Record<string, any> = {
       contentWidth: realSize,
@@ -179,6 +168,7 @@ export default class ViewportService {
 
     return {
       prop,
+      type: data.colType,
       position: data.position,
       headerProp,
       parent,
@@ -259,9 +249,9 @@ export default class ViewportService {
     if (!focused) {
       return null;
     }
-    const colType = this.storesXToType[focused.position.x];
+    const colType = this.sv.selectionStoreConnector.storesXToType[focused.position.x];
     const column = this.sv.columnProvider.getColumn(focused.cell.x, colType);
-    const rowType = this.storesYToType[focused.position.x];
+    const rowType = this.sv.selectionStoreConnector.storesYToType[focused.position.x];
     const model = this.sv.dataProvider.getModel(focused.cell.x, rowType);
     return {
       column,
@@ -273,7 +263,7 @@ export default class ViewportService {
   }
 
   getStoreCoordinateByType(colType: RevoGrid.DimensionCols, rowType: RevoGrid.DimensionRows) {
-    const stores = this.storesByType;
+    const stores = this.sv.selectionStoreConnector.storesByType;
     const storeCoordinate = {
       x: stores[colType],
       y: stores[rowType],
@@ -281,8 +271,12 @@ export default class ViewportService {
     return storeCoordinate;
   }
 
-  setFocus(colType: RevoGrid.DimensionCols, rowType: RevoGrid.DimensionRows, start: Selection.Cell, end: Selection.Cell) {
-    this.sv.selectionStoreConnector?.focusByCell(this.getStoreCoordinateByType(colType, rowType), start, end);
+  setFocus(colType: string, rowType: string, start: Selection.Cell, end: Selection.Cell) {
+    this.sv.selectionStoreConnector?.focusByCell(
+      this.getStoreCoordinateByType(
+        colType as RevoGrid.DimensionCols,
+        rowType as RevoGrid.DimensionRows
+      ), start, end);
   }
 
   setEdit(rowIndex: number, colIndex: number, colType: RevoGrid.DimensionCols, rowType: RevoGrid.DimensionRows) {

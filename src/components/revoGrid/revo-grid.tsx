@@ -412,8 +412,8 @@ export class RevoGridComponent {
   @Method() async setCellsFocus(
     cellStart: Selection.Cell = { x: 0, y: 0 },
     cellEnd: Selection.Cell = { x: 0, y: 0 },
-    colType: RevoGrid.DimensionCols = 'rgCol',
-    rowType: RevoGrid.DimensionRows = 'rgRow',
+    colType = 'rgCol',
+    rowType = 'rgRow',
   ) {
     this.viewport?.setFocus(colType, rowType, cellStart, cellEnd);
   }

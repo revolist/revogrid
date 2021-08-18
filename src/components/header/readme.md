@@ -5,17 +5,18 @@
 
 ## Properties
 
-| Property         | Attribute        | Description | Type                                    | Default     |
-| ---------------- | ---------------- | ----------- | --------------------------------------- | ----------- |
-| `canResize`      | `can-resize`     |             | `boolean`                               | `undefined` |
-| `colData`        | --               |             | `ColumnRegular[]`                       | `undefined` |
-| `columnFilter`   | `column-filter`  |             | `boolean`                               | `undefined` |
-| `dimensionCol`   | --               |             | `ObservableMap<DimensionSettingsState>` | `undefined` |
-| `groupingDepth`  | `grouping-depth` |             | `number`                                | `0`         |
-| `groups`         | --               |             | `{ [x: string]: any; }`                 | `undefined` |
-| `parent`         | `parent`         |             | `string`                                | `''`        |
-| `selectionStore` | --               |             | `ObservableMap<SelectionStoreState>`    | `undefined` |
-| `viewportCol`    | --               |             | `ObservableMap<ViewportState>`          | `undefined` |
+| Property            | Attribute        | Description | Type                                    | Default     |
+| ------------------- | ---------------- | ----------- | --------------------------------------- | ----------- |
+| `canResize`         | `can-resize`     |             | `boolean`                               | `undefined` |
+| `colData`           | --               |             | `ColumnRegular[]`                       | `undefined` |
+| `columnFilter`      | `column-filter`  |             | `boolean`                               | `undefined` |
+| `dimensionCol`      | --               |             | `ObservableMap<DimensionSettingsState>` | `undefined` |
+| `groupingDepth`     | `grouping-depth` |             | `number`                                | `0`         |
+| `groups`            | --               |             | `{ [x: string]: any; }`                 | `undefined` |
+| `parent`            | `parent`         |             | `string`                                | `''`        |
+| `selectionStore`    | --               |             | `ObservableMap<SelectionStoreState>`    | `undefined` |
+| `type` _(required)_ | `type`           |             | `string`                                | `undefined` |
+| `viewportCol`       | --               |             | `ObservableMap<ViewportState>`          | `undefined` |
 
 
 ## Events

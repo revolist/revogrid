@@ -1,11 +1,10 @@
-import { Edition, Selection } from '../interfaces';
+import { Edition, Selection, RevoGrid } from '../interfaces';
 import { cropCellToMax, isHiddenStore, nextCell } from '../store/selection/selection.helpers';
 import { SelectionStore } from '../store/selection/selection.store';
 
 import Cell = Selection.Cell;
 import EditCellStore = Edition.EditCellStore;
 
-type StoresMatrix = { [y: number]: { [x: number]: SelectionStore } };
 type StoreByDimension = Record<number, SelectionStore>;
 type FocusedStore = {
   entity: SelectionStore;
@@ -13,15 +12,24 @@ type FocusedStore = {
   position: Selection.Cell;
 };
 
+type StoresMapping<T> = { [xOrY: number]: Partial<T> };
+
 export const EMPTY_INDEX = -1;
 
 export default class SelectionStoreConnector {
   // dirty flag required to cleanup whole store in case visibility of panels changed
   private dirty = false;
-  private readonly stores: StoresMatrix = {};
+  readonly stores: { [y: number]: { [x: number]: SelectionStore } } = {};
 
   readonly columnStores: StoreByDimension = {};
   readonly rowStores: { [y: number]: SelectionStore } = {};
+
+  /**
+   * Helpers for data conversion
+   */
+  readonly storesByType: Partial<Record<RevoGrid.MultiDimensionType, number>> = {};
+  readonly storesXToType: StoresMapping<RevoGrid.DimensionCols> = {};
+  readonly storesYToType: StoresMapping<RevoGrid.DimensionRows> = {};
 
   get focusedStore(): FocusedStore | null {
     for (let y in this.stores) {
@@ -51,6 +59,7 @@ export default class SelectionStoreConnector {
   }
 
   private readonly sections: Element[] = [];
+
   registerSection(e?: Element) {
     if (!e) {
       this.sections.length = 0;
@@ -75,8 +84,9 @@ export default class SelectionStoreConnector {
     }
   }
 
-  registerColumn(x: number): SelectionStore {
-    // if hidden just create store
+  registerColumn(x: number, type: RevoGrid.DimensionCols): SelectionStore {
+
+    // if hidden just create store but no operations needed
     if (isHiddenStore(x)) {
       return new SelectionStore();
     }
@@ -84,10 +94,13 @@ export default class SelectionStoreConnector {
       return this.columnStores[x];
     }
     this.columnStores[x] = new SelectionStore();
+    // build cross linking type to position
+    this.storesByType[type] = x;
+    this.storesXToType[x] = type;
     return this.columnStores[x];
   }
 
-  registerRow(y: number): SelectionStore {
+  registerRow(y: number, type: RevoGrid.DimensionRows): SelectionStore {
     // if hidden just create store
     if (isHiddenStore(y)) {
       return new SelectionStore();
@@ -96,6 +109,9 @@ export default class SelectionStoreConnector {
       return this.rowStores[y];
     }
     this.rowStores[y] = new SelectionStore();
+    // build cross linking type to position
+    this.storesByType[type] = y;
+    this.storesYToType[y] = type;
     return this.rowStores[y];
   }
 
@@ -121,20 +137,35 @@ export default class SelectionStoreConnector {
       this.rowStores[y].setRangeArea(c);
     });
     // clean up on remove
-    this.stores[y][x]?.store.on('dispose', () => {
-      this.columnStores[x]?.dispose();
-      this.rowStores[y]?.dispose();
-      delete this.rowStores[y];
-      delete this.columnStores[x];
-      if (this.stores[y]) {
-        delete this.stores[y][x];
-      }
-      // clear empty rows
-      if (!Object.keys(this.stores[y] || {}).length) {
-        delete this.stores[y];
-      }
-    });
+    this.stores[y][x]?.store.on('dispose', () => this.destroy(x, y));
     return this.stores[y][x];
+  }
+
+  private destroy(x: number, y: number) {
+    this.columnStores[x]?.dispose();
+    this.rowStores[y]?.dispose();
+
+    delete this.rowStores[y];
+    delete this.columnStores[x];
+    // clear x cross link
+    if (this.storesXToType[x]) {
+      const type = this.storesXToType[x];
+      delete this.storesXToType[x];
+      delete this.storesByType[type];
+    }
+    // clear y cross link
+    if (this.storesYToType[y]) {
+      const type = this.storesYToType[y];
+      delete this.storesYToType[y];
+      delete this.storesByType[type];
+    }
+    if (this.stores[y]) {
+      delete this.stores[y][x];
+    }
+    // clear empty rows
+    if (!Object.keys(this.stores[y] || {}).length) {
+      delete this.stores[y];
+    }
   }
 
   setEditByCell<T extends Selection.Cell>(storePos: T, editCell: T) {

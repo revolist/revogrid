@@ -6,6 +6,7 @@ export const UUID = 'grid-uuid';
 
 export const DISABLED_CLASS = 'disabled';
 export const CELL_CLASS = 'rgCell';
+export const ROW_HEADER_TYPE = 'rowHeaders';
 export const HEADER_CLASS = 'rgHeaderCell';
 export const HEADER_SORTABLE_CLASS = 'sortable';
 export const HEADER_ROW_CLASS = 'header-rgRow';

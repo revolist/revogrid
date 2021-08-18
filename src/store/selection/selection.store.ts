@@ -36,13 +36,17 @@ export class SelectionStore {
     setStore(this.store, { focus: null, range: null, edit: null, tempRange: null });
   }
 
-  setFocus(focus: Selection.Cell, end: Selection.Cell) {
-    setStore(this.store, {
-      focus,
-      range: getRange(focus, end),
-      edit: null,
-      tempRange: null,
-    });
+  setFocus(focus: Selection.Cell, end?: Selection.Cell) {
+    if (!end) {
+      setStore(this.store, { focus });
+    } else {
+      setStore(this.store, {
+        focus,
+        range: getRange(focus, end),
+        edit: null,
+        tempRange: null,
+      });
+    }
   }
 
   setTempArea(range: Selection.TempRange | null) {

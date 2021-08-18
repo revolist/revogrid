@@ -24,6 +24,7 @@ export class RevogrHeaderComponent {
   @Prop() canResize: boolean;
   @Prop() colData: RevoGrid.ColumnRegular[];
   @Prop() columnFilter: boolean;
+  @Prop() type!: string;
 
   @Event() initialHeaderClick: EventEmitter<RevoGrid.InitialHeaderClick>;
   @Event() headerresize: EventEmitter<RevoGrid.ViewSettingSizeProp>;
@@ -92,6 +93,7 @@ export class RevogrHeaderComponent {
 
   get providers() {
     return {
+      type: this.type,
       viewport: this.viewportCol,
       dimension: this.dimensionCol,
       selection: this.selectionStore,

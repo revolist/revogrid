@@ -26,15 +26,17 @@ export const RevoViewPort = ({ viewports, dimensions, orderRef, nakedClick, regi
   };
 
   let el: HTMLElement;
+  const typeRow = 'rgRow';
+  const typeCol = 'rgCol';
   return [
     <div class="main-viewport" ref={e => (el = e)} onClick={e => viewPortClick(e, el)}>
       <div class="viewports">
         {children}
         <revogr-scroll-virtual
           class="vertical"
-          dimension="rgRow"
-          viewportStore={viewports['rgRow'].store}
-          dimensionStore={dimensions['rgRow'].store}
+          dimension={ typeRow }
+          viewportStore={viewports[typeRow].store}
+          dimensionStore={dimensions[typeRow].store}
           ref={el => registerElement(el, 'rowScroll')}
           onScrollVirtual={e => onScroll(e.detail)}
         />
@@ -43,9 +45,9 @@ export const RevoViewPort = ({ viewports, dimensions, orderRef, nakedClick, regi
     </div>,
     <revogr-scroll-virtual
       class="horizontal"
-      dimension="rgCol"
-      viewportStore={viewports['rgCol'].store}
-      dimensionStore={dimensions['rgCol'].store}
+      dimension={ typeCol }
+      viewportStore={viewports[typeCol].store}
+      dimensionStore={dimensions[typeCol].store}
       ref={el => registerElement(el, 'colScroll')}
       onScrollVirtual={e => onScroll(e.detail)}
     />,

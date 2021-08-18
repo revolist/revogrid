@@ -5,17 +5,18 @@
 
 ## Properties
 
-| Property            | Attribute   | Description                                                     | Type                                                           | Default     |
-| ------------------- | ----------- | --------------------------------------------------------------- | -------------------------------------------------------------- | ----------- |
-| `colData`           | --          | Static stores, not expected to change during component lifetime | `ObservableMap<DataSourceState<ColumnRegular, DimensionCols>>` | `undefined` |
-| `dataStore`         | --          |                                                                 | `ObservableMap<DataSourceState<DataType, DimensionRows>>`      | `undefined` |
-| `dimensionRow`      | --          |                                                                 | `ObservableMap<DimensionSettingsState>`                        | `undefined` |
-| `range`             | `range`     |                                                                 | `boolean`                                                      | `undefined` |
-| `readonly`          | `readonly`  |                                                                 | `boolean`                                                      | `undefined` |
-| `rowClass`          | `row-class` |                                                                 | `string`                                                       | `undefined` |
-| `rowSelectionStore` | --          |                                                                 | `ObservableMap<SelectionStoreState>`                           | `undefined` |
-| `viewportCol`       | --          |                                                                 | `ObservableMap<ViewportState>`                                 | `undefined` |
-| `viewportRow`       | --          |                                                                 | `ObservableMap<ViewportState>`                                 | `undefined` |
+| Property                         | Attribute   | Description                                                     | Type                                                           | Default     |
+| -------------------------------- | ----------- | --------------------------------------------------------------- | -------------------------------------------------------------- | ----------- |
+| `colData` _(required)_           | --          | Static stores, not expected to change during component lifetime | `ObservableMap<DataSourceState<ColumnRegular, DimensionCols>>` | `undefined` |
+| `dataStore` _(required)_         | --          |                                                                 | `ObservableMap<DataSourceState<DataType, DimensionRows>>`      | `undefined` |
+| `dimensionRow` _(required)_      | --          |                                                                 | `ObservableMap<DimensionSettingsState>`                        | `undefined` |
+| `range`                          | `range`     |                                                                 | `boolean`                                                      | `undefined` |
+| `readonly`                       | `readonly`  |                                                                 | `boolean`                                                      | `undefined` |
+| `rowClass`                       | `row-class` |                                                                 | `string`                                                       | `undefined` |
+| `rowSelectionStore` _(required)_ | --          |                                                                 | `ObservableMap<SelectionStoreState>`                           | `undefined` |
+| `type` _(required)_              | `type`      |                                                                 | `string`                                                       | `undefined` |
+| `viewportCol` _(required)_       | --          |                                                                 | `ObservableMap<ViewportState>`                                 | `undefined` |
+| `viewportRow` _(required)_       | --          |                                                                 | `ObservableMap<ViewportState>`                                 | `undefined` |
 
 
 ## Events

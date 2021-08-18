@@ -176,7 +176,7 @@ export namespace Components {
         /**
           * Set focus range
          */
-        "setCellsFocus": (cellStart?: Selection.Cell, cellEnd?: Selection.Cell, colType?: RevoGrid.DimensionCols, rowType?: RevoGrid.DimensionRows) => Promise<void>;
+        "setCellsFocus": (cellStart?: Selection.Cell, cellEnd?: Selection.Cell, colType?: string, rowType?: string) => Promise<void>;
         /**
           * Source - defines main data source. Can be an Object or 2 dimensional array([][]); Keys/indexes referenced from columns Prop
          */
@@ -224,6 +224,7 @@ export namespace Components {
         "readonly": boolean;
         "rowClass": string;
         "rowSelectionStore": Observable<Selection.SelectionStoreState>;
+        "type": string;
         "viewportCol": Observable<RevoGrid.ViewportState>;
         "viewportRow": Observable<RevoGrid.ViewportState>;
     }
@@ -260,6 +261,7 @@ export namespace Components {
         "groups": Groups;
         "parent": string;
         "selectionStore": Observable<Selection.SelectionStoreState>;
+        "type": string;
         "viewportCol": Observable<RevoGrid.ViewportState>;
     }
     interface RevogrOrderEditor {
@@ -671,16 +673,17 @@ declare namespace LocalJSX {
         /**
           * Static stores, not expected to change during component lifetime
          */
-        "colData"?: ColumnSource;
-        "dataStore"?: RowSource;
-        "dimensionRow"?: Observable<RevoGrid.DimensionSettingsState>;
+        "colData": ColumnSource;
+        "dataStore": RowSource;
+        "dimensionRow": Observable<RevoGrid.DimensionSettingsState>;
         "onDragStartCell"?: (event: CustomEvent<MouseEvent>) => void;
         "range"?: boolean;
         "readonly"?: boolean;
         "rowClass"?: string;
-        "rowSelectionStore"?: Observable<Selection.SelectionStoreState>;
-        "viewportCol"?: Observable<RevoGrid.ViewportState>;
-        "viewportRow"?: Observable<RevoGrid.ViewportState>;
+        "rowSelectionStore": Observable<Selection.SelectionStoreState>;
+        "type": string;
+        "viewportCol": Observable<RevoGrid.ViewportState>;
+        "viewportRow": Observable<RevoGrid.ViewportState>;
     }
     interface RevogrEdit {
         "column"?: RevoGrid.ColumnRegular | null;
@@ -722,6 +725,7 @@ declare namespace LocalJSX {
         "onInitialHeaderClick"?: (event: CustomEvent<RevoGrid.InitialHeaderClick>) => void;
         "parent"?: string;
         "selectionStore"?: Observable<Selection.SelectionStoreState>;
+        "type": string;
         "viewportCol"?: Observable<RevoGrid.ViewportState>;
     }
     interface RevogrOrderEditor {

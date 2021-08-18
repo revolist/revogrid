@@ -21,18 +21,10 @@ export class KeyboardService {
   constructor(private sv: Config) {}
 
   async keyDown(e: KeyboardEvent, canRange: boolean) {
-    if (!this.sv.selectionStoreService.focused) {
-      return;
-    }
     if (isCtrlKey(e.keyCode, navigator.platform)) {
       this.ctrlDown = true;
     }
 
-    // tab key means same as arrow right
-    if (codesLetter.TAB === e.code) {
-      this.keyChangeSelection(e, canRange);
-      return;
-    }
 
     /**
      *  IF EDIT MODE
@@ -51,8 +43,19 @@ export class KeyboardService {
      */
 
     // pressed clear key
-    if (isClear(e.code)) {
+    if (this.sv.selectionStoreService.ranged && isClear(e.code)) {
       this.sv.clearCell();
+      return;
+    }
+
+    // below works with focus only
+    if (!this.sv.selectionStoreService.focused) {
+      return;
+    }
+
+    // tab key means same as arrow right
+    if (codesLetter.TAB === e.code) {
+      this.keyChangeSelection(e, canRange);
       return;
     }
 
