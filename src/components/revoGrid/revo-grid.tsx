@@ -178,7 +178,7 @@ export class RevoGridComponent {
 
   /**
    * After edit.
-   * Triggered when after data applied or Range changeged.
+   * Triggered after data applied or range changed.
    */
   @Event() afteredit: EventEmitter<Edition.BeforeSaveDataDetails | Edition.BeforeRangeSaveDataDetails>;
 

@@ -148,13 +148,17 @@ export default class ColumnService {
     };
   }
 
-  getRangeData(d: Selection.ChangedRange): RevoGrid.DataLookup {
+  getRangeData(d: Selection.ChangedRange): {
+    changed: RevoGrid.DataLookup,
+    mapping: Selection.Cell[],
+  } {
     const changed: RevoGrid.DataLookup = {};
 
     // get original length sizes
     const copyColLength = d.oldProps.length;
     const copyFrom = this.copyRangeArray(d.oldRange, d.oldProps, this.dataStore);
     const copyRowLength = copyFrom.length;
+    const mapping: Selection.Cell[] = [];
 
     // rows
     for (let rowIndex = d.newRange.y, i = 0; rowIndex < d.newRange.y1 + 1; rowIndex++, i++) {
@@ -178,10 +182,17 @@ export default class ColumnService {
             changed[rowIndex] = {};
           }
           changed[rowIndex][p] = copyRow[currentCol];
+          mapping.push({
+            y: currentCol,
+            x: rowIndex,
+          });
         }
       }
     }
-    return changed;
+    return {
+      changed,
+      mapping,
+    };
   }
 
   getTransformedDataToApply(

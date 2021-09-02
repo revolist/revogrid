@@ -490,7 +490,7 @@ declare namespace LocalJSX {
     order: Record<RevoGrid.ColumnProp, 'asc' | 'desc'>;
   }>) => void;
         /**
-          * After edit. Triggered when after data applied or Range changeged.
+          * After edit. Triggered after data applied or range changed.
          */
         "onAfteredit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails | Edition.BeforeRangeSaveDataDetails>) => void;
         /**

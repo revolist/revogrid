@@ -333,6 +333,7 @@ export declare namespace Selection {
     type: RevoGrid.DimensionRows;
     newRange: RangeArea;
     oldRange: RangeArea;
+    mapping: Selection.Cell[];
     newProps: RevoGrid.ColumnProp[];
     oldProps: RevoGrid.ColumnProp[];
     newData: { [key: number]: RevoGrid.DataType };
