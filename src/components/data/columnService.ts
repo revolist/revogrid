@@ -145,24 +145,22 @@ export default class ColumnService {
     };
   }
 
-  getRangeData(d: Selection.ChangedRange): {
+  getRangeData(d: Selection.ChangedRange, columns: RevoGrid.ColumnRegular[]): {
     changed: RevoGrid.DataLookup,
     mapping: Selection.OldNewRangeMapping,
   } {
     const changed: RevoGrid.DataLookup = {};
 
     // get original length sizes
-    const copyColLength = d.oldProps.length;
-    const copyFrom = this.copyRangeArray(d.oldRange, d.oldProps, this.dataStore);
-    const copyRowLength = copyFrom.length;
+    const copyColLength = d.oldRange.x1 - d.oldRange.x + 1;
+    const copyRowLength = d.oldRange.y1 - d.oldRange.y + 1;
     const mapping: Selection.OldNewRangeMapping = {};
 
     // rows
     for (let rowIndex = d.newRange.y, i = 0; rowIndex < d.newRange.y1 + 1; rowIndex++, i++) {
       // copy original data link
-
-      const oldRowIndex = i % copyRowLength;
-      const copyRow = copyFrom[oldRowIndex];
+      const oldRowIndex = d.oldRange.y + i % copyRowLength;
+      const copyRow = getSourceItem(this.dataStore, oldRowIndex);
 
       // columns
       for (let colIndex = d.newRange.x, j = 0; colIndex < d.newRange.x1 + 1; colIndex++, j++) {
@@ -172,7 +170,8 @@ export default class ColumnService {
         }
 
         const p = this.columns[colIndex].prop;
-        const currentCol = j % copyColLength;
+        const copyColIndex = d.oldRange.x + j % copyColLength;
+        const copyColumnProp = columns[copyColIndex].prop;
 
         /** if can write */
         if (!this.isReadOnly(rowIndex, colIndex)) {
@@ -180,14 +179,14 @@ export default class ColumnService {
           if (!changed[rowIndex]) {
             changed[rowIndex] = {};
           }
-          changed[rowIndex][p] = copyRow[currentCol];
+          changed[rowIndex][p] = copyRow[copyColumnProp];
           /** Generate mapping object */
           if (!mapping[rowIndex]) {
             mapping[rowIndex] = {};
           }
           mapping[rowIndex][p] = {
-            x: currentCol,
-            y: oldRowIndex
+            colProp: copyColumnProp,
+            rowIndex: oldRowIndex
           };
         }
       }
@@ -282,7 +281,7 @@ export default class ColumnService {
     store: Observable<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>,
   ): RevoGrid.DataFormat[][] {
     const toCopy: RevoGrid.DataFormat[][] = [];
-    for (let i = range.y; i < range.y1 + 1; i++) {
+    for (let i = range.y; i <= range.y1; i++) {
       const rgRow: RevoGrid.DataFormat[] = [];
       for (let prop of rangeProps) {
         const item = getSourceItem(store, i);

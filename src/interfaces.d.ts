@@ -232,7 +232,10 @@ export declare namespace Selection {
   };
   type OldNewRangeMapping = {
     [rowIndex: number]: {
-      [T in RevoGrid.ColumnProp]: Cell;
+      [T in RevoGrid.ColumnProp]: {
+        rowIndex: number;
+        colProp: RevoGrid.ColumnProp;
+      };
     };
   };
   type ChangedRange = {
@@ -240,8 +243,8 @@ export declare namespace Selection {
     newRange: RangeArea;
     oldRange: RangeArea;
     mapping: OldNewRangeMapping;
-    newProps: RevoGrid.ColumnProp[];
-    oldProps: RevoGrid.ColumnProp[];
+    // newProps: RevoGrid.ColumnProp[];
+    // oldProps: RevoGrid.ColumnProp[];
     newData: {
       [key: number]: RevoGrid.DataType;
     };

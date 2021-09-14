@@ -1,7 +1,6 @@
 import debounce from 'lodash/debounce';
 import { DebouncedFunc } from 'lodash';
 import each from 'lodash/each';
-import slice from 'lodash/slice';
 
 import { h } from '@stencil/core';
 import { CELL_HANDLER_CLASS } from '../../utils/consts';
@@ -202,17 +201,14 @@ export class AutoFillService {
 
     const oldRange = this.sv.selectionStoreService.ranged;
     const newRange = getRange(start, end);
-    const columns = [...this.sv.columnService.columns];
     const rangeData: Selection.ChangedRange = {
       type: this.sv.dataStore.get('type'),
       newData: {},
       mapping: {},
       newRange,
       oldRange,
-      newProps: slice(columns, newRange.x, newRange.x1 + 1).map(v => v.prop),
-      oldProps: slice(columns, oldRange.x, oldRange.x1 + 1).map(v => v.prop),
     };
-    const { mapping, changed } = this.sv.columnService.getRangeData(rangeData);
+    const { mapping, changed } = this.sv.columnService.getRangeData(rangeData, this.sv.columnService.columns);
     rangeData.newData = changed;
     rangeData.mapping = mapping;
     const selectionEndEvent = this.sv.internalSelectionChanged(rangeData);

@@ -95,6 +95,7 @@ revo-grid {
     height: 1px;
     z-index: 2;
     background: red;
+    pointer-events: none;
   }
 
   .clipboard {
