@@ -1,4 +1,5 @@
-export * from '@/store/dimension/dimension.helpers';
+export * from '../store/dimension/dimension.helpers';
+
 
 interface CSSStyleDeclarationExtended extends CSSStyleDeclaration {
   msOverflowStyle: string;

@@ -1,10 +1,10 @@
 import { h, VNode } from '@stencil/core';
 import { DataSourceState, getSourceItem, getVisibleSourceItem, setSourceByVirtualIndex } from '../../store/dataSource/data.store';
-import { CELL_CLASS, DISABLED_CLASS } from '@/utils/consts';
-import { Edition, Observable, RevoGrid, Selection } from '@/interfaces';
-import { getRange } from '@/store/selection/selection.helpers';
+import { CELL_CLASS, DISABLED_CLASS } from '../../utils/consts';
+import { Edition, Observable, RevoGrid, Selection } from '../../interfaces';
+import { getRange } from '../../store/selection/selection.helpers';
 
-import { isGroupingColumn } from '@/plugins/groupingRow/grouping.service';
+import { isGroupingColumn } from '../../plugins/groupingRow/grouping.service';
 
 export type ColumnSource = Observable<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
 export type RowSource = Observable<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;

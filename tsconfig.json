@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "baseUrl": ".",
     "allowSyntheticDefaultImports": true,
     "allowUnreachableCode": false,
     "declaration": true,
@@ -16,10 +15,7 @@
     "noImplicitAny": true,
     "noImplicitThis": true,
     "noImplicitReturns": true,
-    "sourceMap": true,
-    "paths": {
-      "@/*": ["src/*"]
-    },
+    "sourceMap": true
   },
   "include": ["src", "types/jsx.d.ts"],
   "exclude": ["node_modules"]
