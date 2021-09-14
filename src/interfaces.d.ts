@@ -243,8 +243,6 @@ export declare namespace Selection {
     newRange: RangeArea;
     oldRange: RangeArea;
     mapping: OldNewRangeMapping;
-    // newProps: RevoGrid.ColumnProp[];
-    // oldProps: RevoGrid.ColumnProp[];
     newData: {
       [key: number]: RevoGrid.DataType;
     };
