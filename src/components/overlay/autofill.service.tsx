@@ -206,7 +206,7 @@ export class AutoFillService {
     const rangeData: Selection.ChangedRange = {
       type: this.sv.dataStore.get('type'),
       newData: {},
-      mapping: [],
+      mapping: {},
       newRange,
       oldRange,
       newProps: slice(columns, newRange.x, newRange.x1 + 1).map(v => v.prop),

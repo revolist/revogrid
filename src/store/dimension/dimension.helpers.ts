@@ -2,11 +2,11 @@ import each from 'lodash/each';
 import sortedIndex from 'lodash/sortedIndex';
 import reduce from 'lodash/reduce';
 
-import { mergeSortedArray } from '../../utils/utils';
+import { mergeSortedArray } from '../../utils';
 import { RevoGrid } from '../../interfaces';
 
 export type DimensionPosition = Pick<RevoGrid.DimensionSettingsState, 'indexes' | 'positionIndexes' | 'originItemSize' | 'positionIndexToItem'>;
-type DimensionIndexInput = Pick<RevoGrid.DimensionSettingsState, 'indexes' | 'originItemSize' | 'indexToItem'>;
+export type DimensionIndexInput = Pick<RevoGrid.DimensionSettingsState, 'indexes' | 'originItemSize' | 'indexToItem'>;
 export type DimensionSize = Pick<RevoGrid.DimensionSettingsState, 'indexes' | 'positionIndexes' | 'positionIndexToItem' | 'indexToItem' | 'realSize' | 'sizes'>;
 /**
  * Pre-calculation
@@ -70,13 +70,16 @@ export function calculateDimensionData(state: RevoGrid.DimensionSettingsState, n
   };
 }
 
+/**
+ * Calculate item by position
+ */
 export function getItemByPosition({ indexes, positionIndexes, originItemSize, positionIndexToItem }: DimensionPosition, pos: number) {
   const item: RevoGrid.PositionItem = {
     itemIndex: 0,
     start: 0,
     end: 0,
   };
-  const currentPlace: number = indexes.length ? sortedIndex(positionIndexes, pos) : 0;
+  const currentPlace = indexes.length ? sortedIndex(positionIndexes, pos) : 0;
   // not found or first index
   if (!currentPlace) {
     item.itemIndex = Math.floor(pos / originItemSize);
@@ -84,14 +87,14 @@ export function getItemByPosition({ indexes, positionIndexes, originItemSize, po
     item.end = item.start + originItemSize;
     return item;
   }
-  const positionItem: RevoGrid.PositionItem = positionIndexToItem[currentPlace - 1];
+  const positionItem = positionIndexToItem[currentPlace - 1];
   // if item has specified size
   if (positionItem.end > pos) {
     return positionItem;
   }
   // special size item was present before
-  const relativePos: number = pos - positionItem.end;
-  const relativeIndex: number = Math.floor(relativePos / originItemSize);
+  const relativePos = pos - positionItem.end;
+  const relativeIndex = Math.floor(relativePos / originItemSize);
   item.itemIndex = positionItem.itemIndex + 1 + relativeIndex;
   item.start = positionItem.end + relativeIndex * originItemSize;
   item.end = item.start + originItemSize;
@@ -109,7 +112,7 @@ export function getItemByIndex(dimension: DimensionIndexInput, index: number) {
     return dimension.indexToItem[index];
   }
 
-  const currentPlace: number = dimension.indexes.length ? sortedIndex(dimension.indexes, index) : 0;
+  const currentPlace = dimension.indexes.length ? sortedIndex(dimension.indexes, index) : 0;
   // not found or first index
   if (!currentPlace) {
     item.start = item.itemIndex * dimension.originItemSize;
@@ -118,7 +121,7 @@ export function getItemByIndex(dimension: DimensionIndexInput, index: number) {
   }
   // special size item was present before
 
-  const positionItem: RevoGrid.PositionItem = dimension.indexToItem[dimension.indexes[currentPlace - 1]];
+  const positionItem = dimension.indexToItem[dimension.indexes[currentPlace - 1]];
   item.start = positionItem.end + (index - positionItem.itemIndex - 1) * dimension.originItemSize;
   item.end = item.start + dimension.originItemSize;
   return item;

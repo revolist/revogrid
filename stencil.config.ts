@@ -16,7 +16,7 @@ export const config: Config = {
   hashFileNames: false,
   autoprefixCss: false,
   minifyCss: true,
-  preamble: 'Built by RevoList',
+  preamble: 'Built by Revolist',
   hashedFileNameLength: 8,
 
   extras: {
@@ -36,7 +36,7 @@ export const config: Config = {
     slotChildNodesFix: false,
   },
 
-  buildEs5: 'prod',
+  // buildEs5: 'prod',
   namespace: 'revo-grid',
   taskQueue: 'async',
   globalScript: './src/global/global.ts',
@@ -81,7 +81,6 @@ export const config: Config = {
     {
       type: 'dist',
       esmLoaderPath: '../loader',
-      copy: [{ src: '../dist/types/plugins', dest: './plugins' }],
     },
     {
       type: 'docs-readme',

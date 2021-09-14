@@ -553,6 +553,10 @@ declare namespace LocalJSX {
          */
         "onBeforerangeedit"?: (event: CustomEvent<Edition.BeforeRangeSaveDataDetails>) => void;
         /**
+          * Before row definition
+         */
+        "onBeforerowdefinition"?: (event: CustomEvent<{ vals: any; oldVals: any; }>) => void;
+        /**
           * Before sorting event. Initial sorting triggered, if this event stops no other event called. Use e.preventDefault() to prevent sorting.
          */
         "onBeforesorting"?: (event: CustomEvent<{

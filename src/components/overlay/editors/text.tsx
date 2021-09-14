@@ -1,7 +1,7 @@
 import { h } from '@stencil/core';
 import { isEnterKey, isTab } from '../../../utils/keyCodes.utils';
 import { Edition, RevoGrid } from '../../../interfaces';
-import { timeout } from '../../../utils/utils';
+import { timeout } from '../../../utils';
 
 export type SaveCallback = (value: Edition.SaveData, preventFocus: boolean) => void;
 

@@ -4,7 +4,7 @@ import { RevoGrid, RevoPlugin } from '../interfaces';
 import ColumnDataProvider, { ColumnCollection } from '../services/column.data.provider';
 import { DataProvider } from '../services/data.provider';
 import DimensionProvider, { ColumnItems } from '../services/dimension.provider';
-import { getScrollbarWidth } from '../utils/utils';
+import { getScrollbarWidth } from '../utils';
 import BasePlugin from './basePlugin';
 type Providers = {
   dataProvider: DataProvider;

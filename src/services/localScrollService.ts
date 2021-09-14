@@ -1,4 +1,4 @@
-import { scaleValue } from '../utils/utils';
+import { scaleValue } from '../utils';
 import { RevoGrid } from '../interfaces';
 
 interface Config {

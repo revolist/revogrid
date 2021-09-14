@@ -1,6 +1,6 @@
 {
   "name": "@revolist/revogrid",
-  "version": "4.1.0-next.7",
+  "version": "4.1.0-next.21",
   "description": "Virtual reactive data grid component - RevoGrid.",
   "license": "MIT",
   "directories": {
@@ -38,11 +38,11 @@
     "export",
     "filtering"
   ],
-  "main": "dist/index.cjs.js",
-  "module": "dist/index.js",
+  "main": "dist/index.js",
+  "module": "custom-element/index.js",
   "es2015": "dist/esm/index.mjs",
   "es2017": "dist/esm/index.mjs",
-  "types": "dist/types/index.d.ts",
+  "types": "custom-element/index.d.ts",
   "collection": "dist/collection/collection-manifest.json",
   "collection:main": "dist/collection/index.js",
   "unpkg": "dist/revo-grid/revo-grid.js",
@@ -52,7 +52,8 @@
     "custom-element/"
   ],
   "scripts": {
-    "build": "stencil build --prod --docs",
+    "build": "stencil build --prod --docs && npm run copy:type",
+    "copy:type": "cp -r ./dist/types/* ./dist/collection",
     "build:demo": "cd ./demo/ && rm -rf node_modules && npm i && npm run build",
     "serve": "stencil build --dev --watch --serve",
     "generate": "stencil generate",
@@ -63,7 +64,7 @@
     "@angular/core": "^11.0.9",
     "@juggle/resize-observer": "^3.2.0",
     "@stencil/angular-output-target": "0.0.5",
-    "@stencil/core": "2.6.0",
+    "@stencil/core": "2.8.0",
     "@stencil/react-output-target": "0.0.9",
     "@stencil/sass": "^1.4.1",
     "@stencil/store": "^1.3.0",

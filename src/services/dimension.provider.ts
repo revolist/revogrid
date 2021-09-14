@@ -1,10 +1,10 @@
 import reduce from 'lodash/reduce';
+import { debounce } from 'lodash';
 import { columnTypes, rowTypes } from '../store/storeTypes';
 import DimensionStore from '../store/dimension/dimension.store';
 import ViewportProvider from './viewport.provider';
 import { RevoGrid } from '../interfaces';
-import { DimensionPosition, getItemByIndex, getItemByPosition } from '../store/dimension/dimension.helpers';
-import { debounce } from 'lodash';
+import { getItemByIndex } from '../store/dimension/dimension.helpers';
 
 export type ColumnItems = Record<RevoGrid.DimensionCols, RevoGrid.ColumnRegular[]>;
 
@@ -25,10 +25,6 @@ export default class DimensionProvider {
       },
       {},
     ) as DimensionStores;
-  }
-
-  getItemByPosition(data: DimensionPosition, pos: number) {
-    return getItemByPosition(data, pos);
   }
 
   setDimensionSize(dimensionType: RevoGrid.MultiDimensionType, sizes: RevoGrid.ViewSettingSizeProp): void {

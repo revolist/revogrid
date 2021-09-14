@@ -1,3 +1,5 @@
+export * from '@/store/dimension/dimension.helpers';
+
 interface CSSStyleDeclarationExtended extends CSSStyleDeclaration {
   msOverflowStyle: string;
 }
@@ -36,6 +38,9 @@ export function findPositionInArray<T>(this: T[], el: T, compareFn: (el: T, el2:
   })(this);
 }
 
+/**
+ * Sorted push
+ */
 export function pushSorted<T>(arr: T[], el: T, fn: (el: T, el2: T) => number): T[] {
   arr.splice(findPositionInArray.bind(arr)(el, fn), 0, el);
   return arr;
@@ -46,6 +51,9 @@ function simpleCompare<T>(el1: T, el2: T): boolean {
   return el1 < el2;
 }
 
+/**
+ * Merge sorted array helper function
+ */
 export function mergeSortedArray<T>(arr1: T[], arr2: T[], compareFn: (el: T, el2: T) => boolean = simpleCompare): T[] {
   const merged: T[] = [];
   let index1: number = 0;
@@ -109,12 +117,18 @@ export function scaleValue(value: number, from: [number, number], to: [number, n
   return ((to[1] - to[0]) * (value - from[0])) / (from[1] - from[0]) + to[0];
 }
 
+/**
+ * Async timeout
+ */
 export async function timeout(delay = 0): Promise<void> {
   await new Promise((r: (v?: any) => void) => {
     setTimeout(() => r(), delay);
   });
 }
 
+/**
+ * Type script mixins
+ */
 export function applyMixins(derivedCtor: any, constructors: any[]) {
   constructors.forEach(baseCtor => {
     Object.getOwnPropertyNames(baseCtor.prototype).forEach(name => {

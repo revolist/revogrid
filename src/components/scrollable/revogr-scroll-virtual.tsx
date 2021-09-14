@@ -1,5 +1,5 @@
 import { Component, Element, Event, EventEmitter, h, Host, Method, Prop } from '@stencil/core';
-import { getScrollbarWidth } from '../../utils/utils';
+import { getScrollbarWidth } from '@/utils';
 import LocalScrollService from '../../services/localScrollService';
 import { Observable, RevoGrid } from '../../interfaces';
 

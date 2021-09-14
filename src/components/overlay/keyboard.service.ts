@@ -3,7 +3,7 @@ import { getRange } from '../../store/selection/selection.helpers';
 import SelectionStoreService from '../../store/selection/selection.store.service';
 import { codesLetter } from '../../utils/keyCodes';
 import { isClear, isCtrlKey, isEnterKey, isLetterKey } from '../../utils/keyCodes.utils';
-import { timeout } from '../../utils/utils';
+import { timeout } from '../../utils';
 import { EventData, getCoordinate, isAfterLast, isBeforeFirst } from './selection.utils';
 
 type Config = {

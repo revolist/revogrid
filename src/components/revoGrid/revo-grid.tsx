@@ -8,7 +8,7 @@ import DimensionProvider, { DimensionConfig } from '../../services/dimension.pro
 import ViewportProvider from '../../services/viewport.provider';
 import { Edition, Selection, RevoGrid, ThemeSpace, RevoPlugin } from '../../interfaces';
 import ThemeService from '../../themeManager/themeService';
-import { timeout } from '../../utils/utils';
+import { timeout } from '../../utils';
 import AutoSize, { AutoSizeColumnConfig } from '../../plugins/autoSizeColumn';
 import { columnTypes } from '../../store/storeTypes';
 import FilterPlugin, { ColumnFilterConfig, FilterCollection } from '../../plugins/filter/filter.plugin';
@@ -327,6 +327,10 @@ export class RevoGridComponent {
    * Get resized columns
    */
   @Event() aftercolumnresize: EventEmitter<Record<RevoGrid.ColumnProp, RevoGrid.ColumnRegular>>;
+  /**
+   * Before row definition
+   */
+  @Event() beforerowdefinition: EventEmitter<{ vals: any; oldVals: any; }>;
 
   // --------------------------------------------------------------------------
   //
@@ -693,10 +697,17 @@ export class RevoGridComponent {
     this.dataProvider.setData(newVal, 'rowPinStart');
   }
 
-  @Watch('rowDefinitions') rowDefChanged(newVal: RevoGrid.RowDefinition[] = [], oldVal?: RevoGrid.RowDefinition[]) {
+  @Watch('rowDefinitions') rowDefChanged(after: any, before?: any) {
+    const { detail: {
+      vals: newVal,
+      oldVals: oldVal
+    }} = this.beforerowdefinition.emit({
+      vals: after,
+      oldVals: before
+    });
     // clear current defs
     if (oldVal) {
-      let oldRows = rowDefinitionByType(oldVal.map(v => ({
+      let oldRows = rowDefinitionByType(oldVal.map((v: RevoGrid.RowDefinition) => ({
         ...v,
         size: this.rowSize
       })));

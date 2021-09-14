@@ -45,7 +45,7 @@ export default class DimensionStore {
 
   getCurrentState(): RevoGrid.DimensionSettingsState {
     const state = initialState();
-    const keys: Item[] = Object.keys(state) as Item[];
+    const keys = Object.keys(state);
     return reduce(
       keys,
       (r: RevoGrid.DimensionSettingsState, k: Item) => {
@@ -65,7 +65,7 @@ export default class DimensionStore {
     setStore(this.store, { realSize });
   }
 
-  setStore<T extends { [key: string]: any }>(data: Partial<T>) {
+  setStore<T extends Record<string, any>>(data: Partial<T>) {
     setStore(this.store, data);
   }
 

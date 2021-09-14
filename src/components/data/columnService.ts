@@ -1,17 +1,13 @@
 import { h, VNode } from '@stencil/core';
 import { DataSourceState, getSourceItem, getVisibleSourceItem, setSourceByVirtualIndex } from '../../store/dataSource/data.store';
-import { CELL_CLASS, DISABLED_CLASS } from '../../utils/consts';
-import { Edition, Observable, RevoGrid, Selection } from '../../interfaces';
-import { getRange } from '../../store/selection/selection.helpers';
+import { CELL_CLASS, DISABLED_CLASS } from '@/utils/consts';
+import { Edition, Observable, RevoGrid, Selection } from '@/interfaces';
+import { getRange } from '@/store/selection/selection.helpers';
 
-import BeforeSaveDataDetails = Edition.BeforeSaveDataDetails;
-import ColumnDataSchemaModel = RevoGrid.ColumnDataSchemaModel;
-import ColumnProp = RevoGrid.ColumnProp;
-import DataType = RevoGrid.DataType;
-import { isGroupingColumn } from '../../plugins/groupingRow/grouping.service';
+import { isGroupingColumn } from '@/plugins/groupingRow/grouping.service';
 
 export type ColumnSource = Observable<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
-export type RowSource = Observable<DataSourceState<DataType, RevoGrid.DimensionRows>>;
+export type RowSource = Observable<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
 
 export type ColumnStores = {
   [T in RevoGrid.DimensionCols]: ColumnSource;
@@ -91,7 +87,8 @@ export default class ColumnService {
     return props;
   }
 
-  customRenderer(_r: number, c: number, model: ColumnDataSchemaModel, providers: RevoGrid.Providers): VNode | string | void {
+  customRenderer(
+    _: number, c: number, model: RevoGrid.ColumnDataSchemaModel, providers: RevoGrid.Providers): VNode | string | void {
     const tpl = this.columns[c]?.cellTemplate;
     if (tpl) {
       return tpl(h, { ...model, providers });
@@ -100,7 +97,7 @@ export default class ColumnService {
   }
 
   getRowClass(r: number, prop: string): string {
-    const model: DataType = getSourceItem(this.dataStore, r) || {};
+    const model = getSourceItem(this.dataStore, r) || {};
     return model[prop] || '';
   }
 
@@ -109,7 +106,7 @@ export default class ColumnService {
     return ColumnService.getData(data.model[data.prop as number]);
   }
 
-  getSaveData(rowIndex: number, c: number, val?: string): BeforeSaveDataDetails {
+  getSaveData(rowIndex: number, c: number, val?: string): Edition.BeforeSaveDataDetails {
     if (typeof val === 'undefined') {
       val = this.getCellData(rowIndex, c);
     }
@@ -135,9 +132,9 @@ export default class ColumnService {
     return editor;
   }
 
-  rowDataModel(rowIndex: number, c: number): ColumnDataSchemaModel {
+  rowDataModel(rowIndex: number, c: number): RevoGrid.ColumnDataSchemaModel {
     const column = this.columns[c];
-    const prop: ColumnProp | undefined = column?.prop;
+    const prop: RevoGrid.ColumnProp | undefined = column?.prop;
     const model = getSourceItem(this.dataStore, rowIndex) || {};
     return {
       prop,
@@ -150,7 +147,7 @@ export default class ColumnService {
 
   getRangeData(d: Selection.ChangedRange): {
     changed: RevoGrid.DataLookup,
-    mapping: Selection.Cell[],
+    mapping: Selection.OldNewRangeMapping,
   } {
     const changed: RevoGrid.DataLookup = {};
 
@@ -158,12 +155,14 @@ export default class ColumnService {
     const copyColLength = d.oldProps.length;
     const copyFrom = this.copyRangeArray(d.oldRange, d.oldProps, this.dataStore);
     const copyRowLength = copyFrom.length;
-    const mapping: Selection.Cell[] = [];
+    const mapping: Selection.OldNewRangeMapping = {};
 
     // rows
     for (let rowIndex = d.newRange.y, i = 0; rowIndex < d.newRange.y1 + 1; rowIndex++, i++) {
       // copy original data link
-      const copyRow = copyFrom[i % copyRowLength];
+
+      const oldRowIndex = i % copyRowLength;
+      const copyRow = copyFrom[oldRowIndex];
 
       // columns
       for (let colIndex = d.newRange.x, j = 0; colIndex < d.newRange.x1 + 1; colIndex++, j++) {
@@ -182,10 +181,14 @@ export default class ColumnService {
             changed[rowIndex] = {};
           }
           changed[rowIndex][p] = copyRow[currentCol];
-          mapping.push({
-            y: currentCol,
-            x: rowIndex,
-          });
+          /** Generate mapping object */
+          if (!mapping[rowIndex]) {
+            mapping[rowIndex] = {};
+          }
+          mapping[rowIndex][p] = {
+            x: currentCol,
+            y: oldRowIndex
+          };
         }
       }
     }
@@ -241,7 +244,7 @@ export default class ColumnService {
   }
 
   applyRangeData(data: RevoGrid.DataLookup) {
-    const items: Record<number, DataType> = {};
+    const items: Record<number, RevoGrid.DataType> = {};
     for (let rowIndex in data) {
       const oldModel = (items[rowIndex] = getSourceItem(this.dataStore, parseInt(rowIndex, 10)));
       for (let prop in data[rowIndex]) {

@@ -1,8 +1,9 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "allowSyntheticDefaultImports": true,
     "allowUnreachableCode": false,
-    "declaration": false,
+    "declaration": true,
     "experimentalDecorators": true,
     "lib": ["dom", "es2017"],
     "moduleResolution": "node",
@@ -15,7 +16,10 @@
     "noImplicitAny": true,
     "noImplicitThis": true,
     "noImplicitReturns": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "paths": {
+      "@/*": ["src/*"]
+    },
   },
   "include": ["src", "types/jsx.d.ts"],
   "exclude": ["node_modules"]

@@ -4,7 +4,7 @@ import { Group, Groups } from '../../store/dataSource/data.store';
 import { ColSource, CSVFormat, DataInput, Formatter } from './types';
 
 import { columnTypes, rowTypes } from '../../store/storeTypes';
-import { timeout } from '../../utils/utils';
+import { timeout } from '../../utils';
 import BasePlugin from '../basePlugin';
 import ExportCsv from './csv';
 
