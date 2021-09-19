@@ -211,8 +211,8 @@ export class AutoFillService {
     const { mapping, changed } = this.sv.columnService.getRangeData(rangeData, this.sv.columnService.columns);
     rangeData.newData = changed;
     rangeData.mapping = mapping;
-    const selectionEndEvent = this.sv.internalSelectionChanged(rangeData);
-    if (selectionEndEvent.defaultPrevented) {
+    const e = this.sv.internalSelectionChanged(rangeData);
+    if (e.defaultPrevented) {
       this.sv.setTempRange(null);
       return;
     }

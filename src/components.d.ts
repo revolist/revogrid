@@ -590,7 +590,7 @@ declare namespace LocalJSX {
         /**
           * contentsizechanged event. Triggered when new content size applied. Not including header size Event is not returning size To get actual size use getContentSize after event triggered
          */
-        "onContentsizechanged"?: (event: CustomEvent<any>) => void;
+        "onContentsizechanged"?: (event: CustomEvent<RevoGrid.MultiDimensionType>) => void;
         /**
           * On header click.
          */

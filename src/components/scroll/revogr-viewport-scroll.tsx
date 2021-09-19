@@ -1,11 +1,14 @@
-import { Component, Event, EventEmitter, h, Method, Element, Prop, Host } from '@stencil/core';
+import { Component, Event, EventEmitter, h, Method, Element, Prop, Host, Listen } from '@stencil/core';
 import each from 'lodash/each';
 
 import GridResizeService from '../revoGrid/viewport.resize.service';
 import LocalScrollService from '../../services/localScrollService';
 import { RevoGrid } from '../../interfaces';
 import { CONTENT_SLOT, FOOTER_SLOT, HEADER_SLOT } from '../revoGrid/viewport.helpers';
-
+type Delta = 'deltaX' | 'deltaY';
+type ScrollEvent = {
+  preventDefault(): void;
+} & {[x in Delta]: number;};
 /**
  * Service for tracking grid scrolling
  */
@@ -17,6 +20,7 @@ export class RevogrViewportScroll {
   @Event({ bubbles: false }) scrollViewport: EventEmitter<RevoGrid.ViewPortScrollEvent>;
   @Event() resizeViewport: EventEmitter<RevoGrid.ViewPortResizeEvent>;
   @Event() scrollchange: EventEmitter<{ type: RevoGrid.DimensionType; hasScroll: boolean }>;
+
   private scrollThrottling = 10;
 
   /**
@@ -39,8 +43,8 @@ export class RevogrViewportScroll {
   /**
    * Static functions to bind wheel change
    */
-  private horizontalMouseWheel: (e: WheelEvent) => void;
-  private verticalMouseWheel: (e: WheelEvent) => void;
+  private horizontalMouseWheel: (e: Partial<ScrollEvent>) => void;
+  private verticalMouseWheel: (e: Partial<ScrollEvent>) => void;
 
   private horisontalResize: GridResizeService;
   private scrollService: LocalScrollService;
@@ -72,6 +76,10 @@ export class RevogrViewportScroll {
       this.setScroll(e);
     }
     return e;
+  }
+
+  @Listen('mousewheel-vertical') mousewheelVertical({ detail: e }: CustomEvent<ScrollEvent>) {
+    this.verticalMouseWheel(e);
   }
 
   connectedCallback() {
@@ -262,8 +270,8 @@ export class RevogrViewportScroll {
    * @param delta
    * @param e
    */
-  private onVerticalMouseWheel(type: RevoGrid.DimensionType, delta: 'deltaX' | 'deltaY', e: WheelEvent) {
-    e.preventDefault();
+  private onVerticalMouseWheel(type: RevoGrid.DimensionType, delta: Delta, e: ScrollEvent) {
+    e.preventDefault && e.preventDefault();
     const pos = this.verticalScroll.scrollTop + e[delta];
     this.scrollService?.scroll(pos, type, undefined, e[delta]);
     this.latestScrollUpdate(type);
@@ -275,8 +283,8 @@ export class RevogrViewportScroll {
    * @param delta
    * @param e
    */
-  private onHorizontalMouseWheel(type: RevoGrid.DimensionType, delta: 'deltaX' | 'deltaY', e: WheelEvent) {
-    e.preventDefault();
+  private onHorizontalMouseWheel(type: RevoGrid.DimensionType, delta: Delta, e: ScrollEvent) {
+    e.preventDefault && e.preventDefault();
     const pos = this.horizontalScroll.scrollLeft + e[delta];
     this.scrollService?.scroll(pos, type, undefined, e[delta]);
     this.latestScrollUpdate(type);

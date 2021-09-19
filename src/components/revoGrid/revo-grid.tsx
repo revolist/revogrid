@@ -160,7 +160,7 @@ export class RevoGridComponent {
    * Event is not returning size
    * To get actual size use getContentSize after event triggered
    */
-  @Event() contentsizechanged: EventEmitter;
+  @Event() contentsizechanged: EventEmitter<RevoGrid.MultiDimensionType>;
   /**
    * Before edit event.
    * Triggered before edit data applied.
@@ -591,7 +591,7 @@ export class RevoGridComponent {
     }
     const beforeFill = this.beforeautofill.emit(e.detail);
     if (beforeFill.defaultPrevented) {
-      return;
+      e.preventDefault();
     }
   }
 
@@ -675,12 +675,11 @@ export class RevoGridComponent {
   }
 
   @Watch('source') dataChanged(source: RevoGrid.DataType[] = []) {
-    let newSource = [...source];
     const beforesourceset = this.beforesourceset.emit({
       type: 'rgRow',
-      source: newSource,
+      source,
     });
-    newSource = beforesourceset.detail.source;
+    let newSource = [...beforesourceset.detail.source];
 
     newSource = this.dataProvider.setData(newSource, 'rgRow');
     this.aftersourceset.emit({
@@ -771,7 +770,7 @@ export class RevoGridComponent {
       rowSize: this.rowSize,
     });
     const dimensionProviderConfig: DimensionConfig = {
-      realSizeChanged: () => this.contentsizechanged.emit(),
+      realSizeChanged: (k: RevoGrid.MultiDimensionType) => this.contentsizechanged.emit(k),
     };
     this.dimensionProvider = new DimensionProvider(this.viewportProvider, dimensionProviderConfig);
     this.columnProvider = new ColumnDataProvider();

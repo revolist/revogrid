@@ -10,17 +10,17 @@ export type ColumnItems = Record<RevoGrid.DimensionCols, RevoGrid.ColumnRegular[
 
 export type DimensionStores = { [T in RevoGrid.MultiDimensionType]: DimensionStore };
 export type DimensionConfig = {
-  realSizeChanged(): void;
+  realSizeChanged(k: RevoGrid.MultiDimensionType): void;
 };
 export default class DimensionProvider {
   readonly stores: DimensionStores;
   constructor(private viewports: ViewportProvider, config: DimensionConfig) {
-    const sizeChanged = debounce(() => config.realSizeChanged(), 100);
+    const sizeChanged = debounce((k: RevoGrid.MultiDimensionType) => config.realSizeChanged(k), 100);
     this.stores = reduce(
       [...rowTypes, ...columnTypes],
       (sources: Partial<DimensionStores>, k: RevoGrid.MultiDimensionType) => {
         sources[k] = new DimensionStore();
-        sources[k].store.onChange('realSize', () => sizeChanged());
+        sources[k].store.onChange('realSize', () => sizeChanged(k));
         return sources;
       },
       {},
