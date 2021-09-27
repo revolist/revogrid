@@ -33,7 +33,6 @@ function initialState(): RevoGrid.DimensionSettingsState {
 
     // initial item size if it wasn't changed
     originItemSize: 0,
-    frameOffset: 0,
   };
 }
 
@@ -63,6 +62,10 @@ export default class DimensionStore {
       realSize += this.store.get('sizes')[i] || this.store.get('originItemSize');
     }
     setStore(this.store, { realSize });
+  }
+
+  dispose() {
+    setStore(this.store, initialState());
   }
 
   setStore<T extends Record<string, any>>(data: Partial<T>) {

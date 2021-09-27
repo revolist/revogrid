@@ -12,8 +12,15 @@ export type DimensionSize = Pick<RevoGrid.DimensionSettingsState, 'indexes' | 'p
  * Pre-calculation
  * Dimension sizes for each cell
  */
-export function calculateDimensionData(state: RevoGrid.DimensionSettingsState, newSizes: RevoGrid.ViewSettingSizeProp): DimensionSize {
-  let positionIndexes: number[] = [];
+export function calculateDimensionData({
+  sizes: oldSizes,
+  indexes: oldIndexes,
+  originItemSize,
+  realSize
+}: RevoGrid.DimensionSettingsState,
+  newSizes: RevoGrid.ViewSettingSizeProp = {}
+): DimensionSize {
+  const positionIndexes: number[] = [];
 
   const positionIndexToItem: { [position: number]: RevoGrid.PositionItem } = {};
   const indexToItem: { [index: number]: RevoGrid.PositionItem } = {};
@@ -22,21 +29,20 @@ export function calculateDimensionData(state: RevoGrid.DimensionSettingsState, n
   let newTotal = 0;
 
   // combine all sizes
-  const sizes: RevoGrid.ViewSettingSizeProp = { ...state.sizes, ...newSizes };
+  const sizes = { ...oldSizes, ...newSizes };
   // prepare order sorted new sizes and calculate changed real size
   let newIndexes: number[] = [];
-  each(newSizes, (size: number, index: string) => {
+  each(newSizes, (size, index) => {
     // if first introduced custom size
-    if (!state.sizes[index]) {
-      newTotal += size - (state.realSize ? state.originItemSize : 0);
+    if (!oldSizes[index]) {
+      newTotal += size - (realSize ? originItemSize : 0);
       newIndexes.splice(sortedIndex(newIndexes, parseInt(index, 10)), 0, parseInt(index, 10));
     } else {
-      newTotal += size - state.sizes[index];
+      newTotal += size - oldSizes[index];
     }
   });
-
   // add order to cached order collection for faster linking
-  const updatedIndexesCache: number[] = mergeSortedArray(state.indexes, newIndexes);
+  const updatedIndexesCache = mergeSortedArray(oldIndexes, newIndexes);
 
   // fill new coordinates
   reduce(
@@ -48,9 +54,9 @@ export function calculateDimensionData(state: RevoGrid.DimensionSettingsState, n
         end: 0,
       };
       if (previous) {
-        newItem.start = (itemIndex - previous.itemIndex - 1) * state.originItemSize + previous.end;
+        newItem.start = (itemIndex - previous.itemIndex - 1) * originItemSize + previous.end;
       } else {
-        newItem.start = itemIndex * state.originItemSize;
+        newItem.start = itemIndex * originItemSize;
       }
       newItem.end = newItem.start + sizes[itemIndex];
       positionIndexes.push(newItem.start);
@@ -65,7 +71,7 @@ export function calculateDimensionData(state: RevoGrid.DimensionSettingsState, n
     positionIndexes: [...positionIndexes],
     positionIndexToItem: { ...positionIndexToItem },
     indexToItem,
-    realSize: state.realSize + newTotal,
+    realSize: realSize + newTotal,
     sizes,
   };
 }

@@ -3,7 +3,7 @@ import { RevoGrid } from '../../interfaces';
 
 export type DimensionDataViewport = Pick<
   RevoGrid.DimensionSettingsState,
-  'indexes' | 'positionIndexes' | 'positionIndexToItem' | 'sizes' | 'originItemSize' | 'realSize' | 'frameOffset'
+  'indexes' | 'positionIndexes' | 'positionIndexToItem' | 'sizes' | 'originItemSize' | 'realSize'
 >;
 
 type ItemsToUpdate = Pick<RevoGrid.ViewportStateItems, 'items' | 'start' | 'end'>;

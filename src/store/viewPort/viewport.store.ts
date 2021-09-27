@@ -46,23 +46,23 @@ export default class ViewportStore {
       return;
     }
 
-    const frameOffset: number = dimension.frameOffset;
-    const outsize: number = frameOffset * 2 * dimension.originItemSize;
+    const frameOffset = 1;
+    const outsize = frameOffset * 2 * dimension.originItemSize;
     virtualSize += outsize;
 
-    let maxCoordinate: number = virtualSize;
+    let maxCoordinate = virtualSize;
     if (dimension.realSize > virtualSize) {
       maxCoordinate = dimension.realSize - virtualSize;
     }
     let toUpdate: Partial<RevoGrid.ViewportState> = {
       lastCoordinate: position,
     };
-    let pos: number = position;
+    let pos = position;
     pos -= frameOffset * dimension.originItemSize;
     pos = pos < 0 ? 0 : pos < maxCoordinate ? pos : maxCoordinate;
 
-    const firstItem: RevoGrid.VirtualPositionItem | undefined = getFirstItem(this.getItems());
-    const lastItem: RevoGrid.VirtualPositionItem | undefined = getLastItem(this.getItems());
+    const firstItem = getFirstItem(this.getItems());
+    const lastItem = getLastItem(this.getItems());
 
     // left position changed
     if (!isActiveRange(pos, firstItem)) {
@@ -93,7 +93,9 @@ export default class ViewportStore {
     }
   }
 
-  /** Update viewport sizes */
+  /**
+   * Update viewport sizes
+  */
   setViewPortDimension(sizes: RevoGrid.ViewSettingSizeProp): void {
     const items = this.store.get('items');
     const count = items.length;
@@ -129,6 +131,33 @@ export default class ViewportStore {
       if (start === count) {
         start = 0;
       }
+    }
+
+    setStore(this.store, { items: [...items] });
+  }
+
+  setOriginalSizes(size: number) {
+    const items = this.store.get('items');
+    const count = items.length;
+    // viewport not inited
+    if (!count) {
+      return;
+    }
+
+    let i = 0;
+    let start = this.store.get('start');
+    let pos = this.store.get('lastCoordinate');
+
+    // loop through array from initial item after recombination
+    while (i < count) {
+      const item = items[start];
+      item.start = pos;
+      item.size = size;
+      item.end = item.start + size;
+      pos = item.end;
+      // loop by start index
+      start++;
+      i++;
     }
 
     setStore(this.store, { items: [...items] });

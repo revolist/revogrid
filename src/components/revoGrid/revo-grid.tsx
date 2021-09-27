@@ -26,7 +26,7 @@ import { UUID } from '../../utils/consts';
 import SelectionStoreConnector from '../../services/selection.store.connector';
 import { OrdererService } from '../order/orderRenderer';
 import StretchColumn, { isStretchPlugin } from '../../plugins/stretchPlugin';
-import { rowDefinitionByType } from './grid.helpers';
+import { rowDefinitionByType, rowDefinitionRemoveByType } from './grid.helpers';
 
 @Component({
   tag: 'revo-grid',
@@ -670,8 +670,8 @@ export class RevoGridComponent {
 
   @Watch('theme') themeChanged(t: ThemeSpace.Theme) {
     this.themeService.register(t);
-    this.dimensionProvider.setSettings({ originItemSize: this.themeService.rowSize, frameOffset: this.frameSize || 0 }, 'rgRow');
-    this.dimensionProvider.setSettings({ originItemSize: this.colSize, frameOffset: this.frameSize || 0 }, 'rgCol');
+    this.dimensionProvider.setSettings({ originItemSize: this.themeService.rowSize }, 'rgRow');
+    this.dimensionProvider.setSettings({ originItemSize: this.colSize }, 'rgCol');
   }
 
   @Watch('source') dataChanged(source: RevoGrid.DataType[] = []) {
@@ -704,20 +704,22 @@ export class RevoGridComponent {
       vals: after,
       oldVals: before
     });
+    // apply new vals
+    const newRows = rowDefinitionByType(newVal);
     // clear current defs
     if (oldVal) {
-      const oldRows = rowDefinitionByType(oldVal.map((v: Partial<RevoGrid.RowDefinition>): Partial<RevoGrid.RowDefinition> => ({
-        ...v,
-        size: undefined
-      })));
-      console.log(oldRows)
-      each(oldRows, (r, k: RevoGrid.DimensionRows) => this.dimensionProvider.setDimensionSize(k, r.sizes || {}));
+      const remove = rowDefinitionRemoveByType(oldVal);
+      // clear all old data and drop sizes
+      each(remove, (_, t: RevoGrid.DimensionRows) => {
+        this.dimensionProvider.clearSize(
+          t,
+          this.dataProvider.stores[t].store.get('source').length
+        );
+      });
     }
     if (!newVal.length) {
       return;
     }
-    // apply new vals
-    const newRows = rowDefinitionByType(newVal);
     each(newRows, (r, k: RevoGrid.DimensionRows) => this.dimensionProvider.setDimensionSize(k, r.sizes || {}));
   }
 

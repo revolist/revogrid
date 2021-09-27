@@ -210,7 +210,6 @@ export declare namespace RevoGrid {
     sizes: ViewSettingSizeProp;
   }
   interface DimensionSettingsState extends DimensionCalc {
-    frameOffset: number;
     realSize: number;
     originItemSize: number;
   }

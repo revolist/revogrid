@@ -1,19 +1,13 @@
 import { RevoGrid } from '../../interfaces';
 import reduce from 'lodash/reduce';
-
-export const rowDefinitionByType = (newVal: Partial<RevoGrid.RowDefinition>[] = []) => {
-  return reduce(
-    newVal,
-    (
-      r: Partial<
-        {
-          [T in RevoGrid.DimensionRows]: {
-            sizes?: Record<number, number>;
-          };
-        }
-      >,
-      v,
-    ) => {
+type Result = Partial<{
+  [T in RevoGrid.DimensionRows]: { sizes?: Record<number, number>; };
+}>;
+type RemoveResult = Partial<{
+  [T in RevoGrid.DimensionRows]: number[];
+}>;
+export const rowDefinitionByType = (newVal: RevoGrid.RowDefinition[] = []) => {
+  return reduce(newVal, (r: Result, v) => {
       if (!r[v.type]) {
         r[v.type] = {};
       }
@@ -22,6 +16,20 @@ export const rowDefinitionByType = (newVal: Partial<RevoGrid.RowDefinition>[] = 
           r[v.type].sizes = {};
         }
         r[v.type].sizes[v.index] = v.size;
+      }
+      return r;
+    },
+    {},
+  );
+};
+
+export const rowDefinitionRemoveByType = (oldVal: RevoGrid.RowDefinition[] = []) => {
+  return reduce(oldVal, (r: RemoveResult, v) => {
+      if (!r[v.type]) {
+        r[v.type] = [];
+      }
+      if (v.size) {
+        r[v.type].push(v.index);
       }
       return r;
     },
