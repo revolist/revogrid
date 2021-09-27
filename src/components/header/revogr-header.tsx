@@ -91,9 +91,10 @@ export class RevogrHeaderComponent {
     ];
   }
 
-  get providers() {
+  get providers(): RevoGrid.Providers {
     return {
       type: this.type,
+      data: this.colData,
       viewport: this.viewportCol,
       dimension: this.dimensionCol,
       selection: this.selectionStore,

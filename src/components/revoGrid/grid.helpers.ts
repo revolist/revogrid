@@ -1,7 +1,7 @@
 import { RevoGrid } from '../../interfaces';
 import reduce from 'lodash/reduce';
 
-export const rowDefinitionByType = (newVal: RevoGrid.RowDefinition[] = []) => {
+export const rowDefinitionByType = (newVal: Partial<RevoGrid.RowDefinition>[] = []) => {
   return reduce(
     newVal,
     (

@@ -246,6 +246,9 @@ export default class ColumnService {
     const items: Record<number, RevoGrid.DataType> = {};
     for (let rowIndex in data) {
       const oldModel = (items[rowIndex] = getSourceItem(this.dataStore, parseInt(rowIndex, 10)));
+      if (!oldModel) {
+        continue;
+      }
       for (let prop in data[rowIndex]) {
         oldModel[prop] = data[rowIndex][prop];
       }

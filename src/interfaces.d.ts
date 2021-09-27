@@ -103,6 +103,7 @@ export declare namespace RevoGrid {
   };
   type Providers = {
     type: string;
+    data: Observable<DataSourceState<any, any>>|RevoGrid.ColumnRegular[];
     viewport: Observable<ViewportState>;
     dimension: Observable<DimensionSettingsState>;
     selection: Observable<Selection.SelectionStoreState>;
@@ -177,6 +178,21 @@ export declare namespace RevoGrid {
   interface VirtualPositionItem extends PositionItem {
     size: number;
   }
+  type DataSourceState<T extends DataType | ColumnRegular, ST extends DimensionRows | DimensionCols> = {
+    // items - index based array for mapping to source tree
+    items: number[];
+    // all items, used as proxy for sorting, trimming and others
+    proxyItems: number[];
+    // original data source
+    source: T[];
+    // grouping
+    groupingDepth: number;
+    groups: Record<any, any>;
+    // data source type
+    type: ST;
+    // trim data, to hide entities from visible data source
+    trimmed: Record<any, any>;
+  };
   interface PositionItem {
     itemIndex: number;
     start: number;

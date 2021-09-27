@@ -507,7 +507,7 @@ declare namespace LocalJSX {
         /**
           * Before range apply. Triggered before range applied. Use e.preventDefault() to prevent range.
          */
-        "onBeforeaange"?: (event: CustomEvent<Selection.ChangedRange>) => void;
+        "onBeforeange"?: (event: CustomEvent<Selection.ChangedRange>) => void;
         /**
           * Before autofill. Triggered before autofill applied. Use e.preventDefault() to prevent edit data apply.
          */

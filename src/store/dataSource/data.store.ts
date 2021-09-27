@@ -6,10 +6,6 @@ import { Trimmed, trimmedPlugin } from '../../plugins/trimmed/trimmed.plugin';
 import { setStore } from '../../utils/store.utils';
 import { Observable, RevoGrid } from '../../interfaces';
 import { proxyPlugin } from './data.proxy';
-import DataType = RevoGrid.DataType;
-import ColumnRegular = RevoGrid.ColumnRegular;
-import DimensionRows = RevoGrid.DimensionRows;
-import DimensionCols = RevoGrid.DimensionCols;
 
 export interface Group extends RevoGrid.ColumnProperties {
   name: string;
@@ -18,23 +14,9 @@ export interface Group extends RevoGrid.ColumnProperties {
   ids: (string | number)[];
 }
 export type Groups = Record<any, any>;
-export type GDataType = DataType | ColumnRegular;
-export type GDimension = DimensionRows | DimensionCols;
-export type DataSourceState<T extends GDataType, ST extends GDimension> = {
-  // items - index based array for mapping to source tree
-  items: number[];
-  // all items, used as proxy for sorting, trimming and others
-  proxyItems: number[];
-  // original data source
-  source: T[];
-  // grouping
-  groupingDepth: number;
-  groups: Groups;
-  // data source type
-  type: ST;
-  // trim data, to hide entities from visible data source
-  trimmed: Trimmed;
-};
+export type GDataType = RevoGrid.DataType | RevoGrid.ColumnRegular;
+export type GDimension = RevoGrid.DimensionRows | RevoGrid.DimensionCols;
+export type DataSourceState<T1 extends GDataType, T2 extends GDimension> = RevoGrid.DataSourceState<T1, T2>;
 
 export default class DataStore<T extends GDataType, ST extends GDimension> {
   private readonly dataStore: Observable<DataSourceState<T, ST>>;

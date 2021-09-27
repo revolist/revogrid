@@ -194,7 +194,7 @@ export class RevoGridComponent {
    * Triggered before range applied.
    * Use e.preventDefault() to prevent range.
    */
-  @Event() beforeaange: EventEmitter<Selection.ChangedRange>;
+  @Event() beforeange: EventEmitter<Selection.ChangedRange>;
 
   /**
    * Before rgRow order apply.
@@ -585,8 +585,8 @@ export class RevoGridComponent {
 
   @Listen('internalSelectionChanged') onRangeChanged(e: CustomEvent<Selection.ChangedRange>) {
     e.cancelBubble = true;
-    const beforeaange = this.beforeaange.emit(e.detail);
-    if (beforeaange.defaultPrevented) {
+    const beforeange = this.beforeange.emit(e.detail);
+    if (beforeange.defaultPrevented) {
       e.preventDefault();
     }
     const beforeFill = this.beforeautofill.emit(e.detail);
@@ -706,10 +706,11 @@ export class RevoGridComponent {
     });
     // clear current defs
     if (oldVal) {
-      let oldRows = rowDefinitionByType(oldVal.map((v: RevoGrid.RowDefinition) => ({
+      const oldRows = rowDefinitionByType(oldVal.map((v: Partial<RevoGrid.RowDefinition>): Partial<RevoGrid.RowDefinition> => ({
         ...v,
-        size: this.rowSize
+        size: undefined
       })));
+      console.log(oldRows)
       each(oldRows, (r, k: RevoGrid.DimensionRows) => this.dimensionProvider.setDimensionSize(k, r.sizes || {}));
     }
     if (!newVal.length) {

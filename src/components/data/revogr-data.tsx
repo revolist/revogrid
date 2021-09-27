@@ -124,9 +124,10 @@ export class RevogrData {
     );
   }
 
-  get providers() {
+  get providers(): RevoGrid.Providers {
     return {
       type: this.type,
+      data: this.dataStore,
       viewport: this.viewportCol,
       dimension: this.dimensionRow,
       selection: this.rowSelectionStore,
