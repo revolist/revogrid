@@ -29,6 +29,8 @@ export default class DimensionProvider {
   
   clearSize(t: RevoGrid.MultiDimensionType, count: number): void {
     this.stores[t].drop();
+    // after we done with drop trigger viewport recalculaction
+    this.viewports.stores[t].setOriginalSizes(this.stores[t].store.get('originItemSize'));
     this.setRealSize(count, t);
   }
 

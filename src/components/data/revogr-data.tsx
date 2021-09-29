@@ -71,7 +71,6 @@ export class RevogrData {
         continue;
       }
       /** grouping end */
-
       const cells: (VNode | string | void)[] = [];
       let rowClass = this.rowClass ? this.columnService.getRowClass(rgRow.itemIndex, this.rowClass) : '';
       if (range && rgRow.itemIndex >= range.y && rgRow.itemIndex <= range.y1) {
