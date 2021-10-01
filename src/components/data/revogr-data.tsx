@@ -6,7 +6,7 @@ import { DATA_COL, DATA_ROW } from '../../utils/consts';
 
 import { getSourceItem } from '../../store/dataSource/data.store';
 import { Observable, RevoGrid, Selection } from '../../interfaces';
-import CellRenderer from './cellRenderer';
+import CellRenderer, { DragStartEvent } from './cellRenderer';
 import RowRenderer, { PADDING_DEPTH } from './rowRenderer';
 import GroupingRowRenderer from '../../plugins/groupingRow/grouping.row.renderer';
 import { isGrouping } from '../../plugins/groupingRow/grouping.service';
@@ -36,7 +36,8 @@ export class RevogrData {
   @Prop() dataStore!: RowSource;
   @Prop() type!: string;
 
-  @Event({ eventName: DRAG_START_EVENT }) dragStartCell: EventEmitter<MouseEvent>;
+  @Event({ eventName: DRAG_START_EVENT }) dragStartCell: EventEmitter<DragStartEvent>;
+  @Event() beforeRowRender: EventEmitter;
 
   @Watch('dataStore')
   @Watch('colData')
@@ -64,10 +65,10 @@ export class RevogrData {
 
     const depth = this.dataStore.get('groupingDepth');
     for (let rgRow of rows) {
-      const dataRow = getSourceItem(this.dataStore, rgRow.itemIndex);
+      const dataItem = getSourceItem(this.dataStore, rgRow.itemIndex);
       /** grouping */
-      if (isGrouping(dataRow)) {
-        rowsEls.push(<GroupingRowRenderer {...rgRow} model={dataRow} hasExpand={this.columnService.hasGrouping} />);
+      if (isGrouping(dataItem)) {
+        rowsEls.push(<GroupingRowRenderer {...rgRow} model={dataItem} hasExpand={this.columnService.hasGrouping} />);
         continue;
       }
       /** grouping end */
@@ -79,11 +80,15 @@ export class RevogrData {
       for (let rgCol of cols) {
         cells.push(this.getCellRenderer(rgRow, rgCol, /** grouping apply*/ this.columnService.hasGrouping ? depth : 0));
       }
-      rowsEls.push(
-        <RowRenderer rowClass={rowClass} size={rgRow.size} start={rgRow.start}>
-          {cells}
-        </RowRenderer>,
-      );
+      const row = <RowRenderer rowClass={rowClass} size={rgRow.size} start={rgRow.start}>
+        {cells}
+      </RowRenderer>;
+      this.beforeRowRender.emit({
+        node: row,
+        item: rgRow,
+        dataItem
+      });
+      rowsEls.push(row);
     }
     return rowsEls;
   }

@@ -14,6 +14,7 @@ import { ColumnCollection } from "./services/column.data.provider";
 import { DataInput } from "./plugins/export/types";
 import { VNode } from "@stencil/core";
 import { ColumnSource, RowSource } from "./components/data/columnService";
+import { DragStartEvent } from "./components/data/cellRenderer";
 import { LogicFunction } from "./plugins/filter/filter.types";
 import { FilterItem, ShowData } from "./plugins/filter/filter.pop";
 import { DataSourceState, Groups } from "./store/dataSource/data.store";
@@ -680,7 +681,8 @@ declare namespace LocalJSX {
         "colData": ColumnSource;
         "dataStore": RowSource;
         "dimensionRow": Observable<RevoGrid.DimensionSettingsState>;
-        "onDragStartCell"?: (event: CustomEvent<MouseEvent>) => void;
+        "onBeforeRowRender"?: (event: CustomEvent<any>) => void;
+        "onDragStartCell"?: (event: CustomEvent<DragStartEvent>) => void;
         "range"?: boolean;
         "readonly"?: boolean;
         "rowClass"?: string;

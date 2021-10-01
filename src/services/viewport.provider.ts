@@ -10,7 +10,7 @@ export default class ViewportProvider {
     this.stores = reduce(
       [...rowTypes, ...columnTypes],
       (sources: Partial<ViewportStores>, k: RevoGrid.MultiDimensionType) => {
-        sources[k] = new ViewportStore();
+        sources[k] = new ViewportStore(k);
         return sources;
       },
       {},

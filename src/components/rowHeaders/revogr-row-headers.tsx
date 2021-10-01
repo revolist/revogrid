@@ -31,7 +31,7 @@ export class RevogrRowHeaders {
 
   render() {
     const dataViews: HTMLElement[] = [];
-    const viewport = new ViewportStore();
+    const viewport = new ViewportStore('colPinStart');
 
     /** render viewports rows */
     let totalLength = 1;

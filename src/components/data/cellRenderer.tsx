@@ -3,16 +3,22 @@ import { RevoGrid } from '../../interfaces';
 import ColumnService from './columnService';
 import { DRAG_ICON_CLASS, DRAGGABLE_CLASS } from '../../utils/consts';
 
+export type DragStartEvent = {
+  model: RevoGrid.ColumnDataSchemaModel;
+} & MouseEvent;
 type Props = {
   model: RevoGrid.ColumnDataSchemaModel;
-  onDragStart?(e: MouseEvent): void;
+  onDragStart?(e: DragStartEvent): void;
 };
 
 const CellRenderer = ({ model, onDragStart }: Props) => {
   const els: (VNode | string)[] = [];
   if (model.column.rowDrag && isRowDragService(model.column.rowDrag, model)) {
     els.push(
-      <span class={DRAGGABLE_CLASS} onMouseDown={e => onDragStart(e)}>
+      <span class={DRAGGABLE_CLASS} onMouseDown={e => onDragStart({
+        ...e,
+        model
+      })}>
         <span class={DRAG_ICON_CLASS} />
       </span>,
     );

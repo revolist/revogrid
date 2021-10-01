@@ -173,6 +173,7 @@ export declare namespace RevoGrid {
     realCount: number;
     virtualSize: number;
     lastCoordinate: number;
+    type: MultiDimensionType;
   }
   type ViewSettingSizeProp = Record<string, number>;
   interface VirtualPositionItem extends PositionItem {

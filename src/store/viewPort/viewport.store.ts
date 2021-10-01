@@ -11,7 +11,7 @@ import { addMissingItems, DimensionDataViewport, getFirstItem, getLastItem, getU
 import { setStore } from '../../utils/store.utils';
 import { Observable, RevoGrid } from '../../interfaces';
 
-function initialState(): RevoGrid.ViewportState {
+function initialState(type: RevoGrid.MultiDimensionType): RevoGrid.ViewportState {
   return {
     // virtual item information per rendered item
     items: [],
@@ -28,14 +28,17 @@ function initialState(): RevoGrid.ViewportState {
 
     // last coordinate for store position restore
     lastCoordinate: 0,
+    type
   };
 }
 
 export default class ViewportStore {
   readonly store: Observable<RevoGrid.ViewportState>;
-  constructor() {
-    this.store = createStore(initialState());
-    this.store.onChange('realCount', () => this.clear());
+  constructor(type: RevoGrid.MultiDimensionType) {
+    this.store = createStore(initialState(type));
+    this.store.onChange('realCount', () => {
+      this.clear();
+    });
   }
 
   /** Render viewport based on coordinate, this is main method for draw */
@@ -158,6 +161,9 @@ export default class ViewportStore {
       // loop by start index
       start++;
       i++;
+      if (start === count) {
+        start = 0;
+      }
     }
 
     setStore(this.store, { items: [...items] });
