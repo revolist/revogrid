@@ -295,11 +295,11 @@ export default class ColumnService {
     return toCopy;
   }
 
-  static getData(val?: any): string {
+  static getData(val?: any) {
     if (typeof val === 'undefined' || val === null) {
       return '';
     }
-    return val.toString();
+    return val;
   }
 
   destroy() {

@@ -21,9 +21,10 @@
 
 ## Events
 
-| Event           | Description | Type                      |
-| --------------- | ----------- | ------------------------- |
-| `dragStartCell` |             | `CustomEvent<MouseEvent>` |
+| Event             | Description | Type                                                          |
+| ----------------- | ----------- | ------------------------------------------------------------- |
+| `beforeRowRender` |             | `CustomEvent<any>`                                            |
+| `dragStartCell`   |             | `CustomEvent<{ model: ColumnDataSchemaModel; } & MouseEvent>` |
 
 
 ## Dependencies
