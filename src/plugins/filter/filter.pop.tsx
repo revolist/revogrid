@@ -140,6 +140,8 @@ export class FilterPanel {
     if (e.key.toLowerCase() === 'enter') {
       this.onSave();
     }
+    // keep event local, don't escalate farther to dom
+    e.stopPropagation();
   }
 
   private onCancel() {
