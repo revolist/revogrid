@@ -7,7 +7,7 @@
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 import { Edition, Observable, RevoGrid, RevoPlugin, Selection, ThemeSpace } from "./interfaces";
 import { AutoSizeColumnConfig } from "./plugins/autoSizeColumn";
-import { ColumnFilterConfig, FilterCollection } from "./plugins/filter/filter.plugin";
+import { ColumnFilterConfig, FilterCaptions, FilterCollection } from "./plugins/filter/filter.plugin";
 import { GroupingOptions } from "./plugins/groupingRow/grouping.row.types";
 import { FocusedData } from "./components/revo-grid/viewport.service";
 import { ColumnCollection } from "./services/column.data.provider";
@@ -232,6 +232,7 @@ export namespace Components {
         "editor": Edition.EditorCtr | null;
     }
     interface RevogrFilterPanel {
+        "filterCaptions": FilterCaptions | undefined;
         "filterEntities": Record<string, LogicFunction>;
         "filterNames": Record<string, string>;
         "filterTypes": Record<string, string[]>;
@@ -689,6 +690,7 @@ declare namespace LocalJSX {
         "onCloseEdit"?: (event: CustomEvent<boolean | undefined>) => void;
     }
     interface RevogrFilterPanel {
+        "filterCaptions"?: FilterCaptions | undefined;
         "filterEntities"?: Record<string, LogicFunction>;
         "filterNames"?: Record<string, string>;
         "filterTypes"?: Record<string, string[]>;
