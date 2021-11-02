@@ -486,10 +486,17 @@ export class RevoGridComponent {
   }
 
   /**
-   * Get all active plugins instances
+   * Get the currently focused cell.
    */
   @Method() async getFocused(): Promise<FocusedData|null> {
     return this.viewport?.getFocused();
+  }
+
+  /**
+   * Get the currently selected Range.
+   */
+  @Method() async getSelectedRange(): Promise<Selection.RangeArea|null> {
+    return this.viewport?.getSelectedRange();
   }
 
 

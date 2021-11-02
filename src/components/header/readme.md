@@ -32,11 +32,13 @@
 ### Used by
 
  - [revo-grid](../revo-grid)
+ - [revogr-row-headers](../rowHeaders)
 
 ### Graph
 ```mermaid
 graph TD;
   revo-grid --> revogr-header
+  revogr-row-headers --> revogr-header
   style revogr-header fill:#f9f,stroke:#333,stroke-width:4px
 ```
 
