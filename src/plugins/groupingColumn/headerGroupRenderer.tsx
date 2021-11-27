@@ -34,6 +34,7 @@ const GroupHeaderRenderer = (p: Props): VNode[] => {
     <HeaderCellRenderer
       data={{
         ...p.group,
+        prop: '',
         providers: p.providers,
         index: p.start,
       }}

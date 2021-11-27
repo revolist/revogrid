@@ -9,7 +9,7 @@ import { proxyPlugin } from './data.proxy';
 
 export interface Group extends RevoGrid.ColumnProperties {
   name: string;
-  children: RevoGrid.ColumnRegular[];
+  children: (RevoGrid.ColumnGrouping | RevoGrid.ColumnRegular)[];
   // props/ids
   ids: (string | number)[];
 }

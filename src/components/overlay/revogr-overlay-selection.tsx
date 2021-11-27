@@ -196,7 +196,6 @@ export class OverlaySelection {
     if (this.readonly || !editCell) {
       return;
     }
-    console.log(editCell.val);
     const val = editCell.val || this.columnService.getCellData(editCell.y, editCell.x);
     const editable = {
       ...editCell,

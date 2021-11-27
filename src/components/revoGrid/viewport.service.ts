@@ -13,6 +13,7 @@ import ColumnDataProvider from '../../services/column.data.provider';
 import { DataProvider } from '../../services/data.provider';
 import { reduce } from 'lodash';
 
+export type ResizeDetails = { [index: number]: RevoGrid.ColumnRegular };
 type Config = {
   columnProvider: ColumnDataProvider;
   dataProvider: DataProvider;
@@ -22,7 +23,8 @@ type Config = {
   scrollingService: GridScrollingService;
   orderService: OrdererService;
   selectionStoreConnector: SelectionStoreConnector;
-  resize(r: Record<RevoGrid.ColumnProp, RevoGrid.ColumnRegular>): void;
+
+  resize(r: ResizeDetails): void;
 };
 
 export type FocusedData = {
@@ -43,16 +45,17 @@ export default class ViewportService {
 
   private onColumnResize(
     type: RevoGrid.DimensionCols,
-    e: CustomEvent<RevoGrid.ViewSettingSizeProp>,
+    { detail }: CustomEvent<RevoGrid.ViewSettingSizeProp>,
     store: Observable<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>,
   ) {
-    this.sv.dimensionProvider?.setDimensionSize(type, e.detail);
+    this.sv.dimensionProvider?.setDimensionSize(type, detail);
     const changedItems = reduce(
-      e.detail || {},
-      (r: Record<RevoGrid.ColumnProp, RevoGrid.ColumnRegular>, size, index) => {
-        const item: RevoGrid.ColumnRegular = getSourceItem(store, parseInt(index, 10));
+      detail || {},
+      (r: ResizeDetails, size, i) => {
+        const index = parseInt(i, 10);
+        const item = getSourceItem(store, index);
         if (item) {
-          r[item.prop] = { ...item, size };
+          r[index] = { ...item, size };
         }
         return r;
       },

@@ -482,7 +482,7 @@ declare namespace LocalJSX {
         /**
           * After column resize Get resized columns
          */
-        "onAftercolumnresize"?: (event: CustomEvent<Record<RevoGrid.ColumnProp, RevoGrid.ColumnRegular>>) => void;
+        "onAftercolumnresize"?: (event: CustomEvent<{ [index: number]: RevoGrid.ColumnRegular }>) => void;
         /**
           * Column updated
          */

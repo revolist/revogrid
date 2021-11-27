@@ -63,7 +63,7 @@ export declare namespace RevoGrid {
   type Order = 'asc' | 'desc' | undefined;
   interface ColumnRegular extends ColumnType {
     /** mapping to data */
-    prop?: ColumnProp;
+    prop: ColumnProp;
     /** column pin 'colPinStart'|'colPinEnd' */
     pin?: DimensionColPin;
     /** column header */

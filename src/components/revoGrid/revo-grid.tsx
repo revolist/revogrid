@@ -326,7 +326,7 @@ export class RevoGridComponent {
    * After column resize
    * Get resized columns
    */
-  @Event() aftercolumnresize: EventEmitter<Record<RevoGrid.ColumnProp, RevoGrid.ColumnRegular>>;
+  @Event() aftercolumnresize: EventEmitter<{ [index: number]: RevoGrid.ColumnRegular }>;
   /**
    * Before row definition
    */

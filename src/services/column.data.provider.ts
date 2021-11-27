@@ -205,23 +205,37 @@ export default class ColumnDataProvider {
   }
 
   // columns processing
-  static getColumns(columns: RevoGrid.ColumnData, level: number = 0, types?: RevoGrid.ColumnTypes): ColumnCollection {
+  static getColumns(columns: RevoGrid.ColumnData, level = 0, types?: RevoGrid.ColumnTypes): ColumnCollection {
+    const collection: ColumnCollection = {
+      columns: {
+        rgCol: [],
+        colPinStart: [],
+        colPinEnd: [],
+      },
+      columnGrouping: {
+        rgCol: [],
+        colPinStart: [],
+        colPinEnd: [],
+      },
+      maxLevel: level,
+      sort: {},
+    };
     return reduce(
       columns,
       (res: ColumnCollection, colData: RevoGrid.ColumnDataSchema) => {
-        /** Grouped column */
+        // Grouped column
         if (GroupingColumnPlugin.isColGrouping(colData)) {
           return GroupingColumnPlugin.gatherGroup(res, colData, ColumnDataProvider.getColumns(colData.children, level + 1, types), level);
         }
-        /** Regular column */
+        // Regular column
         const regularColumn = {
           ...(colData.columnType && types && types[colData.columnType]),
           ...colData,
         };
-        // not pin
+        // Regular column, no Pin
         if (!regularColumn.pin) {
           res.columns.rgCol.push(regularColumn);
-          // pin
+          // Pin
         } else {
           res.columns[regularColumn.pin].push(regularColumn);
         }
@@ -233,20 +247,7 @@ export default class ColumnDataProvider {
         regularColumn.beforeSetup && regularColumn.beforeSetup(regularColumn);
         return res;
       },
-      {
-        columns: {
-          rgCol: [],
-          colPinStart: [],
-          colPinEnd: [],
-        },
-        columnGrouping: {
-          rgCol: [],
-          colPinStart: [],
-          colPinEnd: [],
-        },
-        maxLevel: level,
-        sort: {},
-      },
+      collection,
     );
   }
 
