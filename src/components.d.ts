@@ -506,6 +506,13 @@ declare namespace LocalJSX {
          */
         "onAftertrimmed"?: (event: CustomEvent<any>) => void;
         /**
+          * Before data apply. You can override data source here
+         */
+        "onBefore-any-source"?: (event: CustomEvent<{
+    type: RevoGrid.DimensionRows;
+    source: RevoGrid.DataType[];
+  }>) => void;
+        /**
           * Before range apply. Triggered before range applied. Use e.preventDefault() to prevent range.
          */
         "onBeforeange"?: (event: CustomEvent<Selection.ChangedRange>) => void;

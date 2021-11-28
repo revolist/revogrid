@@ -261,6 +261,15 @@ export class RevoGridComponent {
     source: RevoGrid.DataType[];
   }>;
 
+   /**
+   * Before data apply.
+   * You can override data source here
+   */
+  @Event({ eventName: 'before-any-source' }) beforeAnySource: EventEmitter<{
+    type: RevoGrid.DimensionRows;
+    source: RevoGrid.DataType[];
+  }>;
+
   /**  After rows updated */
   @Event() aftersourceset: EventEmitter<{
     type: RevoGrid.DimensionRows;
@@ -674,26 +683,40 @@ export class RevoGridComponent {
     this.dimensionProvider.setSettings({ originItemSize: this.colSize }, 'rgCol');
   }
 
-  @Watch('source') dataChanged(source: RevoGrid.DataType[] = []) {
-    const beforesourceset = this.beforesourceset.emit({
-      type: 'rgRow',
-      source,
-    });
-    let newSource = [...beforesourceset.detail.source];
-
-    newSource = this.dataProvider.setData(newSource, 'rgRow');
-    this.aftersourceset.emit({
-      type: 'rgRow',
-      source: newSource,
-    });
-  }
-
-  @Watch('pinnedBottomSource') dataBottomChanged(newVal: RevoGrid.DataType[] = []) {
-    this.dataProvider.setData(newVal, 'rowPinEnd');
-  }
-
-  @Watch('pinnedTopSource') dataTopChanged(newVal: RevoGrid.DataType[] = []) {
-    this.dataProvider.setData(newVal, 'rowPinStart');
+  @Watch('source')
+  @Watch('pinnedBottomSource')
+  @Watch('pinnedTopSource')
+  dataSourceChanged<T extends RevoGrid.DataType>(
+    newVal: T[] = [],
+    _: T[]|undefined,
+    watchName: string
+  ) {
+    let type: RevoGrid.DimensionRows = 'rgRow';
+    switch (watchName) {
+      case 'pinnedBottomSource':
+        type = 'rowPinEnd';
+        break;
+      case 'pinnedTopSource':
+        type = 'rowPinStart';
+        break;
+      case 'source':
+        type = 'rgRow';
+        /** applied for source only for cross compatability between plugins */
+        const beforesourceset = this.beforesourceset.emit({
+          type,
+          source: newVal,
+        });
+        newVal = beforesourceset.detail.source as T[];
+        break;
+    }
+    this.dataSourceApply(newVal, type);
+    /** applied for source only for cross compatability between plugins */
+    if (watchName === 'source') {
+      this.aftersourceset.emit({
+        type,
+        source: newVal,
+      });
+    }
   }
 
   @Watch('rowDefinitions') rowDefChanged(after: any, before?: any) {
@@ -767,6 +790,15 @@ export class RevoGridComponent {
     }
   }
 
+  private dataSourceApply(source: RevoGrid.DataType[] = [], type: RevoGrid.DimensionRows = 'rgRow') {
+    const beforesourceset = this.beforeAnySource.emit({
+      type,
+      source,
+    });
+    const newSource = [...beforesourceset.detail.source];
+    return this.dataProvider.setData(newSource, type);
+  }
+
   connectedCallback() {
     this.viewportProvider = new ViewportProvider();
     this.themeService = new ThemeService({
@@ -824,9 +856,11 @@ export class RevoGridComponent {
     this.applyStretch(this.stretch);
     this.themeChanged(this.theme);
     this.columnChanged(this.columns);
-    this.dataChanged(this.source);
-    this.dataTopChanged(this.pinnedTopSource);
-    this.dataBottomChanged(this.pinnedBottomSource);
+
+    this.dataSourceChanged(this.source, undefined, 'source');
+    this.dataSourceChanged(this.pinnedTopSource, undefined, 'pinnedTopSource');
+    this.dataSourceChanged(this.pinnedBottomSource, undefined, 'pinnedBottomSource');
+
     this.trimmedRowsChanged(this.trimmedRows);
     this.rowDefChanged(this.rowDefinitions);
     this.groupingChanged(this.grouping);
