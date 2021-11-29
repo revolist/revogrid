@@ -130,10 +130,10 @@ export class OverlaySelection {
     this.keyboardService = new KeyboardService({
       selectionStoreService: this.selectionStoreService,
       selectionStore: s,
-      doEdit: (v, c) => this.doEdit(v, c),
-      clearCell: () => this.clearCell(),
+      doEdit: (v, c) => !this.readonly && this.doEdit(v, c),
+      clearCell: () => !this.readonly && this.clearCell(),
+      internalPaste: () => !this.readonly && this.internalPaste.emit(),
       getData: () => this.getData(),
-      internalPaste: () => this.internalPaste.emit(),
     });
     this.createAutoFillService();
     this.createClipboardService();
