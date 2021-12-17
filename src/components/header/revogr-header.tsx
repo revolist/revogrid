@@ -28,9 +28,18 @@ export class RevogrHeaderComponent {
 
   @Event() initialHeaderClick: EventEmitter<RevoGrid.InitialHeaderClick>;
   @Event() headerresize: EventEmitter<RevoGrid.ViewSettingSizeProp>;
+  @Event({ eventName: 'before-resize', cancelable: true }) beforeResize: EventEmitter<RevoGrid.ColumnRegular[]>;
   @Event() headerdblClick: EventEmitter<RevoGrid.InitialHeaderClick>;
 
   private onResize({ width }: { width?: number }, index: number): void {
+    const col = this.colData[index];
+    const event = this.beforeResize.emit([{
+      ...col,
+      size: width || undefined
+    }]);
+    if (event.defaultPrevented) {
+      return;
+    }
     this.headerresize.emit({ [index]: width || 0 });
   }
 

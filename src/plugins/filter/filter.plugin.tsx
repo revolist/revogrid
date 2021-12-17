@@ -24,6 +24,7 @@ export type ColumnFilterConfig = {
   collection?: FilterCollection;
   include?: string[];
   customFilters?: Record<string, CustomFilter>;
+  filterProp?: string;
 };
 type HeaderEvent = CustomEvent<RevoGrid.ColumnRegular>;
 type FilterCollectionItem = {
@@ -42,6 +43,7 @@ export default class FilterPlugin extends BasePlugin {
   private possibleFilters: Record<string, string[]> = { ...filterTypes };
   private possibleFilterNames: Record<string, string> = { ...filterNames };
   private possibleFilterEntities: Record<string, LogicFunction> = { ...filterEntities };
+  private filterProp = FILTER_PROP;
 
   constructor(protected revogrid: HTMLRevoGridElement, uiid: string, config?: ColumnFilterConfig) {
     super(revogrid);
@@ -56,6 +58,7 @@ export default class FilterPlugin extends BasePlugin {
     };
     this.addEventListener('headerclick', headerclick);
     this.addEventListener('aftersourceset', aftersourceset);
+    this.addEventListener('filter', ({ detail }: CustomEvent) => this.onFilterChange(detail));
 
     this.revogrid.registerVNode([
       <revogr-filter-panel
@@ -82,6 +85,10 @@ export default class FilterPlugin extends BasePlugin {
         this.possibleFilterEntities[cType] = cFilter.func;
         this.possibleFilterNames[cType] = cFilter.name;
       }
+    }
+
+    if (config.filterProp) {
+      this.filterProp = config.filterProp;
     }
 
     /**
@@ -197,13 +204,13 @@ export default class FilterPlugin extends BasePlugin {
     columns.forEach(rgCol => {
       const column = { ...rgCol };
       const hasFilter = collection[column.prop];
-      if (column[FILTER_PROP] && !hasFilter) {
-        delete column[FILTER_PROP];
+      if (column[this.filterProp] && !hasFilter) {
+        delete column[this.filterProp];
         columnsToUpdate.push(column);
       }
-      if (!column[FILTER_PROP] && hasFilter) {
+      if (!column[this.filterProp] && hasFilter) {
         columnsToUpdate.push(column);
-        column[FILTER_PROP] = true;
+        column[this.filterProp] = true;
       }
     });
     const itemsToFilter = this.getRowFilter(items, collection);

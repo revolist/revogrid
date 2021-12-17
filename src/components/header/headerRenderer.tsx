@@ -51,7 +51,6 @@ const HeaderRenderer = (p: Props): VNode => {
       }
     }
   }
-
   return (
     <HeaderCellRenderer data={p.data} props={dataProps}>
       {p.data?.order ? <SortingSign column={p.data} /> : ''}

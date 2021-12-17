@@ -733,6 +733,7 @@ declare namespace LocalJSX {
         "dimensionCol"?: Observable<RevoGrid.DimensionSettingsState>;
         "groupingDepth"?: number;
         "groups"?: Groups;
+        "onBefore-resize"?: (event: CustomEvent<RevoGrid.ColumnRegular[]>) => void;
         "onHeaderdblClick"?: (event: CustomEvent<RevoGrid.InitialHeaderClick>) => void;
         "onHeaderresize"?: (event: CustomEvent<RevoGrid.ViewSettingSizeProp>) => void;
         "onInitialHeaderClick"?: (event: CustomEvent<RevoGrid.InitialHeaderClick>) => void;

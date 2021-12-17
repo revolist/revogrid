@@ -84,7 +84,7 @@ export default class DimensionProvider {
   }
 
   setColumns(type: RevoGrid.MultiDimensionType, sizes?: RevoGrid.ViewSettingSizeProp, noVirtual = false): void {
-    this.stores[type].setDimensionSize(sizes);
+    this.setDimensionSize(type, sizes);
 
     if (noVirtual) {
       this.setNoVirtual(type);

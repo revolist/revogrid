@@ -1,6 +1,9 @@
 import { LogicFunction, LogicFunctionExtraParam, LogicFunctionParam } from '../../filter.types';
 
 const contains: LogicFunction = (value: LogicFunctionParam, extra?: LogicFunctionExtraParam) => {
+  if (!extra) {
+    return true;
+  }
   if (!value) {
     return false;
   }
