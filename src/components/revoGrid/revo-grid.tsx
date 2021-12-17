@@ -341,6 +341,8 @@ export class RevoGridComponent {
    */
   @Event() beforerowdefinition: EventEmitter<{ vals: any; oldVals: any; }>;
 
+  @Event() filterconfigchanged: EventEmitter;
+
   // --------------------------------------------------------------------------
   //
   //  Methods
@@ -788,6 +790,10 @@ export class RevoGridComponent {
       const index = this.internalPlugins.indexOf(stretch);
       this.internalPlugins.splice(index, 1);
     }
+  }
+
+  @Watch('filter') applyFilter(cfg: boolean | ColumnFilterConfig) {
+    this.filterconfigchanged.emit(cfg);
   }
 
   private dataSourceApply(source: RevoGrid.DataType[] = [], type: RevoGrid.DimensionRows = 'rgRow') {
