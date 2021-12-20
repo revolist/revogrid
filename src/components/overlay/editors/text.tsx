@@ -24,7 +24,7 @@ export class TextEditor implements Edition.EditorBase {
     const isEnter = isEnterKey(e.code);
     const isKeyTab = isTab(e.code);
 
-    if ((isKeyTab || isEnter) && e.target && this.saveCallback) {
+    if ((isKeyTab || isEnter) && e.target && this.saveCallback && !e.isComposing) {
       // blur is needed to avoid autoscroll
       this.editInput.blur();
       // request callback which will close cell after all
