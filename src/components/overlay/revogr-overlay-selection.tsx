@@ -189,10 +189,7 @@ export class OverlaySelection {
   private triggerRangeEvent(range: Selection.RangeArea) {
     const type = this.dataStore.get('type');
     const data = this.columnService.getRangeTransformedToProps(range, this.dataStore);
-    this.beforeSetRange.emit({
-      ...data,
-      type,
-    });
+    this.beforeSetRange.emit(data);
     return this.setRange.emit({ ...range, type });
   }
 
