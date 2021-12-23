@@ -24,6 +24,7 @@
 
 | Event                      | Description             | Type                                                                                                                                                  |
 | -------------------------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `before-set-range`         |                         | `CustomEvent<any>`                                                                                                                                    |
 | `focusCell`                |                         | `CustomEvent<{ focus: Cell; end: Cell; }>`                                                                                                            |
 | `internalCellEdit`         |                         | `CustomEvent<{ prop: ColumnProp; model: DataType; val?: string; rowIndex: number; type: DimensionRows; }>`                                            |
 | `internalCopy`             |                         | `CustomEvent<any>`                                                                                                                                    |
@@ -32,7 +33,7 @@
 | `internalRangeDataApply`   | Range data apply        | `CustomEvent<{ data: DataLookup; models: { [rowIndex: number]: DataType; }; type: DimensionRows; }>`                                                  |
 | `internalSelectionChanged` | Selection range changed | `CustomEvent<{ type: DimensionRows; newRange: RangeArea; oldRange: RangeArea; mapping: OldNewRangeMapping; newData: { [key: number]: DataType; }; }>` |
 | `setEdit`                  |                         | `CustomEvent<{ isCancel: boolean; } & BeforeSaveDataDetails>`                                                                                         |
-| `setRange`                 |                         | `CustomEvent<{ x: number; y: number; x1: number; y1: number; }>`                                                                                      |
+| `setRange`                 |                         | `CustomEvent<RangeArea & { type: MultiDimensionType; }>`                                                                                              |
 | `setTempRange`             |                         | `CustomEvent<{ type: string; area: RangeArea; }>`                                                                                                     |
 
 

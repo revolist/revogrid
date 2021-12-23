@@ -66,7 +66,8 @@ export class OverlaySelection {
   @Event({ cancelable: true }) internalFocusCell: EventEmitter<Edition.BeforeSaveDataDetails>;
 
   @Event({ bubbles: false }) setEdit: EventEmitter<Edition.BeforeEdit>;
-  @Event() setRange: EventEmitter<Selection.RangeArea>;
+  @Event({ eventName: 'before-set-range' }) beforeSetRange: EventEmitter;
+  @Event() setRange: EventEmitter<Selection.RangeArea & { type: RevoGrid.MultiDimensionType }>;
   @Event() setTempRange: EventEmitter<Selection.TempRange | null>;
 
   @Event({ bubbles: false }) focusCell: EventEmitter<Selection.FocusedCells>;
@@ -116,7 +117,7 @@ export class OverlaySelection {
   /** Create selection store */
   @Watch('selectionStore') selectionServiceSet(s: Observable<Selection.SelectionStoreState>) {
     this.selectionStoreService = new SelectionStoreService(s, {
-      changeRange: range => !this.setRange.emit(range)?.defaultPrevented,
+      changeRange: range => !this.triggerRangeEvent(range).defaultPrevented,
       focus: (focus, end) => {
         const focused = { focus, end };
         const { defaultPrevented } = this.internalFocusCell.emit(this.columnService.getSaveData(focus.y, focus.x));
@@ -152,7 +153,7 @@ export class OverlaySelection {
       setTempRange: e => this.setTempRange.emit(e),
       internalSelectionChanged: e => this.internalSelectionChanged.emit(e),
       internalRangeDataApply: e => this.internalRangeDataApply.emit(e),
-      setRange: e => this.setRange.emit(e),
+      setRange: e => this.triggerRangeEvent(e),
       getData: () => this.getData(),
     });
   }
@@ -183,6 +184,16 @@ export class OverlaySelection {
 
   disconnectedCallback() {
     this.columnService?.destroy();
+  }
+
+  private triggerRangeEvent(range: Selection.RangeArea) {
+    const type = this.dataStore.get('type');
+    const data = this.columnService.getRangeTransformedToProps(range, this.dataStore);
+    this.beforeSetRange.emit({
+      ...data,
+      type,
+    });
+    return this.setRange.emit({ ...range, type });
   }
 
   private renderRange(range: Selection.RangeArea) {

@@ -794,6 +794,7 @@ declare namespace LocalJSX {
           * Last cell position
          */
         "lastCell"?: Selection.Cell;
+        "onBefore-set-range"?: (event: CustomEvent<any>) => void;
         "onFocusCell"?: (event: CustomEvent<Selection.FocusedCells>) => void;
         "onInternalCellEdit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
         "onInternalCopy"?: (event: CustomEvent<any>) => void;
@@ -808,7 +809,7 @@ declare namespace LocalJSX {
          */
         "onInternalSelectionChanged"?: (event: CustomEvent<Selection.ChangedRange>) => void;
         "onSetEdit"?: (event: CustomEvent<Edition.BeforeEdit>) => void;
-        "onSetRange"?: (event: CustomEvent<Selection.RangeArea>) => void;
+        "onSetRange"?: (event: CustomEvent<Selection.RangeArea & { type: RevoGrid.MultiDimensionType }>) => void;
         "onSetTempRange"?: (event: CustomEvent<Selection.TempRange | null>) => void;
         "range"?: boolean;
         "readonly"?: boolean;

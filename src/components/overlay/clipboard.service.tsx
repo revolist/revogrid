@@ -1,4 +1,3 @@
-import slice from 'lodash/slice';
 import { h } from '@stencil/core';
 import SelectionStoreService from '../../store/selection/selection.store.service';
 import { Observable, RevoGrid, Selection } from '../../interfaces';
@@ -29,9 +28,7 @@ export class ClipboardService {
       range = getRange(focus, focus);
     }
     if (range) {
-      const columns = [...this.sv.columnService.columns];
-      const props = slice(columns, range.x, range.x1 + 1).map(v => v.prop);
-      data = this.sv.columnService.copyRangeArray(range, props, this.sv.dataStore);
+      data = this.sv.columnService.copyRangeArray(range, this.sv.dataStore);
     }
     this.clipboard.doCopy(e, data);
     return true;

@@ -5,6 +5,7 @@ import { Edition, Observable, RevoGrid, Selection } from '../../interfaces';
 import { getRange } from '../../store/selection/selection.helpers';
 
 import { isGroupingColumn } from '../../plugins/groupingRow/grouping.service';
+import { slice } from 'lodash';
 
 export type ColumnSource = Observable<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
 export type RowSource = Observable<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
@@ -278,15 +279,41 @@ export default class ColumnService {
     return changed;
   }
 
+  getRangeTransformedToProps(
+    d: Selection.RangeArea,
+    store: Observable<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>,
+  ) {
+    const area: {
+      prop: RevoGrid.ColumnProp,
+      rowIndex: number,
+      model: RevoGrid.DataSource
+    }[] = [];
+
+    // rows
+    for (let rowIndex = d.y, i = 0; rowIndex < d.y1 + 1; rowIndex++, i++) {
+      // columns
+      for (let colIndex = d.x, j = 0; colIndex < d.x1 + 1; colIndex++, j++) {
+        const prop = this.columns[colIndex].prop;
+        area.push({
+          prop,
+          rowIndex,
+          model: getSourceItem(store, rowIndex),
+        });
+      }
+    }
+    return area;
+  }
+
   copyRangeArray(
     range: Selection.RangeArea,
-    rangeProps: RevoGrid.ColumnProp[],
     store: Observable<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>,
   ): RevoGrid.DataFormat[][] {
+    const cols = [...this.columns];
+    const props = slice(cols, range.x, range.x1 + 1).map(v => v.prop);
     const toCopy: RevoGrid.DataFormat[][] = [];
     for (let i = range.y; i <= range.y1; i++) {
       const rgRow: RevoGrid.DataFormat[] = [];
-      for (let prop of rangeProps) {
+      for (let prop of props) {
         const item = getSourceItem(store, i);
         rgRow.push(item[prop]);
       }
