@@ -290,6 +290,7 @@ export default class ColumnService {
       type: RevoGrid.MultiDimensionType,
     }[] = [];
 
+    const type = this.dataStore.get('type');
     // rows
     for (let rowIndex = d.y, i = 0; rowIndex < d.y1 + 1; rowIndex++, i++) {
       // columns
@@ -298,8 +299,8 @@ export default class ColumnService {
         area.push({
           prop,
           rowIndex,
-          type: this.dataStore.get('type'),
           model: getSourceItem(store, rowIndex),
+          type,
         });
       }
     }
