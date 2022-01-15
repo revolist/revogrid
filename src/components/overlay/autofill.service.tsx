@@ -21,7 +21,7 @@ type Config = {
   setTempRange(e: Selection.TempRange | null): Event;
   internalSelectionChanged(e: Selection.ChangedRange): Event;
   internalRangeDataApply(e: Edition.BeforeRangeSaveDataDetails): Event;
-  setRange(e: Selection.RangeArea): Event;
+  setRange(e: Selection.RangeArea): boolean;
 
   getData(): any;
 };

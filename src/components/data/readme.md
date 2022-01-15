@@ -14,17 +14,18 @@
 | `readonly`                       | `readonly`  |                                                                 | `boolean`                                                      | `undefined` |
 | `rowClass`                       | `row-class` |                                                                 | `string`                                                       | `undefined` |
 | `rowSelectionStore` _(required)_ | --          |                                                                 | `ObservableMap<SelectionStoreState>`                           | `undefined` |
-| `type` _(required)_              | `type`      |                                                                 | `string`                                                       | `undefined` |
+| `type` _(required)_              | `type`      |                                                                 | `"rgRow" \| "rowPinEnd" \| "rowPinStart"`                      | `undefined` |
 | `viewportCol` _(required)_       | --          |                                                                 | `ObservableMap<ViewportState>`                                 | `undefined` |
 | `viewportRow` _(required)_       | --          |                                                                 | `ObservableMap<ViewportState>`                                 | `undefined` |
 
 
 ## Events
 
-| Event             | Description | Type                                                          |
-| ----------------- | ----------- | ------------------------------------------------------------- |
-| `beforeRowRender` |             | `CustomEvent<any>`                                            |
-| `dragStartCell`   |             | `CustomEvent<{ model: ColumnDataSchemaModel; } & MouseEvent>` |
+| Event                | Description | Type                                                          |
+| -------------------- | ----------- | ------------------------------------------------------------- |
+| `before-cell-render` |             | `CustomEvent<BeforeCellRenderEvent>`                          |
+| `beforeRowRender`    |             | `CustomEvent<any>`                                            |
+| `dragStartCell`      |             | `CustomEvent<{ model: ColumnDataSchemaModel; } & MouseEvent>` |
 
 
 ## Dependencies

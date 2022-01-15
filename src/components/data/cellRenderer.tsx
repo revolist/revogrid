@@ -1,11 +1,9 @@
 import { h, VNode } from '@stencil/core';
-import { RevoGrid } from '../../interfaces';
+import { DragStartEvent, RevoGrid } from '../../interfaces';
 import ColumnService from './columnService';
 import { DRAG_ICON_CLASS, DRAGGABLE_CLASS } from '../../utils/consts';
 
-export type DragStartEvent = {
-  model: RevoGrid.ColumnDataSchemaModel;
-} & MouseEvent;
+
 type Props = {
   model: RevoGrid.ColumnDataSchemaModel;
   onDragStart?(e: DragStartEvent): void;

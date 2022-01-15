@@ -24,10 +24,12 @@ export default class ColumnService {
   }
 
   hasGrouping = false;
+  type: RevoGrid.DimensionCols;
 
   constructor(private dataStore: RowSource, private source: ColumnSource) {
     this.unsubscribe.push(source.onChange('source', s => this.checkGrouping(s)));
     this.checkGrouping(source.get('source'));
+    this.type = source.get('type');
   }
 
   private checkGrouping(cols: RevoGrid.ColumnRegular[]) {

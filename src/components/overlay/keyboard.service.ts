@@ -9,12 +9,21 @@ import { EventData, getCoordinate, isAfterLast, isBeforeFirst } from './selectio
 type Config = {
   selectionStoreService: SelectionStoreService;
   selectionStore: Observable<Selection.SelectionStoreState>;
+  range(range: Selection.RangeArea): boolean;
+  focusNext(focus: Selection.Cell, next: Partial<Selection.Cell>): boolean;
   doEdit(val?: any, isCancel?: boolean): void;
   clearCell(): void;
   getData(): any;
   internalPaste(): void;
 };
 
+const DIRECTION_CODES: string[] = [
+  codesLetter.TAB,
+  codesLetter.ARROW_UP,
+  codesLetter.ARROW_DOWN,
+  codesLetter.ARROW_LEFT,
+  codesLetter.ARROW_RIGHT,
+];
 export class KeyboardService {
   private ctrlDown = false;
 
@@ -97,10 +106,15 @@ export class KeyboardService {
 
     const range = this.sv.selectionStore.get('range');
     const focus = this.sv.selectionStore.get('focus');
-    return this.keyPositionChange(data.changes, this.sv.getData(), range, focus, data.isMulti);
+    return this.keyPositionChange(data.changes, range, focus, data.isMulti);
   }
 
-  keyPositionChange(changes: Partial<Selection.Cell>, eData: EventData, range?: Selection.RangeArea, focus?: Selection.Cell, isMulti = false) {
+  keyPositionChange(
+    changes: Partial<Selection.Cell>,
+    range?: Selection.RangeArea,
+    focus?: Selection.Cell,
+    isMulti = false
+  ) {
     if (!range || !focus) {
       return false;
     }
@@ -109,13 +123,14 @@ export class KeyboardService {
       return false;
     }
     if (isMulti) {
+      const eData: EventData = this.sv.getData();
       if (isAfterLast(data.end, eData) || isBeforeFirst(data.start)) {
         return false;
       }
       const range = getRange(data.start, data.end);
-      return this.sv.selectionStoreService.changeRange(range);
+      return this.sv.range(range);
     }
-    return this.sv.selectionStoreService.focus(data.start);
+    return this.sv.focusNext(data.start, changes);
   }
 
   keyUp(e: KeyboardEvent): void {
@@ -133,15 +148,9 @@ export class KeyboardService {
 
   /** Monitor key direction changes */
   changeDirectionKey(e: KeyboardEvent, canRange: boolean): { changes: Partial<Selection.Cell>; isMulti?: boolean } | void {
-    const isMulti: boolean = canRange && e.shiftKey;
-    switch (e.code) {
-      case codesLetter.TAB:
-      case codesLetter.ARROW_UP:
-      case codesLetter.ARROW_DOWN:
-      case codesLetter.ARROW_LEFT:
-      case codesLetter.ARROW_RIGHT:
-        e.preventDefault();
-        break;
+    const isMulti = canRange && e.shiftKey;
+    if (DIRECTION_CODES.includes(e.code)) {
+      e.preventDefault();
     }
     switch (e.code) {
       case codesLetter.ARROW_UP:

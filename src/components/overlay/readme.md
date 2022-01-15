@@ -24,11 +24,14 @@
 
 | Event                      | Description             | Type                                                                                                                                                  |
 | -------------------------- | ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `applyFocus`               |                         | `CustomEvent<FocusRenderEvent>`                                                                                                                       |
+| `before-apply-range`       |                         | `CustomEvent<FocusRenderEvent>`                                                                                                                       |
+| `before-edit-render`       |                         | `CustomEvent<FocusRenderEvent>`                                                                                                                       |
 | `before-set-range`         |                         | `CustomEvent<any>`                                                                                                                                    |
-| `focusCell`                |                         | `CustomEvent<{ focus: Cell; end: Cell; }>`                                                                                                            |
+| `beforeFocusCell`          |                         | `CustomEvent<{ prop: ColumnProp; model: DataType; val?: string; rowIndex: number; type: DimensionRows; }>`                                            |
+| `focusCell`                |                         | `CustomEvent<AllDimensionType & FocusedCells>`                                                                                                        |
 | `internalCellEdit`         |                         | `CustomEvent<{ prop: ColumnProp; model: DataType; val?: string; rowIndex: number; type: DimensionRows; }>`                                            |
 | `internalCopy`             |                         | `CustomEvent<any>`                                                                                                                                    |
-| `internalFocusCell`        |                         | `CustomEvent<{ prop: ColumnProp; model: DataType; val?: string; rowIndex: number; type: DimensionRows; }>`                                            |
 | `internalPaste`            |                         | `CustomEvent<any>`                                                                                                                                    |
 | `internalRangeDataApply`   | Range data apply        | `CustomEvent<{ data: DataLookup; models: { [rowIndex: number]: DataType; }; type: DimensionRows; }>`                                                  |
 | `internalSelectionChanged` | Selection range changed | `CustomEvent<{ type: DimensionRows; newRange: RangeArea; oldRange: RangeArea; mapping: OldNewRangeMapping; newData: { [key: number]: DataType; }; }>` |

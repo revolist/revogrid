@@ -6,6 +6,7 @@ type Event = {
   target: HTMLElement | null;
   preventDefault(): void;
 };
+
 export function dispatchElement(target: Target, eventName: string, detail: DispatchDetail): CustomEvent {
   const event = new CustomEvent(eventName, {
     detail,

@@ -101,10 +101,10 @@ function styleByCellProps(styles: { [key: string]: number }): Selection.RangeAre
 }
 
 export function getCell({ x, y, x1, y1 }: Selection.RangeArea, dimensionRow: RevoGrid.DimensionSettingsState, dimensionCol: RevoGrid.DimensionSettingsState) {
-  const top: number = getItemByIndex(dimensionRow, y).start;
-  const left: number = getItemByIndex(dimensionCol, x).start;
-  const bottom: number = getItemByIndex(dimensionRow, y1).end;
-  const right: number = getItemByIndex(dimensionCol, x1).end;
+  const top = getItemByIndex(dimensionRow, y).start;
+  const left = getItemByIndex(dimensionCol, x).start;
+  const bottom = getItemByIndex(dimensionRow, y1).end;
+  const right = getItemByIndex(dimensionCol, x1).end;
 
   return {
     left,

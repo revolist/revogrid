@@ -5,8 +5,8 @@ import ColumnService, { ColumnSource, RowSource } from './columnService';
 import { DATA_COL, DATA_ROW } from '../../utils/consts';
 
 import { getSourceItem } from '../../store/dataSource/data.store';
-import { Observable, RevoGrid, Selection } from '../../interfaces';
-import CellRenderer, { DragStartEvent } from './cellRenderer';
+import { BeforeCellRenderEvent, DragStartEvent, Observable, RevoGrid, Selection } from '../../interfaces';
+import CellRenderer from './cellRenderer';
 import RowRenderer, { PADDING_DEPTH } from './rowRenderer';
 import GroupingRowRenderer from '../../plugins/groupingRow/grouping.row.renderer';
 import { isGrouping } from '../../plugins/groupingRow/grouping.service';
@@ -34,10 +34,11 @@ export class RevogrData {
   /** Static stores, not expected to change during component lifetime */
   @Prop() colData!: ColumnSource;
   @Prop() dataStore!: RowSource;
-  @Prop() type!: string;
+  @Prop() type!: RevoGrid.DimensionRows;
 
   @Event({ eventName: DRAG_START_EVENT }) dragStartCell: EventEmitter<DragStartEvent>;
   @Event() beforeRowRender: EventEmitter;
+  @Event({ eventName: 'before-cell-render' }) beforeCellRender: EventEmitter<BeforeCellRenderEvent>;
 
   @Watch('dataStore')
   @Watch('colData')
@@ -95,19 +96,42 @@ export class RevogrData {
 
   private getCellRenderer(rgRow: RevoGrid.VirtualPositionItem, rgCol: RevoGrid.VirtualPositionItem, depth = 0) {
     const model = this.columnService.rowDataModel(rgRow.itemIndex, rgCol.itemIndex);
+    const cellEvent = this.beforeCellRender.emit({
+      column: { ...rgCol },
+      row: {
+        ...rgRow,
+        size: undefined
+      },
+      model,
+      rowType: this.type,
+      colType: this.columnService.type,
+    });
+    if (cellEvent.defaultPrevented) {
+      return;
+    }
+    const {
+      detail: {
+        column: columnProps,
+        row: rowProps
+      }
+    } = cellEvent;
     const defaultProps: RevoGrid.CellProps = {
-      [DATA_COL]: rgCol.itemIndex,
-      [DATA_ROW]: rgRow.itemIndex,
+      [DATA_COL]: columnProps.itemIndex,
+      [DATA_ROW]: rowProps.itemIndex,
       style: {
-        width: `${rgCol.size}px`,
-        transform: `translateX(${rgCol.start}px)`,
+        width: `${columnProps.size}px`,
+        transform: `translateX(${columnProps.start}px)`,
+        height: rowProps.size ? `${rowProps.size}px` : undefined,
       },
     };
-    if (depth && !rgCol.itemIndex) {
+    /**
+     * For grouping, can be removed in the future and replaced with event
+     */
+    if (depth && !columnProps.itemIndex) {
       defaultProps.style.paddingLeft = `${PADDING_DEPTH * depth}px`;
     }
-    const props = this.columnService.mergeProperties(rgRow.itemIndex, rgCol.itemIndex, defaultProps);
-    const custom = this.columnService.customRenderer(rgRow.itemIndex, rgCol.itemIndex, model, this.providers);
+    const props = this.columnService.mergeProperties(rowProps.itemIndex, columnProps.itemIndex, defaultProps);
+    const custom = this.columnService.customRenderer(rowProps.itemIndex, columnProps.itemIndex, model, this.providers);
 
     // if custom render
     if (typeof custom !== 'undefined') {

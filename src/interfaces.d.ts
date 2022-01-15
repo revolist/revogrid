@@ -1,7 +1,7 @@
 import { VNode } from '@stencil/core';
 import { ObservableMap, Subscription } from '@stencil/store';
-export declare type Observable<T> = ObservableMap<T>;
-export declare type PluginSubscribe<T> = Subscription<T>;
+export type Observable<T> = ObservableMap<T>;
+export type PluginSubscribe<T> = Subscription<T>;
 export declare namespace RevoGrid {
   type DimensionTypeRow = 'rgRow';
   type DimensionTypeCol = 'rgCol';
@@ -331,9 +331,30 @@ export declare namespace ThemeSpace {
   };
   type Theme = 'default' | 'material' | 'compact' | 'darkMaterial' | 'darkCompact';
 }
-export declare type DimensionStores = {
+export type DimensionStores = {
   [T in RevoGrid.MultiDimensionType]: Observable<RevoGrid.DimensionSettingsState>;
 };
-export declare type ViewportStores = {
+export type ViewportStores = {
   [T in RevoGrid.MultiDimensionType]: Observable<RevoGrid.ViewportState>;
 };
+
+export type DragStartEvent = {
+  model: RevoGrid.ColumnDataSchemaModel;
+} & MouseEvent;
+
+export interface BeforeCellRenderEvent extends AllDimensionType {
+  column: RevoGrid.VirtualPositionItem;
+  row: RevoGrid.VirtualPositionItem;
+  model: any;
+}
+
+export interface AllDimensionType {
+  rowType: RevoGrid.DimensionRows;
+  colType: RevoGrid.DimensionCols;
+}
+
+export type ApplyFocusEvent = AllDimensionType & Selection.FocusedCells;
+export interface FocusRenderEvent extends AllDimensionType {
+  range: Selection.RangeArea;
+  next?: Partial<Selection.Cell>;
+}

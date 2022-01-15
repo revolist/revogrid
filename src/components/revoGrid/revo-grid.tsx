@@ -147,6 +147,7 @@ export class RevoGridComponent {
    */
   @Prop() stretch: boolean | string = false;
 
+
   // --------------------------------------------------------------------------
   //
   //  Events
@@ -340,8 +341,6 @@ export class RevoGridComponent {
    * Before row definition
    */
   @Event() beforerowdefinition: EventEmitter<{ vals: any; oldVals: any; }>;
-
-  @Event() filterconfigchanged: EventEmitter;
 
   // --------------------------------------------------------------------------
   //
@@ -624,7 +623,7 @@ export class RevoGridComponent {
     }
   }
 
-  @Listen('internalFocusCell') onCellFocus(e: CustomEvent<Edition.BeforeSaveDataDetails>) {
+  @Listen('beforeFocusCell') onCellFocus(e: CustomEvent<Edition.BeforeSaveDataDetails>) {
     e.cancelBubble = true;
     const { defaultPrevented } = this.beforecellfocus.emit(e.detail);
     if (!this.canFocus || defaultPrevented) {
@@ -792,8 +791,17 @@ export class RevoGridComponent {
     }
   }
 
+  /** External subscribe */
+  @Event() filterconfigchanged: EventEmitter;
   @Watch('filter') applyFilter(cfg: boolean | ColumnFilterConfig) {
     this.filterconfigchanged.emit(cfg);
+  }
+
+  @Prop() merged: any[];
+  /** External subscribe */
+  @Event() mergechanged: EventEmitter<any[]|undefined>;
+  @Watch('merged') mergeChange(mergeVal: any[]|undefined) {
+    this.mergechanged.emit(mergeVal);
   }
 
   private dataSourceApply(source: RevoGrid.DataType[] = [], type: RevoGrid.DimensionRows = 'rgRow') {
@@ -819,6 +827,13 @@ export class RevoGridComponent {
     this.dataProvider = new DataProvider(this.dimensionProvider);
     this.uuid = `${new Date().getTime()}-rvgrid`;
 
+    const pluginData = {
+      data: this.dataProvider,
+      column: this.columnProvider,
+      dimension: this.dimensionProvider,
+      viewport: this.viewportProvider,
+      selection: this.selectionStoreConnector,
+    };
     if (this.autoSizeColumn) {
       this.internalPlugins.push(
         new AutoSize(
@@ -849,13 +864,7 @@ export class RevoGridComponent {
     if (this.plugins) {
       this.plugins.forEach(p => {
         this.internalPlugins.push(
-          new p(this.element, {
-            data: this.dataProvider,
-            column: this.columnProvider,
-            dimension: this.dimensionProvider,
-            viewport: this.viewportProvider,
-            selection: this.selectionStoreConnector,
-          }),
+          new p(this.element, pluginData),
         );
       });
     }

@@ -1,6 +1,6 @@
 import { Component, Event, EventEmitter, h, Host, Listen, Prop, VNode, Element, Watch } from '@stencil/core';
 
-import { Edition, Observable, RevoGrid, Selection } from '../../interfaces';
+import { AllDimensionType, ApplyFocusEvent, FocusRenderEvent, Edition, Observable, RevoGrid, Selection } from '../../interfaces';
 import ColumnService from '../data/columnService';
 import SelectionStoreService from '../../store/selection/selection.store.service';
 import { codesLetter } from '../../utils/keyCodes';
@@ -63,14 +63,17 @@ export class OverlaySelection {
   @Event({ cancelable: true }) internalPaste: EventEmitter;
 
   @Event({ cancelable: true }) internalCellEdit: EventEmitter<Edition.BeforeSaveDataDetails>;
-  @Event({ cancelable: true }) internalFocusCell: EventEmitter<Edition.BeforeSaveDataDetails>;
+  @Event({ cancelable: true }) beforeFocusCell: EventEmitter<Edition.BeforeSaveDataDetails>;
 
   @Event({ bubbles: false }) setEdit: EventEmitter<Edition.BeforeEdit>;
+  @Event({ eventName: 'before-apply-range' }) beforeApplyRange: EventEmitter<FocusRenderEvent>;
   @Event({ eventName: 'before-set-range' }) beforeSetRange: EventEmitter;
+  @Event({ eventName: 'before-edit-render' }) beforeEditRender: EventEmitter<FocusRenderEvent>;
   @Event() setRange: EventEmitter<Selection.RangeArea & { type: RevoGrid.MultiDimensionType }>;
   @Event() setTempRange: EventEmitter<Selection.TempRange | null>;
 
-  @Event({ bubbles: false }) focusCell: EventEmitter<Selection.FocusedCells>;
+  @Event() applyFocus: EventEmitter<FocusRenderEvent>;
+  @Event() focusCell: EventEmitter<ApplyFocusEvent>;
   /** Selection range changed */
   @Event({ cancelable: true }) internalSelectionChanged: EventEmitter<Selection.ChangedRange>;
 
@@ -117,20 +120,15 @@ export class OverlaySelection {
   /** Create selection store */
   @Watch('selectionStore') selectionServiceSet(s: Observable<Selection.SelectionStoreState>) {
     this.selectionStoreService = new SelectionStoreService(s, {
-      changeRange: range => !this.triggerRangeEvent(range).defaultPrevented,
-      focus: (focus, end) => {
-        const focused = { focus, end };
-        const { defaultPrevented } = this.internalFocusCell.emit(this.columnService.getSaveData(focus.y, focus.x));
-        if (defaultPrevented) {
-          return false;
-        }
-        return !this.focusCell.emit(focused)?.defaultPrevented;
-      },
+      changeRange: range => this.triggerRangeEvent(range),
+      focus: (focus, end) => this.doFocus(focus, end),
     });
 
     this.keyboardService = new KeyboardService({
       selectionStoreService: this.selectionStoreService,
       selectionStore: s,
+      range: (r) => this.selectionStoreService.changeRange(r),
+      focusNext: (f, next) => this.doFocus(f, f, next),
       doEdit: (v, c) => !this.readonly && this.doEdit(v, c),
       clearCell: () => !this.readonly && this.clearCell(),
       internalPaste: () => !this.readonly && this.internalPaste.emit(),
@@ -186,13 +184,6 @@ export class OverlaySelection {
     this.columnService?.destroy();
   }
 
-  private triggerRangeEvent(range: Selection.RangeArea) {
-    const type = this.dataStore.get('type');
-    const data = this.columnService.getRangeTransformedToProps(range, this.dataStore);
-    this.beforeSetRange.emit(data);
-    return this.setRange.emit({ ...range, type });
-  }
-
   private renderRange(range: Selection.RangeArea) {
     const style = getElStyle(range, this.dimensionRow.state, this.dimensionCol.state);
     return [<div class={SELECTION_BORDER_CLASS} style={style} />];
@@ -201,6 +192,7 @@ export class OverlaySelection {
   private renderEditCell() {
     // if can edit
     const editCell = this.selectionStore.get('edit');
+
     if (this.readonly || !editCell) {
       return;
     }
@@ -209,8 +201,20 @@ export class OverlaySelection {
       ...editCell,
       ...this.columnService.getSaveData(editCell.y, editCell.x, val),
     };
-
-    const style = getElStyle({ ...editCell, x1: editCell.x, y1: editCell.y }, this.dimensionRow.state, this.dimensionCol.state);
+    const renderEvent = this.beforeEditRender.emit({
+      range: {
+        ...editCell,
+        x1: editCell.x,
+        y1: editCell.y,
+      },
+      ...this.types
+    });
+    if (renderEvent.defaultPrevented) {
+      return;
+    }
+    
+    const { detail: { range } } = renderEvent;
+    const style = getElStyle(range, this.dimensionRow.state, this.dimensionCol.state);
     return (
       <revogr-edit
         onCellEdit={e => this.onCellEdit(e.detail)}
@@ -261,6 +265,56 @@ export class OverlaySelection {
         <slot name="data" />
       </Host>
     );
+  }
+
+  private doFocus(focus: Selection.Cell, end: Selection.Cell, next?: Partial<Selection.Cell>) {
+    const { defaultPrevented } = this.beforeFocusCell.emit(this.columnService.getSaveData(focus.y, focus.x));
+    if (defaultPrevented) {
+      return false;
+    }
+    const evData = {
+      range: {
+        ...focus,
+        x1: end.x,
+        y1: end.y
+      },
+      next,
+      ...this.types
+    };
+    const applyEvent = this.applyFocus.emit(evData);
+    if (applyEvent.defaultPrevented) {
+      return false;
+    }
+    const { range } = applyEvent.detail;
+    return !this.focusCell.emit({
+      focus: {
+        x: range.x,
+        y: range.y,
+      },
+      end: {
+        x: range.x1,
+        y: range.y1,
+      },
+      ...applyEvent.detail
+    }).defaultPrevented;
+  }
+
+  private triggerRangeEvent(range: Selection.RangeArea) {
+    const type = this.types.rowType;
+    const applyEvent = this.beforeApplyRange.emit({
+      range: { ...range },
+      ...this.types
+    });
+    if (applyEvent.defaultPrevented) {
+      return false;
+    }
+    const data = this.columnService.getRangeTransformedToProps(applyEvent.detail.range, this.dataStore);
+    let e = this.beforeSetRange.emit(data);
+    e = this.setRange.emit({ ...applyEvent.detail.range, type });
+    if (e.defaultPrevented) {
+      return false;
+    }
+    return !e.defaultPrevented;
   }
 
   protected onElementMouseDown(e: MouseEvent) {
@@ -344,6 +398,13 @@ export class OverlaySelection {
     }
     const editCell = this.selectionStoreService.focused;
     return editCell && !this.columnService?.isReadOnly(editCell.y, editCell.x);
+  }
+
+  get types(): AllDimensionType {
+    return {
+      rowType: this.dataStore.get('type'),
+      colType: this.columnService.type
+    };
   }
 
   /** Collect data from element */

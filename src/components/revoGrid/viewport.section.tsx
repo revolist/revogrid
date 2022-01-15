@@ -63,7 +63,13 @@ export const ViewPortSections = ({ resize, editors, rowClass, readonly, range, c
             slot={DATA_SLOT}
           />
           <revogr-temp-range selectionStore={data.segmentSelectionStore} dimensionRow={data.dimensionRow} dimensionCol={data.dimensionCol} />
-          <revogr-focus selectionStore={data.segmentSelectionStore} dimensionRow={data.dimensionRow} dimensionCol={data.dimensionCol} />
+          <revogr-focus
+            rowType={ data.type }
+            colType={ view.type }
+            selectionStore={data.segmentSelectionStore}
+            dimensionRow={data.dimensionRow}
+            dimensionCol={data.dimensionCol}
+          />
         </revogr-overlay-selection>
       );
       dataViews.push(dataView);
