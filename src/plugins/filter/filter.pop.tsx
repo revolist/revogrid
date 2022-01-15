@@ -5,6 +5,7 @@ import { isFilterBtn } from './filter.button';
 import { RevoButton } from '../../components/button/button';
 import '../../utils/closestPolifill';
 import { LogicFunction } from './filter.types';
+import { FilterCaptions } from './filter.plugin';
 
 /**
  * @typedef FilterItem
@@ -32,11 +33,18 @@ const defaultType: FilterType = 'none';
 })
 export class FilterPanel {
   private extraElement: HTMLInputElement | undefined;
+  private filterCaptionsInternal: FilterCaptions = {
+    title: "Filter by condition",
+    save: "Save",
+    reset: "Reset",
+    cancel: "Cancel",
+  };
   @State() changes: ShowData | undefined;
   @Prop({ mutable: true, reflect: true }) uuid: string;
   @Prop() filterTypes: Record<string, string[]> = {};
   @Prop() filterNames: Record<string, string> = {};
   @Prop() filterEntities: Record<string, LogicFunction> = {};
+  @Prop() filterCaptions: FilterCaptions | undefined;
   @Event() filterChange: EventEmitter<FilterItem>;
   @Listen('mousedown', { target: 'document' }) onMouseDown(e: MouseEvent): void {
     if (this.changes && !e.defaultPrevented) {
@@ -82,7 +90,7 @@ export class FilterPanel {
           <input
             type="text"
             value={value}
-            onInput={ (e: InputEvent) => this.onInput(e) }
+            onInput={(e: InputEvent) => this.onInput(e)}
             onKeyDown={e => this.onKeyDown(e)}
             ref={e => (this.extraElement = e)}
           />
@@ -101,19 +109,26 @@ export class FilterPanel {
       left: `${this.changes.x}px`,
       top: `${this.changes.y}px`,
     };
+    const capts = Object.assign(this.filterCaptionsInternal, this.filterCaptions);
+
     return (
       <Host style={style}>
-        <label>Filter by condition</label>
+        <label>{capts.title}</label>
         <select class="select-css" onChange={e => this.onFilterChange(e)}>
           {this.renderConditions(this.changes.type)}
         </select>
         <div>{this.renderExtra(this.filterEntities[this.changes.type].extra, this.changes.value)}</div>
-        <RevoButton class={{ green: true }} onClick={() => this.onSave()}>
-          Save
-        </RevoButton>
-        <RevoButton class={{ light: true }} onClick={() => this.onCancel()}>
-          Cancel
-        </RevoButton>
+        <div class="center">
+          <RevoButton class={{ green: true }} onClick={() => this.onSave()}>
+            {capts.save}
+          </RevoButton>
+          <RevoButton class={{ red: true }} onClick={() => this.onReset()}>
+            {capts.reset}
+          </RevoButton>
+          <RevoButton class={{ light: true }} onClick={() => this.onCancel()}>
+            {capts.cancel}
+          </RevoButton>
+        </div>
       </Host>
     );
   }
@@ -149,15 +164,31 @@ export class FilterPanel {
   }
 
   private onSave() {
-    if (!this.changes) {
-      throw new Error('Changes required per edit');
-    }
+    this.assertChanges();
+
     this.filterChange.emit({
       prop: this.changes.prop,
       type: this.changes.type,
       value: this.extraElement?.value?.trim(),
     });
     this.changes = undefined;
+  }
+
+  private onReset() {
+    this.assertChanges();
+
+    this.filterChange.emit({
+      prop: this.changes.prop,
+      type: "none",
+    });
+
+    this.changes = void 0;
+  }
+
+  private assertChanges() {
+    if (!this.changes) {
+      throw new Error('Changes required per edit');
+    }
   }
 
   private isOutside(e: HTMLElement | null) {
