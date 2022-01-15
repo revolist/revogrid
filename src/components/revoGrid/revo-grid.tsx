@@ -585,12 +585,12 @@ export class RevoGridComponent {
 
   @Listen('internalRangeDataApply') onBeforeRangeEdit(e: CustomEvent<Edition.BeforeRangeSaveDataDetails>) {
     e.cancelBubble = true;
-    const { defaultPrevented } = this.beforerangeedit.emit(e.detail);
+    const { defaultPrevented, detail } = this.beforerangeedit.emit(e.detail);
     if (defaultPrevented) {
       e.preventDefault();
       return;
     }
-    this.afteredit.emit(e.detail);
+    this.afteredit.emit(detail);
   }
 
   @Listen('internalSelectionChanged') onRangeChanged(e: CustomEvent<Selection.ChangedRange>) {
@@ -599,7 +599,7 @@ export class RevoGridComponent {
     if (beforeange.defaultPrevented) {
       e.preventDefault();
     }
-    const beforeFill = this.beforeautofill.emit(e.detail);
+    const beforeFill = this.beforeautofill.emit(beforeange.detail);
     if (beforeFill.defaultPrevented) {
       e.preventDefault();
     }

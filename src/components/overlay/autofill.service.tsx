@@ -20,8 +20,13 @@ type Config = {
 
   setTempRange(e: Selection.TempRange | null): Event;
   internalSelectionChanged(e: Selection.ChangedRange): Event;
-  internalRangeDataApply(e: Edition.BeforeRangeSaveDataDetails): Event;
+  internalRangeDataApply(e: Edition.BeforeRangeSaveDataDetails): CustomEvent;
   setRange(e: Selection.RangeArea): boolean;
+  beforeRangeDataApply(e: {
+    range: Selection.RangeArea
+  }): CustomEvent<{
+    range: Selection.RangeArea
+  }>;
 
   getData(): any;
 };
@@ -163,7 +168,21 @@ export class AutoFillService {
       // Get latest
       this.autoFillInitial = this.getFocus();
       if (this.autoFillType === AutoFillType.autoFill) {
-        this.applyRangeWithData(this.autoFillInitial, this.autoFillLast);
+
+        const range = getRange(this.autoFillInitial, this.autoFillLast);
+        if (range) {
+          const {
+            defaultPrevented: stopApply,
+            detail: { range: newRange }
+          } = this.sv.beforeRangeDataApply({
+            range,
+          });
+          if (!stopApply) {
+            this.applyRangeWithData(newRange);
+          } else {
+            this.sv.setTempRange(null);
+          }
+        }
       } else {
         this.applyRangeOnly(this.autoFillInitial, this.autoFillLast);
       }
@@ -181,26 +200,23 @@ export class AutoFillService {
     for (let rowIndex in data) {
       models[rowIndex] = getSourceItem(this.sv.dataStore, parseInt(rowIndex, 10));
     }
-    const dataEvent = this.sv.internalRangeDataApply({
+    const {
+      defaultPrevented: stopRange,
+      detail,
+    } = this.sv.internalRangeDataApply({
       data,
       models,
       type: this.sv.dataStore.get('type'),
     });
-    if (!dataEvent.defaultPrevented) {
-      this.sv.columnService.applyRangeData(data);
+    if (!stopRange) {
+      this.sv.columnService.applyRangeData(detail.data);
     }
     this.sv.setRange(range);
   }
 
   /** Apply range and copy data during range application */
-  private applyRangeWithData(start?: Selection.Cell, end?: Selection.Cell) {
-    // no changes to apply
-    if (!start || !end) {
-      return;
-    }
-
+  private applyRangeWithData(newRange: Selection.RangeArea) {
     const oldRange = this.sv.selectionStoreService.ranged;
-    const newRange = getRange(start, end);
     const rangeData: Selection.ChangedRange = {
       type: this.sv.dataStore.get('type'),
       newData: {},

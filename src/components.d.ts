@@ -813,6 +813,10 @@ declare namespace LocalJSX {
         "onBefore-edit-render"?: (event: CustomEvent<FocusRenderEvent>) => void;
         "onBefore-set-range"?: (event: CustomEvent<any>) => void;
         "onBeforeFocusCell"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
+        /**
+          * Range data apply
+         */
+        "onBeforeRangeDataApply"?: (event: CustomEvent<FocusRenderEvent>) => void;
         "onFocusCell"?: (event: CustomEvent<ApplyFocusEvent>) => void;
         "onInternalCellEdit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
         "onInternalCopy"?: (event: CustomEvent<any>) => void;

@@ -74,6 +74,8 @@ export class OverlaySelection {
 
   @Event() applyFocus: EventEmitter<FocusRenderEvent>;
   @Event() focusCell: EventEmitter<ApplyFocusEvent>;
+  /** Range data apply */
+  @Event() beforeRangeDataApply: EventEmitter<FocusRenderEvent>;
   /** Selection range changed */
   @Event({ cancelable: true }) internalSelectionChanged: EventEmitter<Selection.ChangedRange>;
 
@@ -148,6 +150,10 @@ export class OverlaySelection {
       columnService: this.columnService,
       dataStore: this.dataStore,
 
+      beforeRangeDataApply: e => this.beforeRangeDataApply.emit({
+        ...e,
+        ...this.types
+      }),
       setTempRange: e => this.setTempRange.emit(e),
       internalSelectionChanged: e => this.internalSelectionChanged.emit(e),
       internalRangeDataApply: e => this.internalRangeDataApply.emit(e),
