@@ -91,7 +91,9 @@ export default class ViewportService {
         colStore,
         onHeaderresize: e => this.onColumnResize(val, e, colStore),
       };
-      column.onResizeViewport = (e: CustomEvent<RevoGrid.ViewPortResizeEvent>) => this.sv.viewportProvider?.setViewport(e.detail.dimension, { virtualSize: e.detail.size });
+      if (val === 'rgCol') {
+        column.onResizeViewport = (e: CustomEvent<RevoGrid.ViewPortResizeEvent>) => this.sv.viewportProvider?.setViewport(e.detail.dimension, { virtualSize: e.detail.size });
+      }
       const colData = this.gatherColumnData(column);
       const columnSelectionStore = this.registerCol(colData.position.x, val);
 

@@ -29,6 +29,7 @@
 | `before-edit-render`       |                         | `CustomEvent<FocusRenderEvent>`                                                                                                                       |
 | `before-set-range`         |                         | `CustomEvent<any>`                                                                                                                                    |
 | `beforeFocusCell`          |                         | `CustomEvent<{ prop: ColumnProp; model: DataType; val?: string; rowIndex: number; type: DimensionRows; }>`                                            |
+| `beforeRangeDataApply`     | Range data apply        | `CustomEvent<FocusRenderEvent>`                                                                                                                       |
 | `focusCell`                |                         | `CustomEvent<AllDimensionType & FocusedCells>`                                                                                                        |
 | `internalCellEdit`         |                         | `CustomEvent<{ prop: ColumnProp; model: DataType; val?: string; rowIndex: number; type: DimensionRows; }>`                                            |
 | `internalCopy`             |                         | `CustomEvent<any>`                                                                                                                                    |

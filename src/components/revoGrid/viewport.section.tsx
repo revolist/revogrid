@@ -75,7 +75,10 @@ export const ViewPortSections = ({ resize, editors, rowClass, readonly, range, c
       dataViews.push(dataView);
     });
     viewPortHtml.push(
-      <revogr-viewport-scroll {...view.prop} ref={el => registerElement(el, view.prop.key)} onScrollViewport={e => onScroll(e.detail, view.prop.key)}>
+      <revogr-viewport-scroll
+        {...view.prop}
+        ref={el => registerElement(el, view.prop.key)}
+        onScrollViewport={e => onScroll(e.detail, view.prop.key)}>
         {dataViews}
       </revogr-viewport-scroll>,
     );

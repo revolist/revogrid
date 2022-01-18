@@ -46,7 +46,7 @@ export class RevogrViewportScroll {
   private horizontalMouseWheel: (e: Partial<ScrollEvent>) => void;
   private verticalMouseWheel: (e: Partial<ScrollEvent>) => void;
 
-  private horisontalResize: GridResizeService;
+  private resizeService: GridResizeService;
   private scrollService: LocalScrollService;
 
   /**
@@ -115,7 +115,7 @@ export class RevogrViewportScroll {
     /**
      * Track horizontal viewport resize
      */
-    this.horisontalResize = new GridResizeService(this.horizontalScroll, {
+    this.resizeService = new GridResizeService(this.horizontalScroll, {
       resize: entries => {
         let height = entries[0]?.contentRect.height || 0;
         if (height) {
@@ -181,7 +181,7 @@ export class RevogrViewportScroll {
   disconnectedCallback() {
     this.verticalScroll.removeEventListener('mousewheel', this.verticalMouseWheel);
     this.horizontalScroll.removeEventListener('mousewheel', this.horizontalMouseWheel);
-    this.horisontalResize.destroy();
+    this.resizeService.destroy();
   }
 
   async componentDidRender() {
