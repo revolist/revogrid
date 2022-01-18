@@ -954,7 +954,7 @@ export class RevoGridComponent {
           }
         }}
         registerElement={(e, k) => this.scrollingService.registerElement(e, k)}
-        onScroll={details => this.scrollingService.onScroll(details)}
+        onScroll={(details, k) => this.scrollingService.onScroll(details, k)}
       />,
     );
     return (

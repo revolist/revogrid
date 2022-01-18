@@ -156,31 +156,24 @@ export class RevogrViewportScroll {
     const hasScroll = size < innerContentSize;
     let el: HTMLElement;
     // event reference for binding
-    let event: (e: MouseEvent) => void;
     switch (type) {
       case 'rgCol':
         el = this.horizontalScroll;
-        event = this.horizontalMouseWheel;
         break;
       case 'rgRow':
         el = this.verticalScroll;
-        event = this.verticalMouseWheel;
         break;
     }
     // based on scroll visibility assign or remove class and event
     if (hasScroll) {
       el.classList.add(`scroll-${type}`);
-      el.addEventListener('mousewheel', event);
     } else {
       el.classList.remove(`scroll-${type}`);
-      el.removeEventListener('mousewheel', event);
     }
     this.scrollchange.emit({ type, hasScroll });
   }
 
   disconnectedCallback() {
-    this.verticalScroll.removeEventListener('mousewheel', this.verticalMouseWheel);
-    this.horizontalScroll.removeEventListener('mousewheel', this.horizontalMouseWheel);
     this.resizeService.destroy();
   }
 
@@ -220,12 +213,15 @@ export class RevogrViewportScroll {
 
   render() {
     return (
-      <Host onScroll={(e: MouseEvent) => this.onScroll('rgCol', e)}>
+      <Host onWheel={this.horizontalMouseWheel} onScroll={(e: MouseEvent) => this.onScroll('rgCol', e)}>
         <div class="inner-content-table" style={{ width: `${this.contentWidth}px` }}>
           <div class="header-wrapper" ref={e => (this.header = e)}>
             <slot name={HEADER_SLOT} />
           </div>
-          <div class="vertical-inner" ref={el => (this.verticalScroll = el)} onScroll={(e: MouseEvent) => this.onScroll('rgRow', e)}>
+          <div class="vertical-inner"
+            ref={el => (this.verticalScroll = el)}
+            onWheel={this.verticalMouseWheel}
+            onScroll={(e: MouseEvent) => this.onScroll('rgRow', e)}>
             <div class="content-wrapper" style={{ height: `${this.contentHeight}px` }}>
               <slot name={CONTENT_SLOT} />
             </div>

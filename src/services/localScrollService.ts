@@ -22,7 +22,7 @@ const initialParams: Params = {
 };
 
 export default class LocalScrollService {
-  private preventArtificialScroll: Record<RevoGrid.DimensionType, number | null> = { rgRow: null, rgCol: null };
+  private preventArtificialScroll: Record<RevoGrid.DimensionType, () => void | null> = { rgRow: null, rgCol: null };
   // to check if scroll changed
   private previousScroll: Record<RevoGrid.DimensionType, number> = { rgRow: 0, rgCol: 0 };
   private params: Record<RevoGrid.DimensionType, Params> = { rgRow: { ...initialParams }, rgCol: { ...initialParams } };
@@ -43,9 +43,17 @@ export default class LocalScrollService {
   }
 
   // apply scroll values after scroll done
-  setScroll(e: RevoGrid.ViewPortScrollEvent) {
+  async setScroll(e: RevoGrid.ViewPortScrollEvent) {
     this.cancelScroll(e.dimension);
-    this.preventArtificialScroll[e.dimension] = window.requestAnimationFrame(() => {
+
+    const frameAnimation = new Promise<boolean>((resolve, reject) => {
+      const animationId = window.requestAnimationFrame(() => {
+        resolve(true);
+      });
+      this.preventArtificialScroll[e.dimension] = reject.bind(null, animationId);
+    });
+    try {
+      await frameAnimation;
       const params = this.getParams(e.dimension);
       e.coordinate = Math.ceil(e.coordinate);
       this.previousScroll[e.dimension] = this.wrapCoordinate(e.coordinate, params);
@@ -54,7 +62,10 @@ export default class LocalScrollService {
         ...e,
         coordinate: params.virtualSize ? this.convert(e.coordinate, params, false) : e.coordinate,
       });
-    });
+
+    } catch (id) {
+      window.cancelAnimationFrame(id);
+    }
   }
 
   // initiate scrolling event
@@ -90,13 +101,12 @@ export default class LocalScrollService {
   }
 
   // prevent already started scroll, performance optimization
-  private cancelScroll(dimension: RevoGrid.DimensionType): boolean {
-    if (typeof this.preventArtificialScroll[dimension] === 'number') {
-      window.cancelAnimationFrame(this.preventArtificialScroll[dimension]);
+  private cancelScroll(dimension: RevoGrid.DimensionType) {
+    const canceler = this.preventArtificialScroll[dimension];
+    if (canceler) {
+      canceler();
       this.preventArtificialScroll[dimension] = null;
-      return true;
     }
-    return false;
   }
 
   /* convert virtual to real and back, scale range */

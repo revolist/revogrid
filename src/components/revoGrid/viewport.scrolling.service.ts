@@ -12,15 +12,15 @@ export default class GridScrollingService {
   async onScroll(e: RevoGrid.ViewPortScrollEvent, key?: RevoGrid.DimensionColPin | string): Promise<void> {
     let newEvent: Promise<RevoGrid.ViewPortScrollEvent>;
     for (let elKey in this.elements) {
-      if (this.isPinnedColumn(key) && e.dimension === 'rgCol') {
+      if (e.dimension === 'rgCol' && elKey === 'headerRow') {
+        continue;
+      } else if (this.isPinnedColumn(key) && e.dimension === 'rgCol') {
         if (elKey === key || !e.delta) {
           continue;
         }
         for (let el of this.elements[elKey]) {
           el.changeScroll && (newEvent = el.changeScroll(e));
         }
-      } else if (e.dimension === 'rgCol' && elKey === 'headerRow') {
-        continue;
       } else {
         for (let el of this.elements[elKey]) {
           el.setScroll(e);
