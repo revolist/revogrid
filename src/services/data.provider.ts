@@ -4,7 +4,7 @@ import DataStore, { getSourceItem, getVisibleSourceItem, Groups, setSourceByVirt
 import { isRowType, rowTypes } from '../store/storeTypes';
 import DimensionProvider from './dimension.provider';
 import { RevoGrid, Edition } from '../interfaces';
-import { Trimmed } from '../plugins/trimmed/trimmed.plugin';
+import { Trimmed } from '../store/dataSource/trimmed.plugin';
 import DimensionRows = RevoGrid.DimensionRows;
 import DataType = RevoGrid.DataType;
 
@@ -26,7 +26,7 @@ export class DataProvider {
   setData(data: DataType[], type: DimensionRows = 'rgRow', grouping?: { depth: number; groups?: Groups }, silent = false): DataType[] {
     // set rgRow data
     this.stores[type].updateData([...data], grouping, silent);
-    this.dimensionProvider.setData(data, type, type !== 'rgRow');
+    this.dimensionProvider.setData(data.length, type, type !== 'rgRow');
     return data;
   }
 
@@ -60,8 +60,9 @@ export class DataProvider {
   setTrimmed(trimmed: Partial<Trimmed>, type: DimensionRows = 'rgRow') {
     const store = this.stores[type];
     store.addTrimmed(trimmed);
+    this.dimensionProvider.setTrimmed(trimmed, type);
     if (type === 'rgRow') {
-      this.dimensionProvider.setData(getVisibleSourceItem(store.store), type);
+      this.dimensionProvider.setData(getVisibleSourceItem(store.store).length, type);
     }
   }
 }

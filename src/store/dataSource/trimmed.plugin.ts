@@ -1,5 +1,5 @@
 import { Observable, PluginSubscribe } from '../../interfaces';
-import { DataSourceState } from '../../store/dataSource/data.store';
+import { DataSourceState } from './data.store';
 
 export type TrimmedEntity = Record<number, boolean>;
 export type Trimmed = Record<string, TrimmedEntity>;

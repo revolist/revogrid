@@ -201,6 +201,7 @@ export declare namespace RevoGrid {
   }
   interface DimensionCalc {
     indexes: number[];
+    count: number;
     positionIndexes: number[];
     positionIndexToItem: {
       [position: number]: PositionItem;
@@ -208,6 +209,7 @@ export declare namespace RevoGrid {
     indexToItem: {
       [index: number]: PositionItem;
     };
+    trimmed: Record<any, any>;
     sizes: ViewSettingSizeProp;
   }
   interface DimensionSettingsState extends DimensionCalc {
@@ -317,6 +319,7 @@ export declare namespace Edition {
   interface EditorBase {
     element?: Element | null;
     editCell?: EditCell;
+    beforeUpdate?(): void;
     componentDidRender?(): void;
     disconnectedCallback?(): void;
     render(createElement?: HyperFunc<VNode>): VNode | VNode[] | string | void;

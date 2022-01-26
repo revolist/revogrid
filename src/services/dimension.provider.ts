@@ -5,6 +5,7 @@ import DimensionStore from '../store/dimension/dimension.store';
 import ViewportProvider from './viewport.provider';
 import { RevoGrid } from '../interfaces';
 import { getItemByIndex } from '../store/dimension/dimension.helpers';
+import { gatherTrimmedItems, Trimmed } from '../store/dataSource/trimmed.plugin';
 
 export type ColumnItems = Record<RevoGrid.DimensionCols, RevoGrid.ColumnRegular[]>;
 
@@ -41,7 +42,13 @@ export default class DimensionProvider {
 
   setRealSize(realCount: number, type: RevoGrid.MultiDimensionType): void {
     this.viewports.stores[type].setViewport({ realCount }, type);
-    this.stores[type].setRealSize(realCount);
+    this.stores[type].setStore({ count: realCount });
+  }
+
+  setTrimmed(trimmed: Partial<Trimmed>, type: RevoGrid.MultiDimensionType) {
+    const allTrimmed = gatherTrimmedItems(trimmed);
+    this.stores[type].setStore({ trimmed: allTrimmed });
+    this.viewports.stores[type].setViewPortDimension(this.stores[type].store.get('sizes'));
   }
 
   /**
@@ -49,8 +56,12 @@ export default class DimensionProvider {
    * @param items - data/column items
    * @param type - dimension type
    */
-  setData(items: RevoGrid.ColumnRegular[] | RevoGrid.DataType[], type: RevoGrid.MultiDimensionType, noVirtual = false) {
-    this.setRealSize(items.length, type);
+  setData(
+    itemCount: number,
+    type: RevoGrid.MultiDimensionType,
+    noVirtual = false
+  ) {
+    this.setRealSize(itemCount, type);
     if (noVirtual) {
       this.setNoVirtual(type);
     }

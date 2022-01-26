@@ -2,7 +2,7 @@ import { createStore } from '@stencil/store';
 import findIndex from 'lodash/findIndex';
 import range from 'lodash/range';
 
-import { Trimmed, trimmedPlugin } from '../../plugins/trimmed/trimmed.plugin';
+import { Trimmed, trimmedPlugin } from './trimmed.plugin';
 import { setStore } from '../../utils/store.utils';
 import { Observable, RevoGrid } from '../../interfaces';
 import { proxyPlugin } from './data.proxy';

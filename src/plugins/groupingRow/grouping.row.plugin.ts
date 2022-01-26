@@ -5,7 +5,7 @@ import { getPhysical, setItems } from '../../store/dataSource/data.store';
 import { columnTypes } from '../../store/storeTypes';
 import BasePlugin from '../basePlugin';
 import { FILTER_TRIMMED_TYPE } from '../filter/filter.plugin';
-import { TrimmedEntity } from '../trimmed/trimmed.plugin';
+import { TrimmedEntity } from '../../store/dataSource/trimmed.plugin';
 import { GROUPING_ROW_TYPE, GROUP_EXPANDED, GROUP_EXPAND_EVENT, PSEUDO_GROUP_COLUMN, PSEUDO_GROUP_ITEM_VALUE } from './grouping.const';
 import { doExpand, doCollapse } from './grouping.row.expand.service';
 import { BeforeSourceSetEvent, GroupingOptions, OnExpandEvent, SourceGather } from './grouping.row.types';
