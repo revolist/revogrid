@@ -79,13 +79,17 @@ export namespace Components {
          */
         "getColumns": () => Promise<RevoGrid.ColumnRegular[]>;
         /**
-          * Get all active plugins instances
+          * Get the currently focused cell.
          */
         "getFocused": () => Promise<FocusedData | null>;
         /**
           * Get all active plugins instances
          */
         "getPlugins": () => Promise<RevoPlugin.Plugin[]>;
+        /**
+          * Get the currently selected Range.
+         */
+        "getSelectedRange": () => Promise<Selection.RangeArea | null>;
         /**
           * Get data from source
          */
