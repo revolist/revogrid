@@ -109,12 +109,12 @@ export class OverlaySelection {
     this.orderEditor?.dragStart(e.detail);
   }
 
-  /** Recived keyboard down from element */
+  /** Get keyboard down from element */
   @Listen('keyup', { target: 'document' }) onKeyUp(e: KeyboardEvent) {
     this.keyboardService?.keyUp(e);
   }
 
-  /** Recived keyboard down from element */
+  /** Get keyboard down from element */
   @Listen('keydown', { target: 'document' }) onKeyDown(e: KeyboardEvent) {
     this.keyboardService?.keyDown(e, this.range);
   }

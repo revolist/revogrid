@@ -3,7 +3,7 @@ import each from 'lodash/each';
 
 import GridResizeService from '../revoGrid/viewport.resize.service';
 import LocalScrollService from '../../services/localScrollService';
-import { RevoGrid } from '../../interfaces';
+import { RevoGrid, ScrollCoordinateEvent } from '../../interfaces';
 import { CONTENT_SLOT, FOOTER_SLOT, HEADER_SLOT } from '../revoGrid/viewport.helpers';
 type Delta = 'deltaX' | 'deltaY';
 type ScrollEvent = {
@@ -17,7 +17,7 @@ type ScrollEvent = {
   styleUrl: 'revogr-viewport-scroll-style.scss',
 })
 export class RevogrViewportScroll {
-  @Event({ bubbles: false }) scrollViewport: EventEmitter<RevoGrid.ViewPortScrollEvent>;
+  @Event({ bubbles: true }) scrollViewport: EventEmitter<RevoGrid.ViewPortScrollEvent>;
   @Event() resizeViewport: EventEmitter<RevoGrid.ViewPortResizeEvent>;
   @Event() scrollchange: EventEmitter<{ type: RevoGrid.DimensionType; hasScroll: boolean }>;
 
@@ -80,6 +80,12 @@ export class RevogrViewportScroll {
 
   @Listen('mousewheel-vertical') mousewheelVertical({ detail: e }: CustomEvent<ScrollEvent>) {
     this.verticalMouseWheel(e);
+  }
+  @Listen('mousewheel-horizontal') mousewheelHorizontal({ detail: e }: CustomEvent<ScrollEvent>) {
+    this.horizontalMouseWheel(e);
+  }
+  @Listen('scroll-coordinate') scrollApply({ detail: { type, coordinate } }: CustomEvent<ScrollCoordinateEvent>) {
+    this.applyOnScroll(type, coordinate);
   }
 
   connectedCallback() {
@@ -238,10 +244,10 @@ export class RevogrViewportScroll {
    * Extra layer for scroll event monitoring, where MouseWheel event is not passing
    * We need to trigger scroll event in case there is no mousewheel event
    */
-  private onScroll(dimension: RevoGrid.DimensionType, e: MouseEvent) {
+  private onScroll(type: RevoGrid.DimensionType, e: MouseEvent) {
     const target = e.target as HTMLElement | undefined;
     let scroll = 0;
-    switch (dimension) {
+    switch (type) {
       case 'rgCol':
         scroll = target?.scrollLeft;
         break;
@@ -249,9 +255,14 @@ export class RevogrViewportScroll {
         scroll = target?.scrollTop;
         break;
     }
-    const change = new Date().getTime() - this.mouseWheelScroll[dimension];
+    this.applyOnScroll(type, scroll);
+  }
+
+  private applyOnScroll(type: RevoGrid.DimensionType, coordinate: number) {
+    const change = new Date().getTime() - this.mouseWheelScroll[type];
+    // apply after throttling
     if (change > this.scrollThrottling) {
-      this.scrollService?.scroll(scroll, dimension);
+      this.scrollService?.scroll(coordinate, type);
     }
   }
 

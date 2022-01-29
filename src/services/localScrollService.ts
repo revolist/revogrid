@@ -20,11 +20,11 @@ const initialParams: Params = {
   virtualSize: 0,
   maxSize: 0,
 };
-
+const NO_COORDINATE = -1;
 export default class LocalScrollService {
   private preventArtificialScroll: Record<RevoGrid.DimensionType, () => void | null> = { rgRow: null, rgCol: null };
   // to check if scroll changed
-  private previousScroll: Record<RevoGrid.DimensionType, number> = { rgRow: 0, rgCol: 0 };
+  private previousScroll: Record<RevoGrid.DimensionType, number> = { rgRow: NO_COORDINATE, rgCol: NO_COORDINATE };
   private params: Record<RevoGrid.DimensionType, Params> = { rgRow: { ...initialParams }, rgCol: { ...initialParams } };
 
   constructor(private cfg: Config) {}
@@ -69,10 +69,15 @@ export default class LocalScrollService {
   }
 
   // initiate scrolling event
-  scroll(coordinate: number, dimension: RevoGrid.DimensionType, force: boolean = false, delta?: number) {
+  scroll(
+    coordinate: number,
+    dimension: RevoGrid.DimensionType,
+    force = false,
+    delta?: number
+  ) {
     this.cancelScroll(dimension);
     if (!force && this.previousScroll[dimension] === coordinate) {
-      this.previousScroll[dimension] = 0;
+      this.previousScroll[dimension] = NO_COORDINATE;
       return;
     }
 
@@ -91,7 +96,7 @@ export default class LocalScrollService {
   // check if scroll outside of region to avoid looping
   private wrapCoordinate(c: number, param: Params): number {
     if (c < 0) {
-      return 0;
+      return NO_COORDINATE;
     }
 
     if (c > param.maxSize) {

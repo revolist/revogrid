@@ -361,3 +361,7 @@ export interface FocusRenderEvent extends AllDimensionType {
   range: Selection.RangeArea;
   next?: Partial<Selection.Cell>;
 }
+export type ScrollCoordinateEvent = {
+  type: RevoGrid.DimensionType;
+  coordinate: number;
+};
