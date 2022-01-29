@@ -282,6 +282,10 @@ export default class ViewportService {
       ), start, end);
   }
 
+  getSelectedRange(): Selection.RangeArea | null {
+    return this.sv.selectionStoreConnector.selectedRange;
+  }
+
   setEdit(rowIndex: number, colIndex: number, colType: RevoGrid.DimensionCols, rowType: RevoGrid.DimensionRows) {
     this.sv.selectionStoreConnector?.setEditByCell(this.getStoreCoordinateByType(colType, rowType), { x: colIndex, y: rowIndex });
   }

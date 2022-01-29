@@ -516,15 +516,26 @@ export class RevoGridComponent {
   }
 
   /**
-   * Get all active plugins instances
+   * Get the currently focused cell.
    */
   @Method() async getFocused(): Promise<FocusedData | null> {
     return this.viewport?.getFocused();
   }
 
+  /**
+   * Get size of content
+   * Including all pinned data
+   */
   @Method() async getContentSize(): Promise<Selection.Cell> {
     return this.dimensionProvider?.getFullSize();
   }
+  /**
+   * Get the currently selected Range.
+   */
+  @Method() async getSelectedRange(): Promise<Selection.RangeArea|null> {
+    return this.viewport?.getSelectedRange();
+  }
+
 
   // --------------------------------------------------------------------------
   //

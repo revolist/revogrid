@@ -116,6 +116,9 @@ export class OverlaySelection {
 
   /** Get keyboard down from element */
   @Listen('keydown', { target: 'document' }) onKeyDown(e: KeyboardEvent) {
+    if (e.defaultPrevented) {
+      return;
+    }
     this.keyboardService?.keyDown(e, this.range);
   }
 

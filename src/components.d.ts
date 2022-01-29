@@ -7,7 +7,7 @@
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 import { ApplyFocusEvent, BeforeCellRenderEvent, DragStartEvent, Edition, FocusRenderEvent, Observable, RevoGrid, RevoPlugin, Selection, ThemeSpace } from "./interfaces";
 import { AutoSizeColumnConfig } from "./plugins/autoSizeColumn";
-import { ColumnFilterConfig, FilterCollection } from "./plugins/filter/filter.plugin";
+import { ColumnFilterConfig, FilterCaptions, FilterCollection } from "./plugins/filter/filter.plugin";
 import { GroupingOptions } from "./plugins/groupingRow/grouping.row.types";
 import { FocusedData } from "./components/revoGrid/viewport.service";
 import { ColumnCollection } from "./services/column.data.provider";
@@ -78,15 +78,22 @@ export namespace Components {
           * Receive all columns in data source
          */
         "getColumns": () => Promise<RevoGrid.ColumnRegular[]>;
+        /**
+          * Get size of content Including all pinned data
+         */
         "getContentSize": () => Promise<Selection.Cell>;
         /**
-          * Get all active plugins instances
+          * Get the currently focused cell.
          */
         "getFocused": () => Promise<FocusedData | null>;
         /**
           * Get all active plugins instances
          */
         "getPlugins": () => Promise<RevoPlugin.Plugin[]>;
+        /**
+          * Get the currently selected Range.
+         */
+        "getSelectedRange": () => Promise<Selection.RangeArea | null>;
         /**
           * Get data from source
          */
@@ -238,6 +245,7 @@ export namespace Components {
         "editor": Edition.EditorCtr | null;
     }
     interface RevogrFilterPanel {
+        "filterCaptions": FilterCaptions | undefined;
         "filterEntities": Record<string, LogicFunction>;
         "filterNames": Record<string, string>;
         "filterTypes": Record<string, string[]>;
@@ -724,6 +732,7 @@ declare namespace LocalJSX {
         "onCloseEdit"?: (event: CustomEvent<boolean | undefined>) => void;
     }
     interface RevogrFilterPanel {
+        "filterCaptions"?: FilterCaptions | undefined;
         "filterEntities"?: Record<string, LogicFunction>;
         "filterNames"?: Record<string, string>;
         "filterTypes"?: Record<string, string[]>;
