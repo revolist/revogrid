@@ -19,10 +19,11 @@ type Config = {
   dataStore: Observable<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
 
   setTempRange(e: Selection.TempRange | null): Event;
-  internalSelectionChanged(e: Selection.ChangedRange): Event;
-  internalRangeDataApply(e: Edition.BeforeRangeSaveDataDetails): CustomEvent;
+  selectionChanged(e: Selection.ChangedRange): Event;
+  rangeCopy(e: Selection.ChangedRange): Event;
+  rangeDataApply(e: Edition.BeforeRangeSaveDataDetails): CustomEvent;
   setRange(e: Selection.RangeArea): boolean;
-  beforeRangeDataApply(e: {
+  clearRangeDataApply(e: {
     range: Selection.RangeArea
   }): CustomEvent<{
     range: Selection.RangeArea
@@ -161,7 +162,7 @@ export class AutoFillService {
     e.preventDefault();
   }
 
-  /** Clear current range selection */
+  // Clear current range selection
   clearAutoFillSelection() {
     // Apply autofill values on mouse up
     if (this.autoFillInitial) {
@@ -174,7 +175,7 @@ export class AutoFillService {
           const {
             defaultPrevented: stopApply,
             detail: { range: newRange }
-          } = this.sv.beforeRangeDataApply({
+          } = this.sv.clearRangeDataApply({
             range,
           });
           if (!stopApply) {
@@ -203,7 +204,7 @@ export class AutoFillService {
     const {
       defaultPrevented: stopRange,
       detail,
-    } = this.sv.internalRangeDataApply({
+    } = this.sv.rangeDataApply({
       data,
       models,
       type: this.sv.dataStore.get('type'),
@@ -227,9 +228,15 @@ export class AutoFillService {
     const { mapping, changed } = this.sv.columnService.getRangeData(rangeData, this.sv.columnService.columns);
     rangeData.newData = changed;
     rangeData.mapping = mapping;
-    const e = this.sv.internalSelectionChanged(rangeData);
+    let e = this.sv.selectionChanged(rangeData);
     if (e.defaultPrevented) {
       this.sv.setTempRange(null);
+      return;
+    }
+
+    e = this.sv.rangeCopy(rangeData);
+    if (e.defaultPrevented) {
+      this.sv.setRange(newRange);
       return;
     }
     this.onRangeApply(rangeData.newData, newRange);

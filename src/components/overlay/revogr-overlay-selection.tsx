@@ -78,9 +78,13 @@ export class OverlaySelection {
   @Event() beforeRangeDataApply: EventEmitter<FocusRenderEvent>;
   /** Selection range changed */
   @Event({ cancelable: true }) internalSelectionChanged: EventEmitter<Selection.ChangedRange>;
+  /** Selection range changed */
+  @Event({ cancelable: true, bubbles: true }) beforeRangeCopyApply: EventEmitter<Selection.ChangedRange>;
 
   /** Range data apply */
   @Event({ cancelable: true }) internalRangeDataApply: EventEmitter<Edition.BeforeRangeSaveDataDetails>;
+  /** Range copy */
+  @Event({ cancelable: true }) rangeClipboardCopy: EventEmitter;
 
   // --------------------------------------------------------------------------
   //
@@ -150,13 +154,15 @@ export class OverlaySelection {
       columnService: this.columnService,
       dataStore: this.dataStore,
 
-      beforeRangeDataApply: e => this.beforeRangeDataApply.emit({
+      clearRangeDataApply: e => this.beforeRangeDataApply.emit({
         ...e,
         ...this.types
       }),
       setTempRange: e => this.setTempRange.emit(e),
-      internalSelectionChanged: e => this.internalSelectionChanged.emit(e),
-      internalRangeDataApply: e => this.internalRangeDataApply.emit(e),
+      selectionChanged: e => this.internalSelectionChanged.emit(e),
+      rangeCopy: e => this.beforeRangeCopyApply.emit(e),
+      rangeDataApply: e => this.internalRangeDataApply.emit(e),
+
       setRange: e => this.triggerRangeEvent(e),
       getData: () => this.getData(),
     });
@@ -177,7 +183,26 @@ export class OverlaySelection {
       columnService: this.columnService,
       dataStore: this.dataStore,
       onRangeApply: (d, r) => this.autoFillService.onRangeApply(d, r),
-      internalCopy: () => this.internalCopy.emit(),
+      onRangeCopy: (range) => {
+        if (!range) {
+          return undefined;
+        }
+        const {
+          data,
+          mapping
+        } = this.columnService.copyRangeArray(range, this.dataStore);
+        const event = this.rangeClipboardCopy.emit({
+          range,
+          data,
+          mapping,
+          ...this.types
+        });
+        if (event.defaultPrevented) {
+          return undefined;
+        }
+        return event.detail.data;
+      },
+      beforeCopy: (range) => this.internalCopy.emit(range),
     });
   }
 

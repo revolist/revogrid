@@ -10,26 +10,24 @@ type Config = {
   columnService: ColumnService;
   dataStore: Observable<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
   onRangeApply(data: RevoGrid.DataLookup, range: Selection.RangeArea): void;
-  internalCopy(): Event;
+  onRangeCopy(range: Selection.RangeArea): any;
+  beforeCopy(range: Selection.RangeArea): Event;
 };
 
 export class ClipboardService {
   private clipboard: HTMLRevogrClipboardElement;
   constructor(private sv: Config) {}
   private onCopy(e: DataTransfer) {
-    const canCopy = this.sv.internalCopy();
-    if (canCopy.defaultPrevented) {
-      return false;
-    }
-    let focus = this.sv.selectionStoreService.focused;
+    const focus = this.sv.selectionStoreService.focused;
     let range = this.sv.selectionStoreService.ranged;
-    let data: RevoGrid.DataFormat[][];
     if (!range) {
       range = getRange(focus, focus);
     }
-    if (range) {
-      data = this.sv.columnService.copyRangeArray(range, this.sv.dataStore);
+    const canCopy = this.sv.beforeCopy(range);
+    if (canCopy.defaultPrevented) {
+      return false;
     }
+    const data = this.sv.onRangeCopy(range);
     this.clipboard.doCopy(e, data);
     return true;
   }

@@ -29,6 +29,7 @@
 | `before-edit-render`       |                         | `CustomEvent<FocusRenderEvent>`                                                                                                                       |
 | `before-set-range`         |                         | `CustomEvent<any>`                                                                                                                                    |
 | `beforeFocusCell`          |                         | `CustomEvent<{ prop: ColumnProp; model: DataType; val?: string; rowIndex: number; type: DimensionRows; }>`                                            |
+| `beforeRangeCopyApply`     | Selection range changed | `CustomEvent<{ type: DimensionRows; newRange: RangeArea; oldRange: RangeArea; mapping: OldNewRangeMapping; newData: { [key: number]: DataType; }; }>` |
 | `beforeRangeDataApply`     | Range data apply        | `CustomEvent<FocusRenderEvent>`                                                                                                                       |
 | `focusCell`                |                         | `CustomEvent<AllDimensionType & FocusedCells>`                                                                                                        |
 | `internalCellEdit`         |                         | `CustomEvent<{ prop: ColumnProp; model: DataType; val?: string; rowIndex: number; type: DimensionRows; }>`                                            |
@@ -36,6 +37,7 @@
 | `internalPaste`            |                         | `CustomEvent<any>`                                                                                                                                    |
 | `internalRangeDataApply`   | Range data apply        | `CustomEvent<{ data: DataLookup; models: { [rowIndex: number]: DataType; }; type: DimensionRows; }>`                                                  |
 | `internalSelectionChanged` | Selection range changed | `CustomEvent<{ type: DimensionRows; newRange: RangeArea; oldRange: RangeArea; mapping: OldNewRangeMapping; newData: { [key: number]: DataType; }; }>` |
+| `rangeClipboardCopy`       | Range copy              | `CustomEvent<any>`                                                                                                                                    |
 | `setEdit`                  |                         | `CustomEvent<{ isCancel: boolean; } & BeforeSaveDataDetails>`                                                                                         |
 | `setRange`                 |                         | `CustomEvent<RangeArea & { type: MultiDimensionType; }>`                                                                                              |
 | `setTempRange`             |                         | `CustomEvent<{ type: string; area: RangeArea; }>`                                                                                                     |

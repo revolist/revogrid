@@ -312,19 +312,26 @@ export default class ColumnService {
   copyRangeArray(
     range: Selection.RangeArea,
     store: Observable<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>,
-  ): RevoGrid.DataFormat[][] {
+  ) {
     const cols = [...this.columns];
     const props = slice(cols, range.x, range.x1 + 1).map(v => v.prop);
     const toCopy: RevoGrid.DataFormat[][] = [];
+    const mapping: any = {};
     for (let i = range.y; i <= range.y1; i++) {
       const rgRow: RevoGrid.DataFormat[] = [];
+      mapping[i] = {};
       for (let prop of props) {
         const item = getSourceItem(store, i);
-        rgRow.push(item[prop]);
+        const val = item[prop];
+        rgRow.push();
+        mapping[i][prop] = val;
       }
       toCopy.push(rgRow);
     }
-    return toCopy;
+    return {
+      data: toCopy,
+      mapping
+    };
   }
 
   static getData(val?: any) {

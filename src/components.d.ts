@@ -814,6 +814,10 @@ declare namespace LocalJSX {
         "onBefore-set-range"?: (event: CustomEvent<any>) => void;
         "onBeforeFocusCell"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
         /**
+          * Selection range changed
+         */
+        "onBeforeRangeCopyApply"?: (event: CustomEvent<Selection.ChangedRange>) => void;
+        /**
           * Range data apply
          */
         "onBeforeRangeDataApply"?: (event: CustomEvent<FocusRenderEvent>) => void;
@@ -829,6 +833,10 @@ declare namespace LocalJSX {
           * Selection range changed
          */
         "onInternalSelectionChanged"?: (event: CustomEvent<Selection.ChangedRange>) => void;
+        /**
+          * Range copy
+         */
+        "onRangeClipboardCopy"?: (event: CustomEvent<any>) => void;
         "onSetEdit"?: (event: CustomEvent<Edition.BeforeEdit>) => void;
         "onSetRange"?: (event: CustomEvent<Selection.RangeArea & { type: RevoGrid.MultiDimensionType }>) => void;
         "onSetTempRange"?: (event: CustomEvent<Selection.TempRange | null>) => void;
