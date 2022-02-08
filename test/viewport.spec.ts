@@ -1,17 +1,20 @@
+import { RevoGrid } from '../src/interfaces';
 import { getFirstItem, getItems, getLastItem, recombineByOffset } from '../src/store/viewPort/viewport.helpers';
-import { ViewportStateItems, VirtualPositionItem } from '../src/interfaces';
-import generateDataRows from '../src/utilsExternal/generate-data-rows';
+import { generateFakeDataObject } from '../src/utilsExternal/generateFakeDataObject';
 
-type ItemsToUpdate = Pick<ViewportStateItems, 'items' | 'start' | 'end'>;
+type ItemsToUpdate = Pick<RevoGrid.ViewportStateItems, 'items' | 'start' | 'end'>;
 
 describe('revo-grid-viewport', () => {
   const virtualSize: number = 600;
   const originItemSize: number = 30;
-  const data = generateDataRows(100, 10);
+  const data = generateFakeDataObject({
+    rows: 100,
+    cols: 10,
+  });
   const realSize = data.length * originItemSize;
   let recombined: ItemsToUpdate;
   let range = { start: 0, end: 0 };
-  let items: VirtualPositionItem[] = getItems({
+  let items: RevoGrid.VirtualPositionItem[] = getItems({
     start: 0,
     startIndex: 0,
     origSize: originItemSize,

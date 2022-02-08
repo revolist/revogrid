@@ -5,12 +5,13 @@
 
 ## Properties
 
-| Property         | Attribute | Description | Type                              | Default     |
-| ---------------- | --------- | ----------- | --------------------------------- | ----------- |
-| `filterEntities` | --        |             | `{ [x: string]: LogicFunction; }` | `{}`        |
-| `filterNames`    | --        |             | `{ [x: string]: string; }`        | `{}`        |
-| `filterTypes`    | --        |             | `{ [x: string]: string[]; }`      | `{}`        |
-| `uuid`           | `uuid`    |             | `string`                          | `undefined` |
+| Property         | Attribute | Description | Type                                                              | Default     |
+| ---------------- | --------- | ----------- | ----------------------------------------------------------------- | ----------- |
+| `filterCaptions` | --        |             | `{ title: string; save: string; reset: string; cancel: string; }` | `undefined` |
+| `filterEntities` | --        |             | `{ [x: string]: LogicFunction; }`                                 | `{}`        |
+| `filterNames`    | --        |             | `{ [x: string]: string; }`                                        | `{}`        |
+| `filterTypes`    | --        |             | `{ [x: string]: string[]; }`                                      | `{}`        |
+| `uuid`           | `uuid`    |             | `string`                                                          | `undefined` |
 
 
 ## Events

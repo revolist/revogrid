@@ -7,4 +7,4 @@ Version 3.0 introduces breaking changes:
     - data-cell -> rgCell;
     - data-header-cell -> rgHeaderCell;
 - All methods migrated to lowercase in order to support the modern approach of event naming. It means events name migration: `afterEdit` -> `afteredit` for all events. Check api for details;
-- Added pure esm modules support in order to use the grid in all modern frontend tooling like vitejs, parcel etc, now you can import custom-elements without lazy loading, just keep in mind you are responsible for polifills.
+- Added pure esm modules support in order to use the grid in all modern frontend tooling like vitejs, parcel etc, now you can import custom-elements without lazy loading, just keep in mind you are responsible for polyfills.

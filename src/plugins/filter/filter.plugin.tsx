@@ -13,12 +13,25 @@ type CustomFilter = {
   func: LogicFunction;
 };
 
+export type FilterCaptions = {
+  title: string;
+  save: string;
+  reset: string;
+  cancel: string;
+}
+
+export type FilterLocalization = {
+  captions: FilterCaptions;
+  filterNames: Record<FilterType, string>;
+}
+
 /**
  * @typedef ColumnFilterConfig
  * @type {object}
  * @property {FilterCollection|undefined} collection - preserved filter data
  * @property {string[]|undefined} include - filters to be included, if defined everything else out of scope will be ignored
  * @property {Record<string, CustomFilter>|undefined} customFilters - hash map of {FilterType:CustomFilter}.
+ * @property {FilterLocalization|undefined} localization - translation for filter popup captions.
  * A way to define your own filter types per column
  */
 export type ColumnFilterConfig = {
@@ -26,6 +39,7 @@ export type ColumnFilterConfig = {
   include?: string[];
   customFilters?: Record<string, CustomFilter>;
   filterProp?: string;
+  localization?: FilterLocalization;
 };
 type HeaderEvent = CustomEvent<RevoGrid.ColumnRegular>;
 type FilterCollectionItem = {
@@ -76,6 +90,7 @@ export default class FilterPlugin extends BasePlugin {
         uuid={`filter-${uiid}`}
         filterNames={this.possibleFilterNames}
         filterEntities={this.possibleFilterEntities}
+        filterCaptions={config.localization?.captions}
         onFilterChange={e => this.onFilterChange(e.detail)}
         ref={e => (this.pop = e)}
       />,
@@ -127,6 +142,16 @@ export default class FilterPlugin extends BasePlugin {
         }
         return result;
       }, {});
+    }
+
+    if (config.localization) {
+      if (config.localization.filterNames) {
+        Object.entries(config.localization.filterNames).forEach(([k, v]) => {
+          if (this.possibleFilterNames[k] != void 0) {
+            this.possibleFilterNames[k] = v;
+          }
+        });
+      }
     }
   }
 

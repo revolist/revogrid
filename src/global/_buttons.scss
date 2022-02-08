@@ -19,6 +19,18 @@
     border: 1px solid darken($color: $bg, $amount: 5);
   }
 
+  &.red {
+    $bg: #E0662E;
+    background-color: $bg;
+    border: 1px solid darken($color: $bg, $amount: 5);
+  }
+
+  &:disabled,
+  &[disabled] {
+    cursor: not-allowed !important;
+    filter: opacity(0.35) !important;
+  }
+
   &.light {
     $br-color: #cedefa;
     $color: #4876ca;
@@ -28,4 +40,7 @@
     color: $color;
     box-shadow: none;
   }
+
+  
+  
 }

@@ -1,6 +1,10 @@
 {
   "name": "@revolist/revogrid",
+<<<<<<< HEAD
   "version": "4.1.0-next.65",
+=======
+  "version": "4.1.0-next.63",
+>>>>>>> 48f7c278acc45e4d96f2719c6feb984418f257b6
   "description": "Virtual reactive data grid component - RevoGrid.",
   "license": "MIT",
   "directories": {
@@ -64,10 +68,10 @@
     "@angular/core": "^11.0.9",
     "@juggle/resize-observer": "^3.2.0",
     "@stencil/angular-output-target": "0.0.5",
-    "@stencil/core": "2.8.0",
+    "@stencil/core": "2.13.0",
+    "@stencil/store": "^1.5.0",
     "@stencil/react-output-target": "0.0.9",
     "@stencil/sass": "^1.4.1",
-    "@stencil/store": "^1.3.0",
     "@stencil/svelte-output-target": "0.0.3",
     "@stencil/vue-output-target": "^0.2.5",
     "@types/events": "^3.0.0",

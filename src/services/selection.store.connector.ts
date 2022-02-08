@@ -58,6 +58,10 @@ export default class SelectionStoreConnector {
     return this.focusedStore?.entity.store.get('focus');
   }
 
+  get selectedRange(): Selection.RangeArea | undefined {
+    return this.focusedStore?.entity.store.get('range');
+  }
+
   private readonly sections: Element[] = [];
 
   registerSection(e?: Element) {
