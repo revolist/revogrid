@@ -85,6 +85,7 @@ export class OverlaySelection {
   @Event({ cancelable: true }) internalRangeDataApply: EventEmitter<Edition.BeforeRangeSaveDataDetails>;
   /** Range copy */
   @Event({ cancelable: true }) rangeClipboardCopy: EventEmitter;
+  @Event({ cancelable: true }) rangeClipboardPaste: EventEmitter;
 
   // --------------------------------------------------------------------------
   //
@@ -206,6 +207,13 @@ export class OverlaySelection {
         return event.detail.data;
       },
       beforeCopy: (range) => this.internalCopy.emit(range),
+      beforePaste: (data, range) => {
+        return this.rangeClipboardPaste.emit({
+          data,
+          range,
+          ...this.types
+        })
+      }
     });
   }
 

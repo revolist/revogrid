@@ -11,12 +11,20 @@ type Config = {
   dataStore: Observable<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
   onRangeApply(data: RevoGrid.DataLookup, range: Selection.RangeArea): void;
   onRangeCopy(range: Selection.RangeArea): any;
-  beforeCopy(range: Selection.RangeArea): Event;
+  beforeCopy(range: Selection.RangeArea): CustomEvent;
+  beforePaste(data: RevoGrid.DataLookup, range: Selection.RangeArea): CustomEvent;
 };
 
 export class ClipboardService {
   private clipboard: HTMLRevogrClipboardElement;
   constructor(private sv: Config) {}
+
+  renderClipboard() {
+    return <revogr-clipboard
+      onCopyRegion={e => this.onCopy(e.detail)}
+      ref={e => (this.clipboard = e)}
+      onPasteRegion={e => this.onPaste(e.detail)} />;
+  }
   private onCopy(e: DataTransfer) {
     const focus = this.sv.selectionStoreService.focused;
     let range = this.sv.selectionStoreService.ranged;
@@ -32,20 +40,17 @@ export class ClipboardService {
     return true;
   }
 
-  renderClipboard() {
-    return <revogr-clipboard
-      onCopyRegion={e => this.onCopy(e.detail)}
-      ref={e => (this.clipboard = e)}
-      onPasteRegion={e => this.onPaste(e.detail)} />;
-  }
-
   private onPaste(data: string[][]) {
     const focus = this.sv.selectionStoreService.focused;
     const isEditing = this.sv.selectionStoreService.edited !== null;
     if (!focus || isEditing) {
       return;
     }
-    const { changed, range } = this.sv.columnService.getTransformedDataToApply(focus, data);
+    let { changed, range } = this.sv.columnService.getTransformedDataToApply(focus, data);
+    const { defaultPrevented: canPaste } = this.sv.beforePaste(changed, range);
+    if (canPaste) {
+      return;
+    }
     this.sv.onRangeApply(changed, range);
   }
 }

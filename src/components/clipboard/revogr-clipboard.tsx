@@ -36,7 +36,11 @@ export class Clipboard {
 
   private htmlParse(data: string) {
     const result: string[][] = [];
-    const table = document.createRange().createContextualFragment(data).querySelector('table');
+    const fragment = document.createRange().createContextualFragment(data);
+    const table = fragment.querySelector('table');
+    if (!table) {
+      return this.textParse(data);
+    }
     for (const rgRow of Array.from(table.rows)) {
       result.push(Array.from(rgRow.cells).map(cell => cell.innerText));
     }

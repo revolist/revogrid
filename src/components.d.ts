@@ -846,6 +846,7 @@ declare namespace LocalJSX {
           * Range copy
          */
         "onRangeClipboardCopy"?: (event: CustomEvent<any>) => void;
+        "onRangeClipboardPaste"?: (event: CustomEvent<any>) => void;
         "onSetEdit"?: (event: CustomEvent<Edition.BeforeEdit>) => void;
         "onSetRange"?: (event: CustomEvent<Selection.RangeArea & { type: RevoGrid.MultiDimensionType }>) => void;
         "onSetTempRange"?: (event: CustomEvent<Selection.TempRange | null>) => void;
