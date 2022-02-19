@@ -127,7 +127,7 @@ export class OverlaySelection {
     this.keyboardService?.keyDown(e, this.range);
   }
 
-  /** Create selection store */
+  // selection
   @Watch('selectionStore') selectionServiceSet(s: Observable<Selection.SelectionStoreState>) {
     this.selectionStoreService = new SelectionStoreService(s, {
       changeRange: range => this.triggerRangeEvent(range),
@@ -147,7 +147,7 @@ export class OverlaySelection {
     this.createAutoFillService();
     this.createClipboardService();
   }
-
+  // autofill
   @Watch('dimensionRow')
   @Watch('dimensionCol')
   createAutoFillService() {
@@ -172,6 +172,7 @@ export class OverlaySelection {
     });
   }
 
+  // columns
   @Watch('dataStore')
   @Watch('colData')
   columnServiceSet() {
@@ -181,6 +182,7 @@ export class OverlaySelection {
     this.createClipboardService();
   }
 
+  // clipboard
   createClipboardService() {
     this.clipboardService = new ClipboardService({
       selectionStoreService: this.selectionStoreService,

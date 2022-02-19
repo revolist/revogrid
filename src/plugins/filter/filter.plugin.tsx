@@ -90,7 +90,7 @@ export default class FilterPlugin extends BasePlugin {
         uuid={`filter-${uiid}`}
         filterNames={this.possibleFilterNames}
         filterEntities={this.possibleFilterEntities}
-        filterCaptions={config.localization?.captions}
+        filterCaptions={config?.localization?.captions}
         onFilterChange={e => this.onFilterChange(e.detail)}
         ref={e => (this.pop = e)}
       />,
