@@ -18,7 +18,7 @@ export const config: Config = {
   minifyCss: true,
   preamble: 'Built by Revolist',
   hashedFileNameLength: 8,
-
+  invisiblePrehydration: false,
   extras: {
     // We need the following for IE11 and old Edge:
     cssVarsShim: true,
