@@ -317,6 +317,7 @@ export namespace Components {
         "headerProp": Record<string, any>;
         "height": number;
         "resize": boolean;
+        "rowClass": string;
         "rowHeaderColumn": RevoGrid.RowHeaders;
         "uiid": string;
     }
@@ -865,6 +866,7 @@ declare namespace LocalJSX {
         "onElementToScroll"?: (event: CustomEvent<ElementScroll>) => void;
         "onScrollViewport"?: (event: CustomEvent<RevoGrid.ViewPortScrollEvent>) => void;
         "resize"?: boolean;
+        "rowClass"?: string;
         "rowHeaderColumn"?: RevoGrid.RowHeaders;
         "uiid"?: string;
     }

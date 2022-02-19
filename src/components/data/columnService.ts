@@ -297,7 +297,7 @@ export default class ColumnService {
     for (let rowIndex = d.y, i = 0; rowIndex < d.y1 + 1; rowIndex++, i++) {
       // columns
       for (let colIndex = d.x, j = 0; colIndex < d.x1 + 1; colIndex++, j++) {
-        const prop = this.columns[colIndex].prop;
+        const prop = this.columns[colIndex]?.prop;
         area.push({
           prop,
           rowIndex,

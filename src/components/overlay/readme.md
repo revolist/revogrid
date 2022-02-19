@@ -38,6 +38,7 @@
 | `internalRangeDataApply`   | Range data apply        | `CustomEvent<{ data: DataLookup; models: { [rowIndex: number]: DataType; }; type: DimensionRows; }>`                                                  |
 | `internalSelectionChanged` | Selection range changed | `CustomEvent<{ type: DimensionRows; newRange: RangeArea; oldRange: RangeArea; mapping: OldNewRangeMapping; newData: { [key: number]: DataType; }; }>` |
 | `rangeClipboardCopy`       | Range copy              | `CustomEvent<any>`                                                                                                                                    |
+| `rangeClipboardPaste`      |                         | `CustomEvent<any>`                                                                                                                                    |
 | `setEdit`                  |                         | `CustomEvent<{ isCancel: boolean; } & BeforeSaveDataDetails>`                                                                                         |
 | `setRange`                 |                         | `CustomEvent<RangeArea & { type: MultiDimensionType; }>`                                                                                              |
 | `setTempRange`             |                         | `CustomEvent<{ type: string; area: RangeArea; }>`                                                                                                     |

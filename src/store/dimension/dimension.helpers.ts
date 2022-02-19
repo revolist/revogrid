@@ -35,7 +35,8 @@ export function calculateDimensionData(
         end: 0,
       };
       if (previous) {
-        newItem.start = (itemIndex - previous.itemIndex - 1) * originItemSize + previous.end;
+        const itemsBetween = (itemIndex - previous.itemIndex - 1) * originItemSize;
+        newItem.start = itemsBetween + previous.end;
       } else {
         newItem.start = itemIndex * originItemSize;
       }

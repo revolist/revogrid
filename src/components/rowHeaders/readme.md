@@ -5,14 +5,15 @@
 
 ## Properties
 
-| Property          | Attribute | Description | Type                    | Default     |
-| ----------------- | --------- | ----------- | ----------------------- | ----------- |
-| `dataPorts`       | --        |             | `ViewportData[]`        | `undefined` |
-| `headerProp`      | --        |             | `{ [x: string]: any; }` | `undefined` |
-| `height`          | `height`  |             | `number`                | `undefined` |
-| `resize`          | `resize`  |             | `boolean`               | `undefined` |
-| `rowHeaderColumn` | --        |             | `RowHeaders`            | `undefined` |
-| `uiid`            | `uiid`    |             | `string`                | `undefined` |
+| Property          | Attribute   | Description | Type                    | Default     |
+| ----------------- | ----------- | ----------- | ----------------------- | ----------- |
+| `dataPorts`       | --          |             | `ViewportData[]`        | `undefined` |
+| `headerProp`      | --          |             | `{ [x: string]: any; }` | `undefined` |
+| `height`          | `height`    |             | `number`                | `undefined` |
+| `resize`          | `resize`    |             | `boolean`               | `undefined` |
+| `rowClass`        | `row-class` |             | `string`                | `undefined` |
+| `rowHeaderColumn` | --          |             | `RowHeaders`            | `undefined` |
+| `uiid`            | `uiid`      |             | `string`                | `undefined` |
 
 
 ## Events

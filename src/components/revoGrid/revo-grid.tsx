@@ -938,6 +938,7 @@ export class RevoGridComponent {
       views.push(
         <revogr-row-headers
           height={contentHeight}
+          rowClass={this.rowClass}
           resize={this.resize}
           dataPorts={anyView.dataPorts}
           headerProp={anyView.headerProp}

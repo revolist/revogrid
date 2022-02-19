@@ -22,6 +22,7 @@ export class RevogrRowHeaders {
   @Prop() dataPorts: ViewportData[];
   @Prop() headerProp: Record<string, any>;
   @Prop() uiid: string;
+  @Prop() rowClass: string;
 
   @Prop() resize: boolean;
   @Prop() rowHeaderColumn: RevoGrid.RowHeaders;
@@ -50,6 +51,7 @@ export class RevogrRowHeaders {
 
       const viewData = {
         ...data,
+        rowClass: this.rowClass,
         dataStore: dataStore.store,
         colData: colData.store,
         viewportCol: viewport.store,
