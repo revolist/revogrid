@@ -1,4 +1,4 @@
-import { Component, Event, EventEmitter, Prop, h, Element, Host } from '@stencil/core';
+import { Component, Event, EventEmitter, Prop, h, Element, Host, Watch, Method } from '@stencil/core';
 
 import { Edition, RevoGrid } from '../../interfaces';
 import { EDIT_INPUT_WR } from '../../utils/consts';
@@ -8,10 +8,10 @@ import { TextEditor } from './editors/text';
   tag: 'revogr-edit',
   styleUrl: 'revogr-edit-style.scss',
 })
-export class Edit {
+export class RevoEdit {
   @Element() element: HTMLElement;
   @Prop() editCell: Edition.EditCell;
-  private currentEditor: Edition.EditorBase | null = null;
+  @Prop() saveBeforeClose: boolean = false;
 
   @Prop() column: RevoGrid.ColumnRegular | null;
   /** Custom editors register */
@@ -21,9 +21,25 @@ export class Edit {
 
   /** Close editor event */
   @Event({ bubbles: false }) closeEdit: EventEmitter<boolean | undefined>;
+  private currentEditor: Edition.EditorBase | null = null;
+  private saveRunning = false;
+
+  // shouldn't be cancelled by saveRunning
+  // editor requires getValue
+  @Watch('saveBeforeClose') saveOnClose(saveBeforeClose = false) {
+    if (saveBeforeClose && !this.saveRunning && this.currentEditor.getValue) {
+      this.saveRunning = true;
+      this.onSave(this.currentEditor.getValue(), true);
+    }
+  }
+
+  @Method() async cancel() {
+    this.saveRunning = true;
+  }
 
   /** Callback triggered on cell editor save */
   onSave(val: Edition.SaveData, preventFocus?: boolean): void {
+    this.saveRunning = true;
     if (this.editCell) {
       this.cellEdit.emit({
         rgCol: this.editCell.x,
@@ -39,13 +55,19 @@ export class Edit {
     if (this.currentEditor) {
       return;
     }
+    this.saveRunning = false;
     // fresh run
     // editor defined for the column
     if (this.editor) {
       this.currentEditor = new this.editor(
         this.column,
-        (e, preventFocus) => this.onSave(e, preventFocus),
-        focusNext => this.closeEdit.emit(focusNext),
+        (e, preventFocus) => {
+          this.onSave(e, preventFocus);
+        },
+        focusNext => {
+          this.saveRunning = true;
+          this.closeEdit.emit(focusNext);
+        },
       );
       return;
     }
@@ -62,6 +84,7 @@ export class Edit {
   }
 
   disconnectedCallback(): void {
+    this.saveRunning = false;
     if (!this.currentEditor) {
       return;
     }

@@ -7,6 +7,7 @@ import { ViewportProps } from './viewport.interfaces';
 type Props = {
   editors: Edition.Editors;
   useClipboard: boolean;
+  applyEditorChangesOnClose: boolean;
   readonly: boolean;
   range: boolean;
   rowClass: string;
@@ -22,7 +23,10 @@ type Props = {
  * First we render vertical parts - pinned start, data, pinned end
  * Per each column we render data collections: headers, pinned top, center data, pinned bottom
  */
-export const ViewPortSections = ({ resize, editors, rowClass, readonly, range, columns, useClipboard, columnFilter, registerElement, onEdit, onScroll }: Props) => {
+export const ViewPortSections = ({
+  resize, editors, rowClass, readonly, range, columns, useClipboard, columnFilter, applyEditorChangesOnClose,
+  registerElement, onEdit, onScroll
+}: Props) => {
   const viewPortHtml: VNode[] = [];
   /** render viewports columns */
   for (let view of columns) {
@@ -35,9 +39,7 @@ export const ViewPortSections = ({ resize, editors, rowClass, readonly, range, c
       canResize: resize,
       columnFilter,
     };
-    const dataViews: HTMLElement[] = [
-      <revogr-header {...headerProperties} slot={HEADER_SLOT} />,
-    ];
+    const dataViews: HTMLElement[] = [<revogr-header {...headerProperties} slot={HEADER_SLOT} />];
     view.dataPorts.forEach((data, j) => {
       const key = view.prop.key + (j + 1);
 
@@ -50,6 +52,7 @@ export const ViewPortSections = ({ resize, editors, rowClass, readonly, range, c
           readonly={readonly}
           range={range}
           useClipboard={useClipboard}
+          applyChangesOnClose={applyEditorChangesOnClose}
           onSetEdit={({ detail }) => onEdit(detail)}
         >
           <revogr-data
@@ -63,22 +66,13 @@ export const ViewPortSections = ({ resize, editors, rowClass, readonly, range, c
             slot={DATA_SLOT}
           />
           <revogr-temp-range selectionStore={data.segmentSelectionStore} dimensionRow={data.dimensionRow} dimensionCol={data.dimensionCol} />
-          <revogr-focus
-            rowType={ data.type }
-            colType={ view.type }
-            selectionStore={data.segmentSelectionStore}
-            dimensionRow={data.dimensionRow}
-            dimensionCol={data.dimensionCol}
-          />
+          <revogr-focus rowType={data.type} colType={view.type} selectionStore={data.segmentSelectionStore} dimensionRow={data.dimensionRow} dimensionCol={data.dimensionCol} />
         </revogr-overlay-selection>
       );
       dataViews.push(dataView);
     });
     viewPortHtml.push(
-      <revogr-viewport-scroll
-        {...view.prop}
-        ref={el => registerElement(el, view.prop.key)}
-        onScrollViewport={e => onScroll(e.detail, view.prop.key)}>
+      <revogr-viewport-scroll {...view.prop} ref={el => registerElement(el, view.prop.key)} onScrollViewport={e => onScroll(e.detail, view.prop.key)}>
         {dataViews}
       </revogr-viewport-scroll>,
     );

@@ -26,6 +26,10 @@ export namespace Components {
          */
         "addTrimmed": (trimmed: Record<number, boolean>, trimmedType?: string, type?: RevoGrid.DimensionRows) => Promise<CustomEvent<{ trimmed: Record<number, boolean>; trimmedType: string; type: string; }>>;
         /**
+          * Apply changes typed in editor on editor close except Escape cases If custom editor in use @method getValue required
+         */
+        "applyEditorChangesOnClose": boolean;
+        /**
           * Autosize config Enable columns autoSize, for more details check @autoSizeColumn plugin By default disabled, hence operation is not resource efficient true to enable with default params (double header separator click for autosize) or provide config
          */
         "autoSizeColumn": boolean | AutoSizeColumnConfig;
@@ -237,12 +241,14 @@ export namespace Components {
         "viewportRow": Observable<RevoGrid.ViewportState>;
     }
     interface RevogrEdit {
+        "cancel": () => Promise<void>;
         "column": RevoGrid.ColumnRegular | null;
         "editCell": Edition.EditCell;
         /**
           * Custom editors register
          */
         "editor": Edition.EditorCtr | null;
+        "saveBeforeClose": boolean;
     }
     interface RevogrFilterPanel {
         "filterCaptions": FilterCaptions | undefined;
@@ -288,6 +294,10 @@ export namespace Components {
         "parent": HTMLElement;
     }
     interface RevogrOverlaySelection {
+        /**
+          * If true applys changes when cell closes if not Escape
+         */
+        "applyChangesOnClose": boolean;
         "canDrag": boolean;
         "colData": Observable<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
         /**
@@ -450,6 +460,10 @@ declare global {
 }
 declare namespace LocalJSX {
     interface RevoGrid {
+        /**
+          * Apply changes typed in editor on editor close except Escape cases If custom editor in use @method getValue required
+         */
+        "applyEditorChangesOnClose"?: boolean;
         /**
           * Autosize config Enable columns autoSize, for more details check @autoSizeColumn plugin By default disabled, hence operation is not resource efficient true to enable with default params (double header separator click for autosize) or provide config
          */
@@ -731,6 +745,7 @@ declare namespace LocalJSX {
           * Close editor event
          */
         "onCloseEdit"?: (event: CustomEvent<boolean | undefined>) => void;
+        "saveBeforeClose"?: boolean;
     }
     interface RevogrFilterPanel {
         "filterCaptions"?: FilterCaptions | undefined;
@@ -802,6 +817,10 @@ declare namespace LocalJSX {
         "parent"?: HTMLElement;
     }
     interface RevogrOverlaySelection {
+        /**
+          * If true applys changes when cell closes if not Escape
+         */
+        "applyChangesOnClose"?: boolean;
         "canDrag"?: boolean;
         "colData"?: Observable<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
         /**

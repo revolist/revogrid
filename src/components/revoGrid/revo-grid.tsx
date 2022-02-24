@@ -84,6 +84,12 @@ export class RevoGridComponent {
   @Prop() editors: Edition.Editors = {};
 
   /**
+   * Apply changes typed in editor on editor close except Escape cases
+   * If custom editor in use @method getValue required
+   */
+  @Prop() applyEditorChangesOnClose = false;
+
+  /**
    * Custom grid plugins
    * Has to be predefined during first grid init
    * Every plugin should be inherited from BasePlugin
@@ -957,6 +963,7 @@ export class RevoGridComponent {
         range={this.range}
         rowClass={this.rowClass}
         editors={this.editors}
+        applyEditorChangesOnClose={this.applyEditorChangesOnClose}
         useClipboard={this.useClipboard}
         columns={this.viewport.columns}
         onEdit={detail => {

@@ -25,6 +25,7 @@ export class OverlaySelection {
   private autoFillService: AutoFillService | null = null;
   private clipboardService: ClipboardService | null = null;
   private orderEditor: HTMLRevogrOrderEditorElement;
+  private cellEditor: HTMLRevogrEditElement | null = null;
 
   @Element() element: HTMLElement;
 
@@ -52,6 +53,8 @@ export class OverlaySelection {
   @Prop() lastCell: Selection.Cell;
   /** Custom editors register */
   @Prop() editors: Edition.Editors;
+  /** If true applys changes when cell closes if not Escape */
+  @Prop() applyChangesOnClose: boolean = false;
 
   // --------------------------------------------------------------------------
   //
@@ -127,7 +130,7 @@ export class OverlaySelection {
     this.keyboardService?.keyDown(e, this.range);
   }
 
-  // selection
+  // selection & keyboard
   @Watch('selectionStore') selectionServiceSet(s: Observable<Selection.SelectionStoreState>) {
     this.selectionStoreService = new SelectionStoreService(s, {
       changeRange: range => this.triggerRangeEvent(range),
@@ -139,7 +142,12 @@ export class OverlaySelection {
       selectionStore: s,
       range: (r) => this.selectionStoreService.changeRange(r),
       focusNext: (f, next) => this.doFocus(f, f, next),
-      doEdit: (v, c) => !this.readonly && this.doEdit(v, c),
+      applyEdit: (val, isEscape) => {
+        if (this.readonly) {
+          return;
+        }
+        this.doEdit(val, isEscape);
+      },
       clearCell: () => !this.readonly && this.clearCell(),
       internalPaste: () => !this.readonly && this.internalPaste.emit(),
       getData: () => this.getData(),
@@ -261,8 +269,14 @@ export class OverlaySelection {
     const style = getElStyle(range, this.dimensionRow.state, this.dimensionCol.state);
     return (
       <revogr-edit
+        ref={(e) => {
+          if (this.cellEditor && !e && this.applyChangesOnClose) {
+            this.cellEditor.saveBeforeClose = true;
+          }
+          this.cellEditor = e;
+        } }
         onCellEdit={e => this.onCellEdit(e.detail)}
-        onCloseEdit={e => this.closeEdit(e)}
+        onCloseEdit={e => this.closeEdit(e, true)}
         editCell={editable}
         column={this.columnService.columns[editCell.x]}
         editor={this.columnService.getCellEditor(editCell.y, editCell.x, this.editors)}
@@ -384,6 +398,9 @@ export class OverlaySelection {
     if (this.canEdit()) {
       const editCell = this.selectionStore.get('focus');
       const data = this.columnService.getSaveData(editCell.y, editCell.x);
+      if (isCancel) {
+        this.cellEditor.cancel();
+      }
       this.setEdit?.emit({
         ...data,
         isCancel,
@@ -392,8 +409,8 @@ export class OverlaySelection {
     }
   }
 
-  private closeEdit(e?: CustomEvent<boolean>) {
-    this.doEdit(undefined, true);
+  private closeEdit(e?: CustomEvent<boolean>, cancelEdit = false) {
+    this.doEdit(undefined, cancelEdit);
     if (e?.detail) {
       this.focusNext();
     }

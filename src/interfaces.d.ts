@@ -1,4 +1,6 @@
+// @ts-ignore
 import { VNode } from '@stencil/core';
+// @ts-ignore
 import { ObservableMap, Subscription } from '@stencil/store';
 export type Observable<T> = ObservableMap<T>;
 export type PluginSubscribe<T> = Subscription<T>;
@@ -319,6 +321,7 @@ export declare namespace Edition {
   interface EditorBase {
     element?: Element | null;
     editCell?: EditCell;
+    getValue?(): any;
     beforeUpdate?(): void;
     componentDidRender?(): void;
     disconnectedCallback?(): void;

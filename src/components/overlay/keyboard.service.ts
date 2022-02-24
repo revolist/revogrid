@@ -11,7 +11,7 @@ type Config = {
   selectionStore: Observable<Selection.SelectionStoreState>;
   range(range: Selection.RangeArea): boolean;
   focusNext(focus: Selection.Cell, next: Partial<Selection.Cell>): boolean;
-  doEdit(val?: any, isCancel?: boolean): void;
+  applyEdit(val?: any, isEscape?: boolean): void;
   clearCell(): void;
   getData(): any;
   internalPaste(): void;
@@ -41,7 +41,7 @@ export class KeyboardService {
     if (this.sv.selectionStoreService.edited) {
       switch (e.code) {
         case codesLetter.ESCAPE:
-          this.sv.doEdit(undefined, true);
+          this.sv.applyEdit(undefined, true);
           break;
       }
       return;
@@ -70,7 +70,7 @@ export class KeyboardService {
 
     // pressed enter
     if (isEnterKey(e.code)) {
-      this.sv.doEdit();
+      this.sv.applyEdit();
       return;
     }
 
@@ -87,7 +87,7 @@ export class KeyboardService {
 
     // pressed letter key
     if (isLetterKey(e.keyCode)) {
-      this.sv.doEdit(e.key);
+      this.sv.applyEdit(e.key);
       return;
     }
 

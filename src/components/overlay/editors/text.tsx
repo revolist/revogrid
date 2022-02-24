@@ -28,8 +28,12 @@ export class TextEditor implements Edition.EditorBase {
       // blur is needed to avoid autoscroll
       this.editInput.blur();
       // request callback which will close cell after all
-      this.saveCallback((e.target as HTMLInputElement).value, isKeyTab);
+      this.saveCallback(this.getValue(), isKeyTab);
     }
+  }
+  
+  getValue() {
+    return this.editInput?.value;
   }
 
   // required
