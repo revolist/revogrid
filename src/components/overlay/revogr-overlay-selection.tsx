@@ -89,7 +89,12 @@ export class OverlaySelection {
   /** Range copy */
   @Event({ cancelable: true }) rangeClipboardCopy: EventEmitter;
   @Event({ cancelable: true }) rangeClipboardPaste: EventEmitter;
-
+  
+  /**
+   * Runs before cell save
+   * Can be used to override or cancel original save
+   */
+  @Event({ eventName: 'before-cell-save', cancelable: true }) beforeCellSave: EventEmitter;
   // --------------------------------------------------------------------------
   //
   //  Listeners
@@ -244,7 +249,6 @@ export class OverlaySelection {
   private renderEditCell() {
     // if can edit
     const editCell = this.selectionStore.get('edit');
-
     if (this.readonly || !editCell) {
       return;
     }
@@ -269,15 +273,22 @@ export class OverlaySelection {
     const style = getElStyle(range, this.dimensionRow.state, this.dimensionCol.state);
     return (
       <revogr-edit
-        ref={(e) => {
-          if (this.cellEditor && !e && this.applyChangesOnClose) {
-            this.cellEditor.saveBeforeClose = true;
+        onCellEdit={e => {
+          const saveEv = this.beforeCellSave.emit(e.detail);
+          if (!saveEv.defaultPrevented) {
+            this.cellEdit(saveEv.detail);
           }
-          this.cellEditor = e;
-        } }
-        onCellEdit={e => this.onCellEdit(e.detail)}
-        onCloseEdit={e => this.closeEdit(e, true)}
+
+          // if not clear navigate to next cell after edit
+          if (!saveEv.detail.preventFocus) {
+            this.focusNext();
+          }
+        }}
+        onCloseEdit={e => {
+          this.closeEdit(e.detail, true);
+        }}
         editCell={editable}
+        saveOnClose={this.applyChangesOnClose}
         column={this.columnService.columns[editCell.x]}
         editor={this.columnService.getCellEditor(editCell.y, editCell.x, this.editors)}
         style={style}
@@ -409,11 +420,17 @@ export class OverlaySelection {
     }
   }
 
-  private closeEdit(e?: CustomEvent<boolean>, cancelEdit = false) {
+  private closeEdit(focusNext = false, cancelEdit = false) {
     this.doEdit(undefined, cancelEdit);
-    if (e?.detail) {
+    if (focusNext) {
       this.focusNext();
     }
+  }
+
+  /** Edit finished, close cell and save */
+  protected cellEdit(e: Edition.SaveDataDetails) {
+    const dataToSave = this.columnService.getSaveData(e.rgRow, e.rgCol, e.val);
+    this.internalCellEdit.emit(dataToSave);
   }
 
   private async focusNext() {
@@ -434,17 +451,7 @@ export class OverlaySelection {
       this.autoFillService.onRangeApply(data, this.selectionStoreService.ranged);
     } else if (this.canEdit()) {
       const focused = this.selectionStoreService.focused;
-      this.onCellEdit({ rgRow: focused.y, rgCol: focused.x, val: '' }, true);
-    }
-  }
-
-  /** Edit finished, close cell and save */
-  protected onCellEdit(e: Edition.SaveDataDetails, clear = false) {
-    const dataToSave = this.columnService.getSaveData(e.rgRow, e.rgCol, e.val);
-    this.internalCellEdit.emit(dataToSave);
-    // if not clear navigate to next cell after edit
-    if (!clear && !e.preventFocus) {
-      this.focusNext();
+      this.cellEdit({ rgRow: focused.y, rgCol: focused.x, val: '' });
     }
   }
 

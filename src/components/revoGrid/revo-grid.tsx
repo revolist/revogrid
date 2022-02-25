@@ -86,6 +86,7 @@ export class RevoGridComponent {
   /**
    * Apply changes typed in editor on editor close except Escape cases
    * If custom editor in use @method getValue required
+   * Check interfaces.d.ts @EditorBase for more info
    */
   @Prop() applyEditorChangesOnClose = false;
 

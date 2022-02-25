@@ -1,4 +1,4 @@
-import { Component, Event, EventEmitter, Prop, h, Element, Host, Watch, Method } from '@stencil/core';
+import { Component, Event, EventEmitter, Prop, h, Element, Host, Method } from '@stencil/core';
 
 import { Edition, RevoGrid } from '../../interfaces';
 import { EDIT_INPUT_WR } from '../../utils/consts';
@@ -11,30 +11,36 @@ import { TextEditor } from './editors/text';
 export class RevoEdit {
   @Element() element: HTMLElement;
   @Prop() editCell: Edition.EditCell;
-  @Prop() saveBeforeClose: boolean = false;
 
   @Prop() column: RevoGrid.ColumnRegular | null;
   /** Custom editors register */
   @Prop() editor: Edition.EditorCtr | null;
 
+  @Prop() saveOnClose: boolean = false;
+
   @Event({ bubbles: false }) cellEdit: EventEmitter<Edition.SaveDataDetails>;
 
   /** Close editor event */
   @Event({ bubbles: false }) closeEdit: EventEmitter<boolean | undefined>;
+
   private currentEditor: Edition.EditorBase | null = null;
   private saveRunning = false;
 
-  // shouldn't be cancelled by saveRunning
-  // editor requires getValue
-  @Watch('saveBeforeClose') saveOnClose(saveBeforeClose = false) {
-    if (saveBeforeClose && !this.saveRunning && this.currentEditor.getValue) {
-      this.saveRunning = true;
-      this.onSave(this.currentEditor.getValue(), true);
-    }
-  }
-
   @Method() async cancel() {
     this.saveRunning = true;
+  }
+
+  onAutoSave() {
+    this.saveRunning = true;
+    const val = this.currentEditor.getValue && this.currentEditor.getValue();
+    // for editor plugin internal usage in case you want to stop save and use your own
+    if (this.currentEditor.beforeAutoSave) {
+      const canSave = this.currentEditor.beforeAutoSave(val);
+      if (canSave === false) {
+        return;
+      }
+    }
+    this.onSave(val, true);
   }
 
   /** Callback triggered on cell editor save */
@@ -47,6 +53,14 @@ export class RevoEdit {
         val,
         preventFocus,
       });
+    }
+  }
+
+  // shouldn't be cancelled by saveRunning
+  // editor requires getValue
+  saveBeforeClose() {
+    if (!this.saveRunning) {
+      this.onAutoSave();
     }
   }
 
@@ -84,6 +98,8 @@ export class RevoEdit {
   }
 
   disconnectedCallback(): void {
+    this.saveBeforeClose();
+
     this.saveRunning = false;
     if (!this.currentEditor) {
       return;

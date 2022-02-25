@@ -321,7 +321,10 @@ export declare namespace Edition {
   interface EditorBase {
     element?: Element | null;
     editCell?: EditCell;
+    // autosave usage when you want to return value for models
     getValue?(): any;
+    // for editor plugin internal usage in case you want to stop auto save and use your own
+    beforeAutoSave?(val?: any): boolean;
     beforeUpdate?(): void;
     componentDidRender?(): void;
     disconnectedCallback?(): void;

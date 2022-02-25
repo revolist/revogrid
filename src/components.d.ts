@@ -26,7 +26,7 @@ export namespace Components {
          */
         "addTrimmed": (trimmed: Record<number, boolean>, trimmedType?: string, type?: RevoGrid.DimensionRows) => Promise<CustomEvent<{ trimmed: Record<number, boolean>; trimmedType: string; type: string; }>>;
         /**
-          * Apply changes typed in editor on editor close except Escape cases If custom editor in use @method getValue required
+          * Apply changes typed in editor on editor close except Escape cases If custom editor in use @method getValue required Check interfaces.d.ts @EditorBase for more info
          */
         "applyEditorChangesOnClose": boolean;
         /**
@@ -248,7 +248,7 @@ export namespace Components {
           * Custom editors register
          */
         "editor": Edition.EditorCtr | null;
-        "saveBeforeClose": boolean;
+        "saveOnClose": boolean;
     }
     interface RevogrFilterPanel {
         "filterCaptions": FilterCaptions | undefined;
@@ -461,7 +461,7 @@ declare global {
 declare namespace LocalJSX {
     interface RevoGrid {
         /**
-          * Apply changes typed in editor on editor close except Escape cases If custom editor in use @method getValue required
+          * Apply changes typed in editor on editor close except Escape cases If custom editor in use @method getValue required Check interfaces.d.ts @EditorBase for more info
          */
         "applyEditorChangesOnClose"?: boolean;
         /**
@@ -745,7 +745,7 @@ declare namespace LocalJSX {
           * Close editor event
          */
         "onCloseEdit"?: (event: CustomEvent<boolean | undefined>) => void;
-        "saveBeforeClose"?: boolean;
+        "saveOnClose"?: boolean;
     }
     interface RevogrFilterPanel {
         "filterCaptions"?: FilterCaptions | undefined;
@@ -839,6 +839,10 @@ declare namespace LocalJSX {
         "lastCell"?: Selection.Cell;
         "onApplyFocus"?: (event: CustomEvent<FocusRenderEvent>) => void;
         "onBefore-apply-range"?: (event: CustomEvent<FocusRenderEvent>) => void;
+        /**
+          * Runs before cell save Can be used to override or cancel original save
+         */
+        "onBefore-cell-save"?: (event: CustomEvent<any>) => void;
         "onBefore-edit-render"?: (event: CustomEvent<FocusRenderEvent>) => void;
         "onBefore-set-range"?: (event: CustomEvent<any>) => void;
         "onBeforeFocusCell"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
