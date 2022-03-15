@@ -17,12 +17,12 @@ export type FilterCaptions = {
   save: string;
   reset: string;
   cancel: string;
-}
+};
 
 export type FilterLocalization = {
   captions: FilterCaptions;
   filterNames: Record<FilterType, string>;
-}
+};
 
 /**
  * @typedef ColumnFilterConfig
@@ -76,7 +76,7 @@ export default class FilterPlugin extends BasePlugin {
         uuid={`filter-${uiid}`}
         filterNames={this.possibleFilterNames}
         filterEntities={this.possibleFilterEntities}
-        filterCaptions={config.localization?.captions}
+        filterCaptions={config?.localization?.captions}
         onFilterChange={e => this.onFilterChange(e.detail)}
         ref={e => (this.pop = e)}
       />,
@@ -265,7 +265,7 @@ export default class FilterPlugin extends BasePlugin {
     const columns = await this.revogrid.getColumns();
     return {
       source,
-      columns
+      columns,
     };
   }
 
