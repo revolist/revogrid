@@ -15,7 +15,7 @@ import { DataInput } from "./plugins/export/types";
 import { VNode } from "@stencil/core";
 import { ColumnSource, RowSource } from "./components/data/columnService";
 import { LogicFunction } from "./plugins/filter/filter.types";
-import { FilterItem, ShowData } from "./plugins/filter/filter.pop";
+import { FilterItem, MultiFilterItem, ShowData } from "./plugins/filter/filter.pop";
 import { DataSourceState, Groups } from "./store/dataSource/data.store";
 import { ViewportData } from "./components/revo-grid/viewport.interfaces";
 import { ElementScroll } from "./components/revo-grid/viewport.scrolling.service";
@@ -699,6 +699,7 @@ declare namespace LocalJSX {
         "filterNames"?: Record<string, string>;
         "filterTypes"?: Record<string, string[]>;
         "onFilterChange"?: (event: CustomEvent<FilterItem>) => void;
+        "onMultiFilterChange"?: (event: CustomEvent<MultiFilterItem>) => void;
         "uuid"?: string;
     }
     interface RevogrFocus {

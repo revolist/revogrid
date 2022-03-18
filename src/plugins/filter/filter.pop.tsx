@@ -20,6 +20,15 @@ export type FilterItem = {
   value?: any;
 };
 
+export type MultiFilterItem = {
+  [prop: string]: {
+    id: number;
+    type: FilterType;
+    value: any;
+    relation: 'and' | 'or';
+  }[];
+};
+
 export type ShowData = {
   x: number;
   y: number;
@@ -34,11 +43,13 @@ const defaultType: FilterType = 'none';
 export class FilterPanel {
   private extraElement: HTMLInputElement | undefined;
   private filterCaptionsInternal: FilterCaptions = {
-    title: "Filter by condition",
-    save: "Save",
-    reset: "Reset",
-    cancel: "Cancel",
+    title: 'Filter by condition',
+    save: 'Save',
+    reset: 'Reset',
+    cancel: 'Cancel',
   };
+  @State() filterItems: MultiFilterItem = {};
+  @State() filterId = 0;
   @State() changes: ShowData | undefined;
   @Prop({ mutable: true, reflect: true }) uuid: string;
   @Prop() filterTypes: Record<string, string[]> = {};
@@ -46,6 +57,7 @@ export class FilterPanel {
   @Prop() filterEntities: Record<string, LogicFunction> = {};
   @Prop() filterCaptions: FilterCaptions | undefined;
   @Event() filterChange: EventEmitter<FilterItem>;
+  @Event() multiFilterChange: EventEmitter<MultiFilterItem>;
   @Listen('mousedown', { target: 'document' }) onMouseDown(e: MouseEvent): void {
     if (this.changes && !e.defaultPrevented) {
       const el = e.target as HTMLElement;
@@ -86,15 +98,7 @@ export class FilterPanel {
     this.extraElement = undefined;
     switch (extra) {
       case 'input':
-        return (
-          <input
-            type="text"
-            value={value}
-            onInput={(e: InputEvent) => this.onInput(e)}
-            onKeyDown={e => this.onKeyDown(e)}
-            ref={e => (this.extraElement = e)}
-          />
-        );
+        return <input type="text" value={value} onInput={(e: InputEvent) => this.onInput(e)} onKeyDown={e => this.onKeyDown(e)} ref={e => (this.extraElement = e)} />;
       default:
         return '';
     }
@@ -111,23 +115,34 @@ export class FilterPanel {
     };
     const capts = Object.assign(this.filterCaptionsInternal, this.filterCaptions);
 
+    const propFilterItems = this.filterItems[this.changes.prop] || [];
+
     return (
       <Host style={style}>
         <label>{capts.title}</label>
-        <select class="select-css" onChange={e => this.onFilterChange(e)}>
-          {this.renderConditions(this.changes.type)}
-        </select>
-        <div>{this.renderExtra(this.filterEntities[this.changes.type].extra, this.changes.value)}</div>
-        <div class="center">
-          <RevoButton class={{ green: true }} onClick={() => this.onSave()}>
-            {capts.save}
-          </RevoButton>
-          <RevoButton class={{ red: true }} onClick={() => this.onReset()}>
-            {capts.reset}
-          </RevoButton>
-          <RevoButton class={{ light: true }} onClick={() => this.onCancel()}>
-            {capts.cancel}
-          </RevoButton>
+        <ul>
+          {propFilterItems.map(d => (
+            <li key={d.id}>
+              {d.id} - {d.type} - {d.value} - {d.relation}
+            </li>
+          ))}
+        </ul>
+        <div>
+          <select class="select-css" onChange={e => this.onFilterChange(e)}>
+            {this.renderConditions(this.changes.type)}
+          </select>
+          <div>{this.renderExtra(this.filterEntities[this.changes.type].extra, this.changes.value)}</div>
+          <div class="center">
+            <RevoButton class={{ green: true }} onClick={() => this.onSave()}>
+              {capts.save}
+            </RevoButton>
+            <RevoButton class={{ red: true }} onClick={() => this.onReset()}>
+              {capts.reset}
+            </RevoButton>
+            <RevoButton class={{ light: true }} onClick={() => this.onCancel()}>
+              {capts.cancel}
+            </RevoButton>
+          </div>
         </div>
       </Host>
     );
@@ -166,6 +181,19 @@ export class FilterPanel {
   private onSave() {
     this.assertChanges();
 
+    if (!this.filterItems[this.changes.prop]) {
+      this.filterItems[this.changes.prop] = [];
+    }
+
+    this.filterItems[this.changes.prop].push({
+      id: this.filterId++,
+      type: this.changes.type,
+      value: this.extraElement?.value?.trim(),
+      relation: 'and',
+    });
+
+    this.multiFilterChange.emit(this.filterItems);
+
     this.filterChange.emit({
       prop: this.changes.prop,
       type: this.changes.type,
@@ -177,9 +205,13 @@ export class FilterPanel {
   private onReset() {
     this.assertChanges();
 
+    delete this.filterItems[this.changes.prop];
+
+    this.multiFilterChange.emit(this.filterItems);
+
     this.filterChange.emit({
       prop: this.changes.prop,
-      type: "none",
+      type: 'none',
     });
 
     this.changes = void 0;

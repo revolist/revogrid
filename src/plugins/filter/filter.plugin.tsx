@@ -2,7 +2,7 @@ import { h } from '@stencil/core';
 import BasePlugin from '../basePlugin';
 import { RevoGrid } from '../../interfaces';
 import { FILTER_PROP, isFilterBtn } from './filter.button';
-import { FilterItem } from './filter.pop';
+import { FilterItem, MultiFilterItem } from './filter.pop';
 import { filterEntities, filterNames, FilterType, filterTypes } from './filter.service';
 import { LogicFunction } from './filter.types';
 
@@ -78,6 +78,7 @@ export default class FilterPlugin extends BasePlugin {
         filterEntities={this.possibleFilterEntities}
         filterCaptions={config?.localization?.captions}
         onFilterChange={e => this.onFilterChange(e.detail)}
+        onMultiFilterChange={e => this.onMultiFilterChange(e.detail)}
         ref={e => (this.pop = e)}
       />,
     ]);
@@ -185,7 +186,12 @@ export default class FilterPlugin extends BasePlugin {
 
   // called on internal component change
   private async onFilterChange(filterItem: FilterItem) {
+    console.log('onFilterChange', filterItem);
     this.filterByProps({ [filterItem.prop]: filterItem });
+  }
+
+  private async onMultiFilterChange(filterItems: MultiFilterItem) {
+    console.log('onMultiFilterChange', filterItems);
   }
 
   /**
