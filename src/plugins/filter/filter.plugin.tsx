@@ -187,11 +187,17 @@ export default class FilterPlugin extends BasePlugin {
   // called on internal component change
   private async onFilterChange(filterItem: FilterItem) {
     console.log('onFilterChange', filterItem);
-    this.filterByProps({ [filterItem.prop]: filterItem });
+    // this.filterByProps({ [filterItem.prop]: filterItem });
   }
 
   private async onMultiFilterChange(filterItems: MultiFilterItem) {
     console.log('onMultiFilterChange', filterItems);
+    const { source, columns } = await this.getData();
+    const { defaultPrevented, detail } = this.emit('beforefilterapply', { collection: this.filterCollection, source, columns });
+    if (defaultPrevented) {
+      return;
+    }
+    this.doMultiFiltering(detail.collection, detail.source, detail.columns, filterItems);
   }
 
   /**
@@ -252,6 +258,40 @@ export default class FilterPlugin extends BasePlugin {
     this.emit('afterFilterApply');
   }
 
+  async doMultiFiltering(collection: FilterCollection, items: RevoGrid.DataType[], columns: RevoGrid.ColumnRegular[], filterItems: MultiFilterItem) {
+    const columnsToUpdate: RevoGrid.ColumnRegular[] = [];
+    // todo improvement: loop through collection of props
+    columns.forEach(rgCol => {
+      const column = { ...rgCol };
+      const hasFilter = filterItems[column.prop];
+      if (column[FILTER_PROP] && !hasFilter) {
+        delete column[FILTER_PROP];
+        columnsToUpdate.push(column);
+      }
+      if (!column[FILTER_PROP] && hasFilter) {
+        columnsToUpdate.push(column);
+        column[FILTER_PROP] = true;
+      }
+    });
+    const itemsToFilter = this.getRowMultiFilter(items, filterItems);
+    // check is filter event prevented
+    const { defaultPrevented } = this.emit('beforefiltertrimmed', { collection, itemsToFilter, source: items });
+    if (defaultPrevented) {
+      return;
+    }
+
+    // const test = { 1: true };
+    // check is trimmed event prevented
+    const isAddedEvent = await this.revogrid.addTrimmed(itemsToFilter, FILTER_TRIMMED_TYPE);
+    if (isAddedEvent.defaultPrevented) {
+      return;
+    }
+
+    // applies the hasFilter to the columns to show filter icon
+    await this.revogrid.updateColumns(columnsToUpdate);
+    this.emit('afterFilterApply');
+  }
+
   async clearFiltering() {
     this.filterCollection = {};
     await this.runFiltering();
@@ -285,6 +325,23 @@ export default class FilterPlugin extends BasePlugin {
           trimmed[rowIndex] = true;
         }
       }
+    });
+    return trimmed;
+  }
+  private getRowMultiFilter(rows: RevoGrid.DataType[], filterItems: MultiFilterItem) {
+    const propKeys = Object.keys(filterItems);
+
+    const trimmed: Record<number, boolean> = {};
+    rows.forEach((model, rowIndex) => {
+      propKeys.forEach(prop => {
+        const propFilters = filterItems[prop];
+        for (const filterData of propFilters) {
+          const filter = filterEntities[filterData.type];
+          if (!filter(model[prop], filterData.value)) {
+            trimmed[rowIndex] = true;
+          }
+        }
+      });
     });
     return trimmed;
   }

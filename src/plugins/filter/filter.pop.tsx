@@ -1,7 +1,7 @@
 import { Component, h, Host, Listen, Prop, State, Event, EventEmitter, VNode, Method } from '@stencil/core';
 import { FilterType } from './filter.service';
 import { RevoGrid } from '../../interfaces';
-import { isFilterBtn } from './filter.button';
+import { isFilterBtn, TrashButton } from './filter.button';
 import { RevoButton } from '../../components/button/button';
 import '../../utils/closestPolifill';
 import { LogicFunction } from './filter.types';
@@ -20,13 +20,15 @@ export type FilterItem = {
   value?: any;
 };
 
+export type FilterData = {
+  id: number;
+  type: FilterType;
+  value?: any;
+  relation: 'and' | 'or';
+};
+
 export type MultiFilterItem = {
-  [prop: string]: {
-    id: number;
-    type: FilterType;
-    value: any;
-    relation: 'and' | 'or';
-  }[];
+  [prop: string]: FilterData[];
 };
 
 export type ShowData = {
@@ -35,6 +37,8 @@ export type ShowData = {
 } & FilterItem;
 
 const defaultType: FilterType = 'none';
+
+const FILTER_LIST_CLASS = 'multi-filter-list';
 
 @Component({
   tag: 'revogr-filter-panel',
@@ -104,6 +108,23 @@ export class FilterPanel {
     }
   }
 
+  getFilterItemsList() {
+    return (
+      <div key={this.filterId}>
+        {(this.filterItems[this.changes.prop] || []).map(d => (
+          <div key={d.id} class={FILTER_LIST_CLASS}>
+            <div>
+              {d.type} - {d.value} - {d.relation}
+            </div>
+            <div onClick={() => this.onRemoveFilter(d.id)}>
+              <TrashButton />
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
   render() {
     if (!this.changes || !this.changes) {
       return <Host style={{ display: 'none' }}></Host>;
@@ -115,18 +136,21 @@ export class FilterPanel {
     };
     const capts = Object.assign(this.filterCaptionsInternal, this.filterCaptions);
 
-    const propFilterItems = this.filterItems[this.changes.prop] || [];
+    // const listItems = (this.filterItems[this.changes.prop] || []).map(d => (
+    //   <div key={d.id} class={FILTER_LIST_CLASS}>
+    //     <div>
+    //       {d.type} - {d.value} - {d.relation}
+    //     </div>
+    //     <div onClick={() => this.onRemoveFilter(d.id)}>
+    //       <TrashButton />
+    //     </div>
+    //   </div>
+    // ));
 
     return (
       <Host style={style}>
         <label>{capts.title}</label>
-        <ul>
-          {propFilterItems.map(d => (
-            <li key={d.id}>
-              {d.id} - {d.type} - {d.value} - {d.relation}
-            </li>
-          ))}
-        </ul>
+        {this.getFilterItemsList()}
         <div>
           <select class="select-css" onChange={e => this.onFilterChange(e)}>
             {this.renderConditions(this.changes.type)}
@@ -199,7 +223,8 @@ export class FilterPanel {
       type: this.changes.type,
       value: this.extraElement?.value?.trim(),
     });
-    this.changes = undefined;
+
+    // this.changes = undefined;
   }
 
   private onReset() {
@@ -215,6 +240,28 @@ export class FilterPanel {
     });
 
     this.changes = void 0;
+  }
+
+  private onRemoveFilter(id: number) {
+    this.assertChanges();
+    this.filterId++;
+
+    const prop = this.changes.prop;
+    const items = this.filterItems[prop];
+    if (!items) {
+      return;
+    }
+    const index = this.filterItems[prop].findIndex(d => d.id === id);
+    if (index === -1) {
+      return;
+    }
+    items.splice(index, 1);
+
+    console.log('remove filter', this.filterItems);
+    this.multiFilterChange.emit(this.filterItems);
+
+    // this.forceUpdate()
+    // this.changes = void 0;
   }
 
   private assertChanges() {
