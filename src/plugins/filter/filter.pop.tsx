@@ -244,24 +244,23 @@ export class FilterPanel {
 
   private onRemoveFilter(id: number) {
     this.assertChanges();
+
+    // this is for reactivity issues for getFilterItemsList()
     this.filterId++;
 
     const prop = this.changes.prop;
+
     const items = this.filterItems[prop];
-    if (!items) {
-      return;
-    }
-    const index = this.filterItems[prop].findIndex(d => d.id === id);
-    if (index === -1) {
-      return;
-    }
+    if (!items) return;
+
+    const index = items.findIndex(d => d.id === id);
+    if (index === -1) return;
     items.splice(index, 1);
 
-    console.log('remove filter', this.filterItems);
-    this.multiFilterChange.emit(this.filterItems);
+    // let's remove the prop if no more filters so the filter icon will be removed
+    if (items.length === 0) delete this.filterItems[prop];
 
-    // this.forceUpdate()
-    // this.changes = void 0;
+    this.multiFilterChange.emit(this.filterItems);
   }
 
   private assertChanges() {
