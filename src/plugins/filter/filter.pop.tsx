@@ -115,7 +115,10 @@ export class FilterPanel {
         {(this.filterItems[this.changes.prop] || []).map(d => (
           <div key={d.id} class={FILTER_LIST_CLASS}>
             <div>
-              {this.filterNames[d.type]} {d.value}
+              {this.filterNames[d.type]}{' '}
+              <strong>
+                <i>{d.value}</i>
+              </strong>
             </div>
 
             <div class={FILTER_LIST_CLASS_ACTION}>

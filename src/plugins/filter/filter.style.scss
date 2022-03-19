@@ -149,6 +149,9 @@ revogr-filter-panel {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 10px;
+  div {
+    white-space: nowrap;
+  }
 
   .multi-filter-list-action {
     display: flex;
@@ -156,7 +159,7 @@ revogr-filter-panel {
     align-items: center;
 
     .and-or-button {
-      margin: 0 5px 0 0;
+      margin: 0 5px 0 10px;
       cursor: pointer;
     }
     .trash-button {
