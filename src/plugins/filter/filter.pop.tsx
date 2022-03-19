@@ -39,6 +39,7 @@ export type ShowData = {
 const defaultType: FilterType = 'none';
 
 const FILTER_LIST_CLASS = 'multi-filter-list';
+const FILTER_LIST_CLASS_ACTION = 'multi-filter-list-action';
 
 @Component({
   tag: 'revogr-filter-panel',
@@ -114,10 +115,14 @@ export class FilterPanel {
         {(this.filterItems[this.changes.prop] || []).map(d => (
           <div key={d.id} class={FILTER_LIST_CLASS}>
             <div>
-              {d.type} - {d.value} - {d.relation}
+              {this.filterNames[d.type]} {d.value}
             </div>
-            <div onClick={() => this.onRemoveFilter(d.id)}>
-              <TrashButton />
+
+            <div class={FILTER_LIST_CLASS_ACTION}>
+              <div onClick={() => this.toggleFilterAndOr(d.id)}>{d.relation}</div>
+              <div onClick={() => this.onRemoveFilter(d.id)}>
+                <TrashButton />
+              </div>
             </div>
           </div>
         ))}
@@ -259,6 +264,25 @@ export class FilterPanel {
 
     // let's remove the prop if no more filters so the filter icon will be removed
     if (items.length === 0) delete this.filterItems[prop];
+
+    this.multiFilterChange.emit(this.filterItems);
+  }
+
+  private toggleFilterAndOr(id: number) {
+    this.assertChanges();
+
+    // this is for reactivity issues for getFilterItemsList()
+    this.filterId++;
+
+    const prop = this.changes.prop;
+
+    const items = this.filterItems[prop];
+    if (!items) return;
+
+    const index = items.findIndex(d => d.id === id);
+    if (index === -1) return;
+
+    items[index].relation = items[index].relation === 'and' ? 'or' : 'and';
 
     this.multiFilterChange.emit(this.filterItems);
   }

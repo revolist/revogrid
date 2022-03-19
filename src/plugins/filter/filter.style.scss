@@ -148,4 +148,13 @@ revogr-filter-panel {
   display: flex;
   justify-content: space-between;
   align-items: center;
+
+  .multi-filter-list-action {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    div {
+      cursor: pointer;
+    }
+  }
 }
