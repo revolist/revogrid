@@ -1,7 +1,7 @@
 import { Component, h, Host, Listen, Prop, State, Event, EventEmitter, VNode, Method } from '@stencil/core';
 import { FilterType } from './filter.service';
 import { RevoGrid } from '../../interfaces';
-import { isFilterBtn, TrashButton } from './filter.button';
+import { AndOrButton, isFilterBtn, TrashButton } from './filter.button';
 import { RevoButton } from '../../components/button/button';
 import '../../utils/closestPolifill';
 import { LogicFunction } from './filter.types';
@@ -119,7 +119,9 @@ export class FilterPanel {
             </div>
 
             <div class={FILTER_LIST_CLASS_ACTION}>
-              <div onClick={() => this.toggleFilterAndOr(d.id)}>{d.relation}</div>
+              <div onClick={() => this.toggleFilterAndOr(d.id)}>
+                <AndOrButton isAnd={d.relation === 'and'} />
+              </div>
               <div onClick={() => this.onRemoveFilter(d.id)}>
                 <TrashButton />
               </div>

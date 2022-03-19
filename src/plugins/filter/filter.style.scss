@@ -148,12 +148,19 @@ revogr-filter-panel {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-bottom: 10px;
 
   .multi-filter-list-action {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    div {
+
+    .and-or-button {
+      margin: 0 5px 0 0;
+      cursor: pointer;
+    }
+    .trash-button {
+      margin-bottom: -3px;
       cursor: pointer;
     }
   }
