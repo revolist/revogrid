@@ -333,23 +333,25 @@ export default class FilterPlugin extends BasePlugin {
 
     const trimmed: Record<number, boolean> = {};
 
-    const filterResults: { [rowIndex: string]: { [prop: string]: boolean[] } } = {};
+    let filterResults: boolean[] = [];
 
     // each rows
     rows.forEach((model, rowIndex) => {
-      if (!filterResults[rowIndex]) filterResults[rowIndex] = {};
+
+
+
 
       // working on all props
       for (const prop of propKeys) {
         const propFilters = filterItems[prop];
-        // let isFilterConditionSatisfied = false;
+        
         let propFilterSatisfiedCount = 0;
 
-        if (!Array.isArray(filterResults[rowIndex][prop])) {
-          filterResults[rowIndex][prop] = [];
-        }
+        // if (!Array.isArray(filterResults)) {
+        //   filterResults = [];
+        // }
 
-        // filterResults[rowIndex][prop] = [];
+        filterResults = [];
 
         // testing each filter for a prop
         propFilters.forEach((filterData, filterIndex) => {
@@ -360,6 +362,7 @@ export default class FilterPlugin extends BasePlugin {
           // THE MAGIC OF FILTERING IS HERE
 
           if (filterData.relation === 'or') {
+            filterResults = [];
             // console.log('test filter', filterData.type, model[prop], filterData.value, filter(model[prop], filterData.value));
             if (!filter(model[prop], filterData.value)) {
               // add to the last of removed/trimmed rows
@@ -369,20 +372,21 @@ export default class FilterPlugin extends BasePlugin {
             console.log('prop-' + prop + ': FILTER RELATION AND === ', filterData.value);
             // 'and' relation will need to know the next filter
             // so we save this current filter to include it in the next filter
-            filterResults[rowIndex][prop].push(!filter(model[prop], filterData.value));
+            filterResults.push(!filter(model[prop], filterData.value));
 
-            console.log('prop-' + prop + ': filterResults[rowIndex][prop] LENGTH', filterResults[rowIndex][prop].length);
+            console.log('prop-' + prop + ': filterResults LENGTH', filterResults.length);
 
             const nextFilterData = propFilters[filterIndex + 1];
 
             // check first if we have a filter on the next index to pair it with this current filter
             if (!(nextFilterData && nextFilterData.relation === 'and')) {
-              console.log('prop-' + prop + ': add all filterResults[rowIndex][prop]', filterResults[rowIndex][prop]);
-              // increase propFilterSatisfiedCount for each true result in filterResults[rowIndex][prop]
-              if (filterResults[rowIndex][prop].indexOf(true) >= 0) {
+              console.log('prop-' + prop + ': add all filterResults', filterResults);
+              // increase propFilterSatisfiedCount for each true result in filterResults
+              if (filterResults.indexOf(true) >= 0) {
                 console.log('prop-' + prop + ': AND relation satisfied REMOVE ROW');
-                propFilterSatisfiedCount += filterResults[rowIndex][prop].length;
+                propFilterSatisfiedCount += filterResults.length;
               }
+              filterResults = [];
             }
 
             // if (filterIndex !== propFilters.length - 1) {
