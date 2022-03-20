@@ -155,11 +155,12 @@ revogr-filter-panel {
 
   .multi-filter-list-action {
     display: flex;
+    margin-left: 10px;
     justify-content: space-between;
     align-items: center;
 
     .and-or-button {
-      margin: 0 5px 0 10px;
+      margin: 0 5px 0 0;
       cursor: pointer;
     }
     .trash-button {

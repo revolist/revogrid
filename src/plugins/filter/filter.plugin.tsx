@@ -332,16 +332,82 @@ export default class FilterPlugin extends BasePlugin {
     const propKeys = Object.keys(filterItems);
 
     const trimmed: Record<number, boolean> = {};
+
+    const filterResults: { [rowIndex: string]: { [prop: string]: boolean[] } } = {};
+
+    // each rows
     rows.forEach((model, rowIndex) => {
-      propKeys.forEach(prop => {
+      if (!filterResults[rowIndex]) filterResults[rowIndex] = {};
+
+      // working on all props
+      for (const prop of propKeys) {
         const propFilters = filterItems[prop];
-        for (const filterData of propFilters) {
-          const filter = filterEntities[filterData.type];
-          if (!filter(model[prop], filterData.value)) {
-            trimmed[rowIndex] = true;
-          }
+        // let isFilterConditionSatisfied = false;
+        let propFilterSatisfiedCount = 0;
+
+        if (!Array.isArray(filterResults[rowIndex][prop])) {
+          filterResults[rowIndex][prop] = [];
         }
-      });
+
+        // filterResults[rowIndex][prop] = [];
+
+        // testing each filter for a prop
+        propFilters.forEach((filterData, filterIndex) => {
+          console.log('prop-' + prop + ': filter starts', prop, filterData.type, filterData.value, filterData.relation);
+          // the filter LogicFunction based on the type
+          const filter = filterEntities[filterData.type];
+
+          // THE MAGIC OF FILTERING IS HERE
+
+          if (filterData.relation === 'or') {
+            // console.log('test filter', filterData.type, model[prop], filterData.value, filter(model[prop], filterData.value));
+            if (!filter(model[prop], filterData.value)) {
+              // add to the last of removed/trimmed rows
+              propFilterSatisfiedCount++;
+            }
+          } else if (filterData.relation === 'and') {
+            console.log('prop-' + prop + ': FILTER RELATION AND === ', filterData.value);
+            // 'and' relation will need to know the next filter
+            // so we save this current filter to include it in the next filter
+            filterResults[rowIndex][prop].push(!filter(model[prop], filterData.value));
+
+            console.log('prop-' + prop + ': filterResults[rowIndex][prop] LENGTH', filterResults[rowIndex][prop].length);
+
+            const nextFilterData = propFilters[filterIndex + 1];
+
+            // check first if we have a filter on the next index to pair it with this current filter
+            if (!(nextFilterData && nextFilterData.relation === 'and')) {
+              console.log('prop-' + prop + ': add all filterResults[rowIndex][prop]', filterResults[rowIndex][prop]);
+              // increase propFilterSatisfiedCount for each true result in filterResults[rowIndex][prop]
+              if (filterResults[rowIndex][prop].indexOf(true) >= 0) {
+                console.log('prop-' + prop + ': AND relation satisfied REMOVE ROW');
+                propFilterSatisfiedCount += filterResults[rowIndex][prop].length;
+              }
+            }
+
+            // if (filterIndex !== propFilters.length - 1) {
+            //   // not last of filters
+
+            //   // get the next filterData
+
+            // } else {
+            //   // check if last of filters to ignore filter relation
+            //   // console.log('LAST OF FILTERS. ignore filter', filterData.relation, filterData.value);
+            //   if (!filter(model[prop], filterData.value)) {
+            //     // add to the last of removed/trimmed rows
+            //     propFilterSatisfiedCount++;
+            //   }
+            // }
+          }
+        }); // end of propFilters forEach
+
+        console.log('prop-' + prop + ': filterResults', filterResults);
+
+        console.log('prop-' + prop + ': TEST propFilterSatisfiedCount', propFilterSatisfiedCount, propFilters.length);
+
+        // add to the list of removed/trimmed rows of filter condition is satisfied
+        if (propFilterSatisfiedCount === propFilters.length) trimmed[rowIndex] = true;
+      } // end of for-of propKeys
     });
     return trimmed;
   }
