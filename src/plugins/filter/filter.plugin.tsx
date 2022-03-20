@@ -332,82 +332,51 @@ export default class FilterPlugin extends BasePlugin {
     const propKeys = Object.keys(filterItems);
 
     const trimmed: Record<number, boolean> = {};
-
-    let filterResults: boolean[] = [];
+    let propFilterSatisfiedCount: number = 0;
+    let lastFilterResults: boolean[] = [];
 
     // each rows
     rows.forEach((model, rowIndex) => {
-
-
-
-
       // working on all props
       for (const prop of propKeys) {
         const propFilters = filterItems[prop];
-        
-        let propFilterSatisfiedCount = 0;
 
-        // if (!Array.isArray(filterResults)) {
-        //   filterResults = [];
-        // }
-
-        filterResults = [];
+        propFilterSatisfiedCount = 0;
+        lastFilterResults = [];
 
         // testing each filter for a prop
-        propFilters.forEach((filterData, filterIndex) => {
-          // console.log('prop-' + prop + ': filter starts', prop, filterData.type, filterData.value, filterData.relation);
+        for (const [filterIndex, filterData] of propFilters.entries()) {
           // the filter LogicFunction based on the type
           const filter = filterEntities[filterData.type];
 
           // THE MAGIC OF FILTERING IS HERE
-
           if (filterData.relation === 'or') {
-            filterResults = [];
-            // console.log('test filter', filterData.type, model[prop], filterData.value, filter(model[prop], filterData.value));
-            if (!filter(model[prop], filterData.value)) {
-              // add to the last of removed/trimmed rows
-              propFilterSatisfiedCount++;
+            lastFilterResults = [];
+            if (filter(model[prop], filterData.value)) {
+              continue;
             }
+            propFilterSatisfiedCount++;
           } else if (filterData.relation === 'and') {
-            // console.log('prop-' + prop + ': FILTER RELATION AND === ', filterData.value);
             // 'and' relation will need to know the next filter
             // so we save this current filter to include it in the next filter
-            filterResults.push(!filter(model[prop], filterData.value));
-
-            // console.log('prop-' + prop + ': filterResults LENGTH', filterResults.length);
-
-            const nextFilterData = propFilters[filterIndex + 1];
+            lastFilterResults.push(!filter(model[prop], filterData.value));
 
             // check first if we have a filter on the next index to pair it with this current filter
-            if (!(nextFilterData && nextFilterData.relation === 'and')) {
-              // console.log('prop-' + prop + ': add all filterResults', filterResults);
-              // increase propFilterSatisfiedCount for each true result in filterResults
-              if (filterResults.indexOf(true) >= 0) {
-                // console.log('prop-' + prop + ': AND relation satisfied REMOVE ROW');
-                propFilterSatisfiedCount += filterResults.length;
+            const nextFilterData = propFilters[filterIndex + 1];
+            // stop the sequence if there is no next filter or if the next filter is not an 'and' relation
+            if (!nextFilterData || nextFilterData.relation !== 'and') {
+              // let's just continue since for sure propFilterSatisfiedCount cannot be satisfied
+              if (lastFilterResults.indexOf(true) === -1) {
+                lastFilterResults = [];
+                continue;
               }
-              filterResults = [];
+
+              // we need to add all of the lastFilterResults since we need to satisfy all
+              propFilterSatisfiedCount += lastFilterResults.length;
+              lastFilterResults = [];
             }
-
-            // if (filterIndex !== propFilters.length - 1) {
-            //   // not last of filters
-
-            //   // get the next filterData
-
-            // } else {
-            //   // check if last of filters to ignore filter relation
-            //   // console.log('LAST OF FILTERS. ignore filter', filterData.relation, filterData.value);
-            //   if (!filter(model[prop], filterData.value)) {
-            //     // add to the last of removed/trimmed rows
-            //     propFilterSatisfiedCount++;
-            //   }
-            // }
           }
-        }); // end of propFilters forEach
-
-        // console.log('prop-' + prop + ': filterResults', filterResults);
-
-        // console.log('prop-' + prop + ': TEST propFilterSatisfiedCount', propFilterSatisfiedCount, propFilters.length);
+        } // end of propFilters forEach
 
         // add to the list of removed/trimmed rows of filter condition is satisfied
         if (propFilterSatisfiedCount === propFilters.length) trimmed[rowIndex] = true;
