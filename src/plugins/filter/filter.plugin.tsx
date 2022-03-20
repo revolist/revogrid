@@ -355,7 +355,7 @@ export default class FilterPlugin extends BasePlugin {
 
         // testing each filter for a prop
         propFilters.forEach((filterData, filterIndex) => {
-          console.log('prop-' + prop + ': filter starts', prop, filterData.type, filterData.value, filterData.relation);
+          // console.log('prop-' + prop + ': filter starts', prop, filterData.type, filterData.value, filterData.relation);
           // the filter LogicFunction based on the type
           const filter = filterEntities[filterData.type];
 
@@ -369,21 +369,21 @@ export default class FilterPlugin extends BasePlugin {
               propFilterSatisfiedCount++;
             }
           } else if (filterData.relation === 'and') {
-            console.log('prop-' + prop + ': FILTER RELATION AND === ', filterData.value);
+            // console.log('prop-' + prop + ': FILTER RELATION AND === ', filterData.value);
             // 'and' relation will need to know the next filter
             // so we save this current filter to include it in the next filter
             filterResults.push(!filter(model[prop], filterData.value));
 
-            console.log('prop-' + prop + ': filterResults LENGTH', filterResults.length);
+            // console.log('prop-' + prop + ': filterResults LENGTH', filterResults.length);
 
             const nextFilterData = propFilters[filterIndex + 1];
 
             // check first if we have a filter on the next index to pair it with this current filter
             if (!(nextFilterData && nextFilterData.relation === 'and')) {
-              console.log('prop-' + prop + ': add all filterResults', filterResults);
+              // console.log('prop-' + prop + ': add all filterResults', filterResults);
               // increase propFilterSatisfiedCount for each true result in filterResults
               if (filterResults.indexOf(true) >= 0) {
-                console.log('prop-' + prop + ': AND relation satisfied REMOVE ROW');
+                // console.log('prop-' + prop + ': AND relation satisfied REMOVE ROW');
                 propFilterSatisfiedCount += filterResults.length;
               }
               filterResults = [];
@@ -405,9 +405,9 @@ export default class FilterPlugin extends BasePlugin {
           }
         }); // end of propFilters forEach
 
-        console.log('prop-' + prop + ': filterResults', filterResults);
+        // console.log('prop-' + prop + ': filterResults', filterResults);
 
-        console.log('prop-' + prop + ': TEST propFilterSatisfiedCount', propFilterSatisfiedCount, propFilters.length);
+        // console.log('prop-' + prop + ': TEST propFilterSatisfiedCount', propFilterSatisfiedCount, propFilters.length);
 
         // add to the list of removed/trimmed rows of filter condition is satisfied
         if (propFilterSatisfiedCount === propFilters.length) trimmed[rowIndex] = true;
