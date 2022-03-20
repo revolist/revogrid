@@ -7,7 +7,7 @@ const eq: LogicFunction = (value: LogicFunctionParam, extra?: LogicFunctionExtra
   if (typeof value !== 'string') {
     value = JSON.stringify(value);
   }
-  return value.toLocaleLowerCase() === extra;
+  return value.toLocaleLowerCase() === extra.toString().toLocaleLowerCase();
 };
 
 export const notEq: LogicFunction = (value: LogicFunctionParam, extra?: LogicFunctionExtraParam) => !eq(value, extra);
