@@ -112,25 +112,35 @@ export class FilterPanel {
   getFilterItemsList() {
     return (
       <div key={this.filterId}>
-        {(this.filterItems[this.changes.prop] || []).map(d => (
-          <div key={d.id} class={FILTER_LIST_CLASS}>
-            <div>
-              {this.filterNames[d.type]}{' '}
-              <strong>
-                <i>{d.value}</i>
-              </strong>
-            </div>
+        {(this.filterItems[this.changes.prop] || []).map((d, index) => {
+          let andOrButton;
 
-            <div class={FILTER_LIST_CLASS_ACTION}>
+          // hide toggle button if there is only one filter and the last one
+          if (index !== this.filterItems[this.changes.prop].length - 1) {
+            andOrButton = (
               <div onClick={() => this.toggleFilterAndOr(d.id)}>
                 <AndOrButton isAnd={d.relation === 'and'} />
               </div>
-              <div onClick={() => this.onRemoveFilter(d.id)}>
-                <TrashButton />
+            );
+          }
+
+          return (
+            <div key={d.id} class={FILTER_LIST_CLASS}>
+              <div>
+                {this.filterNames[d.type]}{' '}
+                <strong>
+                  <i>{d.value}</i>
+                </strong>
+              </div>
+              <div class={FILTER_LIST_CLASS_ACTION}>
+                {andOrButton}
+                <div onClick={() => this.onRemoveFilter(d.id)}>
+                  <TrashButton />
+                </div>
               </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
     );
   }
@@ -144,18 +154,8 @@ export class FilterPanel {
       left: `${this.changes.x}px`,
       top: `${this.changes.y}px`,
     };
-    const capts = Object.assign(this.filterCaptionsInternal, this.filterCaptions);
 
-    // const listItems = (this.filterItems[this.changes.prop] || []).map(d => (
-    //   <div key={d.id} class={FILTER_LIST_CLASS}>
-    //     <div>
-    //       {d.type} - {d.value} - {d.relation}
-    //     </div>
-    //     <div onClick={() => this.onRemoveFilter(d.id)}>
-    //       <TrashButton />
-    //     </div>
-    //   </div>
-    // ));
+    const capts = Object.assign(this.filterCaptionsInternal, this.filterCaptions);
 
     return (
       <Host style={style}>
