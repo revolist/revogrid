@@ -31,6 +31,7 @@ export type FilterLocalization = {
  * @property {string[]|undefined} include - filters to be included, if defined everything else out of scope will be ignored
  * @property {Record<string, CustomFilter>|undefined} customFilters - hash map of {FilterType:CustomFilter}.
  * @property {FilterLocalization|undefined} localization - translation for filter popup captions.
+ * @property {MultiFilterItem|undefined} multiFilterItems - data for multi filtering.
  * A way to define your own filter types per column
  */
 export type ColumnFilterConfig = {
