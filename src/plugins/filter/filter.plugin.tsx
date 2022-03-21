@@ -38,6 +38,7 @@ export type ColumnFilterConfig = {
   include?: string[];
   customFilters?: Record<string, CustomFilter>;
   localization?: FilterLocalization;
+  multiFilterItems?: MultiFilterItem;
 };
 type HeaderEvent = CustomEvent<RevoGrid.ColumnRegular>;
 type FilterCollectionItem = {
@@ -65,7 +66,13 @@ export default class FilterPlugin extends BasePlugin {
     }
     const headerclick = (e: HeaderEvent) => this.headerclick(e);
 
+    const aftersourceset = async () => {
+      if (Object.keys(this.multiFilterItems).length) {
+        await this.runFiltering();
+      }
+    };
     this.addEventListener('headerclick', headerclick);
+    this.addEventListener('aftersourceset', aftersourceset);
 
     this.revogrid.registerVNode([
       <revogr-filter-panel
@@ -82,6 +89,9 @@ export default class FilterPlugin extends BasePlugin {
   private initConfig(config: ColumnFilterConfig) {
     if (config.collection) {
       this.filterCollection = { ...config.collection };
+    }
+    if (config.multiFilterItems) {
+      this.multiFilterItems = { ...config.multiFilterItems };
     }
     if (config.customFilters) {
       for (let cType in config.customFilters) {
