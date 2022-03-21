@@ -2,7 +2,7 @@ import { h } from '@stencil/core';
 import BasePlugin from '../basePlugin';
 import { RevoGrid } from '../../interfaces';
 import { FILTER_PROP, isFilterBtn } from './filter.button';
-import { FilterItem, MultiFilterItem } from './filter.pop';
+import { MultiFilterItem } from './filter.pop';
 import { filterEntities, filterNames, FilterType, filterTypes } from './filter.service';
 import { LogicFunction } from './filter.types';
 
@@ -53,6 +53,7 @@ export const FILTER_TRIMMED_TYPE = 'filter';
 export default class FilterPlugin extends BasePlugin {
   private pop: HTMLRevogrFilterPanelElement;
   private filterCollection: FilterCollection = {};
+  private multiFilterItems: MultiFilterItem = {};
   private possibleFilters: Record<string, string[]> = { ...filterTypes };
   private possibleFilterNames: Record<string, string> = { ...filterNames };
   private possibleFilterEntities: Record<string, LogicFunction> = { ...filterEntities };
@@ -63,13 +64,8 @@ export default class FilterPlugin extends BasePlugin {
       this.initConfig(config);
     }
     const headerclick = (e: HeaderEvent) => this.headerclick(e);
-    const aftersourceset = () => {
-      if (Object.keys(this.filterCollection).length) {
-        this.filterByProps(this.filterCollection);
-      }
-    };
+
     this.addEventListener('headerclick', headerclick);
-    this.addEventListener('aftersourceset', aftersourceset);
 
     this.revogrid.registerVNode([
       <revogr-filter-panel
@@ -78,7 +74,6 @@ export default class FilterPlugin extends BasePlugin {
         filterEntities={this.possibleFilterEntities}
         filterCaptions={config?.localization?.captions}
         onFilterChange={e => this.onFilterChange(e.detail)}
-        onMultiFilterChange={e => this.onMultiFilterChange(e.detail)}
         ref={e => (this.pop = e)}
       />,
     ]);
@@ -185,80 +180,17 @@ export default class FilterPlugin extends BasePlugin {
   }
 
   // called on internal component change
-  private async onFilterChange(filterItem: FilterItem) {
-    // this.filterByProps({ [filterItem.prop]: filterItem });
-  }
-
-  private async onMultiFilterChange(filterItems: MultiFilterItem) {
-    const { source, columns } = await this.getData();
-    const { defaultPrevented, detail } = this.emit('beforefilterapply', { collection: this.filterCollection, source, columns });
-    if (defaultPrevented) {
-      return;
-    }
-    this.doMultiFiltering(detail.collection, detail.source, detail.columns, filterItems);
-  }
-
-  /**
-   * Apply filters collection to extend existing one or override
-   * @method
-   * @param conditions - list of filters to apply
-   */
-  async filterByProps(conditions: Record<RevoGrid.ColumnProp, FilterItem>, override = false) {
-    if (override) {
-      this.filterCollection = {};
-    }
-    for (const prop in conditions) {
-      const { type, value } = conditions[prop];
-      if (type === 'none') {
-        delete this.filterCollection[prop];
-      } else {
-        const filter = this.possibleFilterEntities[type];
-        this.filterCollection[prop] = {
-          filter,
-          value,
-          type,
-        };
-      }
-    }
-    await this.runFiltering();
+  private async onFilterChange(filterItems: MultiFilterItem) {
+    this.multiFilterItems = filterItems;
+    this.runFiltering();
   }
 
   /**
    * Triggers grid filtering
    */
-  async doFiltering(collection: FilterCollection, items: RevoGrid.DataType[], columns: RevoGrid.ColumnRegular[]) {
+  async doFiltering(collection: FilterCollection, items: RevoGrid.DataType[], columns: RevoGrid.ColumnRegular[], filterItems: MultiFilterItem) {
     const columnsToUpdate: RevoGrid.ColumnRegular[] = [];
-    // todo improvement: loop through collection of props
-    columns.forEach(rgCol => {
-      const column = { ...rgCol };
-      const hasFilter = collection[column.prop];
-      if (column[FILTER_PROP] && !hasFilter) {
-        delete column[FILTER_PROP];
-        columnsToUpdate.push(column);
-      }
-      if (!column[FILTER_PROP] && hasFilter) {
-        columnsToUpdate.push(column);
-        column[FILTER_PROP] = true;
-      }
-    });
-    const itemsToFilter = this.getRowFilter(items, collection);
-    // check is filter event prevented
-    const { defaultPrevented, detail } = this.emit('beforefiltertrimmed', { collection, itemsToFilter, source: items });
-    if (defaultPrevented) {
-      return;
-    }
-    // check is trimmed event prevented
-    const isAddedEvent = await this.revogrid.addTrimmed(detail.itemsToFilter, FILTER_TRIMMED_TYPE);
-    if (isAddedEvent.defaultPrevented) {
-      return;
-    }
-    await this.revogrid.updateColumns(columnsToUpdate);
-    this.emit('afterFilterApply');
-  }
 
-  async doMultiFiltering(collection: FilterCollection, items: RevoGrid.DataType[], columns: RevoGrid.ColumnRegular[], filterItems: MultiFilterItem) {
-    const columnsToUpdate: RevoGrid.ColumnRegular[] = [];
-    // todo improvement: loop through collection of props
     columns.forEach(rgCol => {
       const column = { ...rgCol };
       const hasFilter = filterItems[column.prop];
@@ -271,14 +203,13 @@ export default class FilterPlugin extends BasePlugin {
         column[FILTER_PROP] = true;
       }
     });
-    const itemsToFilter = this.getRowMultiFilter(items, filterItems);
+    const itemsToFilter = this.getRowFilter(items, filterItems);
     // check is filter event prevented
     const { defaultPrevented } = this.emit('beforefiltertrimmed', { collection, itemsToFilter, source: items });
     if (defaultPrevented) {
       return;
     }
 
-    // const test = { 1: true };
     // check is trimmed event prevented
     const isAddedEvent = await this.revogrid.addTrimmed(itemsToFilter, FILTER_TRIMMED_TYPE);
     if (isAddedEvent.defaultPrevented) {
@@ -291,7 +222,7 @@ export default class FilterPlugin extends BasePlugin {
   }
 
   async clearFiltering() {
-    this.filterCollection = {};
+    this.multiFilterItems = {};
     await this.runFiltering();
   }
 
@@ -301,7 +232,7 @@ export default class FilterPlugin extends BasePlugin {
     if (defaultPrevented) {
       return;
     }
-    this.doFiltering(detail.collection, detail.source, detail.columns);
+    this.doFiltering(detail.collection, detail.source, detail.columns, this.multiFilterItems);
   }
 
   private async getData() {
@@ -313,20 +244,7 @@ export default class FilterPlugin extends BasePlugin {
     };
   }
 
-  private getRowFilter(rows: RevoGrid.DataType[], collection: FilterCollection) {
-    const trimmed: Record<number, boolean> = {};
-    rows.forEach((model, rowIndex) => {
-      for (const prop in collection) {
-        const filterItem = collection[prop];
-        const filter = filterItem.filter;
-        if (!filter(model[prop], filterItem.value)) {
-          trimmed[rowIndex] = true;
-        }
-      }
-    });
-    return trimmed;
-  }
-  private getRowMultiFilter(rows: RevoGrid.DataType[], filterItems: MultiFilterItem) {
+  private getRowFilter(rows: RevoGrid.DataType[], filterItems: MultiFilterItem) {
     const propKeys = Object.keys(filterItems);
 
     const trimmed: Record<number, boolean> = {};

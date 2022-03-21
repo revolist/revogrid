@@ -61,8 +61,7 @@ export class FilterPanel {
   @Prop() filterNames: Record<string, string> = {};
   @Prop() filterEntities: Record<string, LogicFunction> = {};
   @Prop() filterCaptions: FilterCaptions | undefined;
-  @Event() filterChange: EventEmitter<FilterItem>;
-  @Event() multiFilterChange: EventEmitter<MultiFilterItem>;
+  @Event() filterChange: EventEmitter<MultiFilterItem>;
   @Listen('mousedown', { target: 'document' }) onMouseDown(e: MouseEvent): void {
     if (this.changes && !e.defaultPrevented) {
       const el = e.target as HTMLElement;
@@ -226,13 +225,7 @@ export class FilterPanel {
       relation: 'and',
     });
 
-    this.multiFilterChange.emit(this.filterItems);
-
-    this.filterChange.emit({
-      prop: this.changes.prop,
-      type: this.changes.type,
-      value: this.extraElement?.value?.trim(),
-    });
+    this.filterChange.emit(this.filterItems);
   }
 
   private onReset() {
@@ -240,12 +233,7 @@ export class FilterPanel {
 
     delete this.filterItems[this.changes.prop];
 
-    this.multiFilterChange.emit(this.filterItems);
-
-    this.filterChange.emit({
-      prop: this.changes.prop,
-      type: 'none',
-    });
+    this.filterChange.emit(this.filterItems);
 
     this.changes = void 0;
   }
@@ -268,7 +256,7 @@ export class FilterPanel {
     // let's remove the prop if no more filters so the filter icon will be removed
     if (items.length === 0) delete this.filterItems[prop];
 
-    this.multiFilterChange.emit(this.filterItems);
+    this.filterChange.emit(this.filterItems);
   }
 
   private toggleFilterAndOr(id: number) {
@@ -287,7 +275,7 @@ export class FilterPanel {
 
     items[index].relation = items[index].relation === 'and' ? 'or' : 'and';
 
-    this.multiFilterChange.emit(this.filterItems);
+    this.filterChange.emit(this.filterItems);
   }
 
   private assertChanges() {
