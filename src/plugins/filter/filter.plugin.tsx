@@ -186,12 +186,10 @@ export default class FilterPlugin extends BasePlugin {
 
   // called on internal component change
   private async onFilterChange(filterItem: FilterItem) {
-    console.log('onFilterChange', filterItem);
     // this.filterByProps({ [filterItem.prop]: filterItem });
   }
 
   private async onMultiFilterChange(filterItems: MultiFilterItem) {
-    console.log('onMultiFilterChange', filterItems);
     const { source, columns } = await this.getData();
     const { defaultPrevented, detail } = this.emit('beforefilterapply', { collection: this.filterCollection, source, columns });
     if (defaultPrevented) {

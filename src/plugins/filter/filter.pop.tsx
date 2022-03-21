@@ -233,8 +233,6 @@ export class FilterPanel {
       type: this.changes.type,
       value: this.extraElement?.value?.trim(),
     });
-
-    // this.changes = undefined;
   }
 
   private onReset() {
