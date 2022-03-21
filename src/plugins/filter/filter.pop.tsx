@@ -145,7 +145,7 @@ export class FilterPanel {
   }
 
   render() {
-    if (!this.changes || !this.changes) {
+    if (!this.changes) {
       return <Host style={{ display: 'none' }}></Host>;
     }
     const style = {
@@ -211,7 +211,7 @@ export class FilterPanel {
     this.changes = undefined;
   }
 
-  private onSave() {
+  private onSave() {Host
     this.assertChanges();
 
     if (!this.filterItems[this.changes.prop]) {
