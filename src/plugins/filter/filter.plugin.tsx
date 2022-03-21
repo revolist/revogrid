@@ -205,7 +205,7 @@ export default class FilterPlugin extends BasePlugin {
     });
     const itemsToFilter = this.getRowFilter(items, filterItems);
     // check is filter event prevented
-    const { defaultPrevented } = this.emit('beforefiltertrimmed', { collection, itemsToFilter, source: items });
+    const { defaultPrevented } = this.emit('beforefiltertrimmed', { collection, itemsToFilter, source: items, filterItems });
     if (defaultPrevented) {
       return;
     }
@@ -228,7 +228,7 @@ export default class FilterPlugin extends BasePlugin {
 
   private async runFiltering() {
     const { source, columns } = await this.getData();
-    const { defaultPrevented, detail } = this.emit('beforefilterapply', { collection: this.filterCollection, source, columns });
+    const { defaultPrevented, detail } = this.emit('beforefilterapply', { collection: this.filterCollection, source, columns, filterItems: this.multiFilterItems });
     if (defaultPrevented) {
       return;
     }
