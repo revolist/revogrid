@@ -67,9 +67,24 @@ export default class FilterPlugin extends BasePlugin {
     const headerclick = (e: HeaderEvent) => this.headerclick(e);
 
     const aftersourceset = async () => {
-      if (Object.keys(this.multiFilterItems).length) {
-        await this.runFiltering();
+      const filterCollectionProps = Object.keys(this.filterCollection);
+      if (filterCollectionProps.length > 0) {
+        // handle old way of filtering by reworking FilterCollection to new MultiFilterItem
+        // since id is generated locally, we don't want to conflict with other filters by starting at 0
+        let filterIdStart = 1000;
+        for (const prop of filterCollectionProps) {
+          this.multiFilterItems[prop] = [
+            {
+              id: filterIdStart,
+              type: this.filterCollection[prop].type,
+              value: this.filterCollection[prop].value,
+              relation: 'and',
+            },
+          ];
+          filterIdStart++;
+        }
       }
+      await this.runFiltering();
     };
     this.addEventListener('headerclick', headerclick);
     this.addEventListener('aftersourceset', aftersourceset);
@@ -77,6 +92,7 @@ export default class FilterPlugin extends BasePlugin {
     this.revogrid.registerVNode([
       <revogr-filter-panel
         uuid={`filter-${uiid}`}
+        filterItems={this.multiFilterItems}
         filterNames={this.possibleFilterNames}
         filterEntities={this.possibleFilterEntities}
         filterCaptions={config?.localization?.captions}

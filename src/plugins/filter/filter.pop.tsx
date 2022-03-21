@@ -53,10 +53,10 @@ export class FilterPanel {
     reset: 'Reset',
     cancel: 'Cancel',
   };
-  @State() filterItems: MultiFilterItem = {};
   @State() filterId = 0;
   @State() changes: ShowData | undefined;
   @Prop({ mutable: true, reflect: true }) uuid: string;
+  @Prop() filterItems: MultiFilterItem = {};
   @Prop() filterTypes: Record<string, string[]> = {};
   @Prop() filterNames: Record<string, string> = {};
   @Prop() filterEntities: Record<string, LogicFunction> = {};
