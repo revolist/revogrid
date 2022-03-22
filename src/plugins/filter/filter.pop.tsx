@@ -46,15 +46,18 @@ const FILTER_LIST_CLASS_ACTION = 'multi-filter-list-action';
   styleUrl: 'filter.style.scss',
 })
 export class FilterPanel {
-  private extraElement: HTMLInputElement | undefined;
+  // private extraElement: HTMLInputElement | undefined;
   private filterCaptionsInternal: FilterCaptions = {
     title: 'Filter by condition',
     save: 'Save',
     reset: 'Reset',
     cancel: 'Cancel',
   };
+  @State() userInput: string;
   @State() isFilterIdSet = false;
   @State() filterId = 0;
+  @State() currentFilterId: number = -1;
+  @State() currentFilterType: FilterType = defaultType;
   @State() changes: ShowData | undefined;
   @Prop({ mutable: true, reflect: true }) uuid: string;
   @Prop() filterItems: MultiFilterItem = {};
@@ -95,8 +98,13 @@ export class FilterPanel {
 
   renderConditions(type: FilterType) {
     const options: VNode[] = [];
+    const prop = this.changes?.prop;
     for (let gIndex in this.filterTypes) {
-      options.push(<option value={defaultType}>{this.filterNames[defaultType]}</option>);
+      options.push(
+        <option selected={this.currentFilterType === defaultType} value={defaultType}>
+          {prop && this.filterItems[prop] && this.filterItems[prop].length > 0 ? 'Select condition...' : this.filterNames[defaultType]}
+        </option>,
+      );
 
       options.push(
         ...this.filterTypes[gIndex].map(k => (
@@ -110,14 +118,15 @@ export class FilterPanel {
     return options;
   }
 
-  renderExtra(extra?: string, value?: any) {
-    this.extraElement = undefined;
-    switch (extra) {
-      case 'input':
-        return <input type="text" value={value} onInput={(e: InputEvent) => this.onInput(e)} onKeyDown={e => this.onKeyDown(e)} ref={e => (this.extraElement = e)} />;
-      default:
-        return '';
-    }
+  renderExtra(prop: RevoGrid.ColumnProp) {
+    if (this.filterEntities[this.currentFilterType].extra !== 'input') return '';
+
+    if (!this.filterItems[prop]) return '';
+
+    const index = this.filterItems[prop].findIndex(item => item.id === this.currentFilterId);
+    if (index === -1) return '';
+
+    return <input id="filter-input" type="text" value={this.userInput} onInput={this.onUserInput.bind(this, index, prop)} onKeyDown={e => this.onKeyDown(e)} />;
   }
 
   getFilterItemsList() {
@@ -134,10 +143,12 @@ export class FilterPanel {
               </div>
             );
           }
+          const raquo = String.fromCharCode(187) + ' ';
 
           return (
             <div key={d.id} class={FILTER_LIST_CLASS}>
               <div>
+                {d.id === this.currentFilterId ? raquo : ''}
                 {this.filterNames[d.type]}{' '}
                 <strong>
                   <i>{d.value}</i>
@@ -173,10 +184,10 @@ export class FilterPanel {
         <label>{capts.title}</label>
         {this.getFilterItemsList()}
         <div>
-          <select class="select-css" onChange={e => this.onFilterChange(e)}>
+          <select id="filter-select" class="select-css" onChange={e => this.onFilterChange(e)} onMouseUp={e => this.onDropdownClick(e)}>
             {this.renderConditions(this.changes.type)}
           </select>
-          <div>{this.renderExtra(this.filterEntities[this.changes.type].extra, this.changes.value)}</div>
+          <div class={{ 'filter-input': true }}>{this.renderExtra(this.changes.prop)}</div>
           <div class="center">
             <RevoButton class={{ green: true }} onClick={() => this.onSave()}>
               {capts.save}
@@ -194,25 +205,71 @@ export class FilterPanel {
   }
 
   private onFilterChange(e: Event) {
-    if (!this.changes) {
-      throw new Error('Changes required per edit');
-    }
     const el = e.target as HTMLSelectElement;
     const type = el.value as FilterType;
-    this.changes = {
-      ...this.changes,
-      type,
-    };
+
+    this.currentFilterType = type;
+    this.addNewFilterToProp();
+
+    // focus on input after selecting from dropdown
+    setTimeout(() => {
+      const input = document.getElementById('filter-input') as HTMLInputElement;
+      if (input) input.focus();
+    }, 0);
   }
 
-  private onInput(e: InputEvent) {
-    this.changes.value = (e.target as HTMLInputElement).value;
-    // prevent grid focus and other unexpected events
-    e.preventDefault();
+  private onDropdownClick(e: MouseEvent) {
+    // mouse event detail is 1 when the option is chosen
+    if (e.detail !== 1) return;
+
+    // if event detail is 0, the <select> element is clicked, resetting to defaultType
+    const select = document.getElementById('filter-select') as HTMLSelectElement;
+    if (select) {
+      select.value = defaultType;
+      this.currentFilterType = defaultType;
+    }
+  }
+
+  private addNewFilterToProp() {
+    if (!this.filterItems[this.changes.prop]) {
+      this.filterItems[this.changes.prop] = [];
+    }
+
+    if (this.currentFilterType === 'none') return;
+
+    this.filterId++;
+    this.currentFilterId = this.filterId;
+
+    this.filterItems[this.changes.prop].push({
+      id: this.currentFilterId,
+      type: this.currentFilterType,
+      value: '',
+      relation: 'and',
+    });
+    this.userInput = '';
+  }
+
+  private onUserInput(index: number, prop: RevoGrid.ColumnProp, event: Event) {
+    // update the value of the input
+    this.userInput = (event.target as HTMLInputElement).value;
+    // update the value of the filter item
+    this.filterItems[prop][index].value = this.userInput;
   }
 
   private onKeyDown(e: KeyboardEvent) {
     if (e.key.toLowerCase() === 'enter') {
+      // handle shift + enter on input to add new filter
+      if (e.shiftKey) {
+        const select = document.getElementById('filter-select') as HTMLSelectElement;
+        if (select) {
+          select.value = defaultType;
+          this.currentFilterType = defaultType;
+          this.addNewFilterToProp();
+          select.focus();
+        }
+        return;
+      }
+      // save and emit filter when not pressing shift
       this.onSave();
     }
     // keep event local, don't escalate farther to dom
@@ -226,17 +283,6 @@ export class FilterPanel {
   private onSave() {
     this.assertChanges();
 
-    if (!this.filterItems[this.changes.prop]) {
-      this.filterItems[this.changes.prop] = [];
-    }
-
-    this.filterItems[this.changes.prop].push({
-      id: this.filterId++,
-      type: this.changes.type,
-      value: this.extraElement?.value?.trim(),
-      relation: 'and',
-    });
-
     this.filterChange.emit(this.filterItems);
   }
 
@@ -245,9 +291,10 @@ export class FilterPanel {
 
     delete this.filterItems[this.changes.prop];
 
-    this.filterChange.emit(this.filterItems);
+    // this updates the DOM which is used by getFilterItemsList() key
+    this.filterId++;
 
-    this.changes = void 0;
+    this.filterChange.emit(this.filterItems);
   }
 
   private onRemoveFilter(id: number) {
@@ -267,8 +314,6 @@ export class FilterPanel {
 
     // let's remove the prop if no more filters so the filter icon will be removed
     if (items.length === 0) delete this.filterItems[prop];
-
-    this.filterChange.emit(this.filterItems);
   }
 
   private toggleFilterAndOr(id: number) {
@@ -286,8 +331,6 @@ export class FilterPanel {
     if (index === -1) return;
 
     items[index].relation = items[index].relation === 'and' ? 'or' : 'and';
-
-    this.filterChange.emit(this.filterItems);
   }
 
   private assertChanges() {
@@ -297,6 +340,9 @@ export class FilterPanel {
   }
 
   private isOutside(e: HTMLElement | null) {
+    this.userInput = '';
+    this.currentFilterType = defaultType;
+    this.currentFilterId = -1;
     if (e.classList.contains(`[uuid="${this.uuid}"]`)) {
       return false;
     }
