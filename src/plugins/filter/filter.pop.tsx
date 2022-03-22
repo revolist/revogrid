@@ -53,6 +53,7 @@ export class FilterPanel {
     reset: 'Reset',
     cancel: 'Cancel',
   };
+  @State() isFilterIdSet = false;
   @State() filterId = 0;
   @State() changes: ShowData | undefined;
   @Prop({ mutable: true, reflect: true }) uuid: string;
@@ -79,6 +80,17 @@ export class FilterPanel {
 
   @Method() async getChanges() {
     return this.changes;
+  }
+
+  componentWillRender() {
+    if (!this.isFilterIdSet) {
+      this.isFilterIdSet = true;
+      const filterItems = Object.keys(this.filterItems);
+      for (const prop of filterItems) {
+        // we set the proper filterId so there won't be any conflict when removing filters
+        this.filterId += this.filterItems[prop].length;
+      }
+    }
   }
 
   renderConditions(type: FilterType) {

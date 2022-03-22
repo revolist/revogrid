@@ -71,19 +71,16 @@ export default class FilterPlugin extends BasePlugin {
       const filterCollectionProps = Object.keys(this.filterCollection);
       if (filterCollectionProps.length > 0) {
         // handle old way of filtering by reworking FilterCollection to new MultiFilterItem
-        // since id is generated locally, we don't want to conflict with other filters by starting at 0
-        let filterIdStart = 1000;
-        for (const prop of filterCollectionProps) {
+        filterCollectionProps.forEach((prop, index) => {
           this.multiFilterItems[prop] = [
             {
-              id: filterIdStart,
+              id: index,
               type: this.filterCollection[prop].type,
               value: this.filterCollection[prop].value,
               relation: 'and',
             },
           ];
-          filterIdStart++;
-        }
+        });
       }
       await this.runFiltering();
     };
@@ -299,7 +296,7 @@ export default class FilterPlugin extends BasePlugin {
               continue;
             }
             propFilterSatisfiedCount++;
-          } else if (filterData.relation === 'and') {
+          } else {
             // 'and' relation will need to know the next filter
             // so we save this current filter to include it in the next filter
             lastFilterResults.push(!filter(model[prop], filterData.value));
