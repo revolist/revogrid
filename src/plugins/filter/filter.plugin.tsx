@@ -251,6 +251,25 @@ export default class FilterPlugin extends BasePlugin {
   }
 
   private async runFiltering() {
+    const collection: FilterCollection = {};
+
+    // handle old filterCollection to return the first filter only (if any) from multiFilterItems
+    const filterProps = Object.keys(this.multiFilterItems);
+
+    for (const prop of filterProps) {
+      // check if we have any filter for a column
+      if (this.multiFilterItems[prop].length > 0) {
+        const firstFilterItem = this.multiFilterItems[prop][0];
+        collection[prop] = {
+          filter: filterEntities[firstFilterItem.type],
+          type: firstFilterItem.type,
+          value: firstFilterItem.value,
+        };
+      }
+    }
+
+    this.filterCollection = collection;
+
     const { source, columns } = await this.getData();
     const { defaultPrevented, detail } = this.emit('beforefilterapply', { collection: this.filterCollection, source, columns, filterItems: this.multiFilterItems });
     if (defaultPrevented) {

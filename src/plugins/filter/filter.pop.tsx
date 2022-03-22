@@ -46,7 +46,6 @@ const FILTER_LIST_CLASS_ACTION = 'multi-filter-list-action';
   styleUrl: 'filter.style.scss',
 })
 export class FilterPanel {
-  // private extraElement: HTMLInputElement | undefined;
   private filterCaptionsInternal: FilterCaptions = {
     title: 'Filter by condition',
     save: 'Save',
