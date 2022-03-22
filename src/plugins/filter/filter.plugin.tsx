@@ -229,13 +229,13 @@ export default class FilterPlugin extends BasePlugin {
     });
     const itemsToFilter = this.getRowFilter(items, filterItems);
     // check is filter event prevented
-    const { defaultPrevented } = this.emit('beforefiltertrimmed', { collection, itemsToFilter, source: items, filterItems });
+    const { defaultPrevented, detail } = this.emit('beforefiltertrimmed', { collection, itemsToFilter, source: items, filterItems });
     if (defaultPrevented) {
       return;
     }
 
     // check is trimmed event prevented
-    const isAddedEvent = await this.revogrid.addTrimmed(itemsToFilter, FILTER_TRIMMED_TYPE);
+    const isAddedEvent = await this.revogrid.addTrimmed(detail.itemsToFilter, FILTER_TRIMMED_TYPE);
     if (isAddedEvent.defaultPrevented) {
       return;
     }
@@ -256,7 +256,7 @@ export default class FilterPlugin extends BasePlugin {
     if (defaultPrevented) {
       return;
     }
-    this.doFiltering(detail.collection, detail.source, detail.columns, this.multiFilterItems);
+    this.doFiltering(detail.collection, detail.source, detail.columns, detail.filterItems);
   }
 
   private async getData() {
