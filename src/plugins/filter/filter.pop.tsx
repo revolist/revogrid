@@ -211,7 +211,7 @@ export class FilterPanel {
     this.changes = undefined;
   }
 
-  private onSave() {Host
+  private onSave() {
     this.assertChanges();
 
     if (!this.filterItems[this.changes.prop]) {
