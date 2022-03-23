@@ -244,6 +244,8 @@ export class FilterPanel {
   }
 
   private addNewFilterToProp() {
+    if (!this.changes?.prop) return;
+
     if (!this.filterItems[this.changes.prop]) {
       this.filterItems[this.changes.prop] = [];
     }
@@ -352,6 +354,7 @@ export class FilterPanel {
 
   private isOutside(e: HTMLElement | null) {
     this.currentFilterType = defaultType;
+    this.changes.type = defaultType;
     this.currentFilterId = -1;
     if (e.classList.contains(`[uuid="${this.uuid}"]`)) {
       return false;
