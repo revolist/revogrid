@@ -224,8 +224,11 @@ export class FilterPanel {
     // this re-renders the input to know if we need extra input
     this.filterId++;
 
-    const input = document.getElementById('filter-input-' + this.filterItems[prop][index].id) as HTMLInputElement;
-    if (input) input.focus();
+    // adding setTimeout will wait for the next tick DOM update then focus on input
+    setTimeout(() => {
+      const input = document.getElementById('filter-input-' + this.filterItems[prop][index].id) as HTMLInputElement;
+      if (input) input.focus();
+    }, 0);
   }
 
   private onAddNewFilter(e: Event) {
