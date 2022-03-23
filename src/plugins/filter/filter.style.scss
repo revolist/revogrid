@@ -145,27 +145,40 @@ revogr-filter-panel {
 }
 
 .multi-filter-list {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
+  margin-bottom: 6px;
   div {
     white-space: nowrap;
   }
 
   .multi-filter-list-action {
     display: flex;
-    margin-left: 10px;
+
     justify-content: space-between;
     align-items: center;
-
-    .and-or-button {
-      margin: 0 5px 0 0;
-      cursor: pointer;
-    }
-    .trash-button {
-      margin-bottom: -3px;
-      cursor: pointer;
-    }
   }
+
+  .and-or-button {
+    margin: 0 0 0 10px;
+    padding: 4px 10px;
+    cursor: pointer;
+  }
+  .trash-button {
+    margin: 0 0 -2px 6px;
+    cursor: pointer;
+  }
+}
+
+.add-filter-divider {
+  border-bottom: 3px solid #849398;
+  display: block;
+  height: 3px;
+  width: calc(100% + 8px);
+  margin-bottom: 12px;
+  margin-left: -4px;
+}
+
+.select-input {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }

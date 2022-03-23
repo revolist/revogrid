@@ -52,7 +52,6 @@ export class FilterPanel {
     reset: 'Reset',
     cancel: 'Cancel',
   };
-  @State() userInput: string;
   @State() isFilterIdSet = false;
   @State() filterId = 0;
   @State() currentFilterId: number = -1;
@@ -95,16 +94,19 @@ export class FilterPanel {
     }
   }
 
-  renderConditions(type: FilterType) {
+  renderSelectOptions(type: FilterType, isDefaultTypeRemoved = false) {
     const options: VNode[] = [];
     const prop = this.changes?.prop;
-    for (let gIndex in this.filterTypes) {
+
+    if (!isDefaultTypeRemoved) {
       options.push(
         <option selected={this.currentFilterType === defaultType} value={defaultType}>
-          {prop && this.filterItems[prop] && this.filterItems[prop].length > 0 ? 'Select condition...' : this.filterNames[defaultType]}
+          {prop && this.filterItems[prop] && this.filterItems[prop].length > 0 ? 'Add more condition...' : this.filterNames[defaultType]}
         </option>,
       );
+    }
 
+    for (let gIndex in this.filterTypes) {
       options.push(
         ...this.filterTypes[gIndex].map(k => (
           <option value={k} selected={type === k}>
@@ -117,51 +119,61 @@ export class FilterPanel {
     return options;
   }
 
-  renderExtra(prop: RevoGrid.ColumnProp) {
-    if (this.filterEntities[this.currentFilterType].extra !== 'input') return '';
+  renderExtra(prop: RevoGrid.ColumnProp, index: number) {
+    const currentFilter = this.filterItems[prop];
 
-    if (!this.filterItems[prop]) return '';
+    if (!currentFilter) return '';
 
-    const index = this.filterItems[prop].findIndex(item => item.id === this.currentFilterId);
-    if (index === -1) return '';
+    if (this.filterEntities[currentFilter[index].type].extra !== 'input') return '';
 
-    return <input id="filter-input" type="text" value={this.userInput} onInput={this.onUserInput.bind(this, index, prop)} onKeyDown={e => this.onKeyDown(e)} />;
+    return (
+      <input
+        id={`filter-input-${currentFilter[index].id}`}
+        placeholder="Enter value..."
+        type="text"
+        value={currentFilter[index].value}
+        onInput={this.onUserInput.bind(this, index, prop)}
+        onKeyDown={e => this.onKeyDown(e)}
+      />
+    );
   }
 
   getFilterItemsList() {
+    const prop = this.changes?.prop;
+    if (!prop) return '';
+
+    const propFilters = this.filterItems[prop] || [];
     return (
       <div key={this.filterId}>
-        {(this.filterItems[this.changes.prop] || []).map((d, index) => {
+        {propFilters.map((d, index) => {
           let andOrButton;
 
           // hide toggle button if there is only one filter and the last one
-          if (index !== this.filterItems[this.changes.prop].length - 1) {
+          if (index !== this.filterItems[prop].length - 1) {
             andOrButton = (
               <div onClick={() => this.toggleFilterAndOr(d.id)}>
                 <AndOrButton isAnd={d.relation === 'and'} />
               </div>
             );
           }
-          const raquo = String.fromCharCode(187) + ' ';
 
           return (
             <div key={d.id} class={FILTER_LIST_CLASS}>
-              <div>
-                {d.id === this.currentFilterId ? raquo : ''}
-                {this.filterNames[d.type]}{' '}
-                <strong>
-                  <i>{d.value}</i>
-                </strong>
-              </div>
-              <div class={FILTER_LIST_CLASS_ACTION}>
-                {andOrButton}
+              <div class={{ 'select-input': true }}>
+                <select class="select-css select-filter" onChange={e => this.onFilterTypeChange(e, prop, index)}>
+                  {this.renderSelectOptions(this.filterItems[prop][index].type, true)}
+                </select>
+                <div class={FILTER_LIST_CLASS_ACTION}>{andOrButton}</div>
                 <div onClick={() => this.onRemoveFilter(d.id)}>
                   <TrashButton />
                 </div>
               </div>
+              <div>{this.renderExtra(prop, index)}</div>
             </div>
           );
         })}
+
+        {propFilters.length > 0 ? <div class="add-filter-divider"></div> : ''}
       </div>
     );
   }
@@ -181,52 +193,51 @@ export class FilterPanel {
     return (
       <Host style={style}>
         <label>{capts.title}</label>
-        {this.getFilterItemsList()}
-        <div>
-          <select id="filter-select" class="select-css" onChange={e => this.onFilterChange(e)} onMouseUp={e => this.onDropdownClick(e)}>
-            {this.renderConditions(this.changes.type)}
+        <div>{this.getFilterItemsList()}</div>
+
+        <div class="add-filter">
+          <select id="add-filter" class="select-css" onChange={e => this.onAddNewFilter(e)}>
+            {this.renderSelectOptions(this.changes.type)}
           </select>
-          <div class={{ 'filter-input': true }}>{this.renderExtra(this.changes.prop)}</div>
-          <div class="center">
-            <RevoButton class={{ green: true }} onClick={() => this.onSave()}>
-              {capts.save}
-            </RevoButton>
-            <RevoButton class={{ red: true }} onClick={() => this.onReset()}>
-              {capts.reset}
-            </RevoButton>
-            <RevoButton class={{ light: true }} onClick={() => this.onCancel()}>
-              {capts.cancel}
-            </RevoButton>
-          </div>
+        </div>
+        <div class="center">
+          <RevoButton class={{ green: true }} onClick={() => this.onSave()}>
+            {capts.save}
+          </RevoButton>
+          <RevoButton class={{ red: true }} onClick={() => this.onReset()}>
+            {capts.reset}
+          </RevoButton>
+          <RevoButton class={{ light: true }} onClick={() => this.onCancel()}>
+            {capts.cancel}
+          </RevoButton>
         </div>
       </Host>
     );
   }
 
-  private onFilterChange(e: Event) {
+  private onFilterTypeChange(e: Event, prop: RevoGrid.ColumnProp, index: number) {
+    const el = e.target as HTMLSelectElement;
+    const type = el.value as FilterType;
+
+    this.filterItems[prop][index].type = type;
+
+    // this re-renders the input to know if we need extra input
+    this.filterId++;
+
+    const input = document.getElementById('filter-input-' + this.filterItems[prop][index].id) as HTMLInputElement;
+    if (input) input.focus();
+  }
+
+  private onAddNewFilter(e: Event) {
     const el = e.target as HTMLSelectElement;
     const type = el.value as FilterType;
 
     this.currentFilterType = type;
     this.addNewFilterToProp();
 
-    // focus on input after selecting from dropdown
-    setTimeout(() => {
-      const input = document.getElementById('filter-input') as HTMLInputElement;
-      if (input) input.focus();
-    }, 0);
-  }
-
-  private onDropdownClick(e: MouseEvent) {
-    // mouse event detail is 1 when the option is chosen
-    if (e.detail !== 1) return;
-
-    // if event detail is 0, the <select> element is clicked, resetting to defaultType
-    const select = document.getElementById('filter-select') as HTMLSelectElement;
-    if (select) {
-      select.value = defaultType;
-      this.currentFilterType = defaultType;
-    }
+    // reset value after adding new filter
+    const select = document.getElementById('add-filter') as HTMLSelectElement;
+    if (select) select.value = defaultType;
   }
 
   private addNewFilterToProp() {
@@ -245,31 +256,29 @@ export class FilterPanel {
       value: '',
       relation: 'and',
     });
-    this.userInput = '';
+
+    // adding setTimeout will wait for the next tick DOM update then focus on input
+    setTimeout(() => {
+      const input = document.getElementById('filter-input-' + this.currentFilterId) as HTMLInputElement;
+      if (input) input.focus();
+    }, 0);
   }
 
   private onUserInput(index: number, prop: RevoGrid.ColumnProp, event: Event) {
-    // update the value of the input
-    this.userInput = (event.target as HTMLInputElement).value;
     // update the value of the filter item
-    this.filterItems[prop][index].value = this.userInput;
+    this.filterItems[prop][index].value = (event.target as HTMLInputElement).value;
   }
 
   private onKeyDown(e: KeyboardEvent) {
     if (e.key.toLowerCase() === 'enter') {
-      // handle shift + enter on input to add new filter
-      if (e.shiftKey) {
-        const select = document.getElementById('filter-select') as HTMLSelectElement;
-        if (select) {
-          select.value = defaultType;
-          this.currentFilterType = defaultType;
-          this.addNewFilterToProp();
-          select.focus();
-        }
-        return;
+      const select = document.getElementById('add-filter') as HTMLSelectElement;
+      if (select) {
+        select.value = defaultType;
+        this.currentFilterType = defaultType;
+        this.addNewFilterToProp();
+        select.focus();
       }
-      // save and emit filter when not pressing shift
-      this.onSave();
+      return;
     }
     // keep event local, don't escalate farther to dom
     e.stopPropagation();
@@ -339,7 +348,6 @@ export class FilterPanel {
   }
 
   private isOutside(e: HTMLElement | null) {
-    this.userInput = '';
     this.currentFilterType = defaultType;
     this.currentFilterId = -1;
     if (e.classList.contains(`[uuid="${this.uuid}"]`)) {
