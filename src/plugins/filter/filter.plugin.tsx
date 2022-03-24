@@ -65,6 +65,7 @@ export default class FilterPlugin extends BasePlugin {
     if (config) {
       this.initConfig(config);
     }
+
     const headerclick = (e: HeaderEvent) => this.headerclick(e);
 
     const aftersourceset = async () => {
@@ -72,14 +73,16 @@ export default class FilterPlugin extends BasePlugin {
       if (filterCollectionProps.length > 0) {
         // handle old way of filtering by reworking FilterCollection to new MultiFilterItem
         filterCollectionProps.forEach((prop, index) => {
-          this.multiFilterItems[prop] = [
-            {
-              id: index,
-              type: this.filterCollection[prop].type,
-              value: this.filterCollection[prop].value,
-              relation: 'and',
-            },
-          ];
+          if (!this.multiFilterItems[prop]) {
+            this.multiFilterItems[prop] = [
+              {
+                id: index,
+                type: this.filterCollection[prop].type,
+                value: this.filterCollection[prop].value,
+                relation: 'and',
+              },
+            ];
+          }
         });
       }
       await this.runFiltering();
