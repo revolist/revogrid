@@ -227,6 +227,8 @@ export class FilterPanel {
       const input = document.getElementById('filter-input-' + this.filterItems[prop][index].id) as HTMLInputElement;
       if (input) input.focus();
     }, 0);
+
+    this.debouncedApplyFilter();
   }
 
   private debouncedApplyFilter = debounce(() => {
