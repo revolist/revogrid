@@ -198,7 +198,7 @@ export class FilterPanel {
 
         <div class="add-filter">
           <select id="add-filter" class="select-css" onChange={e => this.onAddNewFilter(e)}>
-            {this.renderSelectOptions(this.changes.type)}
+            {this.renderSelectOptions(this.currentFilterType)}
           </select>
         </div>
         <div class="center">
@@ -230,7 +230,6 @@ export class FilterPanel {
   }
 
   private debouncedApplyFilter = debounce(() => {
-    this.assertChanges();
     this.filterChange.emit(this.filterItems);
   }, 400);
 
@@ -243,13 +242,16 @@ export class FilterPanel {
 
     // reset value after adding new filter
     const select = document.getElementById('add-filter') as HTMLSelectElement;
-    if (select) select.value = defaultType;
+    if (select) {
+      select.value = defaultType;
+      this.currentFilterType = defaultType;
+    }
 
     this.debouncedApplyFilter();
   }
 
   private addNewFilterToProp() {
-    const prop = this.changes?.prop;  
+    const prop = this.changes?.prop;
     if (!(prop || prop === 0)) return;
 
     if (!this.filterItems[prop]) {
@@ -278,7 +280,7 @@ export class FilterPanel {
   private onUserInput(index: number, prop: RevoGrid.ColumnProp, event: Event) {
     // update the value of the filter item
     this.filterItems[prop][index].value = (event.target as HTMLInputElement).value;
-    
+
     this.debouncedApplyFilter();
   }
 
@@ -358,6 +360,9 @@ export class FilterPanel {
   }
 
   private isOutside(e: HTMLElement | null) {
+    const select = document.getElementById('add-filter') as HTMLSelectElement;
+    if (select) select.value = defaultType;
+
     this.currentFilterType = defaultType;
     this.changes.type = defaultType;
     this.currentFilterId = -1;
