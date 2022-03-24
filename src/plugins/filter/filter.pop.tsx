@@ -6,6 +6,7 @@ import { RevoButton } from '../../components/button/button';
 import '../../utils/closestPolifill';
 import { LogicFunction } from './filter.types';
 import { FilterCaptions } from './filter.plugin';
+import debounce from 'lodash/debounce';
 
 /**
  * @typedef FilterItem
@@ -140,7 +141,7 @@ export class FilterPanel {
 
   getFilterItemsList() {
     const prop = this.changes?.prop;
-    if (!prop) return '';
+    if (!(prop || prop === 0)) return '';
 
     const propFilters = this.filterItems[prop] || [];
     return (
@@ -201,9 +202,6 @@ export class FilterPanel {
           </select>
         </div>
         <div class="center">
-          <RevoButton class={{ green: true }} onClick={() => this.onSave()}>
-            {capts.save}
-          </RevoButton>
           <RevoButton class={{ red: true }} onClick={() => this.onReset()}>
             {capts.reset}
           </RevoButton>
@@ -231,6 +229,11 @@ export class FilterPanel {
     }, 0);
   }
 
+  private debouncedApplyFilter = debounce(() => {
+    this.assertChanges();
+    this.filterChange.emit(this.filterItems);
+  }, 400);
+
   private onAddNewFilter(e: Event) {
     const el = e.target as HTMLSelectElement;
     const type = el.value as FilterType;
@@ -241,13 +244,16 @@ export class FilterPanel {
     // reset value after adding new filter
     const select = document.getElementById('add-filter') as HTMLSelectElement;
     if (select) select.value = defaultType;
+
+    this.debouncedApplyFilter();
   }
 
   private addNewFilterToProp() {
-    if (!this.changes?.prop) return;
+    const prop = this.changes?.prop;  
+    if (!(prop || prop === 0)) return;
 
-    if (!this.filterItems[this.changes.prop]) {
-      this.filterItems[this.changes.prop] = [];
+    if (!this.filterItems[prop]) {
+      this.filterItems[prop] = [];
     }
 
     if (this.currentFilterType === 'none') return;
@@ -255,7 +261,7 @@ export class FilterPanel {
     this.filterId++;
     this.currentFilterId = this.filterId;
 
-    this.filterItems[this.changes.prop].push({
+    this.filterItems[prop].push({
       id: this.currentFilterId,
       type: this.currentFilterType,
       value: '',
@@ -272,6 +278,8 @@ export class FilterPanel {
   private onUserInput(index: number, prop: RevoGrid.ColumnProp, event: Event) {
     // update the value of the filter item
     this.filterItems[prop][index].value = (event.target as HTMLInputElement).value;
+    
+    this.debouncedApplyFilter();
   }
 
   private onKeyDown(e: KeyboardEvent) {
@@ -291,12 +299,6 @@ export class FilterPanel {
 
   private onCancel() {
     this.changes = undefined;
-  }
-
-  private onSave() {
-    this.assertChanges();
-
-    this.filterChange.emit(this.filterItems);
   }
 
   private onReset() {
@@ -327,6 +329,8 @@ export class FilterPanel {
 
     // let's remove the prop if no more filters so the filter icon will be removed
     if (items.length === 0) delete this.filterItems[prop];
+
+    this.debouncedApplyFilter();
   }
 
   private toggleFilterAndOr(id: number) {
@@ -344,6 +348,7 @@ export class FilterPanel {
     if (index === -1) return;
 
     items[index].relation = items[index].relation === 'and' ? 'or' : 'and';
+    this.debouncedApplyFilter();
   }
 
   private assertChanges() {
