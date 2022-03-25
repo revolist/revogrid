@@ -14,8 +14,8 @@ import { ColumnCollection } from "./services/column.data.provider";
 import { DataInput } from "./plugins/export/types";
 import { VNode } from "@stencil/core";
 import { ColumnSource, RowSource } from "./components/data/columnService";
+import { MultiFilterItem, ShowData } from "./plugins/filter/filter.pop";
 import { LogicFunction } from "./plugins/filter/filter.types";
-import { FilterItem, ShowData } from "./plugins/filter/filter.pop";
 import { DataSourceState, Groups } from "./store/dataSource/data.store";
 import { ViewportData } from "./components/revo-grid/viewport.interfaces";
 import { ElementScroll } from "./components/revo-grid/viewport.scrolling.service";
@@ -238,6 +238,7 @@ export namespace Components {
     interface RevogrFilterPanel {
         "filterCaptions": FilterCaptions | undefined;
         "filterEntities": Record<string, LogicFunction>;
+        "filterItems": MultiFilterItem;
         "filterNames": Record<string, string>;
         "filterTypes": Record<string, string[]>;
         "getChanges": () => Promise<ShowData>;
@@ -696,9 +697,10 @@ declare namespace LocalJSX {
     interface RevogrFilterPanel {
         "filterCaptions"?: FilterCaptions | undefined;
         "filterEntities"?: Record<string, LogicFunction>;
+        "filterItems"?: MultiFilterItem;
         "filterNames"?: Record<string, string>;
         "filterTypes"?: Record<string, string[]>;
-        "onFilterChange"?: (event: CustomEvent<FilterItem>) => void;
+        "onFilterChange"?: (event: CustomEvent<MultiFilterItem>) => void;
         "uuid"?: string;
     }
     interface RevogrFocus {
