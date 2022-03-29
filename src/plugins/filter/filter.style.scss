@@ -16,6 +16,11 @@ revogr-filter-panel {
   min-width: 220px;
   text-align: left;
 
+  .filter-holder > div {
+    display: flex;
+    flex-direction: column;
+  }
+
   label {
     color: gray;
     font-size: 13px;
@@ -42,6 +47,12 @@ revogr-filter-panel {
   button {
     margin-top: 10px;
     margin-right: 5px;
+  }
+
+
+  .filter-actions {
+    text-align: right;
+    margin-right: -5px;
   }
 }
 
@@ -75,10 +86,6 @@ revogr-filter-panel {
       width: $img-size;
     }
   }
-}
-
-.center {
-  text-align: center;
 }
 
 .select-css {
@@ -145,7 +152,9 @@ revogr-filter-panel {
 }
 
 .multi-filter-list {
-  margin-bottom: 6px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+
   div {
     white-space: nowrap;
   }
@@ -159,22 +168,33 @@ revogr-filter-panel {
 
   .and-or-button {
     margin: 0 0 0 10px;
-    padding: 4px 10px;
+    min-width: 58px;
     cursor: pointer;
   }
   .trash-button {
+    $btn-remove-size: 22px;
     margin: 0 0 -2px 6px;
     cursor: pointer;
+
+    width: $btn-remove-size;
+    height: $btn-remove-size;
+    color: gray;
+    font-size: 18px;
+
+
+    .trash-img {
+      width: 1em;
+    }
   }
 }
 
 .add-filter-divider {
-  border-bottom: 3px solid #849398;
   display: block;
-  height: 3px;
-  width: calc(100% + 8px);
-  margin-bottom: 12px;
-  margin-left: -4px;
+  margin: 0 -10px 10px -10px;
+
+  border-bottom: 1px solid #d9d9d9;
+  height: 10px;
+  box-shadow: 0 4px 5px rgb(0 0 0 / 5%);
 }
 
 .select-input {

@@ -51,7 +51,7 @@ export class FilterPanel {
     title: 'Filter by condition',
     save: 'Save',
     reset: 'Reset',
-    cancel: 'Cancel',
+    cancel: 'Close',
   };
   @State() isFilterIdSet = false;
   @State() filterId = 0;
@@ -194,14 +194,14 @@ export class FilterPanel {
     return (
       <Host style={style}>
         <label>{capts.title}</label>
-        <div>{this.getFilterItemsList()}</div>
+        <div class="filter-holder">{this.getFilterItemsList()}</div>
 
         <div class="add-filter">
           <select id="add-filter" class="select-css" onChange={e => this.onAddNewFilter(e)}>
             {this.renderSelectOptions(this.currentFilterType)}
           </select>
         </div>
-        <div class="center">
+        <div class="filter-actions">
           <RevoButton class={{ red: true }} onClick={() => this.onReset()}>
             {capts.reset}
           </RevoButton>
