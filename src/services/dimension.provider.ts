@@ -6,6 +6,7 @@ import ViewportProvider from './viewport.provider';
 import { RevoGrid } from '../interfaces';
 import { getItemByIndex } from '../store/dimension/dimension.helpers';
 import { gatherTrimmedItems, Trimmed } from '../store/dataSource/trimmed.plugin';
+import { RESIZE_INTERVAL } from '../utils/consts';
 
 export type ColumnItems = Record<RevoGrid.DimensionCols, RevoGrid.ColumnRegular[]>;
 
@@ -16,7 +17,7 @@ export type DimensionConfig = {
 export default class DimensionProvider {
   readonly stores: DimensionStores;
   constructor(private viewports: ViewportProvider, config: DimensionConfig) {
-    const sizeChanged = debounce((k: RevoGrid.MultiDimensionType) => config.realSizeChanged(k), 100);
+    const sizeChanged = debounce((k: RevoGrid.MultiDimensionType) => config.realSizeChanged(k), RESIZE_INTERVAL);
     this.stores = reduce(
       [...rowTypes, ...columnTypes],
       (sources: Partial<DimensionStores>, k: RevoGrid.MultiDimensionType) => {

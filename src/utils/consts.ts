@@ -1,4 +1,6 @@
-export const MIN_COL_SIZE: number = 30;
+export const MIN_COL_SIZE = 30;
+export const RESIZE_INTERVAL = 40;
+
 export const DATA_COL = 'data-rgCol';
 export const DATA_ROW = 'data-rgRow';
 

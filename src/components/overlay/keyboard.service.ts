@@ -5,6 +5,7 @@ import { codesLetter } from '../../utils/keyCodes';
 import { isClear, isCtrlKey, isEnterKey, isLetterKey } from '../../utils/keyCodes.utils';
 import { timeout } from '../../utils';
 import { EventData, getCoordinate, isAfterLast, isBeforeFirst } from './selection.utils';
+import { RESIZE_INTERVAL } from '../../utils/consts';
 
 type Config = {
   selectionStoreService: SelectionStoreService;
@@ -102,7 +103,11 @@ export class KeyboardService {
     if (!data) {
       return false;
     }
-    await timeout();
+
+    // this interval needed for several cases
+    // grid could be resized before next click
+    // at this case to avoid screen jump we use this interval
+    await timeout(RESIZE_INTERVAL + 30);
 
     const range = this.sv.selectionStore.get('range');
     const focus = this.sv.selectionStore.get('focus');
