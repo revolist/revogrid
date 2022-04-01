@@ -16,7 +16,7 @@ export const config: Config = {
   hashFileNames: false,
   autoprefixCss: false,
   minifyCss: true,
-  preamble: 'Built by Revolist',
+  // preamble: 'Built by Revolist',
   hashedFileNameLength: 8,
   invisiblePrehydration: false,
   extras: {
