@@ -2,7 +2,7 @@ import { h } from '@stencil/core';
 import BasePlugin from '../basePlugin';
 import { RevoGrid } from '../../interfaces';
 import { FILTER_PROP, isFilterBtn } from './filter.button';
-import { FilterItem } from './filter.pop';
+import { MultiFilterItem } from './filter.pop';
 import { filterEntities, filterNames, FilterType, filterTypes } from './filter.service';
 import { LogicFunction } from './filter.types';
 import { reduce } from 'lodash';
@@ -18,12 +18,12 @@ export type FilterCaptions = {
   save: string;
   reset: string;
   cancel: string;
-}
+};
 
 export type FilterLocalization = {
   captions: FilterCaptions;
   filterNames: Record<FilterType, string>;
-}
+};
 
 /**
  * @typedef ColumnFilterConfig
@@ -32,6 +32,7 @@ export type FilterLocalization = {
  * @property {string[]|undefined} include - filters to be included, if defined everything else out of scope will be ignored
  * @property {Record<string, CustomFilter>|undefined} customFilters - hash map of {FilterType:CustomFilter}.
  * @property {FilterLocalization|undefined} localization - translation for filter popup captions.
+ * @property {MultiFilterItem|undefined} multiFilterItems - data for multi filtering.
  * A way to define your own filter types per column
  */
 export type ColumnFilterConfig = {
@@ -40,9 +41,11 @@ export type ColumnFilterConfig = {
   customFilters?: Record<string, CustomFilter>;
   filterProp?: string;
   localization?: FilterLocalization;
+  multiFilterItems?: MultiFilterItem;
 };
 type HeaderEvent = CustomEvent<RevoGrid.ColumnRegular>;
 type FilterCollectionItem = {
+  filter: LogicFunction;
   type: FilterType;
   value?: any;
 };
@@ -55,6 +58,7 @@ export const FILTER_CONFIG_CHANGED_EVENT = 'filterconfigchanged';
 export default class FilterPlugin extends BasePlugin {
   private pop: HTMLRevogrFilterPanelElement;
   private filterCollection: FilterCollection = {};
+  private multiFilterItems: MultiFilterItem = {};
   private possibleFilters: Record<string, string[]> = { ...filterTypes };
   private possibleFilterNames: Record<string, string> = { ...filterNames };
   private possibleFilterEntities: Record<string, LogicFunction> = { ...filterEntities };
@@ -65,11 +69,27 @@ export default class FilterPlugin extends BasePlugin {
     if (config) {
       this.initConfig(config);
     }
+
     const headerclick = (e: HeaderEvent) => this.headerclick(e);
-    const aftersourceset = () => {
-      if (Object.keys(this.filterCollection).length) {
-        this.filterByProps(this.filterCollection);
+
+    const aftersourceset = async () => {
+      const filterCollectionProps = Object.keys(this.filterCollection);
+      if (filterCollectionProps.length > 0) {
+        // handle old way of filtering by reworking FilterCollection to new MultiFilterItem
+        filterCollectionProps.forEach((prop, index) => {
+          if (!this.multiFilterItems[prop]) {
+            this.multiFilterItems[prop] = [
+              {
+                id: index,
+                type: this.filterCollection[prop].type,
+                value: this.filterCollection[prop].value,
+                relation: 'and',
+              },
+            ];
+          }
+        });
       }
+      await this.runFiltering();
     };
     this.addEventListener('headerclick', headerclick);
     this.addEventListener(FILTER_CONFIG_CHANGED_EVENT, ({ detail }: CustomEvent<ColumnFilterConfig | boolean>) => {
@@ -88,6 +108,7 @@ export default class FilterPlugin extends BasePlugin {
     this.revogrid.registerVNode([
       <revogr-filter-panel
         uuid={`filter-${uiid}`}
+        filterItems={this.multiFilterItems}
         filterNames={this.possibleFilterNames}
         filterEntities={this.possibleFilterEntities}
         filterCaptions={config?.localization?.captions}
@@ -98,6 +119,9 @@ export default class FilterPlugin extends BasePlugin {
   }
 
   private initConfig(config: ColumnFilterConfig) {
+    if (config.multiFilterItems) {
+      this.multiFilterItems = { ...config.multiFilterItems };
+    }
     if (config.customFilters) {
       for (let cType in config.customFilters) {
         const cFilter = config.customFilters[cType];
@@ -209,42 +233,20 @@ export default class FilterPlugin extends BasePlugin {
   }
 
   // called on internal component change
-  private async onFilterChange(filterItem: FilterItem) {
-    this.filterByProps({ [filterItem.prop]: filterItem });
-  }
-
-  /**
-   * Apply filters collection to extend existing one or override
-   * @method
-   * @param conditions - list of filters to apply
-   */
-  async filterByProps(conditions: Record<RevoGrid.ColumnProp, FilterItem>, override = false) {
-    if (override) {
-      this.filterCollection = {};
-    }
-    for (const prop in conditions) {
-      const { type, value } = conditions[prop];
-      if (type === 'none') {
-        delete this.filterCollection[prop];
-      } else {
-        this.filterCollection[prop] = {
-          value,
-          type,
-        };
-      }
-    }
-    await this.runFiltering();
+  private async onFilterChange(filterItems: MultiFilterItem) {
+    this.multiFilterItems = filterItems;
+    this.runFiltering();
   }
 
   /**
    * Triggers grid filtering
    */
-  async doFiltering(collection: FilterCollection, items: RevoGrid.DataType[], columns: RevoGrid.ColumnRegular[]) {
+  async doFiltering(collection: FilterCollection, items: RevoGrid.DataType[], columns: RevoGrid.ColumnRegular[], filterItems: MultiFilterItem) {
     const columnsToUpdate: RevoGrid.ColumnRegular[] = [];
-    // todo improvement: loop through collection of props
+
     columns.forEach(rgCol => {
       const column = { ...rgCol };
-      const hasFilter = collection[column.prop];
+      const hasFilter = filterItems[column.prop];
       if (column[this.filterProp] && !hasFilter) {
         delete column[this.filterProp];
         columnsToUpdate.push(column);
@@ -254,33 +256,55 @@ export default class FilterPlugin extends BasePlugin {
         column[this.filterProp] = true;
       }
     });
-    const itemsToFilter = this.getRowFilter(items, collection);
+    const itemsToFilter = this.getRowFilter(items, filterItems);
     // check is filter event prevented
-    const { defaultPrevented, detail } = this.emit('beforefiltertrimmed', { collection, itemsToFilter, source: items });
+    const { defaultPrevented, detail } = this.emit('beforefiltertrimmed', { collection, itemsToFilter, source: items, filterItems });
     if (defaultPrevented) {
       return;
     }
+
     // check is trimmed event prevented
     const isAddedEvent = await this.revogrid.addTrimmed(detail.itemsToFilter, FILTER_TRIMMED_TYPE);
     if (isAddedEvent.defaultPrevented) {
       return;
     }
+
+    // applies the hasFilter to the columns to show filter icon
     await this.revogrid.updateColumns(columnsToUpdate);
     this.emit('afterFilterApply');
   }
 
   async clearFiltering() {
-    this.filterCollection = {};
+    this.multiFilterItems = {};
     await this.runFiltering();
   }
 
   private async runFiltering() {
+    const collection: FilterCollection = {};
+
+    // handle old filterCollection to return the first filter only (if any) from multiFilterItems
+    const filterProps = Object.keys(this.multiFilterItems);
+
+    for (const prop of filterProps) {
+      // check if we have any filter for a column
+      if (this.multiFilterItems[prop].length > 0) {
+        const firstFilterItem = this.multiFilterItems[prop][0];
+        collection[prop] = {
+          filter: filterEntities[firstFilterItem.type],
+          type: firstFilterItem.type,
+          value: firstFilterItem.value,
+        };
+      }
+    }
+
+    this.filterCollection = collection;
+
     const { source, columns } = await this.getData();
-    const { defaultPrevented, detail } = this.emit('beforefilterapply', { collection: this.filterCollection, source, columns });
+    const { defaultPrevented, detail } = this.emit('beforefilterapply', { collection: this.filterCollection, source, columns, filterItems: this.multiFilterItems });
     if (defaultPrevented) {
       return;
     }
-    this.doFiltering(detail.collection, detail.source, detail.columns);
+    this.doFiltering(detail.collection, detail.source, detail.columns, detail.filterItems);
   }
 
   private async getData() {
@@ -290,16 +314,59 @@ export default class FilterPlugin extends BasePlugin {
     };
   }
 
-  private getRowFilter(rows: RevoGrid.DataType[], collection: FilterCollection) {
+  private getRowFilter(rows: RevoGrid.DataType[], filterItems: MultiFilterItem) {
+    const propKeys = Object.keys(filterItems);
+
     const trimmed: Record<number, boolean> = {};
+    let propFilterSatisfiedCount: number = 0;
+    let lastFilterResults: boolean[] = [];
+
+    // each rows
     rows.forEach((model, rowIndex) => {
-      for (const prop in collection) {
-        const filterItem = collection[prop];
-        const filter = this.possibleFilterEntities[filterItem.type];
-        if (!filter(model[prop], filterItem.value)) {
-          trimmed[rowIndex] = true;
-        }
-      }
+      // working on all props
+      for (const prop of propKeys) {
+        const propFilters = filterItems[prop];
+
+        propFilterSatisfiedCount = 0;
+        lastFilterResults = [];
+
+        // testing each filter for a prop
+        for (const [filterIndex, filterData] of propFilters.entries()) {
+          // the filter LogicFunction based on the type
+          const filter = filterEntities[filterData.type];
+
+          // THE MAGIC OF FILTERING IS HERE
+          if (filterData.relation === 'or') {
+            lastFilterResults = [];
+            if (filter(model[prop], filterData.value)) {
+              continue;
+            }
+            propFilterSatisfiedCount++;
+          } else {
+            // 'and' relation will need to know the next filter
+            // so we save this current filter to include it in the next filter
+            lastFilterResults.push(!filter(model[prop], filterData.value));
+
+            // check first if we have a filter on the next index to pair it with this current filter
+            const nextFilterData = propFilters[filterIndex + 1];
+            // stop the sequence if there is no next filter or if the next filter is not an 'and' relation
+            if (!nextFilterData || nextFilterData.relation !== 'and') {
+              // let's just continue since for sure propFilterSatisfiedCount cannot be satisfied
+              if (lastFilterResults.indexOf(true) === -1) {
+                lastFilterResults = [];
+                continue;
+              }
+
+              // we need to add all of the lastFilterResults since we need to satisfy all
+              propFilterSatisfiedCount += lastFilterResults.length;
+              lastFilterResults = [];
+            }
+          }
+        } // end of propFilters forEach
+
+        // add to the list of removed/trimmed rows of filter condition is satisfied
+        if (propFilterSatisfiedCount === propFilters.length) trimmed[rowIndex] = true;
+      } // end of for-of propKeys
     });
     return trimmed;
   }
