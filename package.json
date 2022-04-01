@@ -1,6 +1,6 @@
 {
   "name": "@revolist/revogrid",
-  "version": "4.1.0-next.74",
+  "version": "4.1.0-next.76",
   "description": "Virtual reactive data grid component - RevoGrid.",
   "license": "MIT",
   "directories": {
@@ -38,8 +38,8 @@
     "export",
     "filtering"
   ],
-  "main": "dist/index.js",
-  "module": "custom-element/index.js",
+  "main": "./dist/index.cjs.js",
+  "module": "./dist/index.js",
   "es2015": "dist/esm/index.mjs",
   "es2017": "dist/esm/index.mjs",
   "types": "custom-element/index.d.ts",

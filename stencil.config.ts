@@ -73,8 +73,9 @@ export const config: Config = {
     }), */
     // custom element, no polifil
     {
-      type: 'dist-custom-elements-bundle',
+      type: 'dist-custom-elements',
       dir: 'custom-element',
+      autoDefineCustomElements: true,
       empty: true,
     },
     // lazy loading

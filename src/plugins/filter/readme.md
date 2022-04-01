@@ -9,6 +9,7 @@
 | ---------------- | --------- | ----------- | ----------------------------------------------------------------- | ----------- |
 | `filterCaptions` | --        |             | `{ title: string; save: string; reset: string; cancel: string; }` | `undefined` |
 | `filterEntities` | --        |             | `{ [x: string]: LogicFunction; }`                                 | `{}`        |
+| `filterItems`    | --        |             | `{ [prop: string]: FilterData[]; }`                               | `{}`        |
 | `filterNames`    | --        |             | `{ [x: string]: string; }`                                        | `{}`        |
 | `filterTypes`    | --        |             | `{ [x: string]: string[]; }`                                      | `{}`        |
 | `uuid`           | `uuid`    |             | `string`                                                          | `undefined` |
@@ -16,9 +17,9 @@
 
 ## Events
 
-| Event          | Description | Type                                                                                                                                                                                                          |
-| -------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `filterChange` |             | `CustomEvent<{ prop?: ColumnProp; type?: "none" \| "empty" \| "notEmpty" \| "eq" \| "notEq" \| "begins" \| "contains" \| "notContains" \| "eqN" \| "neqN" \| "gt" \| "gte" \| "lt" \| "lte"; value?: any; }>` |
+| Event          | Description | Type                                             |
+| -------------- | ----------- | ------------------------------------------------ |
+| `filterChange` |             | `CustomEvent<{ [prop: string]: FilterData[]; }>` |
 
 
 ## Methods
