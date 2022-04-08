@@ -25,7 +25,6 @@ export class OverlaySelection {
   private autoFillService: AutoFillService | null = null;
   private clipboardService: ClipboardService | null = null;
   private orderEditor: HTMLRevogrOrderEditorElement;
-  private cellEditor: HTMLRevogrEditElement | null = null;
 
   @Element() element: HTMLElement;
 
@@ -409,9 +408,6 @@ export class OverlaySelection {
     if (this.canEdit()) {
       const editCell = this.selectionStore.get('focus');
       const data = this.columnService.getSaveData(editCell.y, editCell.x);
-      if (isCancel) {
-        this.cellEditor.cancel();
-      }
       this.setEdit?.emit({
         ...data,
         isCancel,
