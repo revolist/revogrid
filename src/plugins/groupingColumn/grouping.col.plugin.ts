@@ -46,6 +46,7 @@ export default class GroupingColumnPlugin extends BasePlugin {
       res.columnGrouping[key].push(...collectionItem);
     }
     res.maxLevel = Math.max(res.maxLevel, collection.maxLevel);
+    res.sort = { ...res.sort, ...collection.sort };
     return res;
   }
 
