@@ -8,7 +8,7 @@ import BasePlugin from '../basePlugin';
 import DimensionRows = RevoGrid.DimensionRows;
 
 export type SortingOrder = Record<RevoGrid.ColumnProp, RevoGrid.Order>;
-type SortingOrderFunction = Record<RevoGrid.ColumnProp, RevoGrid.CellCompareFunc>;
+type SortingOrderFunction = Record<RevoGrid.ColumnProp, RevoGrid.CellCompareFunc | undefined>;
 type SourceSetEvent = {
   type: DimensionRows;
   source: RevoGrid.DataType[];
@@ -198,7 +198,10 @@ export default class SortingPlugin extends BasePlugin {
     return source.sort((a, b) => {
       let sorted = 0;
       for (let prop in sortingFunc) {
-        const cmp = sortingFunc[prop];
+        const cmp: RevoGrid.CellCompareFunc | undefined = sortingFunc[prop];
+        if (!cmp) {
+          continue;
+        }
         sorted = cmp(prop, a, b);
         if (sorted) {
            break;
