@@ -275,7 +275,16 @@
       grid.readonly = false;
       grid.range = true;
       grid.resize = true;
-      grid.filter = true;
+      grid.filter = {
+        disableDynamicFiltering: true,
+        localization: {
+          captions: {
+            save: 'Apply(save)',
+            reset: 'Clear(reset)',
+            cancel: '(cancel)',
+          }
+        }
+      };
       // grid.stretch = true;
       grid.exporting = true;
       grid.rowDefinitions = [{

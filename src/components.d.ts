@@ -236,6 +236,7 @@ export namespace Components {
         "editor": Edition.EditorCtr | null;
     }
     interface RevogrFilterPanel {
+        "disableDynamicFiltering": boolean;
         "filterCaptions": FilterCaptions | undefined;
         "filterEntities": Record<string, LogicFunction>;
         "filterItems": MultiFilterItem;
@@ -695,6 +696,7 @@ declare namespace LocalJSX {
         "onCloseEdit"?: (event: CustomEvent<boolean | undefined>) => void;
     }
     interface RevogrFilterPanel {
+        "disableDynamicFiltering"?: boolean;
         "filterCaptions"?: FilterCaptions | undefined;
         "filterEntities"?: Record<string, LogicFunction>;
         "filterItems"?: MultiFilterItem;

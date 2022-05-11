@@ -32,6 +32,7 @@ export type FilterLocalization = {
  * @property {Record<string, CustomFilter>|undefined} customFilters - hash map of {FilterType:CustomFilter}.
  * @property {FilterLocalization|undefined} localization - translation for filter popup captions.
  * @property {MultiFilterItem|undefined} multiFilterItems - data for multi filtering.
+ * @property {boolean|undefined} disableDynamicFiltering - disables dynamic filtering.
  * A way to define your own filter types per column
  */
 export type ColumnFilterConfig = {
@@ -40,6 +41,7 @@ export type ColumnFilterConfig = {
   customFilters?: Record<string, CustomFilter>;
   localization?: FilterLocalization;
   multiFilterItems?: MultiFilterItem;
+  disableDynamicFiltering?: boolean;
 };
 type HeaderEvent = CustomEvent<RevoGrid.ColumnRegular>;
 type FilterCollectionItem = {
@@ -98,6 +100,7 @@ export default class FilterPlugin extends BasePlugin {
         filterEntities={this.possibleFilterEntities}
         filterCaptions={config?.localization?.captions}
         onFilterChange={e => this.onFilterChange(e.detail)}
+        disableDynamicFiltering={config?.disableDynamicFiltering}
         ref={e => (this.pop = e)}
       />,
     ]);
