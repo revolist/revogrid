@@ -183,7 +183,7 @@ export namespace Components {
         /**
           * Defines stretch strategy for columns with @StretchColumn plugin if there are more space on the right last column size would be increased
          */
-        "stretch": boolean|string;
+        "stretch": boolean | string;
         /**
           * Theme name
          */
@@ -647,7 +647,7 @@ declare namespace LocalJSX {
         /**
           * Defines stretch strategy for columns with @StretchColumn plugin if there are more space on the right last column size would be increased
          */
-        "stretch"?: boolean|string;
+        "stretch"?: boolean | string;
         /**
           * Theme name
          */
