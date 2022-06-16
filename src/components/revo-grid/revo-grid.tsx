@@ -145,7 +145,7 @@ export class RevoGridComponent {
    * Defines stretch strategy for columns with @StretchColumn plugin
    * if there are more space on the right last column size would be increased
    */
-  @Prop() stretch: boolean|string = true;
+  @Prop() stretch: boolean | string = true;
 
   // --------------------------------------------------------------------------
   //
@@ -735,7 +735,10 @@ export class RevoGridComponent {
     grPlugin.setGrouping(newVal || {});
   }
 
-  @Watch('stretch') applyStretch(isStretch: boolean|string) {
+  @Watch('stretch') applyStretch(isStretch: boolean | string) {
+    if (isStretch === 'false') {
+      isStretch = false;
+    }
     let stretch = this.internalPlugins.filter(p => isStretchPlugin(p))[0];
     if (isStretch) {
       if(!stretch) {
