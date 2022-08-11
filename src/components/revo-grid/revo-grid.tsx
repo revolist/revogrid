@@ -27,6 +27,7 @@ import { UUID } from '../../utils/consts';
 import SelectionStoreConnector from '../../services/selection.store.connector';
 import { OrdererService } from '../order/orderRenderer';
 import StretchColumn, { isStretchPlugin } from '../../plugins/stretchPlugin';
+import ColumnPlugin from '../../plugins/moveColumn/columnDragPlugin';
 
 @Component({
   tag: 'revo-grid',
@@ -121,6 +122,12 @@ export class RevoGridComponent {
    */
   @Prop() filter: boolean | ColumnFilterConfig = false;
 
+  /**
+   * Enables column move plugin
+   * Can be boolean
+   * Can be filter collection
+   */
+   @Prop() canMoveColumns: boolean = false;
   /**
    * Trimmed rows
    * Functionality which allows to hide rows from main data set
@@ -762,6 +769,14 @@ export class RevoGridComponent {
     this.dataProvider = new DataProvider(this.dimensionProvider);
     this.uuid = `${new Date().getTime()}-rvgrid`;
 
+    const pluginData = {
+      data: this.dataProvider,
+      column: this.columnProvider,
+      dimension: this.dimensionProvider,
+      viewport: this.viewportProvider,
+      selection: this.selectionStoreConnector,
+    };
+
     if (this.autoSizeColumn) {
       this.internalPlugins.push(
         new AutoSize(
@@ -784,8 +799,12 @@ export class RevoGridComponent {
     this.internalPlugins.push(new SortingPlugin(this.element));
     if (this.plugins) {
       this.plugins.forEach(p => {
-        this.internalPlugins.push(new p(this.element));
+        this.internalPlugins.push(new p(this.element, pluginData));
       });
+    }
+
+    if (this.canMoveColumns) {
+      this.internalPlugins.push(new ColumnPlugin(this.element, pluginData));
     }
 
     this.internalPlugins.push(

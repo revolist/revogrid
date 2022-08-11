@@ -34,6 +34,10 @@ export namespace Components {
          */
         "canFocus": boolean;
         /**
+          * Enables column move plugin Can be boolean Can be filter collection
+         */
+        "canMoveColumns": boolean;
+        /**
           * Clear current grid focus
          */
         "clearFocus": () => Promise<void>;
@@ -447,6 +451,10 @@ declare namespace LocalJSX {
           * When true cell focus appear.
          */
         "canFocus"?: boolean;
+        /**
+          * Enables column move plugin Can be boolean Can be filter collection
+         */
+        "canMoveColumns"?: boolean;
         /**
           * Indicates default column size.
          */
