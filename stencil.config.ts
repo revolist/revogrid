@@ -16,7 +16,7 @@ export const config: Config = {
   hashFileNames: false,
   autoprefixCss: false,
   minifyCss: true,
-  preamble: 'Built by RevoList',
+  preamble: 'Built by Revolist',
   hashedFileNameLength: 8,
 
   extras: {
@@ -34,6 +34,7 @@ export const config: Config = {
     appendChildSlotFix: false,
     cloneNodeFix: false,
     slotChildNodesFix: false,
+    experimentalImportInjection: true,
   },
 
   buildEs5: 'prod',
