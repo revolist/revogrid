@@ -142,7 +142,7 @@ export default class AutoSizeColumn extends BasePlugin {
       const sizes: RevoGrid.ViewSettingSizeProp = {};
       each(autoSize[type], rgCol => {
         // calculate size
-        rgCol.size = sizes[rgCol.index] = source.reduce((prev, rgRow) => Math.max(prev, this.getLength(rgRow[rgCol.prop])), 0);
+        rgCol.size = sizes[rgCol.index] = source.reduce((prev, rgRow) => Math.max(prev, this.getLength(rgRow[rgCol.prop])), this.getLength(rgCol.name || ''));
       });
       this.providers.dimensionProvider.setDimensionSize(type, sizes);
     });

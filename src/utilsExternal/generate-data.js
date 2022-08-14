@@ -89,7 +89,7 @@ export function generateFakeDataObject(config = {}) {
     }
     // apply config
     if (rgCol === order) {
-      columns[rgCol].order = 'asc';
+      columns[rgCol].order = 'desc';
     }
   }
   // apply config

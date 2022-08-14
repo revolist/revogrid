@@ -94,8 +94,28 @@ revo-grid {
     right: 0;
     height: 1px;
     z-index: 2;
-    background: red;
+    background: gray;
     pointer-events: none;
+  }
+
+  .drag-position-y {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 1px;
+    z-index: 2;
+    background: gray;
+    pointer-events: none;
+  }
+
+  .drag-auto-scroll-y {
+    pointer-events: none;
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 50px;
+    width: 1px;
   }
 
   .clipboard {

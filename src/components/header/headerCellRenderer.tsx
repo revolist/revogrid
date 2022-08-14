@@ -1,5 +1,6 @@
 import { h, VNode } from '@stencil/core';
 import { RevoGrid } from '../../interfaces';
+import { dispatch } from '../../plugins/dispatcher';
 import { ResizableElement } from '../../services/resizable.directive';
 import ColumnService from '../data/columnService';
 
@@ -7,6 +8,8 @@ type Props = {
   data?: RevoGrid.ColumnTemplateProp;
   props: RevoGrid.CellProps;
 };
+
+const ON_COLUMN_CLICK = 'column-click';
 
 export const HeaderCellRenderer = ({ data, props }: Props, children: VNode[]): VNode => {
   let colTemplate: VNode | VNode[] | string = data?.name || '';
@@ -21,7 +24,12 @@ export const HeaderCellRenderer = ({ data, props }: Props, children: VNode[]): V
     }
   }
   return (
-    <ResizableElement {...cellProps}>
+    <ResizableElement {...cellProps} onMouseDown={(e: MouseEvent) => {
+      dispatch(e.currentTarget as HTMLElement, ON_COLUMN_CLICK, {
+        data,
+        event: e,
+      });
+     }}>
       <div class="header-content">{colTemplate}</div>
       {children}
     </ResizableElement>

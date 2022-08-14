@@ -38,6 +38,10 @@ export namespace Components {
          */
         "canFocus": boolean;
         /**
+          * Enables column move plugin Can be boolean Can be filter collection
+         */
+        "canMoveColumns": boolean;
+        /**
           * Clear current grid focus
          */
         "clearFocus": () => Promise<void>;
@@ -251,6 +255,7 @@ export namespace Components {
         "saveOnClose": boolean;
     }
     interface RevogrFilterPanel {
+        "disableDynamicFiltering": boolean;
         "filterCaptions": FilterCaptions | undefined;
         "filterEntities": Record<string, LogicFunction>;
         "filterItems": MultiFilterItem;
@@ -473,6 +478,10 @@ declare namespace LocalJSX {
           * When true cell focus appear.
          */
         "canFocus"?: boolean;
+        /**
+          * Enables column move plugin Can be boolean Can be filter collection
+         */
+        "canMoveColumns"?: boolean;
         /**
           * Indicates default column size.
          */
@@ -749,6 +758,7 @@ declare namespace LocalJSX {
         "saveOnClose"?: boolean;
     }
     interface RevogrFilterPanel {
+        "disableDynamicFiltering"?: boolean;
         "filterCaptions"?: FilterCaptions | undefined;
         "filterEntities"?: Record<string, LogicFunction>;
         "filterItems"?: MultiFilterItem;
