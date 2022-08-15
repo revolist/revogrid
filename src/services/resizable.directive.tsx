@@ -291,7 +291,7 @@ export class ResizeDirective {
   }
 }
 
-export const ResizableElement = (props: Partial<Props> & RevoGrid.CellProps, children: VNode[]): VNode => {
+export const ResizableElement = (props: Partial<Props> & RevoGrid.CellProps, children: VNode[]) => {
   const resizeEls: VNode[] = [];
   const directive =
     (props.canResize &&

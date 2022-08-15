@@ -64,6 +64,7 @@ export class FilterPanel {
   @Prop() filterNames: Record<string, string> = {};
   @Prop() filterEntities: Record<string, LogicFunction> = {};
   @Prop() filterCaptions: FilterCaptions | undefined;
+  @Prop() disableDynamicFiltering: boolean = false;
   @Event() filterChange: EventEmitter<MultiFilterItem>;
   @Listen('mousedown', { target: 'document' }) onMouseDown(e: MouseEvent): void {
     if (this.changes && !e.defaultPrevented) {
@@ -202,10 +203,15 @@ export class FilterPanel {
           </select>
         </div>
         <div class="filter-actions">
-          <RevoButton class={{ red: true }} onClick={() => this.onReset()}>
+          {this.disableDynamicFiltering &&
+            <RevoButton class={{ red: true, save: true }} onClick={() => this.onSave()}>
+              {capts.save}
+            </RevoButton>
+          }
+          <RevoButton class={{ red: true, reset: true }} onClick={() => this.onReset()}>
             {capts.reset}
           </RevoButton>
-          <RevoButton class={{ light: true }} onClick={() => this.onCancel()}>
+          <RevoButton class={{ light: true, cancel: true }} onClick={() => this.onCancel()}>
             {capts.cancel}
           </RevoButton>
         </div>
@@ -228,7 +234,7 @@ export class FilterPanel {
       if (input) input.focus();
     }, 0);
 
-    this.debouncedApplyFilter();
+    if (!this.disableDynamicFiltering) this.debouncedApplyFilter();
   }
 
   private debouncedApplyFilter = debounce(() => {
@@ -249,7 +255,7 @@ export class FilterPanel {
       this.currentFilterType = defaultType;
     }
 
-    this.debouncedApplyFilter();
+    if (!this.disableDynamicFiltering) this.debouncedApplyFilter();
   }
 
   private addNewFilterToProp() {
@@ -283,7 +289,7 @@ export class FilterPanel {
     // update the value of the filter item
     this.filterItems[prop][index].value = (event.target as HTMLInputElement).value;
 
-    this.debouncedApplyFilter();
+    if (!this.disableDynamicFiltering) this.debouncedApplyFilter();
   }
 
   private onKeyDown(e: KeyboardEvent) {
@@ -299,6 +305,10 @@ export class FilterPanel {
     }
     // keep event local, don't escalate farther to dom
     e.stopPropagation();
+  }
+
+  private onSave() {
+    this.filterChange.emit(this.filterItems);
   }
 
   private onCancel() {
@@ -334,7 +344,7 @@ export class FilterPanel {
     // let's remove the prop if no more filters so the filter icon will be removed
     if (items.length === 0) delete this.filterItems[prop];
 
-    this.debouncedApplyFilter();
+    if (!this.disableDynamicFiltering) this.debouncedApplyFilter();
   }
 
   private toggleFilterAndOr(id: number) {
@@ -352,7 +362,7 @@ export class FilterPanel {
     if (index === -1) return;
 
     items[index].relation = items[index].relation === 'and' ? 'or' : 'and';
-    this.debouncedApplyFilter();
+    if (!this.disableDynamicFiltering) this.debouncedApplyFilter();
   }
 
   private assertChanges() {

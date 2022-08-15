@@ -197,7 +197,7 @@ export default class SelectionStoreConnector {
       }
     }
     if (!currentStorePointer) {
-      return;
+      return null;
     }
 
     // check is focus in next store
@@ -233,13 +233,14 @@ export default class SelectionStoreConnector {
     if (nextStore) {
       let item = { ...focus, ...nextItem };
       this.focus(nextStore, { focus: item, end: item });
-      return;
+      return null;
     }
 
     focus = cropCellToMax(focus, lastCell);
     end = cropCellToMax(end, lastCell);
 
     store.setFocus(focus, end);
+    return focus;
   }
 
   clearAll(): void {

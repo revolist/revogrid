@@ -335,7 +335,9 @@ export class OverlaySelection {
   }
 
   private doFocus(focus: Selection.Cell, end: Selection.Cell, next?: Partial<Selection.Cell>) {
-    const { defaultPrevented } = this.beforeFocusCell.emit(this.columnService.getSaveData(focus.y, focus.x));
+    const { defaultPrevented } = this.beforeFocusCell.emit(
+      this.columnService.getSaveData(focus.y, focus.x)
+    );
     if (defaultPrevented) {
       return false;
     }

@@ -27,6 +27,7 @@ import SelectionStoreConnector from '../../services/selection.store.connector';
 import { OrdererService } from '../order/orderRenderer';
 import StretchColumn, { isStretchPlugin } from '../../plugins/stretchPlugin';
 import { rowDefinitionByType, rowDefinitionRemoveByType } from './grid.helpers';
+import ColumnPlugin from '../../plugins/moveColumn/columnDragPlugin';
 
 @Component({
   tag: 'revo-grid',
@@ -129,6 +130,12 @@ export class RevoGridComponent {
   @Prop() filter: boolean | ColumnFilterConfig = false;
 
   /**
+   * Enables column move plugin
+   * Can be boolean
+   * Can be filter collection
+   */
+   @Prop() canMoveColumns: boolean = false;
+  /**
    * Trimmed rows
    * Functionality which allows to hide rows from main data set
    * @trimmedRows are physical rgRow indexes to hide
@@ -152,8 +159,7 @@ export class RevoGridComponent {
    * Defines stretch strategy for columns with @StretchColumn plugin
    * if there are more space on the right last column size would be increased
    */
-  @Prop() stretch: boolean | string = false;
-
+  @Prop() stretch: boolean | string = true;
 
   // --------------------------------------------------------------------------
   //
@@ -785,11 +791,13 @@ export class RevoGridComponent {
     }
     grPlugin.setGrouping(newVal || {});
   }
-
   /**
    * Stretch Plugin Apply
    */
   @Watch('stretch') applyStretch(isStretch: boolean | string) {
+    if (isStretch === 'false') {
+      isStretch = false;
+    }
     let stretch = this.internalPlugins.filter(p => isStretchPlugin(p))[0];
     if ((typeof isStretch === 'boolean' && isStretch) || isStretch === 'true') {
       if (!stretch) {
@@ -852,6 +860,7 @@ export class RevoGridComponent {
       viewport: this.viewportProvider,
       selection: this.selectionStoreConnector,
     };
+
     if (this.autoSizeColumn) {
       this.internalPlugins.push(
         new AutoSize(
@@ -879,6 +888,9 @@ export class RevoGridComponent {
         columnProvider: this.columnProvider,
       }),
     );
+    if (this.canMoveColumns) {
+      this.internalPlugins.push(new ColumnPlugin(this.element, pluginData));
+    }
     if (this.plugins) {
       this.plugins.forEach(p => {
         this.internalPlugins.push(
