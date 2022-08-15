@@ -30,6 +30,10 @@ export class RevogrFocus {
   }
 
   render() {
+    const editCell = this.selectionStore.get('edit');
+    if (editCell) {
+      return;
+    }
     const data = this.selectionStore.get('focus');
     if (data) {
       const event = this.beforeFocusRender.emit({

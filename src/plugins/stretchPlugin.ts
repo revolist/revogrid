@@ -1,5 +1,5 @@
 import { each } from 'lodash';
-import { calculateRowHeaderSize } from '../components/rowHeaders/row-header-utils';
+import { calculateRowHeaderSize } from '../utils/row-header-utils';
 import { RevoGrid, RevoPlugin } from '../interfaces';
 import ColumnDataProvider, { ColumnCollection } from '../services/column.data.provider';
 import { DataProvider } from '../services/data.provider';

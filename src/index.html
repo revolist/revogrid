@@ -85,7 +85,7 @@
     <section class="content">
       <div class="tile large grid-holder">
         <!-- Grid init-->
-        <revo-grid theme="compact" stretch="true" class="my" key="1" apply-editor-changes-on-close="true"></revo-grid>
+        <revo-grid theme="material" stretch="false" class="my" key="1"></revo-grid>
       </div>
     </section>
 
@@ -203,7 +203,8 @@
         bottomPinned: [],
         colPinEnd: [],
         colPinStart: [],
-        groupedHeader: false,
+        groupedHeader: true,
+        order: 5
       };
       window.setData = function (config = {}) {
         defaultData = { ...defaultData, ...config };
@@ -287,19 +288,18 @@
           mode: 'autoSizeAll',
         };*/
       // default
-      // setData({ rows: 100, cols: 10, 'colPinEnd': [2] });
-      grid.rowHeaders = true;
-      setData({ rows: 1, cols: 1 });
+      setData({ rows: 100, cols: 10, 'colPinEnd': [2] });
 
       // events testing
       // 'beforerange', 'setRange', 'beforefocuslost', 'beforecellfocus', 'beforeedit'
-      const events = [];
+      const events = ['beforeedit', 'aftercolumnresize', 'beforerange', 'setRange', 'beforefocuslost', 'beforecellfocus', 'beforeedit'];
       events.forEach(e => {
         grid.addEventListener(e, $e => {
           if (window.eventsPrevented[e]) {
             $e.preventDefault();
           }
-          console.log(`%c${e}`, 'background: #50d260; color: #fff; border-radius: 3px; padding: 2px 5px;', $e.detail);
+          console.log(`%c${e}`, 'background: #50d260; color: #fff; border-radius: 3px; padding: 2px 5px;', $e);
+          grid.getSelectedRange().then(r => console.log("selectedRange=",r));
         });
       });
     </script>

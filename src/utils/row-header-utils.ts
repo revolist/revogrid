@@ -1,4 +1,4 @@
-import { RevoGrid } from '../../interfaces';
+import { RevoGrid } from '../interfaces';
 
 const LETTER_BLOCK_SIZE = 10;
 export const calculateRowHeaderSize = (itemsLength: number, rowHeaderColumn?: RevoGrid.RowHeaders) => {

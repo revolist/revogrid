@@ -7,7 +7,7 @@ import { ROW_HEADER_TYPE, UUID } from '../../utils/consts';
 import { ElementScroll } from '../revoGrid/viewport.scrolling.service';
 import { ViewportData } from '../revoGrid/viewport.interfaces';
 import { RowHeaderRender } from './row-header-render';
-import { calculateRowHeaderSize } from './row-header-utils';
+import { calculateRowHeaderSize } from '../../utils/row-header-utils';
 import { HEADER_SLOT } from '../revoGrid/viewport.helpers';
 
 /**

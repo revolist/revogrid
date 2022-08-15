@@ -249,7 +249,7 @@ export class OverlaySelection {
     // if can edit
     const editCell = this.selectionStore.get('edit');
     if (this.readonly || !editCell) {
-      return;
+      return null;
     }
     const val = editCell.val || this.columnService.getCellData(editCell.y, editCell.x);
     const editable = {
@@ -265,7 +265,7 @@ export class OverlaySelection {
       ...this.types
     });
     if (renderEvent.defaultPrevented) {
-      return;
+      return null;
     }
     
     const { detail: { range } } = renderEvent;
@@ -296,36 +296,35 @@ export class OverlaySelection {
   }
 
   render() {
-    const range = this.selectionStoreService.ranged;
-    const selectionFocus = this.selectionStoreService.focused;
     const els: VNode[] = [];
     const editCell = this.renderEditCell();
-    if ((range || selectionFocus)&& !editCell && this.useClipboard) {
-      els.push(this.clipboardService.renderClipboard());
-    }
-
-    if (range) {
-      els.push(...this.renderRange(range));
-    }
-
     if (editCell) {
       els.push(editCell);
-    }
-    if (selectionFocus && !this.readonly && !editCell && this.range) {
-      els.push(this.autoFillService.renderAutofill(range, selectionFocus));
-    }
-
-    if (this.canDrag) {
-      els.push(
-        <revogr-order-editor
-          ref={e => (this.orderEditor = e)}
-          dataStore={this.dataStore}
-          dimensionRow={this.dimensionRow}
-          dimensionCol={this.dimensionCol}
-          parent={this.element}
-          onInternalRowDragStart={e => this.onRowDragStart(e)}
-        />,
-      );
+    } else {
+      const range = this.selectionStoreService.ranged;
+      const selectionFocus = this.selectionStoreService.focused;
+      if ((range || selectionFocus) && this.useClipboard) {
+        els.push(this.clipboardService.renderClipboard());
+      }
+  
+      if (range) {
+        els.push(...this.renderRange(range));
+      }
+      if (selectionFocus && !this.readonly && this.range) {
+        els.push(this.autoFillService.renderAutofill(range, selectionFocus));
+      }
+      if (this.canDrag) {
+        els.push(
+          <revogr-order-editor
+            ref={e => (this.orderEditor = e)}
+            dataStore={this.dataStore}
+            dimensionRow={this.dimensionRow}
+            dimensionCol={this.dimensionCol}
+            parent={this.element}
+            onInternalRowDragStart={e => this.onRowDragStart(e)}
+          />,
+        );
+      }
     }
     return (
       <Host onDblClick={() => this.doEdit()} onMouseDown={(e: MouseEvent) => this.onElementMouseDown(e)}>
