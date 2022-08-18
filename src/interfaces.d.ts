@@ -33,7 +33,7 @@ export declare namespace RevoGrid {
   }
   interface ColumnProperties {
     /** column inner template */
-    columnTemplate?: ColumnTemplateFunc<VNode>;
+    columnTemplate?: ColumnTemplateFunc;
     /** cell properties */
     columnProperties?: ColPropertiesFunc;
   }
@@ -46,7 +46,7 @@ export declare namespace RevoGrid {
     /** cell properties */
     cellProperties?: PropertiesFunc;
     /** cell inner template */
-    cellTemplate?: CellTemplateFunc<VNode>;
+    cellTemplate?: CellTemplateFunc;
     /** cell compare function */
     cellCompare?: CellCompareFunc;
     /** default column size */
@@ -131,9 +131,10 @@ export declare namespace RevoGrid {
   interface HyperFunc<T> {
     (sel: any, data: any, children: T): T;
   }
-  type CellTemplateFunc<T> = (createElement: HyperFunc<T>, props: CellTemplateProp) => any;
+  type FocusTemplateFunc = (createElement: HyperFunc<VNode>, detail: FocusRenderEvent) => any;
+  type CellTemplateFunc = (createElement: HyperFunc<VNode>, props: CellTemplateProp) => any;
   type CellCompareFunc = (prop: ColumnProp, a: DataType, b: DataType) => number;
-  type ColumnTemplateFunc<T> = (createElement: HyperFunc<T>, props: ColumnTemplateProp) => T | T[] | string;
+  type ColumnTemplateFunc = (createElement: HyperFunc<VNode>, props: ColumnTemplateProp) => any;
   type PropertiesFunc = (props: ColumnDataSchemaModel) => CellProps | void | undefined;
   type ColPropertiesFunc = (props: ColumnPropProp) => CellProps | void | undefined;
   type DataType = {

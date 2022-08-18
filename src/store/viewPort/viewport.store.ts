@@ -121,11 +121,13 @@ export default class ViewportStore {
       }
       // change size
       const size: number | undefined = sizes[item.itemIndex];
+      // size found
       if (size) {
         const changedSize = size - item.size;
         changedCoordinate += changedSize;
         item.size = size;
         item.end = item.start + size;
+      // size lost
       }
 
       // loop by start index

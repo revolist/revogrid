@@ -74,6 +74,10 @@ export namespace Components {
          */
         "filter": boolean | ColumnFilterConfig;
         /**
+          * Apply changes typed in editor on editor close except Escape cases If custom editor in use @method getValue required Check interfaces.d.ts @EditorBase for more info
+         */
+        "focusTemplate": RevoGrid.FocusTemplateFunc;
+        /**
           * Defines how many rows/columns should be rendered outside visible area.
          */
         "frameSize": number;
@@ -120,7 +124,6 @@ export namespace Components {
           * Group models by provided properties Define properties to be groped by
          */
         "grouping": GroupingOptions;
-        "merged": any[];
         /**
           * Pinned bottom Source: {[T in ColumnProp]: any} - defines pinned bottom rows data source.
          */
@@ -269,6 +272,7 @@ export namespace Components {
         "colType": RevoGrid.DimensionCols;
         "dimensionCol": Observable<RevoGrid.DimensionSettingsState>;
         "dimensionRow": Observable<RevoGrid.DimensionSettingsState>;
+        "focusTemplate": RevoGrid.FocusTemplateFunc | null;
         "rowType": RevoGrid.DimensionRows;
         /**
           * Dynamic stores
@@ -507,6 +511,10 @@ declare namespace LocalJSX {
          */
         "filter"?: boolean | ColumnFilterConfig;
         /**
+          * Apply changes typed in editor on editor close except Escape cases If custom editor in use @method getValue required Check interfaces.d.ts @EditorBase for more info
+         */
+        "focusTemplate"?: RevoGrid.FocusTemplateFunc;
+        /**
           * Defines how many rows/columns should be rendered outside visible area.
          */
         "frameSize"?: number;
@@ -514,7 +522,6 @@ declare namespace LocalJSX {
           * Group models by provided properties Define properties to be groped by
          */
         "grouping"?: GroupingOptions;
-        "merged"?: any[];
         /**
           * After column resize Get resized columns
          */
@@ -644,13 +651,10 @@ declare namespace LocalJSX {
          */
         "onHeaderclick"?: (event: CustomEvent<RevoGrid.ColumnRegular>) => void;
         /**
-          * External subscribe
-         */
-        "onMergechanged"?: (event: CustomEvent<any[]|undefined>) => void;
-        /**
           * Row order change started. Use e.preventDefault() to prevent rgRow order change. Use e.text = 'new name' to change item name on start.
          */
         "onRowdragstart"?: (event: CustomEvent<{ pos: RevoGrid.PositionItem; text: string }>) => void;
+        "onRowheaderschanged"?: (event: CustomEvent<any>) => void;
         /**
           * Before rgRow order apply. Use e.preventDefault() to prevent rgRow order change.
          */
@@ -771,6 +775,7 @@ declare namespace LocalJSX {
         "colType"?: RevoGrid.DimensionCols;
         "dimensionCol"?: Observable<RevoGrid.DimensionSettingsState>;
         "dimensionRow"?: Observable<RevoGrid.DimensionSettingsState>;
+        "focusTemplate"?: RevoGrid.FocusTemplateFunc | null;
         "onBefore-focus-render"?: (event: CustomEvent<FocusRenderEvent>) => void;
         "rowType"?: RevoGrid.DimensionRows;
         /**

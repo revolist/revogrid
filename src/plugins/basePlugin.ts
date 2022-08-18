@@ -39,6 +39,32 @@ export default abstract class BasePlugin implements RevoPlugin.Plugin {
   }
 
   /**
+   * Subscribe to grid properties to watch changes
+   * You can return false in callback to prevent default value set
+   */
+  protected watch<T extends any>(prop: string, callback: (arg: T) => boolean | void) {
+    const nativeValueDesc =
+      Object.getOwnPropertyDescriptor(this.revogrid, prop) ||
+      Object.getOwnPropertyDescriptor(this.revogrid.constructor.prototype, prop);
+  
+    // Overwrite property descriptor for this instance
+    Object.defineProperty(this.revogrid, prop, {
+      set(val: T){
+        const keepDefault = callback(val);
+        if (keepDefault === false) {
+          return;
+        }
+        // Continue with native behavior
+        return nativeValueDesc?.set?.call(this, val);
+      },
+      get(){
+        // Continue with native behavior
+        return nativeValueDesc?.get?.call(this);
+      }
+    });
+  }
+
+  /**
    * Remove event subscription
    * @param eventName
    */

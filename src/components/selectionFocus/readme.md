@@ -5,13 +5,14 @@
 
 ## Properties
 
-| Property         | Attribute  | Description    | Type                                      | Default     |
-| ---------------- | ---------- | -------------- | ----------------------------------------- | ----------- |
-| `colType`        | `col-type` |                | `"colPinEnd" \| "colPinStart" \| "rgCol"` | `undefined` |
-| `dimensionCol`   | --         |                | `ObservableMap<DimensionSettingsState>`   | `undefined` |
-| `dimensionRow`   | --         |                | `ObservableMap<DimensionSettingsState>`   | `undefined` |
-| `rowType`        | `row-type` |                | `"rgRow" \| "rowPinEnd" \| "rowPinStart"` | `undefined` |
-| `selectionStore` | --         | Dynamic stores | `ObservableMap<SelectionStoreState>`      | `undefined` |
+| Property         | Attribute  | Description    | Type                                                                 | Default     |
+| ---------------- | ---------- | -------------- | -------------------------------------------------------------------- | ----------- |
+| `colType`        | `col-type` |                | `"colPinEnd" \| "colPinStart" \| "rgCol"`                            | `undefined` |
+| `dimensionCol`   | --         |                | `ObservableMap<DimensionSettingsState>`                              | `undefined` |
+| `dimensionRow`   | --         |                | `ObservableMap<DimensionSettingsState>`                              | `undefined` |
+| `focusTemplate`  | --         |                | `(createElement: HyperFunc<VNode>, detail: FocusRenderEvent) => any` | `undefined` |
+| `rowType`        | `row-type` |                | `"rgRow" \| "rowPinEnd" \| "rowPinStart"`                            | `undefined` |
+| `selectionStore` | --         | Dynamic stores | `ObservableMap<SelectionStoreState>`                                 | `undefined` |
 
 
 ## Events

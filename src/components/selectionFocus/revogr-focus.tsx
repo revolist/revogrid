@@ -16,6 +16,7 @@ export class RevogrFocus {
   @Prop() dimensionCol: Observable<RevoGrid.DimensionSettingsState>;
   @Prop() colType: RevoGrid.DimensionCols;
   @Prop() rowType: RevoGrid.DimensionRows;
+  @Prop() focusTemplate: RevoGrid.FocusTemplateFunc | null;
   @Event({ eventName: 'before-focus-render' }) beforeFocusRender: EventEmitter<FocusRenderEvent>;
 
   private changed(e: HTMLElement): void {
@@ -54,7 +55,8 @@ export class RevogrFocus {
         this.dimensionRow.state,
         this.dimensionCol.state,
       );
-      return <Host class={FOCUS_CLASS} style={style} />;
+      const extra = this.focusTemplate && this.focusTemplate(h, detail);
+      return <Host class={FOCUS_CLASS} style={style}>{ extra }</Host>;
     }
   }
 }

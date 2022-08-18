@@ -14,6 +14,7 @@ type Props = {
   resize: boolean;
   columns: ViewportProps[];
   columnFilter: boolean;
+  focusTemplate: RevoGrid.FocusTemplateFunc;
   onScroll(e: RevoGrid.ViewPortScrollEvent, key?: RevoGrid.DimensionColPin | string): void;
   onEdit(edit: Edition.BeforeEdit): void;
   registerElement(el: ElementScroll | null, key: string): void;
@@ -25,7 +26,7 @@ type Props = {
  */
 export const ViewPortSections = ({
   resize, editors, rowClass, readonly, range, columns, useClipboard, columnFilter, applyEditorChangesOnClose,
-  registerElement, onEdit, onScroll
+  registerElement, onEdit, onScroll, focusTemplate
 }: Props) => {
   const viewPortHtml: VNode[] = [];
   /** render viewports columns */
@@ -66,7 +67,7 @@ export const ViewPortSections = ({
             slot={DATA_SLOT}
           />
           <revogr-temp-range selectionStore={data.segmentSelectionStore} dimensionRow={data.dimensionRow} dimensionCol={data.dimensionCol} />
-          <revogr-focus rowType={data.type} colType={view.type} selectionStore={data.segmentSelectionStore} dimensionRow={data.dimensionRow} dimensionCol={data.dimensionCol} />
+          <revogr-focus focusTemplate={focusTemplate} rowType={data.type} colType={view.type} selectionStore={data.segmentSelectionStore} dimensionRow={data.dimensionRow} dimensionCol={data.dimensionCol} />
         </revogr-overlay-selection>
       );
       dataViews.push(dataView);

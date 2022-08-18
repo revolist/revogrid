@@ -129,6 +129,14 @@ export class RevoGridComponent {
    */
   @Prop() filter: boolean | ColumnFilterConfig = false;
 
+
+  /**
+   * Apply changes typed in editor on editor close except Escape cases
+   * If custom editor in use @method getValue required
+   * Check interfaces.d.ts @EditorBase for more info
+   */
+   @Prop() focusTemplate: RevoGrid.FocusTemplateFunc;
+
   /**
    * Enables column move plugin
    * Can be boolean
@@ -823,11 +831,9 @@ export class RevoGridComponent {
     this.filterconfigchanged.emit(cfg);
   }
 
-  @Prop() merged: any[];
-  /** External subscribe */
-  @Event() mergechanged: EventEmitter<any[]|undefined>;
-  @Watch('merged') mergeChange(mergeVal: any[]|undefined) {
-    this.mergechanged.emit(mergeVal);
+  @Event() rowheaderschanged: EventEmitter;
+  @Watch('rowHeaders') rowHeadersChange(rowHeaders?: RevoGrid.RowHeaders | boolean) {
+    this.rowheaderschanged.emit(rowHeaders);
   }
 
   private dataSourceApply(source: RevoGrid.DataType[] = [], type: RevoGrid.DimensionRows = 'rgRow') {
@@ -987,6 +993,7 @@ export class RevoGridComponent {
         }}
         registerElement={(e, k) => this.scrollingService.registerElement(e, k)}
         onScroll={(details, k) => this.scrollingService.onScroll(details, k)}
+        focusTemplate={this.focusTemplate}
       />,
     );
     return (

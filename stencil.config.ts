@@ -52,6 +52,11 @@ export const config: Config = {
   ],
   // proxies
   outputTargets: [
+    vueOutputTarget({
+      componentCorePackage,
+      proxiesFile: directivesProxyFile('vue'),
+      componentModels: [],
+    }),
     /*
     angularOutputTarget({
       componentCorePackage,
@@ -61,11 +66,6 @@ export const config: Config = {
     reactOutputTarget({
       componentCorePackage,
       proxiesFile: directivesProxyFile('react'),
-    }),
-    vueOutputTarget({
-      componentCorePackage,
-      proxiesFile: directivesProxyFile('vue'),
-      componentModels: [],
     }),
     svelteOutputTarget({
       componentCorePackage,
