@@ -197,6 +197,9 @@ export class ResizeDirective {
     if (event.defaultPrevented) {
       return;
     }
+    // stop other events if resize in progress
+    event.preventDefault();
+
     this.dropInitial();
     for (let elClass in RESIZE_MASK) {
       const target = event.target as HTMLElement | null;

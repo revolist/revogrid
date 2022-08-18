@@ -40,11 +40,11 @@ export class ColumnOrderHandler {
 
   stop() {
     if (this.element) {
-      this.element.hidden = true;
+      this.element.setAttribute('hidden', '');
     }
+    this.offset = 0;
     this.autoscrollEl?.remove();
     this.autoscrollEl = undefined;
-    this.offset = 0;
   }
 
   showHandler(pos: number, size: number, direction = 'translateX') {

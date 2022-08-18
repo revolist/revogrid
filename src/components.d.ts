@@ -34,7 +34,7 @@ export namespace Components {
          */
         "canFocus": boolean;
         /**
-          * Enables column move plugin Can be boolean Can be filter collection
+          * Enables column move plugin Can be boolean
          */
         "canMoveColumns": boolean;
         /**
@@ -496,7 +496,7 @@ declare namespace LocalJSX {
          */
         "canFocus"?: boolean;
         /**
-          * Enables column move plugin Can be boolean Can be filter collection
+          * Enables column move plugin Can be boolean
          */
         "canMoveColumns"?: boolean;
         /**

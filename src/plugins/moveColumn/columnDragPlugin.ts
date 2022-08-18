@@ -88,6 +88,9 @@ export default class ColumnPlugin extends BasePlugin {
   }
 
   dragStart({ event, data }: DragStartEventDetails) {
+    if (event.defaultPrevented) {
+      return;
+    }
     const { defaultPrevented } = dispatch(this.revogrid, DRAG_START, data);
     // check if allowed to drag particulat column
     if (defaultPrevented) {

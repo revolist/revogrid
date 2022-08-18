@@ -125,7 +125,6 @@ export class RevoGridComponent {
   /**
    * Enables column move plugin
    * Can be boolean
-   * Can be filter collection
    */
    @Prop() canMoveColumns: boolean = false;
   /**
