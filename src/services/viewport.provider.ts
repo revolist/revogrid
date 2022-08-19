@@ -18,6 +18,6 @@ export default class ViewportProvider {
   }
 
   setViewport(type: RevoGrid.MultiDimensionType, data: Partial<RevoGrid.ViewportState>): void {
-    this.stores[type].setViewport(data, type);
+    this.stores[type].setViewport(data);
   }
 }

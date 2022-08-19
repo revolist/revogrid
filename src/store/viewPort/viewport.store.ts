@@ -37,6 +37,8 @@ export default class ViewportStore {
   constructor(type: RevoGrid.MultiDimensionType) {
     this.store = createStore(initialState(type));
     this.store.onChange('realCount', () => this.clearItems());
+    // drop items on virtual size change, require a new item set
+    this.store.onChange('virtualSize', () => this.setViewport({ items: [] }));
   }
 
   /**
@@ -183,7 +185,7 @@ export default class ViewportStore {
     };
   }
 
-  setViewport(data: Partial<RevoGrid.ViewportState>, _: RevoGrid.MultiDimensionType) {
+  setViewport(data: Partial<RevoGrid.ViewportState>) {
     setStore(this.store, data);
   }
 

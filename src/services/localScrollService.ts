@@ -81,7 +81,7 @@ export default class LocalScrollService {
       return;
     }
 
-    const param: Params = this.getParams(dimension);
+    const param = this.getParams(dimension);
     this.cfg.beforeScroll({
       dimension: dimension,
       coordinate: param.virtualSize ? this.convert(coordinate, param) : coordinate,

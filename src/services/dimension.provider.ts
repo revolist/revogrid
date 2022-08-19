@@ -33,7 +33,7 @@ export default class DimensionProvider {
     this.stores[t].drop();
     // after we done with drop trigger viewport recalculaction
     this.viewports.stores[t].setOriginalSizes(this.stores[t].store.get('originItemSize'));
-    this.setRealSize(count, t);
+    this.setItemCount(count, t);
   }
 
   setDimensionSize(type: RevoGrid.MultiDimensionType, sizes: RevoGrid.ViewSettingSizeProp): void {
@@ -41,8 +41,8 @@ export default class DimensionProvider {
     this.viewports.stores[type].setViewPortDimension(sizes);
   }
 
-  setRealSize(realCount: number, type: RevoGrid.MultiDimensionType): void {
-    this.viewports.stores[type].setViewport({ realCount }, type);
+  setItemCount(realCount: number, type: RevoGrid.MultiDimensionType): void {
+    this.viewports.stores[type].setViewport({ realCount });
     this.stores[type].setStore({ count: realCount });
   }
 
@@ -62,7 +62,7 @@ export default class DimensionProvider {
     type: RevoGrid.MultiDimensionType,
     noVirtual = false
   ) {
-    this.setRealSize(itemCount, type);
+    this.setItemCount(itemCount, type);
     if (noVirtual) {
       this.setNoVirtual(type);
     }
@@ -71,7 +71,7 @@ export default class DimensionProvider {
 
   private setNoVirtual(type: RevoGrid.MultiDimensionType) {
     const dimension: RevoGrid.DimensionSettingsState = this.stores[type].getCurrentState();
-    this.viewports.stores[type].setViewport({ virtualSize: dimension.realSize }, type);
+    this.viewports.stores[type].setViewport({ virtualSize: dimension.realSize });
   }
 
   drop() {
@@ -98,10 +98,7 @@ export default class DimensionProvider {
     sizes?: RevoGrid.ViewSettingSizeProp,
     noVirtual = false
   ) {
-    // virtualSize = 0 is required setting, we have to drop virtual size and wait until new will be generated
-    // we need this because of if we apply pinned columns new size will arise
-    this.viewports.stores[type].setViewport({ virtualSize: 0 }, type);
-    this.setRealSize(newLength, type);
+    this.setItemCount(newLength, type);
     this.setDimensionSize(type, sizes);
 
     if (noVirtual) {

@@ -118,9 +118,7 @@ export class RevogrViewportScroll {
   }
 
   componentDidLoad() {
-    /**
-     * Track horizontal viewport resize
-     */
+    // track horizontal viewport resize
     this.resizeService = new GridResizeService(this.horizontalScroll, {
       resize: entries => {
         let height = entries[0]?.contentRect.height || 0;

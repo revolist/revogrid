@@ -74,7 +74,7 @@ export class RevogrRowHeaders {
           itemIndex: 0,
         },
       ],
-    }, 'colPinStart');
+    });
 
     const parent = `${this.uiid}-rowHeaders`;
     const viewportScroll = {
