@@ -36,13 +36,14 @@ export default class ViewportStore {
   readonly store: Observable<RevoGrid.ViewportState>;
   constructor(type: RevoGrid.MultiDimensionType) {
     this.store = createStore(initialState(type));
-    this.store.onChange('realCount', () => {
-      this.clear();
-    });
+    this.store.onChange('realCount', () => this.clearItems());
   }
 
-  /** Render viewport based on coordinate, this is main method for draw */
-  setViewPortCoordinate(position: number, dimension: DimensionDataViewport): void {
+  /**
+   * Render viewport based on coordinate
+   * It's the main method for draw
+  */
+  setViewPortCoordinate(position: number, dimension: DimensionDataViewport) {
     let virtualSize = this.store.get('virtualSize');
     // no visible data to calculate
     if (!virtualSize) {
@@ -97,9 +98,9 @@ export default class ViewportStore {
   }
 
   /**
-   * Update viewport sizes
+   * Update viewport sizes for existing items
   */
-  setViewPortDimension(sizes: RevoGrid.ViewSettingSizeProp): void {
+  setViewPortDimension(sizes: RevoGrid.ViewSettingSizeProp) {
     const items = this.store.get('items');
     const count = items.length;
     // viewport not inited
@@ -141,6 +142,9 @@ export default class ViewportStore {
     setStore(this.store, { items: [...items] });
   }
 
+  /**
+   * Set sizes for existing items
+   */
   setOriginalSizes(size: number) {
     const items = this.store.get('items');
     const count = items.length;
@@ -179,11 +183,11 @@ export default class ViewportStore {
     };
   }
 
-  setViewport(data: Partial<RevoGrid.ViewportState>, _: RevoGrid.MultiDimensionType): void {
+  setViewport(data: Partial<RevoGrid.ViewportState>, _: RevoGrid.MultiDimensionType) {
     setStore(this.store, data);
   }
 
-  clear(): void {
+  clearItems() {
     this.store.set('items', []);
   }
 }

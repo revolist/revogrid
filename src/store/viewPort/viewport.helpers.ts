@@ -12,7 +12,13 @@ type ItemsToUpdate = Pick<RevoGrid.ViewportStateItems, 'items' | 'start' | 'end'
  * If viewport wasn't changed fully simple recombination of positions
  * Otherwise rebuild viewport items
  */
-export function getUpdatedItemsByPosition<T extends ItemsToUpdate>(pos: number, items: T, realCount: number, virtualSize: number, dimension: DimensionDataViewport): ItemsToUpdate {
+export function getUpdatedItemsByPosition<T extends ItemsToUpdate>(
+  pos: number,
+  items: T,
+  realCount: number,
+  virtualSize: number,
+  dimension: DimensionDataViewport
+): ItemsToUpdate {
   const activeItem: RevoGrid.PositionItem = getItemByPosition(dimension, pos);
   const firstItem: RevoGrid.VirtualPositionItem = getFirstItem(items);
   let toUpdate: ItemsToUpdate;
@@ -63,7 +69,11 @@ export function getUpdatedItemsByPosition<T extends ItemsToUpdate>(pos: number, 
   return toUpdate;
 }
 
-export function updateMissingAndRange(items: RevoGrid.VirtualPositionItem[], missing: RevoGrid.VirtualPositionItem[], range: RevoGrid.Range) {
+export function updateMissingAndRange(
+  items: RevoGrid.VirtualPositionItem[],
+  missing: RevoGrid.VirtualPositionItem[],
+  range: RevoGrid.Range
+) {
   items.splice(range.end + 1, 0, ...missing);
   // update range if start larger after recombination
   if (range.start >= range.end && !(range.start === range.end && range.start === 0)) {
@@ -103,12 +113,13 @@ export function getItems(
     sizes?: RevoGrid.ViewSettingSizeProp;
   },
   currentSize: number = 0,
-): RevoGrid.VirtualPositionItem[] {
+) {
   const items: RevoGrid.VirtualPositionItem[] = [];
-  let index: number = opt.startIndex;
-  let size: number = currentSize;
+
+  let index = opt.startIndex;
+  let size = currentSize;
   while (size <= opt.maxSize && index < opt.maxCount) {
-    const newSize: number = getItemSize(index, opt.sizes, opt.origSize);
+    const newSize = getItemSize(index, opt.sizes, opt.origSize);
     items.push({
       start: opt.start + size,
       end: opt.start + size + newSize,
@@ -125,12 +136,13 @@ export function getItems(
  * Do batch items recombination
  * If items not overlapped with existing viewport returns null
  */
+type RecombindDimensionData = Pick<RevoGrid.DimensionSettingsState, 'sizes' | 'realSize' | 'originItemSize'>;
+type RecombineOffsetData = {
+  positiveDirection: boolean;
+} & ItemsToUpdate & RecombindDimensionData;
 export function recombineByOffset(
   offset: number,
-  data: {
-    positiveDirection: boolean;
-  } & ItemsToUpdate &
-    Pick<RevoGrid.DimensionSettingsState, 'sizes' | 'realSize' | 'originItemSize'>,
+  data: RecombineOffsetData
 ): ItemsToUpdate | null {
   const newItems = [...data.items];
   const itemsCount = newItems.length;

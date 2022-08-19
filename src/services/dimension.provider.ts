@@ -92,11 +92,16 @@ export default class DimensionProvider {
     return { y, x };
   }
 
-  setColumns(
+  setNewColumns(
     type: RevoGrid.MultiDimensionType,
+    newLength: number,
     sizes?: RevoGrid.ViewSettingSizeProp,
     noVirtual = false
   ) {
+    // virtualSize = 0 is required setting, we have to drop virtual size and wait until new will be generated
+    // we need this because of if we apply pinned columns new size will arise
+    this.viewports.stores[type].setViewport({ virtualSize: 0 }, type);
+    this.setRealSize(newLength, type);
     this.setDimensionSize(type, sizes);
 
     if (noVirtual) {

@@ -693,13 +693,13 @@ export class RevoGridComponent {
   @Element() element: HTMLRevoGridElement;
 
   @Watch('columns') columnChanged(newVal: RevoGrid.ColumnDataSchema[] = []) {
+    // clear existing data
     this.dimensionProvider.drop();
     const columnGather = ColumnDataProvider.getColumns(newVal, 0, this.columnTypes);
     this.beforecolumnsset.emit(columnGather);
     for (let type of columnTypes) {
       const items = columnGather.columns[type];
-      this.dimensionProvider.setRealSize(items.length, type);
-      this.dimensionProvider.setColumns(type, ColumnDataProvider.getSizes(items), type !== 'rgCol');
+      this.dimensionProvider.setNewColumns(type, items.length, ColumnDataProvider.getSizes(items), type !== 'rgCol');
     }
     this.beforecolumnapplied.emit(columnGather);
     const columns = this.columnProvider.setColumns(columnGather);
