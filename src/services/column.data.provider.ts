@@ -6,7 +6,7 @@ import DataStore, { getSourceItem, getSourceItemVirtualIndexByProp, Groups, setS
 import { columnTypes } from '../store/storeTypes';
 import { ColumnItems } from './dimension.provider';
 import { RevoGrid } from '../interfaces';
-import GroupingColumnPlugin, { ColumnGrouping } from '../plugins/groupingColumn/grouping.col.plugin';
+import GroupingColumnPlugin, { ColumnGrouping, isColGrouping } from '../plugins/groupingColumn/grouping.col.plugin';
 
 export type ColumnCollection = {
   columns: ColumnItems;
@@ -197,7 +197,7 @@ export default class ColumnDataProvider {
 
   static getColumnByProp(columns: RevoGrid.ColumnData, prop: RevoGrid.ColumnProp): RevoGrid.ColumnRegular | undefined {
     return find(columns, c => {
-      if (GroupingColumnPlugin.isColGrouping(c)) {
+      if (isColGrouping(c)) {
         return ColumnDataProvider.getColumnByProp(c.children, prop);
       }
       return c.prop === prop;
@@ -224,7 +224,7 @@ export default class ColumnDataProvider {
       columns,
       (res: ColumnCollection, colData: RevoGrid.ColumnDataSchema) => {
         // Grouped column
-        if (GroupingColumnPlugin.isColGrouping(colData)) {
+        if (isColGrouping(colData)) {
           return GroupingColumnPlugin.gatherGroup(res, colData, ColumnDataProvider.getColumns(colData.children, level + 1, types), level);
         }
         // Regular column

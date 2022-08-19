@@ -1,5 +1,4 @@
 import { h } from '@stencil/core';
-import { EventData } from './columnDragPlugin';
 
 export class ColumnOrderHandler {
   private element?: HTMLDivElement;
@@ -30,21 +29,25 @@ export class ColumnOrderHandler {
     });
   }
 
-  start(e: MouseEvent, { el, gridRect, elScroll }: EventData, dir: 'top' | 'left'  = 'left') {
-    const scrollContainerRect = elScroll.getBoundingClientRect();
+  start(e: MouseEvent, { dataEl, gridRect, scrollEl }: {
+    dataEl: HTMLElement;
+    gridRect: DOMRect;
+    scrollEl: Element;
+  }, dir: 'top' | 'left'  = 'left') {
+    const scrollContainerRect = scrollEl.getBoundingClientRect();
     if (scrollContainerRect) {
       this.offset = scrollContainerRect[dir] - gridRect[dir];
     }
-    this.renderAutoscroll(e, el);
+    this.renderAutoscroll(e, dataEl);
   }
 
   stop() {
     if (this.element) {
       this.element.hidden = true;
     }
+    this.offset = 0;
     this.autoscrollEl?.remove();
     this.autoscrollEl = undefined;
-    this.offset = 0;
   }
 
   showHandler(pos: number, size: number, direction = 'translateX') {

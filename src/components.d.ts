@@ -38,7 +38,7 @@ export namespace Components {
          */
         "canFocus": boolean;
         /**
-          * Enables column move plugin Can be boolean Can be filter collection
+          * Enables column move plugin Can be boolean
          */
         "canMoveColumns": boolean;
         /**
@@ -373,6 +373,54 @@ export namespace Components {
         "setScroll": (e: RevoGrid.ViewPortScrollEvent) => Promise<void>;
     }
 }
+export interface RevoGridCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLRevoGridElement;
+}
+export interface RevogrClipboardCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLRevogrClipboardElement;
+}
+export interface RevogrDataCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLRevogrDataElement;
+}
+export interface RevogrEditCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLRevogrEditElement;
+}
+export interface RevogrFilterPanelCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLRevogrFilterPanelElement;
+}
+export interface RevogrFocusCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLRevogrFocusElement;
+}
+export interface RevogrHeaderCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLRevogrHeaderElement;
+}
+export interface RevogrOrderEditorCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLRevogrOrderEditorElement;
+}
+export interface RevogrOverlaySelectionCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLRevogrOverlaySelectionElement;
+}
+export interface RevogrRowHeadersCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLRevogrRowHeadersElement;
+}
+export interface RevogrScrollVirtualCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLRevogrScrollVirtualElement;
+}
+export interface RevogrViewportScrollCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLRevogrViewportScrollElement;
+}
 declare global {
     interface HTMLRevoGridElement extends Components.RevoGrid, HTMLStencilElement {
     }
@@ -483,7 +531,7 @@ declare namespace LocalJSX {
          */
         "canFocus"?: boolean;
         /**
-          * Enables column move plugin Can be boolean Can be filter collection
+          * Enables column move plugin Can be boolean
          */
         "canMoveColumns"?: boolean;
         /**
@@ -525,92 +573,92 @@ declare namespace LocalJSX {
         /**
           * After column resize Get resized columns
          */
-        "onAftercolumnresize"?: (event: CustomEvent<{ [index: number]: RevoGrid.ColumnRegular }>) => void;
+        "onAftercolumnresize"?: (event: RevoGridCustomEvent<{ [index: number]: RevoGrid.ColumnRegular }>) => void;
         /**
           * Column updated
          */
-        "onAftercolumnsset"?: (event: CustomEvent<{
+        "onAftercolumnsset"?: (event: RevoGridCustomEvent<{
     columns: ColumnCollection;
     order: Record<RevoGrid.ColumnProp, 'asc' | 'desc'>;
   }>) => void;
         /**
           * After edit. Triggered after data applied or range changed.
          */
-        "onAfteredit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails | Edition.BeforeRangeSaveDataDetails>) => void;
+        "onAfteredit"?: (event: RevoGridCustomEvent<Edition.BeforeSaveDataDetails | Edition.BeforeRangeSaveDataDetails>) => void;
         /**
           * After rows updated
          */
-        "onAftersourceset"?: (event: CustomEvent<{
+        "onAftersourceset"?: (event: RevoGridCustomEvent<{
     type: RevoGrid.DimensionRows;
     source: RevoGrid.DataType[];
   }>) => void;
         /**
           * Notify trimmed applied
          */
-        "onAftertrimmed"?: (event: CustomEvent<any>) => void;
+        "onAftertrimmed"?: (event: RevoGridCustomEvent<any>) => void;
         /**
           * Before data apply. You can override data source here
          */
-        "onBefore-any-source"?: (event: CustomEvent<{
+        "onBefore-any-source"?: (event: RevoGridCustomEvent<{
     type: RevoGrid.DimensionRows;
     source: RevoGrid.DataType[];
   }>) => void;
         /**
           * Before range apply. Triggered before range applied. Use e.preventDefault() to prevent range.
          */
-        "onBeforeange"?: (event: CustomEvent<Selection.ChangedRange>) => void;
+        "onBeforeange"?: (event: RevoGridCustomEvent<Selection.ChangedRange>) => void;
         /**
           * Before autofill. Triggered before autofill applied. Use e.preventDefault() to prevent edit data apply.
          */
-        "onBeforeautofill"?: (event: CustomEvent<Selection.ChangedRange>) => void;
+        "onBeforeautofill"?: (event: RevoGridCustomEvent<Selection.ChangedRange>) => void;
         /**
           * Before cell focus changed. Use e.preventDefault() to prevent cell focus change.
          */
-        "onBeforecellfocus"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
+        "onBeforecellfocus"?: (event: RevoGridCustomEvent<Edition.BeforeSaveDataDetails>) => void;
         /**
           * Before column applied but after column set gathered and viewport updated
          */
-        "onBeforecolumnapplied"?: (event: CustomEvent<ColumnCollection>) => void;
+        "onBeforecolumnapplied"?: (event: RevoGridCustomEvent<ColumnCollection>) => void;
         /**
           * Before column update
          */
-        "onBeforecolumnsset"?: (event: CustomEvent<ColumnCollection>) => void;
+        "onBeforecolumnsset"?: (event: RevoGridCustomEvent<ColumnCollection>) => void;
         /**
           * Before edit event. Triggered before edit data applied. Use e.preventDefault() to prevent edit data set and use you own. Use e.val = {your value} to replace edit result with your own.
          */
-        "onBeforeedit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
+        "onBeforeedit"?: (event: RevoGridCustomEvent<Edition.BeforeSaveDataDetails>) => void;
         /**
           * Before edit started Use e.preventDefault() to prevent edit
          */
-        "onBeforeeditstart"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
+        "onBeforeeditstart"?: (event: RevoGridCustomEvent<Edition.BeforeSaveDataDetails>) => void;
         /**
           * Before export Use e.preventDefault() to prevent export Replace data in Event in case you want to modify it in export
          */
-        "onBeforeexport"?: (event: CustomEvent<DataInput>) => void;
+        "onBeforeexport"?: (event: RevoGridCustomEvent<DataInput>) => void;
         /**
           * Before filter applied to data source Use e.preventDefault() to prevent cell focus change Update @collection if you wish to change filters
          */
-        "onBeforefilterapply"?: (event: CustomEvent<{ collection: FilterCollection }>) => void;
+        "onBeforefilterapply"?: (event: RevoGridCustomEvent<{ collection: FilterCollection }>) => void;
         /**
           * Before filter trimmed values Use e.preventDefault() to prevent value trimming and filter apply Update @collection if you wish to change filters Update @itemsToFilter if you wish to filter indexes of trimming
          */
-        "onBeforefiltertrimmed"?: (event: CustomEvent<{ collection: FilterCollection; itemsToFilter: Record<number, boolean> }>) => void;
+        "onBeforefiltertrimmed"?: (event: RevoGridCustomEvent<{ collection: FilterCollection; itemsToFilter: Record<number, boolean> }>) => void;
         /**
           * Before grid focus lost happened. Use e.preventDefault() to prevent cell focus change.
          */
-        "onBeforefocuslost"?: (event: CustomEvent<FocusedData | null>) => void;
+        "onBeforefocuslost"?: (event: RevoGridCustomEvent<FocusedData | null>) => void;
         /**
           * Before range edit event. Triggered before range data applied, when range selection happened. Use e.preventDefault() to prevent edit data set and use you own.
          */
-        "onBeforerangeedit"?: (event: CustomEvent<Edition.BeforeRangeSaveDataDetails>) => void;
+        "onBeforerangeedit"?: (event: RevoGridCustomEvent<Edition.BeforeRangeSaveDataDetails>) => void;
         /**
           * Before row definition
          */
-        "onBeforerowdefinition"?: (event: CustomEvent<{ vals: any; oldVals: any; }>) => void;
+        "onBeforerowdefinition"?: (event: RevoGridCustomEvent<{ vals: any; oldVals: any; }>) => void;
         /**
           * Before sorting event. Initial sorting triggered, if this event stops no other event called. Use e.preventDefault() to prevent sorting.
          */
-        "onBeforesorting"?: (event: CustomEvent<{
+        "onBeforesorting"?: (event: RevoGridCustomEvent<{
     column: RevoGrid.ColumnRegular;
     order: 'desc' | 'asc';
     additive: boolean;
@@ -618,7 +666,7 @@ declare namespace LocalJSX {
         /**
           * Before sorting apply. Use e.preventDefault() to prevent sorting data change.
          */
-        "onBeforesortingapply"?: (event: CustomEvent<{
+        "onBeforesortingapply"?: (event: RevoGridCustomEvent<{
     column: RevoGrid.ColumnRegular;
     order: 'desc' | 'asc';
     additive: boolean;
@@ -626,43 +674,43 @@ declare namespace LocalJSX {
         /**
           * Before data apply. You can override data source here
          */
-        "onBeforesourceset"?: (event: CustomEvent<{
+        "onBeforesourceset"?: (event: RevoGridCustomEvent<{
     type: RevoGrid.DimensionRows;
     source: RevoGrid.DataType[];
   }>) => void;
         /**
           * Before source update sorting apply. Use this event if you intended to prevent sorting on data update. Use e.preventDefault() to prevent sorting data change during rows source update.
          */
-        "onBeforesourcesortingapply"?: (event: CustomEvent<any>) => void;
+        "onBeforesourcesortingapply"?: (event: RevoGridCustomEvent<any>) => void;
         /**
           * Before trimmed values Use e.preventDefault() to prevent value trimming Update @trimmed if you wish to filter indexes of trimming
          */
-        "onBeforetrimmed"?: (event: CustomEvent<{ trimmed: Record<number, boolean>; trimmedType: string; type: string }>) => void;
+        "onBeforetrimmed"?: (event: RevoGridCustomEvent<{ trimmed: Record<number, boolean>; trimmedType: string; type: string }>) => void;
         /**
           * contentsizechanged event. Triggered when new content size applied. Not including header size Event is not returning size To get actual size use getContentSize after event triggered
          */
-        "onContentsizechanged"?: (event: CustomEvent<RevoGrid.MultiDimensionType>) => void;
+        "onContentsizechanged"?: (event: RevoGridCustomEvent<RevoGrid.MultiDimensionType>) => void;
         /**
           * External subscribe
          */
-        "onFilterconfigchanged"?: (event: CustomEvent<any>) => void;
+        "onFilterconfigchanged"?: (event: RevoGridCustomEvent<any>) => void;
         /**
           * On header click.
          */
-        "onHeaderclick"?: (event: CustomEvent<RevoGrid.ColumnRegular>) => void;
+        "onHeaderclick"?: (event: RevoGridCustomEvent<RevoGrid.ColumnRegular>) => void;
         /**
           * Row order change started. Use e.preventDefault() to prevent rgRow order change. Use e.text = 'new name' to change item name on start.
          */
-        "onRowdragstart"?: (event: CustomEvent<{ pos: RevoGrid.PositionItem; text: string }>) => void;
-        "onRowheaderschanged"?: (event: CustomEvent<any>) => void;
+        "onRowdragstart"?: (event: RevoGridCustomEvent<{ pos: RevoGrid.PositionItem; text: string }>) => void;
+        "onRowheaderschanged"?: (event: RevoGridCustomEvent<any>) => void;
         /**
           * Before rgRow order apply. Use e.preventDefault() to prevent rgRow order change.
          */
-        "onRoworderchanged"?: (event: CustomEvent<{ from: number; to: number }>) => void;
+        "onRoworderchanged"?: (event: RevoGridCustomEvent<{ from: number; to: number }>) => void;
         /**
           * Triggered when view port scrolled
          */
-        "onViewportscroll"?: (event: CustomEvent<RevoGrid.ViewPortScrollEvent>) => void;
+        "onViewportscroll"?: (event: RevoGridCustomEvent<RevoGrid.ViewPortScrollEvent>) => void;
         /**
           * Pinned bottom Source: {[T in ColumnProp]: any} - defines pinned bottom rows data source.
          */
@@ -726,8 +774,8 @@ declare namespace LocalJSX {
         "useClipboard"?: boolean;
     }
     interface RevogrClipboard {
-        "onCopyRegion"?: (event: CustomEvent<DataTransfer>) => void;
-        "onPasteRegion"?: (event: CustomEvent<string[][]>) => void;
+        "onCopyRegion"?: (event: RevogrClipboardCustomEvent<DataTransfer>) => void;
+        "onPasteRegion"?: (event: RevogrClipboardCustomEvent<string[][]>) => void;
     }
     interface RevogrData {
         /**
@@ -736,9 +784,9 @@ declare namespace LocalJSX {
         "colData": ColumnSource;
         "dataStore": RowSource;
         "dimensionRow": Observable<RevoGrid.DimensionSettingsState>;
-        "onBefore-cell-render"?: (event: CustomEvent<BeforeCellRenderEvent>) => void;
-        "onBeforeRowRender"?: (event: CustomEvent<any>) => void;
-        "onDragStartCell"?: (event: CustomEvent<DragStartEvent>) => void;
+        "onBefore-cell-render"?: (event: RevogrDataCustomEvent<BeforeCellRenderEvent>) => void;
+        "onBeforeRowRender"?: (event: RevogrDataCustomEvent<any>) => void;
+        "onDragStartCell"?: (event: RevogrDataCustomEvent<DragStartEvent>) => void;
         "range"?: boolean;
         "readonly"?: boolean;
         "rowClass"?: string;
@@ -754,11 +802,11 @@ declare namespace LocalJSX {
           * Custom editors register
          */
         "editor"?: Edition.EditorCtr | null;
-        "onCellEdit"?: (event: CustomEvent<Edition.SaveDataDetails>) => void;
+        "onCellEdit"?: (event: RevogrEditCustomEvent<Edition.SaveDataDetails>) => void;
         /**
           * Close editor event
          */
-        "onCloseEdit"?: (event: CustomEvent<boolean | undefined>) => void;
+        "onCloseEdit"?: (event: RevogrEditCustomEvent<boolean | undefined>) => void;
         "saveOnClose"?: boolean;
     }
     interface RevogrFilterPanel {
@@ -768,7 +816,7 @@ declare namespace LocalJSX {
         "filterItems"?: MultiFilterItem;
         "filterNames"?: Record<string, string>;
         "filterTypes"?: Record<string, string[]>;
-        "onFilterChange"?: (event: CustomEvent<MultiFilterItem>) => void;
+        "onFilterChange"?: (event: RevogrFilterPanelCustomEvent<MultiFilterItem>) => void;
         "uuid"?: string;
     }
     interface RevogrFocus {
@@ -776,7 +824,7 @@ declare namespace LocalJSX {
         "dimensionCol"?: Observable<RevoGrid.DimensionSettingsState>;
         "dimensionRow"?: Observable<RevoGrid.DimensionSettingsState>;
         "focusTemplate"?: RevoGrid.FocusTemplateFunc | null;
-        "onBefore-focus-render"?: (event: CustomEvent<FocusRenderEvent>) => void;
+        "onBefore-focus-render"?: (event: RevogrFocusCustomEvent<FocusRenderEvent>) => void;
         "rowType"?: RevoGrid.DimensionRows;
         /**
           * Dynamic stores
@@ -790,10 +838,10 @@ declare namespace LocalJSX {
         "dimensionCol"?: Observable<RevoGrid.DimensionSettingsState>;
         "groupingDepth"?: number;
         "groups"?: Groups;
-        "onBefore-resize"?: (event: CustomEvent<RevoGrid.ColumnRegular[]>) => void;
-        "onHeaderdblClick"?: (event: CustomEvent<RevoGrid.InitialHeaderClick>) => void;
-        "onHeaderresize"?: (event: CustomEvent<RevoGrid.ViewSettingSizeProp>) => void;
-        "onInitialHeaderClick"?: (event: CustomEvent<RevoGrid.InitialHeaderClick>) => void;
+        "onBefore-resize"?: (event: RevogrHeaderCustomEvent<RevoGrid.ColumnRegular[]>) => void;
+        "onHeaderdblClick"?: (event: RevogrHeaderCustomEvent<RevoGrid.InitialHeaderClick>) => void;
+        "onHeaderresize"?: (event: RevogrHeaderCustomEvent<RevoGrid.ViewSettingSizeProp>) => void;
+        "onInitialHeaderClick"?: (event: RevogrHeaderCustomEvent<RevoGrid.InitialHeaderClick>) => void;
         "parent"?: string;
         "selectionStore"?: Observable<Selection.SelectionStoreState>;
         "type": string;
@@ -809,19 +857,19 @@ declare namespace LocalJSX {
         /**
           * Row dragged, new range ready to be applied
          */
-        "onInitialRowDropped"?: (event: CustomEvent<{ from: number; to: number }>) => void;
+        "onInitialRowDropped"?: (event: RevogrOrderEditorCustomEvent<{ from: number; to: number }>) => void;
         /**
           * Row move
          */
-        "onInternalRowDrag"?: (event: CustomEvent<RevoGrid.PositionItem>) => void;
+        "onInternalRowDrag"?: (event: RevogrOrderEditorCustomEvent<RevoGrid.PositionItem>) => void;
         /**
           * Row drag ended
          */
-        "onInternalRowDragEnd"?: (event: CustomEvent<any>) => void;
+        "onInternalRowDragEnd"?: (event: RevogrOrderEditorCustomEvent<any>) => void;
         /**
           * Row drag started
          */
-        "onInternalRowDragStart"?: (event: CustomEvent<{
+        "onInternalRowDragStart"?: (event: RevogrOrderEditorCustomEvent<{
     cell: Selection.Cell;
     text: string;
     pos: RevoGrid.PositionItem;
@@ -830,7 +878,7 @@ declare namespace LocalJSX {
         /**
           * Row mouse move
          */
-        "onInternalRowMouseMove"?: (event: CustomEvent<Selection.Cell>) => void;
+        "onInternalRowMouseMove"?: (event: RevogrOrderEditorCustomEvent<Selection.Cell>) => void;
         "parent"?: HTMLElement;
     }
     interface RevogrOverlaySelection {
@@ -854,43 +902,43 @@ declare namespace LocalJSX {
           * Last cell position
          */
         "lastCell"?: Selection.Cell;
-        "onApplyFocus"?: (event: CustomEvent<FocusRenderEvent>) => void;
-        "onBefore-apply-range"?: (event: CustomEvent<FocusRenderEvent>) => void;
+        "onApplyFocus"?: (event: RevogrOverlaySelectionCustomEvent<FocusRenderEvent>) => void;
+        "onBefore-apply-range"?: (event: RevogrOverlaySelectionCustomEvent<FocusRenderEvent>) => void;
         /**
           * Runs before cell save Can be used to override or cancel original save
          */
-        "onBefore-cell-save"?: (event: CustomEvent<any>) => void;
-        "onBefore-edit-render"?: (event: CustomEvent<FocusRenderEvent>) => void;
-        "onBefore-set-range"?: (event: CustomEvent<any>) => void;
-        "onBeforeFocusCell"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
+        "onBefore-cell-save"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
+        "onBefore-edit-render"?: (event: RevogrOverlaySelectionCustomEvent<FocusRenderEvent>) => void;
+        "onBefore-set-range"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
+        "onBeforeFocusCell"?: (event: RevogrOverlaySelectionCustomEvent<Edition.BeforeSaveDataDetails>) => void;
         /**
           * Selection range changed
          */
-        "onBeforeRangeCopyApply"?: (event: CustomEvent<Selection.ChangedRange>) => void;
+        "onBeforeRangeCopyApply"?: (event: RevogrOverlaySelectionCustomEvent<Selection.ChangedRange>) => void;
         /**
           * Range data apply
          */
-        "onBeforeRangeDataApply"?: (event: CustomEvent<FocusRenderEvent>) => void;
-        "onFocusCell"?: (event: CustomEvent<ApplyFocusEvent>) => void;
-        "onInternalCellEdit"?: (event: CustomEvent<Edition.BeforeSaveDataDetails>) => void;
-        "onInternalCopy"?: (event: CustomEvent<any>) => void;
-        "onInternalPaste"?: (event: CustomEvent<any>) => void;
+        "onBeforeRangeDataApply"?: (event: RevogrOverlaySelectionCustomEvent<FocusRenderEvent>) => void;
+        "onFocusCell"?: (event: RevogrOverlaySelectionCustomEvent<ApplyFocusEvent>) => void;
+        "onInternalCellEdit"?: (event: RevogrOverlaySelectionCustomEvent<Edition.BeforeSaveDataDetails>) => void;
+        "onInternalCopy"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
+        "onInternalPaste"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
         /**
           * Range data apply
          */
-        "onInternalRangeDataApply"?: (event: CustomEvent<Edition.BeforeRangeSaveDataDetails>) => void;
+        "onInternalRangeDataApply"?: (event: RevogrOverlaySelectionCustomEvent<Edition.BeforeRangeSaveDataDetails>) => void;
         /**
           * Selection range changed
          */
-        "onInternalSelectionChanged"?: (event: CustomEvent<Selection.ChangedRange>) => void;
+        "onInternalSelectionChanged"?: (event: RevogrOverlaySelectionCustomEvent<Selection.ChangedRange>) => void;
         /**
           * Range copy
          */
-        "onRangeClipboardCopy"?: (event: CustomEvent<any>) => void;
-        "onRangeClipboardPaste"?: (event: CustomEvent<any>) => void;
-        "onSetEdit"?: (event: CustomEvent<Edition.BeforeEdit>) => void;
-        "onSetRange"?: (event: CustomEvent<Selection.RangeArea & { type: RevoGrid.MultiDimensionType }>) => void;
-        "onSetTempRange"?: (event: CustomEvent<Selection.TempRange | null>) => void;
+        "onRangeClipboardCopy"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
+        "onRangeClipboardPaste"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
+        "onSetEdit"?: (event: RevogrOverlaySelectionCustomEvent<Edition.BeforeEdit>) => void;
+        "onSetRange"?: (event: RevogrOverlaySelectionCustomEvent<Selection.RangeArea & { type: RevoGrid.MultiDimensionType }>) => void;
+        "onSetTempRange"?: (event: RevogrOverlaySelectionCustomEvent<Selection.TempRange | null>) => void;
         "range"?: boolean;
         "readonly"?: boolean;
         /**
@@ -903,8 +951,8 @@ declare namespace LocalJSX {
         "dataPorts"?: ViewportData[];
         "headerProp"?: Record<string, any>;
         "height"?: number;
-        "onElementToScroll"?: (event: CustomEvent<ElementScroll>) => void;
-        "onScrollViewport"?: (event: CustomEvent<RevoGrid.ViewPortScrollEvent>) => void;
+        "onElementToScroll"?: (event: RevogrRowHeadersCustomEvent<ElementScroll>) => void;
+        "onScrollViewport"?: (event: RevogrRowHeadersCustomEvent<RevoGrid.ViewPortScrollEvent>) => void;
         "resize"?: boolean;
         "rowClass"?: string;
         "rowHeaderColumn"?: RevoGrid.RowHeaders;
@@ -913,7 +961,7 @@ declare namespace LocalJSX {
     interface RevogrScrollVirtual {
         "dimension"?: RevoGrid.DimensionType;
         "dimensionStore"?: Observable<RevoGrid.DimensionSettingsState>;
-        "onScrollVirtual"?: (event: CustomEvent<RevoGrid.ViewPortScrollEvent>) => void;
+        "onScrollVirtual"?: (event: RevogrScrollVirtualCustomEvent<RevoGrid.ViewPortScrollEvent>) => void;
         "viewportStore"?: Observable<RevoGrid.ViewportState>;
     }
     interface RevogrTempRange {
@@ -933,9 +981,9 @@ declare namespace LocalJSX {
           * Width of inner content
          */
         "contentWidth"?: number;
-        "onResizeViewport"?: (event: CustomEvent<RevoGrid.ViewPortResizeEvent>) => void;
-        "onScrollViewport"?: (event: CustomEvent<RevoGrid.ViewPortScrollEvent>) => void;
-        "onScrollchange"?: (event: CustomEvent<{ type: RevoGrid.DimensionType; hasScroll: boolean }>) => void;
+        "onResizeViewport"?: (event: RevogrViewportScrollCustomEvent<RevoGrid.ViewPortResizeEvent>) => void;
+        "onScrollViewport"?: (event: RevogrViewportScrollCustomEvent<RevoGrid.ViewPortScrollEvent>) => void;
+        "onScrollchange"?: (event: RevogrViewportScrollCustomEvent<{ type: RevoGrid.DimensionType; hasScroll: boolean }>) => void;
     }
     interface IntrinsicElements {
         "revo-grid": RevoGrid;
