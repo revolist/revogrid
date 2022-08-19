@@ -13,6 +13,7 @@ import { getItemByPosition } from '../../store/dimension/dimension.helpers';
 import BasePlugin from '../basePlugin';
 import { ColumnOrderHandler } from './columnOrderHandler';
 import { dispatch } from '../dispatcher';
+import { isColGrouping } from '../groupingColumn/grouping.col.plugin';
 
 const COLUMN_CLICK = 'column-click';
 const MOVE = 'column-mouse-move';
@@ -24,7 +25,7 @@ const DRAG_START = 'column-drag-start';
 
 export type DragStartEventDetails = {
   event: MouseEvent;
-  data: RevoGrid.ColumnRegular;
+  data: RevoGrid.ColumnDataSchema;
 };
 
 export type Providers = {
@@ -37,7 +38,7 @@ export type Providers = {
 type StaticData = {
   startPos: number;
   startItem: RevoGrid.PositionItem;
-  data: DragStartEventDetails['data'];
+  data: RevoGrid.ColumnRegular;
   dataEl: HTMLElement;
   scrollEl: Element;
   gridEl: HTMLElement;
@@ -104,7 +105,11 @@ export default class ColumnPlugin extends BasePlugin {
       return;
     }
 
-    const cols = this.getDimension('rgCol');
+    if (isColGrouping(data)) {
+      return;
+    }
+
+    const cols = this.getDimension(data.pin || 'rgCol');
     const gridRect = this.revogrid.getBoundingClientRect();
     const elRect = dataEl.getBoundingClientRect();
     const startItem = getItemByPosition(
@@ -164,19 +169,22 @@ export default class ColumnPlugin extends BasePlugin {
       if (relativePos < 0) {
         relativePos = 0;
       }
-      const newItem = getItemByPosition(this.staticDragData.cols, relativePos);
+      const newPosition = getItemByPosition(this.staticDragData.cols, relativePos);
+
+      const store = this.providers.column.stores[this.dragData.type].store;
+      const items = [...store.get('items')];
 
       // prevent position change if needed
       const { defaultPrevented: stopDrag } = dispatch(this.revogrid, BEFORE_DRAG_END, {
         ...this.staticDragData,
         startPosition: this.staticDragData.startItem,
-        newPosition: newItem,
+        newPosition,
+        newItem: store.get('source')[items[this.staticDragData.startItem.itemIndex]]
       });
       if (!stopDrag) {
-        const store = this.providers.column.stores[this.dragData.type].store;
-        const items = [...store.get('items')];
+        // todo: if move item out of group remove item from group
         const toMove = items.splice(this.staticDragData.startItem.itemIndex, 1);
-        items.splice(newItem.itemIndex, 0, ...toMove);
+        items.splice(newPosition.itemIndex, 0, ...toMove);
         store.set('items', items);
       }
       dispatch(this.revogrid, DRAG_END, this.dragData);

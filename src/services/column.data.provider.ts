@@ -9,7 +9,7 @@ import { RevoGrid } from '../interfaces';
 import ColumnRegular = RevoGrid.ColumnRegular;
 import DimensionCols = RevoGrid.DimensionCols;
 import ColumnProp = RevoGrid.ColumnProp;
-import GroupingColumnPlugin, { ColumnGrouping } from '../plugins/groupingColumn/grouping.col.plugin';
+import GroupingColumnPlugin, { ColumnGrouping, isColGrouping } from '../plugins/groupingColumn/grouping.col.plugin';
 
 export type ColumnCollection = {
   columns: ColumnItems;
@@ -196,7 +196,7 @@ export default class ColumnDataProvider {
 
   static getColumnByProp(columns: RevoGrid.ColumnData, prop: ColumnProp): ColumnRegular | undefined {
     return find(columns, c => {
-      if (GroupingColumnPlugin.isColGrouping(c)) {
+      if (isColGrouping(c)) {
         return ColumnDataProvider.getColumnByProp(c.children, prop);
       }
       return c.prop === prop;
@@ -209,7 +209,7 @@ export default class ColumnDataProvider {
       columns,
       (res: ColumnCollection, colData: RevoGrid.ColumnDataSchema) => {
         /** Grouped column */
-        if (GroupingColumnPlugin.isColGrouping(colData)) {
+        if (isColGrouping(colData)) {
           return GroupingColumnPlugin.gatherGroup(res, colData, ColumnDataProvider.getColumns(colData.children, level + 1, types), level);
         }
         /** Regular column */
