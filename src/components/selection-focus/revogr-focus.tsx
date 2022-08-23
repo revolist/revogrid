@@ -17,7 +17,7 @@ export class RevogrFocus {
   @Prop() selectionStore!: Observable<Selection.SelectionStoreState>;
   @Prop() dimensionRow!: Observable<RevoGrid.DimensionSettingsState>;
   @Prop() dimensionCol!: Observable<RevoGrid.DimensionSettingsState>;
-  @Event({ eventName: 'after-focus' }) afterFocus: EventEmitter<{
+  @Event({ eventName: 'afterfocus' }) afterFocus: EventEmitter<{
     model: any;
   }>;
 
