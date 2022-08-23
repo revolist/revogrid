@@ -537,10 +537,6 @@ declare namespace LocalJSX {
          */
         "grouping"?: GroupingOptions;
         /**
-          * Triggered after focus rendered Can be used for access to focus element Through @event.target
-         */
-        "onAfter-focus"?: (event: RevoGridCustomEvent<{ model: any; }>) => void;
-        /**
           * After column resize Get resized columns
          */
         "onAftercolumnresize"?: (event: RevoGridCustomEvent<Record<RevoGrid.ColumnProp, RevoGrid.ColumnRegular>>) => void;
@@ -555,6 +551,10 @@ declare namespace LocalJSX {
           * After edit. Triggered when after data applied or Range changeged.
          */
         "onAfteredit"?: (event: RevoGridCustomEvent<Edition.BeforeSaveDataDetails | Edition.BeforeRangeSaveDataDetails>) => void;
+        /**
+          * Triggered after focus render finished. Can be used to access a focus element through @event.target
+         */
+        "onAfterfocus"?: (event: RevoGridCustomEvent<{ model: any; }>) => void;
         /**
           * After rows updated
          */
@@ -773,7 +773,7 @@ declare namespace LocalJSX {
         "dataStore": RowSource;
         "dimensionCol": Observable<RevoGrid.DimensionSettingsState>;
         "dimensionRow": Observable<RevoGrid.DimensionSettingsState>;
-        "onAfter-focus"?: (event: RevogrFocusCustomEvent<{
+        "onAfterfocus"?: (event: RevogrFocusCustomEvent<{
     model: any;
   }>) => void;
         "selectionStore": Observable<Selection.SelectionStoreState>;

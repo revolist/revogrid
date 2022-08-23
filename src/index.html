@@ -292,7 +292,7 @@
 
       // events testing
       // 'beforerange', 'setRange', 'beforefocuslost', 'beforecellfocus', 'beforeedit'
-      const events = ['beforeedit', 'aftercolumnresize', 'beforerange', 'setRange', 'beforefocuslost', 'beforecellfocus', 'beforeedit'];
+      const events = ['beforeedit', 'aftercolumnresize', 'beforerange', 'setRange', 'beforefocuslost', 'beforecellfocus', 'beforeedit', 'afterfocus'];
       events.forEach(e => {
         grid.addEventListener(e, $e => {
           if (window.eventsPrevented[e]) {

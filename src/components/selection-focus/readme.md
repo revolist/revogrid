@@ -15,9 +15,9 @@
 
 ## Events
 
-| Event         | Description | Type                           |
-| ------------- | ----------- | ------------------------------ |
-| `after-focus` |             | `CustomEvent<{ model: any; }>` |
+| Event        | Description | Type                           |
+| ------------ | ----------- | ------------------------------ |
+| `afterfocus` |             | `CustomEvent<{ model: any; }>` |
 
 
 ## Dependencies
