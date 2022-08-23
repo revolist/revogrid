@@ -251,11 +251,12 @@ export namespace Components {
         "uuid": string;
     }
     interface RevogrFocus {
-        "dimensionCol": Observable<RevoGrid.DimensionSettingsState>;
-        "dimensionRow": Observable<RevoGrid.DimensionSettingsState>;
         /**
           * Dynamic stores
          */
+        "dataStore": RowSource;
+        "dimensionCol": Observable<RevoGrid.DimensionSettingsState>;
+        "dimensionRow": Observable<RevoGrid.DimensionSettingsState>;
         "selectionStore": Observable<Selection.SelectionStoreState>;
     }
     interface RevogrHeader {
@@ -365,6 +366,10 @@ export interface RevogrEditCustomEvent<T> extends CustomEvent<T> {
 export interface RevogrFilterPanelCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLRevogrFilterPanelElement;
+}
+export interface RevogrFocusCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLRevogrFocusElement;
 }
 export interface RevogrHeaderCustomEvent<T> extends CustomEvent<T> {
     detail: T;
@@ -531,6 +536,10 @@ declare namespace LocalJSX {
           * Group models by provided properties Define properties to be groped by
          */
         "grouping"?: GroupingOptions;
+        /**
+          * Triggered after focus rendered Can be used for access to focus element Through @event.target
+         */
+        "onAfter-focus"?: (event: RevoGridCustomEvent<{ model: any; }>) => void;
         /**
           * After column resize Get resized columns
          */
@@ -758,12 +767,16 @@ declare namespace LocalJSX {
         "uuid"?: string;
     }
     interface RevogrFocus {
-        "dimensionCol"?: Observable<RevoGrid.DimensionSettingsState>;
-        "dimensionRow"?: Observable<RevoGrid.DimensionSettingsState>;
         /**
           * Dynamic stores
          */
-        "selectionStore"?: Observable<Selection.SelectionStoreState>;
+        "dataStore": RowSource;
+        "dimensionCol": Observable<RevoGrid.DimensionSettingsState>;
+        "dimensionRow": Observable<RevoGrid.DimensionSettingsState>;
+        "onAfter-focus"?: (event: RevogrFocusCustomEvent<{
+    model: any;
+  }>) => void;
+        "selectionStore": Observable<Selection.SelectionStoreState>;
     }
     interface RevogrHeader {
         "canResize"?: boolean;
