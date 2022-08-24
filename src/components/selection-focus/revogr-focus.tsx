@@ -2,7 +2,7 @@ import { Component, Prop, h, Host, Element, Event, EventEmitter } from '@stencil
 import { Observable, RevoGrid, Selection } from '../../interfaces';
 import { getSourceItem } from '../../store/dataSource/data.store';
 import { FOCUS_CLASS } from '../../utils/consts';
-import { RowSource } from '../data/columnService';
+import { ColumnSource, RowSource } from '../data/columnService';
 import { getElStyle } from '../overlay/selection.utils';
 
 @Component({
@@ -14,11 +14,13 @@ export class RevogrFocus {
 
   /** Dynamic stores */
   @Prop() dataStore!: RowSource;
+  @Prop() colData!: ColumnSource;
   @Prop() selectionStore!: Observable<Selection.SelectionStoreState>;
   @Prop() dimensionRow!: Observable<RevoGrid.DimensionSettingsState>;
   @Prop() dimensionCol!: Observable<RevoGrid.DimensionSettingsState>;
   @Event({ eventName: 'afterfocus' }) afterFocus: EventEmitter<{
     model: any;
+    column: RevoGrid.ColumnRegular;
   }>;
 
   private changed(e: HTMLElement, focus: Selection.Cell): void {
@@ -26,9 +28,11 @@ export class RevogrFocus {
       block: 'nearest',
       inline: 'nearest',
     });
-    const model = getSourceItem(this.dataStore, focus.y) || {};
+    const model = getSourceItem(this.dataStore, focus.y);
+    const column = getSourceItem(this.colData, focus.x);
     this.afterFocus.emit({
-      model
+      model,
+      column
     });
   }
 

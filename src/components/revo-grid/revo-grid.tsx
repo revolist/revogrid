@@ -198,7 +198,7 @@ export class RevoGridComponent {
    * Triggered after focus render finished.
    * Can be used to access a focus element through @event.target
    */
-  @Event() afterfocus: EventEmitter<{ model: any; }>;
+  @Event() afterfocus: EventEmitter<{ model: any; column: RevoGrid.ColumnRegular; }>;
 
   /**
    * Before rgRow order apply.

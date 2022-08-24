@@ -251,6 +251,7 @@ export namespace Components {
         "uuid": string;
     }
     interface RevogrFocus {
+        "colData": ColumnSource;
         /**
           * Dynamic stores
          */
@@ -554,7 +555,7 @@ declare namespace LocalJSX {
         /**
           * Triggered after focus render finished. Can be used to access a focus element through @event.target
          */
-        "onAfterfocus"?: (event: RevoGridCustomEvent<{ model: any; }>) => void;
+        "onAfterfocus"?: (event: RevoGridCustomEvent<{ model: any; column: RevoGrid.ColumnRegular; }>) => void;
         /**
           * After rows updated
          */
@@ -767,6 +768,7 @@ declare namespace LocalJSX {
         "uuid"?: string;
     }
     interface RevogrFocus {
+        "colData": ColumnSource;
         /**
           * Dynamic stores
          */
@@ -775,6 +777,7 @@ declare namespace LocalJSX {
         "dimensionRow": Observable<RevoGrid.DimensionSettingsState>;
         "onAfterfocus"?: (event: RevogrFocusCustomEvent<{
     model: any;
+    column: RevoGrid.ColumnRegular;
   }>) => void;
         "selectionStore": Observable<Selection.SelectionStoreState>;
     }
