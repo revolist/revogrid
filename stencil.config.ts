@@ -60,16 +60,21 @@ export const config: Config = {
     vueOutputTarget({
       componentCorePackage,
       proxiesFile: directivesProxyFile('vue'),
+      includeDefineCustomElements: true,
       componentModels: [],
     }),
     svelteOutputTarget({
       componentCorePackage,
       proxiesFile: directivesProxyFile('svelte'),
+      includeDefineCustomElements: true,
+      legacy: false,
+      includePolyfills: false,
     }),
     // custom element, no polifil
     {
-      type: 'dist-custom-elements-bundle',
+      type: 'dist-custom-elements',
       dir: 'custom-element',
+      autoDefineCustomElements: true,
       empty: true,
     },
     // lazy loading
