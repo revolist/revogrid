@@ -56,6 +56,7 @@ export const config: Config = {
     vueOutputTarget({
       componentCorePackage,
       proxiesFile: directivesProxyFile('vue'),
+      includeDefineCustomElements: true,
       componentModels: [],
     }),
     /*
@@ -68,9 +69,12 @@ export const config: Config = {
       componentCorePackage,
       proxiesFile: directivesProxyFile('react'),
     }),
-    svelteOutputTarget({
+   svelteOutputTarget({
       componentCorePackage,
       proxiesFile: directivesProxyFile('svelte'),
+      includeDefineCustomElements: true,
+      legacy: false,
+      includePolyfills: false,
     }), */
     // custom element, no polifil
     {

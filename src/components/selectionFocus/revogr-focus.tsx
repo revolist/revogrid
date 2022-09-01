@@ -1,7 +1,9 @@
 import { Component, Prop, h, Host, Event, Element, EventEmitter } from '@stencil/core';
 import { FocusRenderEvent, Observable, RevoGrid, Selection } from '../../interfaces';
 import { FOCUS_CLASS } from '../../utils/consts';
+import { ColumnSource, RowSource } from '../data/columnService';
 import { getElStyle } from '../overlay/selection.utils';
+import { getSourceItem } from '../../store/dataSource/data.store';
 
 @Component({
   tag: 'revogr-focus',
@@ -11,23 +13,40 @@ export class RevogrFocus {
   @Element() el: HTMLElement;
 
   /** Dynamic stores */
-  @Prop() selectionStore: Observable<Selection.SelectionStoreState>;
-  @Prop() dimensionRow: Observable<RevoGrid.DimensionSettingsState>;
-  @Prop() dimensionCol: Observable<RevoGrid.DimensionSettingsState>;
-  @Prop() colType: RevoGrid.DimensionCols;
-  @Prop() rowType: RevoGrid.DimensionRows;
-  @Prop() focusTemplate: RevoGrid.FocusTemplateFunc | null;
-  @Event({ eventName: 'before-focus-render' }) beforeFocusRender: EventEmitter<FocusRenderEvent>;
+  @Prop() selectionStore!: Observable<Selection.SelectionStoreState>;
+  @Prop() dimensionRow!: Observable<RevoGrid.DimensionSettingsState>;
+  @Prop() dimensionCol!: Observable<RevoGrid.DimensionSettingsState>;
+  @Prop() dataStore!: RowSource;
+  @Prop() colData!: ColumnSource;
+  @Prop() colType!: RevoGrid.DimensionCols;
+  @Prop() rowType!: RevoGrid.DimensionRows;
 
-  private changed(e: HTMLElement): void {
+  @Prop() focusTemplate: RevoGrid.FocusTemplateFunc | null = null;
+  @Event({ eventName: 'before-focus-render' }) beforeFocusRender: EventEmitter<FocusRenderEvent>;
+  /**
+   * Used to setup properties after focus was rendered
+   */
+  @Event({ eventName: 'afterfocus' }) afterFocus: EventEmitter<{
+    model: any;
+    column: RevoGrid.ColumnRegular;
+  }>;
+
+  private changed(e: HTMLElement, focus: Selection.Cell): void {
     e?.scrollIntoView({
       block: 'nearest',
       inline: 'nearest',
     });
+    const model = getSourceItem(this.dataStore, focus.y);
+    const column = getSourceItem(this.colData, focus.x);
+    this.afterFocus.emit({
+      model,
+      column
+    });
   }
 
   componentDidRender(): void {
-    this.el && this.changed(this.el);
+    const currentFocus = this.selectionStore.get('focus');
+    currentFocus && this.el && this.changed(this.el, currentFocus);
   }
 
   render() {

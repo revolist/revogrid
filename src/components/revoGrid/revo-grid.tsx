@@ -218,6 +218,12 @@ export class RevoGridComponent {
   @Event() beforeange: EventEmitter<Selection.ChangedRange>;
 
   /**
+   * Triggered after focus render finished.
+   * Can be used to access a focus element through @event.target
+   */
+  @Event() afterfocus: EventEmitter<{ model: any; column: RevoGrid.ColumnRegular; }>;
+
+  /**
    * Before rgRow order apply.
    * Use e.preventDefault() to prevent rgRow order change.
    */

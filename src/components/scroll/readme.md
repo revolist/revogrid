@@ -13,11 +13,11 @@
 
 ## Events
 
-| Event            | Description | Type                                                                             |
-| ---------------- | ----------- | -------------------------------------------------------------------------------- |
-| `resizeViewport` |             | `CustomEvent<{ dimension: DimensionType; size: number; }>`                       |
-| `scrollchange`   |             | `CustomEvent<{ type: DimensionType; hasScroll: boolean; }>`                      |
-| `scrollViewport` |             | `CustomEvent<{ dimension: DimensionType; coordinate: number; delta?: number; }>` |
+| Event            | Description | Type                                                                                                |
+| ---------------- | ----------- | --------------------------------------------------------------------------------------------------- |
+| `resizeViewport` |             | `CustomEvent<{ dimension: DimensionType; size: number; }>`                                          |
+| `scrollchange`   |             | `CustomEvent<{ type: DimensionType; hasScroll: boolean; }>`                                         |
+| `scrollViewport` |             | `CustomEvent<{ dimension: DimensionType; coordinate: number; delta?: number; outside?: boolean; }>` |
 
 
 ## Methods

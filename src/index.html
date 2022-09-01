@@ -85,7 +85,7 @@
     <section class="content">
       <div class="tile large grid-holder">
         <!-- Grid init-->
-        <revo-grid theme="material" can-move-columns stretch="false" class="my" key="1"></revo-grid>
+        <revo-grid theme="material" row-headers can-move-columns stretch="false" class="my" key="1"></revo-grid>
       </div>
     </section>
 
@@ -292,14 +292,13 @@
 
       // events testing
       // 'beforerange', 'setRange', 'beforefocuslost', 'beforecellfocus', 'beforeedit'
-      const events = ['beforeedit', 'aftercolumnresize', 'beforerange', 'setRange', 'beforefocuslost', 'beforecellfocus', 'beforeedit'];
+      const events = ['beforeedit', 'aftercolumnresize', 'beforerange', 'setRange', 'beforefocuslost', 'beforecellfocus', 'beforeedit', 'afterfocus'];
       events.forEach(e => {
         grid.addEventListener(e, $e => {
           if (window.eventsPrevented[e]) {
             $e.preventDefault();
           }
           console.log(`%c${e}`, 'background: #50d260; color: #fff; border-radius: 3px; padding: 2px 5px;', $e);
-          grid.getSelectedRange().then(r => console.log("selectedRange=",r));
         });
       });
     </script>

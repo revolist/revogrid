@@ -14,9 +14,9 @@
 
 ## Events
 
-| Event           | Description | Type                                                                             |
-| --------------- | ----------- | -------------------------------------------------------------------------------- |
-| `scrollVirtual` |             | `CustomEvent<{ dimension: DimensionType; coordinate: number; delta?: number; }>` |
+| Event           | Description | Type                                                                                                |
+| --------------- | ----------- | --------------------------------------------------------------------------------------------------- |
+| `scrollVirtual` |             | `CustomEvent<{ dimension: DimensionType; coordinate: number; delta?: number; outside?: boolean; }>` |
 
 
 ## Methods

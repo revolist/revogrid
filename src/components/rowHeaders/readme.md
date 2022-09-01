@@ -18,10 +18,10 @@
 
 ## Events
 
-| Event             | Description | Type                                                                             |
-| ----------------- | ----------- | -------------------------------------------------------------------------------- |
-| `elementToScroll` |             | `CustomEvent<ElementScroll>`                                                     |
-| `scrollViewport`  |             | `CustomEvent<{ dimension: DimensionType; coordinate: number; delta?: number; }>` |
+| Event             | Description | Type                                                                                                |
+| ----------------- | ----------- | --------------------------------------------------------------------------------------------------- |
+| `elementToScroll` |             | `CustomEvent<ElementScroll>`                                                                        |
+| `scrollViewport`  |             | `CustomEvent<{ dimension: DimensionType; coordinate: number; delta?: number; outside?: boolean; }>` |
 
 
 ## Dependencies
