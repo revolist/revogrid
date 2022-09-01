@@ -1,9 +1,10 @@
 import { Config } from '@stencil/core';
 import { sass } from '@stencil/sass';
-import { angularOutputTarget } from '@stencil/angular-output-target';
-import { reactOutputTarget } from '@stencil/react-output-target';
-import { vueOutputTarget } from '@stencil/vue-output-target';
-import { svelteOutputTarget } from '@stencil/svelte-output-target';
+// import { angularOutputTarget } from '@stencil/angular-output-target';
+// import { reactOutputTarget } from '@stencil/react-output-target';
+// import { vueOutputTarget } from '@stencil/vue-output-target';
+// import { svelteOutputTarget } from '@stencil/svelte-output-target';
+import { vueOutputTarget as vue2OutputTarget } from "@revolist/stencil-vue2-output-target";
 
 const componentCorePackage = '@revolist/revogrid';
 const parent = '../revogrid-proxy';
@@ -53,12 +54,6 @@ export const config: Config = {
   ],
   // proxies
   outputTargets: [
-    vueOutputTarget({
-      componentCorePackage,
-      proxiesFile: directivesProxyFile('vue'),
-      includeDefineCustomElements: true,
-      componentModels: [],
-    }),
     /*
     angularOutputTarget({
       componentCorePackage,
@@ -69,13 +64,27 @@ export const config: Config = {
       componentCorePackage,
       proxiesFile: directivesProxyFile('react'),
     }),
-   svelteOutputTarget({
+
+    vueOutputTarget({
       componentCorePackage,
-      proxiesFile: directivesProxyFile('svelte'),
+      proxiesFile: directivesProxyFile('vue'),
       includeDefineCustomElements: true,
-      legacy: false,
-      includePolyfills: false,
-    }), */
+      componentModels: [],
+    }),
+    svelteOutputTarget({
+        componentCorePackage,
+        proxiesFile: directivesProxyFile('svelte'),
+        includeDefineCustomElements: true,
+        legacy: false,
+        includePolyfills: false,
+      }), */
+    vue2OutputTarget({
+      componentCorePackage,
+      proxiesFile: directivesProxyFile('vue2'),
+      includeDefineCustomElements: true,
+      loaderDir: 'custom-element',
+      componentModels: [],
+    }),
     // custom element, no polifil
     {
       type: 'dist-custom-elements',
