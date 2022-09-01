@@ -563,10 +563,21 @@ export class RevoGridComponent {
   //
   // --------------------------------------------------------------------------
 
-  /** Clear data which is outside of grid container */
-  private handleOutsideClick(e: MouseEvent) {
+  private clickTrackForFocusClear: number | null = null;
+  @Listen('mousedown', { target: 'document' }) mousedownHandle(e: MouseEvent) {
+    this.clickTrackForFocusClear = e.screenX + e.screenY;
+  }
+  @Listen('mouseup', { target: 'document' }) mouseupHandle(e: MouseEvent) {
     const target = e.target as HTMLElement | null;
-    // if event prevented or it is a table where we click at
+    const pos = e.screenX + e.screenY;
+    // detect if mousemove then do nothing
+    if (Math.abs(this.clickTrackForFocusClear - pos) > 10) {
+      return;
+    }
+
+    // check if action finished inside of the document
+    // clear data which is outside of grid
+    // if event prevented or it is current table don't clear focus
     if (e.defaultPrevented || target?.closest(`[${UUID}="${this.uuid}"]`)) {
       return;
     }
@@ -688,7 +699,6 @@ export class RevoGridComponent {
    * Define plugins collection
    */
   private internalPlugins: RevoPlugin.Plugin[] = [];
-  private subscribers: Record<string, () => void> = {};
 
   @Element() element: HTMLRevoGridElement;
 
@@ -922,21 +932,12 @@ export class RevoGridComponent {
       });
       this.viewportscroll.emit(e);
     });
-    this.subscribers = { mouseup: this.handleOutsideClick.bind(this) };
-    for (let type in this.subscribers) {
-      document.addEventListener(type, this.subscribers[type]);
-    }
   }
 
   disconnectedCallback() {
     // destroy plugins on element disconnect
     each(this.internalPlugins, p => p.destroy());
     this.internalPlugins = [];
-    // clear events
-    for (let type in this.subscribers) {
-      document.removeEventListener(type, this.subscribers[type]);
-      delete this.subscribers[type];
-    }
   }
 
   render() {

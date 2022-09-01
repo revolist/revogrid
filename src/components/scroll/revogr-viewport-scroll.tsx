@@ -84,8 +84,11 @@ export class RevogrViewportScroll {
   @Listen('mousewheel-horizontal') mousewheelHorizontal({ detail: e }: CustomEvent<ScrollEvent>) {
     this.horizontalMouseWheel(e);
   }
+  /**
+   * Allows to use outside listener
+   */
   @Listen('scroll-coordinate') scrollApply({ detail: { type, coordinate } }: CustomEvent<ScrollCoordinateEvent>) {
-    this.applyOnScroll(type, coordinate);
+    this.applyOnScroll(type, coordinate, true);
   }
 
   connectedCallback() {
@@ -256,11 +259,11 @@ export class RevogrViewportScroll {
     this.applyOnScroll(type, scroll);
   }
 
-  private applyOnScroll(type: RevoGrid.DimensionType, coordinate: number) {
+  private applyOnScroll(type: RevoGrid.DimensionType, coordinate: number, outside = false) {
     const change = new Date().getTime() - this.mouseWheelScroll[type];
     // apply after throttling
     if (change > this.scrollThrottling) {
-      this.scrollService?.scroll(coordinate, type);
+      this.scrollService?.scroll(coordinate, type, undefined, undefined, outside);
     }
   }
 

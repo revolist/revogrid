@@ -73,7 +73,8 @@ export default class LocalScrollService {
     coordinate: number,
     dimension: RevoGrid.DimensionType,
     force = false,
-    delta?: number
+    delta?: number,
+    outside = false
   ) {
     this.cancelScroll(dimension);
     if (!force && this.previousScroll[dimension] === coordinate) {
@@ -86,6 +87,7 @@ export default class LocalScrollService {
       dimension: dimension,
       coordinate: param.virtualSize ? this.convert(coordinate, param) : coordinate,
       delta,
+      outside
     });
   }
 

@@ -159,6 +159,7 @@ export declare namespace RevoGrid {
     dimension: DimensionType;
     coordinate: number;
     delta?: number;
+    outside?: boolean;
   };
   type InitialHeaderClick = {
     index: number;
