@@ -7,15 +7,13 @@ on:
         default: 'Doc update'
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
 
       # Checout submodule
       - name: Checkout submodules
-        uses: textbook/git-checkout-submodule-action@master
-        with:
-          remote: true
+        run: git submodule update --init --recursive
 
       # Install
       - name: Package update
