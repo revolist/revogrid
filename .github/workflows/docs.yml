@@ -13,7 +13,7 @@ jobs:
 
       # Checout submodule
       - name: Checkout submodules
-        uses: textbook/git-checkout-submodule-action@main
+        uses: textbook/git-checkout-submodule-action@master
         with:
           remote: true
 
