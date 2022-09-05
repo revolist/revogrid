@@ -163,7 +163,7 @@ export default class ColumnService {
     for (let rowIndex = d.newRange.y, i = 0; rowIndex < d.newRange.y1 + 1; rowIndex++, i++) {
       // copy original data link
       const oldRowIndex = d.oldRange.y + i % copyRowLength;
-      const copyRow = getSourceItem(this.dataStore, oldRowIndex);
+      const copyRow = getSourceItem(this.dataStore, oldRowIndex) || {};
 
       // columns
       for (let colIndex = d.newRange.x, j = 0; colIndex < d.newRange.x1 + 1; colIndex++, j++) {

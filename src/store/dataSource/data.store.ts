@@ -109,7 +109,7 @@ export function getVisibleSourceItem(store: Observable<DataSourceState<any, any>
  * @param store - store to process
  * @param virtualIndex - virtual index to process
  */
-export function getSourceItem(store: Observable<DataSourceState<any, any>>, virtualIndex: number) {
+export function getSourceItem(store: Observable<DataSourceState<any, any>>, virtualIndex: number): any | undefined {
   const items = store.get('items');
   const source = store.get('source');
   return source[items[virtualIndex]];
