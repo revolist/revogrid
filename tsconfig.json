@@ -15,7 +15,8 @@
     "noImplicitAny": true,
     "noImplicitThis": true,
     "noImplicitReturns": true,
-    "sourceMap": true
+    "sourceMap": true,
+    "skipLibCheck": true
   },
   "include": ["src", "types/jsx.d.ts"],
   "exclude": ["node_modules"]
