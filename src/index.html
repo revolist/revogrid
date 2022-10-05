@@ -172,9 +172,12 @@
         const grid = document.querySelector('revo-grid');
         grid.grouping = {};
       };
-      window.setGrouping = function (props = [], expandedAll = false) {
+      window.setGrouping = function (props = [], expandedAll = false, groupLabelTemplate) {
         const grid = document.querySelector('revo-grid');
-        grid.grouping = { props, expandedAll };
+        groupLabelTemplate = (createElement, { name, depth }) => {
+          return createElement('span', null, `${props[depth]}: ${name}`);
+        };
+        grid.grouping = { props, expandedAll, groupLabelTemplate };
       };
       window.setTrimmed = function (rows = []) {
         const grid = document.querySelector('revo-grid');

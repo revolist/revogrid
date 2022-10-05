@@ -215,7 +215,12 @@ export default class GroupingRowPlugin extends BasePlugin {
     );
 
     // setup source
-    this.providers.dataProvider.setData(sourceWithGroups, GROUPING_ROW_TYPE, { depth }, true);
+    this.providers.dataProvider.setData(
+      sourceWithGroups,
+      GROUPING_ROW_TYPE,
+      { depth, customRenderer: options.groupLabelTemplate },
+      true,
+    );
     this.updateTrimmed(trimmed, childrenByGroup, oldNewIndexes, oldNewIndexMap);
   }
 
