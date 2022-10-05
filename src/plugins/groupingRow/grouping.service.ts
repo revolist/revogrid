@@ -1,5 +1,6 @@
 import { RevoGrid } from '../../interfaces';
 import { GROUP_DEPTH, GROUP_EXPANDED, PSEUDO_GROUP_COLUMN, PSEUDO_GROUP_ITEM, PSEUDO_GROUP_ITEM_ID, PSEUDO_GROUP_ITEM_VALUE } from './grouping.const';
+import { GroupLabelTemplateFunc } from './grouping.row.types';
 
 type Group<T> = {
   id: string;
@@ -10,6 +11,7 @@ type Group<T> = {
 export type ExpandedOptions = {
   prevExpanded?: Record<string, boolean>;
   expandedAll?: boolean; // skip trim
+  groupLabelTemplate?: GroupLabelTemplateFunc;
 };
 
 /**
