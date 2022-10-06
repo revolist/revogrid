@@ -5,14 +5,15 @@
 
 ## Properties
 
-| Property         | Attribute | Description | Type                                                              | Default     |
-| ---------------- | --------- | ----------- | ----------------------------------------------------------------- | ----------- |
-| `filterCaptions` | --        |             | `{ title: string; save: string; reset: string; cancel: string; }` | `undefined` |
-| `filterEntities` | --        |             | `{ [x: string]: LogicFunction; }`                                 | `{}`        |
-| `filterItems`    | --        |             | `{ [prop: string]: FilterData[]; }`                               | `{}`        |
-| `filterNames`    | --        |             | `{ [x: string]: string; }`                                        | `{}`        |
-| `filterTypes`    | --        |             | `{ [x: string]: string[]; }`                                      | `{}`        |
-| `uuid`           | `uuid`    |             | `string`                                                          | `undefined` |
+| Property                  | Attribute                   | Description | Type                                                              | Default     |
+| ------------------------- | --------------------------- | ----------- | ----------------------------------------------------------------- | ----------- |
+| `disableDynamicFiltering` | `disable-dynamic-filtering` |             | `boolean`                                                         | `false`     |
+| `filterCaptions`          | --                          |             | `{ title: string; save: string; reset: string; cancel: string; }` | `undefined` |
+| `filterEntities`          | --                          |             | `{ [x: string]: LogicFunction; }`                                 | `{}`        |
+| `filterItems`             | --                          |             | `{ [prop: string]: FilterData[]; }`                               | `{}`        |
+| `filterNames`             | --                          |             | `{ [x: string]: string; }`                                        | `{}`        |
+| `filterTypes`             | --                          |             | `{ [x: string]: string[]; }`                                      | `{}`        |
+| `uuid`                    | `uuid`                      |             | `string`                                                          | `undefined` |
 
 
 ## Events

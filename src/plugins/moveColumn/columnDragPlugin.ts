@@ -13,6 +13,7 @@ import { getItemByPosition } from '../../store/dimension/dimension.helpers';
 import BasePlugin from '../basePlugin';
 import { ColumnOrderHandler } from './columnOrderHandler';
 import { dispatch } from '../dispatcher';
+import { isColGrouping } from '../groupingColumn/grouping.col.plugin';
 
 const COLUMN_CLICK = 'column-click';
 const MOVE = 'column-mouse-move';
@@ -24,7 +25,7 @@ const DRAG_START = 'column-drag-start';
 
 export type DragStartEventDetails = {
   event: MouseEvent;
-  data: RevoGrid.ColumnRegular;
+  data: RevoGrid.ColumnDataSchema;
 };
 
 export type Providers = {
@@ -36,10 +37,12 @@ export type Providers = {
 };
 type StaticData = {
   startPos: number;
-  data: DragStartEventDetails['data'];
+  startItem: RevoGrid.PositionItem;
+  data: RevoGrid.ColumnRegular;
   dataEl: HTMLElement;
   scrollEl: Element;
   gridEl: HTMLElement;
+  cols: RevoGrid.DimensionSettingsState;
 };
 
 type LocalSubscriptions = Record<string, LocalSubscription>;
@@ -48,15 +51,10 @@ type LocalSubscription = {
   callback(...params: any[]): void;
 };
 export type EventData = {
-  el: HTMLElement;
-  elScroll: Element;
   elRect: DOMRect;
   gridRect: DOMRect;
-  xOffset: number;
-  data: StaticData['data'];
+  scrollOffset: number;
   type: RevoGrid.DimensionCols;
-  rows: RevoGrid.DimensionSettingsState;
-  cols: RevoGrid.DimensionSettingsState;
 };
 export default class ColumnPlugin extends BasePlugin {
   private moveFunc = debounce((e: MouseEvent) => this.doMove(e), 5);
@@ -88,6 +86,9 @@ export default class ColumnPlugin extends BasePlugin {
   }
 
   dragStart({ event, data }: DragStartEventDetails) {
+    if (event.defaultPrevented) {
+      return;
+    }
     const { defaultPrevented } = dispatch(this.revogrid, DRAG_START, data);
     // check if allowed to drag particulat column
     if (defaultPrevented) {
@@ -103,16 +104,33 @@ export default class ColumnPlugin extends BasePlugin {
     if (!dataEl || !scrollEl) {
       return;
     }
+
+    if (isColGrouping(data)) {
+      return;
+    }
+
+    const cols = this.getDimension(data.pin || 'rgCol');
+    const gridRect = this.revogrid.getBoundingClientRect();
+    const elRect = dataEl.getBoundingClientRect();
+    const startItem = getItemByPosition(
+      cols,
+      getLeftRelative(event.x, gridRect.left, elRect.left - gridRect.left));
+  
     this.staticDragData = {
       startPos: event.x,
+      startItem,
       data,
       dataEl,
       scrollEl,
       gridEl: this.revogrid,
+      cols,
     };
     this.dragData = this.getData(this.staticDragData);
     mousemove.target.addEventListener('mousemove', mousemove.callback);
-    this.orderUi.start(event, this.dragData);
+    this.orderUi.start(event, {
+      ...this.dragData,
+      ...this.staticDragData,
+    });
   }
 
   doMove(e: MouseEvent) {
@@ -126,11 +144,11 @@ export default class ColumnPlugin extends BasePlugin {
     }
     const start = this.staticDragData.startPos;
     if (Math.abs(start - e.x) > 10) {
-      const x = getLeftRelative(e.x, dragData);
-      const rgCol = getItemByPosition(dragData.cols, x);
+      const x = getLeftRelative(e.x, this.dragData.gridRect.left, this.dragData.scrollOffset);
+      const rgCol = getItemByPosition(this.staticDragData.cols, x);
       this.orderUi.autoscroll(x, dragData.elRect.width);
       this.orderUi.showHandler(
-        rgCol.end + dragData.xOffset,
+        rgCol.end + dragData.scrollOffset,
         dragData.gridRect.width
       );
     }
@@ -147,20 +165,26 @@ export default class ColumnPlugin extends BasePlugin {
   onMouseUp(e: MouseEvent) {
     // apply new positions
     if (this.dragData) {
-      const newItem = getItemByPosition(this.dragData.cols, getLeftRelative(e.x, this.dragData));
-      const startItem = getItemByPosition(this.dragData.cols, getLeftRelative(this.staticDragData.startPos, this.dragData));
+      let relativePos = getLeftRelative(e.x, this.dragData.gridRect.left, this.dragData.scrollOffset);
+      if (relativePos < 0) {
+        relativePos = 0;
+      }
+      const newPosition = getItemByPosition(this.staticDragData.cols, relativePos);
+
+      const store = this.providers.column.stores[this.dragData.type].store;
+      const items = [...store.get('items')];
 
       // prevent position change if needed
       const { defaultPrevented: stopDrag } = dispatch(this.revogrid, BEFORE_DRAG_END, {
         ...this.staticDragData,
-        startPosition: startItem,
-        newPosition: newItem,
+        startPosition: this.staticDragData.startItem,
+        newPosition,
+        newItem: store.get('source')[items[this.staticDragData.startItem.itemIndex]]
       });
       if (!stopDrag) {
-        const store = this.providers.column.stores[this.dragData.type].store;
-        const items = [...store.get('items')];
-        const toMove = items.splice(startItem.itemIndex, 1);
-        items.splice(newItem.itemIndex, 0, ...toMove);
+        // todo: if move item out of group remove item from group
+        const toMove = items.splice(this.staticDragData.startItem.itemIndex, 1);
+        items.splice(newPosition.itemIndex, 0, ...toMove);
         store.set('items', items);
       }
       dispatch(this.revogrid, DRAG_END, this.dragData);
@@ -173,6 +197,8 @@ export default class ColumnPlugin extends BasePlugin {
   }
 
   clearOrder() {
+    this.staticDragData = null;
+    this.dragData = null;
     this.clearLocalSubscriptions();
     this.orderUi.stop();
   }
@@ -187,21 +213,16 @@ export default class ColumnPlugin extends BasePlugin {
   private getData({
     gridEl,
     dataEl,
-    scrollEl,
     data,
   }: StaticData): EventData {
     const gridRect = gridEl.getBoundingClientRect();
     const elRect = dataEl.getBoundingClientRect();
+    const scrollOffset = elRect.left - gridRect.left;
     return {
-      el: dataEl,
-      elScroll: scrollEl,
       elRect,
       gridRect,
-      data,
       type: data.pin || 'rgCol',
-      xOffset: elRect.left - gridRect.left,
-      rows: this.getDimension('rgRow'),
-      cols: this.getDimension('rgCol'),
+      scrollOffset,
     };
   }
   private getDimension(type: RevoGrid.MultiDimensionType) {
@@ -211,7 +232,8 @@ export default class ColumnPlugin extends BasePlugin {
 
 export function getLeftRelative(
   absoluteX: number,
-  { xOffset, gridRect }: EventData
+  gridPos: number,
+  offset: number
 ): number {
-  return absoluteX - gridRect.left - xOffset;
+  return absoluteX - gridPos - offset;
 }

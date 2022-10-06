@@ -16,7 +16,7 @@ export const config: Config = {
   hashFileNames: false,
   autoprefixCss: false,
   minifyCss: true,
-  preamble: 'Built by RevoList',
+  preamble: 'Built by Revolist',
   hashedFileNameLength: 8,
 
   extras: {
@@ -34,6 +34,7 @@ export const config: Config = {
     appendChildSlotFix: false,
     cloneNodeFix: false,
     slotChildNodesFix: false,
+    experimentalImportInjection: true,
   },
 
   buildEs5: 'prod',
@@ -59,16 +60,21 @@ export const config: Config = {
     vueOutputTarget({
       componentCorePackage,
       proxiesFile: directivesProxyFile('vue'),
+      includeDefineCustomElements: true,
       componentModels: [],
     }),
     svelteOutputTarget({
       componentCorePackage,
       proxiesFile: directivesProxyFile('svelte'),
+      includeDefineCustomElements: true,
+      legacy: false,
+      includePolyfills: false,
     }),
     // custom element, no polifil
     {
-      type: 'dist-custom-elements-bundle',
+      type: 'dist-custom-elements',
       dir: 'custom-element',
+      autoDefineCustomElements: true,
       empty: true,
     },
     // lazy loading

@@ -6,6 +6,7 @@ import { Trimmed, trimmedPlugin } from '../../plugins/trimmed/trimmed.plugin';
 import { setStore } from '../../utils/store.utils';
 import { Observable, RevoGrid } from '../../interfaces';
 import { proxyPlugin } from './data.proxy';
+import { GroupLabelTemplateFunc } from '../../plugins/groupingRow/grouping.row.types';
 import DataType = RevoGrid.DataType;
 import ColumnRegular = RevoGrid.ColumnRegular;
 import DimensionRows = RevoGrid.DimensionRows;
@@ -30,6 +31,7 @@ export type DataSourceState<T extends GDataType, ST extends GDimension> = {
   // grouping
   groupingDepth: number;
   groups: Groups;
+  groupingCustomRenderer?: GroupLabelTemplateFunc;
   // data source type
   type: ST;
   // trim data, to hide entities from visible data source
@@ -60,7 +62,11 @@ export default class DataStore<T extends GDataType, ST extends GDimension> {
    * @param source - data column/rgRow source
    * @param grouping - grouping information if present
    */
-  updateData(source: T[], grouping?: { depth: number; groups?: Groups }, silent = false) {
+  updateData(
+    source: T[],
+    grouping?: { depth: number; groups?: Groups; customRenderer?: GroupLabelTemplateFunc },
+    silent = false,
+  ) {
     // during full update we do drop trim
     if (!silent) {
       this.store.set('trimmed', {});
@@ -81,6 +87,7 @@ export default class DataStore<T extends GDataType, ST extends GDimension> {
       setStore(this.store, {
         groupingDepth: grouping.depth,
         groups: grouping.groups,
+        groupingCustomRenderer: grouping.customRenderer,
       });
     }
   }

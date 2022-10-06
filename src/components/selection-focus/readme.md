@@ -5,11 +5,20 @@
 
 ## Properties
 
-| Property         | Attribute | Description    | Type                                    | Default     |
-| ---------------- | --------- | -------------- | --------------------------------------- | ----------- |
-| `dimensionCol`   | --        |                | `ObservableMap<DimensionSettingsState>` | `undefined` |
-| `dimensionRow`   | --        |                | `ObservableMap<DimensionSettingsState>` | `undefined` |
-| `selectionStore` | --        | Dynamic stores | `ObservableMap<SelectionStoreState>`    | `undefined` |
+| Property                      | Attribute | Description    | Type                                                           | Default     |
+| ----------------------------- | --------- | -------------- | -------------------------------------------------------------- | ----------- |
+| `colData` _(required)_        | --        |                | `ObservableMap<DataSourceState<ColumnRegular, DimensionCols>>` | `undefined` |
+| `dataStore` _(required)_      | --        | Dynamic stores | `ObservableMap<DataSourceState<DataType, DimensionRows>>`      | `undefined` |
+| `dimensionCol` _(required)_   | --        |                | `ObservableMap<DimensionSettingsState>`                        | `undefined` |
+| `dimensionRow` _(required)_   | --        |                | `ObservableMap<DimensionSettingsState>`                        | `undefined` |
+| `selectionStore` _(required)_ | --        |                | `ObservableMap<SelectionStoreState>`                           | `undefined` |
+
+
+## Events
+
+| Event        | Description | Type                                                  |
+| ------------ | ----------- | ----------------------------------------------------- |
+| `afterfocus` |             | `CustomEvent<{ model: any; column: ColumnRegular; }>` |
 
 
 ## Dependencies

@@ -125,7 +125,6 @@ export class RevoGridComponent {
   /**
    * Enables column move plugin
    * Can be boolean
-   * Can be filter collection
    */
    @Prop() canMoveColumns: boolean = false;
   /**
@@ -194,6 +193,12 @@ export class RevoGridComponent {
    * Use e.preventDefault() to prevent range.
    */
   @Event() beforeaange: EventEmitter<Selection.ChangedRange>;
+
+  /**
+   * Triggered after focus render finished.
+   * Can be used to access a focus element through @event.target
+   */
+  @Event() afterfocus: EventEmitter<{ model: any; column: RevoGrid.ColumnRegular; }>;
 
   /**
    * Before rgRow order apply.

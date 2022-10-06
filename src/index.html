@@ -85,7 +85,7 @@
     <section class="content">
       <div class="tile large grid-holder">
         <!-- Grid init-->
-        <revo-grid theme="material" stretch="false" class="my" key="1"></revo-grid>
+        <revo-grid theme="material" row-headers can-move-columns stretch="false" class="my" key="1"></revo-grid>
       </div>
     </section>
 
@@ -172,9 +172,12 @@
         const grid = document.querySelector('revo-grid');
         grid.grouping = {};
       };
-      window.setGrouping = function (props = [], expandedAll = false) {
+      window.setGrouping = function (props = [], expandedAll = false, groupLabelTemplate) {
         const grid = document.querySelector('revo-grid');
-        grid.grouping = { props, expandedAll };
+        groupLabelTemplate = (createElement, { name, depth }) => {
+          return createElement('span', null, `${props[depth]}: ${name}`);
+        };
+        grid.grouping = { props, expandedAll, groupLabelTemplate };
       };
       window.setTrimmed = function (rows = []) {
         const grid = document.querySelector('revo-grid');
@@ -275,7 +278,32 @@
       grid.readonly = false;
       grid.range = true;
       grid.resize = true;
-      grid.filter = true;
+
+      const filterFunc = (cellValue, extraValue) => {
+      if (!cellValue) {
+              return false;
+          }
+          if (typeof cellValue !== 'string') {
+            cellValue = JSON.stringify(cellValue);
+          }
+          return cellValue === extraValue;
+      };
+      // if you want extra input field for @extraValue
+      filterFunc.extra = 'input';
+
+      const filterConfig = {
+        include: ['newEqual'],
+        customFilters: {
+          'newEqual': {
+            columnFilterType: 'myFilterType', // column filter type id
+            name: 'myEqual',
+            func: filterFunc
+          }
+        },
+        disableDynamicFiltering:true
+      };
+
+      grid.filter = filterConfig;
       // grid.stretch = true;
       grid.exporting = true;
       grid.rowDefinitions = [{
@@ -292,14 +320,13 @@
 
       // events testing
       // 'beforerange', 'setRange', 'beforefocuslost', 'beforecellfocus', 'beforeedit'
-      const events = ['beforeedit', 'aftercolumnresize', 'beforerange', 'setRange', 'beforefocuslost', 'beforecellfocus', 'beforeedit'];
+      const events = ['beforeedit', 'aftercolumnresize', 'beforerange', 'setRange', 'beforefocuslost', 'beforecellfocus', 'beforeedit', 'afterfocus'];
       events.forEach(e => {
         grid.addEventListener(e, $e => {
           if (window.eventsPrevented[e]) {
             $e.preventDefault();
           }
           console.log(`%c${e}`, 'background: #50d260; color: #fff; border-radius: 3px; padding: 2px 5px;', $e);
-          grid.getSelectedRange().then(r => console.log("selectedRange=",r));
         });
       });
     </script>

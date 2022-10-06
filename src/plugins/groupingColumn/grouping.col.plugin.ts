@@ -49,8 +49,7 @@ export default class GroupingColumnPlugin extends BasePlugin {
     res.sort = { ...res.sort, ...collection.sort };
     return res;
   }
-
-  static isColGrouping(colData: RevoGrid.ColumnGrouping | RevoGrid.ColumnRegular): colData is RevoGrid.ColumnGrouping {
-    return !!(colData as RevoGrid.ColumnGrouping).children;
-  }
+}
+export function isColGrouping(colData: RevoGrid.ColumnGrouping | RevoGrid.ColumnRegular): colData is RevoGrid.ColumnGrouping {
+  return !!(colData as RevoGrid.ColumnGrouping).children;
 }
