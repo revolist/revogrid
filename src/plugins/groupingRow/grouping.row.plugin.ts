@@ -169,7 +169,7 @@ export default class GroupingRowPlugin extends BasePlugin {
      * sorting applied need to clear grouping and apply again
      * based on new results whole grouping order will changed
      */
-    this.addEventListener('afterSortingApply', () => this.doSourceUpdate());
+    this.addEventListener('afterSortingApply', () => this.doSourceUpdate({ ...this.options }));
 
     /**
      * Apply logic for focus inside of grouping
@@ -206,8 +206,7 @@ export default class GroupingRowPlugin extends BasePlugin {
      */
     const { sourceWithGroups, depth, trimmed, oldNewIndexMap, childrenByGroup } = gatherGrouping(
       source,
-      // filter
-      item => this.options?.props.map(key => item[key]),
+      this.options?.props || [],
       {
         prevExpanded,
         ...options,
@@ -218,7 +217,7 @@ export default class GroupingRowPlugin extends BasePlugin {
     this.providers.dataProvider.setData(
       sourceWithGroups,
       GROUPING_ROW_TYPE,
-      { depth, customRenderer: options.groupLabelTemplate },
+      { depth, customRenderer: options?.groupLabelTemplate },
       true,
     );
     this.updateTrimmed(trimmed, childrenByGroup, oldNewIndexes, oldNewIndexMap);
@@ -237,8 +236,7 @@ export default class GroupingRowPlugin extends BasePlugin {
     const expanded = this.revogrid.grouping || {};
     const { sourceWithGroups, depth, trimmed, oldNewIndexMap, childrenByGroup } = gatherGrouping(
       source,
-      // filter
-      item => this.options?.props.map(key => item[key]),
+      this.options?.props || [],
       {
         ...(expanded || {}),
       },
