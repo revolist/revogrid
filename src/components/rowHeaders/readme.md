@@ -3,6 +3,11 @@
 <!-- Auto Generated Below -->
 
 
+## Overview
+
+Row headers component
+Visible on the left side of the table
+
 ## Properties
 
 | Property          | Attribute   | Description | Type                    | Default     |
