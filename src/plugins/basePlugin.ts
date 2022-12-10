@@ -41,8 +41,16 @@ export default abstract class BasePlugin implements RevoPlugin.Plugin {
   /**
    * Subscribe to grid properties to watch changes
    * You can return false in callback to prevent default value set
+   * 
+   * @param prop - property name
+   * @param callback - callback function
+   * @param immediate - trigger callback immediately with current value
    */
-  protected watch<T extends any>(prop: string, callback: (arg: T) => boolean | void) {
+  protected watch<T extends any>(
+    prop: string,
+    callback: (arg: T) => boolean | void,
+    { immediate = false }: { immediate: boolean }
+  ) {
     const nativeValueDesc =
       Object.getOwnPropertyDescriptor(this.revogrid, prop) ||
       Object.getOwnPropertyDescriptor(this.revogrid.constructor.prototype, prop);
@@ -60,8 +68,11 @@ export default abstract class BasePlugin implements RevoPlugin.Plugin {
       get(){
         // Continue with native behavior
         return nativeValueDesc?.get?.call(this);
-      }
+      },
     });
+    if (immediate) {
+      callback(nativeValueDesc?.get?.call(this.revogrid));
+    }
   }
 
   /**
