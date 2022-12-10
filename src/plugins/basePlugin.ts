@@ -7,6 +7,8 @@ type Event = {
   preventDefault(): void;
 };
 
+type WatchConfig = { immediate: boolean };
+
 export function dispatchElement(target: Target, eventName: string, detail: DispatchDetail): CustomEvent {
   const event = new CustomEvent(eventName, {
     detail,
@@ -49,7 +51,7 @@ export default abstract class BasePlugin implements RevoPlugin.Plugin {
   protected watch<T extends any>(
     prop: string,
     callback: (arg: T) => boolean | void,
-    { immediate = false }: { immediate: boolean }
+    { immediate }: Partial<WatchConfig> = { immediate: false }
   ) {
     const nativeValueDesc =
       Object.getOwnPropertyDescriptor(this.revogrid, prop) ||
