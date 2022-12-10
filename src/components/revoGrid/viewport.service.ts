@@ -255,7 +255,7 @@ export default class ViewportService {
     const colType = this.sv.selectionStoreConnector.storesXToType[focused.position.x];
     const column = this.sv.columnProvider.getColumn(focused.cell.x, colType);
     const rowType = this.sv.selectionStoreConnector.storesYToType[focused.position.x];
-    const model = this.sv.dataProvider.getModel(focused.cell.x, rowType);
+    const model = this.sv.dataProvider.getModel(focused.cell.y, rowType);
     return {
       column,
       model,
