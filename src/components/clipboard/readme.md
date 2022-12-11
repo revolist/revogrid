@@ -7,10 +7,15 @@
 
 ## Events
 
-| Event         | Description | Type                        |
-| ------------- | ----------- | --------------------------- |
-| `copyRegion`  |             | `CustomEvent<DataTransfer>` |
-| `pasteRegion` |             | `CustomEvent<string[][]>`   |
+| Event              | Description                                                  | Type                        |
+| ------------------ | ------------------------------------------------------------ | --------------------------- |
+| `afterpasteapply`  | Fired after paste applied to the grid                        | `CustomEvent<any>`          |
+| `beforecopy`       | Fired before copy triggered                                  | `CustomEvent<any>`          |
+| `beforecopyapply`  | Fired before copy applied to the clipboard                   | `CustomEvent<any>`          |
+| `beforepaste`      | Fired before paste applied to the grid                       | `CustomEvent<any>`          |
+| `beforepasteapply` | Fired before paste applied to the grid and after data parsed | `CustomEvent<any>`          |
+| `copyRegion`       | Fired when region copied                                     | `CustomEvent<DataTransfer>` |
+| `pasteRegion`      | Fired when region pasted                                     | `CustomEvent<string[][]>`   |
 
 
 ## Methods

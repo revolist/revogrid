@@ -780,7 +780,58 @@ declare namespace LocalJSX {
         "useClipboard"?: boolean;
     }
     interface RevogrClipboard {
+        /**
+          * Fired after paste applied to the grid
+          * @event afterpasteapply
+          * @property {string} raw - raw data from clipboard
+          * @property {string[][]} parsed - parsed data
+          * @property {ClipboardEvent} event - original event
+          * @property {boolean} defaultPrevented - if true, paste will be canceled
+         */
+        "onAfterpasteapply"?: (event: RevogrClipboardCustomEvent<any>) => void;
+        /**
+          * Fired before copy triggered
+          * @event beforecopy
+          * @property {ClipboardEvent} event - original event
+          * @property {boolean} defaultPrevented - if true, copy will be canceled
+         */
+        "onBeforecopy"?: (event: RevogrClipboardCustomEvent<any>) => void;
+        /**
+          * Fired before copy applied to the clipboard
+          * @event beforecopyapply
+          * @property {DataTransfer} event - original event
+          * @property {string} data - data to copy
+          * @property {boolean} defaultPrevented - if true, copy will be canceled
+         */
+        "onBeforecopyapply"?: (event: RevogrClipboardCustomEvent<any>) => void;
+        /**
+          * Fired before paste applied to the grid
+          * @event beforepaste
+          * @property {string} raw - raw data from clipboard
+          * @property {ClipboardEvent} event - original event
+          * @property {boolean} defaultPrevented - if true, paste will be canceled
+         */
+        "onBeforepaste"?: (event: RevogrClipboardCustomEvent<any>) => void;
+        /**
+          * Fired before paste applied to the grid and after data parsed
+          * @event beforepasteapply
+          * @property {string} raw - raw data from clipboard
+          * @property {string[][]} parsed - parsed data
+         */
+        "onBeforepasteapply"?: (event: RevogrClipboardCustomEvent<any>) => void;
+        /**
+          * Fired when region copied
+          * @event copyregion
+          * @property {DataTransfer} data - data to copy
+          * @property {boolean} defaultPrevented - if true, copy will be canceled
+         */
         "onCopyRegion"?: (event: RevogrClipboardCustomEvent<DataTransfer>) => void;
+        /**
+          * Fired when region pasted
+          * @event pasteregion
+          * @property {string[][]} data - data to paste
+          * @property {boolean} defaultPrevented - if true, paste will be canceled
+         */
         "onPasteRegion"?: (event: RevogrClipboardCustomEvent<string[][]>) => void;
     }
     interface RevogrData {

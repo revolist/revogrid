@@ -110,15 +110,15 @@ export class Clipboard {
   }
 
   @Method() async doCopy(e: DataTransfer, data?: RevoGrid.DataFormat[][]) {
-    const parsed = data ? this.parserCopy(data) : '';
     const beforeCopyApply = this.beforeCopyApply.emit({
       event: e,
-      data: parsed,
+      data,
     });
     if (beforeCopyApply.defaultPrevented) {
       return;
     }
-    e.setData('text/plain', beforeCopyApply.detail.data);
+    const parsed = data ? this.parserCopy(data) : '';
+    e.setData('text/plain', parsed);
   }
 
   parserCopy(data: RevoGrid.DataFormat[][]) {
