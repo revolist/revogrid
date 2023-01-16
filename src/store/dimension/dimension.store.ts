@@ -132,7 +132,6 @@ export default class DimensionStore {
    */
   setDimensionSize(sizes: RevoGrid.ViewSettingSizeProp) {
     const dimensionData = calculateDimensionData(this.store.get('originItemSize'), sizes);
-    console.log(sizes)
     setStore(this.store, dimensionData);
     return dimensionData;
   }
