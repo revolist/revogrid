@@ -61,7 +61,10 @@ export default class DimensionProvider {
       };
     }
     this.stores[type].setDimensionSize(newSizes);
-    this.viewports.stores[type].setViewPortDimension(newSizes);
+    this.viewports.stores[type].setViewPortDimensionSizes(
+      newSizes,
+      !keepOld ? this.stores[type].store.get('originItemSize') : undefined
+    );
   }
 
   setItemCount(realCount: number, type: RevoGrid.MultiDimensionType) {
@@ -78,7 +81,7 @@ export default class DimensionProvider {
     const allTrimmed = gatherTrimmedItems(trimmed);
     const dimStoreType = this.stores[type];
     dimStoreType.setStore({ trimmed: allTrimmed });
-    this.viewports.stores[type].setViewPortDimension(dimStoreType.store.get('sizes'));
+    this.viewports.stores[type].setViewPortDimensionSizes(dimStoreType.store.get('sizes'));
   }
 
   /**

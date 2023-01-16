@@ -6,7 +6,7 @@
 
 import { createStore } from '@stencil/store';
 
-import { addMissingItems, DimensionDataViewport, getFirstItem, getLastItem, getUpdatedItemsByPosition, isActiveRange, updateMissingAndRange } from './viewport.helpers';
+import { addMissingItems, DimensionDataViewport, getFirstItem, getLastItem, getUpdatedItemsByPosition, isActiveRange, setItemSizes, updateMissingAndRange } from './viewport.helpers';
 
 import { setStore } from '../../utils/store.utils';
 import { Observable, RevoGrid } from '../../interfaces';
@@ -103,9 +103,10 @@ export default class ViewportStore {
    * Update viewport sizes for existing items
    * This method is generating new item positions based on custom sizes and original sizes
    * @param sizes - custom sizes for each item
+   * @param dropToOriginalSize - drop to original size if requested
    */
-  setViewPortDimension(sizes: RevoGrid.ViewSettingSizeProp) {
-    const items = this.store.get('items');
+  setViewPortDimensionSizes(sizes: RevoGrid.ViewSettingSizeProp, dropToOriginalSize?: number) {
+    let items = [...this.store.get('items')];
     const count = items.length;
     // viewport not inited
     if (!count) {
@@ -116,7 +117,18 @@ export default class ViewportStore {
     let i = 0;
     let start = this.store.get('start');
 
+    // drop to original size if requested
+    if (dropToOriginalSize) {
+      items = setItemSizes(
+        items,
+        start,
+        dropToOriginalSize,
+        this.store.get('lastCoordinate')
+      );
+    }
+
     // loop through array from initial item after recombination
+    // if size change present, change position for all items after
     while (i < count) {
       const item = items[start];
       // change pos if size change present before
@@ -124,7 +136,7 @@ export default class ViewportStore {
         item.start += changedCoordinate;
         item.end += changedCoordinate;
       }
-      // change size
+      // check if size change present
       const size: number | undefined = sizes[item.itemIndex];
       // size found
       if (size) {
@@ -138,6 +150,7 @@ export default class ViewportStore {
       // loop by start index
       start++;
       i++;
+      // if start index out of array, reset it
       if (start === count) {
         start = 0;
       }
@@ -157,26 +170,14 @@ export default class ViewportStore {
       return;
     }
 
-    let i = 0;
-    let start = this.store.get('start');
-    let pos = this.store.get('lastCoordinate');
-
-    // loop through array from initial item after recombination
-    while (i < count) {
-      const item = items[start];
-      item.start = pos;
-      item.size = size;
-      item.end = item.start + size;
-      pos = item.end;
-      // loop by start index
-      start++;
-      i++;
-      if (start === count) {
-        start = 0;
-      }
-    }
-
-    setStore(this.store, { items: [...items] });
+    setStore(this.store, {
+      items: setItemSizes(
+        items,
+        this.store.get('start'),
+        size,
+        this.store.get('lastCoordinate')
+      )
+    });
   }
 
   getItems(): Pick<RevoGrid.ViewportStateItems, 'items' | 'start' | 'end'> {
