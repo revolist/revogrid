@@ -69,6 +69,7 @@ export class Clipboard {
     const data = isHTML ? clipboardData.getData('text/html') : clipboardData.getData('text');
     const beforePaste = this.beforePaste.emit({
       raw: data,
+      isHTML,
       event: e,
     });
 
@@ -76,7 +77,8 @@ export class Clipboard {
       return;
     }
 
-    const parsedData = isHTML ? this.htmlParse(beforePaste.detail.raw) : this.textParse(beforePaste.detail.raw);
+    const parsedData = beforePaste.detail.isHTML ?
+      this.htmlParse(beforePaste.detail.raw) : this.textParse(beforePaste.detail.raw);
     const beforePasteApply = this.beforePasteApply.emit({
       raw: data,
       parsed: parsedData,

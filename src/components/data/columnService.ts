@@ -322,6 +322,9 @@ export default class ColumnService {
       mapping[i] = {};
       for (let prop of props) {
         const item = getSourceItem(store, i);
+        if (!item) {
+          continue;
+        }
         const val = item[prop];
         rgRow.push();
         mapping[i][prop] = val;
