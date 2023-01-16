@@ -48,7 +48,7 @@ export default class ViewportService {
     { detail }: CustomEvent<RevoGrid.ViewSettingSizeProp>,
     store: Observable<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>,
   ) {
-    this.sv.dimensionProvider?.setDimensionSize(type, detail);
+    this.sv.dimensionProvider?.setCustomSizes(type, detail, true);
     const changedItems = reduce(
       detail || {},
       (r: ResizeDetails, size, i) => {

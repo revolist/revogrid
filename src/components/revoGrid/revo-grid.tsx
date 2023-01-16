@@ -168,6 +168,12 @@ export class RevoGridComponent {
    */
   @Prop() stretch: boolean | string = true;
 
+
+  /** 
+   * Additional data to be passed to plugins
+   */
+  @Prop() additionalData: any = {};
+
   // --------------------------------------------------------------------------
   //
   //  Events
@@ -574,6 +580,9 @@ export class RevoGridComponent {
     this.clickTrackForFocusClear = e.screenX + e.screenY;
   }
   @Listen('mouseup', { target: 'document' }) mouseupHandle(e: MouseEvent) {
+    if (e.defaultPrevented) {
+      return;
+    }
     const target = e.target as HTMLElement | null;
     const pos = e.screenX + e.screenY;
     // detect if mousemove then do nothing
@@ -584,7 +593,7 @@ export class RevoGridComponent {
     // check if action finished inside of the document
     // clear data which is outside of grid
     // if event prevented or it is current table don't clear focus
-    if (e.defaultPrevented || target?.closest(`[${UUID}="${this.uuid}"]`)) {
+    if (target?.closest(`[${UUID}="${this.uuid}"]`)) {
       return;
     }
     this.clearFocus();
@@ -598,7 +607,7 @@ export class RevoGridComponent {
 
   /** DRAG AND DROP */
   @Listen('internalRowDragStart') onRowDragStarted(e: CustomEvent<{ pos: RevoGrid.PositionItem; text: string; event: MouseEvent }>) {
-    e.cancelBubble = true;
+    // e.cancelBubble = true;
     const dragStart = this.rowdragstart.emit(e.detail);
     if (dragStart.defaultPrevented) {
       e.preventDefault();
@@ -616,12 +625,12 @@ export class RevoGridComponent {
   }
 
   @Listen('internalRowMouseMove') onRowMouseMove(e: CustomEvent<Selection.Cell>): void {
-    e.cancelBubble = true;
+    // e.cancelBubble = true;
     this.orderService?.moveTip(e.detail);
   }
 
   @Listen('internalCellEdit') async onBeforeEdit(e: CustomEvent<Edition.BeforeSaveDataDetails>) {
-    e.cancelBubble = true;
+    // e.cancelBubble = true;
     const { defaultPrevented, detail } = this.beforeedit.emit(e.detail);
     await timeout();
     // apply data
@@ -632,7 +641,7 @@ export class RevoGridComponent {
   }
 
   @Listen('internalRangeDataApply') onBeforeRangeEdit(e: CustomEvent<Edition.BeforeRangeSaveDataDetails>) {
-    e.cancelBubble = true;
+    // e.cancelBubble = true;
     const { defaultPrevented, detail } = this.beforerangeedit.emit(e.detail);
     if (defaultPrevented) {
       e.preventDefault();
@@ -642,7 +651,7 @@ export class RevoGridComponent {
   }
 
   @Listen('internalSelectionChanged') onRangeChanged(e: CustomEvent<Selection.ChangedRange>) {
-    e.cancelBubble = true;
+    // e.cancelBubble = true;
     const beforeange = this.beforeange.emit(e.detail);
     if (beforeange.defaultPrevented) {
       e.preventDefault();
@@ -654,7 +663,7 @@ export class RevoGridComponent {
   }
 
   @Listen('initialRowDropped') onRowDropped(e: CustomEvent<{ from: number; to: number }>) {
-    e.cancelBubble = true;
+    // e.cancelBubble = true;
     const { defaultPrevented } = this.roworderchanged.emit(e.detail);
     if (defaultPrevented) {
       e.preventDefault();
@@ -672,7 +681,7 @@ export class RevoGridComponent {
   }
 
   @Listen('beforeFocusCell') onCellFocus(e: CustomEvent<Edition.BeforeSaveDataDetails>) {
-    e.cancelBubble = true;
+    // e.cancelBubble = true;
     const { defaultPrevented } = this.beforecellfocus.emit(e.detail);
     if (!this.canFocus || defaultPrevented) {
       e.preventDefault();
@@ -791,7 +800,7 @@ export class RevoGridComponent {
     if (!newVal.length) {
       return;
     }
-    each(newRows, (r, k: RevoGrid.DimensionRows) => this.dimensionProvider.setDimensionSize(k, r.sizes || {}));
+    each(newRows, (r, k: RevoGrid.DimensionRows) => this.dimensionProvider.setCustomSizes(k, r.sizes || {}));
   }
 
   @Watch('trimmedRows') trimmedRowsChanged(newVal: Record<number, boolean> = {}) {

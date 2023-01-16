@@ -66,12 +66,12 @@ export default class StretchColumn extends BasePlugin {
     }
     const type: RevoGrid.DimensionCols = 'rgCol';
     const sizes = this.providers.dimensionProvider.stores[type].store.get('sizes');
-    this.providers.dimensionProvider.setDimensionSize(
+    this.providers.dimensionProvider.setCustomSizes(
       type,
       {
         ...sizes,
         [this.stretchedColumn.index]: this.stretchedColumn.size
-      }
+      }, true
     );
   }
 

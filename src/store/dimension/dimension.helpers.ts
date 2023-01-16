@@ -8,7 +8,8 @@ export type DimensionIndexInput = Pick<RevoGrid.DimensionSettingsState, 'indexes
 export type DimensionSize = Pick<RevoGrid.DimensionSettingsState, 'indexes' | 'positionIndexes' | 'positionIndexToItem' | 'indexToItem' | 'realSize' | 'sizes'>;
 /**
  * Pre-calculation
- * Dimension sizes for each cell
+ * Dimension custom sizes for each cell
+ * Keeps only changed sizes, skips origin size
  */
 export function calculateDimensionData(
   originItemSize: number,
@@ -18,14 +19,15 @@ export function calculateDimensionData(
   const positionIndexToItem: { [position: number]: RevoGrid.PositionItem } = {};
   const indexToItem: { [index: number]: RevoGrid.PositionItem } = {};
 
-  // combine all sizes
+  // combine all new sizes
   const sizes = { ...newSizes };
   // prepare order sorted new sizes and calculate changed real size
   let newIndexes: number[] = [];
-  each(newSizes, (_, index) => {
-    newIndexes[sortedIndex(newIndexes, parseInt(index, 10))] = parseInt(index, 10);
+  each(newSizes, (_, i) => {
+    const index = parseInt(i, 10);
+    newIndexes[sortedIndex(newIndexes, index)] = index;
   });
-  // fill new coordinates
+  // fill new coordinates based on what is changed
   reduce(
     newIndexes,
     (previous: RevoGrid.PositionItem | undefined, itemIndex: number, i: number) => {
@@ -34,6 +36,7 @@ export function calculateDimensionData(
         start: 0,
         end: 0,
       };
+      // if previous item was changed too
       if (previous) {
         const itemsBetween = (itemIndex - previous.itemIndex - 1) * originItemSize;
         newItem.start = itemsBetween + previous.end;

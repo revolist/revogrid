@@ -26,6 +26,10 @@ export namespace Components {
          */
         "addTrimmed": (trimmed: Record<number, boolean>, trimmedType?: string, type?: RevoGrid.DimensionRows) => Promise<CustomEvent<{ trimmed: Record<number, boolean>; trimmedType: string; type: string; }>>;
         /**
+          * Additional data to be passed to plugins
+         */
+        "additionalData": any;
+        /**
           * Apply changes typed in editor on editor close except Escape cases If custom editor in use @method getValue required Check interfaces.d.ts @EditorBase for more info
          */
         "applyEditorChangesOnClose": boolean;
@@ -520,6 +524,10 @@ declare global {
 }
 declare namespace LocalJSX {
     interface RevoGrid {
+        /**
+          * Additional data to be passed to plugins
+         */
+        "additionalData"?: any;
         /**
           * Apply changes typed in editor on editor close except Escape cases If custom editor in use @method getValue required Check interfaces.d.ts @EditorBase for more info
          */

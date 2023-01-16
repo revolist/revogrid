@@ -63,6 +63,13 @@ function initialBase(): RevoGrid.DimensionCalc {
   return {
     indexes: [],
     count: 0,
+
+    // plugin support
+    trimmed: {},
+
+
+    // size operations, this provider stores only changed sizes, not all of them
+    // same as indexes but for sizes and positions
     // item index to size
     sizes: {},
     // order in indexes[] to coordinate
@@ -70,7 +77,6 @@ function initialBase(): RevoGrid.DimensionCalc {
     // initial element to coordinate ^
     indexToItem: {},
     positionIndexes: [],
-    trimmed: {}
   };
 }
 
@@ -119,6 +125,11 @@ export default class DimensionStore {
     setStore(this.store, initialBase());
   }
 
+  /**
+   * Set custom dimension sizes and overwrite old
+   * Generates new indexes based on sizes
+   * @param sizes - sizes to set
+   */
   setDimensionSize(sizes: RevoGrid.ViewSettingSizeProp) {
     const dimensionData = calculateDimensionData(this.store.get('originItemSize'), sizes);
     setStore(this.store, dimensionData);

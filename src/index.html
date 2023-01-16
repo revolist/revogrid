@@ -203,8 +203,8 @@
         bottomPinned: [],
         colPinEnd: [],
         colPinStart: [],
-        groupedHeader: true,
-        order: 5
+        // groupedHeader: true,
+        // order: 5
       };
       window.setData = function (config = {}) {
         defaultData = { ...defaultData, ...config };
@@ -278,17 +278,17 @@
       grid.filter = true;
       // grid.stretch = true;
       grid.exporting = true;
-      grid.rowDefinitions = [{
-          type: 'rgRow',
-          index: 1,
-          size: 100
-      }];
+      // grid.rowDefinitions = [{
+      //     type: 'rgRow',
+      //     index: 1,
+      //     size: 100
+      // }];
       /* 
         grid.autoSizeColumn = {
           mode: 'autoSizeAll',
         };*/
       // default
-      setData({ rows: 100, cols: 10, 'colPinEnd': [2] });
+      setData({ rows: 100, cols: 10,  });
 
       // events testing
       // 'beforerange', 'setRange', 'beforefocuslost', 'beforecellfocus', 'beforeedit'

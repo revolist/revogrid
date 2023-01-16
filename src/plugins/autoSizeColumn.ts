@@ -96,9 +96,9 @@ export default class AutoSizeColumn extends BasePlugin {
       const type = ColumnDataProvider.getColumnType(detail.column);
       const size = this.getColumnSize(detail.index, type);
       if (size) {
-        this.providers.dimensionProvider.setDimensionSize(type, {
+        this.providers.dimensionProvider.setCustomSizes(type, {
           [detail.index]: size,
-        });
+        }, true);
       }
     };
     this.addEventListener('beforecolumnsset', beforecolumnsset);
@@ -144,7 +144,7 @@ export default class AutoSizeColumn extends BasePlugin {
         // calculate size
         rgCol.size = sizes[rgCol.index] = source.reduce((prev, rgRow) => Math.max(prev, this.getLength(rgRow[rgCol.prop])), this.getLength(rgCol.name || ''));
       });
-      this.providers.dimensionProvider.setDimensionSize(type, sizes);
+      this.providers.dimensionProvider.setCustomSizes(type, sizes, true);
     });
   }
 
@@ -195,7 +195,7 @@ export default class AutoSizeColumn extends BasePlugin {
         }
       });
 
-      this.providers.dimensionProvider.setDimensionSize(type, sizes);
+      this.providers.dimensionProvider.setCustomSizes(type, sizes, true);
     });
   }
 
@@ -217,7 +217,7 @@ export default class AutoSizeColumn extends BasePlugin {
           }
         }
       });
-      this.providers.dimensionProvider.setDimensionSize(type, sizes);
+      this.providers.dimensionProvider.setCustomSizes(type, sizes, true);
     });
   }
 

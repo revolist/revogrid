@@ -101,7 +101,9 @@ export default class ViewportStore {
 
   /**
    * Update viewport sizes for existing items
-  */
+   * This method is generating new item positions based on custom sizes and original sizes
+   * @param sizes - custom sizes for each item
+   */
   setViewPortDimension(sizes: RevoGrid.ViewSettingSizeProp) {
     const items = this.store.get('items');
     const count = items.length;
