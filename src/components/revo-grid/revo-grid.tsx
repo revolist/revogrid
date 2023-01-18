@@ -410,7 +410,8 @@ export class RevoGridComponent {
       return;
     }
     await timeout();
-    this.viewport?.setEdit(rgRow, this.columnProvider.getColumnIndexByProp(prop, 'rgCol'), rgCol.pin || 'rgCol', rowSource);
+    const colGroup = rgCol.pin || 'rgCol';
+    this.viewport?.setEdit(rgRow, this.columnProvider.getColumnIndexByProp(prop, colGroup), colGroup, rowSource);
   }
 
   /**
