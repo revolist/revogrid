@@ -753,7 +753,7 @@ declare namespace LocalJSX {
         "editor"?: Edition.EditorCtr | null;
         "onCellEdit"?: (event: RevogrEditCustomEvent<Edition.SaveDataDetails>) => void;
         /**
-          * Close editor event
+          * Close editor event pass true if requires focus next
          */
         "onCloseEdit"?: (event: RevogrEditCustomEvent<boolean | undefined>) => void;
     }
@@ -846,6 +846,10 @@ declare namespace LocalJSX {
           * Last cell position
          */
         "lastCell"?: Selection.Cell;
+        /**
+          * Used for editors support when close requested
+         */
+        "onCancelEdit"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
         "onFocusCell"?: (event: RevogrOverlaySelectionCustomEvent<Selection.FocusedCells>) => void;
         "onInternalCellEdit"?: (event: RevogrOverlaySelectionCustomEvent<Edition.BeforeSaveDataDetails>) => void;
         "onInternalCopy"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;

@@ -891,10 +891,13 @@ export class RevoGridComponent {
       editors={this.editors}
       useClipboard={this.useClipboard}
       columns={this.viewport.columns}
+      onCancelEdit={() => {
+        this.selectionStoreConnector.setEdit(false);
+      }}
       onEdit={detail => {
         const event = this.beforeeditstart.emit(detail);
         if (!event.defaultPrevented) {
-          this.selectionStoreConnector.setEdit(detail.isCancel ? false : detail.val);
+          this.selectionStoreConnector.setEdit(detail.val);
         }
       }}
       registerElement={(e, k) => this.scrollingService.registerElement(e, k)}

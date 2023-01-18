@@ -9,7 +9,8 @@ import { EventData, getCoordinate, isAfterLast, isBeforeFirst } from './selectio
 type Config = {
   selectionStoreService: SelectionStoreService;
   selectionStore: Observable<Selection.SelectionStoreState>;
-  doEdit(val?: any, isCancel?: boolean): void;
+  doEdit(val?: any): void;
+  cancelEdit(): void;
   clearCell(): void;
   getData(): any;
   internalPaste(): void;
@@ -40,7 +41,7 @@ export class KeyboardService {
     if (this.sv.selectionStoreService.edited) {
       switch (e.code) {
         case codesLetter.ESCAPE:
-          this.sv.doEdit(undefined, true);
+          this.sv.cancelEdit();
           break;
       }
       return;
