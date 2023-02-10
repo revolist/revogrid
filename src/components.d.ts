@@ -32,7 +32,7 @@ export namespace Components {
         /**
           * Apply changes typed in editor on editor close except Escape cases If custom editor in use @method getValue required Check interfaces.d.ts @EditorBase for more info
          */
-        "applyEditorChangesOnClose": boolean;
+        "applyOnClose": boolean;
         /**
           * Autosize config Enable columns autoSize, for more details check @autoSizeColumn plugin By default disabled, hence operation is not resource efficient true to enable with default params (double header separator click for autosize) or provide config
          */
@@ -338,6 +338,10 @@ export namespace Components {
         "selectionStore": Observable<Selection.SelectionStoreState>;
         "useClipboard": boolean;
     }
+    /**
+     * Row headers component
+     * Visible on the left side of the table
+     */
     interface RevogrRowHeaders {
         "dataPorts": ViewportData[];
         "headerProp": Record<string, any>;
@@ -362,6 +366,9 @@ export namespace Components {
          */
         "selectionStore": Observable<Selection.SelectionStoreState>;
     }
+    /**
+     * Service for tracking grid scrolling
+     */
     interface RevogrViewportScroll {
         /**
           * update on delta in case we don't know existing position or external change
@@ -482,6 +489,10 @@ declare global {
         prototype: HTMLRevogrOverlaySelectionElement;
         new (): HTMLRevogrOverlaySelectionElement;
     };
+    /**
+     * Row headers component
+     * Visible on the left side of the table
+     */
     interface HTMLRevogrRowHeadersElement extends Components.RevogrRowHeaders, HTMLStencilElement {
     }
     var HTMLRevogrRowHeadersElement: {
@@ -500,6 +511,9 @@ declare global {
         prototype: HTMLRevogrTempRangeElement;
         new (): HTMLRevogrTempRangeElement;
     };
+    /**
+     * Service for tracking grid scrolling
+     */
     interface HTMLRevogrViewportScrollElement extends Components.RevogrViewportScroll, HTMLStencilElement {
     }
     var HTMLRevogrViewportScrollElement: {
@@ -531,7 +545,7 @@ declare namespace LocalJSX {
         /**
           * Apply changes typed in editor on editor close except Escape cases If custom editor in use @method getValue required Check interfaces.d.ts @EditorBase for more info
          */
-        "applyEditorChangesOnClose"?: boolean;
+        "applyOnClose"?: boolean;
         /**
           * Autosize config Enable columns autoSize, for more details check @autoSizeColumn plugin By default disabled, hence operation is not resource efficient true to enable with default params (double header separator click for autosize) or provide config
          */
@@ -869,7 +883,7 @@ declare namespace LocalJSX {
         "editor"?: Edition.EditorCtr | null;
         "onCellEdit"?: (event: RevogrEditCustomEvent<Edition.SaveDataDetails>) => void;
         /**
-          * Close editor event
+          * Close editor event pass true if requires focus next
          */
         "onCloseEdit"?: (event: RevogrEditCustomEvent<boolean | undefined>) => void;
         "saveOnClose"?: boolean;
@@ -993,6 +1007,10 @@ declare namespace LocalJSX {
           * Range data apply
          */
         "onBeforeRangeDataApply"?: (event: RevogrOverlaySelectionCustomEvent<FocusRenderEvent>) => void;
+        /**
+          * Used for editors support when close requested
+         */
+        "onCancelEdit"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
         "onFocusCell"?: (event: RevogrOverlaySelectionCustomEvent<ApplyFocusEvent>) => void;
         "onInternalCellEdit"?: (event: RevogrOverlaySelectionCustomEvent<Edition.BeforeSaveDataDetails>) => void;
         "onInternalCopy"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
@@ -1021,6 +1039,10 @@ declare namespace LocalJSX {
         "selectionStore"?: Observable<Selection.SelectionStoreState>;
         "useClipboard"?: boolean;
     }
+    /**
+     * Row headers component
+     * Visible on the left side of the table
+     */
     interface RevogrRowHeaders {
         "dataPorts"?: ViewportData[];
         "headerProp"?: Record<string, any>;
@@ -1046,6 +1068,9 @@ declare namespace LocalJSX {
          */
         "selectionStore"?: Observable<Selection.SelectionStoreState>;
     }
+    /**
+     * Service for tracking grid scrolling
+     */
     interface RevogrViewportScroll {
         /**
           * Height of inner content
@@ -1088,9 +1113,16 @@ declare module "@stencil/core" {
             "revogr-header": LocalJSX.RevogrHeader & JSXBase.HTMLAttributes<HTMLRevogrHeaderElement>;
             "revogr-order-editor": LocalJSX.RevogrOrderEditor & JSXBase.HTMLAttributes<HTMLRevogrOrderEditorElement>;
             "revogr-overlay-selection": LocalJSX.RevogrOverlaySelection & JSXBase.HTMLAttributes<HTMLRevogrOverlaySelectionElement>;
+            /**
+             * Row headers component
+             * Visible on the left side of the table
+             */
             "revogr-row-headers": LocalJSX.RevogrRowHeaders & JSXBase.HTMLAttributes<HTMLRevogrRowHeadersElement>;
             "revogr-scroll-virtual": LocalJSX.RevogrScrollVirtual & JSXBase.HTMLAttributes<HTMLRevogrScrollVirtualElement>;
             "revogr-temp-range": LocalJSX.RevogrTempRange & JSXBase.HTMLAttributes<HTMLRevogrTempRangeElement>;
+            /**
+             * Service for tracking grid scrolling
+             */
             "revogr-viewport-scroll": LocalJSX.RevogrViewportScroll & JSXBase.HTMLAttributes<HTMLRevogrViewportScrollElement>;
         }
     }

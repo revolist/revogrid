@@ -65,11 +65,12 @@ export class RevogrData {
     const rowsEls: VNode[] = [];
 
     const depth = this.dataStore.get('groupingDepth');
+    const groupingCustomRenderer = this.dataStore.get('groupingCustomRenderer');
     for (let rgRow of rows) {
       const dataItem = getSourceItem(this.dataStore, rgRow.itemIndex);
       /** grouping */
       if (isGrouping(dataItem)) {
-        rowsEls.push(<GroupingRowRenderer {...rgRow} model={dataItem} hasExpand={this.columnService.hasGrouping} />);
+        rowsEls.push(<GroupingRowRenderer {...rgRow} model={dataItem} groupingCustomRenderer={groupingCustomRenderer} hasExpand={this.columnService.hasGrouping} />);
         continue;
       }
       /** grouping end */

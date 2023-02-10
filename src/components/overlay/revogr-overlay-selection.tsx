@@ -25,6 +25,7 @@ export class OverlaySelection {
   private autoFillService: AutoFillService | null = null;
   private clipboardService: ClipboardService | null = null;
   private orderEditor: HTMLRevogrOrderEditorElement;
+  private revogrEdit: HTMLRevogrEditElement | null = null;
 
   @Element() element: HTMLElement;
 
@@ -72,6 +73,10 @@ export class OverlaySelection {
   @Event({ eventName: 'before-set-range' }) beforeSetRange: EventEmitter;
   @Event({ eventName: 'before-edit-render' }) beforeEditRender: EventEmitter<FocusRenderEvent>;
   @Event() setRange: EventEmitter<Selection.RangeArea & { type: RevoGrid.MultiDimensionType }>;
+  /**
+   * Used for editors support when close requested
+   */
+  @Event() cancelEdit: EventEmitter;
   @Event() setTempRange: EventEmitter<Selection.TempRange | null>;
 
   @Event() applyFocus: EventEmitter<FocusRenderEvent>;
@@ -88,7 +93,7 @@ export class OverlaySelection {
   /** Range copy */
   @Event({ cancelable: true }) rangeClipboardCopy: EventEmitter;
   @Event({ cancelable: true }) rangeClipboardPaste: EventEmitter;
-  
+
   /**
    * Runs before cell save
    * Can be used to override or cancel original save
@@ -146,12 +151,13 @@ export class OverlaySelection {
       selectionStore: s,
       range: (r) => this.selectionStoreService.changeRange(r),
       focusNext: (f, next) => this.doFocus(f, f, next),
-      applyEdit: (val, isEscape) => {
+      applyEdit: (val) => {
         if (this.readonly) {
           return;
         }
-        this.doEdit(val, isEscape);
+        this.doEdit(val);
       },
+      cancelEdit: async() => { await this.revogrEdit.cancel(); this.closeEdit();},
       clearCell: () => !this.readonly && this.clearCell(),
       internalPaste: () => !this.readonly && this.internalPaste.emit(),
       getData: () => this.getData(),
@@ -267,11 +273,14 @@ export class OverlaySelection {
     if (renderEvent.defaultPrevented) {
       return null;
     }
-    
+
     const { detail: { range } } = renderEvent;
     const style = getElStyle(range, this.dimensionRow.state, this.dimensionCol.state);
     return (
       <revogr-edit
+        ref={(el) => {
+          this.revogrEdit = el;
+        }}
         onCellEdit={e => {
           const saveEv = this.beforeCellSave.emit(e.detail);
           if (!saveEv.defaultPrevented) {
@@ -283,9 +292,7 @@ export class OverlaySelection {
             this.focusNext();
           }
         }}
-        onCloseEdit={e => {
-          this.closeEdit(e.detail, true);
-        }}
+        onCloseEdit={e => this.closeEdit(e)}
         editCell={editable}
         saveOnClose={this.applyChangesOnClose}
         column={this.columnService.columns[editCell.x]}
@@ -306,7 +313,7 @@ export class OverlaySelection {
       if ((range || selectionFocus) && this.useClipboard) {
         els.push(this.clipboardService.renderClipboard());
       }
-  
+
       if (range) {
         els.push(...this.renderRange(range));
       }
@@ -405,21 +412,24 @@ export class OverlaySelection {
     }
   }
 
-  protected doEdit(val = '', isCancel = false) {
+  protected doEdit(val = '') {
     if (this.canEdit()) {
       const editCell = this.selectionStore.get('focus');
       const data = this.columnService.getSaveData(editCell.y, editCell.x);
       this.setEdit?.emit({
         ...data,
-        isCancel,
         val,
       });
     }
   }
 
-  private closeEdit(focusNext = false, cancelEdit = false) {
-    this.doEdit(undefined, cancelEdit);
-    if (focusNext) {
+  /**
+   * Close editor event triggered
+   * @param details - if requires focus next
+   */
+  private closeEdit(e?: CustomEvent<boolean>) {
+    this.cancelEdit.emit();
+    if (e?.detail) {
       this.focusNext();
     }
   }

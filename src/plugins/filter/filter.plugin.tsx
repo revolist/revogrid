@@ -336,7 +336,7 @@ export default class FilterPlugin extends BasePlugin {
         // testing each filter for a prop
         for (const [filterIndex, filterData] of propFilters.entries()) {
           // the filter LogicFunction based on the type
-          const filter = filterEntities[filterData.type];
+          const filter = this.possibleFilterEntities[filterData.type];
 
           // THE MAGIC OF FILTERING IS HERE
           if (filterData.relation === 'or') {

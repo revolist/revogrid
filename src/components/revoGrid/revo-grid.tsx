@@ -89,7 +89,7 @@ export class RevoGridComponent {
    * If custom editor in use @method getValue required
    * Check interfaces.d.ts @EditorBase for more info
    */
-  @Prop() applyEditorChangesOnClose = false;
+  @Prop() applyOnClose = false;
 
   /**
    * Custom grid plugins
@@ -169,7 +169,7 @@ export class RevoGridComponent {
   @Prop() stretch: boolean | string = true;
 
 
-  /** 
+  /**
    * Additional data to be passed to plugins
    */
   @Prop() additionalData: any = {};
@@ -451,7 +451,8 @@ export class RevoGridComponent {
       return;
     }
     await timeout();
-    this.viewport?.setEdit(rgRow, this.columnProvider.getColumnIndexByProp(prop, 'rgCol'), rgCol.pin || 'rgCol', rowSource);
+    const colGroup = rgCol.pin || 'rgCol';
+    this.viewport?.setEdit(rgRow, this.columnProvider.getColumnIndexByProp(prop, colGroup), colGroup, rowSource);
   }
 
   /**  Set focus range */
@@ -997,13 +998,16 @@ export class RevoGridComponent {
         range={this.range}
         rowClass={this.rowClass}
         editors={this.editors}
-        applyEditorChangesOnClose={this.applyEditorChangesOnClose}
+        onCancelEdit={() => {
+          this.selectionStoreConnector.setEdit(false);
+        }}
+        applyEditorChangesOnClose={this.applyOnClose}
         useClipboard={this.useClipboard}
         columns={this.viewport.columns}
         onEdit={detail => {
           const event = this.beforeeditstart.emit(detail);
           if (!event.defaultPrevented) {
-            this.selectionStoreConnector.setEdit(detail.isCancel ? false : detail.val);
+            this.selectionStoreConnector.setEdit(detail.val);
           }
         }}
         registerElement={(e, k) => this.scrollingService.registerElement(e, k)}

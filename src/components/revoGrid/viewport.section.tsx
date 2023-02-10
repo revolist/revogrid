@@ -16,6 +16,7 @@ type Props = {
   columnFilter: boolean;
   focusTemplate: RevoGrid.FocusTemplateFunc;
   onScroll(e: RevoGrid.ViewPortScrollEvent, key?: RevoGrid.DimensionColPin | string): void;
+  onCancelEdit(): void;
   onEdit(edit: Edition.BeforeEdit): void;
   registerElement(el: ElementScroll | null, key: string): void;
 };
@@ -25,7 +26,7 @@ type Props = {
  * Per each column we render data collections: headers, pinned top, center data, pinned bottom
  */
 export const ViewPortSections = ({
-  resize, editors, rowClass, readonly, range, columns, useClipboard, columnFilter, applyEditorChangesOnClose,
+  resize, editors, rowClass, readonly, range, columns, useClipboard, columnFilter, applyEditorChangesOnClose, onCancelEdit,
   registerElement, onEdit, onScroll, focusTemplate
 }: Props) => {
   const viewPortHtml: VNode[] = [];
@@ -53,6 +54,7 @@ export const ViewPortSections = ({
           readonly={readonly}
           range={range}
           useClipboard={useClipboard}
+          onCancelEdit= {() => onCancelEdit()}
           applyChangesOnClose={applyEditorChangesOnClose}
           onSetEdit={({ detail }) => onEdit(detail)}
         >

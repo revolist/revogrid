@@ -20,7 +20,10 @@ export class RevoEdit {
 
   @Event({ bubbles: false }) cellEdit: EventEmitter<Edition.SaveDataDetails>;
 
-  /** Close editor event */
+  /**
+   * Close editor event
+   * pass true if requires focus next
+   */
   @Event({ bubbles: false }) closeEdit: EventEmitter<boolean | undefined>;
 
   private currentEditor: Edition.EditorBase | null = null;
@@ -43,7 +46,11 @@ export class RevoEdit {
     this.onSave(val, true);
   }
 
-  /** Callback triggered on cell editor save */
+  /**
+   * Callback triggered on cell editor save
+   * Closes editor when called
+   * @param preventFocus - if true editor will not be closed and next cell will not be focused
+   */
   onSave(val: Edition.SaveData, preventFocus?: boolean): void {
     this.saveRunning = true;
     if (this.editCell) {
@@ -53,14 +60,6 @@ export class RevoEdit {
         val,
         preventFocus,
       });
-    }
-  }
-
-  // shouldn't be cancelled by saveRunning
-  // editor requires getValue
-  saveBeforeClose() {
-    if (!this.saveRunning) {
-      this.onAutoSave();
     }
   }
 
@@ -75,9 +74,11 @@ export class RevoEdit {
     if (this.editor) {
       this.currentEditor = new this.editor(
         this.column,
+        // save
         (e, preventFocus) => {
           this.onSave(e, preventFocus);
         },
+        // cancel
         focusNext => {
           this.saveRunning = true;
           this.closeEdit.emit(focusNext);
@@ -98,7 +99,13 @@ export class RevoEdit {
   }
 
   disconnectedCallback(): void {
-    this.saveBeforeClose();
+    if (this.saveOnClose) {
+      // shouldn't be cancelled by saveRunning
+      // editor requires getValue to be able to save
+      if (!this.saveRunning) {
+        this.onAutoSave();
+      }
+    }
 
     this.saveRunning = false;
     if (!this.currentEditor) {

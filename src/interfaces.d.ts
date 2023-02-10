@@ -1,3 +1,5 @@
+/* eslint-disable */
+/* tslint:disable */
 // @ts-ignore
 import { VNode } from '@stencil/core';
 // @ts-ignore
@@ -293,9 +295,9 @@ export declare namespace Edition {
     val: any;
     preventFocus?: boolean;
   };
-  type BeforeEdit = {
-    isCancel: boolean;
-  } & Edition.BeforeSaveDataDetails;
+
+  type BeforeEdit = Edition.BeforeSaveDataDetails;
+
   type BeforeSaveDataDetails = {
     prop: RevoGrid.ColumnProp;
     model: RevoGrid.DataType;
@@ -318,7 +320,7 @@ export declare namespace Edition {
     [name: string]: EditorCtr;
   };
   interface EditorCtr {
-    new (column: RevoGrid.ColumnRegular, saveCallback: (value: Edition.SaveData, preventFocus?: boolean) => void, closeCallback: (focusNext?: boolean) => void): EditorBase;
+    new (column: RevoGrid.ColumnRegular, saveCallback: (value: Edition.SaveData, preventFocus?: boolean) => void, cancelEditCallback: (focusNext?: boolean) => void): EditorBase;
   }
   interface EditorBase {
     element?: Element | null;

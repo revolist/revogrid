@@ -7,6 +7,7 @@ import { RevoGrid, Edition } from '../interfaces';
 import { Trimmed } from '../store/dataSource/trimmed.plugin';
 import DimensionRows = RevoGrid.DimensionRows;
 import DataType = RevoGrid.DataType;
+import { GroupLabelTemplateFunc } from '../plugins/groupingRow/grouping.row.types';
 
 export type RowDataSources = { [T in DimensionRows]: DataStore<DataType, DimensionRows> };
 
@@ -23,7 +24,12 @@ export class DataProvider {
     ) as RowDataSources;
   }
 
-  setData(data: DataType[], type: DimensionRows = 'rgRow', grouping?: { depth: number; groups?: Groups }, silent = false): DataType[] {
+  setData(
+    data: DataType[],
+    type: DimensionRows = 'rgRow',
+    grouping?: { depth: number; groups?: Groups, customRenderer?: GroupLabelTemplateFunc },
+    silent = false,
+  ): DataType[] {
     // set rgRow data
     this.stores[type].updateData([...data], grouping, silent);
     this.dimensionProvider.setData(data.length, type, type !== 'rgRow');

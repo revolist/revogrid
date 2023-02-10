@@ -12,7 +12,8 @@ type Config = {
   selectionStore: Observable<Selection.SelectionStoreState>;
   range(range: Selection.RangeArea): boolean;
   focusNext(focus: Selection.Cell, next: Partial<Selection.Cell>): boolean;
-  applyEdit(val?: any, isEscape?: boolean): void;
+  applyEdit(val?: any): void;
+  cancelEdit(): void;
   clearCell(): void;
   getData(): any;
   internalPaste(): void;
@@ -42,7 +43,7 @@ export class KeyboardService {
     if (this.sv.selectionStoreService.edited) {
       switch (e.code) {
         case codesLetter.ESCAPE:
-          this.sv.applyEdit(undefined, true);
+          this.sv.cancelEdit();
           break;
       }
       return;

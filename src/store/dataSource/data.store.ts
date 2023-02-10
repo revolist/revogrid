@@ -6,6 +6,7 @@ import { Trimmed, trimmedPlugin } from './trimmed.plugin';
 import { setStore } from '../../utils/store.utils';
 import { Observable, RevoGrid } from '../../interfaces';
 import { proxyPlugin } from './data.proxy';
+import { GroupLabelTemplateFunc } from '../../plugins/groupingRow/grouping.row.types';
 
 export interface Group extends RevoGrid.ColumnProperties {
   name: string;
@@ -16,7 +17,9 @@ export interface Group extends RevoGrid.ColumnProperties {
 export type Groups = Record<any, any>;
 export type GDataType = RevoGrid.DataType | RevoGrid.ColumnRegular;
 export type GDimension = RevoGrid.DimensionRows | RevoGrid.DimensionCols;
-export type DataSourceState<T1 extends GDataType, T2 extends GDimension> = RevoGrid.DataSourceState<T1, T2>;
+export type DataSourceState<T1 extends GDataType, T2 extends GDimension> = RevoGrid.DataSourceState<T1, T2> & {
+  groupingCustomRenderer?: GroupLabelTemplateFunc | null;
+};
 
 export default class DataStore<T extends GDataType, ST extends GDimension> {
   private readonly dataStore: Observable<DataSourceState<T, ST>>;
@@ -24,7 +27,7 @@ export default class DataStore<T extends GDataType, ST extends GDimension> {
     return this.dataStore;
   }
   constructor(type: ST) {
-    const store = (this.dataStore = createStore({
+    const store = (this.dataStore = createStore<DataSourceState<T, ST>>({
       items: [],
       proxyItems: [],
       source: [],
@@ -32,6 +35,7 @@ export default class DataStore<T extends GDataType, ST extends GDimension> {
       groups: {},
       type,
       trimmed: {},
+      groupingCustomRenderer: undefined,
     }));
     store.use(proxyPlugin(store));
     store.use(trimmedPlugin(store));
@@ -42,7 +46,11 @@ export default class DataStore<T extends GDataType, ST extends GDimension> {
    * @param source - data column/rgRow source
    * @param grouping - grouping information if present
    */
-  updateData(source: T[], grouping?: { depth: number; groups?: Groups }, silent = false) {
+  updateData(
+    source: T[],
+    grouping?: { depth: number; groups?: Groups; customRenderer?: GroupLabelTemplateFunc },
+    silent = false,
+  ) {
     // during full update we do drop trim
     if (!silent) {
       this.store.set('trimmed', {});
@@ -63,6 +71,7 @@ export default class DataStore<T extends GDataType, ST extends GDimension> {
       setStore(this.store, {
         groupingDepth: grouping.depth,
         groups: grouping.groups,
+        groupingCustomRenderer: grouping.customRenderer,
       });
     }
   }

@@ -64,6 +64,7 @@ export function generateFakeDataObject(config = {}) {
       columns[rgCol] = {
         name: generateHeader(rgCol),
         prop: rgCol,
+        filter:"myFilterType",
         sortable: true,
         size: 200,
         cellCompare: rgCol % 2 == 0 ? naturalSort : undefined,
