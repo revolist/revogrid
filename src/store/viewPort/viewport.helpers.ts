@@ -239,3 +239,47 @@ export function getFirstItem(s: ItemsToUpdate): RevoGrid.VirtualPositionItem | u
 export function getLastItem(s: ItemsToUpdate): RevoGrid.VirtualPositionItem {
   return s.items[s.end];
 }
+
+/**
+ * Set items sizes from start index to end
+ * @param vpItems
+ * @param start
+ * @param size
+ * @param lastCoordinate
+ * @returns
+ */
+export function setItemSizes(
+  vpItems: RevoGrid.VirtualPositionItem[],
+  initialIndex: number,
+  size: number,
+  lastCoordinate: number
+) {
+  const items = [...vpItems];
+  const count = items.length;
+
+  let pos = lastCoordinate;
+  let i = 0;
+  let start = initialIndex;
+
+  // viewport not inited
+  if (!count) {
+    return [];
+  }
+   // loop through array from initial item after recombination
+   while (i < count) {
+    const item = items[start];
+    item.start = pos;
+    item.size = size;
+    item.end = item.start + size;
+    pos = item.end;
+    // loop by start index
+    start++;
+    i++;
+
+    // if start index out of array, reset it
+    if (start === count) {
+      start = 0;
+    }
+  }
+  return items;
+}

@@ -6,7 +6,7 @@
 
 import { createStore } from '@stencil/store';
 
-import { addMissingItems, DimensionDataViewport, getFirstItem, getLastItem, getUpdatedItemsByPosition, isActiveRange, updateMissingAndRange } from './viewport.helpers';
+import { addMissingItems, DimensionDataViewport, getFirstItem, getLastItem, getUpdatedItemsByPosition, isActiveRange, setItemSizes, updateMissingAndRange } from './viewport.helpers';
 
 import { setStore } from '../../utils/store.utils';
 import { Observable, RevoGrid } from '../../interfaces';
@@ -94,8 +94,8 @@ export default class ViewportStore {
   }
 
   /** Update viewport sizes */
-  setViewPortDimension(sizes: RevoGrid.ViewSettingSizeProp): void {
-    const items = this.store.get('items');
+  setViewPortDimension(sizes: RevoGrid.ViewSettingSizeProp, dropToOriginalSize?: number): void {
+    let items = this.store.get('items');
     const count = items.length;
     // viewport not inited
     if (!count) {
@@ -105,6 +105,16 @@ export default class ViewportStore {
     let changedCoordinate = 0;
     let i = 0;
     let start = this.store.get('start');
+
+    // drop to original size if requested
+    if (dropToOriginalSize) {
+      items = setItemSizes(
+        items,
+        start,
+        dropToOriginalSize,
+        this.store.get('lastCoordinate')
+      );
+    }
 
     // loop through array from initial item after recombination
     while (i < count) {
