@@ -38,6 +38,18 @@ export class Clipboard {
    */
   @Event({ eventName: 'afterpasteapply' }) afterPasteApply: EventEmitter;
 
+  /**
+   * Fired before cut triggered
+   * @event beforecopy
+   * @property {ClipboardEvent} event - original event
+   * @property {boolean} defaultPrevented - if true, cut will be canceled
+   */
+  @Event({ eventName: 'beforecut' }) beforeCut: EventEmitter;
+
+  /**
+   * Clears region when cut is done
+   */
+  @Event() clearRegion: EventEmitter<DataTransfer>;
 
   /**
    * Fired before copy triggered
@@ -88,17 +100,22 @@ export class Clipboard {
       return;
     }
     this.pasteRegion.emit(beforePasteApply.detail.parsed);
+    // post paste action
     const afterPasteApply = this.afterPasteApply.emit({
       raw: data,
       parsed: parsedData,
       event: e,
     });
+    // keep default behavior if needed
     if (afterPasteApply.defaultPrevented) {
       return;
     }
     e.preventDefault();
   }
 
+  /**
+   * Listen to copy event and emit copy region event
+   */
   @Listen('copy', { target: 'document' }) copyStarted(e: ClipboardEvent) {
     const beforeCopy = this.beforeCopy.emit({
       event: e,
@@ -106,8 +123,24 @@ export class Clipboard {
     if (beforeCopy.defaultPrevented) {
       return;
     }
-    const data = this.getData(e);
+    const data = this.getData(beforeCopy.detail.event);
     this.copyRegion.emit(data);
+    e.preventDefault();
+  }
+
+  /**
+ * Listen to copy event and emit copy region event
+ */
+  @Listen('cut', { target: 'document' }) cutStarted(e: ClipboardEvent) {
+    const beforeCut = this.beforeCut.emit({
+      event: e,
+    });
+    if (beforeCut.defaultPrevented) {
+      return;
+    }
+    const data = this.getData(beforeCut.detail.event);
+    this.copyStarted(e);
+    this.clearRegion.emit(data);
     e.preventDefault();
   }
 

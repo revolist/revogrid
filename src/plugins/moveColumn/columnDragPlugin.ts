@@ -155,7 +155,7 @@ export default class ColumnPlugin extends BasePlugin {
   }
 
   move(e: MouseEvent): void {
-    dispatch(this.revogrid, MOVE, { ...e });
+    dispatch(this.revogrid, MOVE, e);
     // then do move
     this.moveFunc(e);
   }

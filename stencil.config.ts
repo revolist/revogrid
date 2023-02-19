@@ -21,13 +21,6 @@ export const config: Config = {
   hashedFileNameLength: 8,
   invisiblePrehydration: false,
   extras: {
-    // We need the following for IE11 and old Edge:
-    cssVarsShim: true,
-    dynamicImportShim: true,
-    // We don’t use shadow DOM so this is not needed:
-    shadowDomShim: false,
-    // Setting the below option to “true” will actually break Safari 10 support:
-    safari10: false,
     // This is to tackle an Angular specific performance issue:
     initializeNextTick: true,
     // Don’t need any of these so setting them to “false”:
@@ -78,24 +71,23 @@ export const config: Config = {
         legacy: false,
         includePolyfills: false,
       }), */
-    vue2OutputTarget({
-      componentCorePackage,
-      proxiesFile: directivesProxyFile('vue2'),
-      includeDefineCustomElements: true,
-      loaderDir: 'custom-element',
-      componentModels: [],
-    }),
+    // vue2OutputTarget({
+    //   componentCorePackage,
+    //   proxiesFile: directivesProxyFile('vue2'),
+    //   includeDefineCustomElements: true,
+    //   loaderDir: 'custom-element',
+    //   componentModels: [],
+    // }),
     // custom element, no polifil
     {
       type: 'dist-custom-elements',
       dir: 'custom-element',
-      autoDefineCustomElements: true,
+      customElementsExportBehavior: 'single-export-module',
+      externalRuntime: true,
       empty: true,
     },
-    // lazy loading
     {
       type: 'dist',
-      esmLoaderPath: '../loader',
     },
     {
       type: 'docs-readme',

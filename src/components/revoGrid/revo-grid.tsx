@@ -998,17 +998,20 @@ export class RevoGridComponent {
         range={this.range}
         rowClass={this.rowClass}
         editors={this.editors}
-        onCancelEdit={() => {
-          this.selectionStoreConnector.setEdit(false);
-        }}
         applyEditorChangesOnClose={this.applyOnClose}
         useClipboard={this.useClipboard}
         columns={this.viewport.columns}
+        onSelectAll={() => {
+          this.selectionStoreConnector.selectAll();
+        }}
         onEdit={detail => {
           const event = this.beforeeditstart.emit(detail);
           if (!event.defaultPrevented) {
             this.selectionStoreConnector.setEdit(detail.val);
           }
+        }}
+        onCancelEdit={() => {
+          this.selectionStoreConnector.setEdit(false);
         }}
         registerElement={(e, k) => this.scrollingService.registerElement(e, k)}
         onScroll={(details, k) => this.scrollingService.onScroll(details, k)}

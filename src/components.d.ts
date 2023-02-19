@@ -19,6 +19,20 @@ import { LogicFunction } from "./plugins/filter/filter.types";
 import { DataSourceState, Groups } from "./store/dataSource/data.store";
 import { ViewportData } from "./components/revoGrid/viewport.interfaces";
 import { ElementScroll } from "./components/revoGrid/viewport.scrolling.service";
+export { ApplyFocusEvent, BeforeCellRenderEvent, DragStartEvent, Edition, FocusRenderEvent, Observable, RevoGrid, RevoPlugin, Selection, ThemeSpace } from "./interfaces";
+export { AutoSizeColumnConfig } from "./plugins/autoSizeColumn";
+export { ColumnFilterConfig, FilterCaptions, FilterCollection } from "./plugins/filter/filter.plugin";
+export { GroupingOptions } from "./plugins/groupingRow/grouping.row.types";
+export { FocusedData } from "./components/revoGrid/viewport.service";
+export { ColumnCollection } from "./services/column.data.provider";
+export { DataInput } from "./plugins/export/types";
+export { VNode } from "@stencil/core";
+export { ColumnSource, RowSource } from "./components/data/columnService";
+export { MultiFilterItem, ShowData } from "./plugins/filter/filter.pop";
+export { LogicFunction } from "./plugins/filter/filter.types";
+export { DataSourceState, Groups } from "./store/dataSource/data.store";
+export { ViewportData } from "./components/revoGrid/viewport.interfaces";
+export { ElementScroll } from "./components/revoGrid/viewport.scrolling.service";
 export namespace Components {
     interface RevoGrid {
         /**
@@ -305,7 +319,7 @@ export namespace Components {
         "dataStore": Observable<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
         "dimensionCol": Observable<RevoGrid.DimensionSettingsState>;
         "dimensionRow": Observable<RevoGrid.DimensionSettingsState>;
-        "dragStart": (e: MouseEvent) => Promise<void>;
+        "dragStart": (e: DragStartEvent) => Promise<void>;
         "endOrder": (e: MouseEvent) => Promise<void>;
         "parent": HTMLElement;
     }
@@ -827,6 +841,13 @@ declare namespace LocalJSX {
          */
         "onBeforecopyapply"?: (event: RevogrClipboardCustomEvent<any>) => void;
         /**
+          * Fired before cut triggered
+          * @event beforecopy
+          * @property {ClipboardEvent} event - original event
+          * @property {boolean} defaultPrevented - if true, cut will be canceled
+         */
+        "onBeforecut"?: (event: RevogrClipboardCustomEvent<any>) => void;
+        /**
           * Fired before paste applied to the grid
           * @event beforepaste
           * @property {string} raw - raw data from clipboard
@@ -841,6 +862,10 @@ declare namespace LocalJSX {
           * @property {string[][]} parsed - parsed data
          */
         "onBeforepasteapply"?: (event: RevogrClipboardCustomEvent<any>) => void;
+        /**
+          * Clears region when cut is done
+         */
+        "onClearRegion"?: (event: RevogrClipboardCustomEvent<DataTransfer>) => void;
         /**
           * Fired when region copied
           * @event copyregion
@@ -1028,6 +1053,7 @@ declare namespace LocalJSX {
          */
         "onRangeClipboardCopy"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
         "onRangeClipboardPaste"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
+        "onSelectall"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
         "onSetEdit"?: (event: RevogrOverlaySelectionCustomEvent<Edition.BeforeEdit>) => void;
         "onSetRange"?: (event: RevogrOverlaySelectionCustomEvent<Selection.RangeArea & { type: RevoGrid.MultiDimensionType }>) => void;
         "onSetTempRange"?: (event: RevogrOverlaySelectionCustomEvent<Selection.TempRange | null>) => void;

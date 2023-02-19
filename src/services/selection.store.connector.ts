@@ -258,6 +258,22 @@ export default class SelectionStoreConnector {
     this.focusedStore.entity.setEdit(val);
   }
 
+  /**
+   * Select all cells across all stores
+   */
+  selectAll() {
+    for (let y in this.stores) {
+      for (let x in this.stores[y]) {
+        const store = this.stores[y][x];
+        if (!store) {
+          continue;
+        }
+        const lastCell = store.store.get('lastCell');
+        store.setRange({ x: 0, y: 0 }, { x: lastCell.x - 1, y: lastCell.y - 1 });
+      }
+    }
+  }
+
   private getXStores(y: number) {
     return this.stores[y];
   }

@@ -1,6 +1,6 @@
 import { Component, Event, EventEmitter, h, Host, Listen, Prop, VNode, Element, Watch } from '@stencil/core';
 
-import { AllDimensionType, ApplyFocusEvent, FocusRenderEvent, Edition, Observable, RevoGrid, Selection } from '../../interfaces';
+import { AllDimensionType, ApplyFocusEvent, FocusRenderEvent, Edition, Observable, RevoGrid, Selection, DragStartEvent } from '../../interfaces';
 import ColumnService from '../data/columnService';
 import SelectionStoreService from '../../store/selection/selection.store.service';
 import { codesLetter } from '../../utils/keyCodes';
@@ -68,11 +68,12 @@ export class OverlaySelection {
   @Event({ cancelable: true }) internalCellEdit: EventEmitter<Edition.BeforeSaveDataDetails>;
   @Event({ cancelable: true }) beforeFocusCell: EventEmitter<Edition.BeforeSaveDataDetails>;
 
-  @Event({ bubbles: false }) setEdit: EventEmitter<Edition.BeforeEdit>;
+  @Event() setEdit: EventEmitter<Edition.BeforeEdit>;
   @Event({ eventName: 'before-apply-range' }) beforeApplyRange: EventEmitter<FocusRenderEvent>;
   @Event({ eventName: 'before-set-range' }) beforeSetRange: EventEmitter;
   @Event({ eventName: 'before-edit-render' }) beforeEditRender: EventEmitter<FocusRenderEvent>;
   @Event() setRange: EventEmitter<Selection.RangeArea & { type: RevoGrid.MultiDimensionType }>;
+  @Event({ eventName: 'selectall' }) selectAll: EventEmitter;
   /**
    * Used for editors support when close requested
    */
@@ -122,7 +123,7 @@ export class OverlaySelection {
   }
 
   /** Row drag started */
-  @Listen('dragStartCell') onCellDrag(e: CustomEvent<MouseEvent>) {
+  @Listen('dragStartCell') onCellDrag(e: CustomEvent<DragStartEvent>) {
     this.orderEditor?.dragStart(e.detail);
   }
 
@@ -161,6 +162,7 @@ export class OverlaySelection {
       clearCell: () => !this.readonly && this.clearCell(),
       internalPaste: () => !this.readonly && this.internalPaste.emit(),
       getData: () => this.getData(),
+      selectAll: () => this.selectAll.emit(),
     });
     this.createAutoFillService();
     this.createClipboardService();
@@ -206,8 +208,8 @@ export class OverlaySelection {
       selectionStoreService: this.selectionStoreService,
       columnService: this.columnService,
       dataStore: this.dataStore,
-      onRangeApply: (d, r) => this.autoFillService.onRangeApply(d, r),
-      onRangeCopy: (range) => {
+      rangeApply: (d, r) => this.autoFillService.onRangeApply(d, r),
+      rangeCopy: (range) => {
         if (!range) {
           return undefined;
         }
@@ -226,6 +228,7 @@ export class OverlaySelection {
         }
         return event.detail.data;
       },
+      rangeClear: () => !this.readonly && this.clearCell(),
       beforeCopy: (range) => this.internalCopy.emit(range),
       beforePaste: (data, range) => {
         return this.rangeClipboardPaste.emit({

@@ -36,7 +36,7 @@ Type: `Promise<void>`
 
 
 
-### `dragStart(e: MouseEvent) => Promise<void>`
+### `dragStart(e: DragStartEvent) => Promise<void>`
 
 
 

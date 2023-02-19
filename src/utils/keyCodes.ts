@@ -53,8 +53,10 @@ enum codes {
 enum codesLetter {
   ENTER = 'Enter',
   ENTER_NUM = 'NumpadEnter',
-  V = 'KeyV',
+  A = 'KeyA',
   C = 'KeyC',
+  X = 'KeyX',
+  V = 'KeyV',
   ESCAPE = 'Escape',
   TAB = 'Tab',
   BACKSPACE = 'Backspace',

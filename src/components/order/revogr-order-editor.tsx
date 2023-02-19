@@ -1,7 +1,7 @@
 import { Component, Method, Event, EventEmitter, Prop, Listen } from '@stencil/core';
 import debounce from 'lodash/debounce';
 
-import { Observable, RevoGrid, Selection } from '../../interfaces';
+import { DragStartEvent, Observable, RevoGrid, Selection } from '../../interfaces';
 import { DataSourceState, setItems } from '../../store/dataSource/data.store';
 import { DRAGG_TEXT } from '../../utils/consts';
 import RowOrderService from './rowOrderService';
@@ -78,8 +78,8 @@ export class OrderEditor {
   //
   // --------------------------------------------------------------------------
 
-  @Method() async dragStart(e: MouseEvent): Promise<void> {
-    e.preventDefault();
+  @Method() async dragStart(e: DragStartEvent) {
+    e.originalEvent.preventDefault();
 
     // extra check if previous ended
     if (this.moveFunc) {
@@ -87,9 +87,9 @@ export class OrderEditor {
     }
 
     const data = this.getData();
-    const cell = this.rowOrderService.startOrder(e, data);
-    const pos = this.rowOrderService.getRow(e.y, data);
-    const dragStartEvent = this.internalRowDragStart.emit({ cell, text: DRAGG_TEXT, pos, event: e });
+    const cell = this.rowOrderService.startOrder(e.originalEvent, data);
+    const pos = this.rowOrderService.getRow(e.originalEvent.y, data);
+    const dragStartEvent = this.internalRowDragStart.emit({ cell, text: DRAGG_TEXT, pos, event: e.originalEvent });
     if (dragStartEvent.defaultPrevented) {
       return;
     }
@@ -98,12 +98,12 @@ export class OrderEditor {
     document.addEventListener('mousemove', this.moveFunc);
   }
 
-  @Method() async endOrder(e: MouseEvent): Promise<void> {
+  @Method() async endOrder(e: MouseEvent) {
     this.rowOrderService.endOrder(e, this.getData());
     this.clearOrder();
   }
 
-  @Method() async clearOrder(): Promise<void> {
+  @Method() async clearOrder() {
     this.rowOrderService.clear();
     document.removeEventListener('mousemove', this.moveFunc);
     this.moveFunc = null;

@@ -172,7 +172,11 @@ export default class ColumnService {
           continue;
         }
 
-        const p = this.columns[colIndex].prop;
+        // requested column beyond range
+        if (!this.columns[colIndex]) {
+          continue;
+        }
+        const prop = this.columns[colIndex]?.prop;
         const copyColIndex = d.oldRange.x + j % copyColLength;
         const copyColumnProp = columns[copyColIndex].prop;
 
@@ -182,12 +186,12 @@ export default class ColumnService {
           if (!changed[rowIndex]) {
             changed[rowIndex] = {};
           }
-          changed[rowIndex][p] = copyRow[copyColumnProp];
+          changed[rowIndex][prop] = copyRow[copyColumnProp];
           /** Generate mapping object */
           if (!mapping[rowIndex]) {
             mapping[rowIndex] = {};
           }
-          mapping[rowIndex][p] = {
+          mapping[rowIndex][prop] = {
             colProp: copyColumnProp,
             rowIndex: oldRowIndex
           };
@@ -266,6 +270,10 @@ export default class ColumnService {
     for (let rowIndex = d.y, i = 0; rowIndex < d.y1 + 1; rowIndex++, i++) {
       // columns
       for (let colIndex = d.x, j = 0; colIndex < d.x1 + 1; colIndex++, j++) {
+        // requested column beyond range
+        if (!this.columns[colIndex]) {
+          continue;
+        }
         const p = this.columns[colIndex].prop;
 
         /** if can write */
@@ -316,19 +324,26 @@ export default class ColumnService {
     const cols = [...this.columns];
     const props = slice(cols, range.x, range.x1 + 1).map(v => v.prop);
     const toCopy: RevoGrid.DataFormat[][] = [];
-    const mapping: any = {};
+    const mapping: { [rowIndex: number]: { [colProp: RevoGrid.ColumnProp]: any } } = {};
+
+    // rows indexes
     for (let i = range.y; i <= range.y1; i++) {
       const rgRow: RevoGrid.DataFormat[] = [];
       mapping[i] = {};
+
+      // columns indexes
       for (let prop of props) {
         const item = getSourceItem(store, i);
+
+        // if no item - skip
         if (!item) {
           continue;
         }
         const val = item[prop];
-        rgRow.push();
+        rgRow.push(val);
         mapping[i][prop] = val;
       }
+
       toCopy.push(rgRow);
     }
     return {

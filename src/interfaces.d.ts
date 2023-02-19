@@ -352,8 +352,9 @@ export type ViewportStores = {
 };
 
 export type DragStartEvent = {
+  originalEvent: MouseEvent;
   model: RevoGrid.ColumnDataSchemaModel;
-} & MouseEvent;
+};
 
 export interface BeforeCellRenderEvent extends AllDimensionType {
   column: RevoGrid.VirtualPositionItem;

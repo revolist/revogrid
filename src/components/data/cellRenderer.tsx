@@ -13,8 +13,8 @@ const CellRenderer = ({ model, onDragStart }: Props) => {
   const els: (VNode | string)[] = [];
   if (model.column.rowDrag && isRowDragService(model.column.rowDrag, model)) {
     els.push(
-      <span class={DRAGGABLE_CLASS} onMouseDown={e => onDragStart({
-        ...e,
+      <span class={DRAGGABLE_CLASS} onMouseDown={originalEvent => onDragStart({
+        originalEvent,
         model
       })}>
         <span class={DRAG_ICON_CLASS} />

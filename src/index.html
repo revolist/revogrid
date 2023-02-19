@@ -218,12 +218,7 @@
           const grid = document.querySelector('revo-grid');
           const data = generateFakeDataObject(defaultData);
 
-          // don't re-set columns in order to allow testing
-          // of sorting plugin's sortItems() method.
-          if (!grid.columns || grid.columns.length != data.headers.length) {
-            grid.columns = data.headers;
-          }
-          
+          grid.columns = data.headers;
           grid.source = data.rows;
 
           grid.pinnedTopSource = data.pinnedTopRows;
@@ -319,8 +314,8 @@
       setData({ rows: 100, cols: 10,  });
 
       // events testing
-      // 'beforerange', 'setRange', 'beforefocuslost', 'beforecellfocus', 'beforeedit'
-      const events = ['beforeedit', 'aftercolumnresize', 'beforerange', 'setRange', 'beforefocuslost', 'beforecellfocus', 'beforeedit', 'afterfocus'];
+      // 'beforerange', 'setRange', 'beforefocuslost', 'beforecellfocus', 'beforeedit', 'beforeedit', 'aftercolumnresize', 'beforerange', 'setRange', 'beforefocuslost', 'beforecellfocus', 'beforeedit', 'afterfocus'
+      const events = [];
       events.forEach(e => {
         grid.addEventListener(e, $e => {
           if (window.eventsPrevented[e]) {

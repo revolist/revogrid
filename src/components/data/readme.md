@@ -21,11 +21,11 @@
 
 ## Events
 
-| Event                | Description | Type                                                          |
-| -------------------- | ----------- | ------------------------------------------------------------- |
-| `before-cell-render` |             | `CustomEvent<BeforeCellRenderEvent>`                          |
-| `beforeRowRender`    |             | `CustomEvent<any>`                                            |
-| `dragStartCell`      |             | `CustomEvent<{ model: ColumnDataSchemaModel; } & MouseEvent>` |
+| Event                | Description | Type                                                                        |
+| -------------------- | ----------- | --------------------------------------------------------------------------- |
+| `before-cell-render` |             | `CustomEvent<BeforeCellRenderEvent>`                                        |
+| `beforeRowRender`    |             | `CustomEvent<any>`                                                          |
+| `dragStartCell`      |             | `CustomEvent<{ originalEvent: MouseEvent; model: ColumnDataSchemaModel; }>` |
 
 
 ## Dependencies

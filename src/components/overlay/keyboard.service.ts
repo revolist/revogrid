@@ -10,13 +10,15 @@ import { RESIZE_INTERVAL } from '../../utils/consts';
 type Config = {
   selectionStoreService: SelectionStoreService;
   selectionStore: Observable<Selection.SelectionStoreState>;
-  range(range: Selection.RangeArea): boolean;
-  focusNext(focus: Selection.Cell, next: Partial<Selection.Cell>): boolean;
+
   applyEdit(val?: any): void;
   cancelEdit(): void;
   clearCell(): void;
+  focusNext(focus: Selection.Cell, next: Partial<Selection.Cell>): boolean;
   getData(): any;
   internalPaste(): void;
+  range(range: Selection.RangeArea): boolean;
+  selectAll(): void;
 };
 
 const DIRECTION_CODES: string[] = [
@@ -81,9 +83,22 @@ export class KeyboardService {
       return;
     }
 
+    // cut operation
+    if (this.isCut(e)) {
+      return;
+    }
+
     // paste operation
     if (this.isPaste(e)) {
       this.sv.internalPaste();
+      return;
+    }
+
+    // select all
+    if (this.isAll(e)) {
+      if (canRange) {
+        this.selectAll(e);
+      }
       return;
     }
 
@@ -97,6 +112,17 @@ export class KeyboardService {
     if (await this.keyChangeSelection(e, canRange)) {
       return;
     }
+  }
+
+  private selectAll(e: KeyboardEvent) {
+    const range = this.sv.selectionStore.get('range');
+    const focus = this.sv.selectionStore.get('focus');
+    // if no range or focus - do nothing
+    if (!range || !focus) {
+      return;
+    }
+    e.preventDefault();
+    this.sv.selectAll();
   }
 
   async keyChangeSelection(e: KeyboardEvent, canRange: boolean) {
@@ -144,14 +170,18 @@ export class KeyboardService {
       this.ctrlDown = false;
     }
   }
-
+  isCut(e: KeyboardEvent): boolean {
+    return this.ctrlDown && e.code == codesLetter.X;
+  }
   isCopy(e: KeyboardEvent): boolean {
     return this.ctrlDown && e.code == codesLetter.C;
   }
   isPaste(e: KeyboardEvent): boolean {
     return this.ctrlDown && e.code == codesLetter.V;
   }
-
+  isAll(e: KeyboardEvent): boolean {
+    return this.ctrlDown && e.code == codesLetter.A;
+  }
   /** Monitor key direction changes */
   changeDirectionKey(e: KeyboardEvent, canRange: boolean): { changes: Partial<Selection.Cell>; isMulti?: boolean } | void {
     const isMulti = canRange && e.shiftKey;
