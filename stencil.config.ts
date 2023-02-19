@@ -4,7 +4,7 @@ import { sass } from '@stencil/sass';
 // import { reactOutputTarget } from '@stencil/react-output-target';
 // import { vueOutputTarget } from '@stencil/vue-output-target';
 // import { svelteOutputTarget } from '@stencil/svelte-output-target';
-import { vueOutputTarget as vue2OutputTarget } from "@revolist/stencil-vue2-output-target";
+// import { vueOutputTarget as vue2OutputTarget } from "@revolist/stencil-vue2-output-target";
 
 const componentCorePackage = '@revolist/revogrid';
 const parent = '../revogrid-proxy';
@@ -82,12 +82,15 @@ export const config: Config = {
     {
       type: 'dist-custom-elements',
       dir: 'custom-element',
-      customElementsExportBehavior: 'single-export-module',
+      customElementsExportBehavior: 'bundle', // stencil 3.0
+      // autoDefineCustomElements: true,
       externalRuntime: true,
       empty: true,
     },
     {
       type: 'dist',
+      esmLoaderPath: '../loader',
+      empty: true,
     },
     {
       type: 'docs-readme',

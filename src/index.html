@@ -315,7 +315,7 @@
 
       // events testing
       // 'beforerange', 'setRange', 'beforefocuslost', 'beforecellfocus', 'beforeedit', 'beforeedit', 'aftercolumnresize', 'beforerange', 'setRange', 'beforefocuslost', 'beforecellfocus', 'beforeedit', 'afterfocus'
-      const events = [];
+      const events = ['beforecopyapply'];
       events.forEach(e => {
         grid.addEventListener(e, $e => {
           if (window.eventsPrevented[e]) {
