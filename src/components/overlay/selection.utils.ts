@@ -66,30 +66,30 @@ export function isBeforeFirst({ x, y }: Cell) {
 }
 
 /** Compare cells, only 1 coordinate difference is possible */
-export function getDirectionCoordinate(initial: Cell, last: Cell): Partial<Cell> | null {
-  const c: (keyof Cell)[] = ['x', 'y'];
-  for (let k of c) {
-    if (initial[k] !== last[k]) {
-      return { [k]: 1 };
-    }
-  }
-  return null;
-}
+// export function getDirectionCoordinate(initial: Cell, last: Cell): Partial<Cell> | null {
+//   const c: (keyof Cell)[] = ['x', 'y'];
+//   for (let k of c) {
+//     if (initial[k] !== last[k]) {
+//       return { [k]: 1 };
+//     }
+//   }
+//   return null;
+// }
 
-export function getLargestAxis(initial: Cell, last: Cell): Partial<Cell> | null {
-  const cell: Partial<Cell> = {};
-  const c: (keyof Cell)[] = ['x', 'y'];
-  for (let k of c) {
-    cell[k] = Math.abs(initial[k] - last[k]);
-  }
-  if (cell.x > cell.y) {
-    return { x: 1 };
-  }
-  if (cell.y > cell.x) {
-    return { y: 1 };
-  }
-  return null;
-}
+// export function getLargestAxis(initial: Cell, last: Cell): Partial<Cell> | null {
+//   const cell: Partial<Cell> = {};
+//   const c: (keyof Cell)[] = ['x', 'y'];
+//   for (let k of c) {
+//     cell[k] = Math.abs(initial[k] - last[k]);
+//   }
+//   if (cell.x > cell.y) {
+//     return { x: 1 };
+//   }
+//   if (cell.y > cell.x) {
+//     return { y: 1 };
+//   }
+//   return null;
+// }
 
 function styleByCellProps(styles: { [key: string]: number }): Selection.RangeAreaCss {
   return {

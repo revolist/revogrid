@@ -150,15 +150,18 @@ export class OverlaySelection {
     this.keyboardService = new KeyboardService({
       selectionStoreService: this.selectionStoreService,
       selectionStore: s,
-      range: (r) => this.selectionStoreService.changeRange(r),
+      range: r => this.selectionStoreService.changeRange(r),
       focusNext: (f, next) => this.doFocus(f, f, next),
-      applyEdit: (val) => {
+      applyEdit: val => {
         if (this.readonly) {
           return;
         }
         this.doEdit(val);
       },
-      cancelEdit: async() => { await this.revogrEdit.cancel(); this.closeEdit();},
+      cancelEdit: async () => {
+        await this.revogrEdit.cancel();
+        this.closeEdit();
+      },
       clearCell: () => !this.readonly && this.clearCell(),
       internalPaste: () => !this.readonly && this.internalPaste.emit(),
       getData: () => this.getData(),
@@ -178,10 +181,11 @@ export class OverlaySelection {
       columnService: this.columnService,
       dataStore: this.dataStore,
 
-      clearRangeDataApply: e => this.beforeRangeDataApply.emit({
-        ...e,
-        ...this.types
-      }),
+      clearRangeDataApply: e =>
+        this.beforeRangeDataApply.emit({
+          ...e,
+          ...this.types,
+        }),
       setTempRange: e => this.setTempRange.emit(e),
       selectionChanged: e => this.internalSelectionChanged.emit(e),
       rangeCopy: e => this.beforeRangeCopyApply.emit(e),
@@ -209,19 +213,16 @@ export class OverlaySelection {
       columnService: this.columnService,
       dataStore: this.dataStore,
       rangeApply: (d, r) => this.autoFillService.onRangeApply(d, r),
-      rangeCopy: (range) => {
+      rangeCopy: range => {
         if (!range) {
           return undefined;
         }
-        const {
-          data,
-          mapping
-        } = this.columnService.copyRangeArray(range, this.dataStore);
+        const { data, mapping } = this.columnService.copyRangeArray(range, this.dataStore);
         const event = this.rangeClipboardCopy.emit({
           range,
           data,
           mapping,
-          ...this.types
+          ...this.types,
         });
         if (event.defaultPrevented) {
           return undefined;
@@ -229,14 +230,14 @@ export class OverlaySelection {
         return event.detail.data;
       },
       rangeClear: () => !this.readonly && this.clearCell(),
-      beforeCopy: (range) => this.internalCopy.emit(range),
+      beforeCopy: range => this.internalCopy.emit(range),
       beforePaste: (data, range) => {
         return this.rangeClipboardPaste.emit({
           data,
           range,
-          ...this.types
-        })
-      }
+          ...this.types,
+        });
+      },
     });
   }
 
@@ -271,17 +272,19 @@ export class OverlaySelection {
         x1: editCell.x,
         y1: editCell.y,
       },
-      ...this.types
+      ...this.types,
     });
     if (renderEvent.defaultPrevented) {
       return null;
     }
 
-    const { detail: { range } } = renderEvent;
+    const {
+      detail: { range },
+    } = renderEvent;
     const style = getElStyle(range, this.dimensionRow.state, this.dimensionCol.state);
     return (
       <revogr-edit
-        ref={(el) => {
+        ref={el => {
           this.revogrEdit = el;
         }}
         onCellEdit={e => {
@@ -345,9 +348,7 @@ export class OverlaySelection {
   }
 
   private doFocus(focus: Selection.Cell, end: Selection.Cell, next?: Partial<Selection.Cell>) {
-    const { defaultPrevented } = this.beforeFocusCell.emit(
-      this.columnService.getSaveData(focus.y, focus.x)
-    );
+    const { defaultPrevented } = this.beforeFocusCell.emit(this.columnService.getSaveData(focus.y, focus.x));
     if (defaultPrevented) {
       return false;
     }
@@ -355,10 +356,10 @@ export class OverlaySelection {
       range: {
         ...focus,
         x1: end.x,
-        y1: end.y
+        y1: end.y,
       },
       next,
-      ...this.types
+      ...this.types,
     };
     const applyEvent = this.applyFocus.emit(evData);
     if (applyEvent.defaultPrevented) {
@@ -374,7 +375,7 @@ export class OverlaySelection {
         x: range.x1,
         y: range.y1,
       },
-      ...applyEvent.detail
+      ...applyEvent.detail,
     }).defaultPrevented;
   }
 
@@ -382,7 +383,7 @@ export class OverlaySelection {
     const type = this.types.rowType;
     const applyEvent = this.beforeApplyRange.emit({
       range: { ...range },
-      ...this.types
+      ...this.types,
     });
     if (applyEvent.defaultPrevented) {
       return false;
@@ -481,7 +482,7 @@ export class OverlaySelection {
   get types(): AllDimensionType {
     return {
       rowType: this.dataStore.get('type'),
-      colType: this.columnService.type
+      colType: this.columnService.type,
     };
   }
 

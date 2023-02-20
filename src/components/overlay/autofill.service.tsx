@@ -1,11 +1,10 @@
 import debounce from 'lodash/debounce';
 import { DebouncedFunc } from 'lodash';
-import each from 'lodash/each';
 
 import { h } from '@stencil/core';
 import { CELL_HANDLER_CLASS } from '../../utils/consts';
 import { Observable, Selection, RevoGrid, Edition } from '../../interfaces';
-import { EventData, getCell, getCurrentCell, getDirectionCoordinate, getLargestAxis, isAfterLast } from './selection.utils';
+import { EventData, getCell, getCurrentCell, isAfterLast } from './selection.utils';
 import { getRange } from '../../store/selection/selection.helpers';
 import SelectionStoreService from '../../store/selection/selection.store.service';
 import ColumnService from '../data/columnService';
@@ -111,30 +110,14 @@ export class AutoFillService {
     if (!this.autoFillInitial) {
       return;
     }
-    let current = getCurrentCell({ x, y }, data);
-    let direction: Partial<Selection.Cell> | null;
-    if (this.autoFillLast) {
-      direction = getDirectionCoordinate(this.autoFillStart, this.autoFillLast);
-    }
+    const current = getCurrentCell({ x, y }, data);
 
     // first time or direction equal to start(same as first time)
-    if (!this.autoFillLast || !direction) {
-      direction = getLargestAxis(this.autoFillStart, current);
-
+    if (!this.autoFillLast) {
       if (!this.autoFillLast) {
         this.autoFillLast = this.autoFillStart;
       }
     }
-
-    // nothing changed
-    if (!direction) {
-      return;
-    }
-    each(direction, (v: number, k: keyof Selection.Cell) => {
-      if (v) {
-        current = { ...this.autoFillLast, [k]: current[k] };
-      }
-    });
 
     // check if not the latest
     if (isAfterLast(current, data)) {
