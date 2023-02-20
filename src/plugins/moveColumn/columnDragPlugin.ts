@@ -200,7 +200,7 @@ export default class ColumnPlugin extends BasePlugin {
     this.staticDragData = null;
     this.dragData = null;
     this.clearLocalSubscriptions();
-    this.orderUi.stop();
+    this.orderUi.stop(this.revogrid);
   }
   /**
    * Clearing subscription

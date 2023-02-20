@@ -130,4 +130,11 @@ revo-grid {
     }
   }
 }
-  
+
+revo-grid[can-move-columns] {
+  &.column-drag-start:hover {
+    &, * {
+      cursor: grabbing;
+    }
+  }
+}
