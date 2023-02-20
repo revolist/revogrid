@@ -10,6 +10,7 @@ type Props = {
   end: number;
   group: Group;
   providers: RevoGrid.Providers;
+  additionalData: any;
   canResize?: boolean;
   onResize?(e: ResizeEvent): void;
 };
@@ -39,6 +40,7 @@ const GroupHeaderRenderer = (p: Props): VNode[] => {
         index: p.start,
       }}
       props={groupProps}
+      additionalData={p.additionalData}
     />
   );
 };

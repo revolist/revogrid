@@ -252,6 +252,10 @@ export namespace Components {
     }
     interface RevogrData {
         /**
+          * Additional data to pass to renderer
+         */
+        "additionalData": any;
+        /**
           * Static stores, not expected to change during component lifetime
          */
         "colData": ColumnSource;
@@ -300,6 +304,7 @@ export namespace Components {
         "selectionStore": Observable<Selection.SelectionStoreState>;
     }
     interface RevogrHeader {
+        "additionalData": any;
         "canResize": boolean;
         "colData": RevoGrid.ColumnRegular[];
         "columnFilter": boolean;
@@ -357,6 +362,10 @@ export namespace Components {
      * Visible on the left side of the table
      */
     interface RevogrRowHeaders {
+        /**
+          * Additional data to pass to renderer
+         */
+        "additionalData": any;
         "dataPorts": ViewportData[];
         "headerProp": Record<string, any>;
         "height": number;
@@ -883,6 +892,10 @@ declare namespace LocalJSX {
     }
     interface RevogrData {
         /**
+          * Additional data to pass to renderer
+         */
+        "additionalData"?: any;
+        /**
           * Static stores, not expected to change during component lifetime
          */
         "colData": ColumnSource;
@@ -945,6 +958,7 @@ declare namespace LocalJSX {
         "selectionStore": Observable<Selection.SelectionStoreState>;
     }
     interface RevogrHeader {
+        "additionalData"?: any;
         "canResize"?: boolean;
         "colData"?: RevoGrid.ColumnRegular[];
         "columnFilter"?: boolean;
@@ -1070,6 +1084,10 @@ declare namespace LocalJSX {
      * Visible on the left side of the table
      */
     interface RevogrRowHeaders {
+        /**
+          * Additional data to pass to renderer
+         */
+        "additionalData"?: any;
         "dataPorts"?: ViewportData[];
         "headerProp"?: Record<string, any>;
         "height"?: number;

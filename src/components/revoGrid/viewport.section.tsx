@@ -14,6 +14,7 @@ type Props = {
   resize: boolean;
   columns: ViewportProps[];
   columnFilter: boolean;
+  additionalData: any;
   focusTemplate: RevoGrid.FocusTemplateFunc;
   onScroll(e: RevoGrid.ViewPortScrollEvent, key?: RevoGrid.DimensionColPin | string): void;
   onCancelEdit(): void;
@@ -27,8 +28,8 @@ type Props = {
  * Per each column we render data collections: headers, pinned top, center data, pinned bottom
  */
 export const ViewPortSections = ({
-  resize, editors, rowClass, readonly, range, columns, useClipboard, columnFilter, applyEditorChangesOnClose, onCancelEdit,
-  registerElement, onEdit, onScroll, focusTemplate, onSelectAll,
+  resize, editors, rowClass, readonly, range, columns, useClipboard, columnFilter, applyEditorChangesOnClose, additionalData,
+  onCancelEdit, registerElement, onEdit, onScroll, focusTemplate, onSelectAll,
 }: Props) => {
   const viewPortHtml: VNode[] = [];
   /** render viewports columns */
@@ -37,6 +38,7 @@ export const ViewPortSections = ({
     const headerProperties = {
       ...view.headerProp,
       type: view.type,
+      additionalData,
       viewportCol: view.viewportCol,
       selectionStore: view.columnSelectionStore,
       canResize: resize,
@@ -68,6 +70,7 @@ export const ViewPortSections = ({
             range={range}
             rowClass={rowClass}
             rowSelectionStore={data.rowSelectionStore}
+            additionalData={additionalData}
             slot={DATA_SLOT}
           />
           <revogr-temp-range selectionStore={data.segmentSelectionStore} dimensionRow={data.dimensionRow} dimensionCol={data.dimensionCol} />

@@ -26,7 +26,9 @@ export class RevogrRowHeaders {
 
   @Prop() resize: boolean;
   @Prop() rowHeaderColumn: RevoGrid.RowHeaders;
-  // @Event({ bubbles: false }) beforeRowAdd(y: number): EventEmitter<SelectionStore>;
+  /** Additional data to pass to renderer */
+  @Prop() additionalData: any;
+
   @Event({ bubbles: false }) scrollViewport: EventEmitter<RevoGrid.ViewPortScrollEvent>;
   @Event({ bubbles: false }) elementToScroll: EventEmitter<ElementScroll>;
 

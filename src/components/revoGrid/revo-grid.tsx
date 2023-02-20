@@ -978,6 +978,7 @@ export class RevoGridComponent {
       const anyView = this.viewport.columns[0];
       views.push(
         <revogr-row-headers
+          additionalData={this.additionalData}
           height={contentHeight}
           rowClass={this.rowClass}
           resize={this.resize}
@@ -992,6 +993,7 @@ export class RevoGridComponent {
     }
     views.push(
       <ViewPortSections
+        additionalData={this.additionalData}
         columnFilter={!!this.filter}
         resize={this.resize}
         readonly={this.readonly}

@@ -134,9 +134,9 @@ export declare namespace RevoGrid {
     (sel: any, data: any, children: T): T;
   }
   type FocusTemplateFunc = (createElement: HyperFunc<VNode>, detail: FocusRenderEvent) => any;
-  type CellTemplateFunc = (createElement: HyperFunc<VNode>, props: CellTemplateProp) => any;
+  type CellTemplateFunc = (createElement: HyperFunc<VNode>, props: CellTemplateProp, additionalData?: any) => any;
   type CellCompareFunc = (prop: ColumnProp, a: DataType, b: DataType) => number;
-  type ColumnTemplateFunc = (createElement: HyperFunc<VNode>, props: ColumnTemplateProp) => any;
+  type ColumnTemplateFunc = (createElement: HyperFunc<VNode>, props: ColumnTemplateProp, additionalData?: any) => any;
   type PropertiesFunc = (props: ColumnDataSchemaModel) => CellProps | void | undefined;
   type ColPropertiesFunc = (props: ColumnPropProp) => CellProps | void | undefined;
   type DataType = {

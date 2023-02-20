@@ -5,17 +5,18 @@ import { ResizableElement } from '../../services/resizable.directive';
 import ColumnService from '../data/columnService';
 
 type Props = {
-  data?: RevoGrid.ColumnTemplateProp;
   props: RevoGrid.CellProps;
+  additionalData: any;
+  data?: RevoGrid.ColumnTemplateProp;
 };
 
 const ON_COLUMN_CLICK = 'column-click';
 
-export const HeaderCellRenderer = ({ data, props }: Props, children: VNode[]): VNode => {
+export const HeaderCellRenderer = ({ data, props, additionalData }: Props, children: VNode[]): VNode => {
   let colTemplate: VNode | VNode[] | string = data?.name || '';
   let cellProps = props;
   if (data?.columnTemplate) {
-    colTemplate = data.columnTemplate(h, data);
+    colTemplate = data.columnTemplate(h, data, additionalData);
   }
   if (data?.columnProperties) {
     const extra = data.columnProperties(data);

@@ -91,10 +91,11 @@ export default class ColumnService {
   }
 
   customRenderer(
-    _: number, c: number, model: RevoGrid.ColumnDataSchemaModel, providers: RevoGrid.Providers): VNode | string | void {
+    c: number, model: RevoGrid.ColumnDataSchemaModel, providers: RevoGrid.Providers, additionalData: any
+  ): VNode | string | void {
     const tpl = this.columns[c]?.cellTemplate;
     if (tpl) {
-      return tpl(h, { ...model, providers });
+      return tpl(h, { ...model, providers }, additionalData);
     }
     return;
   }

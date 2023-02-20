@@ -8,6 +8,7 @@ import { HeaderCellRenderer } from './headerCellRenderer';
 
 type Props = {
   column: RevoGrid.VirtualPositionItem;
+  additionalData: any;
   data?: RevoGrid.ColumnTemplateProp;
   range?: Selection.RangeArea;
   canResize?: boolean;
@@ -52,7 +53,7 @@ const HeaderRenderer = (p: Props): VNode => {
     }
   }
   return (
-    <HeaderCellRenderer data={p.data} props={dataProps}>
+    <HeaderCellRenderer data={p.data} props={dataProps} additionalData={p.additionalData}>
       {p.data?.order ? <SortingSign column={p.data} /> : ''}
       {p.canFilter && p.data?.filter !== false ? <FilterButton column={p.data} /> : ''}
     </HeaderCellRenderer>

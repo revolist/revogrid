@@ -25,6 +25,8 @@ export class RevogrData {
   @Prop() range: boolean;
 
   @Prop() rowClass: string;
+  /** Additional data to pass to renderer */
+  @Prop() additionalData: any;
   @Prop() rowSelectionStore!: Observable<Selection.SelectionStoreState>;
   @Prop() viewportRow!: Observable<RevoGrid.ViewportState>;
   @Prop() viewportCol!: Observable<RevoGrid.ViewportState>;
@@ -80,7 +82,12 @@ export class RevogrData {
         rowClass += ' focused-rgRow';
       }
       for (let rgCol of cols) {
-        cells.push(this.getCellRenderer(rgRow, rgCol, /** grouping apply*/ this.columnService.hasGrouping ? depth : 0));
+        cells.push(
+          this.getCellRenderer(
+            rgRow, rgCol,
+            /** grouping apply*/ this.columnService.hasGrouping ? depth : 0
+          )
+        );
       }
       const row = <RowRenderer rowClass={rowClass} size={rgRow.size} start={rgRow.start}>
         {cells}
@@ -132,7 +139,9 @@ export class RevogrData {
       defaultProps.style.paddingLeft = `${PADDING_DEPTH * depth}px`;
     }
     const props = this.columnService.mergeProperties(rowProps.itemIndex, columnProps.itemIndex, defaultProps);
-    const custom = this.columnService.customRenderer(rowProps.itemIndex, columnProps.itemIndex, model, this.providers);
+    const custom = this.columnService.customRenderer(
+      columnProps.itemIndex, model, this.providers, this.additionalData
+    );
 
     // if custom render
     if (typeof custom !== 'undefined') {

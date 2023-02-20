@@ -26,6 +26,8 @@ export class RevogrHeaderComponent {
   @Prop() columnFilter: boolean;
   @Prop() type!: string;
 
+  @Prop() additionalData: any = {};
+
   @Event() initialHeaderClick: EventEmitter<RevoGrid.InitialHeaderClick>;
   @Event() headerresize: EventEmitter<RevoGrid.ViewSettingSizeProp>;
   @Event({ eventName: 'before-resize', cancelable: true }) beforeResize: EventEmitter<RevoGrid.ColumnRegular[]>;
@@ -76,6 +78,7 @@ export class RevogrHeaderComponent {
           }}
           canFilter={!!this.columnFilter}
           canResize={this.canResize}
+          additionalData={this.additionalData}
           onResize={e => this.onResize(e, rgCol.itemIndex)}
           onDoubleClick={e => this.headerdblClick.emit(e)}
           onClick={e => this.initialHeaderClick.emit(e)}
@@ -87,6 +90,7 @@ export class RevogrHeaderComponent {
     return [
       <div class="group-rgRow">
         <ColumnGroupsRenderer
+          additionalData={this.additionalData}
           canResize={this.canResize}
           visibleProps={visibleProps}
           providers={this.providers}
