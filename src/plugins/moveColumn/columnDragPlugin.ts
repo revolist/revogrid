@@ -67,6 +67,8 @@ export default class ColumnPlugin extends BasePlugin {
     this.orderUi = new ColumnOrderHandler();
     revogrid.registerVNode([this.orderUi.render()]);
 
+    revogrid.classList.add('column-draggable');
+
     /** Register events */
     this.localSubscriptions['mouseleave'] = {
       target: document,
