@@ -1,9 +1,12 @@
 import { h } from '@stencil/core';
 
+const COLUMN_DRAG_CLASS = 'column-drag-start';
+
 export class ColumnOrderHandler {
   private element?: HTMLDivElement;
   private autoscrollEl?: HTMLElement;
   private offset = 0;
+
   renderAutoscroll(_: MouseEvent, parent: HTMLElement | null) {
     if (!parent) {
       return;
@@ -29,11 +32,13 @@ export class ColumnOrderHandler {
     });
   }
 
-  start(e: MouseEvent, { dataEl, gridRect, scrollEl }: {
+  start(e: MouseEvent, { dataEl, gridRect, scrollEl, gridEl }: {
     dataEl: HTMLElement;
     gridRect: DOMRect;
     scrollEl: Element;
+    gridEl: Element;
   }, dir: 'top' | 'left'  = 'left') {
+    gridEl.classList.add(COLUMN_DRAG_CLASS);
     const scrollContainerRect = scrollEl.getBoundingClientRect();
     if (scrollContainerRect) {
       this.offset = scrollContainerRect[dir] - gridRect[dir];
@@ -41,7 +46,8 @@ export class ColumnOrderHandler {
     this.renderAutoscroll(e, dataEl);
   }
 
-  stop() {
+  stop(gridEl: Element) {
+    gridEl.classList.remove(COLUMN_DRAG_CLASS);
     if (this.element) {
       this.element.hidden = true;
     }
