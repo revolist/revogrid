@@ -6,12 +6,21 @@
 
 import { createStore } from '@stencil/store';
 
-import { addMissingItems, DimensionDataViewport, getFirstItem, getLastItem, getUpdatedItemsByPosition, isActiveRange, setItemSizes, updateMissingAndRange } from './viewport.helpers';
+import {
+  addMissingItems,
+  DimensionDataViewport,
+  getFirstItem,
+  getLastItem,
+  getUpdatedItemsByPosition,
+  isActiveRange,
+  setItemSizes,
+  updateMissingAndRange,
+} from './viewport.helpers';
 
 import { setStore } from '../../utils/store.utils';
 import { Observable, RevoGrid } from '../../interfaces';
 
-function initialState(type: RevoGrid.MultiDimensionType): RevoGrid.ViewportState {
+function initialState(): RevoGrid.ViewportState {
   return {
     // virtual item information per rendered item
     items: [],
@@ -25,17 +34,21 @@ function initialState(type: RevoGrid.MultiDimensionType): RevoGrid.ViewportState
 
     // total number of items
     realCount: 0,
-
-    // last coordinate for store position restore
-    lastCoordinate: 0,
-    type
   };
 }
 
 export default class ViewportStore {
   readonly store: Observable<RevoGrid.ViewportState>;
-  constructor(type: RevoGrid.MultiDimensionType) {
-    this.store = createStore(initialState(type));
+  // last coordinate for store position restore
+  private lastKnownScroll = 0;
+  get lastCoordinate() {
+    return this.lastKnownScroll;
+  }
+  private set lastCoordinate(value: number) {
+    this.lastKnownScroll = value;
+  }
+  constructor(readonly type: RevoGrid.MultiDimensionType) {
+    this.store = createStore(initialState());
     this.store.onChange('realCount', () => this.clearItems());
     // drop items on virtual size change, require a new item set
     this.store.onChange('virtualSize', () => this.setViewport({ items: [] }));
@@ -44,7 +57,7 @@ export default class ViewportStore {
   /**
    * Render viewport based on coordinate
    * It's the main method for draw
-  */
+   */
   setViewPortCoordinate(position: number, dimension: DimensionDataViewport) {
     let virtualSize = this.store.get('virtualSize');
     // no visible data to calculate
@@ -60,9 +73,7 @@ export default class ViewportStore {
     if (dimension.realSize > virtualSize) {
       maxCoordinate = dimension.realSize - virtualSize;
     }
-    let toUpdate: Partial<RevoGrid.ViewportState> = {
-      lastCoordinate: position,
-    };
+    this.lastCoordinate = position;
     let pos = position;
     pos -= frameOffset * dimension.originItemSize;
     pos = pos < 0 ? 0 : pos < maxCoordinate ? pos : maxCoordinate;
@@ -70,6 +81,7 @@ export default class ViewportStore {
     const firstItem = getFirstItem(this.getItems());
     const lastItem = getLastItem(this.getItems());
 
+    let toUpdate: Partial<RevoGrid.ViewportState> = {};
     // left position changed
     if (!isActiveRange(pos, firstItem)) {
       toUpdate = {
@@ -119,12 +131,7 @@ export default class ViewportStore {
 
     // drop to original size if requested
     if (dropToOriginalSize) {
-      items = setItemSizes(
-        items,
-        start,
-        dropToOriginalSize,
-        this.store.get('lastCoordinate')
-      );
+      items = setItemSizes(items, start, dropToOriginalSize, this.lastCoordinate);
     }
 
     // loop through array from initial item after recombination
@@ -144,7 +151,7 @@ export default class ViewportStore {
         changedCoordinate += changedSize;
         item.size = size;
         item.end = item.start + size;
-      // size lost
+        // size lost
       }
 
       // loop by start index
@@ -171,12 +178,7 @@ export default class ViewportStore {
     }
 
     setStore(this.store, {
-      items: setItemSizes(
-        items,
-        this.store.get('start'),
-        size,
-        this.store.get('lastCoordinate')
-      )
+      items: setItemSizes(items, this.store.get('start'), size, this.lastCoordinate),
     });
   }
 

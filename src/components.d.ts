@@ -250,6 +250,10 @@ export namespace Components {
     interface RevogrClipboard {
         "doCopy": (e: DataTransfer, data?: RevoGrid.DataFormat[][]) => Promise<void>;
     }
+    /**
+     * This component is responsible for rendering data
+     * Rows, columns, groups and cells
+     */
     interface RevogrData {
         /**
           * Additional data to pass to renderer
@@ -261,8 +265,17 @@ export namespace Components {
         "colData": ColumnSource;
         "dataStore": RowSource;
         "dimensionRow": Observable<RevoGrid.DimensionSettingsState>;
+        /**
+          * Range selection mode
+         */
         "range": boolean;
+        /**
+          * If readonly mode enables
+         */
         "readonly": boolean;
+        /**
+          * Defines property from which to read row class
+         */
         "rowClass": string;
         "rowSelectionStore": Observable<Selection.SelectionStoreState>;
         "type": RevoGrid.DimensionRows;
@@ -470,6 +483,10 @@ declare global {
         prototype: HTMLRevogrClipboardElement;
         new (): HTMLRevogrClipboardElement;
     };
+    /**
+     * This component is responsible for rendering data
+     * Rows, columns, groups and cells
+     */
     interface HTMLRevogrDataElement extends Components.RevogrData, HTMLStencilElement {
     }
     var HTMLRevogrDataElement: {
@@ -890,6 +907,10 @@ declare namespace LocalJSX {
          */
         "onPasteRegion"?: (event: RevogrClipboardCustomEvent<string[][]>) => void;
     }
+    /**
+     * This component is responsible for rendering data
+     * Rows, columns, groups and cells
+     */
     interface RevogrData {
         /**
           * Additional data to pass to renderer
@@ -904,8 +925,17 @@ declare namespace LocalJSX {
         "onBefore-cell-render"?: (event: RevogrDataCustomEvent<BeforeCellRenderEvent>) => void;
         "onBeforeRowRender"?: (event: RevogrDataCustomEvent<any>) => void;
         "onDragStartCell"?: (event: RevogrDataCustomEvent<DragStartEvent>) => void;
+        /**
+          * Range selection mode
+         */
         "range"?: boolean;
+        /**
+          * If readonly mode enables
+         */
         "readonly"?: boolean;
+        /**
+          * Defines property from which to read row class
+         */
         "rowClass"?: string;
         "rowSelectionStore": Observable<Selection.SelectionStoreState>;
         "type": RevoGrid.DimensionRows;
@@ -1150,6 +1180,10 @@ declare module "@stencil/core" {
         interface IntrinsicElements {
             "revo-grid": LocalJSX.RevoGrid & JSXBase.HTMLAttributes<HTMLRevoGridElement>;
             "revogr-clipboard": LocalJSX.RevogrClipboard & JSXBase.HTMLAttributes<HTMLRevogrClipboardElement>;
+            /**
+             * This component is responsible for rendering data
+             * Rows, columns, groups and cells
+             */
             "revogr-data": LocalJSX.RevogrData & JSXBase.HTMLAttributes<HTMLRevogrDataElement>;
             "revogr-edit": LocalJSX.RevogrEdit & JSXBase.HTMLAttributes<HTMLRevogrEditElement>;
             "revogr-filter-panel": LocalJSX.RevogrFilterPanel & JSXBase.HTMLAttributes<HTMLRevogrFilterPanelElement>;

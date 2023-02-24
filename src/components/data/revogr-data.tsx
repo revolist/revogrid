@@ -12,6 +12,11 @@ import GroupingRowRenderer from '../../plugins/groupingRow/grouping.row.renderer
 import { isGrouping } from '../../plugins/groupingRow/grouping.service';
 
 const DRAG_START_EVENT = 'dragStartCell';
+
+/**
+ * This component is responsible for rendering data
+ * Rows, columns, groups and cells
+ */
 @Component({
   tag: 'revogr-data',
   styleUrl: 'revogr-data-style.scss',
@@ -21,9 +26,18 @@ export class RevogrData {
 
   @Element() element!: HTMLStencilElement;
 
+  /**
+   * If readonly mode enables
+   */
   @Prop() readonly: boolean;
+  /**
+   * Range selection mode
+  */
   @Prop() range: boolean;
 
+  /**
+   * Defines property from which to read row class
+   */
   @Prop() rowClass: string;
   /** Additional data to pass to renderer */
   @Prop() additionalData: any;

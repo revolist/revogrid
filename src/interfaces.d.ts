@@ -178,8 +178,6 @@ export declare namespace RevoGrid {
   interface ViewportState extends ViewportStateItems {
     realCount: number;
     virtualSize: number;
-    lastCoordinate: number;
-    type: MultiDimensionType;
   }
   type ViewSettingSizeProp = Record<string, number>;
   interface VirtualPositionItem extends PositionItem {

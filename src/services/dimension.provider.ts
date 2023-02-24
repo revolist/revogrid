@@ -34,7 +34,7 @@ export default class DimensionProvider {
   }
   
   /**
-   * Clear old sizes
+   * Clear old sizes from dimension and viewports
    * @param type - dimension type
    * @param count - count of items
    */
@@ -148,7 +148,7 @@ export default class DimensionProvider {
   
   updateViewport(type: RevoGrid.MultiDimensionType) {
     this.setViewPortCoordinate({
-      coordinate: this.viewports.stores[type].store.get('lastCoordinate'),
+      coordinate: this.viewports.stores[type].lastCoordinate,
       type,
     });
   }
