@@ -21,8 +21,6 @@ export function getUpdatedItemsByPosition<T extends ItemsToUpdate>(
 ): ItemsToUpdate {
   const activeItem: RevoGrid.PositionItem = getItemByPosition(dimension, pos);
   const firstItem: RevoGrid.VirtualPositionItem = getFirstItem(items);
-
-  console.log('getUpdatedItemsByPosition', items, pos, firstItem)
   let toUpdate: ItemsToUpdate;
   // do simple position recombination if items already present in viewport
   if (firstItem) {
