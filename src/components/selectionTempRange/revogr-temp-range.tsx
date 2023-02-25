@@ -4,6 +4,9 @@ import { Observable, RevoGrid, Selection } from '../../interfaces';
 import { TMP_SELECTION_BG_CLASS } from '../../utils/consts';
 import { getElStyle } from '../overlay/selection.utils';
 
+/**
+ * Temporary range selection
+ */
 @Component({
   tag: 'revogr-temp-range',
   styleUrl: 'revogr-temp-range-style.scss',
@@ -11,9 +14,24 @@ import { getElStyle } from '../overlay/selection.utils';
 export class RevogrFocus {
   el: HTMLElement;
 
-  /** Dynamic stores */
+  // --------------------------------------------------------------------------
+  //
+  //  Dynamic stores
+  //
+  // --------------------------------------------------------------------------
+
+  /**
+   * Selection store, shows current selection and focus
+   */
   @Prop() selectionStore: Observable<Selection.SelectionStoreState>;
+
+  /**
+   * Dimension row store
+   */
   @Prop() dimensionRow: Observable<RevoGrid.DimensionSettingsState>;
+  /**
+   * Dimension column store
+   */
   @Prop() dimensionCol: Observable<RevoGrid.DimensionSettingsState>;
   private readonly onChange = throttle((e: HTMLElement) => this.doChange(e), 300);
 

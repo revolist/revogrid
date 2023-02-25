@@ -406,11 +406,20 @@ export namespace Components {
         "setScroll": (e: RevoGrid.ViewPortScrollEvent) => Promise<void>;
         "viewportStore": Observable<RevoGrid.ViewportState>;
     }
+    /**
+     * Temporary range selection
+     */
     interface RevogrTempRange {
+        /**
+          * Dimension column store
+         */
         "dimensionCol": Observable<RevoGrid.DimensionSettingsState>;
+        /**
+          * Dimension row store
+         */
         "dimensionRow": Observable<RevoGrid.DimensionSettingsState>;
         /**
-          * Dynamic stores
+          * Selection store, shows current selection and focus
          */
         "selectionStore": Observable<Selection.SelectionStoreState>;
     }
@@ -557,6 +566,9 @@ declare global {
         prototype: HTMLRevogrScrollVirtualElement;
         new (): HTMLRevogrScrollVirtualElement;
     };
+    /**
+     * Temporary range selection
+     */
     interface HTMLRevogrTempRangeElement extends Components.RevogrTempRange, HTMLStencilElement {
     }
     var HTMLRevogrTempRangeElement: {
@@ -1158,11 +1170,20 @@ declare namespace LocalJSX {
         "onScrollVirtual"?: (event: RevogrScrollVirtualCustomEvent<RevoGrid.ViewPortScrollEvent>) => void;
         "viewportStore"?: Observable<RevoGrid.ViewportState>;
     }
+    /**
+     * Temporary range selection
+     */
     interface RevogrTempRange {
+        /**
+          * Dimension column store
+         */
         "dimensionCol"?: Observable<RevoGrid.DimensionSettingsState>;
+        /**
+          * Dimension row store
+         */
         "dimensionRow"?: Observable<RevoGrid.DimensionSettingsState>;
         /**
-          * Dynamic stores
+          * Selection store, shows current selection and focus
          */
         "selectionStore"?: Observable<Selection.SelectionStoreState>;
     }
@@ -1221,6 +1242,9 @@ declare module "@stencil/core" {
              */
             "revogr-row-headers": LocalJSX.RevogrRowHeaders & JSXBase.HTMLAttributes<HTMLRevogrRowHeadersElement>;
             "revogr-scroll-virtual": LocalJSX.RevogrScrollVirtual & JSXBase.HTMLAttributes<HTMLRevogrScrollVirtualElement>;
+            /**
+             * Temporary range selection
+             */
             "revogr-temp-range": LocalJSX.RevogrTempRange & JSXBase.HTMLAttributes<HTMLRevogrTempRangeElement>;
             /**
              * Service for tracking grid scrolling

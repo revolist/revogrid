@@ -3,13 +3,17 @@
 <!-- Auto Generated Below -->
 
 
+## Overview
+
+Temporary range selection
+
 ## Properties
 
-| Property         | Attribute | Description    | Type                                    | Default     |
-| ---------------- | --------- | -------------- | --------------------------------------- | ----------- |
-| `dimensionCol`   | --        |                | `ObservableMap<DimensionSettingsState>` | `undefined` |
-| `dimensionRow`   | --        |                | `ObservableMap<DimensionSettingsState>` | `undefined` |
-| `selectionStore` | --        | Dynamic stores | `ObservableMap<SelectionStoreState>`    | `undefined` |
+| Property         | Attribute | Description                                        | Type                                    | Default     |
+| ---------------- | --------- | -------------------------------------------------- | --------------------------------------- | ----------- |
+| `dimensionCol`   | --        | Dimension column store                             | `ObservableMap<DimensionSettingsState>` | `undefined` |
+| `dimensionRow`   | --        | Dimension row store                                | `ObservableMap<DimensionSettingsState>` | `undefined` |
+| `selectionStore` | --        | Selection store, shows current selection and focus | `ObservableMap<SelectionStoreState>`    | `undefined` |
 
 
 ## Dependencies

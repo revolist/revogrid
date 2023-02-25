@@ -107,6 +107,7 @@ export class AutoFillService {
    * on mouse move apply based on previous direction (if present)
    */
   private doAutofillMouseMove({ x, y }: MouseEvent, data: EventData) {
+    // if no initial - not started
     if (!this.autoFillInitial) {
       return;
     }
@@ -119,15 +120,22 @@ export class AutoFillService {
       }
     }
 
-    // check if not the latest
+    // check if not the latest, if latest - do nothing
     if (isAfterLast(current, data)) {
       return;
     }
     this.autoFillLast = current;
-    this.sv.setTempRange({
-      area: getRange(this.autoFillInitial, this.autoFillLast),
-      type: this.autoFillType,
-    });
+
+    const isSame = current.x === this.autoFillInitial.x && current.y === this.autoFillInitial.y;
+    // if same as initial - clear
+    if (isSame) {
+      this.sv.setTempRange(null);
+    } else {
+      this.sv.setTempRange({
+        area: getRange(this.autoFillInitial, this.autoFillLast),
+        type: this.autoFillType,
+      });
+    }
   }
 
   /**
@@ -145,14 +153,18 @@ export class AutoFillService {
     e.preventDefault();
   }
 
-  // Clear current range selection
+  /**
+   * Clear current range selection
+   * on mouse up and mouse leave events
+   */ 
   clearAutoFillSelection() {
-    // Apply autofill values on mouse up
+    // Apply autofill values on mouse up if present
     if (this.autoFillInitial) {
       // Get latest
       this.autoFillInitial = this.getFocus();
-      if (this.autoFillType === AutoFillType.autoFill) {
 
+      // Apply range data if present
+      if (this.autoFillType === AutoFillType.autoFill) {
         const range = getRange(this.autoFillInitial, this.autoFillLast);
         if (range) {
           const {
@@ -164,6 +176,7 @@ export class AutoFillService {
           if (!stopApply) {
             this.applyRangeWithData(newRange);
           } else {
+            // if prevented - clear temp range
             this.sv.setTempRange(null);
           }
         }
@@ -212,6 +225,8 @@ export class AutoFillService {
     rangeData.newData = changed;
     rangeData.mapping = mapping;
     let e = this.sv.selectionChanged(rangeData);
+
+    // if default prevented - clear range
     if (e.defaultPrevented) {
       this.sv.setTempRange(null);
       return;
