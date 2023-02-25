@@ -346,10 +346,16 @@ export namespace Components {
           * If true applys changes when cell closes if not Escape
          */
         "applyChangesOnClose": boolean;
+        /**
+          * Enable revogr-order-editor component (read more in revogr-order-editor component) Allows D&D
+         */
         "canDrag": boolean;
+        /**
+          * Column data store
+         */
         "colData": Observable<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
         /**
-          * Static stores, not expected to change during component lifetime
+          * Row data store
          */
         "dataStore": Observable<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
         "dimensionCol": Observable<RevoGrid.DimensionSettingsState>;
@@ -362,12 +368,18 @@ export namespace Components {
           * Last cell position
          */
         "lastCell": Selection.Cell;
-        "range": boolean;
-        "readonly": boolean;
         /**
-          * Dynamic stores
+          * Range selection mode
          */
+        "range": boolean;
+        /**
+          * If readonly mode enables
+         */
+        "readonly": boolean;
         "selectionStore": Observable<Selection.SelectionStoreState>;
+        /**
+          * Enable revogr-clipboard component (read more in revogr-clipboard component) Allows copy/paste
+         */
         "useClipboard": boolean;
     }
     /**
@@ -1043,10 +1055,16 @@ declare namespace LocalJSX {
           * If true applys changes when cell closes if not Escape
          */
         "applyChangesOnClose"?: boolean;
+        /**
+          * Enable revogr-order-editor component (read more in revogr-order-editor component) Allows D&D
+         */
         "canDrag"?: boolean;
+        /**
+          * Column data store
+         */
         "colData"?: Observable<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
         /**
-          * Static stores, not expected to change during component lifetime
+          * Row data store
          */
         "dataStore"?: Observable<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
         "dimensionCol"?: Observable<RevoGrid.DimensionSettingsState>;
@@ -1101,12 +1119,18 @@ declare namespace LocalJSX {
         "onSetEdit"?: (event: RevogrOverlaySelectionCustomEvent<Edition.BeforeEdit>) => void;
         "onSetRange"?: (event: RevogrOverlaySelectionCustomEvent<Selection.RangeArea & { type: RevoGrid.MultiDimensionType }>) => void;
         "onSetTempRange"?: (event: RevogrOverlaySelectionCustomEvent<Selection.TempRange | null>) => void;
-        "range"?: boolean;
-        "readonly"?: boolean;
         /**
-          * Dynamic stores
+          * Range selection mode
          */
+        "range"?: boolean;
+        /**
+          * If readonly mode enables
+         */
+        "readonly"?: boolean;
         "selectionStore"?: Observable<Selection.SelectionStoreState>;
+        /**
+          * Enable revogr-clipboard component (read more in revogr-clipboard component) Allows copy/paste
+         */
         "useClipboard"?: boolean;
     }
     /**

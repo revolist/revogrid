@@ -35,23 +35,57 @@ export class OverlaySelection {
   //
   // --------------------------------------------------------------------------
 
+  /**
+   * If readonly mode enables
+   */
   @Prop() readonly: boolean;
+  /**
+   * Range selection mode
+   */
   @Prop() range: boolean;
+  /**
+   * Enable revogr-order-editor component (read more in revogr-order-editor component)
+   * Allows D&D
+   */
   @Prop() canDrag: boolean;
+
+  /**
+   * Enable revogr-clipboard component (read more in revogr-clipboard component)
+   * Allows copy/paste
+   */
   @Prop() useClipboard: boolean;
 
-  /** Dynamic stores */
+  // --------------------------------------------------------------------------
+  //
+  //  Dynamic stores
+  //
+  // --------------------------------------------------------------------------
   @Prop() selectionStore: Observable<Selection.SelectionStoreState>;
   @Prop() dimensionRow: Observable<RevoGrid.DimensionSettingsState>;
   @Prop() dimensionCol: Observable<RevoGrid.DimensionSettingsState>;
 
-  /** Static stores, not expected to change during component lifetime */
+  // --------------------------------------------------------------------------
+  //
+  //  Static stores, not expected to change during component lifetime
+  //
+  // --------------------------------------------------------------------------
+
+  /**
+   * Row data store
+   */
   @Prop() dataStore: Observable<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
 
+  /**
+   * Column data store
+   */
   @Prop() colData: Observable<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
-  /** Last cell position */
+  /**
+   * Last cell position
+   */
   @Prop() lastCell: Selection.Cell;
-  /** Custom editors register */
+  /**
+   * Custom editors register
+   */
   @Prop() editors: Edition.Editors;
   /** If true applys changes when cell closes if not Escape */
   @Prop() applyChangesOnClose: boolean = false;

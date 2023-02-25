@@ -53,7 +53,7 @@ export function getUpdatedItemsByPosition<T extends ItemsToUpdate>(
       // virtual size can differ based on scroll position if some big items are present
       // scroll can be in the middle of item and virtual size will be larger
       // so we need to exclude this part from virtual size hence it's already passed
-      maxSize: Math.min(virtualSize + (pos - activeItem.start), dimension.realSize),
+      maxSize: Math.min(virtualSize + (activeItem.end - activeItem.start), dimension.realSize),
       maxCount: realCount,
       sizes: dimension.sizes,
     });

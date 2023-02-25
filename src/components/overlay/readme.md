@@ -5,20 +5,20 @@
 
 ## Properties
 
-| Property              | Attribute                | Description                                                     | Type                                                           | Default     |
-| --------------------- | ------------------------ | --------------------------------------------------------------- | -------------------------------------------------------------- | ----------- |
-| `applyChangesOnClose` | `apply-changes-on-close` | If true applys changes when cell closes if not Escape           | `boolean`                                                      | `false`     |
-| `canDrag`             | `can-drag`               |                                                                 | `boolean`                                                      | `undefined` |
-| `colData`             | --                       |                                                                 | `ObservableMap<DataSourceState<ColumnRegular, DimensionCols>>` | `undefined` |
-| `dataStore`           | --                       | Static stores, not expected to change during component lifetime | `ObservableMap<DataSourceState<DataType, DimensionRows>>`      | `undefined` |
-| `dimensionCol`        | --                       |                                                                 | `ObservableMap<DimensionSettingsState>`                        | `undefined` |
-| `dimensionRow`        | --                       |                                                                 | `ObservableMap<DimensionSettingsState>`                        | `undefined` |
-| `editors`             | --                       | Custom editors register                                         | `{ [name: string]: EditorCtr; }`                               | `undefined` |
-| `lastCell`            | --                       | Last cell position                                              | `Cell`                                                         | `undefined` |
-| `range`               | `range`                  |                                                                 | `boolean`                                                      | `undefined` |
-| `readonly`            | `readonly`               |                                                                 | `boolean`                                                      | `undefined` |
-| `selectionStore`      | --                       | Dynamic stores                                                  | `ObservableMap<SelectionStoreState>`                           | `undefined` |
-| `useClipboard`        | `use-clipboard`          |                                                                 | `boolean`                                                      | `undefined` |
+| Property              | Attribute                | Description                                                                                   | Type                                                           | Default     |
+| --------------------- | ------------------------ | --------------------------------------------------------------------------------------------- | -------------------------------------------------------------- | ----------- |
+| `applyChangesOnClose` | `apply-changes-on-close` | If true applys changes when cell closes if not Escape                                         | `boolean`                                                      | `false`     |
+| `canDrag`             | `can-drag`               | Enable revogr-order-editor component (read more in revogr-order-editor component) Allows D&D  | `boolean`                                                      | `undefined` |
+| `colData`             | --                       | Column data store                                                                             | `ObservableMap<DataSourceState<ColumnRegular, DimensionCols>>` | `undefined` |
+| `dataStore`           | --                       | Row data store                                                                                | `ObservableMap<DataSourceState<DataType, DimensionRows>>`      | `undefined` |
+| `dimensionCol`        | --                       |                                                                                               | `ObservableMap<DimensionSettingsState>`                        | `undefined` |
+| `dimensionRow`        | --                       |                                                                                               | `ObservableMap<DimensionSettingsState>`                        | `undefined` |
+| `editors`             | --                       | Custom editors register                                                                       | `{ [name: string]: EditorCtr; }`                               | `undefined` |
+| `lastCell`            | --                       | Last cell position                                                                            | `Cell`                                                         | `undefined` |
+| `range`               | `range`                  | Range selection mode                                                                          | `boolean`                                                      | `undefined` |
+| `readonly`            | `readonly`               | If readonly mode enables                                                                      | `boolean`                                                      | `undefined` |
+| `selectionStore`      | --                       |                                                                                               | `ObservableMap<SelectionStoreState>`                           | `undefined` |
+| `useClipboard`        | `use-clipboard`          | Enable revogr-clipboard component (read more in revogr-clipboard component) Allows copy/paste | `boolean`                                                      | `undefined` |
 
 
 ## Events
