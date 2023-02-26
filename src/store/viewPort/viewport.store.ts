@@ -67,14 +67,28 @@ export default class ViewportStore {
 
     const frameOffset = 1;
     const outsize = frameOffset * 2 * dimension.originItemSize;
+    // math virtual size is based on visible area + 2 items outside of visible area
     virtualSize += outsize;
 
+    // max possible coordinate is real size - virtual size
+    // or virtualSize if real size is less
     let maxCoordinate = virtualSize;
     if (dimension.realSize > virtualSize) {
       maxCoordinate = dimension.realSize - virtualSize;
     }
-    this.lastCoordinate = position;
+
     let pos = position;
+    // limit position to max and min coordinates
+    if (pos < 0) {
+      pos = 0;
+    } else if (pos > maxCoordinate) {
+      pos = maxCoordinate;
+    }
+
+    // store last coordinate for further restore on redraw
+    this.lastCoordinate = pos;
+
+    // actual position is less then first item start based on offset
     pos -= frameOffset * dimension.originItemSize;
     pos = pos < 0 ? 0 : pos < maxCoordinate ? pos : maxCoordinate;
 
