@@ -327,6 +327,7 @@ export const ResizableElement = (props: Partial<Props> & RevoGrid.CellProps, chi
         resizeEls.push(
           <div
             onClick={e => e.preventDefault()}
+            onTouchStart={(e: TouchEvent) => e.preventDefault()}
             onDblClick={e => {
               e.preventDefault();
               props.onDoubleClick && props.onDoubleClick();

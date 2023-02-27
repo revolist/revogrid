@@ -9,6 +9,7 @@ import { getRange } from '../../store/selection/selection.helpers';
 import SelectionStoreService from '../../store/selection/selection.store.service';
 import ColumnService from '../data/columnService';
 import { DataSourceState, getSourceItem } from '../../store/dataSource/data.store';
+import { getFromEvent } from '../../utils/events';
 
 type Config = {
   selectionStoreService: SelectionStoreService;
@@ -42,7 +43,7 @@ export class AutoFillService {
   private autoFillStart: Selection.Cell | null = null;
   private autoFillLast: Selection.Cell | null = null;
 
-  private onMouseMoveAutofill: DebouncedFunc<(e: MouseEvent, data: EventData) => void>;
+  private onMouseMoveAutofill: DebouncedFunc<(e: MouseEvent & TouchEvent, data: EventData) => void>;
 
   constructor(private sv: Config) {}
 
@@ -80,10 +81,10 @@ export class AutoFillService {
   }
 
   /** Process mouse move events */
-  selectionMouseMove(e: MouseEvent) {
+  selectionMouseMove(e: MouseEvent & TouchEvent) {
     // initiate mouse move debounce if not present
     if (!this.onMouseMoveAutofill) {
-      this.onMouseMoveAutofill = debounce((e: MouseEvent, data: EventData) => this.doAutofillMouseMove(e, data), 5);
+      this.onMouseMoveAutofill = debounce((e: MouseEvent & TouchEvent, data: EventData) => this.doAutofillMouseMove(e, data), 5);
     }
     if (this.isAutoFill) {
       this.onMouseMoveAutofill(e, this.sv.getData());
@@ -106,12 +107,12 @@ export class AutoFillService {
    * Autofill logic:
    * on mouse move apply based on previous direction (if present)
    */
-  private doAutofillMouseMove({ x, y }: MouseEvent, data: EventData) {
+  private doAutofillMouseMove(event: MouseEvent & TouchEvent, data: EventData) {
     // if no initial - not started
     if (!this.autoFillInitial) {
       return;
     }
-    const current = getCurrentCell({ x, y }, data);
+    const current = getCurrentCell({ x: getFromEvent(event, 'clientX'), y: getFromEvent(event, 'clientY') }, data);
 
     // first time or direction equal to start(same as first time)
     if (!this.autoFillLast) {

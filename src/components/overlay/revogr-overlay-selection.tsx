@@ -139,20 +139,21 @@ export class OverlaySelection {
   //  Listeners
   //
   // --------------------------------------------------------------------------
-
-  @Listen('mousemove', { target: 'document' }) onMouseMove(e: MouseEvent) {
+  @Listen('touchmove', { target: 'document' })
+  @Listen('mousemove', { target: 'document' })
+  onMouseMove(e: MouseEvent & TouchEvent) {
     if (this.selectionStoreService.focused) {
       this.autoFillService.selectionMouseMove(e);
     }
   }
 
-  /** Pointer left document, clear any active operation */
-  @Listen('mouseleave', { target: 'document' }) onMouseOut() {
-    this.autoFillService.clearAutoFillSelection();
-  }
 
   /** Action finished inside of the document */
-  @Listen('mouseup', { target: 'document' }) onMouseUp() {
+  /** Pointer left document, clear any active operation */
+  @Listen('touchend', { target: 'document' })
+  @Listen('mouseup', { target: 'document' })
+  @Listen('mouseleave', { target: 'document' })
+  onMouseUp() {
     this.autoFillService.clearAutoFillSelection();
   }
 

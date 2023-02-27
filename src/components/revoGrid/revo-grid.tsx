@@ -28,6 +28,7 @@ import { OrdererService } from '../order/orderRenderer';
 import StretchColumn, { isStretchPlugin } from '../../plugins/stretchPlugin';
 import { rowDefinitionByType, rowDefinitionRemoveByType } from './grid.helpers';
 import ColumnPlugin from '../../plugins/moveColumn/columnDragPlugin';
+import { getFromEvent } from '../../utils/events';
 
 @Component({
   tag: 'revo-grid',
@@ -577,15 +578,19 @@ export class RevoGridComponent {
   // --------------------------------------------------------------------------
 
   private clickTrackForFocusClear: number | null = null;
-  @Listen('mousedown', { target: 'document' }) mousedownHandle(e: MouseEvent) {
-    this.clickTrackForFocusClear = e.screenX + e.screenY;
+  @Listen('touchstart', { target: 'document' })
+  @Listen('mousedown', { target: 'document' })
+  mousedownHandle(event: MouseEvent & TouchEvent) {
+    this.clickTrackForFocusClear = getFromEvent(event, 'screenX') + getFromEvent(event, 'screenY');
   }
-  @Listen('mouseup', { target: 'document' }) mouseupHandle(e: MouseEvent) {
-    if (e.defaultPrevented) {
+  @Listen('touchend', { target: 'document' })
+  @Listen('mouseup', { target: 'document' })
+  mouseupHandle(event: MouseEvent & TouchEvent) {
+    if (event.defaultPrevented) {
       return;
     }
-    const target = e.target as HTMLElement | null;
-    const pos = e.screenX + e.screenY;
+    const target = event.target as HTMLElement | null;
+    const pos = getFromEvent(event, 'screenX') + getFromEvent(event, 'screenY');
     // detect if mousemove then do nothing
     if (Math.abs(this.clickTrackForFocusClear - pos) > 10) {
       return;
