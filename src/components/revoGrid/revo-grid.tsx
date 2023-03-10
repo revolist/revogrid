@@ -10,7 +10,7 @@ import { Edition, Selection, RevoGrid, ThemeSpace, RevoPlugin } from '../../inte
 import ThemeService from '../../themeManager/themeService';
 import { timeout } from '../../utils';
 import AutoSize, { AutoSizeColumnConfig } from '../../plugins/autoSizeColumn';
-import { columnTypes } from '../../store/storeTypes';
+import { columnTypes, rowTypes } from '../../store/storeTypes';
 import FilterPlugin, { ColumnFilterConfig, FilterCollection } from '../../plugins/filter/filter.plugin';
 import SortingPlugin from '../../plugins/sorting/sorting.plugin';
 import ExportFilePlugin from '../../plugins/export/export.plugin';
@@ -737,6 +737,17 @@ export class RevoGridComponent {
     this.aftercolumnsset.emit({
       columns,
       order: this.columnProvider.order,
+    });
+  }
+
+  @Watch('rowSize') rowSizeChanged(s: number) {// clear existing data
+    this.dimensionProvider.setSettings({ originItemSize: s }, 'rgRow');
+    rowTypes.forEach((t) => {
+      this.dimensionProvider.clearSize(
+        t,
+        this.dataProvider.stores[t].store.get('source').length
+      );
+      this.dimensionProvider.setCustomSizes(t, {}, true);
     });
   }
 

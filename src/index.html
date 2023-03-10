@@ -98,6 +98,8 @@
       <button onclick="exportGrid()">Export to csv</button>
       <button onclick="scrollToCol(30)">Scroll to column 30</button>
       <button onclick="setEdit(30, 10)">Set edit 30:1</button>
+
+      <button onclick="setRowSize(30)">Set row size 30</button>
       <hr />
       <div>
         <strong>Set data</strong>
@@ -159,6 +161,10 @@
         setData({
           groupedHeader: isShow
         });
+      };
+      window.setRowSize = function (s) {
+        const grid = document.querySelector('revo-grid');
+        grid.rowSize = s;
       };
       window.setEdit = function (rgRow, prop) {
         const grid = document.querySelector('revo-grid');
