@@ -8,6 +8,7 @@ import { HeaderCellRenderer } from './headerCellRenderer';
 
 type Props = {
   column: RevoGrid.VirtualPositionItem;
+  cellClass?: Record<string, boolean>;
   data?: RevoGrid.ColumnRegular;
   range?: Selection.RangeArea;
   canResize?: boolean;
@@ -21,6 +22,7 @@ const HeaderRenderer = (p: Props): VNode => {
   const cellClass: { [key: string]: boolean } = {
     [HEADER_CLASS]: true,
     [HEADER_SORTABLE_CLASS]: !!p.data?.sortable,
+    ...p.cellClass,
   };
   if (p.data?.order) {
     cellClass[p.data.order] = true;

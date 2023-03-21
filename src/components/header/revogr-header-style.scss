@@ -68,6 +68,11 @@ revogr-header {
         background-color: deepskyblue;
       }
     }
+    &.last {
+      .resizable {
+        display: none;
+      }
+    }
     .header-content {
       overflow: hidden;
       text-overflow: ellipsis;
