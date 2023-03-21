@@ -19,20 +19,6 @@ import { LogicFunction } from "./plugins/filter/filter.types";
 import { DataSourceState, Groups } from "./store/dataSource/data.store";
 import { ViewportData } from "./components/revoGrid/viewport.interfaces";
 import { ElementScroll } from "./components/revoGrid/viewport.scrolling.service";
-export { ApplyFocusEvent, BeforeCellRenderEvent, DragStartEvent, Edition, FocusRenderEvent, Observable, RevoGrid, RevoPlugin, Selection, ThemeSpace } from "./interfaces";
-export { AutoSizeColumnConfig } from "./plugins/autoSizeColumn";
-export { ColumnFilterConfig, FilterCaptions, FilterCollection } from "./plugins/filter/filter.plugin";
-export { GroupingOptions } from "./plugins/groupingRow/grouping.row.types";
-export { FocusedData } from "./components/revoGrid/viewport.service";
-export { ColumnCollection } from "./services/column.data.provider";
-export { DataInput } from "./plugins/export/types";
-export { VNode } from "@stencil/core";
-export { ColumnSource, RowSource } from "./components/data/columnService";
-export { MultiFilterItem, ShowData } from "./plugins/filter/filter.pop";
-export { LogicFunction } from "./plugins/filter/filter.types";
-export { DataSourceState, Groups } from "./store/dataSource/data.store";
-export { ViewportData } from "./components/revoGrid/viewport.interfaces";
-export { ElementScroll } from "./components/revoGrid/viewport.scrolling.service";
 export namespace Components {
     interface RevoGrid {
         /**
@@ -250,10 +236,6 @@ export namespace Components {
     interface RevogrClipboard {
         "doCopy": (e: DataTransfer, data?: RevoGrid.DataFormat[][]) => Promise<void>;
     }
-    /**
-     * This component is responsible for rendering data
-     * Rows, columns, groups and cells
-     */
     interface RevogrData {
         /**
           * Additional data to pass to renderer
@@ -382,10 +364,6 @@ export namespace Components {
          */
         "useClipboard": boolean;
     }
-    /**
-     * Row headers component
-     * Visible on the left side of the table
-     */
     interface RevogrRowHeaders {
         /**
           * Additional data to pass to renderer
@@ -406,9 +384,6 @@ export namespace Components {
         "setScroll": (e: RevoGrid.ViewPortScrollEvent) => Promise<void>;
         "viewportStore": Observable<RevoGrid.ViewportState>;
     }
-    /**
-     * Temporary range selection
-     */
     interface RevogrTempRange {
         /**
           * Dimension column store
@@ -423,9 +398,6 @@ export namespace Components {
          */
         "selectionStore": Observable<Selection.SelectionStoreState>;
     }
-    /**
-     * Service for tracking grid scrolling
-     */
     interface RevogrViewportScroll {
         /**
           * update on delta in case we don't know existing position or external change
@@ -504,10 +476,6 @@ declare global {
         prototype: HTMLRevogrClipboardElement;
         new (): HTMLRevogrClipboardElement;
     };
-    /**
-     * This component is responsible for rendering data
-     * Rows, columns, groups and cells
-     */
     interface HTMLRevogrDataElement extends Components.RevogrData, HTMLStencilElement {
     }
     var HTMLRevogrDataElement: {
@@ -550,10 +518,6 @@ declare global {
         prototype: HTMLRevogrOverlaySelectionElement;
         new (): HTMLRevogrOverlaySelectionElement;
     };
-    /**
-     * Row headers component
-     * Visible on the left side of the table
-     */
     interface HTMLRevogrRowHeadersElement extends Components.RevogrRowHeaders, HTMLStencilElement {
     }
     var HTMLRevogrRowHeadersElement: {
@@ -566,18 +530,12 @@ declare global {
         prototype: HTMLRevogrScrollVirtualElement;
         new (): HTMLRevogrScrollVirtualElement;
     };
-    /**
-     * Temporary range selection
-     */
     interface HTMLRevogrTempRangeElement extends Components.RevogrTempRange, HTMLStencilElement {
     }
     var HTMLRevogrTempRangeElement: {
         prototype: HTMLRevogrTempRangeElement;
         new (): HTMLRevogrTempRangeElement;
     };
-    /**
-     * Service for tracking grid scrolling
-     */
     interface HTMLRevogrViewportScrollElement extends Components.RevogrViewportScroll, HTMLStencilElement {
     }
     var HTMLRevogrViewportScrollElement: {
@@ -931,10 +889,6 @@ declare namespace LocalJSX {
          */
         "onPasteRegion"?: (event: RevogrClipboardCustomEvent<string[][]>) => void;
     }
-    /**
-     * This component is responsible for rendering data
-     * Rows, columns, groups and cells
-     */
     interface RevogrData {
         /**
           * Additional data to pass to renderer
@@ -1145,10 +1099,6 @@ declare namespace LocalJSX {
          */
         "useClipboard"?: boolean;
     }
-    /**
-     * Row headers component
-     * Visible on the left side of the table
-     */
     interface RevogrRowHeaders {
         /**
           * Additional data to pass to renderer
@@ -1170,9 +1120,6 @@ declare namespace LocalJSX {
         "onScrollVirtual"?: (event: RevogrScrollVirtualCustomEvent<RevoGrid.ViewPortScrollEvent>) => void;
         "viewportStore"?: Observable<RevoGrid.ViewportState>;
     }
-    /**
-     * Temporary range selection
-     */
     interface RevogrTempRange {
         /**
           * Dimension column store
@@ -1187,9 +1134,6 @@ declare namespace LocalJSX {
          */
         "selectionStore"?: Observable<Selection.SelectionStoreState>;
     }
-    /**
-     * Service for tracking grid scrolling
-     */
     interface RevogrViewportScroll {
         /**
           * Height of inner content
@@ -1225,10 +1169,6 @@ declare module "@stencil/core" {
         interface IntrinsicElements {
             "revo-grid": LocalJSX.RevoGrid & JSXBase.HTMLAttributes<HTMLRevoGridElement>;
             "revogr-clipboard": LocalJSX.RevogrClipboard & JSXBase.HTMLAttributes<HTMLRevogrClipboardElement>;
-            /**
-             * This component is responsible for rendering data
-             * Rows, columns, groups and cells
-             */
             "revogr-data": LocalJSX.RevogrData & JSXBase.HTMLAttributes<HTMLRevogrDataElement>;
             "revogr-edit": LocalJSX.RevogrEdit & JSXBase.HTMLAttributes<HTMLRevogrEditElement>;
             "revogr-filter-panel": LocalJSX.RevogrFilterPanel & JSXBase.HTMLAttributes<HTMLRevogrFilterPanelElement>;
@@ -1236,19 +1176,9 @@ declare module "@stencil/core" {
             "revogr-header": LocalJSX.RevogrHeader & JSXBase.HTMLAttributes<HTMLRevogrHeaderElement>;
             "revogr-order-editor": LocalJSX.RevogrOrderEditor & JSXBase.HTMLAttributes<HTMLRevogrOrderEditorElement>;
             "revogr-overlay-selection": LocalJSX.RevogrOverlaySelection & JSXBase.HTMLAttributes<HTMLRevogrOverlaySelectionElement>;
-            /**
-             * Row headers component
-             * Visible on the left side of the table
-             */
             "revogr-row-headers": LocalJSX.RevogrRowHeaders & JSXBase.HTMLAttributes<HTMLRevogrRowHeadersElement>;
             "revogr-scroll-virtual": LocalJSX.RevogrScrollVirtual & JSXBase.HTMLAttributes<HTMLRevogrScrollVirtualElement>;
-            /**
-             * Temporary range selection
-             */
             "revogr-temp-range": LocalJSX.RevogrTempRange & JSXBase.HTMLAttributes<HTMLRevogrTempRangeElement>;
-            /**
-             * Service for tracking grid scrolling
-             */
             "revogr-viewport-scroll": LocalJSX.RevogrViewportScroll & JSXBase.HTMLAttributes<HTMLRevogrViewportScrollElement>;
         }
     }
