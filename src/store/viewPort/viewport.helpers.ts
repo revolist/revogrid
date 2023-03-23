@@ -36,9 +36,13 @@ export function getUpdatedItemsByPosition<T extends ItemsToUpdate>(
     }
   }
 
+  // virtual size can differ based on scroll position if some big items are present
+  // scroll can be in the middle of item and virtual size will be larger
+  // so we need to exclude this part from virtual size hence it's already passed
+  const maxSizeVirtualSize = Math.min(virtualSize + (activeItem.end - activeItem.start), dimension.realSize);
   // if partial recombination add items if revo-viewport has some space left
   if (toUpdate) {
-    const extra = addMissingItems(activeItem, realCount, virtualSize, toUpdate, dimension);
+    const extra = addMissingItems(activeItem, realCount, maxSizeVirtualSize, toUpdate, dimension);
     if (extra.length) {
       updateMissingAndRange(toUpdate.items, extra, toUpdate);
     }
@@ -50,10 +54,7 @@ export function getUpdatedItemsByPosition<T extends ItemsToUpdate>(
       firstItemStart: activeItem.start,
       firstItemIndex: activeItem.itemIndex,
       origSize: dimension.originItemSize,
-      // virtual size can differ based on scroll position if some big items are present
-      // scroll can be in the middle of item and virtual size will be larger
-      // so we need to exclude this part from virtual size hence it's already passed
-      maxSize: Math.min(virtualSize + (activeItem.end - activeItem.start), dimension.realSize),
+      maxSize: maxSizeVirtualSize,
       maxCount: realCount,
       sizes: dimension.sizes,
     });
