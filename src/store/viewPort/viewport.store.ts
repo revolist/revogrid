@@ -70,7 +70,7 @@ export default class ViewportStore {
         ...toUpdate,
         ...getUpdatedItemsByPosition(pos, this.getItems(), this.store.get('realCount'), virtualSize, dimension),
       };
-      setStore(this.store, { ...toUpdate });
+      this.setViewport({ ...toUpdate });
       // right position changed
     } else if (firstItem && this.store.get('virtualSize') + pos > lastItem?.end) {
       // check is any item missing for full fill content
@@ -88,7 +88,7 @@ export default class ViewportStore {
           items: [...items],
           ...range,
         };
-        setStore(this.store, { ...toUpdate });
+        this.setViewport({ ...toUpdate });
       }
     }
   }
@@ -115,6 +115,7 @@ export default class ViewportStore {
         this.store.get('lastCoordinate')
       );
     }
+    console.log('items', items);
 
     // loop through array from initial item after recombination
     while (i < count) {
@@ -141,7 +142,7 @@ export default class ViewportStore {
       }
     }
 
-    setStore(this.store, { items: [...items] });
+    this.setViewport({ items: [...items] });
   }
 
   getItems(): Pick<RevoGrid.ViewportStateItems, 'items' | 'start' | 'end'> {

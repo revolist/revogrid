@@ -74,9 +74,10 @@ export default class DimensionProvider {
     this.viewports.stores[type].setViewport({ virtualSize: dimension.realSize });
   }
 
-  drop() {
+  dropColumns() {
     for (let type of columnTypes) {
-      this.stores[type].drop();  
+      this.stores[type].drop();
+      this.viewports.stores[type].clear();
     }
   }
 

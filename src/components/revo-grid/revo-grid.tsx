@@ -648,7 +648,7 @@ export class RevoGridComponent {
   @Element() element: HTMLRevoGridElement;
 
   @Watch('columns') columnChanged(newVal: RevoGrid.ColumnDataSchema[] = []) {
-    this.dimensionProvider.drop();
+    this.dimensionProvider.dropColumns();
     const columnGather = ColumnDataProvider.getColumns(newVal, 0, this.columnTypes);
     this.beforecolumnsset.emit(columnGather);
     for (let type of columnTypes) {
