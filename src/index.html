@@ -206,8 +206,8 @@
         bottomPinned: [],
         colPinEnd: [],
         colPinStart: [],
-        groupedHeader: true,
-        order: 5
+        // groupedHeader: true,
+        // order: 5
       };
       window.setData = function (config = {}) {
         defaultData = { ...defaultData, ...config };
@@ -316,11 +316,11 @@
           mode: 'autoSizeAll',
         };*/
       // default
-      setData({ rows: 100, cols: 10, 'colPinEnd': [2] });
+      setData({ rows: 100, cols: 10 });
 
       // events testing
-      // 'beforerange', 'setRange', 'beforefocuslost', 'beforecellfocus', 'beforeedit'
-      const events = ['beforeedit', 'aftercolumnresize', 'beforerange', 'setRange', 'beforefocuslost', 'beforecellfocus', 'beforeedit', 'afterfocus'];
+      // 'beforerange', 'setRange', 'beforefocuslost', 'beforecellfocus', 'afterfocus', 'beforeedit', 'aftercolumnresize'
+      const events = ['beforeedit', 'beforerange', 'setRange', 'afteredit'];
       events.forEach(e => {
         grid.addEventListener(e, $e => {
           if (window.eventsPrevented[e]) {
