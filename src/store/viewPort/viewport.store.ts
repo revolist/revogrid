@@ -6,7 +6,7 @@
 
 import { createStore } from '@stencil/store';
 
-import { addMissingItems, DimensionDataViewport, getFirstItem, getLastItem, getUpdatedItemsByPosition, isActiveRange, setItemSizes, updateMissingAndRange } from './viewport.helpers';
+import { addMissingItems, DimensionDataViewport, getFirstItem, getLastItem, getUpdatedItemsByPosition, isActiveRange, isActiveRangeOutsideLastItem, setItemSizes, updateMissingAndRange } from './viewport.helpers';
 
 import { setStore } from '../../utils/store.utils';
 import { Observable, RevoGrid } from '../../interfaces';
@@ -46,38 +46,44 @@ export default class ViewportStore {
       return;
     }
 
-    const frameOffset: number = dimension.frameOffset;
-    const outsize: number = frameOffset * 2 * dimension.originItemSize;
+    const frameOffset = dimension.frameOffset;
+    const singleOffsetInPx = dimension.originItemSize * frameOffset;
+    // add offset to virtual size from both sides
+    const outsize = singleOffsetInPx * 2;
     virtualSize += outsize;
 
-    let maxCoordinate: number = virtualSize;
-    // if real size is bigger than virtual size, then the end will be real size decreased by virtual size
-    // but sometimes the real size slightly bigger than virtual size, so we need to check it and fallback max coordinate to virtual size
+    // expected no scroll if real size less than virtual size, position is 0
+    let maxCoordinate = 0;
+    // if there is nodes outside of viewport, max coordinate has to be adjusted
     if (dimension.realSize > virtualSize) {
-      maxCoordinate = Math.max(dimension.realSize - virtualSize, virtualSize);
+      // max coordinate is real size minus virtual/rendered space
+      maxCoordinate = dimension.realSize - virtualSize;
     }
     let toUpdate: Partial<RevoGrid.ViewportState> = {
       lastCoordinate: position,
     };
-    let pos: number = position;
-    pos -= frameOffset * dimension.originItemSize;
-    pos = pos < 0 ? 0 : pos < maxCoordinate ? pos : maxCoordinate; // todo: check if maxCoordinate can be removed
+    let pos = position;
+    pos -= singleOffsetInPx;
+    pos = pos < 0 ? 0 : pos < maxCoordinate ? pos : maxCoordinate;
 
-    const firstItem: RevoGrid.VirtualPositionItem | undefined = getFirstItem(this.getItems());
-    const lastItem: RevoGrid.VirtualPositionItem | undefined = getLastItem(this.getItems());
+    const allItems = this.getItems();
+    const firstItem: RevoGrid.VirtualPositionItem | undefined = getFirstItem(allItems);
+    const lastItem: RevoGrid.VirtualPositionItem | undefined = getLastItem(allItems);
 
     // left position changed
-    if (!isActiveRange(pos, firstItem)) {
+    // verify if new position is in range of previously rendered first item
+    if (!isActiveRange(pos, dimension.realSize, firstItem, lastItem)) {
       toUpdate = {
         ...toUpdate,
-        ...getUpdatedItemsByPosition(pos, this.getItems(), this.store.get('realCount'), virtualSize, dimension),
+        ...getUpdatedItemsByPosition(pos, allItems, this.store.get('realCount'), virtualSize, dimension),
       };
       this.setViewport({ ...toUpdate });
-      // right position changed
-    } else if (firstItem && this.store.get('virtualSize') + pos > lastItem?.end) {
+    // right position changed
+    } else if (isActiveRangeOutsideLastItem(pos, virtualSize, firstItem, lastItem)) {
       // check is any item missing for full fill content
-      const missing = addMissingItems(firstItem, this.store.get('realCount'), virtualSize + pos - firstItem.start, this.getItems(), dimension);
+      const missing = addMissingItems(firstItem, this.store.get('realCount'), virtualSize + pos - firstItem.start, allItems, dimension);
 
+      // update missing items
       if (missing.length) {
         const items = [...this.store.get('items')];
         const range = {

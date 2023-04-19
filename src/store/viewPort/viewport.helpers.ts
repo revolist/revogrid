@@ -20,7 +20,7 @@ export function getUpdatedItemsByPosition<T extends ItemsToUpdate>(
   dimension: DimensionDataViewport
 ): ItemsToUpdate {
   const activeItem: RevoGrid.PositionItem = getItemByPosition(dimension, pos);
-  const firstItem: RevoGrid.VirtualPositionItem = getFirstItem(items);
+  const firstItem: RevoGrid.PositionItem = getFirstItem(items);
   let toUpdate: ItemsToUpdate;
   // do simple position recombination if items already present in viewport
   if (firstItem) {
@@ -36,10 +36,7 @@ export function getUpdatedItemsByPosition<T extends ItemsToUpdate>(
     }
   }
 
-  // virtual size can differ based on scroll position if some big items are present
-  // scroll can be in the middle of item and virtual size will be larger
-  // so we need to exclude this part from virtual size hence it's already passed
-  const maxSizeVirtualSize = Math.min(virtualSize + (activeItem.end - activeItem.start), dimension.realSize);
+  const maxSizeVirtualSize = getMaxVirtualSize(virtualSize, dimension.realSize, activeItem);
   // if partial recombination add items if revo-viewport has some space left
   if (toUpdate) {
     const extra = addMissingItems(activeItem, realCount, maxSizeVirtualSize, toUpdate, dimension);
@@ -67,6 +64,13 @@ export function getUpdatedItemsByPosition<T extends ItemsToUpdate>(
     };
   }
   return toUpdate;
+}
+
+// virtual size can differ based on scroll position if some big items are present
+// scroll can be in the middle of item and virtual size will be larger
+// so we need to exclude this part from virtual size hence it's already passed
+function getMaxVirtualSize(virtualSize: number, realSize: number, activeItem: RevoGrid.PositionItem) {
+  return Math.min(virtualSize + (activeItem.end - activeItem.start), realSize)
 }
 
 export function updateMissingAndRange(
@@ -247,8 +251,30 @@ function getItemSize(index: number, sizes?: RevoGrid.ViewSettingSizeProp, origSi
   return origSize;
 }
 
-export function isActiveRange(pos: number, item: RevoGrid.PositionItem | undefined): boolean {
-  return item && pos >= item.start && pos <= item.end;
+/**
+ * Verify if position is in range of the PositionItem, start and end are included
+ */
+export function isActiveRange(
+  pos: number,
+  realSize: number,
+  first?: RevoGrid.PositionItem,
+  last?: RevoGrid.PositionItem
+): boolean {
+  if (!first || !last) {
+    return false;
+  }
+  // if position is in range of first item
+  // or position is after first item and last item is the last item in real size
+  return pos >= first.start && pos <= first.end ||
+    pos > first.end && last.end === realSize;
+}
+
+export function isActiveRangeOutsideLastItem(pos: number, virtualSize: number, firstItem?: RevoGrid.PositionItem, lastItem?: RevoGrid.PositionItem) {
+  // if no first item, means no items in viewport
+  if (!firstItem) {
+    return false;
+  }
+  return virtualSize + pos > lastItem?.end
 }
 
 export function getFirstItem(s: ItemsToUpdate): RevoGrid.VirtualPositionItem | undefined {
