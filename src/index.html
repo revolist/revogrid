@@ -307,21 +307,21 @@
       grid.filter = filterConfig;
       // grid.stretch = true;
       grid.exporting = true;
-      // grid.rowDefinitions = [{
-      //     type: 'rgRow',
-      //     index: 1,
-      //     size: 100
-      // }];
+      grid.rowDefinitions = [{
+          type: 'rgRow',
+          index: 1,
+          size: 100
+      }];
       /* 
         grid.autoSizeColumn = {
           mode: 'autoSizeAll',
         };*/
       // default
-      setData({ rows: 100, cols: 10,  });
+      setData({ rows: 100, cols: 10 });
 
       // events testing
-      // 'beforerange', 'setRange', 'beforefocuslost', 'beforecellfocus', 'beforeedit', 'beforeedit', 'aftercolumnresize', 'beforerange', 'setRange', 'beforefocuslost', 'beforecellfocus', 'beforeedit', 'afterfocus'
-      const events = ['beforecopyapply'];
+      // 'beforerange', 'setRange', 'beforefocuslost', 'beforecellfocus', 'afterfocus', 'beforeedit', 'aftercolumnresize'
+      const events = ['beforeedit', 'beforerange', 'setRange', 'afteredit'];
       events.forEach(e => {
         grid.addEventListener(e, $e => {
           if (window.eventsPrevented[e]) {

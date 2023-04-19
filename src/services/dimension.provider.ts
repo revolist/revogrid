@@ -113,9 +113,10 @@ export default class DimensionProvider {
   /**
    * Drop all dimension data
    */
-  drop(types: RevoGrid.MultiDimensionType[] = columnTypes) {
+  dropColumns(types: RevoGrid.MultiDimensionType[] = columnTypes) {
     for (let type of types) {
       this.stores[type].drop();
+      this.viewports.stores[type].clearItems(); // check if needed
     }
   }
 

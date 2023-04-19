@@ -62,17 +62,13 @@ export class RevogrHeaderComponent {
     const cols = this.viewportCol.get('items');
     const range = this.selectionStore?.get('range');
     const cells: VNode[] = [];
-    const visibleProps: Record<string, number> = {};
-    const lastIndex = this.colData.length - 1;
+    const visibleProps: { [prop: string]: number } = {};
 
     // render header columns
     for (let rgCol of cols) {
       const colData = this.colData[rgCol.itemIndex];
       cells.push(
         <HeaderRenderer
-          cellClass={{
-            last: lastIndex === rgCol.itemIndex
-          }}
           range={range}
           column={rgCol}
           data={{
