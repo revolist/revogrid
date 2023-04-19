@@ -51,15 +51,17 @@ export default class ViewportStore {
     virtualSize += outsize;
 
     let maxCoordinate: number = virtualSize;
+    // if real size is bigger than virtual size, then the end will be real size decreased by virtual size
+    // but sometimes the real size slightly bigger than virtual size, so we need to check it and fallback max coordinate to virtual size
     if (dimension.realSize > virtualSize) {
-      maxCoordinate = dimension.realSize - virtualSize;
+      maxCoordinate = Math.max(dimension.realSize - virtualSize, virtualSize);
     }
     let toUpdate: Partial<RevoGrid.ViewportState> = {
       lastCoordinate: position,
     };
     let pos: number = position;
     pos -= frameOffset * dimension.originItemSize;
-    pos = pos < 0 ? 0 : pos < maxCoordinate ? pos : maxCoordinate;
+    pos = pos < 0 ? 0 : pos < maxCoordinate ? pos : maxCoordinate; // todo: check if maxCoordinate can be removed
 
     const firstItem: RevoGrid.VirtualPositionItem | undefined = getFirstItem(this.getItems());
     const lastItem: RevoGrid.VirtualPositionItem | undefined = getLastItem(this.getItems());
