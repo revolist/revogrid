@@ -155,7 +155,6 @@ export default class ViewportStore {
     if (dropToOriginalSize) {
       items = setItemSizes(items, start, dropToOriginalSize, this.lastCoordinate);
     }
-    console.log('items', items);
 
     // loop through array from initial item after recombination
     // if size change present, change position for all items after
