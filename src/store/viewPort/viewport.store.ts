@@ -123,7 +123,6 @@ export default class ViewportStore {
         this.store.get('lastCoordinate')
       );
     }
-    console.log('items', items);
 
     // loop through array from initial item after recombination
     while (i < count) {
