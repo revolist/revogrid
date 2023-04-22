@@ -39,9 +39,7 @@ export class KeyboardService {
     }
 
 
-    /**
-     *  IF EDIT MODE
-     */
+    // IF EDIT MODE
     if (this.sv.selectionStoreService.edited) {
       switch (e.code) {
         case codesLetter.ESCAPE:
@@ -51,9 +49,7 @@ export class KeyboardService {
       return;
     }
 
-    /**
-     *  IF NOT EDIT MODE
-     */
+    // IF NOT EDIT MODE
 
     // pressed clear key
     if (this.sv.selectionStoreService.ranged && isClear(e.code)) {

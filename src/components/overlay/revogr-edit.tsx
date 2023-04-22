@@ -4,6 +4,9 @@ import { Edition, RevoGrid } from '../../interfaces';
 import { EDIT_INPUT_WR } from '../../utils/consts';
 import { TextEditor } from './editors/text';
 
+/**
+ * Cell editor component
+ */
 @Component({
   tag: 'revogr-edit',
   styleUrl: 'revogr-edit-style.scss',
@@ -19,14 +22,16 @@ export class RevoEdit {
   /** Save on editor close */
   @Prop() saveOnClose: boolean = false;
 
-  @Event({ bubbles: false }) cellEdit: EventEmitter<Edition.SaveDataDetails>;
+  /** Cell edit event */
+  @Event() cellEdit: EventEmitter<Edition.SaveDataDetails>;
 
   /**
    * Close editor event
    * pass true if requires focus next
    */
-  @Event({ bubbles: false }) closeEdit: EventEmitter<boolean | undefined>;
+  @Event() closeEdit: EventEmitter<boolean | undefined>;
 
+  /** Edit session editor */
   private currentEditor: Edition.EditorBase | null = null;
   private saveRunning = false;
 
@@ -70,8 +75,9 @@ export class RevoEdit {
       return;
     }
     this.saveRunning = false;
-    // fresh run
-    // editor defined for the column
+    
+    // custom editor usage
+    // use TextEditor (editors/text.tsx) to create custom editor
     if (this.editor) {
       this.currentEditor = new this.editor(
         this.column,
@@ -96,7 +102,7 @@ export class RevoEdit {
       return;
     }
     this.currentEditor.element = this.element.firstElementChild;
-    this.currentEditor.componentDidRender && this.currentEditor.componentDidRender();
+    this.currentEditor.componentDidRender?.();
   }
 
   disconnectedCallback(): void {

@@ -282,6 +282,9 @@ export namespace Components {
         "viewportCol": Observable<RevoGrid.ViewportState>;
         "viewportRow": Observable<RevoGrid.ViewportState>;
     }
+    /**
+     * Cell editor component
+     */
     interface RevogrEdit {
         "cancel": () => Promise<void>;
         "column": RevoGrid.ColumnRegular | null;
@@ -517,6 +520,9 @@ declare global {
         prototype: HTMLRevogrDataElement;
         new (): HTMLRevogrDataElement;
     };
+    /**
+     * Cell editor component
+     */
     interface HTMLRevogrEditElement extends Components.RevogrEdit, HTMLStencilElement {
     }
     var HTMLRevogrEditElement: {
@@ -969,6 +975,9 @@ declare namespace LocalJSX {
         "viewportCol": Observable<RevoGrid.ViewportState>;
         "viewportRow": Observable<RevoGrid.ViewportState>;
     }
+    /**
+     * Cell editor component
+     */
     interface RevogrEdit {
         "column"?: RevoGrid.ColumnRegular | null;
         "editCell"?: Edition.EditCell;
@@ -976,6 +985,9 @@ declare namespace LocalJSX {
           * Custom editors register
          */
         "editor"?: Edition.EditorCtr | null;
+        /**
+          * Cell edit event
+         */
         "onCellEdit"?: (event: RevogrEditCustomEvent<Edition.SaveDataDetails>) => void;
         /**
           * Close editor event pass true if requires focus next
@@ -1236,6 +1248,9 @@ declare module "@stencil/core" {
              * Rows, columns, groups and cells
              */
             "revogr-data": LocalJSX.RevogrData & JSXBase.HTMLAttributes<HTMLRevogrDataElement>;
+            /**
+             * Cell editor component
+             */
             "revogr-edit": LocalJSX.RevogrEdit & JSXBase.HTMLAttributes<HTMLRevogrEditElement>;
             "revogr-filter-panel": LocalJSX.RevogrFilterPanel & JSXBase.HTMLAttributes<HTMLRevogrFilterPanelElement>;
             "revogr-focus": LocalJSX.RevogrFocus & JSXBase.HTMLAttributes<HTMLRevogrFocusElement>;
