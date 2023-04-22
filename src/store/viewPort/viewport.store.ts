@@ -15,6 +15,7 @@ import {
   isActiveRange,
   setItemSizes,
   updateMissingAndRange,
+  isActiveRangeOutsideLastItem,
 } from './viewport.helpers';
 
 import { setStore } from '../../utils/store.utils';
@@ -66,14 +67,17 @@ export default class ViewportStore {
     }
 
     const frameOffset = 1;
-    const outsize = frameOffset * 2 * dimension.originItemSize;
+    const singleOffsetInPx = dimension.originItemSize * frameOffset;
+    // add offset to virtual size from both sides
+    const outsize = singleOffsetInPx * 2;
     // math virtual size is based on visible area + 2 items outside of visible area
     virtualSize += outsize;
 
-    // max possible coordinate is real size - virtual size
-    // or virtualSize if real size is less
-    let maxCoordinate = virtualSize;
+    // expected no scroll if real size less than virtual size, position is 0
+    let maxCoordinate = 0;
+    // if there is nodes outside of viewport, max coordinate has to be adjusted
     if (dimension.realSize > virtualSize) {
+      // max coordinate is real size minus virtual/rendered space
       maxCoordinate = dimension.realSize - virtualSize;
     }
 
@@ -88,26 +92,30 @@ export default class ViewportStore {
     // store last coordinate for further restore on redraw
     this.lastCoordinate = pos;
 
-    // actual position is less then first item start based on offset
+    // actual position is less than first item start based on offset
     pos -= frameOffset * dimension.originItemSize;
     pos = pos < 0 ? 0 : pos < maxCoordinate ? pos : maxCoordinate;
 
-    const firstItem = getFirstItem(this.getItems());
-    const lastItem = getLastItem(this.getItems());
+    const allItems = this.getItems();
+    const firstItem: RevoGrid.VirtualPositionItem | undefined = getFirstItem(allItems);
+    const lastItem: RevoGrid.VirtualPositionItem | undefined = getLastItem(allItems);
+
 
     let toUpdate: Partial<RevoGrid.ViewportState> = {};
     // left position changed
-    if (!isActiveRange(pos, firstItem)) {
+    // verify if new position is in range of previously rendered first item
+    if (!isActiveRange(pos, dimension.realSize, firstItem, lastItem)) {
       toUpdate = {
         ...toUpdate,
-        ...getUpdatedItemsByPosition(pos, this.getItems(), this.store.get('realCount'), virtualSize, dimension),
+        ...getUpdatedItemsByPosition(pos, allItems, this.store.get('realCount'), virtualSize, dimension),
       };
       this.setViewport({ ...toUpdate });
-      // right position changed
-    } else if (firstItem && this.store.get('virtualSize') + pos > lastItem?.end) {
+    // right position changed
+    } else if (isActiveRangeOutsideLastItem(pos, virtualSize, firstItem, lastItem)) {
       // check is any item missing for full fill content
-      const missing = addMissingItems(firstItem, this.store.get('realCount'), virtualSize + pos - firstItem.start, this.getItems(), dimension);
+      const missing = addMissingItems(firstItem, this.store.get('realCount'), virtualSize + pos - firstItem.start, allItems, dimension);
 
+      // update missing items
       if (missing.length) {
         const items = [...this.store.get('items')];
         const range = {
