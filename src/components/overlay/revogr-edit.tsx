@@ -16,6 +16,7 @@ export class RevoEdit {
   /** Custom editors register */
   @Prop() editor: Edition.EditorCtr | null;
 
+  /** Save on editor close */
   @Prop() saveOnClose: boolean = false;
 
   @Event({ bubbles: false }) cellEdit: EventEmitter<Edition.SaveDataDetails>;

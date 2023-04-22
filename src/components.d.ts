@@ -290,6 +290,9 @@ export namespace Components {
           * Custom editors register
          */
         "editor": Edition.EditorCtr | null;
+        /**
+          * Save on editor close
+         */
         "saveOnClose": boolean;
     }
     interface RevogrFilterPanel {
@@ -978,6 +981,9 @@ declare namespace LocalJSX {
           * Close editor event pass true if requires focus next
          */
         "onCloseEdit"?: (event: RevogrEditCustomEvent<boolean | undefined>) => void;
+        /**
+          * Save on editor close
+         */
         "saveOnClose"?: boolean;
     }
     interface RevogrFilterPanel {
