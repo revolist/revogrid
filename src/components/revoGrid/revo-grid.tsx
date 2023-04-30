@@ -580,12 +580,12 @@ export class RevoGridComponent {
   private clickTrackForFocusClear: number | null = null;
   @Listen('touchstart', { target: 'document' })
   @Listen('mousedown', { target: 'document' })
-  mousedownHandle(event: MouseEvent & TouchEvent) {
+  mousedownHandle(event: MouseEvent | TouchEvent) {
     this.clickTrackForFocusClear = getFromEvent(event, 'screenX') + getFromEvent(event, 'screenY');
   }
   @Listen('touchend', { target: 'document' })
   @Listen('mouseup', { target: 'document' })
-  mouseupHandle(event: MouseEvent & TouchEvent) {
+  mouseupHandle(event: MouseEvent | TouchEvent) {
     if (event.defaultPrevented) {
       return;
     }

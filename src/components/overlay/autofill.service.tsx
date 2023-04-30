@@ -43,7 +43,7 @@ export class AutoFillService {
   private autoFillStart: Selection.Cell | null = null;
   private autoFillLast: Selection.Cell | null = null;
 
-  private onMouseMoveAutofill: DebouncedFunc<(e: MouseEvent & TouchEvent, data: EventData) => void>;
+  private onMouseMoveAutofill: DebouncedFunc<(e: MouseEvent | TouchEvent, data: EventData) => void>;
 
   constructor(private sv: Config) {}
 
@@ -71,7 +71,10 @@ export class AutoFillService {
       <div
         class={CELL_HANDLER_CLASS}
         style={{ left: `${handlerStyle.right}px`, top: `${handlerStyle.bottom}px` }}
-        onMouseDown={(e: MouseEvent) => this.selectionStart(e, this.sv.getData(), AutoFillType.autoFill)}
+        onMouseDown={(e: MouseEvent) => {
+          this.selectionStart(e.target as HTMLElement, this.sv.getData(), AutoFillType.autoFill);
+          e.preventDefault();
+        }}
       />
     );
   }
@@ -81,10 +84,10 @@ export class AutoFillService {
   }
 
   /** Process mouse move events */
-  selectionMouseMove(e: MouseEvent & TouchEvent) {
+  selectionMouseMove(e: MouseEvent | TouchEvent) {
     // initiate mouse move debounce if not present
     if (!this.onMouseMoveAutofill) {
-      this.onMouseMoveAutofill = debounce((e: MouseEvent & TouchEvent, data: EventData) => this.doAutofillMouseMove(e, data), 5);
+      this.onMouseMoveAutofill = debounce((e: MouseEvent | TouchEvent, data: EventData) => this.doAutofillMouseMove(e, data), 5);
     }
     if (this.isAutoFill) {
       this.onMouseMoveAutofill(e, this.sv.getData());
@@ -107,7 +110,7 @@ export class AutoFillService {
    * Autofill logic:
    * on mouse move apply based on previous direction (if present)
    */
-  private doAutofillMouseMove(event: MouseEvent & TouchEvent, data: EventData) {
+  private doAutofillMouseMove(event: MouseEvent | TouchEvent, data: EventData) {
     // if no initial - not started
     if (!this.autoFillInitial) {
       return;
@@ -145,13 +148,12 @@ export class AutoFillService {
    * Can be triggered from MouseDown selection on element
    * Or can be triggered on corner square drag
    */
-  selectionStart(e: MouseEvent, data: EventData, type = AutoFillType.selection) {
+  selectionStart(target: HTMLElement, data: EventData, type = AutoFillType.selection) {
     /** Get cell by autofill element */
-    const { top, left } = (e.target as HTMLElement).getBoundingClientRect();
+    const { top, left } = target.getBoundingClientRect();
     this.autoFillInitial = this.getFocus();
     this.autoFillType = type;
     this.autoFillStart = getCurrentCell({ x: left, y: top }, data);
-    e.preventDefault();
   }
 
   /**

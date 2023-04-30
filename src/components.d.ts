@@ -1130,7 +1130,13 @@ declare namespace LocalJSX {
         "onCancelEdit"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
         "onFocusCell"?: (event: RevogrOverlaySelectionCustomEvent<ApplyFocusEvent>) => void;
         "onInternalCellEdit"?: (event: RevogrOverlaySelectionCustomEvent<Edition.BeforeSaveDataDetails>) => void;
+        /**
+          * Before clipboard copy happened
+         */
         "onInternalCopy"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
+        /**
+          * Before paste happened
+         */
         "onInternalPaste"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
         /**
           * Range data apply
@@ -1146,6 +1152,9 @@ declare namespace LocalJSX {
         "onRangeClipboardCopy"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
         "onRangeClipboardPaste"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
         "onSelectall"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
+        /**
+          * Set edit cell
+         */
         "onSetEdit"?: (event: RevogrOverlaySelectionCustomEvent<Edition.BeforeEdit>) => void;
         "onSetRange"?: (event: RevogrOverlaySelectionCustomEvent<Selection.RangeArea & { type: RevoGrid.MultiDimensionType }>) => void;
         "onSetTempRange"?: (event: RevogrOverlaySelectionCustomEvent<Selection.TempRange | null>) => void;

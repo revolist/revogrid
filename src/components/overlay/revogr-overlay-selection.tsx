@@ -12,6 +12,7 @@ import { isEditInput } from './editors/edit.utils';
 import { KeyboardService } from './keyboard.service';
 import { AutoFillService } from './autofill.service';
 import { ClipboardService } from './clipboard.service';
+import { getFromEvent } from '../../utils/events';
 
 @Component({
   tag: 'revogr-overlay-selection',
@@ -96,12 +97,21 @@ export class OverlaySelection {
   //
   // --------------------------------------------------------------------------
 
+  /**
+   * Before clipboard copy happened
+   */
   @Event({ cancelable: true }) internalCopy: EventEmitter;
+  /**
+   * Before paste happened
+   */
   @Event({ cancelable: true }) internalPaste: EventEmitter;
 
   @Event({ cancelable: true }) internalCellEdit: EventEmitter<Edition.BeforeSaveDataDetails>;
   @Event({ cancelable: true }) beforeFocusCell: EventEmitter<Edition.BeforeSaveDataDetails>;
 
+  /**
+   * Set edit cell
+   */
   @Event() setEdit: EventEmitter<Edition.BeforeEdit>;
   @Event({ eventName: 'before-apply-range' }) beforeApplyRange: EventEmitter<FocusRenderEvent>;
   @Event({ eventName: 'before-set-range' }) beforeSetRange: EventEmitter;
@@ -141,7 +151,7 @@ export class OverlaySelection {
   // --------------------------------------------------------------------------
   @Listen('touchmove', { target: 'document' })
   @Listen('mousemove', { target: 'document' })
-  onMouseMove(e: MouseEvent & TouchEvent) {
+  onMouseMove(e: MouseEvent | TouchEvent) {
     if (this.selectionStoreService.focused) {
       this.autoFillService.selectionMouseMove(e);
     }
@@ -375,7 +385,16 @@ export class OverlaySelection {
       }
     }
     return (
-      <Host onDblClick={() => this.doEdit()} onMouseDown={(e: MouseEvent) => this.onElementMouseDown(e)}>
+      <Host
+        // run edit on dblclick
+        onDblClick={(e: MouseEvent) => {
+          // if dblclick prevented outside edit will not start
+          if (!e.defaultPrevented) {
+            this.doEdit();
+          }
+        }}
+        onMouseDown={(e: MouseEvent) => this.onElementMouseDown(e)}
+        onTouchStart={(e: TouchEvent) => this.onElementMouseDown(e)}>
         {els}
         <slot name="data" />
       </Host>
@@ -432,7 +451,7 @@ export class OverlaySelection {
     return !e.defaultPrevented;
   }
 
-  protected onElementMouseDown(e: MouseEvent) {
+  protected onElementMouseDown(e: MouseEvent | TouchEvent) {
     // Ignore focus if clicked input
     if (isEditInput(e.target as HTMLElement | undefined)) {
       return;
@@ -442,15 +461,19 @@ export class OverlaySelection {
       return;
     }
     // Regular cell click
-    const focusCell = getCurrentCell({ x: e.x, y: e.y }, data);
+    const focusCell = getCurrentCell({ x: getFromEvent(e, 'clientX'), y: getFromEvent(e, 'clientY') }, data);
     this.selectionStoreService.focus(focusCell, this.range && e.shiftKey);
 
     // Initiate autofill selection
     if (this.range) {
-      this.autoFillService.selectionStart(e, data);
+      this.autoFillService.selectionStart(e.target as HTMLElement, data);
+      e.preventDefault();
     }
   }
 
+  /** 
+   * Start cell editing
+   */
   protected doEdit(val = '') {
     if (this.canEdit()) {
       const editCell = this.selectionStore.get('focus');
