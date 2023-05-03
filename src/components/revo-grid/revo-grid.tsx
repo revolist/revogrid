@@ -482,7 +482,7 @@ export class RevoGridComponent {
    * Clear current grid focus
    */
   @Method() async clearFocus() {
-    const focused = await this.getFocused();
+    const focused = this.viewport?.getFocused();
     const event = this.beforefocuslost.emit(focused);
     if (event.defaultPrevented) {
       return;

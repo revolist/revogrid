@@ -3,6 +3,10 @@
 <!-- Auto Generated Below -->
 
 
+## Overview
+
+Service for tracking grid scrolling
+
 ## Properties
 
 | Property        | Attribute        | Description             | Type     | Default |
