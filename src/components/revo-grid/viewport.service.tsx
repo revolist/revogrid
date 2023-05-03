@@ -254,15 +254,21 @@ export default class ViewportService {
     this.sv.selectionStoreConnector.setEdit(false);
   }
 
+  /**
+   * Collect focused element data
+   */
   getFocused(): FocusedData | null {
     const focused = this.sv.selectionStoreConnector.focusedStore;
     if (!focused) {
       return null;
     }
+    // get column data
     const colType = this.storesXToType[focused.position.x];
     const column = this.sv.columnProvider.getColumn(focused.cell.x, colType);
-    const rowType = this.storesYToType[focused.position.x];
-    const model = this.sv.dataProvider.getModel(focused.cell.x, rowType);
+
+    // get row data
+    const rowType = this.storesYToType[focused.position.y];
+    const model = this.sv.dataProvider.getModel(focused.cell.y, rowType);
     return {
       column,
       model,
