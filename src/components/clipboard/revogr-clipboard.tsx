@@ -79,8 +79,11 @@ export class Clipboard {
     const clipboardData = this.getData(e);
     const isHTML = clipboardData.types.indexOf('text/html') > -1;
     const data = isHTML ? clipboardData.getData('text/html') : clipboardData.getData('text');
+    const dataText = clipboardData.getData('text');
+
     const beforePaste = this.beforePaste.emit({
       raw: data,
+      dataText,
       isHTML,
       event: e,
     });
@@ -89,8 +92,14 @@ export class Clipboard {
       return;
     }
 
-    const parsedData = beforePaste.detail.isHTML ?
-      this.htmlParse(beforePaste.detail.raw) : this.textParse(beforePaste.detail.raw);
+    let parsedData: string[][];
+    // if html, then search for table if no table fallback to regular text parsing
+    if (beforePaste.detail.isHTML) {
+      const table = this.htmlParse(beforePaste.detail.raw);
+      parsedData = table || this.textParse(dataText);
+    } else {
+      parsedData = this.textParse(beforePaste.detail.raw);
+    }
     const beforePasteApply = this.beforePasteApply.emit({
       raw: data,
       parsed: parsedData,
@@ -174,7 +183,7 @@ export class Clipboard {
     const fragment = document.createRange().createContextualFragment(data);
     const table = fragment.querySelector('table');
     if (!table) {
-      return this.textParse(data);
+      return null;
     }
     for (const rgRow of Array.from(table.rows)) {
       result.push(Array.from(rgRow.cells).map(cell => cell.innerText));
