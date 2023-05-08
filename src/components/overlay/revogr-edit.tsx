@@ -63,6 +63,7 @@ export class RevoEdit {
       this.cellEdit.emit({
         rgCol: this.editCell.x,
         rgRow: this.editCell.y,
+        rowType: this.editCell.type,
         val,
         preventFocus,
       });

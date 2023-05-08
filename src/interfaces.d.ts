@@ -4,6 +4,7 @@
 import { VNode } from '@stencil/core';
 // @ts-ignore
 import { ObservableMap, Subscription } from '@stencil/store';
+import { type } from 'os';
 export type Observable<T> = ObservableMap<T>;
 export type PluginSubscribe<T> = Subscription<T>;
 export declare namespace RevoGrid {
@@ -290,6 +291,7 @@ export declare namespace Edition {
   type SaveDataDetails = {
     rgRow: Selection.RowIndex;
     rgCol: Selection.ColIndex;
+    rowType: RevoGrid.DimensionRows;
     val: any;
     preventFocus?: boolean;
   };

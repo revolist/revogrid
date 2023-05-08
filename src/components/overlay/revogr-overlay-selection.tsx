@@ -520,7 +520,7 @@ export class OverlaySelection {
       this.autoFillService.onRangeApply(data, this.selectionStoreService.ranged);
     } else if (this.canEdit()) {
       const focused = this.selectionStoreService.focused;
-      this.cellEdit({ rgRow: focused.y, rgCol: focused.x, val: '' });
+      this.cellEdit({ rgRow: focused.y, rgCol: focused.x, val: '', rowType: this.types.rowType });
     }
   }
 
