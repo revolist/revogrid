@@ -291,7 +291,8 @@ export declare namespace Edition {
   type SaveDataDetails = {
     rgRow: Selection.RowIndex;
     rgCol: Selection.ColIndex;
-    rowType: RevoGrid.DimensionRows;
+    type: RevoGrid.DimensionRows;
+    prop: RevoGrid.ColumnProp;
     val: any;
     preventFocus?: boolean;
   };
