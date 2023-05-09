@@ -10,7 +10,7 @@ import { Edition, Selection, RevoGrid, ThemeSpace, RevoPlugin } from '../../inte
 import ThemeService from '../../themeManager/themeService';
 import { timeout } from '../../utils';
 import AutoSize, { AutoSizeColumnConfig } from '../../plugins/autoSizeColumn';
-import { columnTypes, rowTypes } from '../../store/storeTypes';
+import { columnTypes as columnDimensions, rowTypes as rowDimensions } from '../../store/storeTypes';
 import FilterPlugin, { ColumnFilterConfig, FilterCollection } from '../../plugins/filter/filter.plugin';
 import SortingPlugin from '../../plugins/sorting/sorting.plugin';
 import ExportFilePlugin from '../../plugins/export/export.plugin';
@@ -99,9 +99,10 @@ export class RevoGridComponent {
    */
   @Prop() plugins: RevoPlugin.PluginClass[];
 
-  /** Types
+  /** Column Types Format
    *  Every type represent multiple column properties
    *  Types will be merged but can be replaced with column properties
+   *  Types were made as separate objects to be reusable per multiple columns
    */
   @Prop() columnTypes: { [name: string]: RevoGrid.ColumnType } = {};
 
@@ -723,12 +724,18 @@ export class RevoGridComponent {
 
   @Element() element: HTMLRevoGridElement;
 
+  /**
+   * Column format change will trigger column structure update
+   */
+  @Watch('columnTypes') columnTypesChanged() {
+    this.columnChanged(this.columns);
+  }
   @Watch('columns') columnChanged(newVal: RevoGrid.ColumnDataSchema[] = []) {
     // clear existing data
     this.dimensionProvider.dropColumns();
     const columnGather = ColumnDataProvider.getColumns(newVal, 0, this.columnTypes);
     this.beforecolumnsset.emit(columnGather);
-    for (let type of columnTypes) {
+    for (let type of columnDimensions) {
       const items = columnGather.columns[type];
       this.dimensionProvider.setNewColumns(type, items.length, ColumnDataProvider.getSizes(items), type !== 'rgCol');
     }
@@ -742,7 +749,7 @@ export class RevoGridComponent {
 
   @Watch('rowSize') rowSizeChanged(s: number) {// clear existing data
     this.dimensionProvider.setSettings({ originItemSize: s }, 'rgRow');
-    rowTypes.forEach((t) => {
+    rowDimensions.forEach((t) => {
       this.dimensionProvider.clearSize(
         t,
         this.dataProvider.stores[t].store.get('source').length

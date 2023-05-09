@@ -72,7 +72,7 @@ export namespace Components {
          */
         "colSize": number;
         /**
-          * Types Every type represent multiple column properties Types will be merged but can be replaced with column properties
+          * Column Types Format Every type represent multiple column properties Types will be merged but can be replaced with column properties Types were made as separate objects to be reusable per multiple columns
          */
         "columnTypes": { [name: string]: RevoGrid.ColumnType };
         /**
@@ -636,7 +636,7 @@ declare namespace LocalJSX {
          */
         "colSize"?: number;
         /**
-          * Types Every type represent multiple column properties Types will be merged but can be replaced with column properties
+          * Column Types Format Every type represent multiple column properties Types will be merged but can be replaced with column properties Types were made as separate objects to be reusable per multiple columns
          */
         "columnTypes"?: { [name: string]: RevoGrid.ColumnType };
         /**
