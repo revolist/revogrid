@@ -21,6 +21,8 @@ export class RevoEdit {
 
   /** Save on editor close */
   @Prop() saveOnClose: boolean = false;
+  /** Additional data to pass to renderer */
+  @Prop() additionalData: any;
 
   /** Cell edit event */
   @Event() cellEdit: EventEmitter<Edition.SaveDataDetails>;
@@ -131,7 +133,7 @@ export class RevoEdit {
   render() {
     if (this.currentEditor) {
       this.currentEditor.editCell = this.editCell;
-      return <Host class={EDIT_INPUT_WR}>{this.currentEditor.render(h)}</Host>;
+      return <Host class={EDIT_INPUT_WR}>{this.currentEditor.render(h, this.additionalData)}</Host>;
     }
     return '';
   }

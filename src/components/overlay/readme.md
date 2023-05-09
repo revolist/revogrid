@@ -7,6 +7,7 @@
 
 | Property              | Attribute                | Description                                                                                   | Type                                                           | Default     |
 | --------------------- | ------------------------ | --------------------------------------------------------------------------------------------- | -------------------------------------------------------------- | ----------- |
+| `additionalData`      | `additional-data`        | Additional data to pass to renderer                                                           | `any`                                                          | `undefined` |
 | `applyChangesOnClose` | `apply-changes-on-close` | If true applys changes when cell closes if not Escape                                         | `boolean`                                                      | `false`     |
 | `canDrag`             | `can-drag`               | Enable revogr-order-editor component (read more in revogr-order-editor component) Allows D&D  | `boolean`                                                      | `undefined` |
 | `colData`             | --                       | Column data store                                                                             | `ObservableMap<DataSourceState<ColumnRegular, DimensionCols>>` | `undefined` |

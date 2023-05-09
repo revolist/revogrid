@@ -51,7 +51,6 @@ export const ViewPortSections = ({
       const dataView = (
         <revogr-overlay-selection
           {...data}
-          slot={data.slot}
           selectionStore={data.segmentSelectionStore}
           onSelectall={() => onSelectAll()}
           editors={editors}
@@ -61,6 +60,8 @@ export const ViewPortSections = ({
           onCancelEdit= {() => onCancelEdit()}
           applyChangesOnClose={applyEditorChangesOnClose}
           onSetEdit={({ detail }) => onEdit(detail)}
+          additionalData={additionalData}
+          slot={data.slot}
         >
           <revogr-data
             {...data}

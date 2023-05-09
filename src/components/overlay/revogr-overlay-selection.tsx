@@ -19,14 +19,6 @@ import { getFromEvent } from '../../utils/events';
   styleUrl: 'revogr-overlay-style.scss',
 })
 export class OverlaySelection {
-  protected columnService: ColumnService;
-
-  protected selectionStoreService: SelectionStoreService;
-  private keyboardService: KeyboardService | null = null;
-  private autoFillService: AutoFillService | null = null;
-  private clipboardService: ClipboardService | null = null;
-  private orderEditor: HTMLRevogrOrderEditorElement;
-  private revogrEdit: HTMLRevogrEditElement | null = null;
 
   @Element() element: HTMLElement;
 
@@ -90,6 +82,8 @@ export class OverlaySelection {
   @Prop() editors: Edition.Editors;
   /** If true applys changes when cell closes if not Escape */
   @Prop() applyChangesOnClose: boolean = false;
+  /** Additional data to pass to renderer */
+  @Prop() additionalData: any;
 
   // --------------------------------------------------------------------------
   //
@@ -139,6 +133,14 @@ export class OverlaySelection {
   @Event({ cancelable: true }) rangeClipboardCopy: EventEmitter;
   @Event({ cancelable: true }) rangeClipboardPaste: EventEmitter;
 
+  protected columnService: ColumnService;
+
+  protected selectionStoreService: SelectionStoreService;
+  private keyboardService: KeyboardService | null = null;
+  private autoFillService: AutoFillService | null = null;
+  private clipboardService: ClipboardService | null = null;
+  private orderEditor: HTMLRevogrOrderEditorElement;
+  private revogrEdit: HTMLRevogrEditElement | null = null;
   /**
    * Runs before cell save
    * Can be used to override or cancel original save
@@ -348,6 +350,7 @@ export class OverlaySelection {
         saveOnClose={this.applyChangesOnClose}
         column={this.columnService.columns[editCell.x]}
         editor={this.columnService.getCellEditor(editCell.y, editCell.x, this.editors)}
+        additionalData={this.additionalData}
         style={style}
       />
     );

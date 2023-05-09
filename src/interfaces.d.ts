@@ -333,7 +333,7 @@ export declare namespace Edition {
     beforeUpdate?(): void;
     componentDidRender?(): void;
     disconnectedCallback?(): void;
-    render(createElement?: HyperFunc<VNode>): VNode | VNode[] | string | void;
+    render(createElement?: HyperFunc<VNode>, additionalData?: any): VNode | VNode[] | string | void;
   }
 }
 export declare namespace ThemeSpace {

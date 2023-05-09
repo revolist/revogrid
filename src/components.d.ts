@@ -286,6 +286,10 @@ export namespace Components {
      * Cell editor component
      */
     interface RevogrEdit {
+        /**
+          * Additional data to pass to renderer
+         */
+        "additionalData": any;
         "cancel": () => Promise<void>;
         "column": RevoGrid.ColumnRegular | null;
         "editCell": Edition.EditCell;
@@ -348,6 +352,10 @@ export namespace Components {
         "parent": HTMLElement;
     }
     interface RevogrOverlaySelection {
+        /**
+          * Additional data to pass to renderer
+         */
+        "additionalData": any;
         /**
           * If true applys changes when cell closes if not Escape
          */
@@ -979,6 +987,10 @@ declare namespace LocalJSX {
      * Cell editor component
      */
     interface RevogrEdit {
+        /**
+          * Additional data to pass to renderer
+         */
+        "additionalData"?: any;
         "column"?: RevoGrid.ColumnRegular | null;
         "editCell"?: Edition.EditCell;
         /**
@@ -1081,6 +1093,10 @@ declare namespace LocalJSX {
         "parent"?: HTMLElement;
     }
     interface RevogrOverlaySelection {
+        /**
+          * Additional data to pass to renderer
+         */
+        "additionalData"?: any;
         /**
           * If true applys changes when cell closes if not Escape
          */
