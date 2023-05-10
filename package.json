@@ -86,10 +86,11 @@
     "rxjs": "^7.8.0",
     "svelte": "^3.58.0",
     "typescript": "^5.0.4",
-    "vue": "^3.2.47"
+    "vue": "^3.2.47",
+    "bootstrap": "^5.2.3"
   },
   "dependencies": {
-    "@stencil/core": "^3.2.1",
+    "@stencil/core": "^3.2.2",
     "lodash": "^4.17.21"
   }
 }

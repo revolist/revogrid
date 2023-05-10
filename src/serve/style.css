@@ -1,0 +1,35 @@
+body,
+html {
+  height: 100%;
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+  margin: 0;
+  overflow: hidden;
+  background-color: #f7f9fc;
+  display: flex;
+}
+
+.inner-cell {
+  width: 100%;
+  height: 100%;
+}
+
+.loader {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  line-height: calc(60vh);
+  text-align: center;
+  background-color: rgba(255, 255, 255, 0.8);
+  z-index: 1000;
+  font-weight: 600;
+  font-family: sans-serif;
+}
+
+.scrollable {
+  overflow-y: auto;
+  height: 100%;
+}

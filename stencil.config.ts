@@ -97,7 +97,7 @@ export const config: Config = {
     },
     {
       type: 'www',
-      copy: [{ src: 'utilsExternal' }],
+      copy: [{ src: 'serve', dest: '.' }, { src: '../node_modules/bootstrap/dist', dest: './bootstrap' }],
       serviceWorker: null, // disable service workers
     },
   ],

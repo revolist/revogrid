@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html dir="ltr" lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
+  <title>Revo Grid Component Demo</title>
+  <style type="text/css">
+    revo-grid {
+      display: block;
+      height: 100%;
+    }
+
+    .inner-cell {
+      width: 100%;
+      height: 100%;
+    }
+  </style>
+
+  <link rel="stylesheet" href="./style.css" />
+  <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="./bootstrap/js/bootstrap.min.js" />
+  <script type="module" src="./controller.js"></script>
+  <script type="module" src="/build/revo-grid.esm.js"></script>
+  <script nomodule src="/build/revo-grid.js"></script>
+</head>
+
+<body>
+  <div class="loader" style="display: none">Please wait. Cooking data...</div>
+  <div class="container-fluid">
+    <div class="row h-100">
+      <!-- Main content area -->
+      <div class="col-lg-9 grid-holder">
+
+        <revo-grid theme="material" row-headers can-move-columns apply-on-close="true" stretch="false" class="my"
+          key="1"></revo-grid>
+
+      </div>
+
+      <!-- Sidebar -->
+      <div class="col-lg-3 d-flex flex-column scrollable">
+        <div class="p-2 mb-auto">
+          <button type="button" class="btn btn-primary btn-sm mt-1" onclick="clearGrouping()">Clear grouping</button>
+          <button type="button" class="btn btn-primary btn-sm mt-1" onclick="setTrimmed([3])">Set trimmed 3</button>
+          <button type="button" class="btn btn-primary btn-sm mt-1" onclick="setTrimmed([])">Clear trimmed</button>
+          <button type="button" class="btn btn-primary btn-sm mt-1" onclick="setGrouping(['key'])">Set grouping by
+            'key'</button>
+          <button type="button" class="btn btn-primary btn-sm mt-1" onclick="exportGrid()">Export to csv</button>
+          <button type="button" class="btn btn-primary btn-sm mt-1" onclick="scrollToCol(30)">Scroll to column
+            30</button>
+          <button type="button" class="btn btn-primary btn-sm mt-1" onclick="setEdit(30, 10)">Set edit 30:1</button>
+
+          <button type="button" class="btn btn-primary btn-sm" onclick="setRowSize(30)">Set row size 30</button>
+
+          <div>
+
+            <ul class="list-group my-3">
+              <li class="list-group-item">
+                <label><input class="form-check-input me-1" type="checkbox"
+                    onchange="setPinned('topPinned', event.target.checked)" />Pinned top</label>
+              </li>
+              <li class="list-group-item">
+                <label><input class="form-check-input me-1" type="checkbox"
+                    onchange="setPinned('bottomPinned', event.target.checked)" />Pinned bottom</label>
+              </li>
+              <li class="list-group-item">
+                <label><input class="form-check-input me-1" type="checkbox"
+                    onchange="setPinned('colPinStart', event.target.checked)" />Pinned left</label>
+              </li>
+              <li class="list-group-item">
+                <label><input class="form-check-input me-1" type="checkbox"
+                    onchange="setPinned('colPinEnd', event.target.checked)" />Pinned right</label>
+              </li>
+            </ul>
+
+            <div class="btn-group" role="group" aria-label="Basic example">
+              <button type="button" class="btn btn-primary btn-sm" onclick="setData({ rows: 1, cols: 1 })">1x1</button>
+              <button type="button" class="btn btn-primary btn-sm" onclick="setData({ rows: 2, cols: 5 })">2x5</button>
+              <button type="button" class="btn btn-primary btn-sm"
+                onclick="setData({ rows: 100, cols: 100 })">100x100</button>
+              <button type="button" class="btn btn-primary btn-sm"
+                onclick="setData({ rows: 1000, cols: 1000 })">1Kx1K</button>
+              <button type="button" class="btn btn-primary btn-sm"
+                onclick="setData({ rows: 10000, cols: 5000 })">10Kx5K</button>
+            </div>
+          </div>
+          <ul class="list-group my-3">
+
+            <li class="list-group-item">
+              <label><input class="form-check-input me-1" type="checkbox"
+                  onchange="showRowHeaders(event.target.checked)" />Show row headers</label>
+            </li>
+            <li class="list-group-item">
+              <label><input class="form-check-input me-1" type="checkbox"
+                  onchange="showColGrouping(event.target.checked)" />Show column grouping</label>
+            </li>
+            <li class="list-group-item">
+              <label><input class="form-check-input me-1" type="checkbox"
+                  onchange="toggleVisibility(event.target.checked)" checked="true" />Toggle Visibility</label>
+            </li>
+            <li class="list-group-item">
+              <label><input class="form-check-input me-1" type="checkbox"
+                  onchange="preventEvent('beforerange', event.target.checked)" />Prevent beforerange</label>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+</body>
+
+</html>
