@@ -17,6 +17,7 @@ import { ColumnSource, RowSource } from "./components/data/columnService";
 import { MultiFilterItem, ShowData } from "./plugins/filter/filter.pop";
 import { LogicFunction } from "./plugins/filter/filter.types";
 import { DataSourceState, Groups } from "./store/dataSource/data.store";
+import { ResizeProps } from "./services/resizable.directive";
 import { ViewportData } from "./components/revoGrid/viewport.interfaces";
 import { ElementScroll } from "./components/revoGrid/viewport.scrolling.service";
 export { ApplyFocusEvent, BeforeCellRenderEvent, DragStartEvent, Edition, FocusRenderEvent, Observable, RevoGrid, RevoPlugin, Selection, ThemeSpace } from "./interfaces";
@@ -31,6 +32,7 @@ export { ColumnSource, RowSource } from "./components/data/columnService";
 export { MultiFilterItem, ShowData } from "./plugins/filter/filter.pop";
 export { LogicFunction } from "./plugins/filter/filter.types";
 export { DataSourceState, Groups } from "./store/dataSource/data.store";
+export { ResizeProps } from "./services/resizable.directive";
 export { ViewportData } from "./components/revoGrid/viewport.interfaces";
 export { ElementScroll } from "./components/revoGrid/viewport.scrolling.service";
 export namespace Components {
@@ -327,7 +329,13 @@ export namespace Components {
         "selectionStore": Observable<Selection.SelectionStoreState>;
     }
     interface RevogrHeader {
+        /**
+          * Extra properties to pass into header renderer, such as vue or react components to handle parent
+         */
         "additionalData": any;
+        /**
+          * If columns can be resized
+         */
         "canResize": boolean;
         "colData": RevoGrid.ColumnRegular[];
         "columnFilter": boolean;
@@ -335,8 +343,15 @@ export namespace Components {
         "groupingDepth": number;
         "groups": Groups;
         "parent": string;
+        /**
+          * Define custom resize position
+         */
+        "resizeHandler": ResizeProps['active'];
         "selectionStore": Observable<Selection.SelectionStoreState>;
-        "type": string;
+        /**
+          * Column type
+         */
+        "type": RevoGrid.DimensionCols | 'rowHeaders';
         "viewportCol": Observable<RevoGrid.ViewportState>;
     }
     interface RevogrOrderEditor {
@@ -1042,7 +1057,13 @@ declare namespace LocalJSX {
         "selectionStore": Observable<Selection.SelectionStoreState>;
     }
     interface RevogrHeader {
+        /**
+          * Extra properties to pass into header renderer, such as vue or react components to handle parent
+         */
         "additionalData"?: any;
+        /**
+          * If columns can be resized
+         */
         "canResize"?: boolean;
         "colData"?: RevoGrid.ColumnRegular[];
         "columnFilter"?: boolean;
@@ -1054,8 +1075,15 @@ declare namespace LocalJSX {
         "onHeaderresize"?: (event: RevogrHeaderCustomEvent<RevoGrid.ViewSettingSizeProp>) => void;
         "onInitialHeaderClick"?: (event: RevogrHeaderCustomEvent<RevoGrid.InitialHeaderClick>) => void;
         "parent"?: string;
+        /**
+          * Define custom resize position
+         */
+        "resizeHandler"?: ResizeProps['active'];
         "selectionStore"?: Observable<Selection.SelectionStoreState>;
-        "type": string;
+        /**
+          * Column type
+         */
+        "type": RevoGrid.DimensionCols | 'rowHeaders';
         "viewportCol"?: Observable<RevoGrid.ViewportState>;
     }
     interface RevogrOrderEditor {

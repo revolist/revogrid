@@ -39,6 +39,11 @@ revogr-viewport-scroll {
     z-index: 2;
   }
 
+  // make sure it would work
+  &.colPinEnd:has(.active) {
+    overflow: visible;
+  }
+
   &.rgCol {
     flex-grow: 1;
   }

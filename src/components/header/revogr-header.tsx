@@ -7,6 +7,7 @@ import { Observable, RevoGrid, Selection } from '../../interfaces';
 import { Groups } from '../../store/dataSource/data.store';
 import HeaderRenderer from './headerRenderer';
 import ColumnGroupsRenderer from '../../plugins/groupingColumn/columnGroupsRenderer';
+import { ResizeProps } from '../../services/resizable.directive';
 
 @Component({
   tag: 'revogr-header',
@@ -21,11 +22,26 @@ export class RevogrHeaderComponent {
   @Prop() parent: string = '';
   @Prop() groups: Groups;
   @Prop() groupingDepth: number = 0;
+
+  /**
+   * If columns can be resized
+   */
   @Prop() canResize: boolean;
+  /**
+   * Define custom resize position
+   */
+  @Prop() resizeHandler: ResizeProps['active'];
   @Prop() colData: RevoGrid.ColumnRegular[];
   @Prop() columnFilter: boolean;
-  @Prop() type!: string;
 
+  /**
+   * Column type
+   */
+  @Prop() type!:  RevoGrid.DimensionCols | 'rowHeaders';
+
+  /**
+   * Extra properties to pass into header renderer, such as vue or react components to handle parent
+   */
   @Prop() additionalData: any = {};
 
   @Event() initialHeaderClick: EventEmitter<RevoGrid.InitialHeaderClick>;
@@ -78,10 +94,11 @@ export class RevogrHeaderComponent {
           }}
           canFilter={!!this.columnFilter}
           canResize={this.canResize}
-          additionalData={this.additionalData}
+          active={this.resizeHandler}
           onResize={e => this.onResize(e, rgCol.itemIndex)}
           onDoubleClick={e => this.headerdblClick.emit(e)}
           onClick={e => this.initialHeaderClick.emit(e)}
+          additionalData={this.additionalData}
         />,
       );
       visibleProps[colData?.prop] = rgCol.itemIndex;
@@ -90,14 +107,15 @@ export class RevogrHeaderComponent {
     return [
       <div class="group-rgRow">
         <ColumnGroupsRenderer
-          additionalData={this.additionalData}
           canResize={this.canResize}
+          active={this.resizeHandler}
           visibleProps={visibleProps}
           providers={this.providers}
           groups={this.groups}
           dimensionCol={this.dimensionCol.state}
           depth={this.groupingDepth}
           onResize={(changedX, startIndex, endIndex) => this.onResizeGroup(changedX, startIndex, endIndex)}
+          additionalData={this.additionalData}
         />
       </div>,
       <div class={`${HEADER_ROW_CLASS} ${HEADER_ACTUAL_ROW_CLASS}`}>{cells}</div>,

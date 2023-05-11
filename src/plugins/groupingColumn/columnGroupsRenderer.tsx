@@ -5,6 +5,7 @@ import { Group } from '../../store/dataSource/data.store';
 import { getItemByIndex } from '../../store/dimension/dimension.helpers';
 import { HEADER_ROW_CLASS } from '../../utils/consts';
 import GroupHeaderRenderer from './headerGroupRenderer';
+import { ResizeProps } from '../..';
 
 type Props = {
   visibleProps: { [prop: string]: number };
@@ -15,9 +16,11 @@ type Props = {
   providers: RevoGrid.Providers;
   additionalData: any;
   onResize(changedX: number, startIndex: number, endIndex: number): void;
-};
+} & Partial<Pick<ResizeProps, 'active'>>;
 
-const ColumnGroupsRenderer = ({ additionalData, providers, depth, groups, visibleProps, dimensionCol, canResize, onResize }: Props): VNode[] => {
+const ColumnGroupsRenderer = ({
+  additionalData, providers, depth, groups, visibleProps, dimensionCol, canResize, active, onResize
+}: Props): VNode[] => {
   // render group columns
   const groupRow: VNode[] = [];
   for (let i = 0; i < depth; i++) {
@@ -40,9 +43,10 @@ const ColumnGroupsRenderer = ({ additionalData, providers, depth, groups, visibl
               start={groupStart}
               end={groupEnd}
               group={group}
-              additionalData={additionalData}
+              active={active}
               canResize={canResize}
               onResize={e => onResize(e.changedX, groupStartIndex, groupEndIndex)}
+              additionalData={additionalData}
             />,
           );
         }

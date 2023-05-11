@@ -1,11 +1,12 @@
 import { h, VNode } from '@stencil/core';
 import { RevoGrid } from '../../interfaces';
 import { dispatch } from '../../plugins/dispatcher';
-import { ResizableElement } from '../../services/resizable.directive';
 import ColumnService from '../data/columnService';
+import { ResizableElement } from '../../services/resizable.element';
+import { ResizeProps } from '../../services/resizable.directive';
 
 type Props = {
-  props: RevoGrid.CellProps;
+  props: RevoGrid.CellProps & Partial<ResizeProps>;
   additionalData: any;
   data?: RevoGrid.ColumnTemplateProp;
 };

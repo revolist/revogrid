@@ -66,6 +66,7 @@ export default class ViewportService {
 
   /**
    * Transform data from stores and apply it to different components
+   * Handle columns
    */
   private getViewportColumnData(contentHeight: number): ViewportProps[] {
     const columns: ViewportProps[] = [];
@@ -166,6 +167,7 @@ export default class ViewportService {
       dimensionCol: data.dimensions[data.colType].store,
       groups: data.colStore.get('groups'),
       groupingDepth: data.colStore.get('groupingDepth'),
+      resizeHandler: data.colType === 'colPinEnd' ? ['l'] : undefined,
       onHeaderresize: data.onHeaderresize,
     };
 

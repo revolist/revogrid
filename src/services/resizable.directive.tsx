@@ -1,7 +1,4 @@
-import { h, VNode } from '@stencil/core';
-import { RevoGrid } from '../interfaces';
-
-type Props = {
+export type ResizeProps = {
   active: ('r' | 'rb' | 'b' | 'lb' | 'l' | 'lt' | 't' | 'rt')[]; // all
   fitParent: boolean; // false
   minWidth: number; // 0
@@ -12,7 +9,7 @@ type Props = {
   maxHeight?: number;
 
   onResize?(e: ResizeEvent): void;
-  onDoubleClick?(): void;
+  onDoubleClick?(originalEvent: MouseEvent): void;
 };
 
 export type ResizeEvent = {
@@ -23,7 +20,7 @@ export type ResizeEvent = {
   height?: number;
 };
 
-enum ResizeEvents {
+export enum ResizeEvents {
   start = 'resize:start',
   move = 'resize:move',
   end = 'resize:end',
@@ -47,7 +44,7 @@ const DISABLE_MASK = {
   h: 0b1000,
 };
 
-const defaultProps = (props: Partial<Props>): Props => {
+const defaultProps = (props: Partial<ResizeProps>): ResizeProps => {
   return {
     ...props,
     fitParent: props.fitParent || false,
@@ -60,7 +57,7 @@ const defaultProps = (props: Partial<Props>): Props => {
 
 export class ResizeDirective {
   private $el: HTMLElement;
-  private props: Props;
+  private props: ResizeProps;
   private minW: number;
   private minH: number;
   private maxW: number;
@@ -83,7 +80,7 @@ export class ResizeDirective {
   private mouseMoveFunc: () => void;
   private mouseUpFunc: () => void;
 
-  constructor(private initialProps: Partial<Props>, private $event?: (e: ResizeEvent) => void) {
+  constructor(private initialProps: Partial<ResizeProps>, private $event?: (e: ResizeEvent) => void) {
     this.props = defaultProps(initialProps);
     this.mouseMoveFunc = this.handleMove.bind(this);
     this.mouseUpFunc = this.handleUp.bind(this);
@@ -118,9 +115,10 @@ export class ResizeDirective {
     if (!this.$event) {
       return;
     }
+    const isLeft = this.activeResizer?.classList.contains('resizable-l');
     this.$event({
       eventName,
-      width: this.width + this.changeX,
+      width: this.width + this.changeX * (isLeft ? -1 : 1),
       height: this.height + this.changeY,
       changedX: this.changeX,
       changedY: this.changeY,
@@ -170,9 +168,10 @@ export class ResizeDirective {
       }
     }
     if (isX && this.disableCalcMap & DISABLE_MASK.w) {
+      const isLeft = this.activeResizer?.classList.contains('resizable-l');
       let diffX = eventX - this.mouseX;
       let changedX = this.changeX + diffX;
-      const newWidth = this.width + changedX;
+      const newWidth = this.width + changedX * (isLeft ? -1 : 1);
 
       // if overcrossed min width
       if (newWidth < this.minW) {
@@ -187,7 +186,11 @@ export class ResizeDirective {
       this.mouseX = eventX;
 
       if (this.activeResizer) {
-        this.activeResizer.style.right = `${-this.changeX}px`;
+        if (!isLeft) {
+          this.activeResizer.style.right = `${-this.changeX}px`;
+        } else {
+          this.activeResizer.style.left = `${this.changeX}px`;
+        }
       }
     }
     this.emitEvent(ResizeEvents.move);
@@ -294,54 +297,3 @@ export class ResizeDirective {
   }
 }
 
-export const ResizableElement = (props: Partial<Props> & RevoGrid.CellProps, children: VNode[]) => {
-  const resizeEls: VNode[] = [];
-  const directive =
-    (props.canResize &&
-      new ResizeDirective(props, e => {
-        if (e.eventName === ResizeEvents.end) {
-          props.onResize && props.onResize(e);
-        }
-      })) ||
-    null;
-  if (props.canResize) {
-    if (props.active) {
-      for (let p in props.active) {
-        resizeEls.push(
-          <div
-            onClick={e => e.preventDefault()}
-            onDblClick={e => {
-              e.preventDefault();
-              props.onDoubleClick && props.onDoubleClick();
-            }}
-            onMouseDown={(e: MouseEvent) => directive?.handleDown(e)}
-            onTouchStart={(e: TouchEvent) => directive?.handleDown(e)}
-            class={`resizable resizable-${props.active[p]}`}
-          />,
-        );
-      }
-    }
-  } else {
-    if (props.active) {
-      for (let p in props.active) {
-        resizeEls.push(
-          <div
-            onClick={e => e.preventDefault()}
-            onTouchStart={(e: TouchEvent) => e.preventDefault()}
-            onDblClick={e => {
-              e.preventDefault();
-              props.onDoubleClick && props.onDoubleClick();
-            }}
-            class={`no-resize resizable resizable-${props.active[p]}`}
-          />,
-        );
-      }
-    }
-  }
-  return (
-    <div {...props} ref={(e: HTMLElement) => directive?.set(e)}>
-      {children}
-      {resizeEls}
-    </div>
-  );
-};

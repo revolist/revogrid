@@ -9,6 +9,7 @@ import { ViewportData } from '../revoGrid/viewport.interfaces';
 import { RowHeaderRender } from './row-header-render';
 import { calculateRowHeaderSize } from '../../utils/row-header-utils';
 import { HEADER_SLOT } from '../revoGrid/viewport.helpers';
+import { JSX } from '../..';
 
 /**
  * Row headers component
@@ -87,7 +88,7 @@ export class RevogrRowHeaders {
       ref: (el: ElementScroll) => this.elementToScroll.emit(el),
       onScrollViewport: (e: CustomEvent) => this.scrollViewport.emit(e.detail),
     };
-    const viewportHeader = {
+    const viewportHeader: JSX.RevogrHeader & { slot: string } = {
       ...this.headerProp,
       colData: typeof this.rowHeaderColumn === 'object' ? [this.rowHeaderColumn] : [],
       viewportCol: viewport.store,
