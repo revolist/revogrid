@@ -691,6 +691,13 @@ declare namespace LocalJSX {
          */
         "grouping"?: GroupingOptions;
         /**
+          * After all rows updated. Use it if you want to track all changes from sources pinned and main
+         */
+        "onAfter-any-source"?: (event: RevoGridCustomEvent<{
+    type: RevoGrid.DimensionRows;
+    source: RevoGrid.DataType[];
+  }>) => void;
+        /**
           * After column resize Get resized columns
          */
         "onAftercolumnresize"?: (event: RevoGridCustomEvent<{ [index: number]: RevoGrid.ColumnRegular }>) => void;

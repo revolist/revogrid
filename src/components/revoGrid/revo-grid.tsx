@@ -311,6 +311,14 @@ export class RevoGridComponent {
     source: RevoGrid.DataType[];
   }>;
 
+  /**
+   * After all rows updated. Use it if you want to track all changes from sources pinned and main
+   */
+  @Event({ eventName: 'after-any-source' }) afterAnySource: EventEmitter<{
+    type: RevoGrid.DimensionRows;
+    source: RevoGrid.DataType[];
+  }>;
+
   /**  Before column update */
   @Event() beforecolumnsset: EventEmitter<ColumnCollection>;
 
@@ -790,7 +798,13 @@ export class RevoGridComponent {
         newVal = beforesourceset.detail.source as T[];
         break;
     }
-    this.dataSourceApply(newVal, type);
+    const beforesourceset = this.beforeAnySource.emit({
+      type,
+      source: newVal,
+    });
+    const newSource = [...beforesourceset.detail.source];
+    this.dataProvider.setData(newSource, type);
+    
     /** applied for source only for cross compatability between plugins */
     if (watchName === 'source') {
       this.aftersourceset.emit({
@@ -798,6 +812,10 @@ export class RevoGridComponent {
         source: newVal,
       });
     }
+    this.afterAnySource.emit({
+      type,
+      source: newVal,
+    });
   }
 
   @Watch('rowDefinitions') rowDefChanged(after: any, before?: any) {
@@ -882,15 +900,6 @@ export class RevoGridComponent {
   @Event() rowheaderschanged: EventEmitter;
   @Watch('rowHeaders') rowHeadersChange(rowHeaders?: RevoGrid.RowHeaders | boolean) {
     this.rowheaderschanged.emit(rowHeaders);
-  }
-
-  private dataSourceApply(source: RevoGrid.DataType[] = [], type: RevoGrid.DimensionRows = 'rgRow') {
-    const beforesourceset = this.beforeAnySource.emit({
-      type,
-      source,
-    });
-    const newSource = [...beforesourceset.detail.source];
-    return this.dataProvider.setData(newSource, type);
   }
 
   connectedCallback() {
