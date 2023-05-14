@@ -78,9 +78,14 @@ export class RevogrViewportScroll {
     return e;
   }
 
+  /**
+   * Dispatch this event to trigger vertical mouse wheel from plugins
+   */
   @Listen('mousewheel-vertical') mousewheelVertical({ detail: e }: CustomEvent<ScrollEvent>) {
     this.verticalMouseWheel(e);
-  }
+  }  /**
+  * Dispatch this event to trigger horizontal mouse wheel from plugins
+  */
   @Listen('mousewheel-horizontal') mousewheelHorizontal({ detail: e }: CustomEvent<ScrollEvent>) {
     this.horizontalMouseWheel(e);
   }
