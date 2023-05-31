@@ -97,13 +97,11 @@ export class AutoFillService {
   private getFocus() {
     let focus = this.sv.selectionStoreService.focused;
     const range = this.sv.selectionStoreService.ranged;
-    if (range) {
+    // there was an issue that it was taking last cell from range but focus was out
+    if (!focus && range) {
       focus = { x: range.x, y: range.y };
     }
-    if (!focus && !range) {
-      return null;
-    }
-    return focus;
+    return focus || null;
   }
 
   /**
@@ -243,7 +241,10 @@ export class AutoFillService {
     this.onRangeApply(rangeData.newData, newRange);
   }
 
-  /** Update range selection ony, no data change (mouse selection) */
+  /**
+   * Update range selection only,
+   * no data change (mouse selection)
+   */
   private applyRangeOnly(start?: Selection.Cell, end?: Selection.Cell) {
     // no changes to apply
     if (!start || !end) {

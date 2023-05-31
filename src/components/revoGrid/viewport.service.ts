@@ -111,9 +111,14 @@ export default class ViewportService {
           rowSelectionStore,
           segmentSelectionStore: segmentSelection.store,
           ref: (e: Element) => this.sv.selectionStoreConnector.registerSection(e),
-          onSetRange: e => segmentSelection.setRangeArea(e.detail),
-          onSetTempRange: e => segmentSelection.setTempArea(e.detail),
+          onSetRange: e => {
+            segmentSelection.setRangeArea(e.detail);
+          },
+          onSetTempRange: e => {
+            segmentSelection.setTempArea(e.detail);
+          },
           onFocusCell: e => {
+            // todo: multi focus
             segmentSelection.clearFocus();
             this.sv.selectionStoreConnector.focus(segmentSelection, e.detail);
           },

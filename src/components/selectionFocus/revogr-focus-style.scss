@@ -4,5 +4,5 @@ revogr-focus.focused-cell {
   position: absolute;
   pointer-events: none;
   z-index: 9;
-  display: block;
+  display: block !important;
 }
