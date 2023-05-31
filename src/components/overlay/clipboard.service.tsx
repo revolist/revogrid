@@ -20,8 +20,9 @@ export class ClipboardService {
   private clipboard: HTMLRevogrClipboardElement;
   constructor(private sv: Config) {}
 
-  renderClipboard() {
+  renderClipboard(readonly = false) {
     return <revogr-clipboard
+      readonly={readonly}
       onCopyRegion={e => this.onCopy(e.detail)}
       onClearRegion={() => this.sv.rangeClear()}
       ref={e => (this.clipboard = e)}

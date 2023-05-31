@@ -5,6 +5,13 @@
 <!-- Auto Generated Below -->
 
 
+## Properties
+
+| Property   | Attribute  | Description                                      | Type      | Default     |
+| ---------- | ---------- | ------------------------------------------------ | --------- | ----------- |
+| `readonly` | `readonly` | If readonly mode enables no need for Paste event | `boolean` | `undefined` |
+
+
 ## Events
 
 | Event              | Description                                                  | Type                        |

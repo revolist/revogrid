@@ -1,8 +1,13 @@
-import { Component, Listen, Method, Event, EventEmitter } from '@stencil/core';
+import { Component, Listen, Method, Event, EventEmitter, Prop } from '@stencil/core';
 import { RevoGrid } from '../../interfaces';
 
 @Component({ tag: 'revogr-clipboard' })
 export class Clipboard {
+  /**
+   * If readonly mode enables no need for Paste event
+   */
+  @Prop() readonly: boolean;
+
   /**
    * Fired when region pasted
    * @event pasteregion
@@ -75,7 +80,12 @@ export class Clipboard {
    * @property {boolean} defaultPrevented - if true, copy will be canceled
    */
   @Event({ bubbles: false }) copyRegion: EventEmitter<DataTransfer>;
+
   @Listen('paste', { target: 'document' }) onPaste(e: ClipboardEvent) {
+    // if readonly do nothing
+    if (this.readonly) {
+      return;
+    }
     const clipboardData = this.getData(e);
     const isHTML = clipboardData.types.indexOf('text/html') > -1;
     const data = isHTML ? clipboardData.getData('text/html') : clipboardData.getData('text');
@@ -138,8 +148,8 @@ export class Clipboard {
   }
 
   /**
- * Listen to copy event and emit copy region event
- */
+   * Listen to copy event and emit copy region event
+   */
   @Listen('cut', { target: 'document' }) cutStarted(e: ClipboardEvent) {
     const beforeCut = this.beforeCut.emit({
       event: e,
@@ -149,6 +159,12 @@ export class Clipboard {
     }
     const data = this.getData(beforeCut.detail.event);
     this.copyStarted(e);
+
+    // if readonly do nothing
+    if (this.readonly) {
+      return;
+    }
+
     this.clearRegion.emit(data);
     e.preventDefault();
   }
@@ -192,6 +208,6 @@ export class Clipboard {
   }
 
   private getData(e: ClipboardEvent) {
-    return e.clipboardData || ((window as unknown) as { clipboardData: DataTransfer | null })?.clipboardData;
+    return e.clipboardData || (window as unknown as { clipboardData: DataTransfer | null })?.clipboardData;
   }
 }

@@ -365,7 +365,7 @@ export class OverlaySelection {
       const range = this.selectionStoreService.ranged;
       const selectionFocus = this.selectionStoreService.focused;
       if ((range || selectionFocus) && this.useClipboard) {
-        els.push(this.clipboardService.renderClipboard());
+        els.push(this.clipboardService.renderClipboard(this.readonly));
       }
 
       if (range) {

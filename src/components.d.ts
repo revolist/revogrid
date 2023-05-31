@@ -251,6 +251,10 @@ export namespace Components {
     }
     interface RevogrClipboard {
         "doCopy": (e: DataTransfer, data?: RevoGrid.DataFormat[][]) => Promise<void>;
+        /**
+          * If readonly mode enables no need for Paste event
+         */
+        "readonly": boolean;
     }
     /**
      * This component is responsible for rendering data
@@ -969,6 +973,10 @@ declare namespace LocalJSX {
           * @property {boolean} defaultPrevented - if true, paste will be canceled
          */
         "onPasteRegion"?: (event: RevogrClipboardCustomEvent<string[][]>) => void;
+        /**
+          * If readonly mode enables no need for Paste event
+         */
+        "readonly"?: boolean;
     }
     /**
      * This component is responsible for rendering data
