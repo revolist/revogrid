@@ -46,9 +46,9 @@ export default class LocalScrollService {
   async setScroll(e: RevoGrid.ViewPortScrollEvent) {
     this.cancelScroll(e.dimension);
 
-    const frameAnimation = new Promise<boolean>((resolve, reject) => {
+    const frameAnimation = new Promise<void>((resolve, reject) => {
       const animationId = window.requestAnimationFrame(() => {
-        resolve(true);
+        resolve();
       });
       this.preventArtificialScroll[e.dimension] = reject.bind(null, animationId);
     });

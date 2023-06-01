@@ -239,7 +239,7 @@ export default class ViewportService {
   scrollToCell(cell: Partial<Selection.Cell>) {
     for (let key in cell) {
       const coordinate = cell[key as keyof Selection.Cell];
-      this.sv.scrollingService.onScroll({ dimension: key === 'x' ? 'rgCol' : 'rgRow', coordinate });
+      this.sv.scrollingService.scrollService({ dimension: key === 'x' ? 'rgCol' : 'rgRow', coordinate });
     }
   }
 

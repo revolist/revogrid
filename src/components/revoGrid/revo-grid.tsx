@@ -590,16 +590,28 @@ export class RevoGridComponent {
   @Listen('touchstart', { target: 'document' })
   @Listen('mousedown', { target: 'document' })
   mousedownHandle(event: MouseEvent | TouchEvent) {
-    this.clickTrackForFocusClear = getFromEvent(event, 'screenX') + getFromEvent(event, 'screenY');
+    const screenX = getFromEvent(event, 'screenX');
+    const screenY = getFromEvent(event, 'screenY');
+    if (screenX === null || screenY === null) {
+      return;
+    }
+
+    this.clickTrackForFocusClear = screenX + screenY;
   }
   @Listen('touchend', { target: 'document' })
   @Listen('mouseup', { target: 'document' })
   mouseupHandle(event: MouseEvent | TouchEvent) {
+    const screenX = getFromEvent(event, 'screenX');
+    const screenY = getFromEvent(event, 'screenY');
+    if (screenX === null || screenY === null) {
+      return;
+    }
+
     if (event.defaultPrevented) {
       return;
     }
     const target = event.target as HTMLElement | null;
-    const pos = getFromEvent(event, 'screenX') + getFromEvent(event, 'screenY');
+    const pos = screenX + screenY;
     // detect if mousemove then do nothing
     if (Math.abs(this.clickTrackForFocusClear - pos) > 10) {
       return;
@@ -1018,7 +1030,7 @@ export class RevoGridComponent {
           headerProp={anyView.headerProp}
           uiid={anyView.prop[UUID]}
           rowHeaderColumn={typeof this.rowHeaders === 'object' ? this.rowHeaders : undefined}
-          onScrollViewport={({ detail: e }: CustomEvent) => this.scrollingService.onScroll(e, 'headerRow')}
+          onScrollViewport={({ detail: e }: CustomEvent) => this.scrollingService.scrollService(e, 'headerRow')}
           onElementToScroll={({ detail: e }: CustomEvent) => this.scrollingService.registerElement(e, 'headerRow')}
         />,
       );
@@ -1048,7 +1060,8 @@ export class RevoGridComponent {
           this.selectionStoreConnector.setEdit(false);
         }}
         registerElement={(e, k) => this.scrollingService.registerElement(e, k)}
-        onScroll={(details, k) => this.scrollingService.onScroll(details, k)}
+        scrollSection={(details, k) => this.scrollingService.scrollService(details, k)}
+        scrollSectionSilent={(details, k) => this.scrollingService.scrollSilentService(details, k)}
         focusTemplate={this.focusTemplate}
       />,
     );
@@ -1060,7 +1073,7 @@ export class RevoGridComponent {
           orderRef={e => (this.orderService = e)}
           registerElement={(e, k) => this.scrollingService.registerElement(e, k)}
           nakedClick={() => this.viewport.clearEdit()}
-          onScroll={details => this.scrollingService.onScroll(details)}
+          onScroll={details => this.scrollingService.scrollService(details)}
         >
           {views}
         </RevoViewPort>

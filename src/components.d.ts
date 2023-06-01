@@ -398,6 +398,10 @@ export namespace Components {
          */
         "editors": Edition.Editors;
         /**
+          * Is mobile view mode
+         */
+        "isMobileDevice": boolean;
+        /**
           * Last cell position
          */
         "lastCell": Selection.Cell;
@@ -464,7 +468,7 @@ export namespace Components {
           * update on delta in case we don't know existing position or external change
           * @param e
          */
-        "changeScroll": (e: RevoGrid.ViewPortScrollEvent) => Promise<RevoGrid.ViewPortScrollEvent>;
+        "changeScroll": (e: RevoGrid.ViewPortScrollEvent, silent?: boolean) => Promise<RevoGrid.ViewPortScrollEvent>;
         /**
           * Height of inner content
          */
@@ -1163,6 +1167,10 @@ declare namespace LocalJSX {
          */
         "editors"?: Edition.Editors;
         /**
+          * Is mobile view mode
+         */
+        "isMobileDevice"?: boolean;
+        /**
           * Last cell position
          */
         "lastCell"?: Selection.Cell;
@@ -1287,7 +1295,14 @@ declare namespace LocalJSX {
         "contentWidth"?: number;
         "onResizeViewport"?: (event: RevogrViewportScrollCustomEvent<RevoGrid.ViewPortResizeEvent>) => void;
         "onScrollViewport"?: (event: RevogrViewportScrollCustomEvent<RevoGrid.ViewPortScrollEvent>) => void;
-        "onScrollchange"?: (event: RevogrViewportScrollCustomEvent<{ type: RevoGrid.DimensionType; hasScroll: boolean }>) => void;
+        "onScrollchange"?: (event: RevogrViewportScrollCustomEvent<{
+    type: RevoGrid.DimensionType;
+    hasScroll: boolean;
+  }>) => void;
+        /**
+          * Silently scroll to coordinate Made to align negative coordinates for mobile devices
+         */
+        "onSilentScroll"?: (event: RevogrViewportScrollCustomEvent<RevoGrid.ViewPortScrollEvent>) => void;
     }
     interface IntrinsicElements {
         "revo-grid": RevoGrid;

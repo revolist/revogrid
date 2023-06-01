@@ -4,6 +4,7 @@ import { UUID } from '../../utils/consts';
 import { ElementScroll } from './viewport';
 import { DATA_SLOT, HEADER_SLOT } from './viewport.helpers';
 import { ViewportProps } from './viewport.interfaces';
+import { isMobileDevice } from '../../utils/mobile';
 type Props = {
   editors: Edition.Editors;
   useClipboard: boolean;
@@ -16,7 +17,14 @@ type Props = {
   columnFilter: boolean;
   additionalData: any;
   focusTemplate: RevoGrid.FocusTemplateFunc;
-  onScroll(e: RevoGrid.ViewPortScrollEvent, key?: RevoGrid.DimensionColPin | string): void;
+  scrollSection(
+    e: RevoGrid.ViewPortScrollEvent,
+    key?: RevoGrid.DimensionColPin | string,
+  ): void;
+  scrollSectionSilent(
+    e: RevoGrid.ViewPortScrollEvent,
+    key?: RevoGrid.DimensionColPin | string,
+  ): void;
   onCancelEdit(): void;
   onEdit(edit: Edition.BeforeEdit): void;
   onSelectAll(): void;
@@ -28,9 +36,25 @@ type Props = {
  * Per each column we render data collections: headers, pinned top, center data, pinned bottom
  */
 export const ViewPortSections = ({
-  resize, editors, rowClass, readonly, range, columns, useClipboard, columnFilter, applyEditorChangesOnClose, additionalData,
-  onCancelEdit, registerElement, onEdit, onScroll, focusTemplate, onSelectAll,
+  resize,
+  editors,
+  rowClass,
+  readonly,
+  range,
+  columns,
+  useClipboard,
+  columnFilter,
+  applyEditorChangesOnClose,
+  additionalData,
+  onCancelEdit,
+  registerElement,
+  onEdit,
+  scrollSection,
+  focusTemplate,
+  onSelectAll,
+  scrollSectionSilent,
 }: Props) => {
+  const isMobile = isMobileDevice();
   const viewPortHtml: VNode[] = [];
   /** render viewports columns */
   for (let view of columns) {
@@ -44,20 +68,23 @@ export const ViewPortSections = ({
       canResize: resize,
       columnFilter,
     };
-    const dataViews: HTMLElement[] = [<revogr-header {...headerProperties} slot={HEADER_SLOT} />];
+    const dataViews: HTMLElement[] = [
+      <revogr-header {...headerProperties} slot={HEADER_SLOT} />,
+    ];
     view.dataPorts.forEach((data, j) => {
       const key = view.prop.key + (j + 1);
 
       const dataView = (
         <revogr-overlay-selection
           {...data}
+          isMobileDevice={isMobile}
           selectionStore={data.segmentSelectionStore}
           onSelectall={() => onSelectAll()}
           editors={editors}
           readonly={readonly}
           range={range}
           useClipboard={useClipboard}
-          onCancelEdit= {() => onCancelEdit()}
+          onCancelEdit={() => onCancelEdit()}
           applyChangesOnClose={applyEditorChangesOnClose}
           onSetEdit={({ detail }) => onEdit(detail)}
           additionalData={additionalData}
@@ -74,14 +101,32 @@ export const ViewPortSections = ({
             additionalData={additionalData}
             slot={DATA_SLOT}
           />
-          <revogr-temp-range selectionStore={data.segmentSelectionStore} dimensionRow={data.dimensionRow} dimensionCol={data.dimensionCol} />
-          <revogr-focus colData={data.colData} dataStore={data.dataStore} focusTemplate={focusTemplate} rowType={data.type} colType={view.type} selectionStore={data.segmentSelectionStore} dimensionRow={data.dimensionRow} dimensionCol={data.dimensionCol} />
+          <revogr-temp-range
+            selectionStore={data.segmentSelectionStore}
+            dimensionRow={data.dimensionRow}
+            dimensionCol={data.dimensionCol}
+          />
+          <revogr-focus
+            colData={data.colData}
+            dataStore={data.dataStore}
+            focusTemplate={focusTemplate}
+            rowType={data.type}
+            colType={view.type}
+            selectionStore={data.segmentSelectionStore}
+            dimensionRow={data.dimensionRow}
+            dimensionCol={data.dimensionCol}
+          />
         </revogr-overlay-selection>
       );
       dataViews.push(dataView);
     });
     viewPortHtml.push(
-      <revogr-viewport-scroll {...view.prop} ref={el => registerElement(el, view.prop.key)} onScrollViewport={e => onScroll(e.detail, view.prop.key)}>
+      <revogr-viewport-scroll
+        {...view.prop}
+        ref={el => registerElement(el, view.prop.key)}
+        onScrollViewport={e => scrollSection(e.detail, view.prop.key)}
+        onSilentScroll={e => scrollSectionSilent(e.detail, view.prop.key)}
+      >
         {dataViews}
       </revogr-viewport-scroll>,
     );

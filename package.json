@@ -1,6 +1,6 @@
 {
   "name": "@revolist/revogrid",
-  "version": "4.4.0-next.12",
+  "version": "4.4.0-next.20",
   "description": "Virtual reactive data grid component - RevoGrid.",
   "license": "MIT",
   "directories": {
@@ -90,7 +90,7 @@
     "bootstrap": "^5.2.3"
   },
   "dependencies": {
-    "@stencil/core": "^3.2.2",
+    "@stencil/core": "^3.3.0",
     "lodash": "^4.17.21"
   }
 }

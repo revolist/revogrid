@@ -1,29 +1,92 @@
+@mixin autofill-handle($handler-size: 14px, $icon-size: 10px) {
+  .autofill-handle {
+    position: absolute;
+    width: $handler-size;
+    height: $handler-size;
+    margin-left: -$handler-size + 1;
+    margin-top: -$handler-size + 1;
+    z-index: 10;
+    cursor: crosshair;
+
+    &::before {
+      content: '';
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      width: $icon-size;
+      height: $icon-size;
+      background: $selection-border;
+      border: 1px solid white;
+      box-sizing: border-box;
+    }
+  }
+}
+
 revogr-overlay-selection {
   display: block;
   position: relative;
   width: 100%;
 
-  .autofill-handle {
-    $handler-size: 10px;
-    position: absolute;
-    width: $handler-size;
-    height: $handler-size;
-    background: $selection-border;
-    margin-left: -$handler-size + 1;
-    margin-top: -$handler-size + 1;
-    border: 1px solid white;
-    box-sizing: border-box;
-    z-index: 10;
-    cursor: crosshair;
+
+  @include autofill-handle;
+
+  &.mobile {
+    @include autofill-handle(30px, 12px);
   }
 
   .selection-border-range {
     position: absolute;
     pointer-events: none;
     z-index: 9;
-  }
 
-  .selection-border-range {
+    .range-handlers {
+      height: 100%;
+      background-color: transparent;
+      width: calc(50% + (50% / 2));
+      max-width: 50px;
+      min-width: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      position: absolute;
+
+      $btn-size: 20px;
+      $handler-w: 15px;
+      $handler-h: 5px;
+      
+      > span {
+        pointer-events: auto;
+        height: $btn-size;
+        width: $btn-size;
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+
+
+        &:before, &:after {
+          position: absolute;
+          border-radius: 5px;
+          width: $handler-w;
+          height: $handler-h;
+          left: 50%;
+          transform: translateX(-50%);
+          background-color: rgba(black, 20%);
+        }
+        &:first-child {
+          top: -($handler-h + 2px);
+          &:before{
+            content: '';
+            top: 0;
+          }
+        }
+        &:last-child {
+          bottom: -($handler-h + 2px);
+          &:after{
+            content: '';
+            bottom: 0;
+          }
+        }
+      }
+    }
     @include selection();
   }
 

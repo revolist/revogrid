@@ -4,7 +4,7 @@ import { AllDimensionType, ApplyFocusEvent, FocusRenderEvent, Edition, Observabl
 import ColumnService from '../data/columnService';
 import SelectionStoreService from '../../store/selection/selection.store.service';
 import { codesLetter } from '../../utils/keyCodes';
-import { SELECTION_BORDER_CLASS } from '../../utils/consts';
+import { MOBILE_CLASS, SELECTION_BORDER_CLASS } from '../../utils/consts';
 import { DataSourceState } from '../../store/dataSource/data.store';
 import { isRangeSingleCell } from '../../store/selection/selection.helpers';
 import { getCurrentCell, getElStyle } from './selection.utils';
@@ -12,7 +12,7 @@ import { isEditInput } from './editors/edit.utils';
 import { KeyboardService } from './keyboard.service';
 import { AutoFillService } from './autofill.service';
 import { ClipboardService } from './clipboard.service';
-import { getFromEvent } from '../../utils/events';
+import { getFromEvent, verifyTouchTarget } from '../../utils/events';
 
 @Component({
   tag: 'revogr-overlay-selection',
@@ -80,10 +80,19 @@ export class OverlaySelection {
    * Custom editors register
    */
   @Prop() editors: Edition.Editors;
-  /** If true applys changes when cell closes if not Escape */
+  /**
+   * If true applys changes when cell closes if not Escape
+   */
   @Prop() applyChangesOnClose: boolean = false;
-  /** Additional data to pass to renderer */
+  /**
+   * Additional data to pass to renderer
+   */
   @Prop() additionalData: any;
+
+  /**
+   * Is mobile view mode
+   */
+  @Prop() isMobileDevice: boolean;
 
   // --------------------------------------------------------------------------
   //
@@ -299,7 +308,11 @@ export class OverlaySelection {
 
   private renderRange(range: Selection.RangeArea) {
     const style = getElStyle(range, this.dimensionRow.state, this.dimensionCol.state);
-    return [<div class={SELECTION_BORDER_CLASS} style={style} />];
+    return [
+      <div class={SELECTION_BORDER_CLASS} style={style}>
+        {this.isMobileDevice && <div class="range-handlers"><span class={MOBILE_CLASS}></span><span class={MOBILE_CLASS}></span></div>}
+      </div>
+    ];
   }
 
   private renderEditCell() {
@@ -389,6 +402,7 @@ export class OverlaySelection {
     }
     return (
       <Host
+        class={{ mobile: this.isMobileDevice }}
         // run edit on dblclick
         onDblClick={(e: MouseEvent) => {
           // if dblclick prevented outside edit will not start
@@ -397,7 +411,7 @@ export class OverlaySelection {
           }
         }}
         onMouseDown={(e: MouseEvent) => this.onElementMouseDown(e)}
-        onTouchStart={(e: TouchEvent) => this.onElementMouseDown(e)}>
+        onTouchStart={(e: TouchEvent) => this.onElementMouseDown(e, true)}>
         {els}
         <slot name="data" />
       </Host>
@@ -454,7 +468,7 @@ export class OverlaySelection {
     return !e.defaultPrevented;
   }
 
-  protected onElementMouseDown(e: MouseEvent | TouchEvent) {
+  protected onElementMouseDown(e: MouseEvent | TouchEvent, touch = false) {
     // Ignore focus if clicked input
     if (isEditInput(e.target as HTMLElement | undefined)) {
       return;
@@ -463,14 +477,24 @@ export class OverlaySelection {
     if (e.defaultPrevented) {
       return;
     }
+    const x = getFromEvent(e, 'clientX');
+    const y = getFromEvent(e, 'clientY');
+    // skip touch
+    if (x === null || y === null) {
+      return;
+    }
     // Regular cell click
-    const focusCell = getCurrentCell({ x: getFromEvent(e, 'clientX'), y: getFromEvent(e, 'clientY') }, data);
+    const focusCell = getCurrentCell({ x, y }, data);
     this.selectionStoreService.focus(focusCell, this.range && e.shiftKey);
 
     // Initiate autofill selection
     if (this.range) {
       this.autoFillService.selectionStart(e.target as HTMLElement, data);
-      e.preventDefault();
+      if (!touch) {
+        e.preventDefault();
+      } else if (verifyTouchTarget((e as TouchEvent).touches[0], MOBILE_CLASS)) {
+        e.preventDefault();
+      }
     }
   }
 

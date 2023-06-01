@@ -2,7 +2,7 @@ import debounce from 'lodash/debounce';
 import { DebouncedFunc } from 'lodash';
 
 import { h } from '@stencil/core';
-import { CELL_HANDLER_CLASS } from '../../utils/consts';
+import { CELL_HANDLER_CLASS, MOBILE_CLASS } from '../../utils/consts';
 import { Observable, Selection, RevoGrid, Edition } from '../../interfaces';
 import { EventData, getCell, getCurrentCell, isAfterLast } from './selection.utils';
 import { getRange } from '../../store/selection/selection.helpers';
@@ -69,14 +69,27 @@ export class AutoFillService {
     }
     return (
       <div
-        class={CELL_HANDLER_CLASS}
-        style={{ left: `${handlerStyle.right}px`, top: `${handlerStyle.bottom}px` }}
-        onMouseDown={(e: MouseEvent) => {
-          this.selectionStart(e.target as HTMLElement, this.sv.getData(), AutoFillType.autoFill);
-          e.preventDefault();
+        class={{
+          [CELL_HANDLER_CLASS]: true,
+          [MOBILE_CLASS]: true,
         }}
+        style={{ left: `${handlerStyle.right}px`, top: `${handlerStyle.bottom}px` }}
+        onMouseDown={(e: MouseEvent) => this.autoFillHandler(e)}
+        onTouchStart={(e: TouchEvent) => this.autoFillHandler(e)}
       />
     );
+  }
+
+  private autoFillHandler(e: MouseEvent | TouchEvent, type = AutoFillType.autoFill) {
+    let target: Element | null = null;
+    if (e.target instanceof Element) {
+      target = e.target;
+    }
+    if (!target) {
+      return;
+    }
+    this.selectionStart(target, this.sv.getData(), type);
+    e.preventDefault();
   }
 
   get isAutoFill() {
@@ -113,7 +126,13 @@ export class AutoFillService {
     if (!this.autoFillInitial) {
       return;
     }
-    const current = getCurrentCell({ x: getFromEvent(event, 'clientX'), y: getFromEvent(event, 'clientY') }, data);
+    const x = getFromEvent(event, 'clientX', MOBILE_CLASS);
+    const y = getFromEvent(event, 'clientY', MOBILE_CLASS);
+    // skip touch
+    if (x === null || y === null) {
+      return;
+    }
+    const current = getCurrentCell({ x, y }, data);
 
     // first time or direction equal to start(same as first time)
     if (!this.autoFillLast) {
@@ -146,7 +165,7 @@ export class AutoFillService {
    * Can be triggered from MouseDown selection on element
    * Or can be triggered on corner square drag
    */
-  selectionStart(target: HTMLElement, data: EventData, type = AutoFillType.selection) {
+  selectionStart(target: Element, data: EventData, type = AutoFillType.selection) {
     /** Get cell by autofill element */
     const { top, left } = target.getBoundingClientRect();
     this.autoFillInitial = this.getFocus();
