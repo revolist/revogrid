@@ -17,16 +17,17 @@ Service for tracking grid scrolling
 
 ## Events
 
-| Event            | Description | Type                                                                                                |
-| ---------------- | ----------- | --------------------------------------------------------------------------------------------------- |
-| `resizeViewport` |             | `CustomEvent<{ dimension: DimensionType; size: number; }>`                                          |
-| `scrollchange`   |             | `CustomEvent<{ type: DimensionType; hasScroll: boolean; }>`                                         |
-| `scrollViewport` |             | `CustomEvent<{ dimension: DimensionType; coordinate: number; delta?: number; outside?: boolean; }>` |
+| Event            | Description                                                                         | Type                                                                                                |
+| ---------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `resizeViewport` |                                                                                     | `CustomEvent<{ dimension: DimensionType; size: number; }>`                                          |
+| `scrollchange`   |                                                                                     | `CustomEvent<{ type: DimensionType; hasScroll: boolean; }>`                                         |
+| `scrollViewport` |                                                                                     | `CustomEvent<{ dimension: DimensionType; coordinate: number; delta?: number; outside?: boolean; }>` |
+| `silentScroll`   | Silently scroll to coordinate Made to align negative coordinates for mobile devices | `CustomEvent<{ dimension: DimensionType; coordinate: number; delta?: number; outside?: boolean; }>` |
 
 
 ## Methods
 
-### `changeScroll(e: RevoGrid.ViewPortScrollEvent) => Promise<RevoGrid.ViewPortScrollEvent>`
+### `changeScroll(e: RevoGrid.ViewPortScrollEvent, silent?: boolean) => Promise<RevoGrid.ViewPortScrollEvent>`
 
 update on delta in case we don't know existing position or external change
 

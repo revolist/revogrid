@@ -86,7 +86,7 @@ export class RevogrData {
       const dataItem = getSourceItem(this.dataStore, rgRow.itemIndex);
       /** grouping */
       if (isGrouping(dataItem)) {
-        rowsEls.push(<GroupingRowRenderer {...rgRow} model={dataItem} groupingCustomRenderer={groupingCustomRenderer} hasExpand={this.columnService.hasGrouping} />);
+        rowsEls.push(<GroupingRowRenderer {...rgRow} index={rgRow.itemIndex} model={dataItem} groupingCustomRenderer={groupingCustomRenderer} hasExpand={this.columnService.hasGrouping} />);
         continue;
       }
       /** grouping end */
@@ -103,7 +103,7 @@ export class RevogrData {
           )
         );
       }
-      const row = <RowRenderer rowClass={rowClass} size={rgRow.size} start={rgRow.start}>
+      const row = <RowRenderer index={rgRow.itemIndex} rowClass={rowClass} size={rgRow.size} start={rgRow.start}>
         {cells}
       </RowRenderer>;
       this.beforeRowRender.emit({

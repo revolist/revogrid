@@ -1,18 +1,24 @@
 import { h, VNode } from '@stencil/core';
 import { JSXBase } from '@stencil/core/internal';
+import { DATA_ROW } from '../../utils/consts';
 
 export interface RowProps extends JSXBase.HTMLAttributes {
   size: number;
   start: number;
+  index: number;
   rowClass?: string;
   depth?: number;
 }
 
 export const PADDING_DEPTH = 10;
 
-const RowRenderer = ({ rowClass, size, start, style, depth }: RowProps, cells: VNode[]) => {
+const RowRenderer = ({ rowClass, index, size, start, style, depth }: RowProps, cells: VNode[]) => {
+  const props = {
+    ...{ [DATA_ROW]: index },
+  };
   return (
     <div
+      {...props}
       class={`rgRow ${rowClass || ''}`}
       style={{
         ...style,

@@ -153,7 +153,9 @@ export default class ViewportStore {
 
     // drop to original size if requested
     if (dropToOriginalSize) {
-      items = setItemSizes(items, start, dropToOriginalSize, this.lastCoordinate);
+      const allItems = this.getItems();
+      const firstItem: RevoGrid.VirtualPositionItem | undefined = getFirstItem(allItems);
+      items = setItemSizes(items, start, dropToOriginalSize, firstItem.start);
     }
 
     // loop through array from initial item after recombination
