@@ -13,10 +13,6 @@ export default class GridScrollingService {
   async scrollService(e: RevoGrid.ViewPortScrollEvent, key?: RevoGrid.DimensionColPin | string) {
     let newEvent: Promise<RevoGrid.ViewPortScrollEvent>;
     let event = e;
-    // skip negative scroll
-    if (e.coordinate < 0) {
-      return;
-    }
     for (let elKey in this.elements) {
       if (e.dimension === 'rgCol' && elKey === 'headerRow') {
         continue;
