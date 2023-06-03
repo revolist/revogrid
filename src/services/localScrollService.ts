@@ -2,6 +2,7 @@ import { scaleValue } from '../utils';
 import { RevoGrid } from '../interfaces';
 
 interface Config {
+  skipAnimationFrame?: boolean;
   beforeScroll(e: RevoGrid.ViewPortScrollEvent): void;
   afterScroll(e: RevoGrid.ViewPortScrollEvent): void;
 }
@@ -47,6 +48,10 @@ export default class LocalScrollService {
     this.cancelScroll(e.dimension);
 
     const frameAnimation = new Promise<void>((resolve, reject) => {
+      // for example safari desktop has issues with animation frame
+      if (this.cfg.skipAnimationFrame) {
+        return resolve();
+      }
       const animationId = window.requestAnimationFrame(() => {
         resolve();
       });

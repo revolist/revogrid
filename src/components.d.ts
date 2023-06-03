@@ -460,9 +460,6 @@ export namespace Components {
          */
         "selectionStore": Observable<Selection.SelectionStoreState>;
     }
-    /**
-     * Service for tracking grid scrolling
-     */
     interface RevogrViewportScroll {
         /**
           * update on delta in case we don't know existing position or external change
@@ -615,9 +612,6 @@ declare global {
         prototype: HTMLRevogrTempRangeElement;
         new (): HTMLRevogrTempRangeElement;
     };
-    /**
-     * Service for tracking grid scrolling
-     */
     interface HTMLRevogrViewportScrollElement extends Components.RevogrViewportScroll, HTMLStencilElement {
     }
     var HTMLRevogrViewportScrollElement: {
@@ -1281,9 +1275,6 @@ declare namespace LocalJSX {
          */
         "selectionStore"?: Observable<Selection.SelectionStoreState>;
     }
-    /**
-     * Service for tracking grid scrolling
-     */
     interface RevogrViewportScroll {
         /**
           * Height of inner content
@@ -1350,9 +1341,6 @@ declare module "@stencil/core" {
              * Temporary range selection
              */
             "revogr-temp-range": LocalJSX.RevogrTempRange & JSXBase.HTMLAttributes<HTMLRevogrTempRangeElement>;
-            /**
-             * Service for tracking grid scrolling
-             */
             "revogr-viewport-scroll": LocalJSX.RevogrViewportScroll & JSXBase.HTMLAttributes<HTMLRevogrViewportScrollElement>;
         }
     }

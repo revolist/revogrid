@@ -19,13 +19,11 @@ import {
   FOOTER_SLOT,
   HEADER_SLOT,
 } from '../revoGrid/viewport.helpers';
+import { isSafariDesktop } from '../../utils/browser';
 type Delta = 'deltaX' | 'deltaY';
 type LocalScrollEvent = {
   preventDefault(): void;
 } & { [x in Delta]: number };
-/**
- * Service for tracking grid scrolling
- */
 @Component({
   tag: 'revogr-viewport-scroll',
   styleUrl: 'revogr-viewport-scroll-style.scss',
@@ -78,7 +76,11 @@ export class RevogrViewportScroll {
    * Last mw event time for trigger scroll function below
    * If mousewheel function was ignored we still need to trigger render
    */
-  private mouseWheelScroll: Record<RevoGrid.DimensionType, number> = {
+  private mouseWheelScrollTimestamp: Record<RevoGrid.DimensionType, number> = {
+    rgCol: 0,
+    rgRow: 0,
+  };
+  private lastKnownScrollCoordinate: Record<RevoGrid.DimensionType, number> = {
     rgCol: 0,
     rgRow: 0,
   };
@@ -167,13 +169,17 @@ export class RevogrViewportScroll {
      * Create local scroll service
      */
     this.scrollService = new LocalScrollService({
+      // to improve safari smoothnes on scroll
+      skipAnimationFrame: isSafariDesktop(),
       beforeScroll: e => this.scrollViewport.emit(e),
       afterScroll: e => {
+        this.lastKnownScrollCoordinate[e.dimension] = e.coordinate;
         switch (e.dimension) {
           case 'rgCol':
             this.horizontalScroll.scrollLeft = e.coordinate;
             break;
           case 'rgRow':
+            // this will trigger on scroll event
             this.verticalScroll.scrollTop = e.coordinate;
             // for mobile devices to skip negative scroll loop. only on vertical scroll
             if (this.verticalScroll.style.transform) {
@@ -355,14 +361,17 @@ export class RevogrViewportScroll {
     this.applyOnScroll(type, scroll);
   }
 
+  /**
+   * Applies scroll on scroll event only if mousewheel event was some time ago
+   */
   private applyOnScroll(
     type: RevoGrid.DimensionType,
     coordinate: number,
     outside = false,
   ) {
-    const change = new Date().getTime() - this.mouseWheelScroll[type];
+    const change = new Date().getTime() - this.mouseWheelScrollTimestamp[type];
     // apply after throttling
-    if (change > this.scrollThrottling) {
+    if (change > this.scrollThrottling && coordinate !== this.lastKnownScrollCoordinate[type]) {
       this.scrollService?.scroll(
         coordinate,
         type,
@@ -375,7 +384,7 @@ export class RevogrViewportScroll {
 
   /** remember last mw event time */
   private latestScrollUpdate(dimension: RevoGrid.DimensionType) {
-    this.mouseWheelScroll[dimension] = new Date().getTime();
+    this.mouseWheelScrollTimestamp[dimension] = new Date().getTime();
   }
 
   /**
