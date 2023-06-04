@@ -19,7 +19,6 @@ import {
   FOOTER_SLOT,
   HEADER_SLOT,
 } from '../revoGrid/viewport.helpers';
-import { isSafariDesktop } from '../../utils/browser';
 type Delta = 'deltaX' | 'deltaY';
 type LocalScrollEvent = {
   preventDefault(): void;
@@ -153,24 +152,24 @@ export class RevogrViewportScroll {
      */
     if ('ontouchstart' in document.documentElement) {
       this.scrollThrottling = 0;
-    } else {
-      this.verticalMouseWheel = this.onVerticalMouseWheel.bind(
-        this,
-        'rgRow',
-        'deltaY',
-      );
-      this.horizontalMouseWheel = this.onHorizontalMouseWheel.bind(
-        this,
-        'rgCol',
-        'deltaX',
-      );
     }
+    // allow mousewheel for all devices including mobile
+    this.verticalMouseWheel = this.onVerticalMouseWheel.bind(
+      this,
+      'rgRow',
+      'deltaY',
+    );
+    this.horizontalMouseWheel = this.onHorizontalMouseWheel.bind(
+      this,
+      'rgCol',
+      'deltaX',
+    );
     /**
      * Create local scroll service
      */
     this.scrollService = new LocalScrollService({
       // to improve safari smoothnes on scroll
-      skipAnimationFrame: isSafariDesktop(),
+      // skipAnimationFrame: isSafariDesktop(),
       beforeScroll: e => this.scrollViewport.emit(e),
       afterScroll: e => {
         this.lastKnownScrollCoordinate[e.dimension] = e.coordinate;
