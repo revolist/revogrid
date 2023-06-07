@@ -31,6 +31,8 @@ export class RevogrFocus {
     column: RevoGrid.ColumnRegular;
   }>;
 
+  private activeFocus: Selection.Cell = null;
+
   private changed(e: HTMLElement, focus: Selection.Cell): void {
     e?.scrollIntoView({
       block: 'nearest',
@@ -46,6 +48,10 @@ export class RevogrFocus {
 
   componentDidRender(): void {
     const currentFocus = this.selectionStore.get('focus');
+    if (this.activeFocus?.x === currentFocus?.x && this.activeFocus?.y === currentFocus?.y) {
+      return;
+    }
+    this.activeFocus = currentFocus;
     currentFocus && this.el && this.changed(this.el, currentFocus);
   }
 
