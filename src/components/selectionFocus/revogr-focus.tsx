@@ -24,6 +24,11 @@ export class RevogrFocus {
   @Prop() focusTemplate: RevoGrid.FocusTemplateFunc | null = null;
   @Event({ eventName: 'before-focus-render' }) beforeFocusRender: EventEmitter<FocusRenderEvent>;
   /**
+   * Before focus changed verify if it's in view and scroll viewport into this view
+   * Can be prevented by event.preventDefault()
+   */
+  @Event({ eventName: 'beforescrollintoview' }) beforeScrollIntoView: EventEmitter<{ el: HTMLElement }>;
+  /**
    * Used to setup properties after focus was rendered
    */
   @Event({ eventName: 'afterfocus' }) afterFocus: EventEmitter<{
@@ -34,10 +39,13 @@ export class RevogrFocus {
   private activeFocus: Selection.Cell = null;
 
   private changed(e: HTMLElement, focus: Selection.Cell): void {
-    e?.scrollIntoView({
-      block: 'nearest',
-      inline: 'nearest',
-    });
+    const beforeScrollIn = this.beforeScrollIntoView.emit({ el: e });
+    if (!beforeScrollIn.defaultPrevented) {
+      e.scrollIntoView({
+        block: 'nearest',
+        inline: 'nearest',
+      });
+    }
     const model = getSourceItem(this.dataStore, focus.y);
     const column = getSourceItem(this.colData, focus.x);
     this.afterFocus.emit({

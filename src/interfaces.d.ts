@@ -363,6 +363,10 @@ export interface BeforeCellRenderEvent extends AllDimensionType {
   model: any;
 }
 
+export type AfterRendererEvent = {
+  type: RevoGrid.DimensionType;
+};
+
 export interface AllDimensionType {
   rowType: RevoGrid.DimensionRows;
   colType: RevoGrid.DimensionCols;

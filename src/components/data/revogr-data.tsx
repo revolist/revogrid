@@ -55,6 +55,7 @@ export class RevogrData {
   @Event({ eventName: DRAG_START_EVENT }) dragStartCell: EventEmitter<DragStartEvent>;
   @Event() beforeRowRender: EventEmitter;
   @Event({ eventName: 'before-cell-render' }) beforeCellRender: EventEmitter<BeforeCellRenderEvent>;
+  @Event() afterrender: EventEmitter;
 
   @Watch('dataStore')
   @Watch('colData')
@@ -71,12 +72,18 @@ export class RevogrData {
     this.columnService?.destroy();
   }
 
+  componentDidRender() {
+    this.afterrender.emit({ type: this.type });
+  }
+
   render() {
     const rows = this.viewportRow.get('items');
     const cols = this.viewportCol.get('items');
     if (!this.columnService.columns.length || !rows.length || !cols.length) {
       return '';
     }
+    // TODO: instead of subscribing here probably create a watch and apply events just to node and avoid rerender
+    // verify if every cell in viewport is getting rendered after focus and solve after it
     const range = this.rowSelectionStore?.get('range');
     const rowsEls: VNode[] = [];
 

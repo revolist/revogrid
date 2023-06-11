@@ -991,6 +991,7 @@ declare namespace LocalJSX {
         "colData": ColumnSource;
         "dataStore": RowSource;
         "dimensionRow": Observable<RevoGrid.DimensionSettingsState>;
+        "onAfterrender"?: (event: RevogrDataCustomEvent<any>) => void;
         "onBefore-cell-render"?: (event: RevogrDataCustomEvent<BeforeCellRenderEvent>) => void;
         "onBeforeRowRender"?: (event: RevogrDataCustomEvent<any>) => void;
         "onDragStartCell"?: (event: RevogrDataCustomEvent<DragStartEvent>) => void;
@@ -1063,6 +1064,10 @@ declare namespace LocalJSX {
     column: RevoGrid.ColumnRegular;
   }>) => void;
         "onBefore-focus-render"?: (event: RevogrFocusCustomEvent<FocusRenderEvent>) => void;
+        /**
+          * Before focus changed verify if it's in view and scroll viewport into this view Can be prevented by event.preventDefault()
+         */
+        "onBeforescrollintoview"?: (event: RevogrFocusCustomEvent<{ el: HTMLElement }>) => void;
         "rowType": RevoGrid.DimensionRows;
         /**
           * Dynamic stores
