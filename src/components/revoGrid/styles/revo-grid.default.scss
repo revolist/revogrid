@@ -87,6 +87,10 @@ revo-grid[theme='default'] {
     box-shadow: $cell-shadow-top, $cell-shadow-right, $cell-shadow-bottom;
   }
 
+  revogr-focus-row {
+    background-color: $focused-header;
+  }
+
   revogr-data {
     $cell-shadow-bottom: 0 -1px 0 0 $cell-border-color inset;
     $cell-shadow-right: -1px 0 0 0 $cell-border-color inset;
@@ -94,10 +98,6 @@ revo-grid[theme='default'] {
     .rgRow {
       line-height: $default-rows-size;
       box-shadow: $cell-shadow-bottom, $cell-shadow-right;
-
-      &.focused-rgRow {
-        background-color: $focused-header;
-      }
     }
     .rgCell {
       box-shadow: $cell-shadow-bottom, $cell-shadow-right;

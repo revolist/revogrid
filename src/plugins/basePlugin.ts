@@ -73,7 +73,7 @@ export default abstract class BasePlugin implements RevoPlugin.Plugin {
       },
     });
     if (immediate) {
-      callback(nativeValueDesc?.get?.call(this.revogrid));
+      callback(nativeValueDesc?.value);
     }
   }
 

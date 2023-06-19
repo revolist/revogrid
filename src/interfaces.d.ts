@@ -157,6 +157,7 @@ export declare namespace RevoGrid {
   type ViewPortResizeEvent = {
     dimension: DimensionType;
     size: number;
+    rowHeader?: boolean;
   };
   type ViewPortScrollEvent = {
     dimension: DimensionType;

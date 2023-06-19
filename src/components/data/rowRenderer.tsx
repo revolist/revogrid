@@ -12,7 +12,7 @@ export interface RowProps extends JSXBase.HTMLAttributes {
 
 export const PADDING_DEPTH = 10;
 
-const RowRenderer = ({ rowClass, index, size, start, style, depth }: RowProps, cells: VNode[]) => {
+const RowRenderer = ({ rowClass, index, size, start, depth }: RowProps, cells: VNode[]) => {
   const props = {
     ...{ [DATA_ROW]: index },
   };
@@ -21,7 +21,6 @@ const RowRenderer = ({ rowClass, index, size, start, style, depth }: RowProps, c
       {...props}
       class={`rgRow ${rowClass || ''}`}
       style={{
-        ...style,
         height: `${size}px`,
         transform: `translateY(${start}px)`,
         paddingLeft: depth ? `${PADDING_DEPTH * depth}px` : undefined,

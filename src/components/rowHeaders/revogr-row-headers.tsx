@@ -30,7 +30,8 @@ export class RevogrRowHeaders {
   /** Additional data to pass to renderer */
   @Prop() additionalData: any;
 
-  @Event({ bubbles: false }) scrollViewport: EventEmitter<RevoGrid.ViewPortScrollEvent>;
+  @Event({ bubbles: false })
+  scrollViewport: EventEmitter<RevoGrid.ViewPortScrollEvent>;
   @Event({ bubbles: false }) elementToScroll: EventEmitter<ElementScroll>;
 
   render() {
@@ -42,10 +43,16 @@ export class RevogrRowHeaders {
     for (let data of this.dataPorts) {
       const itemCount = data.dataStore.get('items').length;
       // initiate row data
-      const dataStore = new DataStore<RevoGrid.DataType, RevoGrid.DimensionRows>(data.type);
+      const dataStore = new DataStore<
+        RevoGrid.DataType,
+        RevoGrid.DimensionRows
+      >(data.type);
       dataStore.updateData(data.dataStore.get('source'));
       // initiate column data
-      const colData = new DataStore<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>('colPinStart');
+      const colData = new DataStore<
+        RevoGrid.ColumnRegular,
+        RevoGrid.DimensionCols
+      >('colPinStart');
       const column = {
         cellTemplate: RowHeaderRender(totalLength),
         ...this.rowHeaderColumn,
@@ -61,7 +68,15 @@ export class RevogrRowHeaders {
         readonly: true,
         range: false,
       };
-      dataViews.push(<revogr-data {...viewData} />);
+      dataViews.push(
+        <revogr-data {...viewData}>
+          <revogr-focus-row
+            dimensionRow={viewData.dimensionRow}
+            dimensionCol={viewData.dimensionCol}
+            selectionStore={viewData.rowSelectionStore}
+          />
+        </revogr-data>,
+      );
       totalLength += itemCount;
     }
 
@@ -90,7 +105,8 @@ export class RevogrRowHeaders {
     };
     const viewportHeader: JSX.RevogrHeader & { slot: string } = {
       ...this.headerProp,
-      colData: typeof this.rowHeaderColumn === 'object' ? [this.rowHeaderColumn] : [],
+      colData:
+        typeof this.rowHeaderColumn === 'object' ? [this.rowHeaderColumn] : [],
       viewportCol: viewport.store,
       canResize: false,
       type: ROW_HEADER_TYPE,
@@ -98,8 +114,8 @@ export class RevogrRowHeaders {
       slot: HEADER_SLOT,
     };
     return (
-      <Host class={ { [ROW_HEADER_TYPE]: true } } key={ROW_HEADER_TYPE}>
-        <revogr-viewport-scroll {...viewportScroll}>
+      <Host class={{ [ROW_HEADER_TYPE]: true }} key={ROW_HEADER_TYPE}>
+        <revogr-viewport-scroll {...viewportScroll} row-header={true}>
           <revogr-header {...viewportHeader} />
           {dataViews}
         </revogr-viewport-scroll>

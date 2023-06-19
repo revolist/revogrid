@@ -28,8 +28,8 @@ type LocalScrollEvent = {
   styleUrl: 'revogr-viewport-scroll-style.scss',
 })
 export class RevogrViewportScroll {
-  @Event({ bubbles: true })
-  scrollViewport: EventEmitter<RevoGrid.ViewPortScrollEvent>;
+  @Prop() readonly rowHeader: boolean;
+  @Event({ bubbles: true }) scrollViewport: EventEmitter<RevoGrid.ViewPortScrollEvent>;
   @Event() resizeViewport: EventEmitter<RevoGrid.ViewPortResizeEvent>;
   @Event() scrollchange: EventEmitter<{
     type: RevoGrid.DimensionType;
@@ -211,7 +211,7 @@ export class RevogrViewportScroll {
           },
         };
         each(els, (item, dimension: RevoGrid.DimensionType) => {
-          this.resizeViewport.emit({ dimension, size: item.size });
+          this.resizeViewport.emit({ dimension, size: item.size, rowHeader: this.rowHeader });
           this.scrollService?.scroll(item.scroll, dimension, true);
           // track scroll visibility on outer element change
           this.setScrollVisibility(dimension, item.size, item.contentSize);

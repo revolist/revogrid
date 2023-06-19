@@ -30,15 +30,9 @@
   <div class="container-fluid">
     <div class="row h-100">
       <!-- Main content area -->
-      <div class="col-lg-9 grid-holder">
-
-        <revo-grid theme="material" row-headers can-move-columns apply-on-close="true" stretch="false" class="my"
-          key="1"></revo-grid>
-
-      </div>
 
       <!-- Sidebar -->
-      <div class="col-lg-3 d-flex flex-column scrollable">
+      <div class="col-lg-3 d-none d-sm-flex flex-sm-column order-lg-1 scrollable">
         <div class="p-2 mb-auto">
           <button type="button" class="btn btn-primary btn-sm mt-1" onclick="clearGrouping()">Clear grouping</button>
           <button type="button" class="btn btn-primary btn-sm mt-1" onclick="setTrimmed([3])">Set trimmed 3</button>
@@ -104,6 +98,12 @@
             </li>
           </ul>
         </div>
+      </div>
+      <div class="col-lg-9 order-lg-2">
+
+        <revo-grid theme="material" row-headers can-move-columns apply-on-close="true" stretch="false" class="my"
+          key="1"></revo-grid>
+
       </div>
     </div>
   </div>

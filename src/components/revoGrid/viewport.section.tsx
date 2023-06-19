@@ -31,9 +31,11 @@ type Props = {
   registerElement(el: ElementScroll | null, key: string): void;
 };
 /**
- * All render based on sections
- * First we render vertical parts - pinned start, data, pinned end
- * Per each column we render data collections: headers, pinned top, center data, pinned bottom
+ * The code renders a view port divided into sections.
+ * It starts by rendering the pinned start, data, and pinned end sections.
+ * Within each section, it renders columns along with their headers, pinned top, center data, and pinned bottom.
+ * The code iterates over the columns and their data to generate the view port's HTML structure.
+ * Finally, the rendered sections are returned as the result.
  */
 export const ViewPortSections = ({
   resize,
@@ -100,7 +102,13 @@ export const ViewPortSections = ({
             rowSelectionStore={data.rowSelectionStore}
             additionalData={additionalData}
             slot={DATA_SLOT}
-          />
+          >
+            <revogr-focus-row
+              dimensionRow={data.dimensionRow}
+              dimensionCol={data.dimensionCol}
+              selectionStore={data.rowSelectionStore}
+            />
+          </revogr-data>
           <revogr-temp-range
             selectionStore={data.segmentSelectionStore}
             dimensionRow={data.dimensionRow}

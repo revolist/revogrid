@@ -5,17 +5,18 @@
 
 ## Properties
 
-| Property        | Attribute        | Description             | Type     | Default |
-| --------------- | ---------------- | ----------------------- | -------- | ------- |
-| `contentHeight` | `content-height` | Height of inner content | `number` | `0`     |
-| `contentWidth`  | `content-width`  | Width of inner content  | `number` | `0`     |
+| Property        | Attribute        | Description             | Type      | Default     |
+| --------------- | ---------------- | ----------------------- | --------- | ----------- |
+| `contentHeight` | `content-height` | Height of inner content | `number`  | `0`         |
+| `contentWidth`  | `content-width`  | Width of inner content  | `number`  | `0`         |
+| `rowHeader`     | `row-header`     |                         | `boolean` | `undefined` |
 
 
 ## Events
 
 | Event            | Description                                                                         | Type                                                                                                |
 | ---------------- | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `resizeViewport` |                                                                                     | `CustomEvent<{ dimension: DimensionType; size: number; }>`                                          |
+| `resizeViewport` |                                                                                     | `CustomEvent<{ dimension: DimensionType; size: number; rowHeader?: boolean; }>`                     |
 | `scrollchange`   |                                                                                     | `CustomEvent<{ type: DimensionType; hasScroll: boolean; }>`                                         |
 | `scrollViewport` |                                                                                     | `CustomEvent<{ dimension: DimensionType; coordinate: number; delta?: number; outside?: boolean; }>` |
 | `silentScroll`   | Silently scroll to coordinate Made to align negative coordinates for mobile devices | `CustomEvent<{ dimension: DimensionType; coordinate: number; delta?: number; outside?: boolean; }>` |

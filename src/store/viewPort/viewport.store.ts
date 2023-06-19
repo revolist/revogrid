@@ -60,9 +60,9 @@ export default class ViewportStore {
    * It's the main method for draw
    */
   setViewPortCoordinate(position: number, dimension: DimensionDataViewport) {
-    let virtualSize = this.store.get('virtualSize');
+    const viewportSize = this.store.get('virtualSize');
     // no visible data to calculate
-    if (!virtualSize) {
+    if (!viewportSize) {
       return;
     }
 
@@ -71,14 +71,14 @@ export default class ViewportStore {
     // add offset to virtual size from both sides
     const outsize = singleOffsetInPx * 2;
     // math virtual size is based on visible area + 2 items outside of visible area
-    virtualSize += outsize;
+    const virtualSize = viewportSize + outsize;
 
     // expected no scroll if real size less than virtual size, position is 0
     let maxCoordinate = 0;
     // if there is nodes outside of viewport, max coordinate has to be adjusted
-    if (dimension.realSize > virtualSize) {
+    if (dimension.realSize > viewportSize) {
       // max coordinate is real size minus virtual/rendered space
-      maxCoordinate = dimension.realSize - virtualSize;
+      maxCoordinate = dimension.realSize - viewportSize - singleOffsetInPx;
     }
 
     let pos = position;
@@ -93,7 +93,7 @@ export default class ViewportStore {
     this.lastCoordinate = pos;
 
     // actual position is less than first item start based on offset
-    pos -= frameOffset * dimension.originItemSize;
+    pos -= singleOffsetInPx;
     pos = pos < 0 ? 0 : pos < maxCoordinate ? pos : maxCoordinate;
 
     const allItems = this.getItems();
@@ -110,7 +110,7 @@ export default class ViewportStore {
         ...getUpdatedItemsByPosition(pos, allItems, this.store.get('realCount'), virtualSize, dimension),
       };
       this.setViewport({ ...toUpdate });
-    // right position changed
+    // verify is render area is outside of last item
     } else if (isActiveRangeOutsideLastItem(pos, virtualSize, firstItem, lastItem)) {
       // check is any item missing for full fill content
       const missing = addMissingItems(firstItem, this.store.get('realCount'), virtualSize + pos - firstItem.start, allItems, dimension);

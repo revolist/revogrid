@@ -1,5 +1,5 @@
-import { Component, Element, Event, Prop, VNode, EventEmitter, h } from '@stencil/core';
-import { HTMLStencilElement, Watch } from '@stencil/core/internal';
+import { Component, Host, Watch, Element, Event, Prop, VNode, EventEmitter, h } from '@stencil/core';
+import { HTMLStencilElement } from '@stencil/core/internal';
 
 import ColumnService, { ColumnSource, RowSource } from './columnService';
 import { DATA_COL, DATA_ROW } from '../../utils/consts';
@@ -39,7 +39,10 @@ export class RevogrData {
    * Defines property from which to read row class
    */
   @Prop() rowClass: string;
-  /** Additional data to pass to renderer */
+  /**
+   * Additional data to pass to renderer
+   * Used in plugins such as vue or react to pass root app entity to cells
+   */
   @Prop() additionalData: any;
   @Prop() rowSelectionStore!: Observable<Selection.SelectionStoreState>;
   @Prop() viewportRow!: Observable<RevoGrid.ViewportState>;
@@ -53,8 +56,17 @@ export class RevogrData {
   @Prop() type!: RevoGrid.DimensionRows;
 
   @Event({ eventName: DRAG_START_EVENT }) dragStartCell: EventEmitter<DragStartEvent>;
+  /**
+   * Before each row render
+   */
   @Event() beforeRowRender: EventEmitter;
+  /**
+   * Before each cell render function. Allows to override cell properties
+   */
   @Event({ eventName: 'before-cell-render' }) beforeCellRender: EventEmitter<BeforeCellRenderEvent>;
+  /**
+   * When data render finished for the designated type
+   */
   @Event() afterrender: EventEmitter;
 
   @Watch('dataStore')
@@ -82,9 +94,6 @@ export class RevogrData {
     if (!this.columnService.columns.length || !rows.length || !cols.length) {
       return '';
     }
-    // TODO: instead of subscribing here probably create a watch and apply events just to node and avoid rerender
-    // verify if every cell in viewport is getting rendered after focus and solve after it
-    const range = this.rowSelectionStore?.get('range');
     const rowsEls: VNode[] = [];
 
     const depth = this.dataStore.get('groupingDepth');
@@ -99,9 +108,6 @@ export class RevogrData {
       /** grouping end */
       const cells: (VNode | string | void)[] = [];
       let rowClass = this.rowClass ? this.columnService.getRowClass(rgRow.itemIndex, this.rowClass) : '';
-      if (range && rgRow.itemIndex >= range.y && rgRow.itemIndex <= range.y1) {
-        rowClass += ' focused-rgRow';
-      }
       for (let rgCol of cols) {
         cells.push(
           this.getCellRenderer(
@@ -120,7 +126,10 @@ export class RevogrData {
       });
       rowsEls.push(row);
     }
-    return rowsEls;
+    return <Host>
+      <slot />
+      {rowsEls}
+    </Host>;
   }
 
   private getCellRenderer(rgRow: RevoGrid.VirtualPositionItem, rgCol: RevoGrid.VirtualPositionItem, depth = 0) {

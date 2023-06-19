@@ -43,6 +43,9 @@
     box-shadow: 0 -1px 0 $cell-border-color;
   }
 
+  revogr-focus-row {
+    background-color: $focused-header;
+  }
   revogr-data {
     .rgCell {
       color: rgba($font-color, 0.9);
@@ -50,10 +53,6 @@
 
     .rgRow {
       box-shadow: $cell-shadow-cell;
-
-      &.focused-rgRow {
-        background-color: $focused-header;
-      }
     }
 
     .revo-draggable {

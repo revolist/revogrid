@@ -29,6 +29,7 @@ Rows, columns, groups and cells
 
 | Event                | Description | Type                                                                        |
 | -------------------- | ----------- | --------------------------------------------------------------------------- |
+| `afterrender`        |             | `CustomEvent<any>`                                                          |
 | `before-cell-render` |             | `CustomEvent<BeforeCellRenderEvent>`                                        |
 | `beforeRowRender`    |             | `CustomEvent<any>`                                                          |
 | `dragStartCell`      |             | `CustomEvent<{ originalEvent: MouseEvent; model: ColumnDataSchemaModel; }>` |
