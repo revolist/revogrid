@@ -80,7 +80,7 @@ export class RevogrFocus {
         colType: this.colType,
       });
       if (event.defaultPrevented) {
-        return;
+        return <slot/>;
       }
       const { detail } = event;
       const style = getElStyle(
@@ -89,7 +89,7 @@ export class RevogrFocus {
         this.dimensionCol.state,
       );
       const extra = this.focusTemplate && this.focusTemplate(h, detail);
-      return <Host class={FOCUS_CLASS} style={style}>{ extra }</Host>;
+      return <Host class={FOCUS_CLASS} style={style}><slot/>{ extra }</Host>;
     }
   }
 }

@@ -36,6 +36,11 @@ export { ResizeProps } from "./services/resizable.directive";
 export { ViewportData } from "./components/revoGrid/viewport.interfaces";
 export { ElementScroll } from "./components/revoGrid/viewport.scrolling.service";
 export namespace Components {
+    /**
+     * Slots
+     * @example data-rgCol-rgRow - main data slot
+     * @example focus-rgCol-rgRow - focus layer for main data
+     */
     interface RevoGrid {
         /**
           * Add trimmed by type
@@ -542,6 +547,11 @@ export interface RevogrViewportScrollCustomEvent<T> extends CustomEvent<T> {
     target: HTMLRevogrViewportScrollElement;
 }
 declare global {
+    /**
+     * Slots
+     * @example data-rgCol-rgRow - main data slot
+     * @example focus-rgCol-rgRow - focus layer for main data
+     */
     interface HTMLRevoGridElement extends Components.RevoGrid, HTMLStencilElement {
     }
     var HTMLRevoGridElement: {
@@ -662,6 +672,11 @@ declare global {
     }
 }
 declare namespace LocalJSX {
+    /**
+     * Slots
+     * @example data-rgCol-rgRow - main data slot
+     * @example focus-rgCol-rgRow - focus layer for main data
+     */
     interface RevoGrid {
         /**
           * Additional data to be passed to plugins
@@ -1373,6 +1388,11 @@ export { LocalJSX as JSX };
 declare module "@stencil/core" {
     export namespace JSX {
         interface IntrinsicElements {
+            /**
+             * Slots
+             * @example data-rgCol-rgRow - main data slot
+             * @example focus-rgCol-rgRow - focus layer for main data
+             */
             "revo-grid": LocalJSX.RevoGrid & JSXBase.HTMLAttributes<HTMLRevoGridElement>;
             "revogr-clipboard": LocalJSX.RevogrClipboard & JSXBase.HTMLAttributes<HTMLRevogrClipboardElement>;
             /**

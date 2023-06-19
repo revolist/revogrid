@@ -103,6 +103,7 @@ export const ViewPortSections = ({
             additionalData={additionalData}
             slot={DATA_SLOT}
           >
+            <slot name={`data-${view.type}-${data.type}`} />
             <revogr-focus-row
               dimensionRow={data.dimensionRow}
               dimensionCol={data.dimensionCol}
@@ -123,7 +124,9 @@ export const ViewPortSections = ({
             selectionStore={data.segmentSelectionStore}
             dimensionRow={data.dimensionRow}
             dimensionCol={data.dimensionCol}
-          />
+          >
+            <slot name={`focus-${view.type}-${data.type}`} />
+          </revogr-focus>
         </revogr-overlay-selection>
       );
       dataViews.push(dataView);

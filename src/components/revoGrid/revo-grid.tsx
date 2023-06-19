@@ -30,6 +30,11 @@ import { rowDefinitionByType, rowDefinitionRemoveByType } from './grid.helpers';
 import ColumnPlugin from '../../plugins/moveColumn/columnDragPlugin';
 import { getFromEvent } from '../../utils/events';
 
+/**
+ * Slots
+ * @slot data-{column-type}-{row-type}. @example data-rgCol-rgRow - main data slot
+ * @slot focus-${view.type}-${data.type}. @example focus-rgCol-rgRow - focus layer for main data
+ */
 @Component({
   tag: 'revo-grid',
   styleUrl: 'revo-grid-style.scss',
@@ -1075,6 +1080,7 @@ export class RevoGridComponent {
           nakedClick={() => this.viewport.clearEdit()}
           onScroll={details => this.scrollingService.scrollService(details)}
         >
+          <slot name='viewport'/>
           {views}
         </RevoViewPort>
         {this.extraElements}
