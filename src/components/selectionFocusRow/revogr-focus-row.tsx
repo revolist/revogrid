@@ -25,7 +25,6 @@ export class RevogrFocusRow {
   render() {
     const range = this.selectionStore?.get('range');
 
-    console.log('revogr-focus-row.tsx: range:', range);
     if (!range) {
       return;
     }
