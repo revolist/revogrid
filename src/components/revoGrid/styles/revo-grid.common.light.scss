@@ -51,13 +51,12 @@
     }
   }
 
-  revogr-focus-row {
-    background-color: $focused-header;
-  }
-
   revogr-data {
     .rgRow {
       box-shadow: $cell-shadow-cell;
+      &.focused-rgRow {
+        background-color: $focused-header;
+      }
     }
 
     .rgCell {

@@ -2,7 +2,7 @@ import { Component, Host, Watch, Element, Event, Prop, VNode, EventEmitter, h } 
 import { HTMLStencilElement } from '@stencil/core/internal';
 
 import ColumnService, { ColumnSource, RowSource } from './columnService';
-import { DATA_COL, DATA_ROW } from '../../utils/consts';
+import { DATA_COL, DATA_ROW, ROW_FOCUSED_CLASS } from '../../utils/consts';
 
 import { getSourceItem } from '../../store/dataSource/data.store';
 import { BeforeCellRenderEvent, DragStartEvent, Observable, RevoGrid, Selection } from '../../interfaces';
@@ -69,6 +69,9 @@ export class RevogrData {
    */
   @Event() afterrender: EventEmitter;
 
+  private renderedRows = new Map<number, VNode>();
+  private currentRange: Selection.RangeArea | null = null;
+
   @Watch('dataStore')
   @Watch('colData')
   onStoreChange() {
@@ -78,6 +81,31 @@ export class RevogrData {
 
   connectedCallback() {
     this.onStoreChange();
+    this.rowSelectionStore.onChange('range', (e) => {
+      // clear prev range
+      if (this.currentRange) {
+        this.renderedRows.forEach((row, y) => {
+           // skip current range
+           if (e && y >= e.y && y <= e.y1) {
+            return;
+          }
+          if (row && row.$elm$ instanceof HTMLElement && row.$elm$.classList.contains(ROW_FOCUSED_CLASS)) {
+            row.$elm$.classList.remove(ROW_FOCUSED_CLASS);
+          }
+        });
+      }
+
+      // apply new range
+      if (e) {
+        for (let y = e.y; y <= e.y1; y++) {
+          const row = this.renderedRows.get(y);
+          if (row && row.$elm$ instanceof HTMLElement && !row.$elm$.classList.contains(ROW_FOCUSED_CLASS)) {
+            row.$elm$.classList.add(ROW_FOCUSED_CLASS);
+          }
+        }
+      }
+      this.currentRange = e;
+    });
   }
 
   disconnectedCallback() {
@@ -88,6 +116,7 @@ export class RevogrData {
     this.afterrender.emit({ type: this.type });
   }
 
+
   render() {
     const rows = this.viewportRow.get('items');
     const cols = this.viewportCol.get('items');
@@ -95,6 +124,7 @@ export class RevogrData {
       return '';
     }
     const rowsEls: VNode[] = [];
+    this.renderedRows = new Map();
 
     const depth = this.dataStore.get('groupingDepth');
     const groupingCustomRenderer = this.dataStore.get('groupingCustomRenderer');
@@ -108,6 +138,9 @@ export class RevogrData {
       /** grouping end */
       const cells: (VNode | string | void)[] = [];
       let rowClass = this.rowClass ? this.columnService.getRowClass(rgRow.itemIndex, this.rowClass) : '';
+      if (this.currentRange && rgRow.itemIndex >= this.currentRange.y && rgRow.itemIndex <= this.currentRange.y1) {
+        rowClass += ` ${ROW_FOCUSED_CLASS}`;
+      }
       for (let rgCol of cols) {
         cells.push(
           this.getCellRenderer(
@@ -125,6 +158,7 @@ export class RevogrData {
         dataItem
       });
       rowsEls.push(row);
+      this.renderedRows.set(rgRow.itemIndex, row);
     }
     return <Host>
       <slot />

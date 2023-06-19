@@ -104,11 +104,6 @@ export const ViewPortSections = ({
             slot={DATA_SLOT}
           >
             <slot name={`data-${view.type}-${data.type}`} />
-            <revogr-focus-row
-              dimensionRow={data.dimensionRow}
-              dimensionCol={data.dimensionCol}
-              selectionStore={data.rowSelectionStore}
-            />
           </revogr-data>
           <revogr-temp-range
             selectionStore={data.segmentSelectionStore}

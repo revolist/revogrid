@@ -69,13 +69,7 @@ export class RevogrRowHeaders {
         range: false,
       };
       dataViews.push(
-        <revogr-data {...viewData}>
-          <revogr-focus-row
-            dimensionRow={viewData.dimensionRow}
-            dimensionCol={viewData.dimensionCol}
-            selectionStore={viewData.rowSelectionStore}
-          />
-        </revogr-data>,
+        <revogr-data {...viewData}></revogr-data>,
       );
       totalLength += itemCount;
     }

@@ -3,6 +3,10 @@
 <!-- Auto Generated Below -->
 
 
+## Overview
+
+Slots
+
 ## Properties
 
 | Property             | Attribute          | Description                                                                                                                                                                                                                                             | Type                                                                                                                                                                                                                                             | Default     |
@@ -304,6 +308,14 @@ Update columns
 Type: `Promise<void>`
 
 
+
+
+## Slots
+
+| Slot                                 | Description |
+| ------------------------------------ | ----------- |
+| `"data-{column-type}-{row-type}."`   |             |
+| `"focus-${view.type}-${data.type}."` |             |
 
 
 ## Dependencies

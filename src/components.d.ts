@@ -337,21 +337,6 @@ export namespace Components {
          */
         "selectionStore": Observable<Selection.SelectionStoreState>;
     }
-    /**
-     * Separate component for focus selection on row
-     * It's required to prevent extra renders on main component
-     */
-    interface RevogrFocusRow {
-        /**
-          * Dimension column store
-         */
-        "dimensionCol": Observable<RevoGrid.DimensionSettingsState>;
-        /**
-          * Dimension row store
-         */
-        "dimensionRow": Observable<RevoGrid.DimensionSettingsState>;
-        "selectionStore": Observable<Selection.SelectionStoreState>;
-    }
     interface RevogrHeader {
         /**
           * Extra properties to pass into header renderer, such as vue or react components to handle parent
@@ -595,16 +580,6 @@ declare global {
         prototype: HTMLRevogrFocusElement;
         new (): HTMLRevogrFocusElement;
     };
-    /**
-     * Separate component for focus selection on row
-     * It's required to prevent extra renders on main component
-     */
-    interface HTMLRevogrFocusRowElement extends Components.RevogrFocusRow, HTMLStencilElement {
-    }
-    var HTMLRevogrFocusRowElement: {
-        prototype: HTMLRevogrFocusRowElement;
-        new (): HTMLRevogrFocusRowElement;
-    };
     interface HTMLRevogrHeaderElement extends Components.RevogrHeader, HTMLStencilElement {
     }
     var HTMLRevogrHeaderElement: {
@@ -661,7 +636,6 @@ declare global {
         "revogr-edit": HTMLRevogrEditElement;
         "revogr-filter-panel": HTMLRevogrFilterPanelElement;
         "revogr-focus": HTMLRevogrFocusElement;
-        "revogr-focus-row": HTMLRevogrFocusRowElement;
         "revogr-header": HTMLRevogrHeaderElement;
         "revogr-order-editor": HTMLRevogrOrderEditorElement;
         "revogr-overlay-selection": HTMLRevogrOverlaySelectionElement;
@@ -1125,21 +1099,6 @@ declare namespace LocalJSX {
          */
         "selectionStore": Observable<Selection.SelectionStoreState>;
     }
-    /**
-     * Separate component for focus selection on row
-     * It's required to prevent extra renders on main component
-     */
-    interface RevogrFocusRow {
-        /**
-          * Dimension column store
-         */
-        "dimensionCol": Observable<RevoGrid.DimensionSettingsState>;
-        /**
-          * Dimension row store
-         */
-        "dimensionRow": Observable<RevoGrid.DimensionSettingsState>;
-        "selectionStore": Observable<Selection.SelectionStoreState>;
-    }
     interface RevogrHeader {
         /**
           * Extra properties to pass into header renderer, such as vue or react components to handle parent
@@ -1374,7 +1333,6 @@ declare namespace LocalJSX {
         "revogr-edit": RevogrEdit;
         "revogr-filter-panel": RevogrFilterPanel;
         "revogr-focus": RevogrFocus;
-        "revogr-focus-row": RevogrFocusRow;
         "revogr-header": RevogrHeader;
         "revogr-order-editor": RevogrOrderEditor;
         "revogr-overlay-selection": RevogrOverlaySelection;
@@ -1406,11 +1364,6 @@ declare module "@stencil/core" {
             "revogr-edit": LocalJSX.RevogrEdit & JSXBase.HTMLAttributes<HTMLRevogrEditElement>;
             "revogr-filter-panel": LocalJSX.RevogrFilterPanel & JSXBase.HTMLAttributes<HTMLRevogrFilterPanelElement>;
             "revogr-focus": LocalJSX.RevogrFocus & JSXBase.HTMLAttributes<HTMLRevogrFocusElement>;
-            /**
-             * Separate component for focus selection on row
-             * It's required to prevent extra renders on main component
-             */
-            "revogr-focus-row": LocalJSX.RevogrFocusRow & JSXBase.HTMLAttributes<HTMLRevogrFocusRowElement>;
             "revogr-header": LocalJSX.RevogrHeader & JSXBase.HTMLAttributes<HTMLRevogrHeaderElement>;
             "revogr-order-editor": LocalJSX.RevogrOrderEditor & JSXBase.HTMLAttributes<HTMLRevogrOrderEditorElement>;
             "revogr-overlay-selection": LocalJSX.RevogrOverlaySelection & JSXBase.HTMLAttributes<HTMLRevogrOverlaySelectionElement>;
