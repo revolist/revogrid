@@ -1205,6 +1205,9 @@ declare namespace LocalJSX {
          */
         "onBefore-cell-save"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
         "onBefore-edit-render"?: (event: RevogrOverlaySelectionCustomEvent<FocusRenderEvent>) => void;
+        /**
+          * Before range selection applied
+         */
         "onBefore-set-range"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
         "onBeforeFocusCell"?: (event: RevogrOverlaySelectionCustomEvent<Edition.BeforeSaveDataDetails>) => void;
         /**

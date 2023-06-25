@@ -305,6 +305,8 @@ export declare namespace Edition {
     model: RevoGrid.DataType;
     val?: SaveData;
     rowIndex: number;
+    colIndex: number;
+    colType: RevoGrid.DimensionCols;
     type: RevoGrid.DimensionRows;
   };
   type BeforeRangeSaveDataDetails = {

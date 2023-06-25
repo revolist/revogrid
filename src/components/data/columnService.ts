@@ -110,16 +110,18 @@ export default class ColumnService {
     return ColumnService.getData(data.model[data.prop as number]);
   }
 
-  getSaveData(rowIndex: number, c: number, val?: string): Edition.BeforeSaveDataDetails {
+  getSaveData(rowIndex: number, colIndex: number, val?: string): Edition.BeforeSaveDataDetails {
     if (typeof val === 'undefined') {
-      val = this.getCellData(rowIndex, c);
+      val = this.getCellData(rowIndex, colIndex);
     }
-    const data = this.rowDataModel(rowIndex, c);
+    const data = this.rowDataModel(rowIndex, colIndex);
     return {
       prop: data.prop,
       rowIndex,
+      colIndex,
       val,
       model: data.model,
+      colType: this.type,
       type: this.dataStore.get('type'),
     };
   }
@@ -297,7 +299,9 @@ export default class ColumnService {
     const area: {
       prop: RevoGrid.ColumnProp,
       rowIndex: number,
+      colIndex: number,
       model: RevoGrid.DataSource,
+      colType: RevoGrid.MultiDimensionType,
       type: RevoGrid.MultiDimensionType,
     }[] = [];
 
@@ -310,8 +314,10 @@ export default class ColumnService {
         area.push({
           prop,
           rowIndex,
+          colIndex,
           model: getSourceItem(store, rowIndex),
           type,
+          colType: this.type,
         });
       }
     }

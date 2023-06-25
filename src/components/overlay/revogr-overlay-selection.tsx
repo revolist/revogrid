@@ -117,6 +117,9 @@ export class OverlaySelection {
    */
   @Event() setEdit: EventEmitter<Edition.BeforeEdit>;
   @Event({ eventName: 'before-apply-range' }) beforeApplyRange: EventEmitter<FocusRenderEvent>;
+  /**
+   * Before range selection applied
+   */
   @Event({ eventName: 'before-set-range' }) beforeSetRange: EventEmitter;
   @Event({ eventName: 'before-edit-render' }) beforeEditRender: EventEmitter<FocusRenderEvent>;
   @Event() setRange: EventEmitter<Selection.RangeArea & { type: RevoGrid.MultiDimensionType }>;
