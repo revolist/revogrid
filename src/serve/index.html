@@ -32,7 +32,7 @@
       <!-- Main content area -->
 
       <!-- Sidebar -->
-      <div class="col-lg-3 d-none d-sm-flex flex-sm-column order-lg-1 scrollable">
+      <div class="col-lg-3 d-none d-sm-flex flex-sm-column order-lg-1 scrollable" style="max-width: 300px;">
         <div class="p-2 mb-auto">
           <button type="button" class="btn btn-primary btn-sm mt-1" onclick="clearGrouping()">Clear grouping</button>
           <button type="button" class="btn btn-primary btn-sm mt-1" onclick="setTrimmed([3])">Set trimmed 3</button>
@@ -99,9 +99,9 @@
           </ul>
         </div>
       </div>
-      <div class="col-lg-9 order-lg-2">
+      <div class="col-lg-9 order-lg-2 flex-grow-1">
 
-        <revo-grid theme="material" row-headers can-move-columns apply-on-close="true" stretch="false" class="my"
+        <revo-grid theme="compact" row-headers can-move-columns apply-on-close="true" stretch="false" class="my"
           key="1">
           <div slot="focus-common">
             Hello
