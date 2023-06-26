@@ -122,7 +122,7 @@ export class RevogrHeaderComponent {
     ];
   }
 
-  get providers(): RevoGrid.Providers {
+  get providers(): RevoGrid.Providers<RevoGrid.DimensionCols | 'rowHeaders'> {
     return {
       type: this.type,
       data: this.colData,

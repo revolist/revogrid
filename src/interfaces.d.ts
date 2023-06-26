@@ -43,13 +43,17 @@ export declare namespace RevoGrid {
   type ColumnTypes = {
     [name: string]: RevoGrid.ColumnType;
   };
+  interface CellTemplate {
+    // TODO: Add Promise support for template and all custom function so user will be able to use async render on the light speed
+    (createElement: HyperFunc<VNode>, props: CellTemplateProp, additionalData?: any): any;
+  }
   interface ColumnType extends ColumnProperties {
     /** is column or cell readonly */
     readonly?: ReadOnlyFormat;
     /** cell properties */
     cellProperties?: PropertiesFunc;
-    /** cell inner template */
-    cellTemplate?: CellTemplateFunc;
+    /** cell inner template, now template is async */
+    cellTemplate?: CellTemplate;
     /** cell compare function */
     cellCompare?: CellCompareFunc;
     /** default column size */
@@ -90,7 +94,7 @@ export declare namespace RevoGrid {
   type ColumnDataSchema = ColumnGrouping | ColumnRegular;
   type ColumnData = ColumnDataSchema[];
   type ColumnTemplateProp = ColumnRegular & {
-    providers: Providers;
+    providers: Providers<RevoGrid.DimensionCols | 'rowHeaders'>;
     index: number;
   };
   type ColumnPropProp = ColumnGrouping | ColumnTemplateProp;
@@ -106,8 +110,8 @@ export declare namespace RevoGrid {
     } | string;
     [attr: string]: CellProp;
   };
-  type Providers = {
-    type: string;
+  type Providers<T = RevoGrid.DimensionRows> = {
+    type: T;
     data: Observable<DataSourceState<any, any>>|RevoGrid.ColumnRegular[];
     viewport: Observable<ViewportState>;
     dimension: Observable<DimensionSettingsState>;
@@ -135,7 +139,6 @@ export declare namespace RevoGrid {
     (sel: any, data: any, children: T): T;
   }
   type FocusTemplateFunc = (createElement: HyperFunc<VNode>, detail: FocusRenderEvent) => any;
-  type CellTemplateFunc = (createElement: HyperFunc<VNode>, props: CellTemplateProp, additionalData?: any) => any;
   type CellCompareFunc = (prop: ColumnProp, a: DataType, b: DataType) => number;
   type ColumnTemplateFunc = (createElement: HyperFunc<VNode>, props: ColumnTemplateProp, additionalData?: any) => any;
   type PropertiesFunc = (props: ColumnDataSchemaModel) => CellProps | void | undefined;

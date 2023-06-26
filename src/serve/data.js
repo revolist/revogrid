@@ -68,6 +68,12 @@ export function generateFakeDataObject(config = {}) {
         sortable: true,
         size: 200,
         cellCompare: rgCol % 2 == 0 ? naturalSort : undefined,
+        // cellTemplate: (h, v) => {
+        //   for(let i = 0; i < 1000000; i++) {
+        //     // do nothing, this is just to slow down to test performance
+        //   }
+        //   return v.model[v.prop];
+        // }
       };
 
       // apply config

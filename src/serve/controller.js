@@ -167,7 +167,7 @@ function onLoad() {
     mode: 'autoSizeAll',
   };*/
   // default
-  setData({ rows: 100, cols: 10 });
+  setData({ rows: 1000, cols: 1000 });
 
   // events testing
   // 'beforerange', 'setRange', 'beforefocuslost', 'beforecellfocus', 'afterfocus', 'beforeedit', 'aftercolumnresize'

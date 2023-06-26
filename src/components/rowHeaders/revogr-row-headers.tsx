@@ -53,7 +53,7 @@ export class RevogrRowHeaders {
         RevoGrid.ColumnRegular,
         RevoGrid.DimensionCols
       >('colPinStart');
-      const column = {
+      const column: RevoGrid.ColumnRegular = {
         cellTemplate: RowHeaderRender(totalLength),
         ...this.rowHeaderColumn,
       };

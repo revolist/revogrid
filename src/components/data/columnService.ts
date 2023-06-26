@@ -1,4 +1,3 @@
-import { h, VNode } from '@stencil/core';
 import { DataSourceState, getSourceItem, getVisibleSourceItem, setSourceByVirtualIndex } from '../../store/dataSource/data.store';
 import { CELL_CLASS, DISABLED_CLASS } from '../../utils/consts';
 import { Edition, Observable, RevoGrid, Selection } from '../../interfaces';
@@ -88,16 +87,6 @@ export default class ColumnService {
       return ColumnService.doMerge(props, extra);
     }
     return props;
-  }
-
-  customRenderer(
-    c: number, model: RevoGrid.ColumnDataSchemaModel, providers: RevoGrid.Providers, additionalData: any
-  ): VNode | string | void {
-    const tpl = this.columns[c]?.cellTemplate;
-    if (tpl) {
-      return tpl(h, { ...model, providers }, additionalData);
-    }
-    return;
   }
 
   getRowClass(r: number, prop: string): string {

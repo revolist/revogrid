@@ -1,17 +1,15 @@
 import { Component, Host, Watch, Element, Event, Prop, VNode, EventEmitter, h } from '@stencil/core';
-import { HTMLStencilElement } from '@stencil/core/internal';
+import { HTMLStencilElement, State } from '@stencil/core/internal';
 
 import ColumnService, { ColumnSource, RowSource } from './columnService';
-import { DATA_COL, DATA_ROW, ROW_FOCUSED_CLASS } from '../../utils/consts';
+import { ROW_FOCUSED_CLASS } from '../../utils/consts';
 
 import { getSourceItem } from '../../store/dataSource/data.store';
-import { BeforeCellRenderEvent, DragStartEvent, Observable, RevoGrid, Selection } from '../../interfaces';
-import CellRenderer from './cellRenderer';
-import RowRenderer, { PADDING_DEPTH } from './rowRenderer';
+import { Observable, RevoGrid, Selection } from '../../interfaces';
+import RowRenderer  from './rowRenderer';
 import GroupingRowRenderer from '../../plugins/groupingRow/grouping.row.renderer';
 import { isGrouping } from '../../plugins/groupingRow/grouping.service';
 
-const DRAG_START_EVENT = 'dragStartCell';
 
 /**
  * This component is responsible for rendering data
@@ -55,15 +53,10 @@ export class RevogrData {
   @Prop() dataStore!: RowSource;
   @Prop() type!: RevoGrid.DimensionRows;
 
-  @Event({ eventName: DRAG_START_EVENT }) dragStartCell: EventEmitter<DragStartEvent>;
   /**
    * Before each row render
    */
   @Event() beforeRowRender: EventEmitter;
-  /**
-   * Before each cell render function. Allows to override cell properties
-   */
-  @Event({ eventName: 'before-cell-render' }) beforeCellRender: EventEmitter<BeforeCellRenderEvent>;
   /**
    * When data render finished for the designated type
    */
@@ -72,11 +65,22 @@ export class RevogrData {
   private renderedRows = new Map<number, VNode>();
   private currentRange: Selection.RangeArea | null = null;
 
+
+  @State() providers: RevoGrid.Providers;
+
   @Watch('dataStore')
   @Watch('colData')
   onStoreChange() {
     this.columnService?.destroy();
     this.columnService = new ColumnService(this.dataStore, this.colData);
+    // make sure we have correct data, before render
+    this.providers = {
+      type: this.type,
+      data: this.dataStore,
+      viewport: this.viewportCol,
+      dimension: this.dimensionRow,
+      selection: this.rowSelectionStore,
+    };
   }
 
   connectedCallback() {
@@ -143,10 +147,19 @@ export class RevogrData {
       }
       for (let rgCol of cols) {
         cells.push(
-          this.getCellRenderer(
-            rgRow, rgCol,
-            /** grouping apply*/ this.columnService.hasGrouping ? depth : 0
-          )
+          <revogr-cell
+            additionalData={ this.additionalData }
+            columnService={ this.columnService }
+            providers={ this.providers }
+            depth={this.columnService.hasGrouping ? depth : 0}
+            rowIndex={rgRow.itemIndex}
+            rowStart={rgRow.start}
+            rowEnd={rgRow.end}
+            rowSize={rgRow.size}
+            colIndex={rgCol.itemIndex}
+            colStart={rgCol.start}
+            colEnd={rgCol.end}
+            colSize={rgCol.size}/>
         );
       }
       const row = <RowRenderer index={rgRow.itemIndex} rowClass={rowClass} size={rgRow.size} start={rgRow.start}>
@@ -164,75 +177,5 @@ export class RevogrData {
       <slot />
       {rowsEls}
     </Host>;
-  }
-
-  private getCellRenderer(rgRow: RevoGrid.VirtualPositionItem, rgCol: RevoGrid.VirtualPositionItem, depth = 0) {
-    const model = this.columnService.rowDataModel(rgRow.itemIndex, rgCol.itemIndex);
-    const cellEvent = this.beforeCellRender.emit({
-      column: { ...rgCol },
-      row: {
-        ...rgRow,
-        size: undefined
-      },
-      model,
-      rowType: this.type,
-      colType: this.columnService.type,
-    });
-    if (cellEvent.defaultPrevented) {
-      return;
-    }
-    const {
-      detail: {
-        column: columnProps,
-        row: rowProps
-      }
-    } = cellEvent;
-    const defaultProps: RevoGrid.CellProps = {
-      [DATA_COL]: columnProps.itemIndex,
-      [DATA_ROW]: rowProps.itemIndex,
-      style: {
-        width: `${columnProps.size}px`,
-        transform: `translateX(${columnProps.start}px)`,
-        height: rowProps.size ? `${rowProps.size}px` : undefined,
-      },
-    };
-    /**
-     * For grouping, can be removed in the future and replaced with event
-     */
-    if (depth && !columnProps.itemIndex) {
-      defaultProps.style.paddingLeft = `${PADDING_DEPTH * depth}px`;
-    }
-    const props = this.columnService.mergeProperties(rowProps.itemIndex, columnProps.itemIndex, defaultProps);
-    const custom = this.columnService.customRenderer(
-      columnProps.itemIndex, model, this.providers, this.additionalData
-    );
-
-    // if custom render
-    if (typeof custom !== 'undefined') {
-      return <div {...props}>{custom}</div>;
-    }
-
-    // something is wrong with data
-    if (!model.column) {
-      console.error('Investigate column problem');
-      return;
-    }
-
-    // if regular render
-    return (
-      <div {...props}>
-        <CellRenderer model={model} onDragStart={e => this.dragStartCell.emit(e)} />
-      </div>
-    );
-  }
-
-  get providers(): RevoGrid.Providers {
-    return {
-      type: this.type,
-      data: this.dataStore,
-      viewport: this.viewportCol,
-      dimension: this.dimensionRow,
-      selection: this.rowSelectionStore,
-    };
   }
 }

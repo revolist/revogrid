@@ -254,6 +254,42 @@ export namespace Components {
          */
         "useClipboard": boolean;
     }
+    /**
+     * Component is responsible for rendering cell
+     * Main purpose is to track changes and understand what exactly need to be rerendered instead of full grid render
+     */
+    interface RevogrCell {
+        /**
+          * Additional data to pass to renderer Used in plugins such as vue or react to pass root app entity to cells
+         */
+        "additionalData": any;
+        "colEnd": number;
+        /**
+          * Column props passed via property
+         */
+        "colIndex": number;
+        "colSize": number;
+        "colStart": number;
+        /**
+          * Column service
+         */
+        "columnService": ColumnService;
+        /**
+          * Grouping
+         */
+        "depth": number;
+        /**
+          * Cached providers
+         */
+        "providers": RevoGrid.Providers;
+        "rowEnd": number;
+        /**
+          * Row props passed via property
+         */
+        "rowIndex": number;
+        "rowSize": number;
+        "rowStart": number;
+    }
     interface RevogrClipboard {
         "doCopy": (e: DataTransfer, data?: RevoGrid.DataFormat[][]) => Promise<void>;
         /**
@@ -487,6 +523,10 @@ export interface RevoGridCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLRevoGridElement;
 }
+export interface RevogrCellCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLRevogrCellElement;
+}
 export interface RevogrClipboardCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLRevogrClipboardElement;
@@ -542,6 +582,16 @@ declare global {
     var HTMLRevoGridElement: {
         prototype: HTMLRevoGridElement;
         new (): HTMLRevoGridElement;
+    };
+    /**
+     * Component is responsible for rendering cell
+     * Main purpose is to track changes and understand what exactly need to be rerendered instead of full grid render
+     */
+    interface HTMLRevogrCellElement extends Components.RevogrCell, HTMLStencilElement {
+    }
+    var HTMLRevogrCellElement: {
+        prototype: HTMLRevogrCellElement;
+        new (): HTMLRevogrCellElement;
     };
     interface HTMLRevogrClipboardElement extends Components.RevogrClipboard, HTMLStencilElement {
     }
@@ -631,6 +681,7 @@ declare global {
     };
     interface HTMLElementTagNameMap {
         "revo-grid": HTMLRevoGridElement;
+        "revogr-cell": HTMLRevogrCellElement;
         "revogr-clipboard": HTMLRevogrClipboardElement;
         "revogr-data": HTMLRevogrDataElement;
         "revogr-edit": HTMLRevogrEditElement;
@@ -922,6 +973,47 @@ declare namespace LocalJSX {
          */
         "useClipboard"?: boolean;
     }
+    /**
+     * Component is responsible for rendering cell
+     * Main purpose is to track changes and understand what exactly need to be rerendered instead of full grid render
+     */
+    interface RevogrCell {
+        /**
+          * Additional data to pass to renderer Used in plugins such as vue or react to pass root app entity to cells
+         */
+        "additionalData"?: any;
+        "colEnd": number;
+        /**
+          * Column props passed via property
+         */
+        "colIndex": number;
+        "colSize": number;
+        "colStart": number;
+        /**
+          * Column service
+         */
+        "columnService": ColumnService;
+        /**
+          * Grouping
+         */
+        "depth"?: number;
+        /**
+          * Before each cell render function. Allows to override cell properties
+         */
+        "onBefore-cell-render"?: (event: RevogrCellCustomEvent<BeforeCellRenderEvent>) => void;
+        "onDragStartCell"?: (event: RevogrCellCustomEvent<DragStartEvent>) => void;
+        /**
+          * Cached providers
+         */
+        "providers": RevoGrid.Providers;
+        "rowEnd": number;
+        /**
+          * Row props passed via property
+         */
+        "rowIndex": number;
+        "rowSize": number;
+        "rowStart": number;
+    }
     interface RevogrClipboard {
         /**
           * Fired after paste applied to the grid
@@ -1012,14 +1104,9 @@ declare namespace LocalJSX {
          */
         "onAfterrender"?: (event: RevogrDataCustomEvent<any>) => void;
         /**
-          * Before each cell render function. Allows to override cell properties
-         */
-        "onBefore-cell-render"?: (event: RevogrDataCustomEvent<BeforeCellRenderEvent>) => void;
-        /**
           * Before each row render
          */
         "onBeforeRowRender"?: (event: RevogrDataCustomEvent<any>) => void;
-        "onDragStartCell"?: (event: RevogrDataCustomEvent<DragStartEvent>) => void;
         /**
           * Range selection mode
          */
@@ -1331,6 +1418,7 @@ declare namespace LocalJSX {
     }
     interface IntrinsicElements {
         "revo-grid": RevoGrid;
+        "revogr-cell": RevogrCell;
         "revogr-clipboard": RevogrClipboard;
         "revogr-data": RevogrData;
         "revogr-edit": RevogrEdit;
@@ -1355,6 +1443,11 @@ declare module "@stencil/core" {
              * @example focus-rgCol-rgRow - focus layer for main data
              */
             "revo-grid": LocalJSX.RevoGrid & JSXBase.HTMLAttributes<HTMLRevoGridElement>;
+            /**
+             * Component is responsible for rendering cell
+             * Main purpose is to track changes and understand what exactly need to be rerendered instead of full grid render
+             */
+            "revogr-cell": LocalJSX.RevogrCell & JSXBase.HTMLAttributes<HTMLRevogrCellElement>;
             "revogr-clipboard": LocalJSX.RevogrClipboard & JSXBase.HTMLAttributes<HTMLRevogrClipboardElement>;
             /**
              * This component is responsible for rendering data

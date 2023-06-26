@@ -9,7 +9,7 @@ type Props = {
   start: number;
   end: number;
   group: Group;
-  providers: RevoGrid.Providers;
+  providers: RevoGrid.Providers<RevoGrid.DimensionCols | 'rowHeaders'>;
   additionalData: any;
   canResize?: boolean;
   onResize?(e: ResizeEvent): void;

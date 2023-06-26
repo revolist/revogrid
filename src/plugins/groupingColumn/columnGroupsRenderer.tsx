@@ -7,20 +7,20 @@ import { HEADER_ROW_CLASS } from '../../utils/consts';
 import GroupHeaderRenderer from './headerGroupRenderer';
 import { ResizeProps } from '../..';
 
-type Props = {
+type Props<T> = {
   visibleProps: { [prop: string]: number };
   groups: Record<number, Group[]>;
   dimensionCol: Pick<RevoGrid.DimensionSettingsState, 'indexes' | 'originItemSize' | 'indexToItem'>;
   depth: number;
   canResize: boolean;
-  providers: RevoGrid.Providers;
+  providers: RevoGrid.Providers<T>;
   additionalData: any;
   onResize(changedX: number, startIndex: number, endIndex: number): void;
 } & Partial<Pick<ResizeProps, 'active'>>;
 
 const ColumnGroupsRenderer = ({
   additionalData, providers, depth, groups, visibleProps, dimensionCol, canResize, active, onResize
-}: Props): VNode[] => {
+}: Props<RevoGrid.DimensionCols | 'rowHeaders'>): VNode[] => {
   // render group columns
   const groupRow: VNode[] = [];
   for (let i = 0; i < depth; i++) {
