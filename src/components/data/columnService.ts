@@ -127,8 +127,8 @@ export default class ColumnService {
     return editor;
   }
 
-  rowDataModel(rowIndex: number, c: number): RevoGrid.ColumnDataSchemaModel {
-    const column = this.columns[c];
+  rowDataModel(rowIndex: number, colIndex: number): RevoGrid.ColumnDataSchemaModel {
+    const column = this.columns[colIndex];
     const prop: RevoGrid.ColumnProp | undefined = column?.prop;
     const model = getSourceItem(this.dataStore, rowIndex) || {};
     return {
@@ -137,6 +137,7 @@ export default class ColumnService {
       data: this.dataStore.get('source'),
       column,
       rowIndex,
+      colIndex,
     };
   }
 

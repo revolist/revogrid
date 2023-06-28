@@ -1,4 +1,4 @@
-import { Component, Event, Prop, EventEmitter, h, VNode } from '@stencil/core';
+import { Component, Event, Prop, EventEmitter, h, VNode, Host } from '@stencil/core';
 import {
   BeforeCellRenderEvent,
   DragStartEvent,
@@ -111,9 +111,9 @@ export class RevogridCellRenderer {
     // if custom render
     if (tpl) {
       return (
-        <div {...props}>
+        <Host {...props}>
           {tpl(h, { ...model, providers: this.providers }, this.additionalData)}
-        </div>
+        </Host>
       );
     }
     // something is wrong with data
@@ -140,7 +140,7 @@ export class RevogridCellRenderer {
     }
     els.push(`${ColumnService.getData(model.model[model.prop])}`);
     // if regular render
-    return <div {...props}>{els}</div>;
+    return <Host {...props}>{els}</Host>;
   }
 }
 

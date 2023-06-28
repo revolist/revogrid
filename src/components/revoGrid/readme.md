@@ -345,6 +345,7 @@ graph TD;
   revogr-row-headers --> revogr-data
   revogr-row-headers --> revogr-viewport-scroll
   revogr-row-headers --> revogr-header
+  revogr-data --> revogr-cell
   revogr-overlay-selection --> revogr-edit
   revogr-overlay-selection --> revogr-order-editor
   style revo-grid fill:#f9f,stroke:#333,stroke-width:4px

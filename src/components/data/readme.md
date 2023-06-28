@@ -27,12 +27,10 @@ Rows, columns, groups and cells
 
 ## Events
 
-| Event                | Description                                                          | Type                                                                        |
-| -------------------- | -------------------------------------------------------------------- | --------------------------------------------------------------------------- |
-| `afterrender`        | When data render finished for the designated type                    | `CustomEvent<any>`                                                          |
-| `before-cell-render` | Before each cell render function. Allows to override cell properties | `CustomEvent<BeforeCellRenderEvent>`                                        |
-| `beforeRowRender`    | Before each row render                                               | `CustomEvent<any>`                                                          |
-| `dragStartCell`      |                                                                      | `CustomEvent<{ originalEvent: MouseEvent; model: ColumnDataSchemaModel; }>` |
+| Event             | Description                                       | Type               |
+| ----------------- | ------------------------------------------------- | ------------------ |
+| `afterrender`     | When data render finished for the designated type | `CustomEvent<any>` |
+| `beforeRowRender` | Before each row render                            | `CustomEvent<any>` |
 
 
 ## Dependencies
@@ -42,9 +40,14 @@ Rows, columns, groups and cells
  - [revo-grid](../revoGrid)
  - [revogr-row-headers](../rowHeaders)
 
+### Depends on
+
+- [revogr-cell](.)
+
 ### Graph
 ```mermaid
 graph TD;
+  revogr-data --> revogr-cell
   revo-grid --> revogr-data
   revogr-row-headers --> revogr-data
   style revogr-data fill:#f9f,stroke:#333,stroke-width:4px

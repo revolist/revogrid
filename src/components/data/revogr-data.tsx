@@ -1,4 +1,14 @@
-import { Component, Host, Watch, Element, Event, Prop, VNode, EventEmitter, h } from '@stencil/core';
+import {
+  Component,
+  Host,
+  Watch,
+  Element,
+  Event,
+  Prop,
+  VNode,
+  EventEmitter,
+  h,
+} from '@stencil/core';
 import { HTMLStencilElement, State } from '@stencil/core/internal';
 
 import ColumnService, { ColumnSource, RowSource } from './columnService';
@@ -6,10 +16,9 @@ import { ROW_FOCUSED_CLASS } from '../../utils/consts';
 
 import { getSourceItem } from '../../store/dataSource/data.store';
 import { Observable, RevoGrid, Selection } from '../../interfaces';
-import RowRenderer  from './rowRenderer';
+import RowRenderer from './rowRenderer';
 import GroupingRowRenderer from '../../plugins/groupingRow/grouping.row.renderer';
 import { isGrouping } from '../../plugins/groupingRow/grouping.service';
-
 
 /**
  * This component is responsible for rendering data
@@ -30,7 +39,7 @@ export class RevogrData {
   @Prop() readonly: boolean;
   /**
    * Range selection mode
-  */
+   */
   @Prop() range: boolean;
 
   /**
@@ -65,6 +74,7 @@ export class RevogrData {
   private renderedRows = new Map<number, VNode>();
   private currentRange: Selection.RangeArea | null = null;
 
+  private rangeUnsubscribe: (() => void) | undefined;
 
   @State() providers: RevoGrid.Providers;
 
@@ -81,19 +91,21 @@ export class RevogrData {
       dimension: this.dimensionRow,
       selection: this.rowSelectionStore,
     };
-  }
 
-  connectedCallback() {
-    this.onStoreChange();
-    this.rowSelectionStore.onChange('range', (e) => {
+    this.rangeUnsubscribe?.();
+    this.rangeUnsubscribe = this.rowSelectionStore.onChange('range', e => {
       // clear prev range
       if (this.currentRange) {
         this.renderedRows.forEach((row, y) => {
-           // skip current range
-           if (e && y >= e.y && y <= e.y1) {
+          // skip current range
+          if (e && y >= e.y && y <= e.y1) {
             return;
           }
-          if (row && row.$elm$ instanceof HTMLElement && row.$elm$.classList.contains(ROW_FOCUSED_CLASS)) {
+          if (
+            row &&
+            row.$elm$ instanceof HTMLElement &&
+            row.$elm$.classList.contains(ROW_FOCUSED_CLASS)
+          ) {
             row.$elm$.classList.remove(ROW_FOCUSED_CLASS);
           }
         });
@@ -103,7 +115,11 @@ export class RevogrData {
       if (e) {
         for (let y = e.y; y <= e.y1; y++) {
           const row = this.renderedRows.get(y);
-          if (row && row.$elm$ instanceof HTMLElement && !row.$elm$.classList.contains(ROW_FOCUSED_CLASS)) {
+          if (
+            row &&
+            row.$elm$ instanceof HTMLElement &&
+            !row.$elm$.classList.contains(ROW_FOCUSED_CLASS)
+          ) {
             row.$elm$.classList.add(ROW_FOCUSED_CLASS);
           }
         }
@@ -112,23 +128,27 @@ export class RevogrData {
     });
   }
 
+  connectedCallback() {
+    this.onStoreChange();
+  }
+
   disconnectedCallback() {
     this.columnService?.destroy();
+    this.rangeUnsubscribe?.();
   }
 
   componentDidRender() {
     this.afterrender.emit({ type: this.type });
   }
 
-
   render() {
+    this.renderedRows = new Map();
     const rows = this.viewportRow.get('items');
     const cols = this.viewportCol.get('items');
     if (!this.columnService.columns.length || !rows.length || !cols.length) {
       return '';
     }
     const rowsEls: VNode[] = [];
-    this.renderedRows = new Map();
 
     const depth = this.dataStore.get('groupingDepth');
     const groupingCustomRenderer = this.dataStore.get('groupingCustomRenderer');
@@ -136,21 +156,37 @@ export class RevogrData {
       const dataItem = getSourceItem(this.dataStore, rgRow.itemIndex);
       /** grouping */
       if (isGrouping(dataItem)) {
-        rowsEls.push(<GroupingRowRenderer {...rgRow} index={rgRow.itemIndex} model={dataItem} groupingCustomRenderer={groupingCustomRenderer} hasExpand={this.columnService.hasGrouping} />);
+        rowsEls.push(
+          <GroupingRowRenderer
+            {...rgRow}
+            index={rgRow.itemIndex}
+            model={dataItem}
+            groupingCustomRenderer={groupingCustomRenderer}
+            hasExpand={this.columnService.hasGrouping}
+          />,
+        );
         continue;
       }
       /** grouping end */
       const cells: (VNode | string | void)[] = [];
-      let rowClass = this.rowClass ? this.columnService.getRowClass(rgRow.itemIndex, this.rowClass) : '';
-      if (this.currentRange && rgRow.itemIndex >= this.currentRange.y && rgRow.itemIndex <= this.currentRange.y1) {
+      let rowClass = this.rowClass
+        ? this.columnService.getRowClass(rgRow.itemIndex, this.rowClass)
+        : '';
+
+      // highlight row if it is in range
+      if (
+        this.currentRange &&
+        rgRow.itemIndex >= this.currentRange.y &&
+        rgRow.itemIndex <= this.currentRange.y1
+      ) {
         rowClass += ` ${ROW_FOCUSED_CLASS}`;
       }
       for (let rgCol of cols) {
         cells.push(
           <revogr-cell
-            additionalData={ this.additionalData }
-            columnService={ this.columnService }
-            providers={ this.providers }
+            additionalData={this.additionalData}
+            columnService={this.columnService}
+            providers={this.providers}
             depth={this.columnService.hasGrouping ? depth : 0}
             rowIndex={rgRow.itemIndex}
             rowStart={rgRow.start}
@@ -159,23 +195,33 @@ export class RevogrData {
             colIndex={rgCol.itemIndex}
             colStart={rgCol.start}
             colEnd={rgCol.end}
-            colSize={rgCol.size}/>
+            colSize={rgCol.size}
+          />,
         );
       }
-      const row = <RowRenderer index={rgRow.itemIndex} rowClass={rowClass} size={rgRow.size} start={rgRow.start}>
-        {cells}
-      </RowRenderer>;
+      const row = (
+        <RowRenderer
+          index={rgRow.itemIndex}
+          rowClass={rowClass}
+          size={rgRow.size}
+          start={rgRow.start}
+        >
+          {cells}
+        </RowRenderer>
+      );
       this.beforeRowRender.emit({
         node: row,
         item: rgRow,
-        dataItem
+        dataItem,
       });
       rowsEls.push(row);
       this.renderedRows.set(rgRow.itemIndex, row);
     }
-    return <Host>
-      <slot />
-      {rowsEls}
-    </Host>;
+    return (
+      <Host>
+        <slot />
+        {rowsEls}
+      </Host>
+    );
   }
 }
