@@ -22,6 +22,8 @@ export declare namespace RevoGrid {
     column: ColumnRegular;
     rowIndex: number;
     colIndex: number;
+    colType: DimensionCols;
+    type: DimensionRows;
     data: DataSource;
   };
   type CellTemplateProp = {

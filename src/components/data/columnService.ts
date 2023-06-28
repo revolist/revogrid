@@ -131,6 +131,7 @@ export default class ColumnService {
     const column = this.columns[colIndex];
     const prop: RevoGrid.ColumnProp | undefined = column?.prop;
     const model = getSourceItem(this.dataStore, rowIndex) || {};
+    const type = this.dataStore.get('type');
     return {
       prop,
       model,
@@ -138,6 +139,8 @@ export default class ColumnService {
       column,
       rowIndex,
       colIndex,
+      colType: this.type,
+      type,
     };
   }
 
@@ -291,8 +294,8 @@ export default class ColumnService {
       rowIndex: number,
       colIndex: number,
       model: RevoGrid.DataSource,
-      colType: RevoGrid.MultiDimensionType,
-      type: RevoGrid.MultiDimensionType,
+      colType: RevoGrid.DimensionCols,
+      type: RevoGrid.DimensionRows,
     }[] = [];
 
     const type = this.dataStore.get('type');
