@@ -145,6 +145,19 @@ export class OverlaySelection {
   @Event({ cancelable: true }) rangeClipboardCopy: EventEmitter;
   @Event({ cancelable: true }) rangeClipboardPaste: EventEmitter;
 
+  /**
+   * Before key up event proxy, used to prevent key up trigger.
+   * If you have some custom behaviour event, use this event to check if it wasn't processed by internal logic.
+   * Call preventDefault()
+   */
+  @Event({ eventName: 'beforekeydown' }) beforeKeyDown: EventEmitter<KeyboardEvent>;
+  /**
+   * Before key down event proxy, used to prevent key down trigger.
+   * If you have some custom behaviour event, use this event to check if it wasn't processed by internal logic.
+   * Call preventDefault()
+   */
+  @Event({ eventName: 'beforekeyup' }) beforeKeyUp: EventEmitter<KeyboardEvent>;
+
   protected columnService: ColumnService;
 
   protected selectionStoreService: SelectionStoreService;
@@ -188,12 +201,17 @@ export class OverlaySelection {
 
   /** Get keyboard down from element */
   @Listen('keyup', { target: 'document' }) onKeyUp(e: KeyboardEvent) {
+    const proxy = this.beforeKeyUp.emit(e);
+    if (e.defaultPrevented || proxy.defaultPrevented) {
+      return;
+    }
     this.keyboardService?.keyUp(e);
   }
 
   /** Get keyboard down from element */
   @Listen('keydown', { target: 'document' }) onKeyDown(e: KeyboardEvent) {
-    if (e.defaultPrevented) {
+    const proxy = this.beforeKeyDown.emit(e);
+    if (e.defaultPrevented || proxy.defaultPrevented) {
       return;
     }
     this.keyboardService?.keyDown(e, this.range);

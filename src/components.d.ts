@@ -1306,6 +1306,14 @@ declare namespace LocalJSX {
          */
         "onBeforeRangeDataApply"?: (event: RevogrOverlaySelectionCustomEvent<FocusRenderEvent>) => void;
         /**
+          * Before key up event proxy, used to prevent key up trigger. If you have some custom behaviour event, use this event to check if it wasn't processed by internal logic. Call preventDefault()
+         */
+        "onBeforekeydown"?: (event: RevogrOverlaySelectionCustomEvent<KeyboardEvent>) => void;
+        /**
+          * Before key down event proxy, used to prevent key down trigger. If you have some custom behaviour event, use this event to check if it wasn't processed by internal logic. Call preventDefault()
+         */
+        "onBeforekeyup"?: (event: RevogrOverlaySelectionCustomEvent<KeyboardEvent>) => void;
+        /**
           * Used for editors support when close requested
          */
         "onCancelEdit"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
