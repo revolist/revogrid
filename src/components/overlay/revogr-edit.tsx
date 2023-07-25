@@ -19,10 +19,17 @@ export class Edit {
 
   @Event({ bubbles: false }) cellEdit: EventEmitter<Edition.SaveDataDetails>;
 
-  /** Close editor event */
+  /**
+   * Close editor event
+   * pass true if requires focus next
+   */
   @Event({ bubbles: false }) closeEdit: EventEmitter<boolean | undefined>;
 
-  /** Callback triggered on cell editor save */
+  /**
+   * Callback triggered on cell editor save
+   * Closes editor when called
+   * @param preventFocus - if true editor will not be closed and next cell will not be focused
+   */
   onSave(val: Edition.SaveData, preventFocus?: boolean): void {
     if (this.editCell) {
       this.cellEdit.emit({

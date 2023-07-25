@@ -14,6 +14,14 @@ revo-grid {
 
   @include noSelect;
 
+  &.column-draggable.column-drag-start {
+    &, * {
+      &:hover {
+        cursor: grabbing;
+      }
+    }
+  }
+
   .footer-wrapper,
   .header-wrapper {
     width: 100%;
@@ -130,4 +138,3 @@ revo-grid {
     }
   }
 }
-  

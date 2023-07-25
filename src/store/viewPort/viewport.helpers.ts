@@ -12,43 +12,46 @@ type ItemsToUpdate = Pick<RevoGrid.ViewportStateItems, 'items' | 'start' | 'end'
  * If viewport wasn't changed fully simple recombination of positions
  * Otherwise rebuild viewport items
  */
-export function getUpdatedItemsByPosition<T extends ItemsToUpdate>(pos: number, items: T, realCount: number, virtualSize: number, dimension: DimensionDataViewport): ItemsToUpdate {
+export function getUpdatedItemsByPosition<T extends ItemsToUpdate>(
+  pos: number, // coordinate
+  items: T,
+  realCount: number,
+  virtualSize: number,
+  dimension: DimensionDataViewport
+): ItemsToUpdate {
   const activeItem: RevoGrid.PositionItem = getItemByPosition(dimension, pos);
-  const firstItem: RevoGrid.VirtualPositionItem = getFirstItem(items);
+  const firstItem: RevoGrid.PositionItem = getFirstItem(items);
   let toUpdate: ItemsToUpdate;
-
-  // do simple position replacement if items already present in viewport
+  // do simple position recombination if items already present in viewport
   if (firstItem) {
-    let changedOffsetStart: number = activeItem.itemIndex - (firstItem.itemIndex || 0);
+    let changedOffsetStart = activeItem.itemIndex - (firstItem.itemIndex || 0);
+    // if item changed
     if (changedOffsetStart) {
       // simple recombination
-      const newData: ItemsToUpdate | null = recombineByOffset(Math.abs(changedOffsetStart), {
+      toUpdate = recombineByOffset(Math.abs(changedOffsetStart), {
         positiveDirection: changedOffsetStart > -1,
         ...dimension,
         ...items,
       });
+    }
+  }
 
-      if (newData) {
-        toUpdate = newData;
-      }
-
-      // if partial replacement add items if revo-viewport has some space left
-      if (toUpdate) {
-        const extra = addMissingItems(activeItem, realCount, virtualSize, toUpdate, dimension);
-        if (extra.length) {
-          updateMissingAndRange(toUpdate.items, extra, toUpdate);
-        }
-      }
+  const maxSizeVirtualSize = getMaxVirtualSize(virtualSize, dimension.realSize, activeItem);
+  // if partial recombination add items if revo-viewport has some space left
+  if (toUpdate) {
+    const extra = addMissingItems(activeItem, realCount, maxSizeVirtualSize, toUpdate, dimension);
+    if (extra.length) {
+      updateMissingAndRange(toUpdate.items, extra, toUpdate);
     }
   }
 
   // new collection if no items after replacement full replacement
   if (!toUpdate) {
     const items = getItems({
-      start: activeItem.start,
-      startIndex: activeItem.itemIndex,
+      firstItemStart: activeItem.start,
+      firstItemIndex: activeItem.itemIndex,
       origSize: dimension.originItemSize,
-      maxSize: virtualSize,
+      maxSize: maxSizeVirtualSize,
       maxCount: realCount,
       sizes: dimension.sizes,
     });
@@ -63,7 +66,18 @@ export function getUpdatedItemsByPosition<T extends ItemsToUpdate>(pos: number, 
   return toUpdate;
 }
 
-export function updateMissingAndRange(items: RevoGrid.VirtualPositionItem[], missing: RevoGrid.VirtualPositionItem[], range: RevoGrid.Range) {
+// virtual size can differ based on scroll position if some big items are present
+// scroll can be in the middle of item and virtual size will be larger
+// so we need to exclude this part from virtual size hence it's already passed
+function getMaxVirtualSize(virtualSize: number, realSize: number, activeItem: RevoGrid.PositionItem) {
+  return Math.min(virtualSize + (activeItem.end - activeItem.start), realSize)
+}
+
+export function updateMissingAndRange(
+  items: RevoGrid.VirtualPositionItem[],
+  missing: RevoGrid.VirtualPositionItem[],
+  range: RevoGrid.Range
+) {
   items.splice(range.end + 1, 0, ...missing);
   // update range if start larger after recombination
   if (range.start >= range.end && !(range.start === range.end && range.start === 0)) {
@@ -72,7 +86,10 @@ export function updateMissingAndRange(items: RevoGrid.VirtualPositionItem[], mis
   range.end += missing.length;
 }
 
-// if partial replacement add items if revo-viewport has some space left
+/**
+ * If partial replacement
+ * this function adds items if viewport has some space left
+ */
 export function addMissingItems<T extends ItemsToUpdate>(
   firstItem: RevoGrid.PositionItem,
   realCount: number,
@@ -83,8 +100,8 @@ export function addMissingItems<T extends ItemsToUpdate>(
   const lastItem: RevoGrid.VirtualPositionItem = getLastItem(existingCollection);
   const items = getItems({
     sizes: dimension.sizes,
-    start: lastItem.end,
-    startIndex: lastItem.itemIndex + 1,
+    firstItemStart: lastItem.end,
+    firstItemIndex: lastItem.itemIndex + 1,
     origSize: dimension.originItemSize,
     maxSize: virtualSize - (lastItem.end - firstItem.start),
     maxCount: realCount,
@@ -92,26 +109,32 @@ export function addMissingItems<T extends ItemsToUpdate>(
   return items;
 }
 
-// get revo-viewport items parameters, caching position and calculating items count in revo-viewport
+/**
+ * Get wiewport items parameters
+ * caching position and calculating items count in viewport
+ */
 export function getItems(
   opt: {
-    startIndex: number;
-    start: number;
+    firstItemIndex: number;
+    firstItemStart: number;
     origSize: number;
-    maxSize: number;
-    maxCount: number;
+    maxSize: number; // virtual size
+    maxCount: number; // real item count, where the last item
     sizes?: RevoGrid.ViewSettingSizeProp;
   },
-  currentSize: number = 0,
-): RevoGrid.VirtualPositionItem[] {
+  currentSize = 0,
+) {
   const items: RevoGrid.VirtualPositionItem[] = [];
-  let index: number = opt.startIndex;
-  let size: number = currentSize;
+
+  let index = opt.firstItemIndex;
+  let size = currentSize;
+
+  // max size or max count
   while (size <= opt.maxSize && index < opt.maxCount) {
-    const newSize: number = getItemSize(index, opt.sizes, opt.origSize);
+    const newSize = getItemSize(index, opt.sizes, opt.origSize);
     items.push({
-      start: opt.start + size,
-      end: opt.start + size + newSize,
+      start: opt.firstItemStart + size,
+      end: opt.firstItemStart + size + newSize,
       itemIndex: index,
       size: newSize,
     });
@@ -228,8 +251,30 @@ function getItemSize(index: number, sizes?: RevoGrid.ViewSettingSizeProp, origSi
   return origSize;
 }
 
-export function isActiveRange(pos: number, item: RevoGrid.PositionItem | undefined): boolean {
-  return item && pos >= item.start && pos <= item.end;
+/**
+ * Verify if position is in range of the PositionItem, start and end are included
+ */
+export function isActiveRange(
+  pos: number,
+  realSize: number,
+  first?: RevoGrid.PositionItem,
+  last?: RevoGrid.PositionItem
+): boolean {
+  if (!first || !last) {
+    return false;
+  }
+  // if position is in range of first item
+  // or position is after first item and last item is the last item in real size
+  return pos >= first.start && pos <= first.end ||
+    pos > first.end && last.end === realSize;
+}
+
+export function isActiveRangeOutsideLastItem(pos: number, virtualSize: number, firstItem?: RevoGrid.PositionItem, lastItem?: RevoGrid.PositionItem) {
+  // if no first item, means no items in viewport
+  if (!firstItem) {
+    return false;
+  }
+  return virtualSize + pos > lastItem?.end
 }
 
 export function getFirstItem(s: ItemsToUpdate): RevoGrid.VirtualPositionItem | undefined {
@@ -238,4 +283,48 @@ export function getFirstItem(s: ItemsToUpdate): RevoGrid.VirtualPositionItem | u
 
 export function getLastItem(s: ItemsToUpdate): RevoGrid.VirtualPositionItem {
   return s.items[s.end];
+}
+
+/**
+ * Set items sizes from start index to end
+ * @param vpItems
+ * @param start
+ * @param size
+ * @param lastCoordinate
+ * @returns
+ */
+export function setItemSizes(
+  vpItems: RevoGrid.VirtualPositionItem[],
+  initialIndex: number,
+  size: number,
+  lastCoordinate: number
+) {
+  const items = [...vpItems];
+  const count = items.length;
+
+  let pos = lastCoordinate;
+  let i = 0;
+  let start = initialIndex;
+
+  // viewport not inited
+  if (!count) {
+    return [];
+  }
+   // loop through array from initial item after recombination
+   while (i < count) {
+    const item = items[start];
+    item.start = pos;
+    item.size = size;
+    item.end = item.start + size;
+    pos = item.end;
+    // loop by start index
+    start++;
+    i++;
+
+    // if start index out of array, reset it
+    if (start === count) {
+      start = 0;
+    }
+  }
+  return items;
 }

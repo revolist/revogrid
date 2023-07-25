@@ -3,6 +3,11 @@ import { isEnterKey, isTab } from '../../../utils/keyCodes.utils';
 import { Edition, RevoGrid } from '../../../interfaces';
 import { timeout } from '../../../utils/utils';
 
+/**
+ * Callback triggered on cell editor save
+ * Closes editor when called
+ * @param preventFocus - if true editor will not be closed and next cell will not be focused
+ */
 export type SaveCallback = (value: Edition.SaveData, preventFocus: boolean) => void;
 
 export class TextEditor implements Edition.EditorBase {

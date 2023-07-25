@@ -67,9 +67,15 @@ export function generateFakeDataObject(config = {}) {
         prop: rgCol,
         filter:"myFilterType",
         sortable: true,
-        size: 200,
+        size: 140,
         cellCompare: (rgCol % 2) == 0 ? naturalSort : undefined
       };
+      
+      if (rgCol == 0) {
+        columns[rgCol].size = 433;
+      } else if (rgCol == 10) {
+        columns[rgCol].size = 200;
+      }
 
       // apply config
       if (colPinStart.indexOf(j) > -1) {

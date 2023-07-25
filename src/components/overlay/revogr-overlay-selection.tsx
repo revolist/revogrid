@@ -66,6 +66,10 @@ export class OverlaySelection {
   @Event({ cancelable: true }) internalFocusCell: EventEmitter<Edition.BeforeSaveDataDetails>;
 
   @Event({ bubbles: false }) setEdit: EventEmitter<Edition.BeforeEdit>;
+  /**
+   * Used for editors support when close requested
+   */
+  @Event() cancelEdit: EventEmitter;
   @Event() setRange: EventEmitter<Selection.RangeArea>;
   @Event() setTempRange: EventEmitter<Selection.TempRange | null>;
 
@@ -133,7 +137,8 @@ export class OverlaySelection {
     this.keyboardService = new KeyboardService({
       selectionStoreService: this.selectionStoreService,
       selectionStore: s,
-      doEdit: (v, c) => this.doEdit(v, c),
+      doEdit: (v) => this.doEdit(v),
+      cancelEdit: () => this.closeEdit(),
       clearCell: () => this.clearCell(),
       getData: () => this.getData(),
       internalPaste: () => this.internalPaste.emit()
@@ -277,20 +282,23 @@ export class OverlaySelection {
     }
   }
 
-  protected doEdit(val = '', isCancel = false) {
+  protected doEdit(val = '') {
     if (this.canEdit()) {
       const editCell = this.selectionStore.get('focus');
       const data = this.columnService.getSaveData(editCell.y, editCell.x);
       this.setEdit?.emit({
         ...data,
-        isCancel,
         val,
       });
     }
   }
 
+  /**
+   * Close editor event triggered
+   * @param details - if requires focus next
+   */
   private closeEdit(e?: CustomEvent<boolean>) {
-    this.doEdit(undefined, true);
+    this.cancelEdit.emit();
     if (e?.detail) {
       this.focusNext();
     }

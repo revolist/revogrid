@@ -32,6 +32,28 @@ export default class DimensionProvider {
   }
 
   /**
+   * Apply new custom sizes to dimension and view port
+   * @param type - dimension type
+   * @param sizes - new custom sizes
+   * @param keepOld - keep old sizes merge new with old
+   */
+  setCustomSizes(type: RevoGrid.MultiDimensionType, sizes: RevoGrid.ViewSettingSizeProp, keepOld = false) {
+    let newSizes = sizes;
+    if (keepOld) {
+      const oldSizes = this.stores[type].store.get('sizes');
+      newSizes = {
+        ...oldSizes,
+        ...sizes,
+      };
+    }
+    this.stores[type].setDimensionSize(newSizes);
+    this.viewports.stores[type].setViewPortDimension(
+      newSizes,
+      !keepOld ? this.stores[type].store.get('originItemSize') : undefined
+    );
+  }
+
+  /**
    * Sets dimension data and view port coordinate
    * @param items - data/column items
    * @param type - dimension type
@@ -52,17 +74,21 @@ export default class DimensionProvider {
     this.viewports.stores[type].setViewport({ virtualSize: dimension.realSize });
   }
 
-  drop() {
+  dropColumns() {
     for (let type of columnTypes) {
-      this.stores[type].drop();  
+      this.stores[type].drop();
+      this.viewports.stores[type].clear();
     }
   }
 
   setColumns(
     type: RevoGrid.MultiDimensionType,
+    newLength: number,
     sizes?: RevoGrid.ViewSettingSizeProp,
-    noVirtual = false): void {
-    this.stores[type].setDimensionSize(sizes);
+    noVirtual = false
+  ) {
+    this.setRealSize(newLength, type);
+    this.setCustomSizes(type, sizes);
 
     if (noVirtual) {
       this.setNoVirtual(type);

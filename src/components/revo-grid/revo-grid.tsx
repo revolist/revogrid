@@ -410,7 +410,8 @@ export class RevoGridComponent {
       return;
     }
     await timeout();
-    this.viewport?.setEdit(rgRow, this.columnProvider.getColumnIndexByProp(prop, 'rgCol'), rgCol.pin || 'rgCol', rowSource);
+    const colGroup = rgCol.pin || 'rgCol';
+    this.viewport?.setEdit(rgRow, this.columnProvider.getColumnIndexByProp(prop, colGroup), colGroup, rowSource);
   }
 
   /**
@@ -481,7 +482,7 @@ export class RevoGridComponent {
    * Clear current grid focus
    */
   @Method() async clearFocus() {
-    const focused = await this.getFocused();
+    const focused = this.viewport?.getFocused();
     const event = this.beforefocuslost.emit(focused);
     if (event.defaultPrevented) {
       return;
@@ -647,13 +648,12 @@ export class RevoGridComponent {
   @Element() element: HTMLRevoGridElement;
 
   @Watch('columns') columnChanged(newVal: RevoGrid.ColumnDataSchema[] = []) {
-    this.dimensionProvider.drop();
+    this.dimensionProvider.dropColumns();
     const columnGather = ColumnDataProvider.getColumns(newVal, 0, this.columnTypes);
     this.beforecolumnsset.emit(columnGather);
     for (let type of columnTypes) {
       const items = columnGather.columns[type];
-      this.dimensionProvider.setRealSize(items.length, type);
-      this.dimensionProvider.setColumns(type, ColumnDataProvider.getSizes(items), type !== 'rgCol');
+      this.dimensionProvider.setColumns(type, items.length, ColumnDataProvider.getSizes(items), type !== 'rgCol');
     }
     this.beforecolumnapplied.emit(columnGather);
     const columns = this.columnProvider.setColumns(columnGather);
@@ -890,10 +890,13 @@ export class RevoGridComponent {
       editors={this.editors}
       useClipboard={this.useClipboard}
       columns={this.viewport.columns}
+      onCancelEdit={() => {
+        this.selectionStoreConnector.setEdit(false);
+      }}
       onEdit={detail => {
         const event = this.beforeeditstart.emit(detail);
         if (!event.defaultPrevented) {
-          this.selectionStoreConnector.setEdit(detail.isCancel ? false : detail.val);
+          this.selectionStoreConnector.setEdit(detail.val);
         }
       }}
       registerElement={(e, k) => this.scrollingService.registerElement(e, k)}
