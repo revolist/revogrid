@@ -73,3 +73,20 @@ export function isTab(code: string): boolean {
 export function isEnterKey(code: string): boolean {
   return code === codesLetter.ENTER || code === codesLetter.ENTER_NUM;
 }
+
+export function isCut(event: KeyboardEvent): boolean {
+  return (event.ctrlKey && event.key === 'x') || // Ctrl + X on Windows
+  (event.metaKey && event.key === 'x');   // Cmd + X on Mac
+}
+export function isCopy(event: KeyboardEvent): boolean {
+  return (event.ctrlKey && event.key === 'c') || // Ctrl + C on Windows
+    (event.metaKey && event.key === 'c');   // Cmd + C on Mac
+}
+export function isPaste(event: KeyboardEvent): boolean {
+  return (event.ctrlKey && event.key === 'v') || // Ctrl + V on Windows
+  (event.metaKey && event.key === 'v');   // Cmd + V on Mac
+}
+export function isAll(event: KeyboardEvent): boolean {
+  return  (event.ctrlKey && event.key === 'a') || // Ctrl + A on Windows
+  (event.metaKey && event.key === 'a');   // Cmd + A on Mac
+}

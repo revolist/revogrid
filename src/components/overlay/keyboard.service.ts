@@ -2,7 +2,7 @@ import { Observable, Selection } from '../../interfaces';
 import { getRange } from '../../store/selection/selection.helpers';
 import SelectionStoreService from '../../store/selection/selection.store.service';
 import { codesLetter } from '../../utils/keyCodes';
-import { isClear, isCtrlKey, isEnterKey, isLetterKey } from '../../utils/keyCodes.utils';
+import { isAll, isClear, isCopy, isCut, isEnterKey, isLetterKey, isPaste } from '../../utils/keyCodes.utils';
 import { timeout } from '../../utils';
 import { EventData, getCoordinate, isAfterLast, isBeforeFirst } from './selection.utils';
 import { RESIZE_INTERVAL } from '../../utils/consts';
@@ -29,16 +29,10 @@ const DIRECTION_CODES: string[] = [
   codesLetter.ARROW_RIGHT,
 ];
 export class KeyboardService {
-  private ctrlDown = false;
 
   constructor(private sv: Config) {}
 
   async keyDown(e: KeyboardEvent, canRange: boolean) {
-    if (isCtrlKey(e.keyCode, navigator.platform)) {
-      this.ctrlDown = true;
-    }
-
-
     // IF EDIT MODE
     if (this.sv.selectionStoreService.edited) {
       switch (e.code) {
@@ -75,23 +69,23 @@ export class KeyboardService {
     }
 
     // copy operation
-    if (this.isCopy(e)) {
+    if (isCopy(e)) {
       return;
     }
 
     // cut operation
-    if (this.isCut(e)) {
+    if (isCut(e)) {
       return;
     }
 
     // paste operation
-    if (this.isPaste(e)) {
+    if (isPaste(e)) {
       this.sv.internalPaste();
       return;
     }
 
     // select all
-    if (this.isAll(e)) {
+    if (isAll(e)) {
       if (canRange) {
         this.selectAll(e);
       }
@@ -161,23 +155,6 @@ export class KeyboardService {
     return this.sv.focusNext(data.start, changes);
   }
 
-  keyUp(e: KeyboardEvent): void {
-    if (isCtrlKey(e.keyCode, navigator.platform)) {
-      this.ctrlDown = false;
-    }
-  }
-  isCut(e: KeyboardEvent): boolean {
-    return this.ctrlDown && e.code == codesLetter.X;
-  }
-  isCopy(e: KeyboardEvent): boolean {
-    return this.ctrlDown && e.code == codesLetter.C;
-  }
-  isPaste(e: KeyboardEvent): boolean {
-    return this.ctrlDown && e.code == codesLetter.V;
-  }
-  isAll(e: KeyboardEvent): boolean {
-    return this.ctrlDown && e.code == codesLetter.A;
-  }
   /** Monitor key direction changes */
   changeDirectionKey(e: KeyboardEvent, canRange: boolean): { changes: Partial<Selection.Cell>; isMulti?: boolean } | void {
     const isMulti = canRange && e.shiftKey;

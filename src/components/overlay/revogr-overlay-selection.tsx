@@ -201,11 +201,7 @@ export class OverlaySelection {
 
   /** Get keyboard down from element */
   @Listen('keyup', { target: 'document' }) onKeyUp(e: KeyboardEvent) {
-    const proxy = this.beforeKeyUp.emit(e);
-    if (e.defaultPrevented || proxy.defaultPrevented) {
-      return;
-    }
-    this.keyboardService?.keyUp(e);
+    this.beforeKeyUp.emit(e);
   }
 
   /** Get keyboard down from element */
