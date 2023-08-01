@@ -1,6 +1,6 @@
 {
   "name": "@revolist/revogrid",
-  "version": "3.6.5",
+  "version": "3.6.16",
   "description": "Virtual reactive data grid component - RevoGrid.",
   "license": "MIT",
   "directories": {
@@ -69,7 +69,7 @@
     "@stencil/sass": "^1.5.2",
     "@stencil/store": "^1.3.0",
     "@stencil/svelte-output-target": "0.0.3",
-    "@stencil/vue-output-target": "^0.6.2",
+    "@stencil/vue-output-target": "^0.8.6",
     "@types/events": "^3.0.0",
     "@types/jest": "^26.0.20",
     "@types/node": "^18.7.2",
@@ -85,7 +85,7 @@
     "rxjs": "^6.6.3",
     "svelte": "^3.49.0",
     "typescript": "^4.7.4",
-    "vue": "^3.2.37"
+    "vue": "^3.3.4"
   },
   "dependencies": {
     "lodash": "^4.17.20"
