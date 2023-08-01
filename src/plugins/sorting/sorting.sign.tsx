@@ -8,5 +8,5 @@ type Props = {
   column: RevoGrid.ColumnRegular;
 };
 export const SortingSign = ({ column }: Props) => {
-  return <i class={column.order} />;
+  return <i class={column?.order ?? 'sort-off'} />;
 };
