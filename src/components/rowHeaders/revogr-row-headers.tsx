@@ -33,9 +33,9 @@ export class RevogrRowHeaders {
     /** render viewports rows */
     let totalLength = 1;
     for (let data of this.dataPorts) {
-      const items = data.dataStore.get('items')
+      const items = data.dataStore.get('items');
       const itemCount = items.length;
-      const source = data.dataStore.get('source')
+      const source = data.dataStore.get('source');
       const visibleSourceItems = items.map(v => source[v]); // from src/store/dataSource/data.store.ts
       // initiate row data
       const dataStore = new DataStore<RevoGrid.DataType, RevoGrid.DimensionRows>(data.type);
