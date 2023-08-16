@@ -1,4 +1,4 @@
-import { Component, h, Host, Listen, Prop, State, Event, EventEmitter, VNode, Method } from '@stencil/core';
+import { Component, Event, EventEmitter, h, Host, Listen, Method, Prop, State, VNode } from '@stencil/core';
 import { FilterType } from './filter.service';
 import { AndOrButton, isFilterBtn, TrashButton } from './filter.button';
 import '../../utils/closest.polifill';
@@ -54,6 +54,10 @@ export class FilterPanel {
     // drops the filter
     reset: 'Cancel',
     cancel: 'Close',
+    add: 'Add more condition...',
+    placeholder: 'Enter value...',
+    and: 'and',
+    or: 'or',
   };
   @State() isFilterIdSet = false;
   @State() filterId = 0;
@@ -103,9 +107,11 @@ export class FilterPanel {
     const prop = this.changes?.prop;
 
     if (!isDefaultTypeRemoved) {
+      const capts = Object.assign(this.filterCaptionsInternal, this.filterCaptions);
+
       options.push(
         <option selected={this.currentFilterType === defaultType} value={defaultType}>
-          {prop && this.filterItems[prop] && this.filterItems[prop].length > 0 ? 'Add more condition...' : this.filterNames[defaultType]}
+          {prop && this.filterItems[prop] && this.filterItems[prop].length > 0 ? capts.add : this.filterNames[defaultType]}
         </option>,
       );
     }
@@ -130,10 +136,12 @@ export class FilterPanel {
 
     if (this.filterEntities[currentFilter[index].type].extra !== 'input') return '';
 
+    const capts = Object.assign(this.filterCaptionsInternal, this.filterCaptions);
+
     return (
       <input
         id={`filter-input-${currentFilter[index].id}`}
-        placeholder="Enter value..."
+        placeholder={capts.placeholder}
         type="text"
         value={currentFilter[index].value}
         onInput={this.onUserInput.bind(this, index, prop)}
@@ -147,6 +155,7 @@ export class FilterPanel {
     if (!(prop || prop === 0)) return '';
 
     const propFilters = this.filterItems[prop] || [];
+    const capts = Object.assign(this.filterCaptionsInternal, this.filterCaptions);
     return (
       <div key={this.filterId}>
         {propFilters.map((d, index) => {
@@ -156,7 +165,7 @@ export class FilterPanel {
           if (index !== this.filterItems[prop].length - 1) {
             andOrButton = (
               <div onClick={() => this.toggleFilterAndOr(d.id)}>
-                <AndOrButton isAnd={d.relation === 'and'} />
+                <AndOrButton text={d.relation === 'and' ? capts.and : capts.or} />
               </div>
             );
           }
@@ -223,9 +232,7 @@ export class FilterPanel {
 
   private onFilterTypeChange(e: Event, prop: ColumnProp, index: number) {
     const el = e.target as HTMLSelectElement;
-    const type = el.value as FilterType;
-
-    this.filterItems[prop][index].type = type;
+    this.filterItems[prop][index].type = el.value as FilterType;
 
     // this re-renders the input to know if we need extra input
     this.filterId++;
@@ -245,9 +252,7 @@ export class FilterPanel {
 
   private onAddNewFilter(e: Event) {
     const el = e.target as HTMLSelectElement;
-    const type = el.value as FilterType;
-
-    this.currentFilterType = type;
+    this.currentFilterType = el.value as FilterType;
     this.addNewFilterToProp();
 
     // reset value after adding new filter

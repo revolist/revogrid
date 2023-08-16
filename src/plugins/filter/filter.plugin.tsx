@@ -25,6 +25,10 @@ export type FilterCaptions = {
   save: string;
   reset: string;
   cancel: string;
+  add: string,
+  placeholder: string,
+  and: string,
+  or: string,
 };
 
 export type FilterLocalization = {
