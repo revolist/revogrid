@@ -5,18 +5,16 @@ import { isRowType, rowTypes } from '../store/storeTypes';
 import DimensionProvider from './dimension.provider';
 import { RevoGrid, Edition } from '../interfaces';
 import { Trimmed } from '../store/dataSource/trimmed.plugin';
-import DimensionRows = RevoGrid.DimensionRows;
-import DataType = RevoGrid.DataType;
 import { GroupLabelTemplateFunc } from '../plugins/groupingRow/grouping.row.types';
 
-export type RowDataSources = { [T in DimensionRows]: DataStore<DataType, DimensionRows> };
+export type RowDataSources = { [T in RevoGrid.DimensionRows]: DataStore<RevoGrid.DataType, RevoGrid.DimensionRows> };
 
 export class DataProvider {
   public readonly stores: RowDataSources;
   constructor(private dimensionProvider: DimensionProvider) {
     this.stores = reduce(
       rowTypes,
-      (sources: Partial<RowDataSources>, k: DimensionRows) => {
+      (sources: Partial<RowDataSources>, k: RevoGrid.DimensionRows) => {
         sources[k] = new DataStore(k);
         return sources;
       },
@@ -25,18 +23,18 @@ export class DataProvider {
   }
 
   setData(
-    data: DataType[],
-    type: DimensionRows = 'rgRow',
+    data: RevoGrid.DataType[],
+    type: RevoGrid.DimensionRows = 'rgRow',
     grouping?: { depth: number; groups?: Groups, customRenderer?: GroupLabelTemplateFunc },
     silent = false,
-  ): DataType[] {
+  ): RevoGrid.DataType[] {
     // set rgRow data
     this.stores[type].updateData([...data], grouping, silent);
     this.dimensionProvider.setData(data.length, type, type !== 'rgRow');
     return data;
   }
 
-  getModel(virtualIndex: number, type: DimensionRows = 'rgRow') {
+  getModel(virtualIndex: number, type: RevoGrid.DimensionRows = 'rgRow') {
     const store = this.stores[type].store;
     return getSourceItem(store, virtualIndex);
   }
@@ -47,23 +45,23 @@ export class DataProvider {
     setSourceByVirtualIndex(this.stores[type].store, { [rowIndex]: model });
   }
 
-  refresh(type: DimensionRows | 'all' = 'all') {
+  refresh(type: RevoGrid.DimensionRows | 'all' = 'all') {
     if (isRowType(type)) {
       this.refreshItems(type);
     }
-    rowTypes.forEach((t: DimensionRows) => this.refreshItems(t));
+    rowTypes.forEach((t: RevoGrid.DimensionRows) => this.refreshItems(t));
   }
 
-  refreshItems(type: DimensionRows = 'rgRow') {
+  refreshItems(type: RevoGrid.DimensionRows = 'rgRow') {
     const items = this.stores[type].store.get('items');
     this.stores[type].setData({ items: [...items] });
   }
 
-  setGrouping({ depth }: { depth: number }, type: DimensionRows = 'rgRow') {
+  setGrouping({ depth }: { depth: number }, type: RevoGrid.DimensionRows = 'rgRow') {
     this.stores[type].setData({ groupingDepth: depth });
   }
 
-  setTrimmed(trimmed: Partial<Trimmed>, type: DimensionRows = 'rgRow') {
+  setTrimmed(trimmed: Partial<Trimmed>, type: RevoGrid.DimensionRows = 'rgRow') {
     const store = this.stores[type];
     store.addTrimmed(trimmed);
     this.dimensionProvider.setTrimmed(trimmed, type);
