@@ -6,7 +6,7 @@ import { getRange } from '../../store/selection/selection.helpers';
 import { isGroupingColumn } from '../../plugins/groupingRow/grouping.service';
 import { slice } from 'lodash';
 
-export type ColumnSource = Observable<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
+export type ColumnSource<T = RevoGrid.ColumnRegular> = Observable<DataSourceState<T, RevoGrid.DimensionCols>>;
 export type RowSource = Observable<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
 
 export type ColumnStores = {
@@ -188,6 +188,7 @@ export default class ColumnService {
             mapping[rowIndex] = {};
           }
           mapping[rowIndex][prop] = {
+            colIndex: copyColIndex,
             colProp: copyColumnProp,
             rowIndex: oldRowIndex
           };

@@ -236,6 +236,7 @@ export class AutoFillService {
     const oldRange = this.sv.selectionStoreService.ranged;
     const rangeData: Selection.ChangedRange = {
       type: this.sv.dataStore.get('type'),
+      colType: this.sv.columnService.type,
       newData: {},
       mapping: {},
       newRange,

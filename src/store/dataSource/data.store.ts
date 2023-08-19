@@ -66,7 +66,7 @@ export default class DataStore<T extends GDataType, ST extends GDimension> {
     });
     // update data items
     this.store.set('items', items);
-    // apply grooping if present
+    // apply grouping if present
     if (grouping) {
       setStore(this.store, {
         groupingDepth: grouping.depth,

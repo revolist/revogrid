@@ -1,6 +1,6 @@
 {
   "name": "@revolist/revogrid",
-  "version": "4.6.0-next.4",
+  "version": "4.6.0-next.7",
   "description": "Virtual reactive data grid component - RevoGrid.",
   "license": "MIT",
   "directories": {
@@ -61,36 +61,36 @@
     "prettier": "npx prettier --write ./src"
   },
   "devDependencies": {
-    "@angular/core": "^16.1.1",
+    "@angular/core": "^16.2.1",
     "@juggle/resize-observer": "^3.4.0",
     "@revolist/stencil-vue2-output-target": "^0.0.3",
-    "@stencil/angular-output-target": "0.7.1",
+    "@stencil/angular-output-target": "0.8.1",
     "@stencil/react-output-target": "0.5.3",
-    "@stencil/sass": "^3.0.4",
-    "@stencil/store": "^2.0.8",
+    "@stencil/sass": "^3.0.5",
+    "@stencil/store": "^2.0.9",
     "@stencil/svelte-output-target": "0.0.3",
     "@stencil/vue-output-target": "^0.8.6",
     "@types/events": "^3.0.0",
-    "@types/jest": "^29.5.1",
-    "@types/lodash": "^4.14.195",
-    "@types/node": "^18.15.11",
-    "@types/react": "^18.2.12",
-    "@types/react-dom": "^18.2.5",
+    "@types/jest": "^29.5.3",
+    "@types/lodash": "^4.14.197",
+    "@types/node": "^20.5.1",
+    "@types/react": "^18.2.20",
+    "@types/react-dom": "^18.2.7",
     "@types/resize-observer-browser": "^0.1.7",
-    "gh-pages": "^5.0.0",
+    "gh-pages": "^6.0.0",
     "jest": "26.0.1",
     "jest-cli": "26.0.1",
-    "prettier": "2.8.8",
+    "prettier": "3.0.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "rxjs": "^7.8.1",
-    "svelte": "^3.59.1",
-    "typescript": "^5.1.3",
+    "svelte": "^4.2.0",
     "vue": "^3.3.4",
-    "bootstrap": "^5.3.0"
+    "bootstrap": "^5.3.1",
+    "typescript": "^5.1.3"
   },
   "dependencies": {
-    "@stencil/core": "^4.0.1",
+    "@stencil/core": "^4.0.5",
     "lodash": "^4.17.21"
   }
 }

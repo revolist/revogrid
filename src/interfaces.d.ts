@@ -74,24 +74,26 @@ export declare namespace RevoGrid {
   }
   type Order = 'asc' | 'desc' | undefined;
   interface ColumnRegular extends ColumnType {
-    /** mapping to data */
+    // mapping to data, it's object keys/props, @required used for indexing
     prop: ColumnProp;
-    /** column pin 'colPinStart'|'colPinEnd' */
+    // column pin 'colPinStart'|'colPinEnd'
     pin?: DimensionColPin;
-    /** column header */
+    // column header
     name?: DataFormat;
-    /** is column can be sorted */
+    // is column can be sorted
     sortable?: boolean;
-    /** column size would be changed based on content size */
+    // column size would be changed based on content size
     autoSize?: boolean;
-    /** filter */
+    // filter
     filter?: boolean | string | string[];
     order?: Order;
-    /** is cell in column or individual can be dragged */
+    // is cell in column or individual can be dragged
     rowDrag?: RowDrag;
-    /** represents type defined in @columnTypes property */
+    // represents type defined in @columnTypes property
     columnType?: string;
+    // called before column applied to the store
     beforeSetup?(rgCol: ColumnRegular): void;
+    // other keys
     [key: string]: any;
   }
   type ColumnDataSchema = ColumnGrouping | ColumnRegular;
@@ -101,6 +103,7 @@ export declare namespace RevoGrid {
     index: number;
   };
   type ColumnPropProp = ColumnGrouping | ColumnTemplateProp;
+  // Regularly all column are indexed by prop
   type ColumnProp = string | number;
   type DataFormat = any;
   type CellProp = string | number | object | boolean | undefined;
@@ -264,12 +267,14 @@ export declare namespace Selection {
     [rowIndex: number]: {
       [T in RevoGrid.ColumnProp]: {
         rowIndex: number;
+        colIndex: number;
         colProp: RevoGrid.ColumnProp;
       };
     };
   };
   type ChangedRange = {
     type: RevoGrid.DimensionRows;
+    colType: RevoGrid.DimensionCols;
     newRange: RangeArea;
     oldRange: RangeArea;
     mapping: OldNewRangeMapping;
