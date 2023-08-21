@@ -50,7 +50,7 @@ enum codes {
   X = 88,
 }
 
-enum codesLetter {
+export enum codesLetter {
   ENTER = 'Enter',
   ENTER_NUM = 'NumpadEnter',
   A = 'KeyA',
@@ -68,5 +68,9 @@ enum codesLetter {
   SHIFT = 'Shift',
 }
 
+export enum keyValues {
+  ENTER = 'Enter', // Enter + NumpadEnter
+  TAB = 'Tab',
+}
+
 export default codes;
-export { codesLetter };

@@ -5,7 +5,7 @@ import {
   isClear,
   isCopy,
   isCut,
-  isEnterKey,
+  isEnterKeyValue,
   isLetterKey,
   isPaste,
 } from '../../utils/key.utils';
@@ -78,12 +78,12 @@ export class KeyboardService {
 
     // tab key means same as arrow right
     if (codesLetter.TAB === e.code) {
-      this.keyChangeSelection(e, canRange);
+      await this.keyChangeSelection(e, canRange);
       return;
     }
 
     // pressed enter
-    if (isEnterKey(e.code)) {
+    if (isEnterKeyValue(e.key)) {
       this.sv.change();
       return;
     }

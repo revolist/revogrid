@@ -1,4 +1,4 @@
-import KeyCodesEnum, { codesLetter } from './key.codes';
+import KeyCodesEnum, { codesLetter, keyValues } from './key.codes';
 import OsPlatform from './platform';
 import includes from 'lodash/includes';
 
@@ -52,14 +52,29 @@ export function isMetaKey(code: number): boolean {
 // navigator.platform
 export function isCtrlKey(code: number, platform: string): boolean {
   if (platform.includes(OsPlatform.mac)) {
-    return includes([KeyCodesEnum.COMMAND_LEFT, KeyCodesEnum.COMMAND_RIGHT, KeyCodesEnum.COMMAND_FIREFOX], code);
+    return includes(
+      [
+        KeyCodesEnum.COMMAND_LEFT,
+        KeyCodesEnum.COMMAND_RIGHT,
+        KeyCodesEnum.COMMAND_FIREFOX,
+      ],
+      code,
+    );
   }
 
   return KeyCodesEnum.CONTROL === code;
 }
 
 export function isCtrlMetaKey(code: KeyCodesEnum): boolean {
-  return includes([KeyCodesEnum.CONTROL, KeyCodesEnum.COMMAND_LEFT, KeyCodesEnum.COMMAND_RIGHT, KeyCodesEnum.COMMAND_FIREFOX], code);
+  return includes(
+    [
+      KeyCodesEnum.CONTROL,
+      KeyCodesEnum.COMMAND_LEFT,
+      KeyCodesEnum.COMMAND_RIGHT,
+      KeyCodesEnum.COMMAND_FIREFOX,
+    ],
+    code,
+  );
 }
 
 export function isClear(code: string): boolean {
@@ -69,24 +84,35 @@ export function isClear(code: string): boolean {
 export function isTab(code: string): boolean {
   return codesLetter.TAB === code;
 }
+export function isTabKeyValue(key: string): boolean {
+  return keyValues.TAB === key;
+}
 
-export function isEnterKey(code: string): boolean {
-  return code === codesLetter.ENTER || code === codesLetter.ENTER_NUM;
+export function isEnterKeyValue(key: string): boolean {
+  return keyValues.ENTER === key;
 }
 
 export function isCut(event: KeyboardEvent): boolean {
-  return (event.ctrlKey && event.code === 'KeyX') || // Ctrl + X on Windows
-  (event.metaKey && event.code === 'KeyX');   // Cmd + X on Mac
+  return (
+    (event.ctrlKey && event.code === 'KeyX') || // Ctrl + X on Windows
+    (event.metaKey && event.code === 'KeyX')
+  ); // Cmd + X on Mac
 }
 export function isCopy(event: KeyboardEvent): boolean {
-  return (event.ctrlKey && event.code === 'KeyC') || // Ctrl + C on Windows
-    (event.metaKey && event.code === 'KeyC');   // Cmd + C on Mac
+  return (
+    (event.ctrlKey && event.code === 'KeyC') || // Ctrl + C on Windows
+    (event.metaKey && event.code === 'KeyC')
+  ); // Cmd + C on Mac
 }
 export function isPaste(event: KeyboardEvent): boolean {
-  return (event.ctrlKey && event.code === 'KeyV') || // Ctrl + V on Windows
-  (event.metaKey && event.code === 'KeyV');   // Cmd + V on Mac
+  return (
+    (event.ctrlKey && event.code === 'KeyV') || // Ctrl + V on Windows
+    (event.metaKey && event.code === 'KeyV')
+  ); // Cmd + V on Mac
 }
 export function isAll(event: KeyboardEvent): boolean {
-  return  (event.ctrlKey && event.code === 'KeyA') || // Ctrl + A on Windows
-  (event.metaKey && event.code === 'KeyA');   // Cmd + A on Mac
+  return (
+    (event.ctrlKey && event.code === 'KeyA') || // Ctrl + A on Windows
+    (event.metaKey && event.code === 'KeyA')
+  ); // Cmd + A on Mac
 }

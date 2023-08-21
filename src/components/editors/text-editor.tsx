@@ -1,5 +1,5 @@
 import { VNode, h as createElement } from '@stencil/core';
-import { isEnterKey, isTab } from '../../utils/key.utils';
+import { isEnterKeyValue, isTab } from '../../utils/key.utils';
 import { timeout } from '../../utils';
 import { ColumnRegular } from '@type';
 import { EditCell, EditorBase, SaveData } from '@type';
@@ -40,8 +40,8 @@ export class TextEditor implements EditorBase {
   }
 
   private onKeyDown(e: KeyboardEvent) {
-    const isEnter = isEnterKey(e.code);
-    const isKeyTab = isTab(e.code);
+    const isEnter = isEnterKeyValue(e.key);
+    const isKeyTab = isTab(e.key);
 
     if (
       (isKeyTab || isEnter) &&
@@ -82,6 +82,7 @@ export class TextEditor implements EditorBase {
   render(h: typeof createElement, _additionalData: any): VNode | VNode[] {
     return h('input', {
       type: 'text',
+      enterKeyHint: 'enter',
       // set input value from cell data
       value: this.editCell?.val || '',
       // save input element as ref for further usage
