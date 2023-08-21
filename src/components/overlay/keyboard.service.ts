@@ -2,7 +2,7 @@ import { Observable, Selection } from '../../interfaces';
 import { getRange } from '../../store/selection/selection.helpers';
 import SelectionStoreService from '../../store/selection/selection.store.service';
 import { codesLetter } from '../../utils/keyCodes';
-import { isClear, isCtrlKey, isEnterKey, isLetterKey } from '../../utils/keyCodes.utils';
+import { isClear, isCtrlKey, isEnterKeyValue, isLetterKey } from '../../utils/keyCodes.utils';
 import { timeout } from '../../utils/utils';
 import { EventData, getCoordinate, isAfterLast, isBeforeFirst } from './selection.utils';
 
@@ -58,7 +58,7 @@ export class KeyboardService {
     }
 
     // pressed enter
-    if (isEnterKey(e.code)) {
+    if (isEnterKeyValue(e.key)) {
       this.sv.doEdit();
       return;
     }

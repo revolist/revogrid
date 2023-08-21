@@ -1,5 +1,5 @@
 import { h } from '@stencil/core';
-import { isEnterKey, isTab } from '../../../utils/keyCodes.utils';
+import { isEnterKey, isEnterKeyValue, isTab, isTabKeyValue } from '../../../utils/keyCodes.utils';
 import { Edition, RevoGrid } from '../../../interfaces';
 import { timeout } from '../../../utils/utils';
 
@@ -26,8 +26,8 @@ export class TextEditor implements Edition.EditorBase {
   }
 
   private onKeyDown(e: KeyboardEvent): void {
-    const isEnter = isEnterKey(e.code);
-    const isKeyTab = isTab(e.code);
+    const isEnter = isEnterKeyValue(e.key);
+    const isKeyTab = isTabKeyValue(e.key);
 
     if ((isKeyTab || isEnter) && e.target && this.saveCallback && !e.isComposing) {
       // blur is needed to avoid autoscroll
@@ -42,6 +42,7 @@ export class TextEditor implements Edition.EditorBase {
     return (
       <input
         type="text"
+        enterkeyhint="enter"
         value={this.editCell?.val || ''}
         ref={el => {
           this.editInput = el;
