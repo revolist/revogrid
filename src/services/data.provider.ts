@@ -25,12 +25,16 @@ export class DataProvider {
   setData(
     data: RevoGrid.DataType[],
     type: RevoGrid.DimensionRows = 'rgRow',
+    disableVirtualRows = false,
     grouping?: { depth: number; groups?: Groups, customRenderer?: GroupLabelTemplateFunc },
     silent = false,
   ): RevoGrid.DataType[] {
     // set rgRow data
     this.stores[type].updateData([...data], grouping, silent);
-    this.dimensionProvider.setData(data.length, type, type !== 'rgRow');
+
+    // for pinned row no need virtual data
+    const noVirtual = type !== 'rgRow' || disableVirtualRows;
+    this.dimensionProvider.setData(data.length, type, noVirtual);
     return data;
   }
 

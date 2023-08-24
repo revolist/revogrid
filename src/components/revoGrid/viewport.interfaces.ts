@@ -20,7 +20,9 @@ export type ViewportColumn = {
   dimensions: DimensionStores;
 
   rowStores: RowDataSources;
-  colStore: Observable<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
+  colStore: Observable<
+    DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>
+  >;
 } & Partial<JSX.RevogrViewportScroll> &
   Partial<JSX.RevogrHeader>;
 
@@ -30,9 +32,13 @@ export type ViewportData = {
 
   /** Viewport data position. Position provides connection between independent data stores and Selection store. */
   position: Selection.Cell;
-  colData: Observable<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
+  colData: Observable<
+    DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>
+  >;
 
-  dataStore: Observable<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
+  dataStore: Observable<
+    DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>
+  >;
 
   /** Stores to pass dimension data for render */
   dimensionRow: Observable<RevoGrid.DimensionSettingsState>;
@@ -61,7 +67,9 @@ export type ViewportData = {
   onUnregister?(): void;
   onSetRange?(e: CustomEvent<Selection.RangeArea>): void;
   onSetTempRange?(e: CustomEvent<Selection.TempRange | null>): void;
-  onFocusCell?(e: CustomEvent<{ focus: Selection.Cell; end: Selection.Cell }>): void;
+  onFocusCell?(
+    e: CustomEvent<{ focus: Selection.Cell; end: Selection.Cell }>,
+  ): void;
 };
 
 export type ViewportProps = {

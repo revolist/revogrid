@@ -106,7 +106,7 @@ export default class DimensionProvider {
    */
 
   private setNoVirtual(type: RevoGrid.MultiDimensionType) {
-    const dimension: RevoGrid.DimensionSettingsState = this.stores[type].getCurrentState();
+    const dimension = this.stores[type].getCurrentState();
     this.viewports.stores[type].setViewport({ virtualSize: dimension.realSize });
   }
 

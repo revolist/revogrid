@@ -47,7 +47,7 @@ export namespace Components {
          */
         "addTrimmed": (trimmed: Record<number, boolean>, trimmedType?: string, type?: RevoGrid.DimensionRows) => Promise<CustomEvent<{ trimmed: Record<number, boolean>; trimmedType: string; type: string; }>>;
         /**
-          * Additional data to be passed to plugins
+          * Additional data to be passed to plugins, renders, editors
          */
         "additionalData": any;
         /**
@@ -86,6 +86,14 @@ export namespace Components {
           * Columns - defines an array of grid columns. Can be column or grouped column.
          */
         "columns": (RevoGrid.ColumnRegular | RevoGrid.ColumnGrouping)[];
+        /**
+          * Disable lazy rendering mode for the X axis Use when not many columns present and you don't need rerenader cells during scroll
+         */
+        "disableVirtualX": boolean;
+        /**
+          * Disable lazy rendering mode for the Y axis Use when not many rows present and you don't need rerenader cells during scroll
+         */
+        "disableVirtualY": boolean;
         /**
           * Custom editors register
          */
@@ -704,7 +712,7 @@ declare namespace LocalJSX {
      */
     interface RevoGrid {
         /**
-          * Additional data to be passed to plugins
+          * Additional data to be passed to plugins, renders, editors
          */
         "additionalData"?: any;
         /**
@@ -735,6 +743,14 @@ declare namespace LocalJSX {
           * Columns - defines an array of grid columns. Can be column or grouped column.
          */
         "columns"?: (RevoGrid.ColumnRegular | RevoGrid.ColumnGrouping)[];
+        /**
+          * Disable lazy rendering mode for the X axis Use when not many columns present and you don't need rerenader cells during scroll
+         */
+        "disableVirtualX"?: boolean;
+        /**
+          * Disable lazy rendering mode for the Y axis Use when not many rows present and you don't need rerenader cells during scroll
+         */
+        "disableVirtualY"?: boolean;
         /**
           * Custom editors register
          */
@@ -769,7 +785,9 @@ declare namespace LocalJSX {
         /**
           * After column resize Get resized columns
          */
-        "onAftercolumnresize"?: (event: RevoGridCustomEvent<{ [index: number]: RevoGrid.ColumnRegular }>) => void;
+        "onAftercolumnresize"?: (event: RevoGridCustomEvent<{
+    [index: number]: RevoGrid.ColumnRegular;
+  }>) => void;
         /**
           * Column updated
          */
@@ -784,7 +802,10 @@ declare namespace LocalJSX {
         /**
           * Triggered after focus render finished. Can be used to access a focus element through @event.target
          */
-        "onAfterfocus"?: (event: RevoGridCustomEvent<{ model: any; column: RevoGrid.ColumnRegular; }>) => void;
+        "onAfterfocus"?: (event: RevoGridCustomEvent<{
+    model: any;
+    column: RevoGrid.ColumnRegular;
+  }>) => void;
         /**
           * After rows updated
          */
@@ -842,7 +863,10 @@ declare namespace LocalJSX {
         /**
           * Before filter trimmed values Use e.preventDefault() to prevent value trimming and filter apply Update @collection if you wish to change filters Update @itemsToFilter if you wish to filter indexes of trimming
          */
-        "onBeforefiltertrimmed"?: (event: RevoGridCustomEvent<{ collection: FilterCollection; itemsToFilter: Record<number, boolean> }>) => void;
+        "onBeforefiltertrimmed"?: (event: RevoGridCustomEvent<{
+    collection: FilterCollection;
+    itemsToFilter: Record<number, boolean>;
+  }>) => void;
         /**
           * Before grid focus lost happened. Use e.preventDefault() to prevent cell focus change.
          */
@@ -854,7 +878,7 @@ declare namespace LocalJSX {
         /**
           * Before row definition
          */
-        "onBeforerowdefinition"?: (event: RevoGridCustomEvent<{ vals: any; oldVals: any; }>) => void;
+        "onBeforerowdefinition"?: (event: RevoGridCustomEvent<{ vals: any; oldVals: any }>) => void;
         /**
           * Before sorting event. Initial sorting triggered, if this event stops no other event called. Use e.preventDefault() to prevent sorting.
          */
@@ -885,7 +909,11 @@ declare namespace LocalJSX {
         /**
           * Before trimmed values Use e.preventDefault() to prevent value trimming Update @trimmed if you wish to filter indexes of trimming
          */
-        "onBeforetrimmed"?: (event: RevoGridCustomEvent<{ trimmed: Record<number, boolean>; trimmedType: string; type: string }>) => void;
+        "onBeforetrimmed"?: (event: RevoGridCustomEvent<{
+    trimmed: Record<number, boolean>;
+    trimmedType: string;
+    type: string;
+  }>) => void;
         /**
           * contentsizechanged event. Triggered when new content size applied. Not including header size Event is not returning size To get actual size use getContentSize after event triggered
          */
@@ -901,7 +929,10 @@ declare namespace LocalJSX {
         /**
           * Row order change started. Use e.preventDefault() to prevent rgRow order change. Use e.text = 'new name' to change item name on start.
          */
-        "onRowdragstart"?: (event: RevoGridCustomEvent<{ pos: RevoGrid.PositionItem; text: string }>) => void;
+        "onRowdragstart"?: (event: RevoGridCustomEvent<{
+    pos: RevoGrid.PositionItem;
+    text: string;
+  }>) => void;
         "onRowheaderschanged"?: (event: RevoGridCustomEvent<any>) => void;
         /**
           * Before rgRow order apply. Use e.preventDefault() to prevent rgRow order change.
