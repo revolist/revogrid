@@ -27,10 +27,10 @@ Rows, columns, groups and cells
 
 ## Events
 
-| Event             | Description                                       | Type               |
-| ----------------- | ------------------------------------------------- | ------------------ |
-| `afterrender`     | When data render finished for the designated type | `CustomEvent<any>` |
-| `beforeRowRender` | Before each row render                            | `CustomEvent<any>` |
+| Event             | Description                                       | Type                                     |
+| ----------------- | ------------------------------------------------- | ---------------------------------------- |
+| `afterrender`     | When data render finished for the designated type | `CustomEvent<any>`                       |
+| `beforerowrender` | Before each row render                            | `CustomEvent<BeforeRowRenderEvent<any>>` |
 
 
 ## Dependencies

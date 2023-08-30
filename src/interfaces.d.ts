@@ -371,10 +371,16 @@ export type DragStartEvent = {
   model: RevoGrid.ColumnDataSchemaModel;
 };
 
-export interface BeforeCellRenderEvent extends AllDimensionType {
+export interface BeforeCellRenderEvent<T = any> extends AllDimensionType {
   column: RevoGrid.VirtualPositionItem;
   row: RevoGrid.VirtualPositionItem;
-  model: any;
+  model: T;
+}
+
+export interface BeforeRowRenderEvent<T = any>  extends AllDimensionType {
+  dataItem: T;
+  item: RevoGrid.VirtualPositionItem;
+  node: VNode;
 }
 
 export type AfterRendererEvent = {

@@ -5,7 +5,7 @@
  * It contains typing information for all components that exist in this project.
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
-import { ApplyFocusEvent, BeforeCellRenderEvent, DragStartEvent, Edition, FocusRenderEvent, Observable, RevoGrid, RevoPlugin, Selection, ThemeSpace } from "./interfaces";
+import { ApplyFocusEvent, BeforeCellRenderEvent, BeforeRowRenderEvent, DragStartEvent, Edition, FocusRenderEvent, Observable, RevoGrid, RevoPlugin, Selection, ThemeSpace } from "./interfaces";
 import { AutoSizeColumnConfig } from "./plugins/autoSizeColumn";
 import { ColumnFilterConfig, FilterCaptions, FilterCollection } from "./plugins/filter/filter.plugin";
 import { GroupingOptions } from "./plugins/groupingRow/grouping.row.types";
@@ -20,7 +20,7 @@ import { DataSourceState, Groups } from "./store/dataSource/data.store";
 import { ResizeProps } from "./services/resizable.directive";
 import { ViewportData } from "./components/revoGrid/viewport.interfaces";
 import { ElementScroll } from "./components/revoGrid/viewport.scrolling.service";
-export { ApplyFocusEvent, BeforeCellRenderEvent, DragStartEvent, Edition, FocusRenderEvent, Observable, RevoGrid, RevoPlugin, Selection, ThemeSpace } from "./interfaces";
+export { ApplyFocusEvent, BeforeCellRenderEvent, BeforeRowRenderEvent, DragStartEvent, Edition, FocusRenderEvent, Observable, RevoGrid, RevoPlugin, Selection, ThemeSpace } from "./interfaces";
 export { AutoSizeColumnConfig } from "./plugins/autoSizeColumn";
 export { ColumnFilterConfig, FilterCaptions, FilterCollection } from "./plugins/filter/filter.plugin";
 export { GroupingOptions } from "./plugins/groupingRow/grouping.row.types";
@@ -1137,7 +1137,7 @@ declare namespace LocalJSX {
         /**
           * Before each row render
          */
-        "onBeforeRowRender"?: (event: RevogrDataCustomEvent<any>) => void;
+        "onBeforerowrender"?: (event: RevogrDataCustomEvent<BeforeRowRenderEvent>) => void;
         /**
           * Range selection mode
          */

@@ -15,7 +15,7 @@ import ColumnService, { ColumnSource, RowSource } from './columnService';
 import { ROW_FOCUSED_CLASS } from '../../utils/consts';
 
 import { getSourceItem } from '../../store/dataSource/data.store';
-import { Observable, RevoGrid, Selection } from '../../interfaces';
+import { BeforeRowRenderEvent, Observable, RevoGrid, Selection } from '../../interfaces';
 import RowRenderer from './rowRenderer';
 import GroupingRowRenderer from '../../plugins/groupingRow/grouping.row.renderer';
 import { isGrouping } from '../../plugins/groupingRow/grouping.service';
@@ -65,7 +65,7 @@ export class RevogrData {
   /**
    * Before each row render
    */
-  @Event() beforeRowRender: EventEmitter;
+  @Event() beforerowrender: EventEmitter<BeforeRowRenderEvent>;
   /**
    * When data render finished for the designated type
    */
@@ -199,7 +199,7 @@ export class RevogrData {
           />,
         );
       }
-      const row = (
+      const row: VNode = (
         <RowRenderer
           index={rgRow.itemIndex}
           rowClass={rowClass}
@@ -209,10 +209,12 @@ export class RevogrData {
           {cells}
         </RowRenderer>
       );
-      this.beforeRowRender.emit({
+      this.beforerowrender.emit({
         node: row,
         item: rgRow,
         dataItem,
+        colType: this.columnService.type,
+        rowType: this.type,
       });
       rowsEls.push(row);
       this.renderedRows.set(rgRow.itemIndex, row);
