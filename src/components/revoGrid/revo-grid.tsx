@@ -219,6 +219,14 @@ export class RevoGridComponent {
    */
   @Prop() disableVirtualY = false;
 
+
+  /**
+   * Prevents rendering until job is done.
+   * Can be used for initial rendering performance improvement.
+   * When several plugins require initial rendering this will prevent double initial rendering.
+   */
+  @Prop() jobsBeforeRender: Promise<any>[] = [];
+
   // --------------------------------------------------------------------------
   //
   //  Events
@@ -1062,6 +1070,10 @@ export class RevoGridComponent {
     rowHeaders?: RevoGrid.RowHeaders | boolean,
   ) {
     this.rowheaderschanged.emit(rowHeaders);
+  }
+
+  componentWillRender() {
+    return Promise.all(this.jobsBeforeRender);
   }
 
   connectedCallback() {

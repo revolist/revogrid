@@ -34,6 +34,17 @@ Type: `Promise<ViewPortScrollEvent>`
 
 
 
+### `onScroll(type: RevoGrid.DimensionType, e: UIEvent) => Promise<void>`
+
+Extra layer for scroll event monitoring, where MouseWheel event is not passing
+We need to trigger scroll event in case there is no mousewheel event
+
+#### Returns
+
+Type: `Promise<void>`
+
+
+
 ### `setScroll(e: RevoGrid.ViewPortScrollEvent) => Promise<void>`
 
 

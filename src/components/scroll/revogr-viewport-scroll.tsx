@@ -337,7 +337,7 @@ export class RevogrViewportScroll {
    * Extra layer for scroll event monitoring, where MouseWheel event is not passing
    * We need to trigger scroll event in case there is no mousewheel event
    */
-  private onScroll(type: RevoGrid.DimensionType, e: UIEvent) {
+  @Method() onScroll(type: RevoGrid.DimensionType, e: UIEvent) {
     if (!(e.target instanceof HTMLElement)) {
       return;
     }

@@ -158,6 +158,10 @@ export namespace Components {
          */
         "grouping": GroupingOptions;
         /**
+          * Prevents rendering until job is done. Can be used for initial rendering performance improvement. When several plugins require initial rendering this will prevent double initial rendering.
+         */
+        "jobsBeforeRender": Promise<any>[];
+        /**
           * Pinned bottom Source: {[T in ColumnProp]: any} - defines pinned bottom rows data source.
          */
         "pinnedBottomSource": RevoGrid.DataType[];
@@ -320,6 +324,10 @@ export namespace Components {
         "colData": ColumnSource;
         "dataStore": RowSource;
         "dimensionRow": Observable<RevoGrid.DimensionSettingsState>;
+        /**
+          * Prevents rendering until job is done. Can be used for initial rendering performance improvement. When several plugins require initial rendering this will prevent double initial rendering.
+         */
+        "jobsBeforeRender": Promise<any>[];
         /**
           * Range selection mode
          */
@@ -523,6 +531,10 @@ export namespace Components {
           * Width of inner content
          */
         "contentWidth": number;
+        /**
+          * Extra layer for scroll event monitoring, where MouseWheel event is not passing We need to trigger scroll event in case there is no mousewheel event
+         */
+        "onScroll": (type: RevoGrid.DimensionType, e: UIEvent) => Promise<void>;
         "rowHeader": boolean;
         "setScroll": (e: RevoGrid.ViewPortScrollEvent) => Promise<void>;
     }
@@ -775,6 +787,10 @@ declare namespace LocalJSX {
           * Group models by provided properties Define properties to be groped by
          */
         "grouping"?: GroupingOptions;
+        /**
+          * Prevents rendering until job is done. Can be used for initial rendering performance improvement. When several plugins require initial rendering this will prevent double initial rendering.
+         */
+        "jobsBeforeRender"?: Promise<any>[];
         /**
           * After all rows updated. Use it if you want to track all changes from sources pinned and main
          */
@@ -1130,6 +1146,10 @@ declare namespace LocalJSX {
         "colData": ColumnSource;
         "dataStore": RowSource;
         "dimensionRow": Observable<RevoGrid.DimensionSettingsState>;
+        /**
+          * Prevents rendering until job is done. Can be used for initial rendering performance improvement. When several plugins require initial rendering this will prevent double initial rendering.
+         */
+        "jobsBeforeRender"?: Promise<any>[];
         /**
           * When data render finished for the designated type
          */
