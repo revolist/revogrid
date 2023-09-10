@@ -66,5 +66,11 @@ enum codesLetter {
   SHIFT = 'Shift',
 }
 
+enum keyValues {
+  ENTER = 'Enter', // Enter + NumpadEnter
+  TAB = 'Tab',
+}
+
 export default codes;
 export { codesLetter };
+export { keyValues };

@@ -1,4 +1,4 @@
-import KeyCodesEnum, { codesLetter } from './keyCodes';
+import KeyCodesEnum, { codesLetter, keyValues } from './keyCodes';
 import OsPlatform from './platform';
 import includes from 'lodash/includes';
 
@@ -70,6 +70,15 @@ export function isTab(code: string): boolean {
   return codesLetter.TAB === code;
 }
 
+// does not work with virtual keyboard on android
 export function isEnterKey(code: string): boolean {
   return code === codesLetter.ENTER || code === codesLetter.ENTER_NUM;
+}
+
+export function isTabKeyValue (key: string): boolean {
+  return keyValues.TAB === key;
+}
+
+export function isEnterKeyValue (key: string): boolean {
+  return keyValues.ENTER === key;
 }
