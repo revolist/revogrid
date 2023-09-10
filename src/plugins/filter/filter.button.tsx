@@ -38,8 +38,8 @@ export const TrashButton = () => {
     </div>
   );
 };
-export const AndOrButton = ({ isAnd }: any) => {
-  return <button class={{ [AND_OR_BUTTON]: true, 'light revo-button': true }}>{isAnd ? 'and' : 'or'}</button>;
+export const AndOrButton = ({ text }: any) => {
+  return <button class={{ [AND_OR_BUTTON]: true, 'light revo-button': true }}>{text}</button>;
 };
 
 export function isFilterBtn(e: HTMLElement) {

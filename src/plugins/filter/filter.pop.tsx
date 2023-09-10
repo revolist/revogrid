@@ -52,6 +52,10 @@ export class FilterPanel {
     save: 'Save',
     reset: 'Reset',
     cancel: 'Close',
+    add: 'Add more condition...',
+    placeholder: 'Enter value...',
+    and: 'and',
+    or: 'or',
   };
   @State() isFilterIdSet = false;
   @State() filterId = 0;
@@ -101,9 +105,11 @@ export class FilterPanel {
     const prop = this.changes?.prop;
 
     if (!isDefaultTypeRemoved) {
+      const capts = Object.assign(this.filterCaptionsInternal, this.filterCaptions);
+
       options.push(
         <option selected={this.currentFilterType === defaultType} value={defaultType}>
-          {prop && this.filterItems[prop] && this.filterItems[prop].length > 0 ? 'Add more condition...' : this.filterNames[defaultType]}
+          {prop && this.filterItems[prop] && this.filterItems[prop].length > 0 ? capts.add : this.filterNames[defaultType]}
         </option>,
       );
     }
@@ -128,10 +134,12 @@ export class FilterPanel {
 
     if (this.filterEntities[currentFilter[index].type].extra !== 'input') return '';
 
+    const capts = Object.assign(this.filterCaptionsInternal, this.filterCaptions);
+
     return (
       <input
         id={`filter-input-${currentFilter[index].id}`}
-        placeholder="Enter value..."
+        placeholder={capts.placeholder}
         type="text"
         value={currentFilter[index].value}
         onInput={this.onUserInput.bind(this, index, prop)}
@@ -145,6 +153,7 @@ export class FilterPanel {
     if (!(prop || prop === 0)) return '';
 
     const propFilters = this.filterItems[prop] || [];
+    const capts = Object.assign(this.filterCaptionsInternal, this.filterCaptions);
     return (
       <div key={this.filterId}>
         {propFilters.map((d, index) => {
@@ -154,7 +163,7 @@ export class FilterPanel {
           if (index !== this.filterItems[prop].length - 1) {
             andOrButton = (
               <div onClick={() => this.toggleFilterAndOr(d.id)}>
-                <AndOrButton isAnd={d.relation === 'and'} />
+                <AndOrButton text={d.relation === 'and' ? capts.and : capts.or} />
               </div>
             );
           }
