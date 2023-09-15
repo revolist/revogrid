@@ -8,8 +8,9 @@ export class Clipboard {
   @Listen('paste', { target: 'document' }) onPaste(e: ClipboardEvent) {
     const clipboardData = this.getData(e);
     const isHTML = clipboardData.types.indexOf('text/html') > -1;
-    const data = isHTML ? clipboardData.getData('text/html') : clipboardData.getData('text');
-    const parsedData = isHTML ? this.htmlParse(data) : this.textParse(data);
+    const canBeParsedAsHtml = isHTML ? this.canBeParsedAsHTML(clipboardData.getData('text/html')) : false;
+    const data = canBeParsedAsHtml ? clipboardData.getData('text/html') : clipboardData.getData('text');
+    const parsedData = canBeParsedAsHtml ? this.htmlParse(data) : this.textParse(data);
     this.pasteRegion.emit(parsedData);
     e.preventDefault();
   }
@@ -41,6 +42,10 @@ export class Clipboard {
       result.push(Array.from(rgRow.cells).map(cell => cell.innerText));
     }
     return result;
+  }
+
+  private canBeParsedAsHTML (data: string) {
+    return document.createRange().createContextualFragment(data).querySelector('table') !== null
   }
 
   private getData(e: ClipboardEvent) {
