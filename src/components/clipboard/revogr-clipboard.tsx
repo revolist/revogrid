@@ -101,6 +101,7 @@ export class Clipboard {
     // if html, then search for table if no table fallback to regular text parsing
     if (beforePaste.detail.isHTML) {
       const table = this.htmlParse(beforePaste.detail.raw);
+      // fallback to text if not possible to parse as html
       parsedData = table || this.textParse(dataText);
     } else {
       parsedData = this.textParse(beforePaste.detail.raw);
