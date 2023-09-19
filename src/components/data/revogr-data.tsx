@@ -63,13 +63,6 @@ export class RevogrData {
   @Prop() type!: RevoGrid.DimensionRows;
 
   /**
-   * Prevents rendering until job is done.
-   * Can be used for initial rendering performance improvement.
-   * When several plugins require initial rendering this will prevent double initial rendering.
-   */
-  @Prop() jobsBeforeRender: Promise<any>[] = [];
-
-  /**
    * Before each row render
    */
   @Event() beforerowrender: EventEmitter<BeforeRowRenderEvent>;
@@ -133,10 +126,6 @@ export class RevogrData {
       }
       this.currentRange = e;
     });
-  }
-
-  componentWillRender() {
-    return Promise.all(this.jobsBeforeRender);
   }
 
   connectedCallback() {

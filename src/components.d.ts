@@ -325,10 +325,6 @@ export namespace Components {
         "dataStore": RowSource;
         "dimensionRow": Observable<RevoGrid.DimensionSettingsState>;
         /**
-          * Prevents rendering until job is done. Can be used for initial rendering performance improvement. When several plugins require initial rendering this will prevent double initial rendering.
-         */
-        "jobsBeforeRender": Promise<any>[];
-        /**
           * Range selection mode
          */
         "range": boolean;
@@ -1146,10 +1142,6 @@ declare namespace LocalJSX {
         "colData": ColumnSource;
         "dataStore": RowSource;
         "dimensionRow": Observable<RevoGrid.DimensionSettingsState>;
-        /**
-          * Prevents rendering until job is done. Can be used for initial rendering performance improvement. When several plugins require initial rendering this will prevent double initial rendering.
-         */
-        "jobsBeforeRender"?: Promise<any>[];
         /**
           * When data render finished for the designated type
          */
