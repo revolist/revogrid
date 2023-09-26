@@ -1,5 +1,5 @@
 import { Component, Listen, Method, Event, EventEmitter, Prop } from '@stencil/core';
-import { RevoGrid } from '../../interfaces';
+import { DataFormat } from '../../types/interfaces';
 
 @Component({ tag: 'revogr-clipboard' })
 export class Clipboard {
@@ -169,7 +169,7 @@ export class Clipboard {
     e.preventDefault();
   }
 
-  @Method() async doCopy(e: DataTransfer, data?: RevoGrid.DataFormat[][]) {
+  @Method() async doCopy(e: DataTransfer, data?: DataFormat[][]) {
     const beforeCopyApply = this.beforeCopyApply.emit({
       event: e,
       data,
@@ -181,7 +181,7 @@ export class Clipboard {
     e.setData('text/plain', parsed);
   }
 
-  parserCopy(data: RevoGrid.DataFormat[][]) {
+  parserCopy(data: DataFormat[][]) {
     return data.map(rgRow => rgRow.join('\t')).join('\n');
   }
 

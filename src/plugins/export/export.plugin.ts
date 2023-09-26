@@ -1,12 +1,13 @@
 import fill from 'lodash/fill';
-import { RevoGrid } from '../../interfaces';
 import { Group, Groups } from '../../store/dataSource/data.store';
 import { ColSource, CSVFormat, DataInput, Formatter } from './types';
 
 import { columnTypes, rowTypes } from '../../store/storeTypes';
 import { timeout } from '../../utils';
-import BasePlugin from '../basePlugin';
+import { BasePlugin } from '../base.plugin';
 import ExportCsv from './csv';
+import { DimensionCols } from '../..';
+import { ColumnProp, DataType } from '../..';
 
 enum ExportTypes {
   csv = 'csv',
@@ -104,15 +105,15 @@ export default class ExportFilePlugin extends BasePlugin {
     };
   }
 
-  private async getColPerSource(t: RevoGrid.DimensionCols) {
+  private async getColPerSource(t: DimensionCols) {
     const store = await this.revogrid.getColumnStore(t);
     const source = store.get('source');
     const virtualIndexes = store.get('items');
     const depth = store.get('groupingDepth');
     const groups = store.get('groups');
     const colNames: string[] = [];
-    const colProps: RevoGrid.ColumnProp[] = [];
-    const visibleItems = virtualIndexes.reduce((r: Record<string, number>, v, virtualIndex) => {
+    const colProps: ColumnProp[] = [];
+    const visibleItems = virtualIndexes.reduce((r: Record<string, number>, v: number, virtualIndex: number) => {
       const prop = source[v].prop;
       colNames.push(source[v].name || '');
       colProps.push(prop);
@@ -163,12 +164,12 @@ export default class ExportFilePlugin extends BasePlugin {
   }
 
   private async getSource() {
-    const data: RevoGrid.DataType[][] = [];
+    const data: DataType[][] = [];
     const promisesData: Promise<number>[] = [];
     rowTypes.forEach(t => {
-      const dataPart: RevoGrid.DataType[] = [];
+      const dataPart: DataType[] = [];
       data.push(dataPart);
-      const promise = this.revogrid.getVisibleSource(t).then((d: RevoGrid.DataType[]) => dataPart.push(...d));
+      const promise = this.revogrid.getVisibleSource(t).then((d: DataType[]) => dataPart.push(...d));
       promisesData.push(promise);
     });
     await Promise.all(promisesData);

@@ -1,17 +1,18 @@
-import { Observable, RevoGrid, Selection } from '../../interfaces';
+import reduce from 'lodash/reduce';
+
 import DimensionProvider from '../../services/dimension.provider';
 import SelectionStoreConnector, {
   EMPTY_INDEX,
 } from '../../services/selection.store.connector';
 import ViewportProvider from '../../services/viewport.provider';
 import {
-  DataSourceState,
+  DSourceState,
   getSourceItem,
   getVisibleSourceItem,
 } from '../../store/dataSource/data.store';
 import { columnTypes, rowTypes } from '../../store/storeTypes';
 import { UUID } from '../../utils/consts';
-import { OrdererService } from '../order/orderRenderer';
+import { OrdererService } from '../order/order-renderer';
 import GridScrollingService from './viewport.scrolling.service';
 import {
   CONTENT_SLOT,
@@ -19,18 +20,26 @@ import {
   getLastCell,
   HEADER_SLOT,
 } from './viewport.helpers';
+
+import ColumnDataProvider from '../../services/column.data.provider';
+import { DataProvider } from '../../services/data.provider';
+import {
+  ColumnRegular,
+  Observable,
+  ViewPortResizeEvent,
+  ViewSettingSizeProp,
+} from '../..';
+import { DimensionCols, DimensionRows } from '../..';
 import {
   HeaderProperties,
   SlotType,
   ViewportColumn,
   ViewportData,
   ViewportProps,
-} from './viewport.interfaces';
-import ColumnDataProvider from '../../services/column.data.provider';
-import { DataProvider } from '../../services/data.provider';
-import { reduce } from 'lodash';
+} from '../../types/viewport.interfaces';
+import { Cell, RangeArea } from '../..';
 
-export type ResizeDetails = { [index: number]: RevoGrid.ColumnRegular };
+export type ResizeDetails = { [index: number]: ColumnRegular };
 type Config = {
   columnProvider: ColumnDataProvider;
   dataProvider: DataProvider;
@@ -49,10 +58,10 @@ type Config = {
 
 export type FocusedData = {
   model: any;
-  cell: Selection.Cell;
-  colType: RevoGrid.DimensionCols;
-  rowType: RevoGrid.DimensionRows;
-  column?: RevoGrid.ColumnRegular;
+  cell: Cell;
+  colType: DimensionCols;
+  rowType: DimensionRows;
+  column?: ColumnRegular;
 };
 
 /** Collect Column data */
@@ -128,9 +137,7 @@ export default class ViewportService {
         onHeaderresize: e => this.onColumnResize(val, e, colStore),
       };
       if (val === 'rgCol') {
-        column.onResizeViewport = (
-          e: CustomEvent<RevoGrid.ViewPortResizeEvent>,
-        ) => {
+        column.onResizeViewport = (e: CustomEvent<ViewPortResizeEvent>) => {
           if (config.disableVirtualY && e.detail.dimension === 'rgRow') {
             return;
           } else if (config.disableVirtualX && e.detail.dimension === 'rgCol') {
@@ -139,7 +146,7 @@ export default class ViewportService {
           config.viewportProvider?.setViewport(e.detail.dimension, {
             virtualSize: e.detail.size,
           });
-        }
+        };
       }
       const colData = gatherColumnData(column);
       const columnSelectionStore = this.registerCol(colData.position.x, val);
@@ -193,11 +200,9 @@ export default class ViewportService {
   }
 
   private onColumnResize(
-    type: RevoGrid.DimensionCols,
-    { detail }: CustomEvent<RevoGrid.ViewSettingSizeProp>,
-    store: Observable<
-      DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>
-    >,
+    type: DimensionCols,
+    { detail }: CustomEvent<ViewSettingSizeProp>,
+    store: Observable<DSourceState<ColumnRegular, DimensionCols>>,
   ) {
     this.config.dimensionProvider?.setCustomSizes(type, detail, true);
     const changedItems = reduce(
@@ -216,23 +221,23 @@ export default class ViewportService {
   }
 
   /** register selection store for Segment */
-  private registerSegment(position: Selection.Cell) {
+  private registerSegment(position: Cell) {
     return this.config.selectionStoreConnector.register(position);
   }
 
   /** register selection store for Row */
-  private registerRow(y: number, type: RevoGrid.DimensionRows) {
+  private registerRow(y: number, type: DimensionRows) {
     return this.config.selectionStoreConnector.registerRow(y, type).store;
   }
 
   /** register selection store for Column */
-  private registerCol(x: number, type: RevoGrid.DimensionCols) {
+  private registerCol(x: number, type: DimensionCols) {
     return this.config.selectionStoreConnector.registerColumn(x, type).store;
   }
 
   /** Collect Row data */
   private dataViewPort(data: ViewportColumn) {
-    const slots: { [key in RevoGrid.DimensionRows]: SlotType } = {
+    const slots: { [key in DimensionRows]: SlotType } = {
       rowPinStart: HEADER_SLOT,
       rgRow: CONTENT_SLOT,
       rowPinEnd: FOOTER_SLOT,
@@ -265,7 +270,7 @@ export default class ViewportService {
 
   private dataPartition(
     data: ViewportColumn,
-    type: RevoGrid.DimensionRows,
+    type: DimensionRows,
     slot: SlotType,
     fixed?: boolean,
   ) {
@@ -288,9 +293,9 @@ export default class ViewportService {
     };
   }
 
-  scrollToCell(cell: Partial<Selection.Cell>) {
+  scrollToCell(cell: Partial<Cell>) {
     for (let key in cell) {
-      const coordinate = cell[key as keyof Selection.Cell];
+      const coordinate = cell[key as keyof Cell];
       this.config.scrollingService.scrollService({
         dimension: key === 'x' ? 'rgCol' : 'rgRow',
         coordinate,
@@ -338,10 +343,7 @@ export default class ViewportService {
     };
   }
 
-  getStoreCoordinateByType(
-    colType: RevoGrid.DimensionCols,
-    rowType: RevoGrid.DimensionRows,
-  ) {
+  getStoreCoordinateByType(colType: DimensionCols, rowType: DimensionRows) {
     const stores = this.config.selectionStoreConnector.storesByType;
     const storeCoordinate = {
       x: stores[colType],
@@ -350,31 +352,26 @@ export default class ViewportService {
     return storeCoordinate;
   }
 
-  setFocus(
-    colType: string,
-    rowType: string,
-    start: Selection.Cell,
-    end: Selection.Cell,
-  ) {
+  setFocus(colType: string, rowType: string, start: Cell, end: Cell) {
     this.config.selectionStoreConnector?.focusByCell(
       this.getStoreCoordinateByType(
-        colType as RevoGrid.DimensionCols,
-        rowType as RevoGrid.DimensionRows,
+        colType as DimensionCols,
+        rowType as DimensionRows,
       ),
       start,
       end,
     );
   }
 
-  getSelectedRange(): Selection.RangeArea | null {
+  getSelectedRange(): RangeArea | null {
     return this.config.selectionStoreConnector.selectedRange;
   }
 
   setEdit(
     rowIndex: number,
     colIndex: number,
-    colType: RevoGrid.DimensionCols,
-    rowType: RevoGrid.DimensionRows,
+    colType: DimensionCols,
+    rowType: DimensionRows,
   ) {
     this.config.selectionStoreConnector?.setEditByCell(
       this.getStoreCoordinateByType(colType, rowType),

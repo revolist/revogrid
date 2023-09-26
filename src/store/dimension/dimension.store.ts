@@ -8,15 +8,31 @@ import reduce from 'lodash/reduce';
 
 import { setStore } from '../../utils/store.utils';
 import { calculateDimensionData } from './dimension.helpers';
-import { Observable, PluginSubscribe, RevoGrid } from '../../interfaces';
 import each from 'lodash/each';
+import {
+  DimensionCalc,
+  DimensionSettingsState,
+  Observable,
+  PluginSubscribe,
+  ViewSettingSizeProp,
+} from '../..';
+import { MultiDimensionType } from '../..';
 
-type Item = keyof RevoGrid.DimensionSettingsState;
+export type DimensionStoreCollection = {
+  [T in MultiDimensionType]: DimensionStore;
+};
 
-const trimmedPlugin = (store: DimensionStore): PluginSubscribe<RevoGrid.DimensionSettingsState> => {
-  let trimmedSize: RevoGrid.DimensionSettingsState['sizes'] = {};
+type Item = keyof DimensionSettingsState;
 
-  const setTrimmed = (sizes: RevoGrid.DimensionSettingsState['sizes'], trimmed: RevoGrid.DimensionSettingsState['trimmed']) => {
+const trimmedPlugin = (
+  store: DimensionStore,
+): PluginSubscribe<DimensionSettingsState> => {
+  let trimmedSize: DimensionSettingsState['sizes'] = {};
+
+  const setTrimmed = (
+    sizes: DimensionSettingsState['sizes'],
+    trimmed: DimensionSettingsState['trimmed'],
+  ) => {
     const newSize = { ...sizes };
     trimmedSize = {};
     each(trimmed, (v, index) => {
@@ -31,17 +47,19 @@ const trimmedPlugin = (store: DimensionStore): PluginSubscribe<RevoGrid.Dimensio
     set(key, val) {
       switch (key) {
         case 'trimmed':
-          const trim = val as RevoGrid.DimensionSettingsState['trimmed'];
+          const trim = val as DimensionSettingsState['trimmed'];
           const sizes = store.store.get('sizes');
           // recover trimmed, apply new trim
           setTrimmed({ ...sizes, ...trimmedSize }, trim);
           break;
       }
-    }
-  }
+    },
+  };
 };
 
-const realSizePlugin = (store: DimensionStore): PluginSubscribe<RevoGrid.DimensionSettingsState> => {
+const realSizePlugin = (
+  store: DimensionStore,
+): PluginSubscribe<DimensionSettingsState> => {
   return {
     set(k) {
       switch (k) {
@@ -51,22 +69,22 @@ const realSizePlugin = (store: DimensionStore): PluginSubscribe<RevoGrid.Dimensi
           let realSize = 0;
           const count = store.store.get('count');
           for (let i = 0; i < count; i++) {
-            realSize += store.store.get('sizes')[i] || store.store.get('originItemSize');
+            realSize +=
+              store.store.get('sizes')[i] || store.store.get('originItemSize');
           }
           store.setStore({ realSize });
       }
-    }
+    },
   };
 };
 
-function initialBase(): RevoGrid.DimensionCalc {
+function initialBase(): DimensionCalc {
   return {
     indexes: [],
     count: 0,
 
     // plugin support
     trimmed: {},
-
 
     // size operations, this provider stores only changed sizes, not all of them
     // same as indexes but for sizes and positions
@@ -80,7 +98,7 @@ function initialBase(): RevoGrid.DimensionCalc {
   };
 }
 
-function initialState(): RevoGrid.DimensionSettingsState {
+function initialState(): DimensionSettingsState {
   return {
     ...initialBase(),
     // size which all items can take
@@ -92,19 +110,19 @@ function initialState(): RevoGrid.DimensionSettingsState {
 }
 
 export default class DimensionStore {
-  readonly store: Observable<RevoGrid.DimensionSettingsState>;
+  readonly store: Observable<DimensionSettingsState>;
   constructor() {
     this.store = createStore(initialState());
     this.store.use(trimmedPlugin(this));
     this.store.use(realSizePlugin(this));
   }
 
-  getCurrentState(): RevoGrid.DimensionSettingsState {
+  getCurrentState(): DimensionSettingsState {
     const state = initialState();
     const keys = Object.keys(state);
     return reduce(
       keys,
-      (r: RevoGrid.DimensionSettingsState, k: Item) => {
+      (r: DimensionSettingsState, k: Item) => {
         const data = this.store.get(k);
         r[k] = data as never;
         return r;
@@ -130,8 +148,11 @@ export default class DimensionStore {
    * Generates new indexes based on sizes
    * @param sizes - sizes to set
    */
-  setDimensionSize(sizes: RevoGrid.ViewSettingSizeProp) {
-    const dimensionData = calculateDimensionData(this.store.get('originItemSize'), sizes);
+  setDimensionSize(sizes: ViewSettingSizeProp) {
+    const dimensionData = calculateDimensionData(
+      this.store.get('originItemSize'),
+      sizes,
+    );
     setStore(this.store, dimensionData);
     return dimensionData;
   }

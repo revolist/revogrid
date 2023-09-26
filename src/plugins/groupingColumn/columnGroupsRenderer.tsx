@@ -1,26 +1,27 @@
 import { h, VNode } from '@stencil/core';
 import findIndex from 'lodash/findIndex';
-import { RevoGrid } from '../../interfaces';
 import { Group } from '../../store/dataSource/data.store';
 import { getItemByIndex } from '../../store/dimension/dimension.helpers';
 import { HEADER_ROW_CLASS } from '../../utils/consts';
 import GroupHeaderRenderer from './headerGroupRenderer';
+import { DimensionSettingsState, Providers } from '../../types/interfaces';
 import { ResizeProps } from '../..';
+import { DimensionCols } from '../../components';
 
 type Props<T> = {
   visibleProps: { [prop: string]: number };
   groups: Record<number, Group[]>;
-  dimensionCol: Pick<RevoGrid.DimensionSettingsState, 'indexes' | 'originItemSize' | 'indexToItem'>;
+  dimensionCol: Pick<DimensionSettingsState, 'indexes' | 'originItemSize' | 'indexToItem'>;
   depth: number;
   canResize: boolean;
-  providers: RevoGrid.Providers<T>;
+  providers: Providers<T>;
   additionalData: any;
   onResize(changedX: number, startIndex: number, endIndex: number): void;
 } & Partial<Pick<ResizeProps, 'active'>>;
 
 const ColumnGroupsRenderer = ({
   additionalData, providers, depth, groups, visibleProps, dimensionCol, canResize, active, onResize
-}: Props<RevoGrid.DimensionCols | 'rowHeaders'>): VNode[] => {
+}: Props<DimensionCols | 'rowHeaders'>): VNode[] => {
   // render group columns
   const groupRow: VNode[] = [];
   for (let i = 0; i < depth; i++) {

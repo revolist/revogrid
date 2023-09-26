@@ -1,10 +1,11 @@
+import { DimensionType } from '..';
+import { ViewPortScrollEvent } from '..';
 import { scaleValue } from '../utils';
-import { RevoGrid } from '../interfaces';
 
 interface Config {
   skipAnimationFrame?: boolean;
-  beforeScroll(e: RevoGrid.ViewPortScrollEvent): void;
-  afterScroll(e: RevoGrid.ViewPortScrollEvent): void;
+  beforeScroll(e: ViewPortScrollEvent): void;
+  afterScroll(e: ViewPortScrollEvent): void;
 }
 
 type Params = {
@@ -23,10 +24,10 @@ const initialParams: Params = {
 };
 const NO_COORDINATE = -1;
 export default class LocalScrollService {
-  private preventArtificialScroll: Record<RevoGrid.DimensionType, () => void | null> = { rgRow: null, rgCol: null };
+  private preventArtificialScroll: Record<DimensionType, () => void | null> = { rgRow: null, rgCol: null };
   // to check if scroll changed
-  private previousScroll: Record<RevoGrid.DimensionType, number> = { rgRow: NO_COORDINATE, rgCol: NO_COORDINATE };
-  private params: Record<RevoGrid.DimensionType, Params> = { rgRow: { ...initialParams }, rgCol: { ...initialParams } };
+  private previousScroll: Record<DimensionType, number> = { rgRow: NO_COORDINATE, rgCol: NO_COORDINATE };
+  private params: Record<DimensionType, Params> = { rgRow: { ...initialParams }, rgCol: { ...initialParams } };
 
   constructor(private cfg: Config) {}
 
@@ -34,7 +35,7 @@ export default class LocalScrollService {
     return contentSize + (virtualSize ? clientSize - virtualSize : 0);
   }
 
-  setParams(params: Params, dimension: RevoGrid.DimensionType) {
+  setParams(params: Params, dimension: DimensionType) {
     const virtualContentSize = LocalScrollService.getVirtualContentSize(params.contentSize, params.clientSize, params.virtualSize);
     this.params[dimension] = {
       ...params,
@@ -44,7 +45,7 @@ export default class LocalScrollService {
   }
 
   // apply scroll values after scroll done
-  async setScroll(e: RevoGrid.ViewPortScrollEvent) {
+  async setScroll(e: ViewPortScrollEvent) {
     this.cancelScroll(e.dimension);
 
     const frameAnimation = new Promise<void>((resolve, reject) => {
@@ -76,7 +77,7 @@ export default class LocalScrollService {
   // initiate scrolling event
   scroll(
     coordinate: number,
-    dimension: RevoGrid.DimensionType,
+    dimension: DimensionType,
     force = false,
     delta?: number,
     outside = false
@@ -96,7 +97,7 @@ export default class LocalScrollService {
     });
   }
 
-  private getParams(dimension: RevoGrid.DimensionType): Params {
+  private getParams(dimension: DimensionType): Params {
     return this.params[dimension];
   }
 
@@ -113,7 +114,7 @@ export default class LocalScrollService {
   }
 
   // prevent already started scroll, performance optimization
-  private cancelScroll(dimension: RevoGrid.DimensionType) {
+  private cancelScroll(dimension: DimensionType) {
     const canceler = this.preventArtificialScroll[dimension];
     if (canceler) {
       canceler();

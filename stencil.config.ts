@@ -1,10 +1,10 @@
 import { Config } from '@stencil/core';
 import { sass } from '@stencil/sass';
-// import { angularOutputTarget } from '@stencil/angular-output-target';
-// import { reactOutputTarget } from '@stencil/react-output-target';
-// import { vueOutputTarget } from '@stencil/vue-output-target';
-// import { svelteOutputTarget } from '@stencil/svelte-output-target';
-// import { vueOutputTarget as vue2OutputTarget } from "@revolist/stencil-vue2-output-target";
+import { angularOutputTarget } from '@stencil/angular-output-target';
+import { reactOutputTarget } from '@stencil/react-output-target';
+import { vueOutputTarget } from '@stencil/vue-output-target';
+import { svelteOutputTarget } from '@stencil/svelte-output-target';
+import { vueOutputTarget as vue2OutputTarget } from "@revolist/stencil-vue2-output-target";
 
 const componentCorePackage = '@revolist/revogrid';
 const parent = '../revogrid-proxy';
@@ -17,7 +17,7 @@ export const config: Config = {
   hashFileNames: false,
   autoprefixCss: false,
   minifyCss: true,
-  preamble: 'Built by Revolist',
+  preamble: 'Built by Revolist OU',
   hashedFileNameLength: 8,
   invisiblePrehydration: false,
   extras: {
@@ -28,7 +28,6 @@ export const config: Config = {
     appendChildSlotFix: false,
     cloneNodeFix: false,
     slotChildNodesFix: false,
-    experimentalImportInjection: true,
   },
 
   // buildEs5: 'prod',
@@ -47,7 +46,6 @@ export const config: Config = {
   ],
   // proxies
   outputTargets: [
-    /*
     angularOutputTarget({
       componentCorePackage,
       directivesProxyFile: directivesProxyFile('angular', `proxies/${entry}`),
@@ -70,20 +68,19 @@ export const config: Config = {
         includeDefineCustomElements: true,
         legacy: false,
         includePolyfills: false,
-      }), */
-    // vue2OutputTarget({
-    //   componentCorePackage,
-    //   proxiesFile: directivesProxyFile('vue2'),
-    //   includeDefineCustomElements: true,
-    //   loaderDir: 'custom-element',
-    //   componentModels: [],
-    // }),
+      }),
+    vue2OutputTarget({
+      componentCorePackage,
+      proxiesFile: directivesProxyFile('vue2'),
+      includeDefineCustomElements: true,
+      loaderDir: 'custom-element',
+      componentModels: [],
+    }),
     // custom element, no polifil
     {
       type: 'dist-custom-elements',
       dir: 'custom-element',
-      customElementsExportBehavior: 'bundle', // stencil 3.0
-      // autoDefineCustomElements: true,
+      customElementsExportBehavior: 'bundle',
       externalRuntime: true,
       empty: true,
     },

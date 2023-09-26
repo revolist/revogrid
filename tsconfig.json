@@ -16,7 +16,10 @@
     "noImplicitThis": true,
     "noImplicitReturns": true,
     "sourceMap": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "paths": {
+      "@root": ["./*"]
+    }
   },
   "include": ["src", "types/jsx.d.ts"],
   "exclude": ["node_modules"]

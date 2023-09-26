@@ -1,19 +1,17 @@
-import { Edition, Observable, Selection } from '../../interfaces';
+import { Observable } from '../..';
+import { Cell, SelectionStoreState, EditCellStore, RangeArea } from '../..';
 import { getRange } from './selection.helpers';
-import Cell = Selection.Cell;
-import Range = Selection.RangeArea;
-
 interface Config {
-  changeRange(range: Range): boolean;
+  changeRange(range: RangeArea): boolean;
   focus(focus: Cell, end: Cell): boolean;
 }
 
 export default class SelectionStoreService {
-  constructor(public store: Observable<Selection.SelectionStoreState>, private config: Config) {
+  constructor(public store: Observable<SelectionStoreState>, private config: Config) {
     this.store = store;
   }
 
-  get edited(): Edition.EditCellStore | null {
+  get edited(): EditCellStore | null {
     return this.store.get('edit');
   }
 
@@ -21,11 +19,11 @@ export default class SelectionStoreService {
     return this.store.get('focus');
   }
 
-  get ranged(): Range | null {
+  get ranged(): RangeArea | null {
     return this.store.get('range');
   }
 
-  changeRange(range: Range) {
+  changeRange(range: RangeArea) {
     return this.config.changeRange(range);
   }
 

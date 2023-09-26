@@ -1,5 +1,5 @@
 import { h } from '@stencil/core';
-import { RevoGrid } from '../../interfaces';
+import { ColumnRegular } from '../../types/interfaces';
 
 export const FILTER_BUTTON_CLASS = 'rv-filter';
 export const FILTER_BUTTON_ACTIVE = 'active';
@@ -8,7 +8,7 @@ export const AND_OR_BUTTON = 'and-or-button';
 export const TRASH_BUTTON = 'trash-button';
 
 type Props = {
-  column: RevoGrid.ColumnRegular;
+  column: ColumnRegular;
 };
 export const FilterButton = ({ column }: Props) => {
   return (

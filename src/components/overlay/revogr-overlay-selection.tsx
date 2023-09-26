@@ -1,11 +1,9 @@
 import { Component, Event, EventEmitter, h, Host, Listen, Prop, VNode, Element, Watch } from '@stencil/core';
-
-import { AllDimensionType, ApplyFocusEvent, FocusRenderEvent, Edition, Observable, RevoGrid, Selection, DragStartEvent } from '../../interfaces';
-import ColumnService from '../data/columnService';
+import ColumnService from '../data/column.service';
 import SelectionStoreService from '../../store/selection/selection.store.service';
-import { codesLetter } from '../../utils/keyCodes';
+import { codesLetter } from '../../utils/key.codes';
 import { MOBILE_CLASS, SELECTION_BORDER_CLASS } from '../../utils/consts';
-import { DataSourceState } from '../../store/dataSource/data.store';
+import { DSourceState } from '../../store/dataSource/data.store';
 import { isRangeSingleCell } from '../../store/selection/selection.helpers';
 import { getCurrentCell, getElStyle } from './selection.utils';
 import { isEditInput } from './editors/edit.utils';
@@ -13,6 +11,10 @@ import { KeyboardService } from './keyboard.service';
 import { AutoFillService } from './autofill.service';
 import { ClipboardService } from './clipboard.service';
 import { getFromEvent, verifyTouchTarget } from '../../utils/events';
+import { Observable, SelectionStoreState, DimensionSettingsState, DataType, DimensionRows, ColumnRegular, DimensionCols, Cell, DragStartEvent } from '../../components';
+import { MultiDimensionType } from '../../types/dimension';
+import { FocusRenderEvent, ApplyFocusEvent, AllDimensionType } from '../../types/interfaces';
+import { Editors, BeforeSaveDataDetails, BeforeEdit, RangeArea, TempRange, ChangedRange, BeforeRangeSaveDataDetails, SaveDataDetails } from '../../types/selection';
 
 @Component({
   tag: 'revogr-overlay-selection',
@@ -53,9 +55,9 @@ export class OverlaySelection {
   //  Dynamic stores
   //
   // --------------------------------------------------------------------------
-  @Prop() selectionStore: Observable<Selection.SelectionStoreState>;
-  @Prop() dimensionRow: Observable<RevoGrid.DimensionSettingsState>;
-  @Prop() dimensionCol: Observable<RevoGrid.DimensionSettingsState>;
+  @Prop() selectionStore: Observable<SelectionStoreState>;
+  @Prop() dimensionRow: Observable<DimensionSettingsState>;
+  @Prop() dimensionCol: Observable<DimensionSettingsState>;
 
   // --------------------------------------------------------------------------
   //
@@ -66,20 +68,20 @@ export class OverlaySelection {
   /**
    * Row data store
    */
-  @Prop() dataStore: Observable<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
+  @Prop() dataStore: Observable<DSourceState<DataType, DimensionRows>>;
 
   /**
    * Column data store
    */
-  @Prop() colData: Observable<DataSourceState<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>>;
+  @Prop() colData: Observable<DSourceState<ColumnRegular, DimensionCols>>;
   /**
    * Last cell position
    */
-  @Prop() lastCell: Selection.Cell;
+  @Prop() lastCell: Cell;
   /**
    * Custom editors register
    */
-  @Prop() editors: Edition.Editors;
+  @Prop() editors: Editors;
   /**
    * If true applys changes when cell closes if not Escape
    */
@@ -109,38 +111,38 @@ export class OverlaySelection {
    */
   @Event({ cancelable: true }) internalPaste: EventEmitter;
 
-  @Event({ cancelable: true }) internalCellEdit: EventEmitter<Edition.BeforeSaveDataDetails>;
-  @Event({ cancelable: true }) beforeFocusCell: EventEmitter<Edition.BeforeSaveDataDetails>;
+  @Event({ cancelable: true }) internalCellEdit: EventEmitter<BeforeSaveDataDetails>;
+  @Event({ cancelable: true }) beforeFocusCell: EventEmitter<BeforeSaveDataDetails>;
 
   /**
    * Set edit cell
    */
-  @Event() setEdit: EventEmitter<Edition.BeforeEdit>;
+  @Event() setEdit: EventEmitter<BeforeEdit>;
   @Event({ eventName: 'before-apply-range' }) beforeApplyRange: EventEmitter<FocusRenderEvent>;
   /**
    * Before range selection applied
    */
   @Event({ eventName: 'before-set-range' }) beforeSetRange: EventEmitter;
   @Event({ eventName: 'before-edit-render' }) beforeEditRender: EventEmitter<FocusRenderEvent>;
-  @Event() setRange: EventEmitter<Selection.RangeArea & { type: RevoGrid.MultiDimensionType }>;
+  @Event() setRange: EventEmitter<RangeArea & { type: MultiDimensionType }>;
   @Event({ eventName: 'selectall' }) selectAll: EventEmitter;
   /**
    * Used for editors support when close requested
    */
   @Event() cancelEdit: EventEmitter;
-  @Event() setTempRange: EventEmitter<Selection.TempRange | null>;
+  @Event() setTempRange: EventEmitter<TempRange | null>;
 
   @Event() applyFocus: EventEmitter<FocusRenderEvent>;
   @Event() focusCell: EventEmitter<ApplyFocusEvent>;
   /** Range data apply */
   @Event() beforeRangeDataApply: EventEmitter<FocusRenderEvent>;
   /** Selection range changed */
-  @Event({ cancelable: true }) internalSelectionChanged: EventEmitter<Selection.ChangedRange>;
+  @Event({ cancelable: true }) internalSelectionChanged: EventEmitter<ChangedRange>;
   /** Selection range changed */
-  @Event({ cancelable: true, bubbles: true }) beforeRangeCopyApply: EventEmitter<Selection.ChangedRange>;
+  @Event({ cancelable: true, bubbles: true }) beforeRangeCopyApply: EventEmitter<ChangedRange>;
 
   /** Range data apply */
-  @Event({ cancelable: true }) internalRangeDataApply: EventEmitter<Edition.BeforeRangeSaveDataDetails>;
+  @Event({ cancelable: true }) internalRangeDataApply: EventEmitter<BeforeRangeSaveDataDetails>;
   /** Range copy */
   @Event({ cancelable: true }) rangeClipboardCopy: EventEmitter;
   @Event({ cancelable: true }) rangeClipboardPaste: EventEmitter;
@@ -214,7 +216,7 @@ export class OverlaySelection {
   }
 
   // selection & keyboard
-  @Watch('selectionStore') selectionServiceSet(s: Observable<Selection.SelectionStoreState>) {
+  @Watch('selectionStore') selectionServiceSet(s: Observable<SelectionStoreState>) {
     this.selectionStoreService = new SelectionStoreService(s, {
       changeRange: range => this.triggerRangeEvent(range),
       focus: (focus, end) => this.doFocus(focus, end),
@@ -323,7 +325,7 @@ export class OverlaySelection {
     this.columnService?.destroy();
   }
 
-  private renderRange(range: Selection.RangeArea) {
+  private renderRange(range: RangeArea) {
     const style = getElStyle(range, this.dimensionRow.state, this.dimensionCol.state);
     return [
       <div class={SELECTION_BORDER_CLASS} style={style}>
@@ -435,7 +437,7 @@ export class OverlaySelection {
     );
   }
 
-  private doFocus(focus: Selection.Cell, end: Selection.Cell, next?: Partial<Selection.Cell>) {
+  private doFocus(focus: Cell, end: Cell, next?: Partial<Cell>) {
     const { defaultPrevented } = this.beforeFocusCell.emit(this.columnService.getSaveData(focus.y, focus.x));
     if (defaultPrevented) {
       return false;
@@ -467,7 +469,7 @@ export class OverlaySelection {
     }).defaultPrevented;
   }
 
-  private triggerRangeEvent(range: Selection.RangeArea) {
+  private triggerRangeEvent(range: RangeArea) {
     const type = this.types.rowType;
     const applyEvent = this.beforeApplyRange.emit({
       range: { ...range },
@@ -541,7 +543,7 @@ export class OverlaySelection {
   }
 
   /** Edit finished, close cell and save */
-  protected cellEdit(e: Edition.SaveDataDetails) {
+  protected cellEdit(e: SaveDataDetails) {
     const dataToSave = this.columnService.getSaveData(e.rgRow, e.rgCol, e.val);
     this.internalCellEdit.emit(dataToSave);
   }
@@ -575,7 +577,7 @@ export class OverlaySelection {
     }
   }
 
-  private onRowDragStart({ detail }: CustomEvent<{ cell: Selection.Cell; text: string }>) {
+  private onRowDragStart({ detail }: CustomEvent<{ cell: Cell; text: string }>) {
     detail.text = this.columnService.getCellData(detail.cell.y, detail.cell.x);
   }
 

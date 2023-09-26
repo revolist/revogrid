@@ -1,12 +1,12 @@
-import { ThemeSpace } from '../interfaces';
+import { Theme, ThemeConfig, ThemePackage } from '../types/theme';
 import ThemeCompact from './theme.compact';
 import ThemeDefault from './theme.default';
 import ThemeMaterial from './theme.material';
 
 export const DEFAULT_THEME = 'default';
-export const allowedThemes: ThemeSpace.Theme[] = [DEFAULT_THEME, 'material', 'compact', 'darkMaterial', 'darkCompact'];
+export const allowedThemes: Theme[] = [DEFAULT_THEME, 'material', 'compact', 'darkMaterial', 'darkCompact'];
 export default class ThemeService {
-  private currentTheme: ThemeSpace.ThemePackage;
+  private currentTheme: ThemePackage;
   private customRowSize: number = 0;
 
   get theme() {
@@ -21,12 +21,12 @@ export default class ThemeService {
     this.customRowSize = size;
   }
 
-  constructor(cfg: ThemeSpace.ThemeConfig) {
+  constructor(cfg: ThemeConfig) {
     this.customRowSize = cfg.rowSize;
     this.register('default');
   }
 
-  register(theme: ThemeSpace.Theme) {
+  register(theme: Theme) {
     const parsedTheme = ThemeService.getTheme(theme);
     switch (parsedTheme) {
       case 'material':
@@ -43,9 +43,9 @@ export default class ThemeService {
     }
   }
 
-  static getTheme(theme: string): ThemeSpace.Theme {
-    if (allowedThemes.indexOf(theme as ThemeSpace.Theme) > -1) {
-      return theme as ThemeSpace.Theme;
+  static getTheme(theme: string): Theme {
+    if (allowedThemes.indexOf(theme as Theme) > -1) {
+      return theme as Theme;
     }
     return DEFAULT_THEME;
   }

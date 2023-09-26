@@ -1,13 +1,14 @@
-import { RevoGrid, Selection } from '../../interfaces';
 import { getItemByPosition } from '../../store/dimension/dimension.helpers';
+import { DimensionSettingsState, PositionItem } from '../..';
+import { Cell } from '../..';
 
-type EventData = { el: HTMLElement; rows: RevoGrid.DimensionSettingsState; cols: RevoGrid.DimensionSettingsState };
+type EventData = { el: HTMLElement; rows: DimensionSettingsState; cols: DimensionSettingsState };
 interface Config {
   positionChanged(from: number, to: number): void;
 }
 
 export default class RowOrderService {
-  private currentCell: Selection.Cell | null = null;
+  private currentCell: Cell | null = null;
   private previousRow: number | null = null;
 
   constructor(private config: Config) {}
@@ -35,12 +36,12 @@ export default class RowOrderService {
   }
 
   /** Drag started, reserve initial cell for farther use */
-  startOrder(e: MouseEvent, data: EventData): Selection.Cell {
+  startOrder(e: MouseEvent, data: EventData): Cell {
     this.currentCell = this.getCell(e, data);
     return this.currentCell;
   }
 
-  move(y: number, data: EventData): RevoGrid.PositionItem | null {
+  move(y: number, data: EventData): PositionItem | null {
     const rgRow = this.getRow(y, data);
     // if rgRow same as previous or below range (-1 = 0) do nothing
     if (this.previousRow === rgRow.itemIndex || rgRow.itemIndex < -1) {
@@ -57,7 +58,7 @@ export default class RowOrderService {
   }
 
   /** Calculate cell based on x, y position */
-  getRow(y: number, { el, rows }: EventData): RevoGrid.PositionItem {
+  getRow(y: number, { el, rows }: EventData): PositionItem {
     const { top } = el.getBoundingClientRect();
     const topRelative = y - top;
     const rgRow = getItemByPosition(rows, topRelative);
@@ -70,7 +71,7 @@ export default class RowOrderService {
   }
 
   /** Calculate cell based on x, y position */
-  getCell({ x, y }: Selection.Cell, { el, rows, cols }: EventData): Selection.Cell {
+  getCell({ x, y }: Cell, { el, rows, cols }: EventData): Cell {
     const { top, left } = el.getBoundingClientRect();
     const topRelative = y - top;
     const leftRelative = x - left;

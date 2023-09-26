@@ -1,12 +1,12 @@
 import { getItemByIndex, getItemByPosition } from '../../store/dimension/dimension.helpers';
-import { Selection, RevoGrid } from '../../interfaces';
-import Cell = Selection.Cell;
+import { DimensionSettingsState } from '../..';
+import { Cell, RangeArea, RangeAreaCss } from '../..';
 
 export type EventData = {
   el: HTMLElement;
-  rows: RevoGrid.DimensionSettingsState;
-  cols: RevoGrid.DimensionSettingsState;
-  lastCell: Selection.Cell;
+  rows: DimensionSettingsState;
+  cols: DimensionSettingsState;
+  lastCell: Cell;
 };
 
 /** Calculate cell based on x, y position */
@@ -37,7 +37,7 @@ export function getCurrentCell({ x, y }: Cell, { el, rows, cols }: EventData): C
   return { x: rgCol.itemIndex, y: rgRow.itemIndex };
 }
 
-export function getCoordinate(range: Selection.RangeArea, focus: Cell, changes: Partial<Cell>, isMulti = false) {
+export function getCoordinate(range: RangeArea, focus: Cell, changes: Partial<Cell>, isMulti = false) {
   const updateCoordinate = (c: keyof Cell) => {
     const start = { x: range.x, y: range.y };
     const end = isMulti ? { x: range.x1, y: range.y1 } : start;
@@ -91,7 +91,7 @@ export function isBeforeFirst({ x, y }: Cell) {
 //   return null;
 // }
 
-function styleByCellProps(styles: { [key: string]: number }): Selection.RangeAreaCss {
+function styleByCellProps(styles: { [key: string]: number }): RangeAreaCss {
   return {
     left: `${styles.left}px`,
     top: `${styles.top}px`,
@@ -100,7 +100,7 @@ function styleByCellProps(styles: { [key: string]: number }): Selection.RangeAre
   };
 }
 
-export function getCell({ x, y, x1, y1 }: Selection.RangeArea, dimensionRow: RevoGrid.DimensionSettingsState, dimensionCol: RevoGrid.DimensionSettingsState) {
+export function getCell({ x, y, x1, y1 }: RangeArea, dimensionRow: DimensionSettingsState, dimensionCol: DimensionSettingsState) {
   const top = getItemByIndex(dimensionRow, y).start;
   const left = getItemByIndex(dimensionCol, x).start;
   const bottom = getItemByIndex(dimensionRow, y1).end;
@@ -116,7 +116,7 @@ export function getCell({ x, y, x1, y1 }: Selection.RangeArea, dimensionRow: Rev
   };
 }
 
-export function getElStyle(range: Selection.RangeArea, dimensionRow: RevoGrid.DimensionSettingsState, dimensionCol: RevoGrid.DimensionSettingsState): Selection.RangeAreaCss {
+export function getElStyle(range: RangeArea, dimensionRow: DimensionSettingsState, dimensionCol: DimensionSettingsState): RangeAreaCss {
   const styles = getCell(range, dimensionRow, dimensionCol);
   return styleByCellProps(styles);
 }

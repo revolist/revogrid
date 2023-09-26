@@ -21,7 +21,7 @@
 
 ## Methods
 
-### `changeScroll(e: RevoGrid.ViewPortScrollEvent) => Promise<RevoGrid.ViewPortScrollEvent>`
+### `changeScroll(e: ViewPortScrollEvent) => Promise<ViewPortScrollEvent>`
 
 
 
@@ -31,7 +31,7 @@ Type: `Promise<ViewPortScrollEvent>`
 
 
 
-### `setScroll(e: RevoGrid.ViewPortScrollEvent) => Promise<void>`
+### `setScroll(e: ViewPortScrollEvent) => Promise<void>`
 
 
 

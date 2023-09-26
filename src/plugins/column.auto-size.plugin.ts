@@ -4,22 +4,24 @@
  */
 import each from 'lodash/each';
 import reduce from 'lodash/reduce';
-import BasePlugin from './basePlugin';
-import { RevoGrid, Edition } from '../interfaces';
+import { BasePlugin } from './base.plugin';
 import ColumnDataProvider, { ColumnCollection } from '../services/column.data.provider';
-import { DataProvider } from '../services/data.provider';
 import { columnTypes } from '../store/storeTypes';
-import DimensionProvider, { ColumnItems } from '../services/dimension.provider';
+import { ColumnItems } from '../services/dimension.provider';
 import { getSourceItem } from '../store/dataSource/data.store';
+import { DimensionCols, DimensionRows } from '..';
+import { ColumnRegular, DataType, InitialHeaderClick, ViewSettingSizeProp } from '..';
+import { BeforeSaveDataDetails, BeforeRangeSaveDataDetails } from '..';
+import { PluginProviders } from '../';
 
-interface Column extends RevoGrid.ColumnRegular {
+interface Column extends ColumnRegular {
   index: number;
 }
 
-type AutoSizeColumns = Record<RevoGrid.DimensionCols, ColumnRecords>;
+type AutoSizeColumns = Record<DimensionCols, ColumnRecords>;
 type ColumnRecords = Record<any, Column>;
-type SourceSetEvent = { type: RevoGrid.DimensionRows; source: RevoGrid.DataType[] };
-type EditEvent = Edition.BeforeSaveDataDetails | Edition.BeforeRangeSaveDataDetails;
+type SourceSetEvent = { type: DimensionRows; source: DataType[] };
+type EditEvent = BeforeSaveDataDetails | BeforeRangeSaveDataDetails;
 type Resolve = (cols: Partial<AutoSizeColumns>) => void;
 type Reject = () => void;
 
@@ -42,12 +44,6 @@ export type AutoSizeColumnConfig = {
   preciseSize?: boolean;
 };
 
-type Providers = {
-  dataProvider: DataProvider;
-  dimensionProvider: DimensionProvider;
-  columnProvider: ColumnDataProvider;
-};
-
 const LETTER_BLOCK_SIZE = 7;
 
 enum ColumnAutoSizeMode {
@@ -59,7 +55,7 @@ enum ColumnAutoSizeMode {
   autoSizeAll = 'autoSizeAll',
 }
 
-export default class AutoSizeColumn extends BasePlugin {
+export default class AutoSizeColumnPlugin extends BasePlugin {
   private autoSizeColumns: Partial<AutoSizeColumns> | null = null;
   private readonly letterBlockSize: number;
 
@@ -70,8 +66,8 @@ export default class AutoSizeColumn extends BasePlugin {
   private dataResolve: Resolve | null = null;
   private dataReject: Reject | null = null;
 
-  constructor(revogrid: HTMLRevoGridElement, protected providers: Providers, private config?: AutoSizeColumnConfig) {
-    super(revogrid);
+  constructor(revogrid: HTMLRevoGridElement, protected providers: PluginProviders, private config?: AutoSizeColumnConfig) {
+    super(revogrid, providers);
     this.letterBlockSize = config?.letterBlockSize || LETTER_BLOCK_SIZE;
 
     // create test container to check text width
@@ -92,11 +88,11 @@ export default class AutoSizeColumn extends BasePlugin {
     const beforecolumnsset = ({ detail: { columns } }: CustomEvent<ColumnCollection>) => {
       this.columnSet(columns);
     };
-    const headerDblClick = ({ detail }: CustomEvent<RevoGrid.InitialHeaderClick>) => {
+    const headerDblClick = ({ detail }: CustomEvent<InitialHeaderClick>) => {
       const type = ColumnDataProvider.getColumnType(detail.column);
       const size = this.getColumnSize(detail.index, type);
       if (size) {
-        this.providers.dimensionProvider.setCustomSizes(type, {
+        this.providers.dimension.setCustomSizes(type, {
           [detail.index]: size,
         }, true);
       }
@@ -117,7 +113,7 @@ export default class AutoSizeColumn extends BasePlugin {
     }
   }
 
-  private async setSource(source: RevoGrid.DataType[]): Promise<void> {
+  private async setSource(source: DataType[]): Promise<void> {
     let autoSize = this.autoSizeColumns;
     if (this.dataReject) {
       this.dataReject();
@@ -138,13 +134,13 @@ export default class AutoSizeColumn extends BasePlugin {
     }
 
     // calculate sizes
-    each(autoSize, (_v, type: RevoGrid.DimensionCols) => {
-      const sizes: RevoGrid.ViewSettingSizeProp = {};
+    each(autoSize, (_v, type: DimensionCols) => {
+      const sizes: ViewSettingSizeProp = {};
       each(autoSize[type], rgCol => {
         // calculate size
         rgCol.size = sizes[rgCol.index] = source.reduce((prev, rgRow) => Math.max(prev, this.getLength(rgRow[rgCol.prop])), this.getLength(rgCol.name || ''));
       });
-      this.providers.dimensionProvider.setCustomSizes(type, sizes, true);
+      this.providers.dimension.setCustomSizes(type, sizes, true);
     });
   }
 
@@ -168,14 +164,14 @@ export default class AutoSizeColumn extends BasePlugin {
   }
 
   private afteredit(e: EditEvent): void {
-    let data: Record<string, RevoGrid.DataType>;
+    let data: Record<string, DataType>;
     if (this.isRangeEdit(e)) {
       data = e.data;
     } else {
       data = { 0: { [e.prop]: e.val } };
     }
-    each(this.autoSizeColumns, (columns, type: RevoGrid.DimensionCols) => {
-      const sizes: RevoGrid.ViewSettingSizeProp = {};
+    each(this.autoSizeColumns, (columns, type: DimensionCols) => {
+      const sizes: ViewSettingSizeProp = {};
 
       each(columns, rgCol => {
         // calculate size
@@ -195,7 +191,7 @@ export default class AutoSizeColumn extends BasePlugin {
         }
       });
 
-      this.providers.dimensionProvider.setCustomSizes(type, sizes, true);
+      this.providers.dimension.setCustomSizes(type, sizes, true);
     });
   }
 
@@ -206,8 +202,8 @@ export default class AutoSizeColumn extends BasePlugin {
     } else {
       props[e.prop] = true;
     }
-    each(this.autoSizeColumns, (columns, type: RevoGrid.DimensionCols) => {
-      const sizes: RevoGrid.ViewSettingSizeProp = {};
+    each(this.autoSizeColumns, (columns, type: DimensionCols) => {
+      const sizes: ViewSettingSizeProp = {};
 
       each(columns, rgCol => {
         if (props[rgCol.prop]) {
@@ -217,17 +213,17 @@ export default class AutoSizeColumn extends BasePlugin {
           }
         }
       });
-      this.providers.dimensionProvider.setCustomSizes(type, sizes, true);
+      this.providers.dimension.setCustomSizes(type, sizes, true);
     });
   }
 
-  private getColumnSize(index: number, type: RevoGrid.DimensionCols): number {
+  private getColumnSize(index: number, type: DimensionCols): number {
     const rgCol = this.autoSizeColumns[type][index];
     if (!rgCol) {
       return 0;
     }
     return reduce(
-      this.providers.dataProvider.stores,
+      this.providers.data.stores,
       (r, s) => {
         const perStore = reduce(
           s.store.get('items'),
@@ -245,7 +241,7 @@ export default class AutoSizeColumn extends BasePlugin {
 
   private columnSet(columns: ColumnItems): void {
     for (let t of columnTypes) {
-      const type = t as RevoGrid.DimensionCols;
+      const type = t as DimensionCols;
       const cols = columns[type];
 
       for (let i in cols) {
@@ -275,8 +271,8 @@ export default class AutoSizeColumn extends BasePlugin {
     this.dataReject = null;
   }
 
-  private isRangeEdit(e: EditEvent): e is Edition.BeforeRangeSaveDataDetails {
-    return !!(e as Edition.BeforeRangeSaveDataDetails).data;
+  private isRangeEdit(e: EditEvent): e is BeforeRangeSaveDataDetails {
+    return !!(e as BeforeRangeSaveDataDetails).data;
   }
 
   private initiatePresizeElement(): HTMLElement {

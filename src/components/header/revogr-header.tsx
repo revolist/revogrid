@@ -3,11 +3,13 @@ import { HTMLStencilElement, VNode } from '@stencil/core/internal';
 import keyBy from 'lodash/keyBy';
 
 import { HEADER_ACTUAL_ROW_CLASS, HEADER_ROW_CLASS } from '../../utils/consts';
-import { Observable, RevoGrid, Selection } from '../../interfaces';
 import { Groups } from '../../store/dataSource/data.store';
-import HeaderRenderer from './headerRenderer';
+import HeaderRenderer from './header-renderer';
 import ColumnGroupsRenderer from '../../plugins/groupingColumn/columnGroupsRenderer';
 import { ResizeProps } from '../../services/resizable.directive';
+import { ColumnRegular, DimensionSettingsState, InitialHeaderClick, Observable, Providers, ViewportState, ViewSettingSizeProp } from '../../types/interfaces';
+import { DimensionCols } from '../../types/dimension';
+import { SelectionStoreState } from '../../types/selection';
 
 @Component({
   tag: 'revogr-header',
@@ -15,9 +17,9 @@ import { ResizeProps } from '../../services/resizable.directive';
 })
 export class RevogrHeaderComponent {
   @Element() element!: HTMLStencilElement;
-  @Prop() viewportCol: Observable<RevoGrid.ViewportState>;
-  @Prop() dimensionCol: Observable<RevoGrid.DimensionSettingsState>;
-  @Prop() selectionStore: Observable<Selection.SelectionStoreState>;
+  @Prop() viewportCol: Observable<ViewportState>;
+  @Prop() dimensionCol: Observable<DimensionSettingsState>;
+  @Prop() selectionStore: Observable<SelectionStoreState>;
 
   @Prop() parent: string = '';
   @Prop() groups: Groups;
@@ -31,23 +33,23 @@ export class RevogrHeaderComponent {
    * Define custom resize position
    */
   @Prop() resizeHandler: ResizeProps['active'];
-  @Prop() colData: RevoGrid.ColumnRegular[];
+  @Prop() colData: ColumnRegular[];
   @Prop() columnFilter: boolean;
 
   /**
    * Column type
    */
-  @Prop() type!:  RevoGrid.DimensionCols | 'rowHeaders';
+  @Prop() type!:  DimensionCols | 'rowHeaders';
 
   /**
    * Extra properties to pass into header renderer, such as vue or react components to handle parent
    */
   @Prop() additionalData: any = {};
 
-  @Event() initialHeaderClick: EventEmitter<RevoGrid.InitialHeaderClick>;
-  @Event() headerresize: EventEmitter<RevoGrid.ViewSettingSizeProp>;
-  @Event({ eventName: 'before-resize', cancelable: true }) beforeResize: EventEmitter<RevoGrid.ColumnRegular[]>;
-  @Event() headerdblClick: EventEmitter<RevoGrid.InitialHeaderClick>;
+  @Event() initialHeaderClick: EventEmitter<InitialHeaderClick>;
+  @Event() headerresize: EventEmitter<ViewSettingSizeProp>;
+  @Event({ eventName: 'before-resize', cancelable: true }) beforeResize: EventEmitter<ColumnRegular[]>;
+  @Event() headerdblClick: EventEmitter<InitialHeaderClick>;
 
   private onResize({ width }: { width?: number }, index: number): void {
     const col = this.colData[index];
@@ -62,7 +64,7 @@ export class RevogrHeaderComponent {
   }
 
   private onResizeGroup(changedX: number, startIndex: number, endIndex: number): void {
-    const sizes: RevoGrid.ViewSettingSizeProp = {};
+    const sizes: ViewSettingSizeProp = {};
     const cols = keyBy(this.viewportCol.get('items'), 'itemIndex');
     const change = changedX / (endIndex - startIndex + 1);
     for (let i = startIndex; i <= endIndex; i++) {
@@ -122,7 +124,7 @@ export class RevogrHeaderComponent {
     ];
   }
 
-  get providers(): RevoGrid.Providers<RevoGrid.DimensionCols | 'rowHeaders'> {
+  get providers(): Providers<DimensionCols | 'rowHeaders'> {
     return {
       type: this.type,
       data: this.colData,

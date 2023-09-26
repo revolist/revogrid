@@ -1,17 +1,18 @@
 import isArray from 'lodash/isArray';
 import map from 'lodash/map';
-import { RevoGrid } from '../../interfaces';
 import { ColumnCollection } from '../../services/column.data.provider';
 import { ColumnItems } from '../../services/dimension.provider';
 import { Group as StoreGroup } from '../../store/dataSource/data.store';
-import BasePlugin from '../basePlugin';
+import { BasePlugin } from '../base.plugin';
+import { DimensionCols } from '../..';
+import { ColumnGrouping, ColumnRegular } from '../..';
 interface Group extends StoreGroup {
   level: number;
 }
-export type ColumnGrouping = Record<RevoGrid.DimensionCols, Group[]>;
+export type ColumnGroupingCollection = Record<DimensionCols, Group[]>;
 
 export default class GroupingColumnPlugin extends BasePlugin {
-  static gatherGroup<T extends ColumnCollection>(res: T, colData: RevoGrid.ColumnGrouping, collection: T, level = 0): T {
+  static gatherGroup<T extends ColumnCollection>(res: T, colData: ColumnGrouping, collection: T, level = 0): T {
     // group template
     const group: Group = {
       ...colData,
@@ -41,7 +42,7 @@ export default class GroupingColumnPlugin extends BasePlugin {
     }
     // merge column groupings
     for (let k in collection.columnGrouping) {
-      const key = k as RevoGrid.DimensionCols;
+      const key = k as DimensionCols;
       const collectionItem = collection.columnGrouping[key];
       res.columnGrouping[key].push(...collectionItem);
     }
@@ -50,6 +51,10 @@ export default class GroupingColumnPlugin extends BasePlugin {
     return res;
   }
 }
-export function isColGrouping(colData: RevoGrid.ColumnGrouping | RevoGrid.ColumnRegular): colData is RevoGrid.ColumnGrouping {
-  return !!(colData as RevoGrid.ColumnGrouping).children;
+
+/**
+ * Check if column is grouping column
+ */
+export function isColGrouping(colData: ColumnGrouping | ColumnRegular): colData is ColumnGrouping {
+  return !!(colData as ColumnGrouping).children;
 }

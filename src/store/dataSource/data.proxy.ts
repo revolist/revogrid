@@ -1,7 +1,7 @@
-import { Observable, PluginSubscribe } from '../../interfaces';
-import { DataSourceState } from '../../store/dataSource/data.store';
+import { DSourceState } from '../../store/dataSource/data.store';
+import { Observable, PluginSubscribe } from '../..';
 
-type State = DataSourceState<any, any>;
+type State = DSourceState<any, any>;
 
 /**
  * All items
@@ -17,7 +17,7 @@ export const proxyPlugin = (store: Observable<State>): PluginSubscribe<State> =>
      * Getting existing collection of items
      * Mark indexes as visible
      */
-    const oldItems = store.get('items').reduce((r: Record<number, boolean>, v) => {
+    const oldItems = store.get('items').reduce((r: Record<number, boolean>, v: number) => {
       r[v] = true;
       return r;
     }, {});

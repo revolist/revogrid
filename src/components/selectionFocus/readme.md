@@ -7,9 +7,9 @@
 
 | Property                      | Attribute  | Description    | Type                                                                 | Default     |
 | ----------------------------- | ---------- | -------------- | -------------------------------------------------------------------- | ----------- |
-| `colData` _(required)_        | --         |                | `ObservableMap<DataSourceState<ColumnRegular, DimensionCols>>`       | `undefined` |
+| `colData` _(required)_        | --         |                | `ObservableMap<DSourceState<ColumnRegular, DimensionCols>>`          | `undefined` |
 | `colType` _(required)_        | `col-type` |                | `"colPinEnd" \| "colPinStart" \| "rgCol"`                            | `undefined` |
-| `dataStore` _(required)_      | --         |                | `ObservableMap<DataSourceState<DataType, DimensionRows>>`            | `undefined` |
+| `dataStore` _(required)_      | --         |                | `ObservableMap<DSourceState<DataType, DimensionRows>>`               | `undefined` |
 | `dimensionCol` _(required)_   | --         |                | `ObservableMap<DimensionSettingsState>`                              | `undefined` |
 | `dimensionRow` _(required)_   | --         |                | `ObservableMap<DimensionSettingsState>`                              | `undefined` |
 | `focusTemplate`               | --         |                | `(createElement: HyperFunc<VNode>, detail: FocusRenderEvent) => any` | `null`      |

@@ -3,45 +3,47 @@ import { DebouncedFunc } from 'lodash';
 
 import { h } from '@stencil/core';
 import { CELL_HANDLER_CLASS, MOBILE_CLASS } from '../../utils/consts';
-import { Observable, Selection, RevoGrid, Edition } from '../../interfaces';
 import { EventData, getCell, getCurrentCell, isAfterLast } from './selection.utils';
 import { getRange } from '../../store/selection/selection.helpers';
 import SelectionStoreService from '../../store/selection/selection.store.service';
-import ColumnService from '../data/columnService';
-import { DataSourceState, getSourceItem } from '../../store/dataSource/data.store';
+import ColumnService from '../data/column.service';
+import { DSourceState, getSourceItem } from '../../store/dataSource/data.store';
 import { getFromEvent } from '../../utils/events';
+import { DataLookup, DataType, DimensionSettingsState, Observable } from '../../types/interfaces';
+import { TempRange, ChangedRange, BeforeRangeSaveDataDetails, RangeArea, Cell } from '../../types/selection';
+import { DimensionRows } from '../../types/dimension';
 
 type Config = {
   selectionStoreService: SelectionStoreService;
-  dimensionRow: Observable<RevoGrid.DimensionSettingsState>;
-  dimensionCol: Observable<RevoGrid.DimensionSettingsState>;
+  dimensionRow: Observable<DimensionSettingsState>;
+  dimensionCol: Observable<DimensionSettingsState>;
   columnService: ColumnService;
-  dataStore: Observable<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
+  dataStore: Observable<DSourceState<DataType, DimensionRows>>;
 
-  setTempRange(e: Selection.TempRange | null): Event;
-  selectionChanged(e: Selection.ChangedRange): Event;
-  rangeCopy(e: Selection.ChangedRange): Event;
-  rangeDataApply(e: Edition.BeforeRangeSaveDataDetails): CustomEvent;
-  setRange(e: Selection.RangeArea): boolean;
+  setTempRange(e: TempRange | null): Event;
+  selectionChanged(e: ChangedRange): Event;
+  rangeCopy(e: ChangedRange): Event;
+  rangeDataApply(e: BeforeRangeSaveDataDetails): CustomEvent;
+  setRange(e: RangeArea): boolean;
   clearRangeDataApply(e: {
-    range: Selection.RangeArea
+    range: RangeArea
   }): CustomEvent<{
-    range: Selection.RangeArea
+    range: RangeArea
   }>;
 
   getData(): any;
 };
 
-enum AutoFillType {
+const enum AutoFillType {
   selection = 'Selection',
   autoFill = 'AutoFill',
 }
 
 export class AutoFillService {
   private autoFillType: AutoFillType | null = null;
-  private autoFillInitial: Selection.Cell | null = null;
-  private autoFillStart: Selection.Cell | null = null;
-  private autoFillLast: Selection.Cell | null = null;
+  private autoFillInitial: Cell | null = null;
+  private autoFillStart: Cell | null = null;
+  private autoFillLast: Cell | null = null;
 
   private onMouseMoveAutofill: DebouncedFunc<(e: MouseEvent | TouchEvent, data: EventData) => void>;
 
@@ -52,7 +54,7 @@ export class AutoFillService {
    * @param range
    * @param selectionFocus
    */
-  renderAutofill(range: Selection.RangeArea, selectionFocus: Selection.Cell) {
+  renderAutofill(range: RangeArea, selectionFocus: Cell) {
     let handlerStyle;
     if (range) {
       handlerStyle = getCell(range, this.sv.dimensionRow.state, this.sv.dimensionCol.state);
@@ -212,8 +214,8 @@ export class AutoFillService {
   }
 
   /** Trigger range apply events and handle responses */
-  onRangeApply(data: RevoGrid.DataLookup, range: Selection.RangeArea): void {
-    const models: RevoGrid.DataLookup = {};
+  onRangeApply(data: DataLookup, range: RangeArea): void {
+    const models: DataLookup = {};
     for (let rowIndex in data) {
       models[rowIndex] = getSourceItem(this.sv.dataStore, parseInt(rowIndex, 10));
     }
@@ -232,9 +234,9 @@ export class AutoFillService {
   }
 
   /** Apply range and copy data during range application */
-  private applyRangeWithData(newRange: Selection.RangeArea) {
+  private applyRangeWithData(newRange: RangeArea) {
     const oldRange = this.sv.selectionStoreService.ranged;
-    const rangeData: Selection.ChangedRange = {
+    const rangeData: ChangedRange = {
       type: this.sv.dataStore.get('type'),
       colType: this.sv.columnService.type,
       newData: {},
@@ -265,7 +267,7 @@ export class AutoFillService {
    * Update range selection only,
    * no data change (mouse selection)
    */
-  private applyRangeOnly(start?: Selection.Cell, end?: Selection.Cell) {
+  private applyRangeOnly(start?: Cell, end?: Cell) {
     // no changes to apply
     if (!start || !end) {
       return;

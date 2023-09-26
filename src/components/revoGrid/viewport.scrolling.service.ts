@@ -1,17 +1,18 @@
-import { RevoGrid } from '../../interfaces';
 import { columnTypes } from '../../store/storeTypes';
+import { DimensionColPin } from '../..';
+import { ViewPortScrollEvent } from '../..';
 
 export interface ElementScroll {
-  changeScroll?(e: RevoGrid.ViewPortScrollEvent, silent?: boolean): Promise<RevoGrid.ViewPortScrollEvent>;
-  setScroll(e: RevoGrid.ViewPortScrollEvent): Promise<void>;
+  changeScroll?(e: ViewPortScrollEvent, silent?: boolean): Promise<ViewPortScrollEvent>;
+  setScroll(e: ViewPortScrollEvent): Promise<void>;
 }
 export type ElementsScroll = { [key: string]: ElementScroll[] };
 export default class GridScrollingService {
   private elements: ElementsScroll = {};
-  constructor(private setViewport: (e: RevoGrid.ViewPortScrollEvent) => void) {}
+  constructor(private setViewport: (e: ViewPortScrollEvent) => void) {}
 
-  async scrollService(e: RevoGrid.ViewPortScrollEvent, key?: RevoGrid.DimensionColPin | string) {
-    let newEvent: Promise<RevoGrid.ViewPortScrollEvent>;
+  async scrollService(e: ViewPortScrollEvent, key?: DimensionColPin | string) {
+    let newEvent: Promise<ViewPortScrollEvent>;
     let event = e;
     for (let elKey in this.elements) {
       if (e.dimension === 'rgCol' && elKey === 'headerRow') {
@@ -41,13 +42,13 @@ export default class GridScrollingService {
   /**
    * Silent scroll update for mobile devices when we have negative scroll top 
    */
-  async scrollSilentService(e: RevoGrid.ViewPortScrollEvent, key?: RevoGrid.DimensionColPin | string) {
+  async scrollSilentService(e: ViewPortScrollEvent, key?: DimensionColPin | string) {
     for (let elKey in this.elements) {
       // skip same element update
       if (elKey === key) {
         continue;
       }
-      if (columnTypes.includes(key as RevoGrid.DimensionColPin) && (elKey === 'headerRow' || columnTypes.includes(elKey  as RevoGrid.DimensionColPin))) {
+      if (columnTypes.includes(key as DimensionColPin) && (elKey === 'headerRow' || columnTypes.includes(elKey  as DimensionColPin))) {
         for (let el of this.elements[elKey]) {
           await el.changeScroll?.(e, true);
         }
@@ -56,7 +57,7 @@ export default class GridScrollingService {
     }
   }
 
-  private isPinnedColumn(key?: RevoGrid.DimensionColPin | string): key is RevoGrid.DimensionColPin {
+  private isPinnedColumn(key?: DimensionColPin | string): key is DimensionColPin {
     return ['colPinStart', 'colPinEnd'].indexOf(key) > -1;
   }
 

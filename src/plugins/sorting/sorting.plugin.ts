@@ -1,13 +1,15 @@
 import size from 'lodash/size';
 import debounce from 'lodash/debounce';
 
-import { RevoGrid } from '../../interfaces';
 import { setStore } from '../../utils/store.utils';
 import ColumnDataProvider from '../../services/column.data.provider';
-import BasePlugin from '../basePlugin';
+import { BasePlugin } from '../base.plugin';
+import { ColumnProp, Order, CellCompareFunc, ColumnRegular, InitialHeaderClick, DataType } from '../..';
+import { DimensionRows } from '../..';
+import { PluginProviders } from '../../';
 
-export type SortingOrder = Record<RevoGrid.ColumnProp, RevoGrid.Order>;
-type SortingOrderFunction = Record<RevoGrid.ColumnProp, RevoGrid.CellCompareFunc | undefined>;
+export type SortingOrder = Record<ColumnProp, Order>;
+type SortingOrderFunction = Record<ColumnProp, CellCompareFunc | undefined>;
 type ColumnSetEvent = {
   order: SortingOrder;
 };
@@ -31,11 +33,11 @@ export default class SortingPlugin extends BasePlugin {
   private doSort = debounce((order: SortingOrder, comparison: SortingOrderFunction) => this.sort(order, comparison), 50);
 
 
-  constructor(protected revogrid: HTMLRevoGridElement) {
-    super(revogrid);
+  constructor(protected revogrid: HTMLRevoGridElement, providers: PluginProviders) {
+    super(revogrid, providers);
 
     const aftersourceset = async ({ detail: { type } }: CustomEvent<{
-      type: RevoGrid.DimensionRows
+      type: DimensionRows
     }>) => {
       // if sorting was provided - sort data
       if (!!this.sorting && this.sortingFunc) {
@@ -56,7 +58,7 @@ export default class SortingPlugin extends BasePlugin {
       }
       this.doSort(order, sortingFunc);
     };
-    const headerclick = async (e: CustomEvent<RevoGrid.InitialHeaderClick>) => {
+    const headerclick = async (e: CustomEvent<InitialHeaderClick>) => {
       if (e.defaultPrevented) {
         return;
       }
@@ -73,8 +75,8 @@ export default class SortingPlugin extends BasePlugin {
     this.addEventListener('initialHeaderClick', headerclick);
   }
 
-  private getComparer(column: RevoGrid.ColumnRegular, order: RevoGrid.Order): RevoGrid.CellCompareFunc {
-    const cellCmp: RevoGrid.CellCompareFunc = column?.cellCompare.bind({ order }) || this.defaultCellCompare;
+  private getComparer(column: ColumnRegular, order: Order): CellCompareFunc {
+    const cellCmp: CellCompareFunc = column?.cellCompare.bind({ order }) || this.defaultCellCompare;
     if (order == 'asc') {
       return cellCmp;
     }
@@ -88,8 +90,8 @@ export default class SortingPlugin extends BasePlugin {
    * Apply sorting to data on header click
    * If additive - add to existing sorting, multiple columns can be sorted
    */
-  async headerclick(column: RevoGrid.ColumnRegular, index: number, additive: boolean) {
-    let order: RevoGrid.Order = this.getNextOrder(column.order);
+  async headerclick(column: ColumnRegular, index: number, additive: boolean) {
+    let order: Order = this.getNextOrder(column.order);
     const beforeEvent = this.emit('beforesorting', { column, order, additive });
     if (beforeEvent.defaultPrevented) {
       return;
@@ -143,7 +145,7 @@ export default class SortingPlugin extends BasePlugin {
    * @param sorting - per column sorting
    * @param data - this.stores['rgRow'].store.get('source')
    */
-  async sort(sorting: SortingOrder, sortingFunc: SortingOrderFunction, types: RevoGrid.DimensionRows[] = ['rgRow', 'rowPinStart', 'rowPinEnd']) {
+  async sort(sorting: SortingOrder, sortingFunc: SortingOrderFunction, types: DimensionRows[] = ['rgRow', 'rowPinStart', 'rowPinEnd']) {
     // if no sorting - reset
     if (!size(sorting)) {
       this.sorting = null;
@@ -171,20 +173,20 @@ export default class SortingPlugin extends BasePlugin {
     this.emit('afterSortingApply');
   }
 
-  defaultCellCompare(prop: RevoGrid.ColumnProp, a: RevoGrid.DataType, b: RevoGrid.DataType) {
+  defaultCellCompare(prop: ColumnProp, a: DataType, b: DataType) {
     const av = a[prop]?.toString().toLowerCase();
     const bv = b[prop]?.toString().toLowerCase();
 
     return av == bv ? 0 : av > bv ? 1 : -1;
   }
 
-  descCellCompare(cmp: RevoGrid.CellCompareFunc) {
-    return (prop: RevoGrid.ColumnProp, a: RevoGrid.DataType, b: RevoGrid.DataType): number => {
+  descCellCompare(cmp: CellCompareFunc) {
+    return (prop: ColumnProp, a: DataType, b: DataType): number => {
       return -1 * cmp(prop, a, b);
     };
   }
 
-  sortIndexByItems(indexes: number[], source: RevoGrid.DataType[], sortingFunc: SortingOrderFunction): number[] {
+  sortIndexByItems(indexes: number[], source: DataType[], sortingFunc: SortingOrderFunction): number[] {
     // if no sorting - return unsorted indexes
     if (Object.entries(sortingFunc).length === 0) {
       // Unsort indexes
@@ -213,7 +215,7 @@ export default class SortingPlugin extends BasePlugin {
     });
   }
 
-  getNextOrder(currentOrder: RevoGrid.Order): RevoGrid.Order {
+  getNextOrder(currentOrder: Order): Order {
     switch (currentOrder) {
       case undefined:
         return 'asc';

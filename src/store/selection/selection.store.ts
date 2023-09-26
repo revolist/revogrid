@@ -1,11 +1,15 @@
+/**
+ * Selection store
+ */
+
 import { createStore } from '@stencil/store';
-import { Observable, Selection } from '../../interfaces';
 import { setStore } from '../../utils/store.utils';
 import { getRange } from './selection.helpers';
+import { Observable } from '../..';
+import { SelectionStoreState, Cell, TempRange, RangeArea } from '../..';
 
-type StoreState = Selection.SelectionStoreState;
 
-function defaultState(): StoreState {
+function defaultState(): SelectionStoreState {
   return {
     range: null,
     tempRange: null,
@@ -17,7 +21,7 @@ function defaultState(): StoreState {
 }
 
 export class SelectionStore {
-  readonly store: Observable<Selection.SelectionStoreState>;
+  readonly store: Observable<SelectionStoreState>;
   private unsubscribe: { (): void }[] = [];
   constructor() {
     this.store = createStore(defaultState());
@@ -28,7 +32,7 @@ export class SelectionStore {
     });
   }
 
-  onChange<Key extends keyof StoreState>(propName: Key, cb: (newValue: StoreState[Key]) => void) {
+  onChange<Key extends keyof SelectionStoreState>(propName: Key, cb: (newValue: SelectionStoreState[Key]) => void) {
     this.unsubscribe.push(this.store.onChange(propName, cb));
   }
 
@@ -36,7 +40,7 @@ export class SelectionStore {
     setStore(this.store, { focus: null, range: null, edit: null, tempRange: null });
   }
 
-  setFocus(focus: Selection.Cell, end?: Selection.Cell) {
+  setFocus(focus: Cell, end?: Cell) {
     if (!end) {
       setStore(this.store, { focus });
     } else {
@@ -49,7 +53,7 @@ export class SelectionStore {
     }
   }
 
-  setTempArea(range: Selection.TempRange | null) {
+  setTempArea(range: TempRange | null) {
     setStore(this.store, { tempRange: range?.area, tempRangeType: range?.type, edit: null });
   }
 
@@ -58,14 +62,14 @@ export class SelectionStore {
   }
 
   /** Can be applied from selection change or from simple keyboard change clicks */
-  setRangeArea(range: Selection.RangeArea) {
+  setRangeArea(range: RangeArea) {
     setStore(this.store, { range, edit: null, tempRange: null });
   }
-  setRange(start: Selection.Cell, end: Selection.Cell) {
+  setRange(start: Cell, end: Cell) {
     this.setRangeArea(getRange(start, end));
   }
 
-  setLastCell(lastCell: Selection.Cell) {
+  setLastCell(lastCell: Cell) {
     setStore(this.store, { lastCell });
   }
 

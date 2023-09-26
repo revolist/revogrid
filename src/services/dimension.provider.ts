@@ -1,36 +1,36 @@
 import reduce from 'lodash/reduce';
-import { debounce } from 'lodash';
+import debounce from 'lodash/debounce';
 import { columnTypes, rowTypes } from '../store/storeTypes';
-import DimensionStore from '../store/dimension/dimension.store';
+import DimensionStore, { DimensionStoreCollection } from '../store/dimension/dimension.store';
 import ViewportProvider from './viewport.provider';
-import { RevoGrid } from '../interfaces';
 import { getItemByIndex } from '../store/dimension/dimension.helpers';
 import { gatherTrimmedItems, Trimmed } from '../store/dataSource/trimmed.plugin';
 import { RESIZE_INTERVAL } from '../utils/consts';
+import { ColumnRegular, DimensionSettingsState, ViewPortScrollEvent, ViewSettingSizeProp } from '..';
+import { DimensionCols, DimensionType, MultiDimensionType } from '..';
 
-export type ColumnItems = Record<RevoGrid.DimensionCols, RevoGrid.ColumnRegular[]>;
+export type ColumnItems = Record<DimensionCols, ColumnRegular[]>;
 
-export type DimensionStores = { [T in RevoGrid.MultiDimensionType]: DimensionStore };
 export type DimensionConfig = {
-  realSizeChanged(k: RevoGrid.MultiDimensionType): void;
+  realSizeChanged(k: MultiDimensionType): void;
 };
 /**
  * Dimension provider
  * Stores dimension information and custom sizes
  */
 export default class DimensionProvider {
-  readonly stores: DimensionStores;
+  readonly stores: DimensionStoreCollection;
   constructor(private viewports: ViewportProvider, config: DimensionConfig) {
-    const sizeChanged = debounce((k: RevoGrid.MultiDimensionType) => config.realSizeChanged(k), RESIZE_INTERVAL);
+    const sizeChanged = debounce((k: MultiDimensionType) => config.realSizeChanged(k), RESIZE_INTERVAL);
     this.stores = reduce(
       [...rowTypes, ...columnTypes],
-      (sources: Partial<DimensionStores>, k: RevoGrid.MultiDimensionType) => {
+      (sources: Partial<DimensionStoreCollection>, k: MultiDimensionType) => {
         sources[k] = new DimensionStore();
         sources[k].store.onChange('realSize', () => sizeChanged(k));
         return sources;
       },
       {},
-    ) as DimensionStores;
+    ) as DimensionStoreCollection;
   }
   
   /**
@@ -38,7 +38,7 @@ export default class DimensionProvider {
    * @param type - dimension type
    * @param count - count of items
    */
-  clearSize(t: RevoGrid.MultiDimensionType, count: number) {
+  clearSize(t: MultiDimensionType, count: number) {
     this.stores[t].drop();
     // after we done with drop trigger viewport recalculaction
     this.viewports.stores[t].setOriginalSizes(this.stores[t].store.get('originItemSize'));
@@ -51,7 +51,7 @@ export default class DimensionProvider {
    * @param sizes - new custom sizes
    * @param keepOld - keep old sizes merge new with old
    */
-  setCustomSizes(type: RevoGrid.MultiDimensionType, sizes: RevoGrid.ViewSettingSizeProp, keepOld = false) {
+  setCustomSizes(type: MultiDimensionType, sizes: ViewSettingSizeProp, keepOld = false) {
     let newSizes = sizes;
     if (keepOld) {
       const oldSizes = this.stores[type].store.get('sizes');
@@ -67,7 +67,7 @@ export default class DimensionProvider {
     );
   }
 
-  setItemCount(realCount: number, type: RevoGrid.MultiDimensionType) {
+  setItemCount(realCount: number, type: MultiDimensionType) {
     this.viewports.stores[type].setViewport({ realCount });
     this.stores[type].setStore({ count: realCount });
   }
@@ -77,7 +77,7 @@ export default class DimensionProvider {
    * @param trimmed - trimmed items
    * @param type 
    */
-  setTrimmed(trimmed: Partial<Trimmed>, type: RevoGrid.MultiDimensionType) {
+  setTrimmed(trimmed: Partial<Trimmed>, type: MultiDimensionType) {
     const allTrimmed = gatherTrimmedItems(trimmed);
     const dimStoreType = this.stores[type];
     dimStoreType.setStore({ trimmed: allTrimmed });
@@ -91,7 +91,7 @@ export default class DimensionProvider {
    */
   setData(
     itemCount: number,
-    type: RevoGrid.MultiDimensionType,
+    type: MultiDimensionType,
     noVirtual = false
   ) {
     this.setItemCount(itemCount, type);
@@ -105,7 +105,7 @@ export default class DimensionProvider {
    * @param type - dimension type
    */
 
-  private setNoVirtual(type: RevoGrid.MultiDimensionType) {
+  private setNoVirtual(type: MultiDimensionType) {
     const dimension = this.stores[type].getCurrentState();
     this.viewports.stores[type].setViewport({ virtualSize: dimension.realSize });
   }
@@ -113,7 +113,7 @@ export default class DimensionProvider {
   /**
    * Drop all dimension data
    */
-  dropColumns(types: RevoGrid.MultiDimensionType[] = columnTypes) {
+  dropColumns(types: MultiDimensionType[] = columnTypes) {
     for (let type of types) {
       this.stores[type].drop();
       this.viewports.stores[type].clearItems(); // check if needed
@@ -133,9 +133,9 @@ export default class DimensionProvider {
   }
 
   setNewColumns(
-    type: RevoGrid.MultiDimensionType,
+    type: MultiDimensionType,
     newLength: number,
-    sizes?: RevoGrid.ViewSettingSizeProp,
+    sizes?: ViewSettingSizeProp,
     noVirtual = false
   ) {
     this.setItemCount(newLength, type);
@@ -147,27 +147,27 @@ export default class DimensionProvider {
     this.updateViewport(type);
   }
   
-  updateViewport(type: RevoGrid.MultiDimensionType) {
+  updateViewport(type: MultiDimensionType) {
     this.setViewPortCoordinate({
       coordinate: this.viewports.stores[type].lastCoordinate,
       type,
     });
   }
 
-  setViewPortCoordinate({ coordinate, type }: { coordinate: number; type: RevoGrid.MultiDimensionType }) {
+  setViewPortCoordinate({ coordinate, type }: { coordinate: number; type: MultiDimensionType }) {
     const dimension = this.stores[type].getCurrentState();
     this.viewports.stores[type].setViewPortCoordinate(coordinate, dimension);
   }
 
-  getViewPortPos(e: RevoGrid.ViewPortScrollEvent): number {
-    const dimension: RevoGrid.DimensionSettingsState = this.stores[e.dimension].getCurrentState();
+  getViewPortPos(e: ViewPortScrollEvent): number {
+    const dimension: DimensionSettingsState = this.stores[e.dimension].getCurrentState();
     const item = getItemByIndex(dimension, e.coordinate);
 
     return item.start;
   }
 
-  setSettings(data: Partial<RevoGrid.DimensionSettingsState>, dimensionType: RevoGrid.DimensionType) {
-    let stores: RevoGrid.MultiDimensionType[] = [];
+  setSettings(data: Partial<DimensionSettingsState>, dimensionType: DimensionType) {
+    let stores: MultiDimensionType[] = [];
     switch (dimensionType) {
       case 'rgCol':
         stores = columnTypes;

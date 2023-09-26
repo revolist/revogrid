@@ -1,17 +1,17 @@
 import { h } from '@stencil/core';
-import RowRenderer, { RowProps } from '../../components/data/rowRenderer';
-import { RevoGrid } from '../../interfaces';
+import RowRenderer, { RowProps } from '../../components/data/row-renderer';
 import { GROUP_DEPTH, GROUP_EXPANDED, GROUP_EXPAND_BTN, GROUP_EXPAND_EVENT, PSEUDO_GROUP_ITEM } from './grouping.const';
 import { GroupLabelTemplateFunc } from './grouping.row.types';
+import { DataType, PositionItem } from '../../types/interfaces';
 
 interface GroupRowPros extends RowProps {
-  model: RevoGrid.DataType;
+  model: DataType;
   hasExpand: boolean;
   groupingCustomRenderer?: GroupLabelTemplateFunc;
 }
-type Props = GroupRowPros & RevoGrid.PositionItem;
+type Props = GroupRowPros & PositionItem;
 
-function expandEvent(e: MouseEvent, model: RevoGrid.DataType, virtualIndex: number) {
+function expandEvent(e: MouseEvent, model: DataType, virtualIndex: number) {
   const event = new CustomEvent(GROUP_EXPAND_EVENT, {
     detail: {
       model,

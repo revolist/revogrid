@@ -23,21 +23,15 @@ import DimensionProvider, {
   DimensionConfig,
 } from '../../services/dimension.provider';
 import ViewportProvider from '../../services/viewport.provider';
-import {
-  Edition,
-  Selection,
-  RevoGrid,
-  ThemeSpace,
-  RevoPlugin,
-} from '../../interfaces';
-import ThemeService from '../../themeManager/themeService';
+import ThemeService from '../../themeManager/theme.service';
 import { timeout } from '../../utils';
-import AutoSize, { AutoSizeColumnConfig } from '../../plugins/autoSizeColumn';
+import AutoSize, { AutoSizeColumnConfig } from '../../plugins/column.auto-size.plugin';
 import {
   columnTypes as columnDimensions,
   rowTypes as rowDimensions,
 } from '../../store/storeTypes';
-import FilterPlugin, {
+import {
+  FilterPlugin,
   ColumnFilterConfig,
   FilterCollection,
 } from '../../plugins/filter/filter.plugin';
@@ -46,18 +40,24 @@ import ExportFilePlugin from '../../plugins/export/export.plugin';
 import { DataInput } from '../../plugins/export/types';
 import GroupingRowPlugin from '../../plugins/groupingRow/grouping.row.plugin';
 import { GroupingOptions } from '../../plugins/groupingRow/grouping.row.types';
-import { ColumnSource, RowSource } from '../data/columnService';
+import { ColumnSource, RowSource } from '../data/column.service';
 import { RevoViewPort } from './viewport';
 import ViewportService, { FocusedData } from './viewport.service';
 import { ViewPortSections } from './viewport.section';
 import GridScrollingService from './viewport.scrolling.service';
 import { UUID } from '../../utils/consts';
 import SelectionStoreConnector from '../../services/selection.store.connector';
-import { OrdererService } from '../order/orderRenderer';
-import StretchColumn, { isStretchPlugin } from '../../plugins/stretchPlugin';
+import { OrdererService } from '../order/order-renderer';
+import StretchColumn, { isStretchPlugin } from '../../plugins/column.stretch.plugin';
 import { rowDefinitionByType, rowDefinitionRemoveByType } from './grid.helpers';
-import ColumnPlugin from '../../plugins/moveColumn/columnDragPlugin';
+import ColumnPlugin from '../../plugins/moveColumn/column.drag.plugin';
 import { getFromEvent } from '../../utils/events';
+import { MultiDimensionType, DimensionRows, DimensionCols } from '../../types/dimension';
+import { RowHeaders, ColumnRegular, ColumnGrouping, DataType, RowDefinition, ColumnType, FocusTemplateFunc, PositionItem, ColumnProp, ViewPortScrollEvent, InitialHeaderClick, ColumnDataSchema } from '../../types/interfaces';
+import { Editors, BeforeSaveDataDetails, BeforeRangeSaveDataDetails, Cell, ChangedRange, RangeArea } from '../../types/selection';
+import { Theme } from '../../types/theme';
+import { PluginBaseComponent, PluginExternalConstructor } from '../../types/plugin';
+import { PluginProviders } from '../..';
 
 /**
  * Slots
@@ -76,7 +76,7 @@ export class RevoGridComponent {
   // --------------------------------------------------------------------------
 
   /** Excel like show rgRow indexe per rgRow */
-  @Prop() rowHeaders: RevoGrid.RowHeaders | boolean;
+  @Prop() rowHeaders: RowHeaders | boolean;
   /**
    * Defines how many rows/columns should be rendered outside visible area.
    */
@@ -102,22 +102,22 @@ export class RevoGridComponent {
    * Columns - defines an array of grid columns.
    * Can be column or grouped column.
    */
-  @Prop() columns: (RevoGrid.ColumnRegular | RevoGrid.ColumnGrouping)[] = [];
+  @Prop() columns: (ColumnRegular | ColumnGrouping)[] = [];
   /**
    * Source - defines main data source.
    * Can be an Object or 2 dimensional array([][]);
    * Keys/indexes referenced from columns Prop
    */
-  @Prop() source: RevoGrid.DataType[] = [];
+  @Prop() source: DataType[] = [];
   /** Pinned top Source: {[T in ColumnProp]: any} - defines pinned top rows data source. */
-  @Prop() pinnedTopSource: RevoGrid.DataType[] = [];
+  @Prop() pinnedTopSource: DataType[] = [];
   /** Pinned bottom Source: {[T in ColumnProp]: any} - defines pinned bottom rows data source. */
-  @Prop() pinnedBottomSource: RevoGrid.DataType[] = [];
+  @Prop() pinnedBottomSource: DataType[] = [];
   /** Row properies applied */
-  @Prop() rowDefinitions: RevoGrid.RowDefinition[] = [];
+  @Prop() rowDefinitions: RowDefinition[] = [];
 
   /** Custom editors register */
-  @Prop() editors: Edition.Editors = {};
+  @Prop() editors: Editors = {};
 
   /**
    * Apply changes typed in editor on editor close except Escape cases
@@ -131,17 +131,17 @@ export class RevoGridComponent {
    * Has to be predefined during first grid init
    * Every plugin should be inherited from BasePlugin
    */
-  @Prop() plugins: RevoPlugin.PluginClass[];
+  @Prop() plugins: PluginExternalConstructor[];
 
   /** Column Types Format
    *  Every type represent multiple column properties
    *  Types will be merged but can be replaced with column properties
    *  Types were made as separate objects to be reusable per multiple columns
    */
-  @Prop() columnTypes: { [name: string]: RevoGrid.ColumnType } = {};
+  @Prop() columnTypes: { [name: string]: ColumnType } = {};
 
   /** Theme name */
-  @Prop({ reflect: true, mutable: true }) theme: ThemeSpace.Theme = 'default';
+  @Prop({ reflect: true, mutable: true }) theme: Theme = 'default';
 
   /**
    * Row class property
@@ -170,7 +170,7 @@ export class RevoGridComponent {
    * If custom editor in use @method getValue required
    * Check interfaces.d.ts @EditorBase for more info
    */
-  @Prop() focusTemplate: RevoGrid.FocusTemplateFunc;
+  @Prop() focusTemplate: FocusTemplateFunc;
 
   /**
    * Enables column move plugin
@@ -240,28 +240,28 @@ export class RevoGridComponent {
    * Event is not returning size
    * To get actual size use getContentSize after event triggered
    */
-  @Event() contentsizechanged: EventEmitter<RevoGrid.MultiDimensionType>;
+  @Event() contentsizechanged: EventEmitter<MultiDimensionType>;
   /**
    * Before edit event.
    * Triggered before edit data applied.
    * Use e.preventDefault() to prevent edit data set and use you own.
    * Use e.val = {your value} to replace edit result with your own.
    */
-  @Event() beforeedit: EventEmitter<Edition.BeforeSaveDataDetails>;
+  @Event() beforeedit: EventEmitter<BeforeSaveDataDetails>;
 
   /**
    * Before range edit event.
    * Triggered before range data applied, when range selection happened.
    * Use e.preventDefault() to prevent edit data set and use you own.
    */
-  @Event() beforerangeedit: EventEmitter<Edition.BeforeRangeSaveDataDetails>;
+  @Event() beforerangeedit: EventEmitter<BeforeRangeSaveDataDetails>;
 
   /**
    * After edit.
    * Triggered after data applied or range changed.
    */
   @Event() afteredit: EventEmitter<
-    Edition.BeforeSaveDataDetails | Edition.BeforeRangeSaveDataDetails
+    BeforeSaveDataDetails | BeforeRangeSaveDataDetails
   >;
 
   /**
@@ -269,14 +269,14 @@ export class RevoGridComponent {
    * Triggered before autofill applied.
    * Use e.preventDefault() to prevent edit data apply.
    */
-  @Event() beforeautofill: EventEmitter<Selection.ChangedRange>;
+  @Event() beforeautofill: EventEmitter<ChangedRange>;
 
   /**
    * Before range apply.
    * Triggered before range applied.
    * Use e.preventDefault() to prevent range.
    */
-  @Event() beforeange: EventEmitter<Selection.ChangedRange>;
+  @Event() beforeange: EventEmitter<ChangedRange>;
 
   /**
    * Triggered after focus render finished.
@@ -284,7 +284,7 @@ export class RevoGridComponent {
    */
   @Event() afterfocus: EventEmitter<{
     model: any;
-    column: RevoGrid.ColumnRegular;
+    column: ColumnRegular;
   }>;
 
   /**
@@ -305,7 +305,7 @@ export class RevoGridComponent {
    * Use e.preventDefault() to prevent sorting data change.
    */
   @Event() beforesortingapply: EventEmitter<{
-    column: RevoGrid.ColumnRegular;
+    column: ColumnRegular;
     order: 'desc' | 'asc';
     additive: boolean;
   }>;
@@ -315,7 +315,7 @@ export class RevoGridComponent {
    * Use e.preventDefault() to prevent sorting.
    */
   @Event() beforesorting: EventEmitter<{
-    column: RevoGrid.ColumnRegular;
+    column: ColumnRegular;
     order: 'desc' | 'asc';
     additive: boolean;
   }>;
@@ -326,20 +326,20 @@ export class RevoGridComponent {
    * Use e.text = 'new name' to change item name on start.
    */
   @Event() rowdragstart: EventEmitter<{
-    pos: RevoGrid.PositionItem;
+    pos: PositionItem;
     text: string;
   }>;
 
   /**
    * On header click.
    */
-  @Event() headerclick: EventEmitter<RevoGrid.ColumnRegular>;
+  @Event() headerclick: EventEmitter<ColumnRegular>;
 
   /**
    * Before cell focus changed.
    * Use e.preventDefault() to prevent cell focus change.
    */
-  @Event() beforecellfocus: EventEmitter<Edition.BeforeSaveDataDetails>;
+  @Event() beforecellfocus: EventEmitter<BeforeSaveDataDetails>;
 
   /**
    * Before grid focus lost happened.
@@ -351,8 +351,8 @@ export class RevoGridComponent {
    * You can override data source here
    */
   @Event() beforesourceset: EventEmitter<{
-    type: RevoGrid.DimensionRows;
-    source: RevoGrid.DataType[];
+    type: DimensionRows;
+    source: DataType[];
   }>;
 
   /**
@@ -360,22 +360,22 @@ export class RevoGridComponent {
    * You can override data source here
    */
   @Event({ eventName: 'before-any-source' }) beforeAnySource: EventEmitter<{
-    type: RevoGrid.DimensionRows;
-    source: RevoGrid.DataType[];
+    type: DimensionRows;
+    source: DataType[];
   }>;
 
   /**  After rows updated */
   @Event() aftersourceset: EventEmitter<{
-    type: RevoGrid.DimensionRows;
-    source: RevoGrid.DataType[];
+    type: DimensionRows;
+    source: DataType[];
   }>;
 
   /**
    * After all rows updated. Use it if you want to track all changes from sources pinned and main
    */
   @Event({ eventName: 'after-any-source' }) afterAnySource: EventEmitter<{
-    type: RevoGrid.DimensionRows;
-    source: RevoGrid.DataType[];
+    type: DimensionRows;
+    source: DataType[];
   }>;
 
   /**  Before column update */
@@ -387,7 +387,7 @@ export class RevoGridComponent {
   /**  Column updated */
   @Event() aftercolumnsset: EventEmitter<{
     columns: ColumnCollection;
-    order: Record<RevoGrid.ColumnProp, 'asc' | 'desc'>;
+    order: Record<ColumnProp, 'asc' | 'desc'>;
   }>;
 
   /**
@@ -427,7 +427,7 @@ export class RevoGridComponent {
   /**
    * Triggered when view port scrolled
    */
-  @Event() viewportscroll: EventEmitter<RevoGrid.ViewPortScrollEvent>;
+  @Event() viewportscroll: EventEmitter<ViewPortScrollEvent>;
   /**
    * Before export
    * Use e.preventDefault() to prevent export
@@ -439,13 +439,13 @@ export class RevoGridComponent {
    * Before edit started
    * Use e.preventDefault() to prevent edit
    */
-  @Event() beforeeditstart: EventEmitter<Edition.BeforeSaveDataDetails>;
+  @Event() beforeeditstart: EventEmitter<BeforeSaveDataDetails>;
   /**
    * After column resize
    * Get resized columns
    */
   @Event() aftercolumnresize: EventEmitter<{
-    [index: number]: RevoGrid.ColumnRegular;
+    [index: number]: ColumnRegular;
   }>;
   /**
    * Before row definition
@@ -461,7 +461,7 @@ export class RevoGridComponent {
    * Refreshes data viewport.
    * Can be specific part as rgRow or pinned rgRow or 'all' by default.
    */
-  @Method() async refresh(type: RevoGrid.DimensionRows | 'all' = 'all') {
+  @Method() async refresh(type: DimensionRows | 'all' = 'all') {
     this.dataProvider.refresh(type);
   }
 
@@ -484,7 +484,7 @@ export class RevoGridComponent {
   }
 
   /**  Scrolls view port to specified column prop */
-  @Method() async scrollToColumnProp(prop: RevoGrid.ColumnProp) {
+  @Method() async scrollToColumnProp(prop: ColumnProp) {
     const coordinate = this.columnProvider.getColumnIndexByProp(prop, 'rgCol');
     if (coordinate < 0) {
       // already on the screen
@@ -498,7 +498,7 @@ export class RevoGridComponent {
   }
 
   /** Update columns */
-  @Method() async updateColumns(cols: RevoGrid.ColumnRegular[]) {
+  @Method() async updateColumns(cols: ColumnRegular[]) {
     this.columnProvider.updateColumns(cols);
   }
 
@@ -506,7 +506,7 @@ export class RevoGridComponent {
   @Method() async addTrimmed(
     trimmed: Record<number, boolean>,
     trimmedType = 'external',
-    type: RevoGrid.DimensionRows = 'rgRow',
+    type: DimensionRows = 'rgRow',
   ) {
     const event = this.beforetrimmed.emit({
       trimmed,
@@ -522,15 +522,15 @@ export class RevoGridComponent {
   }
 
   /**  Scrolls view port to coordinate */
-  @Method() async scrollToCoordinate(cell: Partial<Selection.Cell>) {
+  @Method() async scrollToCoordinate(cell: Partial<Cell>) {
     this.viewport?.scrollToCell(cell);
   }
 
   /**  Bring cell to edit mode */
   @Method() async setCellEdit(
     rgRow: number,
-    prop: RevoGrid.ColumnProp,
-    rowSource: RevoGrid.DimensionRows = 'rgRow',
+    prop: ColumnProp,
+    rowSource: DimensionRows = 'rgRow',
   ) {
     const rgCol = ColumnDataProvider.getColumnByProp(this.columns, prop);
     if (!rgCol) {
@@ -548,8 +548,8 @@ export class RevoGridComponent {
 
   /**  Set focus range */
   @Method() async setCellsFocus(
-    cellStart: Selection.Cell = { x: 0, y: 0 },
-    cellEnd: Selection.Cell = { x: 0, y: 0 },
+    cellStart: Cell = { x: 0, y: 0 },
+    cellEnd: Cell = { x: 0, y: 0 },
     colType = 'rgCol',
     rowType = 'rgRow',
   ) {
@@ -566,7 +566,7 @@ export class RevoGridComponent {
   }
 
   /**  Get data from source */
-  @Method() async getSource(type: RevoGrid.DimensionRows = 'rgRow') {
+  @Method() async getSource(type: DimensionRows = 'rgRow') {
     return this.dataProvider.stores[type].store.get('source');
   }
 
@@ -575,7 +575,7 @@ export class RevoGridComponent {
    * Trimmed/filtered rows will be excluded
    * @param type - type of source
    */
-  @Method() async getVisibleSource(type: RevoGrid.DimensionRows = 'rgRow') {
+  @Method() async getVisibleSource(type: DimensionRows = 'rgRow') {
     return getVisibleSourceItem(this.dataProvider.stores[type].store);
   }
 
@@ -585,7 +585,7 @@ export class RevoGridComponent {
    * @param type - type of source
    */
   @Method() async getSourceStore(
-    type: RevoGrid.DimensionRows = 'rgRow',
+    type: DimensionRows = 'rgRow',
   ): Promise<RowSource> {
     return this.dataProvider.stores[type].store;
   }
@@ -595,7 +595,7 @@ export class RevoGridComponent {
    * @param type - type of column
    */
   @Method() async getColumnStore(
-    type: RevoGrid.DimensionCols = 'rgCol',
+    type: DimensionCols = 'rgCol',
   ): Promise<ColumnSource> {
     return this.columnProvider.stores[type].store;
   }
@@ -607,7 +607,7 @@ export class RevoGridComponent {
    * @param order - order to apply
    */
   @Method() async updateColumnSorting(
-    column: RevoGrid.ColumnRegular,
+    column: ColumnRegular,
     index: number,
     order: 'asc' | 'desc',
     additive: boolean,
@@ -630,7 +630,7 @@ export class RevoGridComponent {
   /**
    * Receive all columns in data source
    */
-  @Method() async getColumns(): Promise<RevoGrid.ColumnRegular[]> {
+  @Method() async getColumns(): Promise<ColumnRegular[]> {
     return this.columnProvider.getColumns();
   }
 
@@ -649,7 +649,7 @@ export class RevoGridComponent {
   /**
    * Get all active plugins instances
    */
-  @Method() async getPlugins(): Promise<RevoPlugin.Plugin[]> {
+  @Method() async getPlugins(): Promise<PluginBaseComponent[]> {
     return [...this.internalPlugins];
   }
 
@@ -664,13 +664,13 @@ export class RevoGridComponent {
    * Get size of content
    * Including all pinned data
    */
-  @Method() async getContentSize(): Promise<Selection.Cell> {
+  @Method() async getContentSize(): Promise<Cell> {
     return this.dimensionProvider?.getFullSize();
   }
   /**
    * Get the currently selected Range.
    */
-  @Method() async getSelectedRange(): Promise<Selection.RangeArea | null> {
+  @Method() async getSelectedRange(): Promise<RangeArea | null> {
     return this.viewport?.getSelectedRange();
   }
 
@@ -729,7 +729,7 @@ export class RevoGridComponent {
   /** DRAG AND DROP */
   @Listen('internalRowDragStart') onRowDragStarted(
     e: CustomEvent<{
-      pos: RevoGrid.PositionItem;
+      pos: PositionItem;
       text: string;
       event: MouseEvent;
     }>,
@@ -752,19 +752,19 @@ export class RevoGridComponent {
 
   @Listen('internalRowDrag') onRowDrag({
     detail,
-  }: CustomEvent<RevoGrid.PositionItem>) {
+  }: CustomEvent<PositionItem>) {
     this.orderService?.move(detail);
   }
 
   @Listen('internalRowMouseMove') onRowMouseMove(
-    e: CustomEvent<Selection.Cell>,
+    e: CustomEvent<Cell>,
   ): void {
     // e.cancelBubble = true;
     this.orderService?.moveTip(e.detail);
   }
 
   @Listen('internalCellEdit') async onBeforeEdit(
-    e: CustomEvent<Edition.BeforeSaveDataDetails>,
+    e: CustomEvent<BeforeSaveDataDetails>,
   ) {
     // e.cancelBubble = true;
     const { defaultPrevented, detail } = this.beforeedit.emit(e.detail);
@@ -777,7 +777,7 @@ export class RevoGridComponent {
   }
 
   @Listen('internalRangeDataApply') onBeforeRangeEdit(
-    e: CustomEvent<Edition.BeforeRangeSaveDataDetails>,
+    e: CustomEvent<BeforeRangeSaveDataDetails>,
   ) {
     // e.cancelBubble = true;
     const { defaultPrevented, detail } = this.beforerangeedit.emit(e.detail);
@@ -789,7 +789,7 @@ export class RevoGridComponent {
   }
 
   @Listen('internalSelectionChanged') onRangeChanged(
-    e: CustomEvent<Selection.ChangedRange>,
+    e: CustomEvent<ChangedRange>,
   ) {
     // e.cancelBubble = true;
     const beforeange = this.beforeange.emit(e.detail);
@@ -813,7 +813,7 @@ export class RevoGridComponent {
   }
 
   @Listen('initialHeaderClick') onHeaderClick(
-    e: CustomEvent<RevoGrid.InitialHeaderClick>,
+    e: CustomEvent<InitialHeaderClick>,
   ) {
     const { defaultPrevented } = this.headerclick.emit({
       ...e.detail.column,
@@ -825,7 +825,7 @@ export class RevoGridComponent {
   }
 
   @Listen('beforeFocusCell') onCellFocus(
-    e: CustomEvent<Edition.BeforeSaveDataDetails>,
+    e: CustomEvent<BeforeSaveDataDetails>,
   ) {
     // e.cancelBubble = true;
     const { defaultPrevented } = this.beforecellfocus.emit(e.detail);
@@ -859,7 +859,7 @@ export class RevoGridComponent {
    * Plugins
    * Define plugins collection
    */
-  private internalPlugins: RevoPlugin.Plugin[] = [];
+  private internalPlugins: PluginBaseComponent[] = [];
 
   @Element() element: HTMLRevoGridElement;
 
@@ -869,7 +869,7 @@ export class RevoGridComponent {
   @Watch('columnTypes') columnTypesChanged() {
     this.columnChanged(this.columns);
   }
-  @Watch('columns') columnChanged(newVal: RevoGrid.ColumnDataSchema[] = []) {
+  @Watch('columns') columnChanged(newVal: ColumnDataSchema[] = []) {
     // clear existing data
     this.dimensionProvider.dropColumns();
     const columnGather = ColumnDataProvider.getColumns(
@@ -918,7 +918,7 @@ export class RevoGridComponent {
     });
   }
 
-  @Watch('theme') themeChanged(t: ThemeSpace.Theme) {
+  @Watch('theme') themeChanged(t: Theme) {
     this.themeService.register(t);
     this.dimensionProvider.setSettings(
       { originItemSize: this.themeService.rowSize },
@@ -933,12 +933,12 @@ export class RevoGridComponent {
   @Watch('source')
   @Watch('pinnedBottomSource')
   @Watch('pinnedTopSource')
-  dataSourceChanged<T extends RevoGrid.DataType>(
+  dataSourceChanged<T extends DataType>(
     newVal: T[] = [],
     _: T[] | undefined,
     watchName: string,
   ) {
-    let type: RevoGrid.DimensionRows = 'rgRow';
+    let type: DimensionRows = 'rgRow';
     switch (watchName) {
       case 'pinnedBottomSource':
         type = 'rowPinEnd';
@@ -996,7 +996,7 @@ export class RevoGridComponent {
     if (oldVal) {
       const remove = rowDefinitionRemoveByType(oldVal);
       // clear all old data and drop sizes
-      each(remove, (_, t: RevoGrid.DimensionRows) => {
+      each(remove, (_, t: DimensionRows) => {
         this.dimensionProvider.clearSize(
           t,
           this.dataProvider.stores[t].store.get('source').length,
@@ -1006,7 +1006,7 @@ export class RevoGridComponent {
     if (!newVal.length) {
       return;
     }
-    each(newRows, (r, k: RevoGrid.DimensionRows) =>
+    each(newRows, (r, k: DimensionRows) =>
       this.dimensionProvider.setCustomSizes(k, r.sizes || {}),
     );
   }
@@ -1043,12 +1043,15 @@ export class RevoGridComponent {
     let stretch = this.internalPlugins.filter(p => isStretchPlugin(p))[0];
     if ((typeof isStretch === 'boolean' && isStretch) || isStretch === 'true') {
       if (!stretch) {
+        const pluginData: PluginProviders = {
+          data: this.dataProvider,
+          column: this.columnProvider,
+          dimension: this.dimensionProvider,
+          viewport: this.viewportProvider,
+          selection: this.selectionStoreConnector,
+        };
         this.internalPlugins.push(
-          new StretchColumn(this.element, {
-            dataProvider: this.dataProvider,
-            columnProvider: this.columnProvider,
-            dimensionProvider: this.dimensionProvider,
-          }),
+          new StretchColumn(this.element, pluginData),
         );
       } else if (isStretchPlugin(stretch)) {
         stretch.applyStretch(this.columnProvider.getRawColumns());
@@ -1067,7 +1070,7 @@ export class RevoGridComponent {
 
   @Event() rowheaderschanged: EventEmitter;
   @Watch('rowHeaders') rowHeadersChange(
-    rowHeaders?: RevoGrid.RowHeaders | boolean,
+    rowHeaders?: RowHeaders | boolean,
   ) {
     this.rowheaderschanged.emit(rowHeaders);
   }
@@ -1082,7 +1085,7 @@ export class RevoGridComponent {
       rowSize: this.rowSize,
     });
     const dimensionProviderConfig: DimensionConfig = {
-      realSizeChanged: (k: RevoGrid.MultiDimensionType) =>
+      realSizeChanged: (k: MultiDimensionType) =>
         this.contentsizechanged.emit(k),
     };
     this.dimensionProvider = new DimensionProvider(
@@ -1094,7 +1097,7 @@ export class RevoGridComponent {
     this.dataProvider = new DataProvider(this.dimensionProvider);
     this.uuid = `${new Date().getTime()}-rvgrid`;
 
-    const pluginData = {
+    const pluginData: PluginProviders = {
       data: this.dataProvider,
       column: this.columnProvider,
       dimension: this.dimensionProvider,
@@ -1106,11 +1109,7 @@ export class RevoGridComponent {
       this.internalPlugins.push(
         new AutoSize(
           this.element,
-          {
-            dataProvider: this.dataProvider,
-            columnProvider: this.columnProvider,
-            dimensionProvider: this.dimensionProvider,
-          },
+          pluginData,
           typeof this.autoSizeColumn === 'object'
             ? this.autoSizeColumn
             : undefined,
@@ -1121,21 +1120,19 @@ export class RevoGridComponent {
       this.internalPlugins.push(
         new FilterPlugin(
           this.element,
+          pluginData,
           this.uuid,
           typeof this.filter === 'object' ? this.filter : undefined,
         ),
       );
     }
     if (this.exporting) {
-      this.internalPlugins.push(new ExportFilePlugin(this.element));
+      this.internalPlugins.push(new ExportFilePlugin(this.element, pluginData));
     }
-    this.internalPlugins.push(new SortingPlugin(this.element));
+    this.internalPlugins.push(new SortingPlugin(this.element, pluginData));
 
     this.internalPlugins.push(
-      new GroupingRowPlugin(this.element, {
-        dataProvider: this.dataProvider,
-        columnProvider: this.columnProvider,
-      }),
+      new GroupingRowPlugin(this.element, pluginData),
     );
     if (this.canMoveColumns) {
       this.internalPlugins.push(new ColumnPlugin(this.element, pluginData));
@@ -1162,7 +1159,7 @@ export class RevoGridComponent {
     this.groupingChanged(this.grouping);
 
     this.scrollingService = new GridScrollingService(
-      (e: RevoGrid.ViewPortScrollEvent) => {
+      (e: ViewPortScrollEvent) => {
         this.dimensionProvider.setViewPortCoordinate({
           coordinate: e.coordinate,
           type: e.dimension,

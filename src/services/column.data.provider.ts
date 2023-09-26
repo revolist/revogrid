@@ -9,26 +9,27 @@ import DataStore, {
   setSourceByVirtualIndex,
 } from '../store/dataSource/data.store';
 import { columnTypes } from '../store/storeTypes';
-import { RevoGrid } from '../interfaces';
 import GroupingColumnPlugin, {
-  ColumnGrouping,
+  ColumnGroupingCollection,
   isColGrouping,
 } from '../plugins/groupingColumn/grouping.col.plugin';
+import { ColumnData, ColumnDataSchema, ColumnProp, ColumnRegular, ColumnTypes, ViewSettingSizeProp } from '..';
+import { DimensionCols, DimensionColPin } from '..';
 
 export type ColumnCollection = {
-  columns: Record<RevoGrid.DimensionCols, RevoGrid.ColumnRegular[]>;
-  columnByProp: Record<RevoGrid.ColumnProp, RevoGrid.ColumnRegular[]>;
-  columnGrouping: ColumnGrouping;
+  columns: Record<DimensionCols, ColumnRegular[]>;
+  columnByProp: Record<ColumnProp, ColumnRegular[]>;
+  columnGrouping: ColumnGroupingCollection;
   maxLevel: number;
-  sort: Record<RevoGrid.ColumnProp, RevoGrid.ColumnRegular>;
+  sort: Record<ColumnProp, ColumnRegular>;
 };
 
 export type ColumnDataSources = Record<
-  RevoGrid.DimensionCols,
-  DataStore<RevoGrid.ColumnRegular, RevoGrid.DimensionCols>
+  DimensionCols,
+  DataStore<ColumnRegular, DimensionCols>
 >;
-type Sorting = Record<RevoGrid.ColumnProp, RevoGrid.ColumnRegular>;
-type SortingOrder = Record<RevoGrid.ColumnProp, 'asc' | 'desc'>;
+type Sorting = Record<ColumnProp, ColumnRegular>;
+type SortingOrder = Record<ColumnProp, 'asc' | 'desc'>;
 
 export default class ColumnDataProvider {
   readonly dataSources: ColumnDataSources;
@@ -51,7 +52,7 @@ export default class ColumnDataProvider {
   constructor() {
     this.dataSources = reduce(
       columnTypes,
-      (sources: Partial<ColumnDataSources>, k: RevoGrid.DimensionCols) => {
+      (sources: Partial<ColumnDataSources>, k: DimensionCols) => {
         sources[k] = new DataStore(k);
         return sources;
       },
@@ -61,15 +62,15 @@ export default class ColumnDataProvider {
 
   column(
     c: number,
-    pin?: RevoGrid.DimensionColPin,
-  ): RevoGrid.ColumnRegular | undefined {
+    pin?: DimensionColPin,
+  ): ColumnRegular | undefined {
     return this.getColumn(c, pin || 'rgCol');
   }
 
   getColumn(
     virtualIndex: number,
-    type: RevoGrid.DimensionCols,
-  ): RevoGrid.ColumnRegular | undefined {
+    type: DimensionCols,
+  ): ColumnRegular | undefined {
     return getSourceItem(this.dataSources[type].store, virtualIndex);
   }
 
@@ -77,9 +78,9 @@ export default class ColumnDataProvider {
     return reduce(
       this.dataSources,
       (
-        result: Record<RevoGrid.DimensionCols, RevoGrid.ColumnRegular[]>,
+        result: Record<DimensionCols, ColumnRegular[]>,
         item,
-        type: RevoGrid.DimensionCols,
+        type: DimensionCols,
       ) => {
         result[type] = item.store.get('source');
         return result;
@@ -92,32 +93,32 @@ export default class ColumnDataProvider {
     );
   }
 
-  getColumns(type: RevoGrid.DimensionCols | 'all' = 'all') {
+  getColumns(type: DimensionCols | 'all' = 'all') {
     if (type !== 'all') {
       return this.dataSources[type].store.get('source');
     }
-    return columnTypes.reduce((r: RevoGrid.ColumnRegular[], t) => {
+    return columnTypes.reduce((r: ColumnRegular[], t) => {
       r.push(...this.dataSources[t].store.get('source'));
       return r;
     }, []);
   }
 
   getColumnIndexByProp(
-    prop: RevoGrid.ColumnProp,
-    type: RevoGrid.DimensionCols,
+    prop: ColumnProp,
+    type: DimensionCols,
   ): number {
     return getSourceItemVirtualIndexByProp(this.dataSources[type].store, prop);
   }
 
   getColumnByProp(
-    prop: RevoGrid.ColumnProp,
-    type: RevoGrid.DimensionCols,
-  ): RevoGrid.ColumnRegular | undefined {
+    prop: ColumnProp,
+    type: DimensionCols,
+  ): ColumnRegular | undefined {
     const items = this.dataSources[type].store.get('source');
     return find(items, { prop });
   }
 
-  refreshByType(type: RevoGrid.DimensionCols) {
+  refreshByType(type: DimensionCols) {
     this.dataSources[type].refresh();
   }
 
@@ -144,19 +145,19 @@ export default class ColumnDataProvider {
     return data;
   }
 
-  updateColumns(cols: RevoGrid.ColumnRegular[]) {
+  updateColumns(cols: ColumnRegular[]) {
     // collect column by type and propert
     const columnByKey: Partial<
       Record<
-        RevoGrid.DimensionCols,
-        Record<RevoGrid.ColumnProp, RevoGrid.ColumnRegular>
+        DimensionCols,
+        Record<ColumnProp, ColumnRegular>
       >
     > = cols.reduce(
       (
         res: Partial<
           Record<
-            RevoGrid.DimensionCols,
-            Record<RevoGrid.ColumnProp, RevoGrid.ColumnRegular>
+            DimensionCols,
+            Record<ColumnProp, ColumnRegular>
           >
         >,
         c,
@@ -173,12 +174,12 @@ export default class ColumnDataProvider {
 
     // find indexes in source
     const colByIndex: Partial<
-      Record<RevoGrid.DimensionCols, Record<number, RevoGrid.ColumnRegular>>
+      Record<DimensionCols, Record<number, ColumnRegular>>
     > = {};
-    each(columnByKey, (colsToUpdate, type: RevoGrid.DimensionCols) => {
+    each(columnByKey, (colsToUpdate, type: DimensionCols) => {
       const items = this.dataSources[type].store.get('source');
       colByIndex[type] = items.reduce(
-        (result: Record<number, RevoGrid.ColumnRegular>, rgCol, index) => {
+        (result: Record<number, ColumnRegular>, rgCol, index) => {
           const colToUpdateIfExists = colsToUpdate[rgCol.prop];
           if (colToUpdateIfExists) {
             result[index] = colToUpdateIfExists;
@@ -188,22 +189,22 @@ export default class ColumnDataProvider {
         {},
       );
     });
-    each(colByIndex, (colsToUpdate, type: RevoGrid.DimensionCols) =>
+    each(colByIndex, (colsToUpdate, type: DimensionCols) =>
       setSourceByVirtualIndex(this.dataSources[type].store, colsToUpdate),
     );
   }
 
-  updateColumn(column: RevoGrid.ColumnRegular, index: number) {
+  updateColumn(column: ColumnRegular, index: number) {
     const type = ColumnDataProvider.getColumnType(column);
     setSourceByVirtualIndex(this.dataSources[type].store, { [index]: column });
   }
 
   updateColumnSorting(
-    column: RevoGrid.ColumnRegular,
+    column: ColumnRegular,
     index: number,
     sorting: 'asc' | 'desc',
     additive: boolean,
-  ): RevoGrid.ColumnRegular {
+  ): ColumnRegular {
     if (!additive) {
       this.clearSorting();
     }
@@ -217,18 +218,18 @@ export default class ColumnDataProvider {
     const types = reduce(
       this.sorting,
       (
-        r: { [key in Partial<RevoGrid.DimensionCols>]: boolean },
-        c: RevoGrid.ColumnRegular,
+        r: { [key in Partial<DimensionCols>]: boolean },
+        c: ColumnRegular,
       ) => {
         const k = ColumnDataProvider.getColumnType(c);
         r[k] = true;
         return r;
       },
-      {} as { [key in Partial<RevoGrid.DimensionCols>]: boolean },
+      {} as { [key in Partial<DimensionCols>]: boolean },
     );
-    each(types, (_, type: RevoGrid.DimensionCols) => {
+    each(types, (_, type: DimensionCols) => {
       const cols = this.dataSources[type].store.get('source');
-      each(cols, (c: RevoGrid.ColumnRegular) => (c.order = undefined));
+      each(cols, (c: ColumnRegular) => (c.order = undefined));
       this.dataSources[type].setData({ source: [...cols] });
     });
 
@@ -236,13 +237,13 @@ export default class ColumnDataProvider {
   }
 
   static getSizes(
-    cols: RevoGrid.ColumnRegular[],
-  ): RevoGrid.ViewSettingSizeProp {
+    cols: ColumnRegular[],
+  ): ViewSettingSizeProp {
     return reduce(
       cols,
       (
-        res: RevoGrid.ViewSettingSizeProp,
-        c: RevoGrid.ColumnRegular,
+        res: ViewSettingSizeProp,
+        c: ColumnRegular,
         i: number,
       ) => {
         if (c.size) {
@@ -255,22 +256,22 @@ export default class ColumnDataProvider {
   }
 
   static getColumnByProp(
-    columns: RevoGrid.ColumnData,
-    prop: RevoGrid.ColumnProp,
-  ): RevoGrid.ColumnRegular | undefined {
+    columns: ColumnData,
+    prop: ColumnProp,
+  ): ColumnRegular | undefined {
     return find(columns, c => {
       if (isColGrouping(c)) {
         return ColumnDataProvider.getColumnByProp(c.children, prop);
       }
       return c.prop === prop;
-    }) as RevoGrid.ColumnRegular | undefined;
+    }) as ColumnRegular | undefined;
   }
 
   // columns processing
   static getColumns(
-    columns: RevoGrid.ColumnData,
+    columns: ColumnData,
     level = 0,
-    types?: RevoGrid.ColumnTypes,
+    types?: ColumnTypes,
   ): ColumnCollection {
     const collection: ColumnCollection = {
       // columns as they are in stores per type
@@ -295,7 +296,7 @@ export default class ColumnDataProvider {
 
     return reduce(
       columns,
-      (res: ColumnCollection, colData: RevoGrid.ColumnDataSchema) => {
+      (res: ColumnCollection, colData: ColumnDataSchema) => {
         // Grouped column
         if (isColGrouping(colData)) {
           return GroupingColumnPlugin.gatherGroup(
@@ -334,7 +335,7 @@ export default class ColumnDataProvider {
     );
   }
 
-  static getColumnType(rgCol: RevoGrid.ColumnRegular): RevoGrid.DimensionCols {
+  static getColumnType(rgCol: ColumnRegular): DimensionCols {
     if (rgCol.pin) {
       return rgCol.pin;
     }

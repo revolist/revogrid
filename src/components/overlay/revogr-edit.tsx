@@ -1,8 +1,8 @@
 import { Component, Event, EventEmitter, Prop, h, Element, Host, Method } from '@stencil/core';
-
-import { Edition, RevoGrid } from '../../interfaces';
 import { EDIT_INPUT_WR } from '../../utils/consts';
-import { TextEditor } from './editors/text';
+import { TextEditor } from './editors/text-editor';
+import { ColumnRegular } from '../../types/interfaces';
+import { EditCell, EditorCtr, SaveDataDetails, EditorBase, SaveData } from '../../types/selection';
 
 /**
  * Cell editor component
@@ -13,11 +13,11 @@ import { TextEditor } from './editors/text';
 })
 export class RevoEdit {
   @Element() element: HTMLElement;
-  @Prop() editCell: Edition.EditCell;
+  @Prop() editCell: EditCell;
 
-  @Prop() column: RevoGrid.ColumnRegular | null;
+  @Prop() column: ColumnRegular | null;
   /** Custom editors register */
-  @Prop() editor: Edition.EditorCtr | null;
+  @Prop() editor: EditorCtr | null;
 
   /** Save on editor close */
   @Prop() saveOnClose: boolean = false;
@@ -25,7 +25,7 @@ export class RevoEdit {
   @Prop() additionalData: any;
 
   /** Cell edit event */
-  @Event() cellEdit: EventEmitter<Edition.SaveDataDetails>;
+  @Event() cellEdit: EventEmitter<SaveDataDetails>;
 
   /**
    * Close editor event
@@ -34,7 +34,7 @@ export class RevoEdit {
   @Event() closeEdit: EventEmitter<boolean | undefined>;
 
   /** Edit session editor */
-  private currentEditor: Edition.EditorBase | null = null;
+  private currentEditor: EditorBase | null = null;
   private saveRunning = false;
 
   @Method() async cancel() {
@@ -59,7 +59,7 @@ export class RevoEdit {
    * Closes editor when called
    * @param preventFocus - if true editor will not be closed and next cell will not be focused
    */
-  onSave(val: Edition.SaveData, preventFocus?: boolean): void {
+  onSave(val: SaveData, preventFocus?: boolean): void {
     this.saveRunning = true;
     if (this.editCell) {
       this.cellEdit.emit({

@@ -1,8 +1,12 @@
-import { RevoGrid } from '../interfaces';
+import { DimensionCols, DimensionRows } from '..';
 
-export const rowTypes: RevoGrid.DimensionRows[] = ['rowPinStart', 'rgRow', 'rowPinEnd'];
-export const columnTypes: RevoGrid.DimensionCols[] = ['colPinStart', 'rgCol', 'colPinEnd'];
+export const rowTypes: DimensionRows[] = ['rowPinStart', 'rgRow', 'rowPinEnd'];
+export const columnTypes: DimensionCols[] = [
+  'colPinStart',
+  'rgCol',
+  'colPinEnd',
+];
 
-export function isRowType(type: RevoGrid.DimensionRows | any): type is RevoGrid.DimensionRows {
+export function isRowType(type: DimensionRows | any): type is DimensionRows {
   return rowTypes.indexOf(type) > -1;
 }

@@ -1,11 +1,11 @@
 import { h } from '@stencil/core';
-import { RevoGrid } from '../../interfaces';
+import { ColumnRegular } from '../../types/interfaces';
 
 export const FILTER_BUTTON_CLASS = 'rv-filter';
 export const FILTER_BUTTON_ACTIVE = 'active';
 
 type Props = {
-  column: RevoGrid.ColumnRegular;
+  column: ColumnRegular;
 };
 export const SortingSign = ({ column }: Props) => {
   return <i class={column.order} />;

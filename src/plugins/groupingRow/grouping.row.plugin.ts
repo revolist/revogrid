@@ -1,11 +1,9 @@
-import { Edition, RevoGrid } from '../../interfaces';
-import ColumnDataProvider, {
+import {
   ColumnCollection,
 } from '../../services/column.data.provider';
-import { DataProvider } from '../../services/data.provider';
 import { getPhysical, setItems } from '../../store/dataSource/data.store';
 import { columnTypes } from '../../store/storeTypes';
-import BasePlugin from '../basePlugin';
+import { BasePlugin } from '../base.plugin';
 import { FILTER_TRIMMED_TYPE } from '../filter/filter.plugin';
 import { TrimmedEntity } from '../../store/dataSource/trimmed.plugin';
 import {
@@ -32,6 +30,9 @@ import {
   processDoubleConversionTrimmed,
   TRIMMED_GROUPING,
 } from './grouping.trimmed.service';
+import { BeforeSaveDataDetails } from '../..';
+import { ColumnRegular } from '../..';
+import { PluginProviders } from '../../';
 
 export default class GroupingRowPlugin extends BasePlugin {
   private options: GroupingOptions | undefined;
@@ -41,7 +42,7 @@ export default class GroupingRowPlugin extends BasePlugin {
   }
 
   get store() {
-    return this.providers.dataProvider.stores[GROUPING_ROW_TYPE].store;
+    return this.providers.data.stores[GROUPING_ROW_TYPE].store;
   }
 
   // proxy for items get
@@ -55,16 +56,13 @@ export default class GroupingRowPlugin extends BasePlugin {
 
   constructor(
     protected revogrid: HTMLRevoGridElement,
-    protected providers: {
-      dataProvider: DataProvider;
-      columnProvider: ColumnDataProvider;
-    },
+    protected providers: PluginProviders
   ) {
-    super(revogrid);
+    super(revogrid, providers);
   }
 
   // befoce cell focus
-  private onFocus(e: CustomEvent<Edition.BeforeSaveDataDetails>) {
+  private onFocus(e: CustomEvent<BeforeSaveDataDetails>) {
     if (isGrouping(e.detail.model)) {
       e.preventDefault();
     }
@@ -128,7 +126,7 @@ export default class GroupingRowPlugin extends BasePlugin {
     );
   }
 
-  private setColumnGrouping(cols?: RevoGrid.ColumnRegular[]) {
+  private setColumnGrouping(cols?: ColumnRegular[]) {
     // if 0 column as holder
     if (cols?.length) {
       cols[0][PSEUDO_GROUP_COLUMN] = true;
@@ -252,7 +250,7 @@ export default class GroupingRowPlugin extends BasePlugin {
     });
 
     // setup source
-    this.providers.dataProvider.setData(
+    this.providers.data.setData(
       sourceWithGroups,
       GROUPING_ROW_TYPE,
       this.revogrid.disableVirtualY,
@@ -283,7 +281,7 @@ export default class GroupingRowPlugin extends BasePlugin {
       ...(expanded || {}),
     });
     data.source = sourceWithGroups;
-    this.providers.dataProvider.setGrouping({ depth });
+    this.providers.data.setGrouping({ depth });
     this.updateTrimmed(trimmed, childrenByGroup, oldNewIndexMap);
   }
 
@@ -304,8 +302,8 @@ export default class GroupingRowPlugin extends BasePlugin {
     }
     // props exist and columns inited
     for (let t of columnTypes) {
-      if (this.setColumnGrouping(this.providers.columnProvider.getColumns(t))) {
-        this.providers.columnProvider.refreshByType(t);
+      if (this.setColumnGrouping(this.providers.column.getColumns(t))) {
+        this.providers.column.refreshByType(t);
         break;
       }
     }
@@ -318,7 +316,7 @@ export default class GroupingRowPlugin extends BasePlugin {
   clearGrouping() {
     // clear columns
     columnTypes.forEach(t => {
-      const cols = this.providers.columnProvider.getColumns(t);
+      const cols = this.providers.column.getColumns(t);
       let deleted = false;
       cols.forEach(c => {
         if (isGroupingColumn(c)) {
@@ -328,12 +326,12 @@ export default class GroupingRowPlugin extends BasePlugin {
       });
       // if column store had grouping clear and refresh
       if (deleted) {
-        this.providers.columnProvider.refreshByType(t);
+        this.providers.column.refreshByType(t);
       }
     });
     // clear rows
     const { source, oldNewIndexes } = this.getSource(true);
-    this.providers.dataProvider.setData(
+    this.providers.data.setData(
       source,
       GROUPING_ROW_TYPE,
       this.revogrid.disableVirtualY,

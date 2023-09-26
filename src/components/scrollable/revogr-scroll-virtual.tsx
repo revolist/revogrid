@@ -1,7 +1,8 @@
 import { Component, Element, Event, EventEmitter, h, Host, Method, Prop } from '@stencil/core';
-import LocalScrollService from '../../services/localScrollService';
-import { Observable, RevoGrid } from '../../interfaces';
+import LocalScrollService from '../../services/local.scroll.service';
 import { getScrollbarWidth } from '../../utils';
+import { DimensionType } from '../../types/dimension';
+import { Observable, ViewportState, DimensionSettingsState, ViewPortScrollEvent } from '../../types/interfaces';
 
 @Component({
   tag: 'revogr-scroll-virtual',
@@ -15,14 +16,14 @@ export class RevogrScrollVirtual {
 
   @Element() element: HTMLElement;
 
-  @Prop() dimension: RevoGrid.DimensionType = 'rgRow';
-  @Prop() viewportStore: Observable<RevoGrid.ViewportState>;
-  @Prop() dimensionStore: Observable<RevoGrid.DimensionSettingsState>;
+  @Prop() dimension: DimensionType = 'rgRow';
+  @Prop() viewportStore: Observable<ViewportState>;
+  @Prop() dimensionStore: Observable<DimensionSettingsState>;
 
-  @Event() scrollVirtual: EventEmitter<RevoGrid.ViewPortScrollEvent>;
+  @Event() scrollVirtual: EventEmitter<ViewPortScrollEvent>;
 
   @Method()
-  async setScroll(e: RevoGrid.ViewPortScrollEvent): Promise<void> {
+  async setScroll(e: ViewPortScrollEvent): Promise<void> {
     if (this.dimension !== e.dimension) {
       return;
     }
@@ -31,7 +32,7 @@ export class RevogrScrollVirtual {
 
   // update on delta in case we don't know existing position or external change
   @Method()
-  async changeScroll(e: RevoGrid.ViewPortScrollEvent): Promise<RevoGrid.ViewPortScrollEvent> {
+  async changeScroll(e: ViewPortScrollEvent): Promise<ViewPortScrollEvent> {
     if (e.delta) {
       switch (e.dimension) {
         case 'rgCol':

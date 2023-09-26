@@ -1,49 +1,32 @@
-import { RevoPlugin, RevoGrid } from '../interfaces';
-
-type DispatchDetail = RevoGrid.ColumnRegular | RevoGrid.ColumnTemplateProp;
-type Target = HTMLElement | null;
-type Event = {
-  target: HTMLElement | null;
-  preventDefault(): void;
-};
+import { PluginProviders, PluginBaseComponent } from '..';
 
 type WatchConfig = { immediate: boolean };
 
-export function dispatchElement(target: Target, eventName: string, detail: DispatchDetail): CustomEvent {
-  const event = new CustomEvent(eventName, {
-    detail,
-    cancelable: true,
-    bubbles: true,
-  });
-  target?.dispatchEvent(event);
-  return event;
-}
-export function dispatch(e: Event, eventName: string, detail: DispatchDetail): CustomEvent {
-  e.preventDefault();
-  return dispatchElement(e.target as Target, eventName, detail);
-}
-
 /**
  * Base layer for plugins
- * Provide minimal starting core
+ * Provide minimal starting core for plugins to work
+ * Extend this class to create plugin
  */
-export default abstract class BasePlugin implements RevoPlugin.Plugin {
-  protected readonly subscriptions: Record<string, (e?: any) => void> = {};
-  constructor(protected revogrid: HTMLRevoGridElement) {}
+export class BasePlugin implements PluginBaseComponent {
+  protected readonly subscriptions: Record<string, (...args: any[]) => void> = {};
+  constructor(protected revogrid: HTMLRevoGridElement, protected providers: PluginProviders) {}
   /**
    *
-   * @param eventName - event name to subscribe to in revo-grid
+   * @param eventName - event name to subscribe to in revo-grid component (e.g. 'initialHeaderClick')
    * @param callback - callback function for event
    */
-  protected addEventListener(eventName: string, callback: (e: CustomEvent) => void) {
+  protected addEventListener(
+    eventName: string,
+    callback: (e: CustomEvent) => void,
+  ) {
     this.revogrid.addEventListener(eventName, callback);
     this.subscriptions[eventName] = callback;
   }
 
   /**
-   * Subscribe to grid properties to watch changes
+   * Subscribe to property change in revo-grid component
    * You can return false in callback to prevent default value set
-   * 
+   *
    * @param prop - property name
    * @param callback - callback function
    * @param immediate - trigger callback immediately with current value
@@ -51,15 +34,15 @@ export default abstract class BasePlugin implements RevoPlugin.Plugin {
   protected watch<T extends any>(
     prop: string,
     callback: (arg: T) => boolean | void,
-    { immediate }: Partial<WatchConfig> = { immediate: false }
+    { immediate }: Partial<WatchConfig> = { immediate: false },
   ) {
     const nativeValueDesc =
       Object.getOwnPropertyDescriptor(this.revogrid, prop) ||
       Object.getOwnPropertyDescriptor(this.revogrid.constructor.prototype, prop);
-  
+
     // Overwrite property descriptor for this instance
     Object.defineProperty(this.revogrid, prop, {
-      set(val: T){
+      set(val: T) {
         const keepDefault = callback(val);
         if (keepDefault === false) {
           return;
@@ -67,7 +50,7 @@ export default abstract class BasePlugin implements RevoPlugin.Plugin {
         // Continue with native behavior
         return nativeValueDesc?.set?.call(this, val);
       },
-      get(){
+      get() {
         // Continue with native behavior
         return nativeValueDesc?.get?.call(this);
       },
@@ -78,7 +61,7 @@ export default abstract class BasePlugin implements RevoPlugin.Plugin {
   }
 
   /**
-   * Remove event subscription
+   * Remove event listener
    * @param eventName
    */
   protected removeEventListener(eventName: string) {
@@ -87,11 +70,8 @@ export default abstract class BasePlugin implements RevoPlugin.Plugin {
   }
 
   /**
-   * Trigger event to grid upper level
-   * Event can be cancelled
-   * @param eventName
-   * @param detail
-   * @returns event
+   * Emit event from revo-grid component
+   * Event can be cancelled by calling event.preventDefault() in callback
    */
   protected emit(eventName: string, detail?: any) {
     const event = new CustomEvent(eventName, { detail, cancelable: true });
@@ -100,7 +80,7 @@ export default abstract class BasePlugin implements RevoPlugin.Plugin {
   }
 
   /**
-   * Clearing inner subscription
+   * Clear all subscriptions
    */
   protected clearSubscriptions() {
     for (let type in this.subscriptions) {
@@ -109,7 +89,7 @@ export default abstract class BasePlugin implements RevoPlugin.Plugin {
   }
 
   /**
-   * Minimal destroy implementations
+   * Destroy plugin and clear all subscriptions
    */
   destroy() {
     this.clearSubscriptions();

@@ -1,15 +1,17 @@
 import { Component, Method, Event, EventEmitter, Prop, Listen } from '@stencil/core';
 import debounce from 'lodash/debounce';
 
-import { DragStartEvent, Observable, RevoGrid, Selection } from '../../interfaces';
-import { DataSourceState, setItems } from '../../store/dataSource/data.store';
+import { DSourceState, setItems } from '../../store/dataSource/data.store';
 import { DRAGG_TEXT } from '../../utils/consts';
-import RowOrderService from './rowOrderService';
+import RowOrderService from './order-row.service';
+import { DimensionRows } from '../../types/dimension';
+import { DataType, DimensionSettingsState, DragStartEvent, Observable, PositionItem } from '../../types/interfaces';
+import { Cell } from '../../types/selection';
 
 @Component({ tag: 'revogr-order-editor' })
 export class OrderEditor {
   private rowOrderService: RowOrderService;
-  private moveFunc: ((e: Selection.Cell) => void) | null;
+  private moveFunc: ((e: Cell) => void) | null;
   private rowMoveFunc = debounce((y: number) => {
     const rgRow = this.rowOrderService.move(y, this.getData());
     if (rgRow !== null) {
@@ -23,11 +25,11 @@ export class OrderEditor {
   //
   // --------------------------------------------------------------------------
   @Prop() parent: HTMLElement;
-  @Prop() dimensionRow: Observable<RevoGrid.DimensionSettingsState>;
-  @Prop() dimensionCol: Observable<RevoGrid.DimensionSettingsState>;
+  @Prop() dimensionRow: Observable<DimensionSettingsState>;
+  @Prop() dimensionCol: Observable<DimensionSettingsState>;
 
   /** Static stores, not expected to change during component lifetime */
-  @Prop() dataStore: Observable<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
+  @Prop() dataStore: Observable<DSourceState<DataType, DimensionRows>>;
 
   // --------------------------------------------------------------------------
   //
@@ -37,9 +39,9 @@ export class OrderEditor {
 
   /** Row drag started */
   @Event({ cancelable: true }) internalRowDragStart: EventEmitter<{
-    cell: Selection.Cell;
+    cell: Cell;
     text: string;
-    pos: RevoGrid.PositionItem;
+    pos: PositionItem;
     event: MouseEvent;
   }>;
 
@@ -47,10 +49,10 @@ export class OrderEditor {
   @Event({ cancelable: true }) internalRowDragEnd: EventEmitter;
 
   /** Row move */
-  @Event({ cancelable: true }) internalRowDrag: EventEmitter<RevoGrid.PositionItem>;
+  @Event({ cancelable: true }) internalRowDrag: EventEmitter<PositionItem>;
 
   /** Row mouse move */
-  @Event({ cancelable: true }) internalRowMouseMove: EventEmitter<Selection.Cell>;
+  @Event({ cancelable: true }) internalRowMouseMove: EventEmitter<Cell>;
 
   /** Row dragged, new range ready to be applied */
   @Event({ cancelable: true }) initialRowDropped: EventEmitter<{ from: number; to: number }>;

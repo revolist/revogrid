@@ -1,11 +1,11 @@
-import { RevoGrid } from '../../interfaces';
+import { DataType } from '../..';
 
 export type ColSource = {
   headers: string[][];
   props: any[];
 };
 export type DataInput = {
-  data: RevoGrid.DataType[];
+  data: DataType[];
 } & ColSource;
 
 export interface FormatterOptions {

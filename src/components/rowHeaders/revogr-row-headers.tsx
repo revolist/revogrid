@@ -1,14 +1,15 @@
 import { h, Host } from '@stencil/core';
 import { Component, Prop, Event, EventEmitter } from '@stencil/core';
-import { RevoGrid } from '../../interfaces';
 import DataStore from '../../store/dataSource/data.store';
-import ViewportStore from '../../store/viewPort/viewport.store';
+import ViewportStore from '../../store/viewport/viewport.store';
 import { ROW_HEADER_TYPE, UUID } from '../../utils/consts';
 import { ElementScroll } from '../revoGrid/viewport.scrolling.service';
-import { ViewportData } from '../revoGrid/viewport.interfaces';
 import { RowHeaderRender } from './row-header-render';
 import { calculateRowHeaderSize } from '../../utils/row-header-utils';
 import { HEADER_SLOT } from '../revoGrid/viewport.helpers';
+import { DimensionRows, DimensionCols } from '../../types/dimension';
+import { RowHeaders, ViewPortScrollEvent, DataType, ColumnRegular } from '../../types/interfaces';
+import { ViewportData } from '../../types/viewport.interfaces';
 import { JSX } from '../..';
 
 /**
@@ -26,12 +27,12 @@ export class RevogrRowHeaders {
   @Prop() rowClass: string;
 
   @Prop() resize: boolean;
-  @Prop() rowHeaderColumn: RevoGrid.RowHeaders;
+  @Prop() rowHeaderColumn: RowHeaders;
   /** Additional data to pass to renderer */
   @Prop() additionalData: any;
 
   @Event({ bubbles: false })
-  scrollViewport: EventEmitter<RevoGrid.ViewPortScrollEvent>;
+  scrollViewport: EventEmitter<ViewPortScrollEvent>;
   @Event({ bubbles: false }) elementToScroll: EventEmitter<ElementScroll>;
 
   render() {
@@ -44,16 +45,16 @@ export class RevogrRowHeaders {
       const itemCount = data.dataStore.get('items').length;
       // initiate row data
       const dataStore = new DataStore<
-        RevoGrid.DataType,
-        RevoGrid.DimensionRows
+        DataType,
+        DimensionRows
       >(data.type);
       dataStore.updateData(data.dataStore.get('source'));
       // initiate column data
       const colData = new DataStore<
-        RevoGrid.ColumnRegular,
-        RevoGrid.DimensionCols
+        ColumnRegular,
+        DimensionCols
       >('colPinStart');
-      const column: RevoGrid.ColumnRegular = {
+      const column: ColumnRegular = {
         cellTemplate: RowHeaderRender(totalLength),
         ...this.rowHeaderColumn,
       };

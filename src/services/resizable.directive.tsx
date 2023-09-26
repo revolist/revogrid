@@ -80,7 +80,10 @@ export class ResizeDirective {
   private mouseMoveFunc: () => void;
   private mouseUpFunc: () => void;
 
-  constructor(private initialProps: Partial<ResizeProps>, private $event?: (e: ResizeEvent) => void) {
+  constructor(
+    private initialProps: Partial<ResizeProps>,
+    private $event?: (e: ResizeEvent) => void,
+  ) {
     this.props = defaultProps(initialProps);
     this.mouseMoveFunc = this.handleMove.bind(this);
     this.mouseUpFunc = this.handleUp.bind(this);
@@ -143,9 +146,13 @@ export class ResizeDirective {
       eventY = event.clientY;
       eventX = event.clientX;
     }
-    let isX = this.resizeState & RESIZE_MASK['resizable-r'].bit || this.resizeState & RESIZE_MASK['resizable-l'].bit;
+    let isX =
+      this.resizeState & RESIZE_MASK['resizable-r'].bit ||
+      this.resizeState & RESIZE_MASK['resizable-l'].bit;
 
-    let isY = this.resizeState & RESIZE_MASK['resizable-t'].bit || this.resizeState & RESIZE_MASK['resizable-b'].bit;
+    let isY =
+      this.resizeState & RESIZE_MASK['resizable-t'].bit ||
+      this.resizeState & RESIZE_MASK['resizable-b'].bit;
 
     if (isY && this.disableCalcMap & DISABLE_MASK.h) {
       let diffY = eventY - this.mouseY;
@@ -235,7 +242,10 @@ export class ResizeDirective {
     this.unbindMove();
   }
 
-  private setInitials({ clientX, clientY }: { clientX: number; clientY: number }, target?: HTMLElement) {
+  private setInitials(
+    { clientX, clientY }: { clientX: number; clientY: number },
+    target?: HTMLElement,
+  ) {
     const computedStyle = getComputedStyle(this.$el);
     this.$el.classList.add('active');
     this.activeResizer = target;
@@ -246,7 +256,9 @@ export class ResizeDirective {
       this.parent.width = this.$el.parentElement.clientWidth;
 
       // min width
-      const minPaddingX = parseFloat(computedStyle.paddingLeft) + parseFloat(computedStyle.paddingRight);
+      const minPaddingX =
+        parseFloat(computedStyle.paddingLeft) +
+        parseFloat(computedStyle.paddingRight);
       this.minW = Math.max(minPaddingX, this.initialProps.minWidth || 0);
 
       // max width
@@ -261,7 +273,9 @@ export class ResizeDirective {
       this.parent.height = this.$el.parentElement.clientHeight;
 
       // min height
-      const minPaddingY = parseFloat(computedStyle.paddingTop) + parseFloat(computedStyle.paddingBottom);
+      const minPaddingY =
+        parseFloat(computedStyle.paddingTop) +
+        parseFloat(computedStyle.paddingBottom);
       this.minH = Math.max(minPaddingY, this.initialProps.minHeight || 0);
       // max height
       if (this.initialProps.maxHeight) {
@@ -281,19 +295,53 @@ export class ResizeDirective {
   }
 
   private bindMove() {
-    document.documentElement.addEventListener('mouseup', this.mouseUpFunc, true);
-    document.documentElement.addEventListener('touchend', this.mouseUpFunc, true);
-    document.documentElement.addEventListener('mousemove', this.mouseMoveFunc, true);
-    document.documentElement.addEventListener('touchmove', this.mouseMoveFunc, true);
+    document.documentElement.addEventListener(
+      'mouseup',
+      this.mouseUpFunc,
+      true,
+    );
+    document.documentElement.addEventListener(
+      'touchend',
+      this.mouseUpFunc,
+      true,
+    );
+    document.documentElement.addEventListener(
+      'mousemove',
+      this.mouseMoveFunc,
+      true,
+    );
+    document.documentElement.addEventListener(
+      'touchmove',
+      this.mouseMoveFunc,
+      true,
+    );
     document.documentElement.addEventListener('mouseleave', this.mouseUpFunc);
   }
 
   private unbindMove() {
-    document.documentElement.removeEventListener('mouseup', this.mouseUpFunc, true);
-    document.documentElement.removeEventListener('touchend', this.mouseUpFunc, true);
-    document.documentElement.removeEventListener('mousemove', this.mouseMoveFunc, true);
-    document.documentElement.removeEventListener('touchmove', this.mouseMoveFunc, true);
-    document.documentElement.removeEventListener('mouseleave', this.mouseUpFunc);
+    document.documentElement.removeEventListener(
+      'mouseup',
+      this.mouseUpFunc,
+      true,
+    );
+    document.documentElement.removeEventListener(
+      'touchend',
+      this.mouseUpFunc,
+      true,
+    );
+    document.documentElement.removeEventListener(
+      'mousemove',
+      this.mouseMoveFunc,
+      true,
+    );
+    document.documentElement.removeEventListener(
+      'touchmove',
+      this.mouseMoveFunc,
+      true,
+    );
+    document.documentElement.removeEventListener(
+      'mouseleave',
+      this.mouseUpFunc,
+    );
   }
 }
-

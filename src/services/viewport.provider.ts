@@ -1,23 +1,23 @@
 import reduce from 'lodash/reduce';
 import { columnTypes, rowTypes } from '../store/storeTypes';
-import ViewportStore from '../store/viewPort/viewport.store';
-import { RevoGrid } from '../interfaces';
+import ViewportStore, { ViewportStoreCollection } from '../store/viewport/viewport.store';
+import { MultiDimensionType } from '..';
+import { ViewportState } from '..';
 
-export type ViewportStores = { [T in RevoGrid.MultiDimensionType]: ViewportStore };
 export default class ViewportProvider {
-  readonly stores: ViewportStores;
+  readonly stores: ViewportStoreCollection;
   constructor() {
     this.stores = reduce(
       [...rowTypes, ...columnTypes],
-      (sources: Partial<ViewportStores>, k: RevoGrid.MultiDimensionType) => {
+      (sources: Partial<ViewportStoreCollection>, k: MultiDimensionType) => {
         sources[k] = new ViewportStore(k);
         return sources;
       },
       {},
-    ) as ViewportStores;
+    ) as ViewportStoreCollection;
   }
 
-  setViewport(type: RevoGrid.MultiDimensionType, data: Partial<RevoGrid.ViewportState>): void {
+  setViewport(type: MultiDimensionType, data: Partial<ViewportState>): void {
     this.stores[type].setViewport(data);
   }
 }

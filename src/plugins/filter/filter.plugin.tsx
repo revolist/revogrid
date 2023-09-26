@@ -1,11 +1,13 @@
 import { h } from '@stencil/core';
-import BasePlugin from '../basePlugin';
-import { RevoGrid } from '../../interfaces';
+import reduce from 'lodash/reduce';
+
+import { BasePlugin } from '../base.plugin';
 import { FILTER_PROP, isFilterBtn } from './filter.button';
 import { MultiFilterItem } from './filter.pop';
 import { filterEntities, filterNames, FilterType, filterTypes } from './filter.service';
 import { LogicFunction } from './filter.types';
-import { reduce } from 'lodash';
+import { ColumnProp, ColumnRegular, DataType } from '../../types/interfaces';
+import { PluginProviders } from '../..';
 
 type CustomFilter = {
   columnFilterType: string; // property defined in column filter: string/number/abstract/enum...etc
@@ -45,19 +47,19 @@ export type ColumnFilterConfig = {
   multiFilterItems?: MultiFilterItem;
   disableDynamicFiltering?: boolean;
 };
-type HeaderEvent = CustomEvent<RevoGrid.ColumnRegular>;
+type HeaderEvent = CustomEvent<ColumnRegular>;
 type FilterCollectionItem = {
   filter: LogicFunction;
   type: FilterType;
   value?: any;
 };
 
-export type FilterCollection = Record<RevoGrid.ColumnProp, FilterCollectionItem>;
+export type FilterCollection = Record<ColumnProp, FilterCollectionItem>;
 
 export const FILTER_TRIMMED_TYPE = 'filter';
 export const FILTER_CONFIG_CHANGED_EVENT = 'filterconfigchanged';
 
-export default class FilterPlugin extends BasePlugin {
+export class FilterPlugin extends BasePlugin {
   private pop: HTMLRevogrFilterPanelElement;
   private filterCollection: FilterCollection = {};
   private multiFilterItems: MultiFilterItem = {};
@@ -66,8 +68,8 @@ export default class FilterPlugin extends BasePlugin {
   private possibleFilterEntities: Record<string, LogicFunction> = { ...filterEntities };
   private filterProp = FILTER_PROP;
 
-  constructor(protected revogrid: HTMLRevoGridElement, uiid: string, config?: ColumnFilterConfig) {
-    super(revogrid);
+  constructor(protected revogrid: HTMLRevoGridElement, providers: PluginProviders, uiid: string, config?: ColumnFilterConfig) {
+    super(revogrid, providers);
     if (config) {
       this.initConfig(config);
     }
@@ -244,8 +246,8 @@ export default class FilterPlugin extends BasePlugin {
   /**
    * Triggers grid filtering
    */
-  async doFiltering(collection: FilterCollection, items: RevoGrid.DataType[], columns: RevoGrid.ColumnRegular[], filterItems: MultiFilterItem) {
-    const columnsToUpdate: RevoGrid.ColumnRegular[] = [];
+  async doFiltering(collection: FilterCollection, items: DataType[], columns: ColumnRegular[], filterItems: MultiFilterItem) {
+    const columnsToUpdate: ColumnRegular[] = [];
 
     columns.forEach(rgCol => {
       const column = { ...rgCol };
@@ -317,7 +319,7 @@ export default class FilterPlugin extends BasePlugin {
     };
   }
 
-  private getRowFilter(rows: RevoGrid.DataType[], filterItems: MultiFilterItem) {
+  private getRowFilter(rows: DataType[], filterItems: MultiFilterItem) {
     const propKeys = Object.keys(filterItems);
 
     const trimmed: Record<number, boolean> = {};

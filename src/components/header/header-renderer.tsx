@@ -1,21 +1,22 @@
 import { h, VNode } from '@stencil/core';
-import { RevoGrid, Selection } from '../../interfaces';
 import { FilterButton } from '../../plugins/filter/filter.button';
 import { SortingSign } from '../../plugins/sorting/sorting.sign';
 import { ResizeEvent, ResizeProps } from '../../services/resizable.directive';
 import { DATA_COL, FOCUS_CLASS, HEADER_CLASS, HEADER_SORTABLE_CLASS, MIN_COL_SIZE } from '../../utils/consts';
-import { HeaderCellRenderer } from './headerCellRenderer';
+import { HeaderCellRenderer } from './header-cell-renderer';
+import { VirtualPositionItem, ColumnTemplateProp, InitialHeaderClick, CellProps } from '../../types/interfaces';
+import { RangeArea } from '../../types/selection';
 
 type Props = {
-  column: RevoGrid.VirtualPositionItem;
+  column: VirtualPositionItem;
   additionalData: any;
-  data?: RevoGrid.ColumnTemplateProp;
-  range?: Selection.RangeArea;
+  data?: ColumnTemplateProp;
+  range?: RangeArea;
   canResize?: boolean;
   canFilter?: boolean;
   onResize?(e: ResizeEvent): void;
-  onClick?(data: RevoGrid.InitialHeaderClick): void;
-  onDoubleClick?(data: RevoGrid.InitialHeaderClick): void;
+  onClick?(data: InitialHeaderClick): void;
+  onDoubleClick?(data: InitialHeaderClick): void;
 } & Partial<Pick<ResizeProps, 'active'>>;
 
 const HeaderRenderer = (p: Props): VNode => {
@@ -26,7 +27,7 @@ const HeaderRenderer = (p: Props): VNode => {
   if (p.data?.order) {
     cellClass[p.data.order] = true;
   }
-  const dataProps: RevoGrid.CellProps & Partial<ResizeProps> = {
+  const dataProps: CellProps & Partial<ResizeProps> = {
     [DATA_COL]: p.column.itemIndex,
     canResize: p.canResize,
     minWidth: p.data?.minSize || MIN_COL_SIZE,

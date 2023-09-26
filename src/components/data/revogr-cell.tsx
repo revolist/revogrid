@@ -1,17 +1,14 @@
 import { Component, Event, Prop, EventEmitter, h, VNode, Host } from '@stencil/core';
-import {
-  BeforeCellRenderEvent,
-  DragStartEvent,
-  RevoGrid,
-} from '../../interfaces';
+
 import {
   DATA_COL,
   DATA_ROW,
   DRAGGABLE_CLASS,
   DRAG_ICON_CLASS,
 } from '../../utils/consts';
-import ColumnService from './columnService';
-import { PADDING_DEPTH } from './rowRenderer';
+import ColumnService from './column.service';
+import { PADDING_DEPTH } from './row-renderer';
+import { BeforeCellRenderEvent, CellProps, ColumnDataSchemaModel, DragStartEvent, Providers, RowDrag } from '../../types/interfaces';
 /**
  * Component is responsible for rendering cell
  * Main purpose is to track changes and understand what exactly need to be rerendered instead of full grid render
@@ -32,7 +29,7 @@ export class RevogridCellRenderer {
   /**
    * Cached providers
    */
-  @Prop() providers!: RevoGrid.Providers;
+  @Prop() providers!: Providers;
   /**
    * Grouping
    */
@@ -87,7 +84,7 @@ export class RevogridCellRenderer {
     const {
       detail: { column: columnProps, row: rowProps },
     } = cellEvent;
-    const defaultProps: RevoGrid.CellProps = {
+    const defaultProps: CellProps = {
       [DATA_COL]: columnProps.itemIndex,
       [DATA_ROW]: rowProps.itemIndex,
       style: {
@@ -145,8 +142,8 @@ export class RevogridCellRenderer {
 }
 
 function isRowDragService(
-  rowDrag: RevoGrid.RowDrag,
-  model: RevoGrid.ColumnDataSchemaModel,
+  rowDrag: RowDrag,
+  model: ColumnDataSchemaModel,
 ): boolean {
   if (typeof rowDrag === 'function') {
     return rowDrag(model);

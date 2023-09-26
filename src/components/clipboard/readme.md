@@ -29,7 +29,7 @@
 
 ## Methods
 
-### `doCopy(e: DataTransfer, data?: RevoGrid.DataFormat[][]) => Promise<void>`
+### `doCopy(e: DataTransfer, data?: DataFormat[][]) => Promise<void>`
 
 
 

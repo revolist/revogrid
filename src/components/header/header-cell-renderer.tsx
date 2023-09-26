@@ -1,14 +1,14 @@
 import { h, VNode } from '@stencil/core';
-import { RevoGrid } from '../../interfaces';
 import { dispatch } from '../../plugins/dispatcher';
-import ColumnService from '../data/columnService';
+import ColumnService from '../data/column.service';
 import { ResizableElement } from '../../services/resizable.element';
 import { ResizeProps } from '../../services/resizable.directive';
+import { CellProps, ColumnTemplateProp } from '../../types/interfaces';
 
 type Props = {
-  props: RevoGrid.CellProps & Partial<ResizeProps>;
+  props: CellProps & Partial<ResizeProps>;
   additionalData: any;
-  data?: RevoGrid.ColumnTemplateProp;
+  data?: ColumnTemplateProp;
 };
 
 const ON_COLUMN_CLICK = 'column-click';

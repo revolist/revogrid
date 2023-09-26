@@ -1,22 +1,23 @@
 import { h } from '@stencil/core';
-import { isEnterKey, isTab } from '../../../utils/keyCodes.utils';
-import { Edition, RevoGrid } from '../../../interfaces';
+import { isEnterKey, isTab } from '../../../utils/key.utils';
 import { timeout } from '../../../utils';
+import { ColumnRegular } from '../../../types/interfaces';
+import { EditCell, EditorBase, SaveData } from '../../../types/selection';
 
 /**
  * Callback triggered on cell editor save
  * Closes editor when called
  * @param preventFocus - if true editor will not be closed and next cell will not be focused
  */
-export type SaveCallback = (value: Edition.SaveData, preventFocus: boolean) => void;
+export type SaveCallback = (value: SaveData, preventFocus: boolean) => void;
 
-export class TextEditor implements Edition.EditorBase {
+export class TextEditor implements EditorBase {
   private editInput!: HTMLInputElement;
 
   public element: Element | null = null;
-  public editCell: Edition.EditCell | null = null;
+  public editCell: EditCell | null = null;
 
-  constructor(public column: RevoGrid.ColumnRegular, private saveCallback?: SaveCallback) {}
+  constructor(public column: ColumnRegular, private saveCallback?: SaveCallback) {}
 
   async componentDidRender(): Promise<void> {
     if (this.editInput) {

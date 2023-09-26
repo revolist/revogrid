@@ -1,20 +1,21 @@
 import { h, VNode } from '@stencil/core';
-import { RevoGrid } from '../../interfaces';
-import { DimensionStores } from '../../services/dimension.provider';
-import { ViewportStores } from '../../services/viewport.provider';
-import OrderRenderer, { OrdererService } from '../order/orderRenderer';
+import OrderRenderer, { OrdererService } from '../order/order-renderer';
+import { ViewPortScrollEvent } from '../../types/interfaces';
+import { DimensionColPin } from '../../types/dimension';
+import { DimensionStoreCollection } from '../../store/dimension/dimension.store';
+import { ViewportStoreCollection } from '../../store/viewport/viewport.store';
 
 export interface ElementScroll {
-  changeScroll?(e: RevoGrid.ViewPortScrollEvent): Promise<RevoGrid.ViewPortScrollEvent>;
-  setScroll(e: RevoGrid.ViewPortScrollEvent): Promise<void>;
+  changeScroll?(e: ViewPortScrollEvent): Promise<ViewPortScrollEvent>;
+  setScroll(e: ViewPortScrollEvent): Promise<void>;
 }
 
 type Props = {
-  viewports: ViewportStores;
-  dimensions: DimensionStores;
+  viewports: ViewportStoreCollection;
+  dimensions: DimensionStoreCollection;
   orderRef(e: OrdererService): void;
   registerElement(el: ElementScroll | null, key: string): void;
-  onScroll(e: RevoGrid.ViewPortScrollEvent, key?: RevoGrid.DimensionColPin | string): void;
+  onScroll(e: ViewPortScrollEvent, key?: DimensionColPin | string): void;
   nakedClick(e: MouseEvent): void;
 };
 

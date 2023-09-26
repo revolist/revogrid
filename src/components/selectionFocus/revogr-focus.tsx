@@ -1,9 +1,11 @@
 import { Component, Prop, h, Host, Event, Element, EventEmitter } from '@stencil/core';
-import { FocusRenderEvent, Observable, RevoGrid, Selection } from '../../interfaces';
 import { FOCUS_CLASS } from '../../utils/consts';
-import { ColumnSource, RowSource } from '../data/columnService';
+import { ColumnSource, RowSource } from '../data/column.service';
 import { getElStyle } from '../overlay/selection.utils';
 import { getSourceItem } from '../../store/dataSource/data.store';
+import { Cell, SelectionStoreState } from '../../types/selection';
+import { ColumnRegular, DimensionSettingsState, FocusRenderEvent, FocusTemplateFunc, Observable } from '../../types/interfaces';
+import { DimensionCols, DimensionRows } from '../../types/dimension';
 
 @Component({
   tag: 'revogr-focus',
@@ -13,15 +15,15 @@ export class RevogrFocus {
   @Element() el: HTMLElement;
 
   /** Dynamic stores */
-  @Prop() selectionStore!: Observable<Selection.SelectionStoreState>;
-  @Prop() dimensionRow!: Observable<RevoGrid.DimensionSettingsState>;
-  @Prop() dimensionCol!: Observable<RevoGrid.DimensionSettingsState>;
+  @Prop() selectionStore!: Observable<SelectionStoreState>;
+  @Prop() dimensionRow!: Observable<DimensionSettingsState>;
+  @Prop() dimensionCol!: Observable<DimensionSettingsState>;
   @Prop() dataStore!: RowSource;
   @Prop() colData!: ColumnSource;
-  @Prop() colType!: RevoGrid.DimensionCols;
-  @Prop() rowType!: RevoGrid.DimensionRows;
+  @Prop() colType!: DimensionCols;
+  @Prop() rowType!: DimensionRows;
 
-  @Prop() focusTemplate: RevoGrid.FocusTemplateFunc | null = null;
+  @Prop() focusTemplate: FocusTemplateFunc | null = null;
   @Event({ eventName: 'before-focus-render' }) beforeFocusRender: EventEmitter<FocusRenderEvent>;
   /**
    * Before focus changed verify if it's in view and scroll viewport into this view
@@ -33,12 +35,12 @@ export class RevogrFocus {
    */
   @Event({ eventName: 'afterfocus' }) afterFocus: EventEmitter<{
     model: any;
-    column: RevoGrid.ColumnRegular;
+    column: ColumnRegular;
   }>;
 
-  private activeFocus: Selection.Cell = null;
+  private activeFocus: Cell = null;
 
-  private changed(e: HTMLElement, focus: Selection.Cell): void {
+  private changed(e: HTMLElement, focus: Cell): void {
     const beforeScrollIn = this.beforeScrollIntoView.emit({ el: e });
     if (!beforeScrollIn.defaultPrevented) {
       e.scrollIntoView({

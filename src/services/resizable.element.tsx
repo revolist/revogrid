@@ -1,8 +1,8 @@
 import { h, VNode } from '@stencil/core';
-import { RevoGrid } from '../interfaces';
 import { ResizeProps, ResizeDirective, ResizeEvents } from './resizable.directive';
+import { CellProps } from '../types/interfaces';
 
-export const ResizableElement = (props: Partial<ResizeProps> & RevoGrid.CellProps, children: VNode[]) => {
+export const ResizableElement = (props: Partial<ResizeProps> & CellProps, children: VNode[]) => {
   const resizeEls: VNode[] = [];
   const directive =
     (props.canResize &&

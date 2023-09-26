@@ -1,8 +1,9 @@
 import { Component, Prop, h, Host } from '@stencil/core';
-import { throttle } from 'lodash';
-import { Observable, RevoGrid, Selection } from '../../interfaces';
+import throttle from 'lodash/throttle';
 import { TMP_SELECTION_BG_CLASS } from '../../utils/consts';
 import { getElStyle } from '../overlay/selection.utils';
+import { Observable, DimensionSettingsState } from '../../types/interfaces';
+import { SelectionStoreState, RangeArea } from '../../types/selection';
 
 /**
  * Temporary range selection
@@ -23,16 +24,16 @@ export class RevogrFocus {
   /**
    * Selection store, shows current selection and focus
    */
-  @Prop() selectionStore: Observable<Selection.SelectionStoreState>;
+  @Prop() selectionStore: Observable<SelectionStoreState>;
 
   /**
    * Dimension row store
    */
-  @Prop() dimensionRow: Observable<RevoGrid.DimensionSettingsState>;
+  @Prop() dimensionRow: Observable<DimensionSettingsState>;
   /**
    * Dimension column store
    */
-  @Prop() dimensionCol: Observable<RevoGrid.DimensionSettingsState>;
+  @Prop() dimensionCol: Observable<DimensionSettingsState>;
   private readonly onChange = throttle((e: HTMLElement) => this.doChange(e), 300);
 
   private doChange(e: HTMLElement): void {
@@ -82,7 +83,7 @@ export class RevogrFocus {
     );
   }
 
-  private getRange(): Selection.RangeArea | null {
+  private getRange(): RangeArea | null {
     const range = this.selectionStore.get('range');
     if (range) {
       return range;

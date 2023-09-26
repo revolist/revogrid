@@ -11,14 +11,16 @@ import {
 } from '@stencil/core';
 import { HTMLStencilElement, State } from '@stencil/core/internal';
 
-import ColumnService, { ColumnSource, RowSource } from './columnService';
+import ColumnService, { ColumnSource, RowSource } from './column.service';
 import { ROW_FOCUSED_CLASS } from '../../utils/consts';
 
 import { getSourceItem } from '../../store/dataSource/data.store';
-import { BeforeRowRenderEvent, Observable, RevoGrid, Selection } from '../../interfaces';
-import RowRenderer from './rowRenderer';
+import RowRenderer from './row-renderer';
 import GroupingRowRenderer from '../../plugins/groupingRow/grouping.row.renderer';
 import { isGrouping } from '../../plugins/groupingRow/grouping.service';
+import { DimensionRows } from '../../types/dimension';
+import { Observable, ViewportState, DimensionSettingsState, BeforeRowRenderEvent, Providers } from '../../types/interfaces';
+import { SelectionStoreState, RangeArea } from '../../types/selection';
 
 /**
  * This component is responsible for rendering data
@@ -51,16 +53,16 @@ export class RevogrData {
    * Used in plugins such as vue or react to pass root app entity to cells
    */
   @Prop() additionalData: any;
-  @Prop() rowSelectionStore!: Observable<Selection.SelectionStoreState>;
-  @Prop() viewportRow!: Observable<RevoGrid.ViewportState>;
-  @Prop() viewportCol!: Observable<RevoGrid.ViewportState>;
+  @Prop() rowSelectionStore!: Observable<SelectionStoreState>;
+  @Prop() viewportRow!: Observable<ViewportState>;
+  @Prop() viewportCol!: Observable<ViewportState>;
 
-  @Prop() dimensionRow!: Observable<RevoGrid.DimensionSettingsState>;
+  @Prop() dimensionRow!: Observable<DimensionSettingsState>;
 
   /** Static stores, not expected to change during component lifetime */
   @Prop() colData!: ColumnSource;
   @Prop() dataStore!: RowSource;
-  @Prop() type!: RevoGrid.DimensionRows;
+  @Prop() type!: DimensionRows;
 
   /**
    * Before each row render
@@ -72,11 +74,11 @@ export class RevogrData {
   @Event() afterrender: EventEmitter;
 
   private renderedRows = new Map<number, VNode>();
-  private currentRange: Selection.RangeArea | null = null;
+  private currentRange: RangeArea | null = null;
 
   private rangeUnsubscribe: (() => void) | undefined;
 
-  @State() providers: RevoGrid.Providers;
+  @State() providers: Providers;
 
   @Watch('dataStore')
   @Watch('colData')

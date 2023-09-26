@@ -1,12 +1,12 @@
 import { Component, h, Host, Listen, Prop, State, Event, EventEmitter, VNode, Method } from '@stencil/core';
 import { FilterType } from './filter.service';
-import { RevoGrid } from '../../interfaces';
 import { AndOrButton, isFilterBtn, TrashButton } from './filter.button';
 import { RevoButton } from '../../components/button/button';
-import '../../utils/closestPolifill';
+import '../../utils/closest.polifill';
 import { LogicFunction } from './filter.types';
 import { FilterCaptions } from './filter.plugin';
 import debounce from 'lodash/debounce';
+import { ColumnProp } from '../../types/interfaces';
 
 /**
  * @typedef FilterItem
@@ -16,7 +16,7 @@ import debounce from 'lodash/debounce';
  * @property {any} value - value for additional filtering, text value or some id
  */
 export type FilterItem = {
-  prop?: RevoGrid.ColumnProp;
+  prop?: ColumnProp;
   type?: FilterType;
   value?: any;
 };
@@ -121,7 +121,7 @@ export class FilterPanel {
     return options;
   }
 
-  renderExtra(prop: RevoGrid.ColumnProp, index: number) {
+  renderExtra(prop: ColumnProp, index: number) {
     const currentFilter = this.filterItems[prop];
 
     if (!currentFilter) return '';
@@ -219,7 +219,7 @@ export class FilterPanel {
     );
   }
 
-  private onFilterTypeChange(e: Event, prop: RevoGrid.ColumnProp, index: number) {
+  private onFilterTypeChange(e: Event, prop: ColumnProp, index: number) {
     const el = e.target as HTMLSelectElement;
     const type = el.value as FilterType;
 
@@ -285,7 +285,7 @@ export class FilterPanel {
     }, 0);
   }
 
-  private onUserInput(index: number, prop: RevoGrid.ColumnProp, event: Event) {
+  private onUserInput(index: number, prop: ColumnProp, event: Event) {
     // update the value of the filter item
     this.filterItems[prop][index].value = (event.target as HTMLInputElement).value;
 

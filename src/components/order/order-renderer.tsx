@@ -1,5 +1,6 @@
 import { h, VNode } from '@stencil/core';
-import { RevoGrid, Selection } from '../../interfaces';
+import { PositionItem } from '../../types/interfaces';
+import { Cell } from '../../types/selection';
 
 type Props = { ref: { (e: OrdererService): void } };
 
@@ -13,7 +14,7 @@ export class OrdererService {
   text!: HTMLElement;
   draggable!: HTMLElement;
 
-  start(parent: HTMLElement, { pos, text, event }: { pos: RevoGrid.PositionItem; text: string; event: MouseEvent }): void {
+  start(parent: HTMLElement, { pos, text, event }: { pos: PositionItem; text: string; event: MouseEvent }): void {
     const { top } = parent.getBoundingClientRect();
     this.parentY = top;
     if (this.text) {
@@ -26,10 +27,10 @@ export class OrdererService {
   end(): void {
     this.el?.classList.add('hidden');
   }
-  move(pos: RevoGrid.PositionItem): void {
+  move(pos: PositionItem): void {
     this.moveElement(pos.end - this.parentY);
   }
-  moveTip({ x, y }: Selection.Cell): void {
+  moveTip({ x, y }: Cell): void {
     if (!this.draggable) {
       return;
     }

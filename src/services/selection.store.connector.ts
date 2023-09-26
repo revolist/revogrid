@@ -1,15 +1,13 @@
-import { Edition, Selection, RevoGrid } from '../interfaces';
 import { cropCellToMax, isHiddenStore, nextCell } from '../store/selection/selection.helpers';
 import { SelectionStore } from '../store/selection/selection.store';
-
-import Cell = Selection.Cell;
-import EditCellStore = Edition.EditCellStore;
+import { MultiDimensionType, DimensionCols, DimensionRows } from '..';
+import { Cell, EditCellStore, RangeArea } from '..';
 
 type StoreByDimension = Record<number, SelectionStore>;
 type FocusedStore = {
   entity: SelectionStore;
-  cell: Selection.Cell;
-  position: Selection.Cell;
+  cell: Cell;
+  position: Cell;
 };
 
 type StoresMapping<T> = { [xOrY: number]: Partial<T> };
@@ -27,9 +25,9 @@ export default class SelectionStoreConnector {
   /**
    * Helpers for data conversion
    */
-  readonly storesByType: Partial<Record<RevoGrid.MultiDimensionType, number>> = {};
-  readonly storesXToType: StoresMapping<RevoGrid.DimensionCols> = {};
-  readonly storesYToType: StoresMapping<RevoGrid.DimensionRows> = {};
+  readonly storesByType: Partial<Record<MultiDimensionType, number>> = {};
+  readonly storesXToType: StoresMapping<DimensionCols> = {};
+  readonly storesYToType: StoresMapping<DimensionRows> = {};
 
   get focusedStore(): FocusedStore | null {
     for (let y in this.stores) {
@@ -58,7 +56,7 @@ export default class SelectionStoreConnector {
     return this.focusedStore?.entity.store.get('focus');
   }
 
-  get selectedRange(): Selection.RangeArea | undefined {
+  get selectedRange(): RangeArea | undefined {
     return this.focusedStore?.entity.store.get('range');
   }
 
@@ -88,7 +86,7 @@ export default class SelectionStoreConnector {
     }
   }
 
-  registerColumn(x: number, type: RevoGrid.DimensionCols): SelectionStore {
+  registerColumn(x: number, type: DimensionCols): SelectionStore {
 
     // if hidden just create store but no operations needed
     if (isHiddenStore(x)) {
@@ -104,7 +102,7 @@ export default class SelectionStoreConnector {
     return this.columnStores[x];
   }
 
-  registerRow(y: number, type: RevoGrid.DimensionRows): SelectionStore {
+  registerRow(y: number, type: DimensionRows): SelectionStore {
     // if hidden just create store
     if (isHiddenStore(y)) {
       return new SelectionStore();
@@ -122,7 +120,7 @@ export default class SelectionStoreConnector {
   /**
    * Cross store proxy, based on multiple dimensions
    */
-  register({ x, y }: Selection.Cell): SelectionStore {
+  register({ x, y }: Cell): SelectionStore {
     // if hidden just create store
     if (isHiddenStore(x) || isHiddenStore(y)) {
       return new SelectionStore();
@@ -172,18 +170,18 @@ export default class SelectionStoreConnector {
     }
   }
 
-  setEditByCell<T extends Selection.Cell>(storePos: T, editCell: T) {
+  setEditByCell<T extends Cell>(storePos: T, editCell: T) {
     this.focusByCell(storePos, editCell, editCell);
     this.setEdit('');
   }
 
-  focusByCell<T extends Selection.Cell>(storePos: T, start: T, end: T) {
+  focusByCell<T extends Cell>(storePos: T, start: T, end: T) {
     const store = this.stores[storePos.y][storePos.x];
     this.focus(store, { focus: start, end });
   }
 
   focus(store: SelectionStore, { focus, end }: { focus: Cell; end: Cell }) {
-    let currentStorePointer: Selection.Cell;
+    let currentStorePointer: Cell;
     // clear all stores focus leave only active one
     for (let y in this.stores) {
       for (let x in this.stores[y]) {

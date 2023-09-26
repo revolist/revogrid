@@ -10,19 +10,19 @@ Rows, columns, groups and cells
 
 ## Properties
 
-| Property                         | Attribute         | Description                                                                                               | Type                                                           | Default     |
-| -------------------------------- | ----------------- | --------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- | ----------- |
-| `additionalData`                 | `additional-data` | Additional data to pass to renderer Used in plugins such as vue or react to pass root app entity to cells | `any`                                                          | `undefined` |
-| `colData` _(required)_           | --                | Static stores, not expected to change during component lifetime                                           | `ObservableMap<DataSourceState<ColumnRegular, DimensionCols>>` | `undefined` |
-| `dataStore` _(required)_         | --                |                                                                                                           | `ObservableMap<DataSourceState<DataType, DimensionRows>>`      | `undefined` |
-| `dimensionRow` _(required)_      | --                |                                                                                                           | `ObservableMap<DimensionSettingsState>`                        | `undefined` |
-| `range`                          | `range`           | Range selection mode                                                                                      | `boolean`                                                      | `undefined` |
-| `readonly`                       | `readonly`        | If readonly mode enables                                                                                  | `boolean`                                                      | `undefined` |
-| `rowClass`                       | `row-class`       | Defines property from which to read row class                                                             | `string`                                                       | `undefined` |
-| `rowSelectionStore` _(required)_ | --                |                                                                                                           | `ObservableMap<SelectionStoreState>`                           | `undefined` |
-| `type` _(required)_              | `type`            |                                                                                                           | `"rgRow" \| "rowPinEnd" \| "rowPinStart"`                      | `undefined` |
-| `viewportCol` _(required)_       | --                |                                                                                                           | `ObservableMap<ViewportState>`                                 | `undefined` |
-| `viewportRow` _(required)_       | --                |                                                                                                           | `ObservableMap<ViewportState>`                                 | `undefined` |
+| Property                         | Attribute         | Description                                                                                               | Type                                                        | Default     |
+| -------------------------------- | ----------------- | --------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- | ----------- |
+| `additionalData`                 | `additional-data` | Additional data to pass to renderer Used in plugins such as vue or react to pass root app entity to cells | `any`                                                       | `undefined` |
+| `colData` _(required)_           | --                | Static stores, not expected to change during component lifetime                                           | `ObservableMap<DSourceState<ColumnRegular, DimensionCols>>` | `undefined` |
+| `dataStore` _(required)_         | --                |                                                                                                           | `ObservableMap<DSourceState<DataType, DimensionRows>>`      | `undefined` |
+| `dimensionRow` _(required)_      | --                |                                                                                                           | `ObservableMap<DimensionSettingsState>`                     | `undefined` |
+| `range`                          | `range`           | Range selection mode                                                                                      | `boolean`                                                   | `undefined` |
+| `readonly`                       | `readonly`        | If readonly mode enables                                                                                  | `boolean`                                                   | `undefined` |
+| `rowClass`                       | `row-class`       | Defines property from which to read row class                                                             | `string`                                                    | `undefined` |
+| `rowSelectionStore` _(required)_ | --                |                                                                                                           | `ObservableMap<SelectionStoreState>`                        | `undefined` |
+| `type` _(required)_              | `type`            |                                                                                                           | `"rgRow" \| "rowPinEnd" \| "rowPinStart"`                   | `undefined` |
+| `viewportCol` _(required)_       | --                |                                                                                                           | `ObservableMap<ViewportState>`                              | `undefined` |
+| `viewportRow` _(required)_       | --                |                                                                                                           | `ObservableMap<ViewportState>`                              | `undefined` |
 
 
 ## Events

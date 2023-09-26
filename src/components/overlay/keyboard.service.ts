@@ -1,23 +1,24 @@
-import { Observable, Selection } from '../../interfaces';
 import { getRange } from '../../store/selection/selection.helpers';
 import SelectionStoreService from '../../store/selection/selection.store.service';
-import { codesLetter } from '../../utils/keyCodes';
-import { isAll, isClear, isCopy, isCut, isEnterKey, isLetterKey, isPaste } from '../../utils/keyCodes.utils';
+import { codesLetter } from '../../utils/key.codes';
+import { isAll, isClear, isCopy, isCut, isEnterKey, isLetterKey, isPaste } from '../../utils/key.utils';
 import { timeout } from '../../utils';
 import { EventData, getCoordinate, isAfterLast, isBeforeFirst } from './selection.utils';
 import { RESIZE_INTERVAL } from '../../utils/consts';
+import { Cell, RangeArea, SelectionStoreState } from '../..';
+import { Observable } from '../..';
 
 type Config = {
   selectionStoreService: SelectionStoreService;
-  selectionStore: Observable<Selection.SelectionStoreState>;
+  selectionStore: Observable<SelectionStoreState>;
 
   applyEdit(val?: any): void;
   cancelEdit(): void;
   clearCell(): void;
-  focusNext(focus: Selection.Cell, next: Partial<Selection.Cell>): boolean;
+  focusNext(focus: Cell, next: Partial<Cell>): boolean;
   getData(): any;
   internalPaste(): void;
-  range(range: Selection.RangeArea): boolean;
+  range(range: RangeArea): boolean;
   selectAll(): void;
 };
 
@@ -132,9 +133,9 @@ export class KeyboardService {
   }
 
   keyPositionChange(
-    changes: Partial<Selection.Cell>,
-    range?: Selection.RangeArea,
-    focus?: Selection.Cell,
+    changes: Partial<Cell>,
+    range?: RangeArea,
+    focus?: Cell,
     isMulti = false
   ) {
     if (!range || !focus) {
@@ -156,7 +157,7 @@ export class KeyboardService {
   }
 
   /** Monitor key direction changes */
-  changeDirectionKey(e: KeyboardEvent, canRange: boolean): { changes: Partial<Selection.Cell>; isMulti?: boolean } | void {
+  changeDirectionKey(e: KeyboardEvent, canRange: boolean): { changes: Partial<Cell>; isMulti?: boolean } | void {
     const isMulti = canRange && e.shiftKey;
     if (DIRECTION_CODES.includes(e.code)) {
       e.preventDefault();

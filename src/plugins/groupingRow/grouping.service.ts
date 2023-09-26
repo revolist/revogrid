@@ -1,4 +1,4 @@
-import { RevoGrid } from '../../interfaces';
+import { DataType, ColumnProp, ColumnRegular } from '../..';
 import {
   GROUP_DEPTH,
   GROUP_EXPANDED,
@@ -14,13 +14,13 @@ export type ExpandedOptions = {
   prevExpanded?: Record<string, boolean>;
   expandedAll?: boolean; // skip trim
 
-  getGroupValue?(item: RevoGrid.DataType, prop: string | number): any;
+  getGroupValue?(item: DataType, prop: string | number): any;
   groupLabelTemplate?: GroupLabelTemplateFunc;
 };
 
-type GroupedData = Map<string, GroupedData | RevoGrid.DataType[]>;
+type GroupedData = Map<string, GroupedData | DataType[]>;
 
-function getGroupValueDefault(item: RevoGrid.DataType, prop: string | number) {
+function getGroupValueDefault(item: DataType, prop: string | number) {
   return item[prop] || null;
 }
 
@@ -32,8 +32,8 @@ function getGroupValueDefault(item: RevoGrid.DataType, prop: string | number) {
  * @param expanded - potentially expanded items if present
  */
 export function gatherGrouping(
-  array: RevoGrid.DataType[],
-  groupIds: RevoGrid.ColumnProp[],
+  array: DataType[],
+  groupIds: ColumnProp[],
   { prevExpanded, expandedAll, getGroupValue = getGroupValueDefault }: ExpandedOptions,
 ) {
   const groupedItems: GroupedData = new Map();
@@ -52,7 +52,7 @@ export function gatherGrouping(
     }
     const lastLevelItems = currentGroupLevel.get(
       lastLevelValue,
-    ) as RevoGrid.DataType[];
+    ) as DataType[];
     lastLevelItems.push({
       ...item,
       [GROUP_ORIGINAL_INDEX]: originalIndex,
@@ -67,7 +67,7 @@ export function gatherGrouping(
   const oldNewIndexMap: Record<number, number> = {};
   // check if group header exists
   const pseudoGroupTest: Record<string, number[]> = {};
-  const sourceWithGroups: RevoGrid.DataType[] = [];
+  const sourceWithGroups: DataType[] = [];
   function flattenGroupMaps(
     groupedValues: GroupedData,
     parentIds: string[],
@@ -124,15 +124,15 @@ export function gatherGrouping(
   };
 }
 
-export function getGroupingName(rgRow?: RevoGrid.DataType) {
+export function getGroupingName(rgRow?: DataType) {
   return rgRow && rgRow[PSEUDO_GROUP_ITEM];
 }
 
-export function isGrouping(rgRow?: RevoGrid.DataType) {
+export function isGrouping(rgRow?: DataType) {
   return rgRow && typeof rgRow[PSEUDO_GROUP_ITEM] !== 'undefined';
 }
 
-export function isGroupingColumn(column?: RevoGrid.ColumnRegular) {
+export function isGroupingColumn(column?: ColumnRegular) {
   return column && typeof column[PSEUDO_GROUP_COLUMN] !== 'undefined';
 }
 
@@ -159,8 +159,8 @@ export function getParsedGroup(id: string): any[] {
 // check if items is child of current clicked group
 export function isSameGroup(
   currentGroup: any[],
-  currentModel: RevoGrid.DataType,
-  nextModel: RevoGrid.DataType,
+  currentModel: DataType,
+  nextModel: DataType,
 ) {
   const nextGroup = getParsedGroup(nextModel[PSEUDO_GROUP_ITEM_ID]);
   if (!nextGroup) {

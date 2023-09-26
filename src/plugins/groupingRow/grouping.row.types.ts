@@ -1,14 +1,14 @@
 import { VNode } from '@stencil/core';
-import { RevoGrid } from '../../interfaces';
+import { HyperFunc, ColumnProp, DimensionRows, DataType } from '../..';
 
 export type GroupLabelTemplateFunc = (
-  createElement: RevoGrid.HyperFunc<VNode>,
+  createElement: HyperFunc<VNode>,
   props: { name: string; itemIndex: number; expanded: boolean; depth: number; },
 ) => any;
 
 export type GroupingOptions = {
   // properties array to group
-  props?: RevoGrid.ColumnProp[];
+  props?: ColumnProp[];
   /** is expanded by default */
   expandedAll?: boolean;
   // custom group label
@@ -17,7 +17,7 @@ export type GroupingOptions = {
    * choose column prop to which expand button will be applied
    * if not defined first column in grid
    */
-  // applyToProp?: RevoGrid.ColumnProp;
+  // applyToProp?: ColumnProp;
   /**
    * todo
    * choose if render cells in grouping rgRow
@@ -27,17 +27,17 @@ export type GroupingOptions = {
 };
 
 export type BeforeSourceSetEvent = {
-  type: RevoGrid.DimensionRows;
-  source: RevoGrid.DataType[];
+  type: DimensionRows;
+  source: DataType[];
 };
 
 export type OnExpandEvent = {
-  model: RevoGrid.DataType;
+  model: DataType;
   virtualIndex: number;
 };
 
 export type SourceGather = {
-  source: RevoGrid.DataType[];
+  source: DataType[];
   prevExpanded: Record<string, boolean>;
   oldNewIndexes?: Record<number, number>;
 };

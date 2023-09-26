@@ -1,4 +1,4 @@
-import KeyCodesEnum, { codesLetter } from './keyCodes';
+import KeyCodesEnum, { codesLetter } from './key.codes';
 import OsPlatform from './platform';
 import includes from 'lodash/includes';
 

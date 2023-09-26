@@ -1,9 +1,9 @@
-import { RevoGrid } from '../../interfaces';
+import { DataType } from '../..';
 import { PSEUDO_GROUP_ITEM_ID, PSEUDO_GROUP_ITEM_VALUE, GROUP_EXPANDED, GROUP_DEPTH } from './grouping.const';
 import { isGrouping, getParsedGroup, isSameGroup } from './grouping.service';
 
 // provide collapse data
-export function doCollapse(pIndex: number, source: RevoGrid.DataType[]) {
+export function doCollapse(pIndex: number, source: DataType[]) {
   const model = source[pIndex];
   const collapseValue = model[PSEUDO_GROUP_ITEM_VALUE];
   const trimmed: Record<number, boolean> = {};
@@ -31,7 +31,7 @@ export function doCollapse(pIndex: number, source: RevoGrid.DataType[]) {
  * @param source - data source
  * @param rowItemsIndexes - rgRow indexes
  */
-export function doExpand(vIndex: number, source: RevoGrid.DataType[], rowItemsIndexes: number[]) {
+export function doExpand(vIndex: number, source: DataType[], rowItemsIndexes: number[]) {
   const physicalIndex = rowItemsIndexes[vIndex];
   const model = source[physicalIndex];
   const currentGroup = getParsedGroup(model[PSEUDO_GROUP_ITEM_ID]);

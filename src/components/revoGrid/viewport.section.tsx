@@ -1,12 +1,14 @@
 import { h, VNode } from '@stencil/core';
-import { Edition, RevoGrid } from '../../interfaces';
 import { UUID } from '../../utils/consts';
 import { ElementScroll } from './viewport';
 import { DATA_SLOT, HEADER_SLOT } from './viewport.helpers';
-import { ViewportProps } from './viewport.interfaces';
 import { isMobileDevice } from '../../utils/mobile';
+import { DimensionColPin } from '../../types/dimension';
+import { FocusTemplateFunc, ViewPortScrollEvent } from '../../types/interfaces';
+import { ViewportProps } from '../../types/viewport.interfaces';
+import { BeforeEdit, Editors } from '../../types/selection';
 type Props = {
-  editors: Edition.Editors;
+  editors: Editors;
   useClipboard: boolean;
   applyEditorChangesOnClose: boolean;
   readonly: boolean;
@@ -16,17 +18,17 @@ type Props = {
   columns: ViewportProps[];
   columnFilter: boolean;
   additionalData: any;
-  focusTemplate: RevoGrid.FocusTemplateFunc;
+  focusTemplate: FocusTemplateFunc;
   scrollSection(
-    e: RevoGrid.ViewPortScrollEvent,
-    key?: RevoGrid.DimensionColPin | string,
+    e: ViewPortScrollEvent,
+    key?: DimensionColPin | string,
   ): void;
   scrollSectionSilent(
-    e: RevoGrid.ViewPortScrollEvent,
-    key?: RevoGrid.DimensionColPin | string,
+    e: ViewPortScrollEvent,
+    key?: DimensionColPin | string,
   ): void;
   onCancelEdit(): void;
-  onEdit(edit: Edition.BeforeEdit): void;
+  onEdit(edit: BeforeEdit): void;
   onSelectAll(): void;
   registerElement(el: ElementScroll | null, key: string): void;
 };

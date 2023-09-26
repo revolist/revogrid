@@ -1,19 +1,21 @@
 import { h } from '@stencil/core';
 import SelectionStoreService from '../../store/selection/selection.store.service';
-import { Observable, RevoGrid, Selection } from '../../interfaces';
 import { getRange } from '../../store/selection/selection.helpers';
-import ColumnService from '../data/columnService';
-import { DataSourceState } from '../../store/dataSource/data.store';
+import ColumnService from '../data/column.service';
+import { DSourceState } from '../../store/dataSource/data.store';
+import { DimensionRows } from '../../types/dimension';
+import { Observable, DataType, DataLookup } from '../../types/interfaces';
+import { RangeArea } from '../../types/selection';
 
 type Config = {
   selectionStoreService: SelectionStoreService;
   columnService: ColumnService;
-  dataStore: Observable<DataSourceState<RevoGrid.DataType, RevoGrid.DimensionRows>>;
-  rangeApply(data: RevoGrid.DataLookup, range: Selection.RangeArea): void;
-  rangeCopy(range: Selection.RangeArea): any;
+  dataStore: Observable<DSourceState<DataType, DimensionRows>>;
+  rangeApply(data: DataLookup, range: RangeArea): void;
+  rangeCopy(range: RangeArea): any;
   rangeClear(): void;
-  beforeCopy(range: Selection.RangeArea): CustomEvent;
-  beforePaste(data: RevoGrid.DataLookup, range: Selection.RangeArea): CustomEvent;
+  beforeCopy(range: RangeArea): CustomEvent;
+  beforePaste(data: DataLookup, range: RangeArea): CustomEvent;
 };
 
 export class ClipboardService {

@@ -5,12 +5,12 @@
 
 ## Properties
 
-| Property       | Attribute | Description                                                     | Type                                                      | Default     |
-| -------------- | --------- | --------------------------------------------------------------- | --------------------------------------------------------- | ----------- |
-| `dataStore`    | --        | Static stores, not expected to change during component lifetime | `ObservableMap<DataSourceState<DataType, DimensionRows>>` | `undefined` |
-| `dimensionCol` | --        |                                                                 | `ObservableMap<DimensionSettingsState>`                   | `undefined` |
-| `dimensionRow` | --        |                                                                 | `ObservableMap<DimensionSettingsState>`                   | `undefined` |
-| `parent`       | --        |                                                                 | `HTMLElement`                                             | `undefined` |
+| Property       | Attribute | Description                                                     | Type                                                   | Default     |
+| -------------- | --------- | --------------------------------------------------------------- | ------------------------------------------------------ | ----------- |
+| `dataStore`    | --        | Static stores, not expected to change during component lifetime | `ObservableMap<DSourceState<DataType, DimensionRows>>` | `undefined` |
+| `dimensionCol` | --        |                                                                 | `ObservableMap<DimensionSettingsState>`                | `undefined` |
+| `dimensionRow` | --        |                                                                 | `ObservableMap<DimensionSettingsState>`                | `undefined` |
+| `parent`       | --        |                                                                 | `HTMLElement`                                          | `undefined` |
 
 
 ## Events

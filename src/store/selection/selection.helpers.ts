@@ -1,7 +1,5 @@
-import { Selection } from '../../interfaces';
 import { EMPTY_INDEX } from '../../services/selection.store.connector';
-import Cell = Selection.Cell;
-import RangeArea = Selection.RangeArea;
+import { Cell, RangeArea } from '../..';
 
 export function isHiddenStore(pos: number) {
   return pos === EMPTY_INDEX;

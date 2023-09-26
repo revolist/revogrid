@@ -3,17 +3,19 @@
  */
 import debounce from 'lodash/debounce';
 import each from 'lodash/each';
-import { RevoGrid } from '../../interfaces';
 import ColumnDataProvider from '../../services/column.data.provider';
 import { DataProvider } from '../../services/data.provider';
 import DimensionProvider from '../../services/dimension.provider';
 import SelectionStoreConnector from '../../services/selection.store.connector';
 import ViewportProvider from '../../services/viewport.provider';
 import { getItemByPosition } from '../../store/dimension/dimension.helpers';
-import BasePlugin from '../basePlugin';
-import { ColumnOrderHandler } from './columnOrderHandler';
+import { BasePlugin } from '../base.plugin';
+import { ColumnOrderHandler } from './order-column.handler';
 import { dispatch } from '../dispatcher';
 import { isColGrouping } from '../groupingColumn/grouping.col.plugin';
+import { ColumnDataSchema, ColumnRegular, DimensionSettingsState, PositionItem } from '../..';
+import { DimensionCols, MultiDimensionType } from '../..';
+import { PluginProviders } from '../../';
 
 const COLUMN_CLICK = 'column-click';
 const MOVE = 'column-mouse-move';
@@ -25,7 +27,7 @@ const DRAG_START = 'column-drag-start';
 
 export type DragStartEventDetails = {
   event: MouseEvent;
-  data: RevoGrid.ColumnDataSchema;
+  data: ColumnDataSchema;
 };
 
 export type Providers = {
@@ -37,12 +39,12 @@ export type Providers = {
 };
 type StaticData = {
   startPos: number;
-  startItem: RevoGrid.PositionItem;
-  data: RevoGrid.ColumnRegular;
+  startItem: PositionItem;
+  data: ColumnRegular;
   dataEl: HTMLElement;
   scrollEl: Element;
   gridEl: HTMLElement;
-  cols: RevoGrid.DimensionSettingsState;
+  cols: DimensionSettingsState;
 };
 
 type LocalSubscriptions = Record<string, LocalSubscription>;
@@ -54,7 +56,7 @@ export type EventData = {
   elRect: DOMRect;
   gridRect: DOMRect;
   scrollOffset: number;
-  type: RevoGrid.DimensionCols;
+  type: DimensionCols;
 };
 export default class ColumnPlugin extends BasePlugin {
   private moveFunc = debounce((e: MouseEvent) => this.doMove(e), 5);
@@ -62,8 +64,8 @@ export default class ColumnPlugin extends BasePlugin {
   private dragData: EventData | null = null;
   private readonly orderUi: ColumnOrderHandler;
   protected readonly localSubscriptions: LocalSubscriptions = {};
-  constructor(protected revogrid: HTMLRevoGridElement, private providers: Providers) {
-    super(revogrid);
+  constructor(protected revogrid: HTMLRevoGridElement, protected providers: PluginProviders) {
+    super(revogrid, providers);
     this.orderUi = new ColumnOrderHandler();
     revogrid.registerVNode([this.orderUi.render()]);
 
@@ -227,7 +229,7 @@ export default class ColumnPlugin extends BasePlugin {
       scrollOffset,
     };
   }
-  private getDimension(type: RevoGrid.MultiDimensionType) {
+  private getDimension(type: MultiDimensionType) {
     return this.providers.dimension.stores[type].getCurrentState();
   }
 }

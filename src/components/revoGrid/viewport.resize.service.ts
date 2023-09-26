@@ -1,5 +1,5 @@
 import throttle from 'lodash/throttle';
-import { resizeObserver } from '../../utils/resizeObserver';
+import { resizeObserver } from '../../utils/resize-observer.polifill';
 interface Events {
   resize(entries: ReadonlyArray<ResizeObserverEntry>, observer: ResizeObserver): void;
 }

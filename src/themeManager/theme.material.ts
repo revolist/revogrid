@@ -1,5 +1,5 @@
-import { ThemeSpace } from '../interfaces';
+import { ThemePackage } from '../types/theme';
 
-export default class ThemeMaterial implements ThemeSpace.ThemePackage {
-  defaultRowSize: number = 42;
+export default class ThemeMaterial implements ThemePackage {
+  defaultRowSize = 42;
 }

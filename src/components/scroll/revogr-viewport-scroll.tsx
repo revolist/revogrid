@@ -12,13 +12,14 @@ import {
 import each from 'lodash/each';
 
 import GridResizeService from '../revoGrid/viewport.resize.service';
-import LocalScrollService from '../../services/localScrollService';
-import { RevoGrid, ScrollCoordinateEvent } from '../../interfaces';
+import LocalScrollService from '../../services/local.scroll.service';
 import {
   CONTENT_SLOT,
   FOOTER_SLOT,
   HEADER_SLOT,
 } from '../revoGrid/viewport.helpers';
+import { DimensionType } from '../../types/dimension';
+import { ScrollCoordinateEvent, ViewPortResizeEvent, ViewPortScrollEvent } from '../../types/interfaces';
 type Delta = 'deltaX' | 'deltaY';
 type LocalScrollEvent = {
   preventDefault(): void;
@@ -29,10 +30,10 @@ type LocalScrollEvent = {
 })
 export class RevogrViewportScroll {
   @Prop() readonly rowHeader: boolean;
-  @Event({ bubbles: true }) scrollViewport: EventEmitter<RevoGrid.ViewPortScrollEvent>;
-  @Event() resizeViewport: EventEmitter<RevoGrid.ViewPortResizeEvent>;
+  @Event({ bubbles: true }) scrollViewport: EventEmitter<ViewPortScrollEvent>;
+  @Event() resizeViewport: EventEmitter<ViewPortResizeEvent>;
   @Event() scrollchange: EventEmitter<{
-    type: RevoGrid.DimensionType;
+    type: DimensionType;
     hasScroll: boolean;
   }>;
 
@@ -41,7 +42,7 @@ export class RevogrViewportScroll {
    * Made to align negative coordinates for mobile devices
   */
   @Event()
-  silentScroll: EventEmitter<RevoGrid.ViewPortScrollEvent>;
+  silentScroll: EventEmitter<ViewPortScrollEvent>;
 
   private scrollThrottling = 10;
 
@@ -75,15 +76,15 @@ export class RevogrViewportScroll {
    * Last mw event time for trigger scroll function below
    * If mousewheel function was ignored we still need to trigger render
    */
-  private mouseWheelScrollTimestamp: Record<RevoGrid.DimensionType, number> = {
+  private mouseWheelScrollTimestamp: Record<DimensionType, number> = {
     rgCol: 0,
     rgRow: 0,
   };
-  private lastKnownScrollCoordinate: Record<RevoGrid.DimensionType, number> = {
+  private lastKnownScrollCoordinate: Record<DimensionType, number> = {
     rgCol: 0,
     rgRow: 0,
   };
-  @Method() async setScroll(e: RevoGrid.ViewPortScrollEvent) {
+  @Method() async setScroll(e: ViewPortScrollEvent) {
     this.latestScrollUpdate(e.dimension);
     this.scrollService?.setScroll(e);
   }
@@ -93,7 +94,7 @@ export class RevogrViewportScroll {
    * @param e
    */
   @Method() async changeScroll(
-    e: RevoGrid.ViewPortScrollEvent,
+    e: ViewPortScrollEvent,
     silent = false,
   ) {
     if (silent) {
@@ -210,7 +211,7 @@ export class RevogrViewportScroll {
             scroll: this.horizontalScroll.scrollLeft,
           },
         };
-        each(els, (item, dimension: RevoGrid.DimensionType) => {
+        each(els, (item, dimension: DimensionType) => {
           this.resizeViewport.emit({ dimension, size: item.size, rowHeader: this.rowHeader });
           this.scrollService?.scroll(item.scroll, dimension, true);
           // track scroll visibility on outer element change
@@ -229,7 +230,7 @@ export class RevogrViewportScroll {
    * @param innerContentSize - inner content size
    */
   setScrollVisibility(
-    type: RevoGrid.DimensionType,
+    type: DimensionType,
     size: number,
     innerContentSize: number,
   ) {
@@ -304,7 +305,7 @@ export class RevogrViewportScroll {
     return (
       <Host
         onWheel={this.horizontalMouseWheel}
-        onScroll={(e: UIEvent) => this.onScroll('rgCol', e)}
+        onScroll={(e: UIEvent) => this.applyScroll('rgCol', e)}
       >
         <div
           class="inner-content-table"
@@ -317,7 +318,7 @@ export class RevogrViewportScroll {
             class="vertical-inner"
             ref={el => (this.verticalScroll = el)}
             onWheel={this.verticalMouseWheel}
-            onScroll={(e: MouseEvent) => this.onScroll('rgRow', e)}
+            onScroll={(e: MouseEvent) => this.applyScroll('rgRow', e)}
           >
             <div
               class="content-wrapper"
@@ -337,7 +338,7 @@ export class RevogrViewportScroll {
    * Extra layer for scroll event monitoring, where MouseWheel event is not passing
    * We need to trigger scroll event in case there is no mousewheel event
    */
-  @Method() onScroll(type: RevoGrid.DimensionType, e: UIEvent) {
+  @Method() async applyScroll(type: DimensionType, e: UIEvent) {
     if (!(e.target instanceof HTMLElement)) {
       return;
     }
@@ -364,7 +365,7 @@ export class RevogrViewportScroll {
    * Applies scroll on scroll event only if mousewheel event was some time ago
    */
   private applyOnScroll(
-    type: RevoGrid.DimensionType,
+    type: DimensionType,
     coordinate: number,
     outside = false,
   ) {
@@ -382,7 +383,7 @@ export class RevogrViewportScroll {
   }
 
   /** remember last mw event time */
-  private latestScrollUpdate(dimension: RevoGrid.DimensionType) {
+  private latestScrollUpdate(dimension: DimensionType) {
     this.mouseWheelScrollTimestamp[dimension] = new Date().getTime();
   }
 
@@ -393,7 +394,7 @@ export class RevogrViewportScroll {
    * @param e
    */
   private onVerticalMouseWheel(
-    type: RevoGrid.DimensionType,
+    type: DimensionType,
     delta: Delta,
     e: LocalScrollEvent,
   ) {
@@ -410,7 +411,7 @@ export class RevogrViewportScroll {
    * @param e
    */
   private onHorizontalMouseWheel(
-    type: RevoGrid.DimensionType,
+    type: DimensionType,
     delta: Delta,
     e: LocalScrollEvent,
   ) {
