@@ -70,6 +70,7 @@ export const ViewPortSections = ({
       viewportCol: view.viewportCol,
       selectionStore: view.columnSelectionStore,
       canResize: resize,
+      readonly,
       columnFilter,
     };
     const dataViews: HTMLElement[] = [

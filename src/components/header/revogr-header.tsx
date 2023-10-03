@@ -17,6 +17,10 @@ import { SelectionStoreState } from '../../types/selection';
 })
 export class RevogrHeaderComponent {
   @Element() element!: HTMLStencilElement;
+
+  /**
+   * Stores
+  */
   @Prop() viewportCol: Observable<ViewportState>;
   @Prop() dimensionCol: Observable<DimensionSettingsState>;
   @Prop() selectionStore: Observable<SelectionStoreState>;
@@ -26,14 +30,26 @@ export class RevogrHeaderComponent {
   @Prop() groupingDepth: number = 0;
 
   /**
+   * Readonly mode
+   */
+  @Prop() readonly: boolean;
+  /**
    * If columns can be resized
    */
   @Prop() canResize: boolean;
   /**
-   * Define custom resize position
+   * Defines resize position
    */
   @Prop() resizeHandler: ResizeProps['active'];
+
+  /**
+   * Columns - defines an array of grid columns.
+   */
   @Prop() colData: ColumnRegular[];
+
+  /**
+   * Column filter
+   */
   @Prop() columnFilter: boolean;
 
   /**
@@ -45,6 +61,7 @@ export class RevogrHeaderComponent {
    * Extra properties to pass into header renderer, such as vue or react components to handle parent
    */
   @Prop() additionalData: any = {};
+
 
   @Event() initialHeaderClick: EventEmitter<InitialHeaderClick>;
   @Event() headerresize: EventEmitter<ViewSettingSizeProp>;
@@ -127,6 +144,7 @@ export class RevogrHeaderComponent {
   get providers(): Providers<DimensionCols | 'rowHeaders'> {
     return {
       type: this.type,
+      readonly: this.readonly,
       data: this.colData,
       viewport: this.viewportCol,
       dimension: this.dimensionCol,

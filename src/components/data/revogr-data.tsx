@@ -36,11 +36,11 @@ export class RevogrData {
   @Element() element!: HTMLStencilElement;
 
   /**
-   * If readonly mode enables
+   * Readonly mode
    */
   @Prop() readonly: boolean;
   /**
-   * Range selection mode
+   * Range allowed
    */
   @Prop() range: boolean;
 
@@ -53,6 +53,7 @@ export class RevogrData {
    * Used in plugins such as vue or react to pass root app entity to cells
    */
   @Prop() additionalData: any;
+  /** Stores */
   @Prop() rowSelectionStore!: Observable<SelectionStoreState>;
   @Prop() viewportRow!: Observable<ViewportState>;
   @Prop() viewportCol!: Observable<ViewportState>;
@@ -88,6 +89,7 @@ export class RevogrData {
     // make sure we have correct data, before render
     this.providers = {
       type: this.type,
+      readonly: this.readonly,
       data: this.dataStore,
       viewport: this.viewportCol,
       dimension: this.dimensionRow,

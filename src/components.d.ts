@@ -341,17 +341,20 @@ export namespace Components {
         "dataStore": RowSource;
         "dimensionRow": Observable<DimensionSettingsState>;
         /**
-          * Range selection mode
+          * Range allowed
          */
         "range": boolean;
         /**
-          * If readonly mode enables
+          * Readonly mode
          */
         "readonly": boolean;
         /**
           * Defines property from which to read row class
          */
         "rowClass": string;
+        /**
+          * Stores
+         */
         "rowSelectionStore": Observable<SelectionStoreState>;
         "type": DimensionRows;
         "viewportCol": Observable<ViewportState>;
@@ -410,14 +413,24 @@ export namespace Components {
           * If columns can be resized
          */
         "canResize": boolean;
+        /**
+          * Columns - defines an array of grid columns.
+         */
         "colData": ColumnRegular[];
+        /**
+          * Column filter
+         */
         "columnFilter": boolean;
         "dimensionCol": Observable<DimensionSettingsState>;
         "groupingDepth": number;
         "groups": Groups;
         "parent": string;
         /**
-          * Define custom resize position
+          * Readonly mode
+         */
+        "readonly": boolean;
+        /**
+          * Defines resize position
          */
         "resizeHandler": ResizeProps['active'];
         "selectionStore": Observable<SelectionStoreState>;
@@ -425,6 +438,9 @@ export namespace Components {
           * Column type
          */
         "type": DimensionCols | 'rowHeaders';
+        /**
+          * Stores
+         */
         "viewportCol": Observable<ViewportState>;
     }
     interface RevogrOrderEditor {
@@ -1178,17 +1194,20 @@ declare namespace LocalJSX {
          */
         "onBeforerowrender"?: (event: RevogrDataCustomEvent<BeforeRowRenderEvent>) => void;
         /**
-          * Range selection mode
+          * Range allowed
          */
         "range"?: boolean;
         /**
-          * If readonly mode enables
+          * Readonly mode
          */
         "readonly"?: boolean;
         /**
           * Defines property from which to read row class
          */
         "rowClass"?: string;
+        /**
+          * Stores
+         */
         "rowSelectionStore": Observable<SelectionStoreState>;
         "type": DimensionRows;
         "viewportCol": Observable<ViewportState>;
@@ -1265,7 +1284,13 @@ declare namespace LocalJSX {
           * If columns can be resized
          */
         "canResize"?: boolean;
+        /**
+          * Columns - defines an array of grid columns.
+         */
         "colData"?: ColumnRegular[];
+        /**
+          * Column filter
+         */
         "columnFilter"?: boolean;
         "dimensionCol"?: Observable<DimensionSettingsState>;
         "groupingDepth"?: number;
@@ -1276,7 +1301,11 @@ declare namespace LocalJSX {
         "onInitialHeaderClick"?: (event: RevogrHeaderCustomEvent<InitialHeaderClick>) => void;
         "parent"?: string;
         /**
-          * Define custom resize position
+          * Readonly mode
+         */
+        "readonly"?: boolean;
+        /**
+          * Defines resize position
          */
         "resizeHandler"?: ResizeProps['active'];
         "selectionStore"?: Observable<SelectionStoreState>;
@@ -1284,6 +1313,9 @@ declare namespace LocalJSX {
           * Column type
          */
         "type": DimensionCols | 'rowHeaders';
+        /**
+          * Stores
+         */
         "viewportCol"?: Observable<ViewportState>;
     }
     interface RevogrOrderEditor {

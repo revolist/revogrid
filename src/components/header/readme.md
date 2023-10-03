@@ -9,16 +9,17 @@
 | ------------------- | ----------------- | ----------------------------------------------------------------------------------------------- | -------------------------------------------------------------- | ----------- |
 | `additionalData`    | `additional-data` | Extra properties to pass into header renderer, such as vue or react components to handle parent | `any`                                                          | `{}`        |
 | `canResize`         | `can-resize`      | If columns can be resized                                                                       | `boolean`                                                      | `undefined` |
-| `colData`           | --                |                                                                                                 | `ColumnRegular[]`                                              | `undefined` |
-| `columnFilter`      | `column-filter`   |                                                                                                 | `boolean`                                                      | `undefined` |
+| `colData`           | --                | Columns - defines an array of grid columns.                                                     | `ColumnRegular[]`                                              | `undefined` |
+| `columnFilter`      | `column-filter`   | Column filter                                                                                   | `boolean`                                                      | `undefined` |
 | `dimensionCol`      | --                |                                                                                                 | `ObservableMap<DimensionSettingsState>`                        | `undefined` |
 | `groupingDepth`     | `grouping-depth`  |                                                                                                 | `number`                                                       | `0`         |
 | `groups`            | --                |                                                                                                 | `{ [x: string]: any; }`                                        | `undefined` |
 | `parent`            | `parent`          |                                                                                                 | `string`                                                       | `''`        |
-| `resizeHandler`     | --                | Define custom resize position                                                                   | `("b" \| "rt" \| "lt" \| "r" \| "rb" \| "lb" \| "l" \| "t")[]` | `undefined` |
+| `readonly`          | `readonly`        | Readonly mode                                                                                   | `boolean`                                                      | `undefined` |
+| `resizeHandler`     | --                | Defines resize position                                                                         | `("b" \| "rt" \| "lt" \| "r" \| "rb" \| "lb" \| "l" \| "t")[]` | `undefined` |
 | `selectionStore`    | --                |                                                                                                 | `ObservableMap<SelectionStoreState>`                           | `undefined` |
 | `type` _(required)_ | `type`            | Column type                                                                                     | `"colPinEnd" \| "colPinStart" \| "rgCol" \| "rowHeaders"`      | `undefined` |
-| `viewportCol`       | --                |                                                                                                 | `ObservableMap<ViewportState>`                                 | `undefined` |
+| `viewportCol`       | --                | Stores                                                                                          | `ObservableMap<ViewportState>`                                 | `undefined` |
 
 
 ## Events

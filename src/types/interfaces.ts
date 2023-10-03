@@ -133,11 +133,21 @@ export type CellProps = {
     | string;
   [attr: string]: CellProp;
 };
+/**
+ * Providers for grid which are going to be injected into each cell template
+ */
 export type Providers<T = DimensionRows> = {
+  // dimension type
   type: T;
+  // is grid in readonly mode
+  readonly: boolean;
+  // data source store
   data: Observable<DataSourceState<any, any>> | ColumnRegular[];
+  // viewport store
   viewport: Observable<ViewportState>;
+  // dimension store
   dimension: Observable<DimensionSettingsState>;
+  // selection store
   selection: Observable<SelectionStoreState>;
 };
 export interface HyperFunc<T> {
