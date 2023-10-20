@@ -7,7 +7,6 @@ In parallel, we've birthed [Revosheets](https://www.producthunt.com/posts/revosh
 <a href="https://www.producthunt.com/posts/revosheets?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-revosheets" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=420743&theme=dark" alt="Revosheets - Your&#0032;one&#0045;stop&#0032;spreadsheet&#0032;editor | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
 
 
-
 <p align="center">
   <a href="https://revolist.github.io/revogrid">
     <img src="./assets/logo.svg" alt="RevoGrid" height="150" />
