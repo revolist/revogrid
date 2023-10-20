@@ -1,3 +1,13 @@
+# 🎉 Exciting News! 
+
+For the past 2 years, we've been tirelessly refining Revogrid v4, pushing the boundaries of performance. We are going to release it later this month.
+In parallel, we've birthed [Revosheets](https://www.producthunt.com/posts/revosheets), an app wholly powered by Revogrid. Our vision is for [Revosheets](https://www.producthunt.com/posts/revosheets) to champion and sustain Revogrid's growth long-term. As we gear up for the Revogrid v4 release, we invite you to show some love and support for Revosheets on Product Hunt. 
+
+### Let's make it soar! 🚀
+<a href="https://www.producthunt.com/posts/revosheets?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-revosheets" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=420743&theme=dark" alt="Revosheets - Your&#0032;one&#0045;stop&#0032;spreadsheet&#0032;editor | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
+
+
+
 <p align="center">
   <a href="https://revolist.github.io/revogrid">
     <img src="./assets/logo.svg" alt="RevoGrid" height="150" />
