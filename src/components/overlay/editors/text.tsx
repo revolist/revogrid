@@ -1,5 +1,5 @@
 import { h } from '@stencil/core';
-import { isEnterKey, isEnterKeyValue, isTab, isTabKeyValue } from '../../../utils/keyCodes.utils';
+import { isEnterKeyValue, isTabKeyValue } from '../../../utils/keyCodes.utils';
 import { Edition, RevoGrid } from '../../../interfaces';
 import { timeout } from '../../../utils/utils';
 
