@@ -75,18 +75,19 @@ export function isEnterKey(code: string): boolean {
 }
 
 export function isCut(event: KeyboardEvent): boolean {
-  return (event.ctrlKey && event.key === 'x') || // Ctrl + X on Windows
-  (event.metaKey && event.key === 'x');   // Cmd + X on Mac
+  return (event.ctrlKey && event.code === 'KeyX') || // Ctrl + X on Windows
+  (event.metaKey && event.code === 'KeyX');   // Cmd + X on Mac
 }
 export function isCopy(event: KeyboardEvent): boolean {
-  return (event.ctrlKey && event.key === 'c') || // Ctrl + C on Windows
-    (event.metaKey && event.key === 'c');   // Cmd + C on Mac
+  console.log('isCopy', event);
+  return (event.ctrlKey && event.code === 'KeyC') || // Ctrl + C on Windows
+    (event.metaKey && event.code === 'KeyC');   // Cmd + C on Mac
 }
 export function isPaste(event: KeyboardEvent): boolean {
-  return (event.ctrlKey && event.key === 'v') || // Ctrl + V on Windows
-  (event.metaKey && event.key === 'v');   // Cmd + V on Mac
+  return (event.ctrlKey && event.code === 'KeyV') || // Ctrl + V on Windows
+  (event.metaKey && event.code === 'KeyV');   // Cmd + V on Mac
 }
 export function isAll(event: KeyboardEvent): boolean {
-  return  (event.ctrlKey && event.key === 'a') || // Ctrl + A on Windows
-  (event.metaKey && event.key === 'a');   // Cmd + A on Mac
+  return  (event.ctrlKey && event.code === 'KeyA') || // Ctrl + A on Windows
+  (event.metaKey && event.code === 'KeyA');   // Cmd + A on Mac
 }
