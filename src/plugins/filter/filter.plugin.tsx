@@ -17,6 +17,10 @@ export type FilterCaptions = {
   save: string;
   reset: string;
   cancel: string;
+  add: string,
+  placeholder: string,
+  and: string,
+  or: string,
 };
 
 export type FilterLocalization = {
@@ -177,9 +181,14 @@ export default class FilterPlugin extends BasePlugin {
     this.pop.filterTypes = this.getColumnFilter(e.detail.filter);
     this.pop.show({
       ...this.filterCollection[prop],
-      x: buttonPos.x - gridPos.x,
+      x: -9999,
       y: buttonPos.y - gridPos.y + buttonPos.height,
       prop,
+    });
+    // fix filter dialog is out of view
+    setTimeout(async () => {
+      const { width } = this.pop.getBoundingClientRect();
+      this.pop.style.left = Math.min(buttonPos.x - gridPos.x, gridPos.width - width - 20) + 'px';
     });
   }
 
