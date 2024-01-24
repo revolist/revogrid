@@ -1,10 +1,18 @@
 import size from 'lodash/size';
 import debounce from 'lodash/debounce';
+import range from 'lodash/range';
 
 import { setStore } from '../../utils/store.utils';
 import ColumnDataProvider from '../../services/column.data.provider';
 import { BasePlugin } from '../base.plugin';
-import { ColumnProp, Order, CellCompareFunc, ColumnRegular, InitialHeaderClick, DataType } from '../..';
+import {
+  ColumnProp,
+  Order,
+  CellCompareFunc,
+  ColumnRegular,
+  InitialHeaderClick,
+  DataType,
+} from '../..';
 import { DimensionRows } from '../..';
 import { PluginProviders } from '../../';
 
@@ -30,14 +38,22 @@ export default class SortingPlugin extends BasePlugin {
 
   // sorting function per column, multiple columns sorting supported
   private sortingFunc: SortingOrderFunction | null = null;
-  private doSort = debounce((order: SortingOrder, comparison: SortingOrderFunction) => this.sort(order, comparison), 50);
+  private doSort = debounce(
+    (order: SortingOrder, comparison: SortingOrderFunction) =>
+      this.sort(order, comparison),
+    50,
+  );
 
-
-  constructor(protected revogrid: HTMLRevoGridElement, providers: PluginProviders) {
+  constructor(
+    protected revogrid: HTMLRevoGridElement,
+    providers: PluginProviders,
+  ) {
     super(revogrid, providers);
 
-    const aftersourceset = async ({ detail: { type } }: CustomEvent<{
-      type: DimensionRows
+    const aftersourceset = async ({
+      detail: { type },
+    }: CustomEvent<{
+      type: DimensionRows;
     }>) => {
       // if sorting was provided - sort data
       if (!!this.sorting && this.sortingFunc) {
@@ -48,12 +64,17 @@ export default class SortingPlugin extends BasePlugin {
         this.doSort(this.sorting, this.sortingFunc);
       }
     };
-    const aftercolumnsset = async ({ detail: { order } }: CustomEvent<ColumnSetEvent>) => {
+    const aftercolumnsset = async ({
+      detail: { order },
+    }: CustomEvent<ColumnSetEvent>) => {
       const columns = await this.revogrid.getColumns();
       const sortingFunc: SortingOrderFunction = {};
 
       for (let prop in order) {
-        const cmp = this.getComparer(ColumnDataProvider.getColumnByProp(columns, prop), order[prop]);
+        const cmp = this.getComparer(
+          ColumnDataProvider.getColumnByProp(columns, prop),
+          order[prop],
+        );
         sortingFunc[prop] = cmp;
       }
       this.doSort(order, sortingFunc);
@@ -67,7 +88,11 @@ export default class SortingPlugin extends BasePlugin {
         return;
       }
 
-      this.headerclick(e.detail.column, e.detail.index, e.detail?.originalEvent?.shiftKey);
+      this.headerclick(
+        e.detail.column,
+        e.detail.index,
+        e.detail?.originalEvent?.shiftKey,
+      );
     };
 
     this.addEventListener('after-any-source', aftersourceset);
@@ -76,7 +101,8 @@ export default class SortingPlugin extends BasePlugin {
   }
 
   private getComparer(column: ColumnRegular, order: Order): CellCompareFunc {
-    const cellCmp: CellCompareFunc = column?.cellCompare.bind({ order }) || this.defaultCellCompare;
+    const cellCmp: CellCompareFunc =
+      column?.cellCompare?.bind({ order }) || this.defaultCellCompare;
     if (order == 'asc') {
       return cellCmp;
     }
@@ -97,10 +123,19 @@ export default class SortingPlugin extends BasePlugin {
       return;
     }
     order = beforeEvent.detail.order;
-    const newCol = await this.revogrid.updateColumnSorting(beforeEvent.detail.column, index, order, additive);
+    const newCol = await this.revogrid.updateColumnSorting(
+      beforeEvent.detail.column,
+      index,
+      order,
+      additive,
+    );
 
     // apply sort data
-    const beforeApplyEvent = this.emit('beforesortingapply', { column: newCol, order, additive });
+    const beforeApplyEvent = this.emit('beforesortingapply', {
+      column: newCol,
+      order,
+      additive,
+    });
     if (beforeApplyEvent.defaultPrevented) {
       return;
     }
@@ -129,9 +164,14 @@ export default class SortingPlugin extends BasePlugin {
         sortingFunc[column.prop] = cmp;
       }
     } else {
-      // reset sorting
-      this.sorting = { [column.prop]: order };
-      this.sortingFunc = { [column.prop]: cmp };
+      if (order) {
+        // reset sorting
+        this.sorting = { [column.prop]: order };
+        this.sortingFunc = { [column.prop]: cmp };
+      } else {
+        delete this.sorting[column.prop];
+        delete this.sortingFunc[column.prop];
+      }
     }
 
     this.doSort(this.sorting, this.sortingFunc);
@@ -141,34 +181,54 @@ export default class SortingPlugin extends BasePlugin {
    * Sort items by sorting function
    * @requires proxyItems applied to row store
    * @requires source applied to row store
-   * 
+   *
    * @param sorting - per column sorting
    * @param data - this.stores['rgRow'].store.get('source')
    */
-  async sort(sorting: SortingOrder, sortingFunc: SortingOrderFunction, types: DimensionRows[] = ['rgRow', 'rowPinStart', 'rowPinEnd']) {
+  async sort(
+    sorting: SortingOrder,
+    sortingFunc: SortingOrderFunction,
+    types: DimensionRows[] = ['rgRow', 'rowPinStart', 'rowPinEnd'],
+  ) {
     // if no sorting - reset
     if (!size(sorting)) {
       this.sorting = null;
       this.sortingFunc = null;
-      return;
-    }
-    // set sorting
-    this.sorting = sorting;
-    this.sortingFunc = sortingFunc;
 
-    // by default it'll sort by rgRow store
-    // todo: support multiple stores
-    for (let type of types) {
-      const store = await this.revogrid.getSourceStore(type);
-      // row data
-      const source = store.get('source');
-      // row indexes
-      const proxyItems = store.get('proxyItems');
-      const data = this.sortIndexByItems([...proxyItems], source, sortingFunc);
-      setStore(store, {
-        proxyItems: data,
-        source: [...source],
-      });
+      for (let type of types) {
+        const store = await this.revogrid.getSourceStore(type);
+        // row data
+        const source = store.get('source');
+        // row indexes
+        const proxyItems = range(0, source.length);
+        setStore(store, {
+          proxyItems,
+          source: [...source],
+        });
+      }
+    } else {
+      // set sorting
+      this.sorting = sorting;
+      this.sortingFunc = sortingFunc;
+
+      // by default it'll sort by rgRow store
+      // todo: support multiple stores
+      for (let type of types) {
+        const store = await this.revogrid.getSourceStore(type);
+        // row data
+        const source = store.get('source');
+        // row indexes
+        const proxyItems = store.get('proxyItems');
+        const data = this.sortIndexByItems(
+          [...proxyItems],
+          source,
+          sortingFunc,
+        );
+        setStore(store, {
+          proxyItems: data,
+          source: [...source],
+        });
+      }
     }
     this.emit('afterSortingApply');
   }
@@ -186,13 +246,17 @@ export default class SortingPlugin extends BasePlugin {
     };
   }
 
-  sortIndexByItems(indexes: number[], source: DataType[], sortingFunc: SortingOrderFunction): number[] {
+  sortIndexByItems(
+    indexes: number[],
+    source: DataType[],
+    sortingFunc: SortingOrderFunction,
+  ): number[] {
     // if no sorting - return unsorted indexes
     if (Object.entries(sortingFunc).length === 0) {
       // Unsort indexes
       return [...Array(indexes.length).keys()];
     }
-    // 
+    //
     /**
      * go through all indexes and align in new order
      * performs a multi-level sorting by applying multiple comparison functions to determine the order of the items based on different properties.
