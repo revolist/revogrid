@@ -28,6 +28,8 @@ export const config: Config = {
     appendChildSlotFix: false,
     cloneNodeFix: false,
     slotChildNodesFix: false,
+    // Required by Vite to bundle a Stencil project (https://github.com/vitejs/vite/issues/12434#issuecomment-1471305880)
+    enableImportInjection: true,
   },
 
   // buildEs5: 'prod',
