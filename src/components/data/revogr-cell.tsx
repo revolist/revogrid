@@ -31,24 +31,51 @@ export class RevogridCellRenderer {
    */
   @Prop() providers!: Providers;
   /**
-   * Grouping
+   * Grouping depth
    */
   @Prop() depth: number;
 
   /**
    * Row props passed via property
    */
+
+  /**
+   * Row index viewport Y position
+   */
   @Prop() rowIndex!: number;
+
+  /**
+   * Top cell side edge position in px
+   */
   @Prop() rowStart!: number;
+  /**
+   * Bottom cell side edge position in px
+   */
   @Prop() rowEnd!: number;
+
+  /**
+   * Row height in px
+   */
   @Prop() rowSize!: number;
 
   /**
    * Column props passed via property
    */
+  /**
+   * Column index
+   */
   @Prop() colIndex!: number;
+  /**
+   * Left side edge position in px
+   */
   @Prop() colStart!: number;
+  /**
+   * Right side edge position in px
+   */
   @Prop() colEnd!: number;
+  /**
+   * Column width
+   */
   @Prop() colSize!: number;
 
   /**
@@ -61,6 +88,8 @@ export class RevogridCellRenderer {
 
   render() {
     const model = this.columnService.rowDataModel(this.rowIndex, this.colIndex);
+
+    // call before cell render
     const cellEvent = this.beforeCellRender.emit({
       column: {
         itemIndex: this.colIndex,
@@ -78,6 +107,8 @@ export class RevogridCellRenderer {
       rowType: this.providers.type,
       colType: this.columnService.type,
     });
+
+    // if event was prevented
     if (cellEvent.defaultPrevented) {
       return;
     }
@@ -141,6 +172,9 @@ export class RevogridCellRenderer {
   }
 }
 
+/**
+ * Checks if the given rowDrag is a service for dragging rows.
+*/
 function isRowDragService(
   rowDrag: RowDrag,
   model: ColumnDataSchemaModel,
