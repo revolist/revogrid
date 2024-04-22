@@ -5,8 +5,8 @@ import { generateFakeDataObject } from '../src/utilsExternal/generateFakeDataObj
 type ItemsToUpdate = Pick<RevoGrid.ViewportStateItems, 'items' | 'start' | 'end'>;
 
 describe('revo-grid-viewport', () => {
-  const virtualSize: number = 600;
-  const originItemSize: number = 30;
+  const virtualSize = 600;
+  const originItemSize = 30;
   const data = generateFakeDataObject({
     rows: 100,
     cols: 10,
@@ -43,7 +43,7 @@ describe('revo-grid-viewport', () => {
       });
 
       it('Start should be positive', () => {
-        let i: number = 0;
+        let i = 0;
         while (i < recombined.items.length) {
           const item = recombined.items[i % recombined.items.length];
           expect(item.start).toBeGreaterThanOrEqual(0);
@@ -52,7 +52,7 @@ describe('revo-grid-viewport', () => {
       });
 
       it('End should be in range', () => {
-        let i: number = 0;
+        let i = 0;
         while (i < recombined.items.length) {
           const item = recombined.items[i % recombined.items.length];
           expect(item.end).toBeLessThanOrEqual(realSize);
@@ -61,7 +61,7 @@ describe('revo-grid-viewport', () => {
       });
 
       it('Indexes should be positive', () => {
-        let i: number = 0;
+        let i = 0;
         while (i < recombined.items.length) {
           const item = recombined.items[i % recombined.items.length];
           expect(item.itemIndex).toBeGreaterThanOrEqual(0);
@@ -77,7 +77,7 @@ describe('revo-grid-viewport', () => {
 
       it('Range should be in order: 1, 2, 3...', () => {
         let prev: VirtualPositionItem | null = null;
-        let i: number = recombined.start;
+        let i = recombined.start;
         let count = 0;
         while (count < recombined.items.length) {
           const item = recombined.items[i % recombined.items.length];

@@ -39,6 +39,12 @@ Type: `Promise<ShowData>`
 
 
 
+#### Parameters
+
+| Name        | Type                                     | Description |
+| ----------- | ---------------------------------------- | ----------- |
+| `newEntity` | `{ x: number; y: number; } & FilterItem` |             |
+
 #### Returns
 
 Type: `Promise<void>`
@@ -48,4 +54,4 @@ Type: `Promise<void>`
 
 ----------------------------------------------
 
-*Built with [StencilJS](https://stenciljs.com/)*
+*Built with love by Revolist OU*

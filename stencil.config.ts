@@ -4,12 +4,13 @@ import { angularOutputTarget } from '@stencil/angular-output-target';
 import { reactOutputTarget } from '@stencil/react-output-target';
 import { vueOutputTarget } from '@stencil/vue-output-target';
 import { svelteOutputTarget } from '@stencil/svelte-output-target';
-import { vueOutputTarget as vue2OutputTarget } from "@revolist/stencil-vue2-output-target";
+import { vueOutputTarget as vue2OutputTarget } from '@revolist/stencil-vue2-output-target';
 
 const componentCorePackage = '@revolist/revogrid';
 const parent = '../revogrid-proxy';
 const entry = 'revogrid.ts';
-const directivesProxyFile = (name: string, filepath = entry) => `${parent}/${name}/src/${filepath}`;
+const directivesProxyFile = (name: string, filepath = entry) =>
+  `${parent}/${name}/src/${filepath}`;
 
 export const config: Config = {
   // https://github.com/ionic-team/stencil/blob/master/src/declarations/stencil-public-compiler.ts
@@ -42,7 +43,7 @@ export const config: Config = {
         'src/global/_colors.scss',
         'src/global/_icons.scss',
         'src/global/_mixins.scss',
-        'src/global/_buttons.scss'
+        'src/global/_buttons.scss',
       ],
     }),
   ],
@@ -65,12 +66,12 @@ export const config: Config = {
       componentModels: [],
     }),
     svelteOutputTarget({
-        componentCorePackage,
-        proxiesFile: directivesProxyFile('svelte'),
-        includeDefineCustomElements: true,
-        legacy: false,
-        includePolyfills: false,
-      }),
+      componentCorePackage,
+      proxiesFile: directivesProxyFile('svelte'),
+      includeDefineCustomElements: true,
+      legacy: false,
+      includePolyfills: false,
+    }),
     vue2OutputTarget({
       componentCorePackage,
       proxiesFile: directivesProxyFile('vue2'),
@@ -93,10 +94,18 @@ export const config: Config = {
     },
     {
       type: 'docs-readme',
+      footer: '*Built with love by Revolist OU*',
+    },
+    {
+      type: 'docs-vscode',
+      file: 'vscode-data.json',
     },
     {
       type: 'www',
-      copy: [{ src: 'serve', dest: '.' }, { src: '../node_modules/bootstrap/dist', dest: './bootstrap' }],
+      copy: [
+        { src: 'serve', dest: '.' },
+        { src: '../node_modules/bootstrap/dist', dest: './bootstrap' },
+      ],
       serviceWorker: null, // disable service workers
     },
   ],

@@ -214,7 +214,7 @@ export default class ColumnDataProvider {
     return column;
   }
 
-  clearSorting(): void {
+  clearSorting() {
     const types = reduce(
       this.sorting,
       (

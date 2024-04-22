@@ -16,7 +16,7 @@ export default class GridResizeService {
     this.resizeObserver?.observe(el);
   }
 
-  public destroy(): void {
+  public destroy() {
     this.resizeObserver?.disconnect();
     this.resizeObserver = null;
   }

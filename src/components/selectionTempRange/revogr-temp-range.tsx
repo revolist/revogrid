@@ -6,20 +6,16 @@ import { Observable, DimensionSettingsState } from '../../types/interfaces';
 import { SelectionStoreState, RangeArea } from '../../types/selection';
 
 /**
- * Temporary range selection
+ * Temporary range selection component. Shows temporary range selection.
  */
 @Component({
   tag: 'revogr-temp-range',
   styleUrl: 'revogr-temp-range-style.scss',
 })
 export class RevogrFocus {
-  el: HTMLElement;
-
-  // --------------------------------------------------------------------------
-  //
-  //  Dynamic stores
-  //
-  // --------------------------------------------------------------------------
+  /**
+   * Dynamic stores
+   */
 
   /**
    * Selection store, shows current selection and focus
@@ -34,16 +30,18 @@ export class RevogrFocus {
    * Dimension column store
    */
   @Prop() dimensionCol: Observable<DimensionSettingsState>;
+
+  el: HTMLElement;
   private readonly onChange = throttle((e: HTMLElement) => this.doChange(e), 300);
 
-  private doChange(e: HTMLElement): void {
+  private doChange(e: HTMLElement) {
     e?.scrollIntoView({
       block: 'nearest',
       inline: 'nearest',
     });
   }
 
-  componentDidRender(): void {
+  componentDidRender() {
     if (this.el) {
       this.onChange(this.el);
     }

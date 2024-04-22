@@ -14,7 +14,7 @@ export default class RowOrderService {
   constructor(private config: Config) {}
 
   /** Drag finished, calculate and apply changes */
-  endOrder(e: MouseEvent, data: EventData): void {
+  endOrder(e: MouseEvent, data: EventData) {
     if (this.currentCell === null) {
       return;
     }
@@ -52,7 +52,7 @@ export default class RowOrderService {
   }
 
   /** Drag stopped, probably cursor outside of document area */
-  clear(): void {
+  clear() {
     this.currentCell = null;
     this.previousRow = null;
   }

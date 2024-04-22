@@ -4,21 +4,12 @@ import { DataFormat } from '../../types/interfaces';
 @Component({ tag: 'revogr-clipboard' })
 export class Clipboard {
   /**
-   * If readonly mode enables no need for Paste event
+   * If readonly mode - disabled Paste event
    */
   @Prop() readonly: boolean;
 
   /**
-   * Fired when region pasted
-   * @event pasteregion
-   * @property {string[][]} data - data to paste
-   * @property {boolean} defaultPrevented - if true, paste will be canceled
-   */
-  @Event({ bubbles: false }) pasteRegion: EventEmitter<string[][]>;
-
-  /**
-   * Fired before paste applied to the grid
-   * @event beforepaste
+   * Paste 1. Fired before paste applied to the grid
    * @property {string} raw - raw data from clipboard
    * @property {ClipboardEvent} event - original event
    * @property {boolean} defaultPrevented - if true, paste will be canceled
@@ -26,16 +17,22 @@ export class Clipboard {
   @Event({ eventName: 'beforepaste' }) beforePaste: EventEmitter;
 
   /**
-   * Fired before paste applied to the grid and after data parsed
-   * @event beforepasteapply
+   * Paste 2. Fired before paste applied to the grid and after data parsed
    * @property {string} raw - raw data from clipboard
    * @property {string[][]} parsed - parsed data
    */
   @Event({ eventName: 'beforepasteapply' }) beforePasteApply: EventEmitter;
 
   /**
-   * Fired after paste applied to the grid
-   * @event afterpasteapply
+   * Paste 3. Internal method. When data region is ready pass it to the top.
+   * @property {string[][]} data - data to paste
+   * @property {boolean} defaultPrevented - if true, paste will be canceled
+   */
+  @Event({ eventName: 'pasteregion', bubbles: false }) pasteRegion: EventEmitter<string[][]>;
+
+
+  /**
+   * Paste 4. Fired after paste applied to the grid
    * @property {string} raw - raw data from clipboard
    * @property {string[][]} parsed - parsed data
    * @property {ClipboardEvent} event - original event
@@ -44,29 +41,26 @@ export class Clipboard {
   @Event({ eventName: 'afterpasteapply' }) afterPasteApply: EventEmitter;
 
   /**
-   * Fired before cut triggered
-   * @event beforecopy
+   * Cut 1. Fired before cut triggered
    * @property {ClipboardEvent} event - original event
    * @property {boolean} defaultPrevented - if true, cut will be canceled
    */
   @Event({ eventName: 'beforecut' }) beforeCut: EventEmitter;
 
   /**
-   * Clears region when cut is done
+   * Cut 2. Clears region when cut is done
    */
-  @Event() clearRegion: EventEmitter<DataTransfer>;
+  @Event({ eventName: 'clearregion' }) clearRegion: EventEmitter<DataTransfer>;
 
   /**
-   * Fired before copy triggered
-   * @event beforecopy
+   * Copy 1. Fired before copy triggered
    * @property {ClipboardEvent} event - original event
    * @property {boolean} defaultPrevented - if true, copy will be canceled
    */
   @Event({ eventName: 'beforecopy' }) beforeCopy: EventEmitter;
 
   /**
-   * Fired before copy applied to the clipboard
-   * @event beforecopyapply
+   * Copy Method 1. Fired before copy applied to the clipboard from outside.
    * @property {DataTransfer} event - original event
    * @property {string} data - data to copy
    * @property {boolean} defaultPrevented - if true, copy will be canceled
@@ -74,12 +68,11 @@ export class Clipboard {
   @Event({ eventName: 'beforecopyapply' }) beforeCopyApply: EventEmitter;
 
   /**
-   * Fired when region copied
-   * @event copyregion
+   * Copy 2. Fired when region copied
    * @property {DataTransfer} data - data to copy
    * @property {boolean} defaultPrevented - if true, copy will be canceled
    */
-  @Event({ bubbles: false }) copyRegion: EventEmitter<DataTransfer>;
+  @Event({ eventName: 'copyregion', bubbles: false }) copyRegion: EventEmitter<DataTransfer>;
 
   @Listen('paste', { target: 'document' }) onPaste(e: ClipboardEvent) {
     // if readonly do nothing

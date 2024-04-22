@@ -323,7 +323,7 @@ export class FilterPlugin extends BasePlugin {
     const propKeys = Object.keys(filterItems);
 
     const trimmed: Record<number, boolean> = {};
-    let propFilterSatisfiedCount: number = 0;
+    let propFilterSatisfiedCount = 0;
     let lastFilterResults: boolean[] = [];
 
     // each rows

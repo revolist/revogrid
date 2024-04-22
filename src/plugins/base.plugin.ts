@@ -12,7 +12,7 @@ export class BasePlugin implements PluginBaseComponent {
   constructor(protected revogrid: HTMLRevoGridElement, protected providers: PluginProviders) {}
   /**
    *
-   * @param eventName - event name to subscribe to in revo-grid component (e.g. 'initialHeaderClick')
+   * @param eventName - event name to subscribe to in revo-grid component (e.g. 'beforeheaderclick')
    * @param callback - callback function for event
    */
   protected addEventListener(

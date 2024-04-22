@@ -26,7 +26,7 @@ export class TextEditor implements EditorBase {
     }
   }
 
-  private onKeyDown(e: KeyboardEvent): void {
+  private onKeyDown(e: KeyboardEvent) {
     const isEnter = isEnterKey(e.code);
     const isKeyTab = isTab(e.code);
 

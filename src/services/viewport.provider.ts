@@ -17,7 +17,7 @@ export default class ViewportProvider {
     ) as ViewportStoreCollection;
   }
 
-  setViewport(type: MultiDimensionType, data: Partial<ViewportState>): void {
+  setViewport(type: MultiDimensionType, data: Partial<ViewportState>) {
     this.stores[type].setViewport(data);
   }
 }

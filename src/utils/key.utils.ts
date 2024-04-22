@@ -79,7 +79,6 @@ export function isCut(event: KeyboardEvent): boolean {
   (event.metaKey && event.code === 'KeyX');   // Cmd + X on Mac
 }
 export function isCopy(event: KeyboardEvent): boolean {
-  console.log('isCopy', event);
   return (event.ctrlKey && event.code === 'KeyC') || // Ctrl + C on Windows
     (event.metaKey && event.code === 'KeyC');   // Cmd + C on Mac
 }

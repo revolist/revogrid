@@ -3,27 +3,37 @@
 <!-- Auto Generated Below -->
 
 
+## Overview
+
+Virtual scroll component for RevoGrid
+
 ## Properties
 
-| Property         | Attribute   | Description | Type                                    | Default     |
-| ---------------- | ----------- | ----------- | --------------------------------------- | ----------- |
-| `dimension`      | `dimension` |             | `"rgCol" \| "rgRow"`                    | `'rgRow'`   |
-| `dimensionStore` | --          |             | `ObservableMap<DimensionSettingsState>` | `undefined` |
-| `viewportStore`  | --          |             | `ObservableMap<ViewportState>`          | `undefined` |
+| Property                      | Attribute   | Description                               | Type                                    | Default     |
+| ----------------------------- | ----------- | ----------------------------------------- | --------------------------------------- | ----------- |
+| `dimension`                   | `dimension` | Scroll dimension (X - rgCol or Y - rgRow) | `"rgCol" \| "rgRow"`                    | `'rgRow'`   |
+| `dimensionStore` _(required)_ | --          | Dimensions                                | `ObservableMap<DimensionSettingsState>` | `undefined` |
+| `viewportStore` _(required)_  | --          | Viewport                                  | `ObservableMap<ViewportState>`          | `undefined` |
 
 
 ## Events
 
-| Event           | Description | Type                                                                                                |
-| --------------- | ----------- | --------------------------------------------------------------------------------------------------- |
-| `scrollVirtual` |             | `CustomEvent<{ dimension: DimensionType; coordinate: number; delta?: number; outside?: boolean; }>` |
+| Event           | Description  | Type                                                                                                |
+| --------------- | ------------ | --------------------------------------------------------------------------------------------------- |
+| `scrollvirtual` | Scroll event | `CustomEvent<{ dimension: DimensionType; coordinate: number; delta?: number; outside?: boolean; }>` |
 
 
 ## Methods
 
 ### `changeScroll(e: ViewPortScrollEvent) => Promise<ViewPortScrollEvent>`
 
+Update on delta in case we don't know existing position or external change
 
+#### Parameters
+
+| Name | Type                                                                                   | Description |
+| ---- | -------------------------------------------------------------------------------------- | ----------- |
+| `e`  | `{ dimension: DimensionType; coordinate: number; delta?: number; outside?: boolean; }` |             |
 
 #### Returns
 
@@ -34,6 +44,12 @@ Type: `Promise<ViewPortScrollEvent>`
 ### `setScroll(e: ViewPortScrollEvent) => Promise<void>`
 
 
+
+#### Parameters
+
+| Name | Type                                                                                   | Description |
+| ---- | -------------------------------------------------------------------------------------- | ----------- |
+| `e`  | `{ dimension: DimensionType; coordinate: number; delta?: number; outside?: boolean; }` |             |
 
 #### Returns
 
@@ -57,4 +73,4 @@ graph TD;
 
 ----------------------------------------------
 
-*Built with [StencilJS](https://stenciljs.com/)*
+*Built with love by Revolist OU*

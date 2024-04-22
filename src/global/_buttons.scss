@@ -14,7 +14,7 @@
   cursor: pointer;
 
   &.green {
-    $bg: #2ee072;
+    $bg: #009037;
     background-color: $bg;
     border: 1px solid darken($color: $bg, $amount: 5);
   }
@@ -33,8 +33,8 @@
 
   &.light {
     $br-color: #cedefa;
-    $color: #4876ca;
-    border: 2px solid $br-color;
+    $color: #000;
+    border: 1px solid $br-color;
     line-height: $h - 2;
     background: none;
     color: $color;

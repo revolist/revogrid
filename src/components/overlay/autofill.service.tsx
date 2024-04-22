@@ -150,6 +150,7 @@ export class AutoFillService {
     this.autoFillLast = current;
 
     const isSame = current.x === this.autoFillInitial.x && current.y === this.autoFillInitial.y;
+    
     // if same as initial - clear
     if (isSame) {
       this.sv.setTempRange(null);
@@ -214,7 +215,7 @@ export class AutoFillService {
   }
 
   /** Trigger range apply events and handle responses */
-  onRangeApply(data: DataLookup, range: RangeArea): void {
+  onRangeApply(data: DataLookup, range: RangeArea) {
     const models: DataLookup = {};
     for (let rowIndex in data) {
       models[rowIndex] = getSourceItem(this.sv.dataStore, parseInt(rowIndex, 10));

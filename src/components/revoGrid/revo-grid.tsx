@@ -18,14 +18,14 @@ import ColumnDataProvider, {
   ColumnCollection,
 } from '../../services/column.data.provider';
 import { DataProvider } from '../../services/data.provider';
-import { getVisibleSourceItem } from '../../store/dataSource/data.store';
-import DimensionProvider, {
-  DimensionConfig,
-} from '../../services/dimension.provider';
+import { DSourceState, getVisibleSourceItem } from '../../store/dataSource/data.store';
+import DimensionProvider from '../../services/dimension.provider';
 import ViewportProvider from '../../services/viewport.provider';
 import ThemeService from '../../themeManager/theme.service';
 import { timeout } from '../../utils';
-import AutoSize, { AutoSizeColumnConfig } from '../../plugins/column.auto-size.plugin';
+import AutoSize, {
+  AutoSizeColumnConfig,
+} from '../../plugins/column.auto-size.plugin';
 import {
   columnTypes as columnDimensions,
   rowTypes as rowDimensions,
@@ -40,27 +40,59 @@ import ExportFilePlugin from '../../plugins/export/export.plugin';
 import { DataInput } from '../../plugins/export/types';
 import GroupingRowPlugin from '../../plugins/groupingRow/grouping.row.plugin';
 import { GroupingOptions } from '../../plugins/groupingRow/grouping.row.types';
-import { ColumnSource, RowSource } from '../data/column.service';
-import { RevoViewPort } from './viewport';
 import ViewportService, { FocusedData } from './viewport.service';
-import { ViewPortSections } from './viewport.section';
+import { DATA_SLOT, HEADER_SLOT } from './viewport.helpers';
 import GridScrollingService from './viewport.scrolling.service';
 import { UUID } from '../../utils/consts';
 import SelectionStoreConnector from '../../services/selection.store.connector';
-import { OrdererService } from '../order/order-renderer';
-import StretchColumn, { isStretchPlugin } from '../../plugins/column.stretch.plugin';
+import OrderRenderer, { OrdererService } from '../order/order-renderer';
+import StretchColumn, {
+  isStretchPlugin,
+} from '../../plugins/column.stretch.plugin';
 import { rowDefinitionByType, rowDefinitionRemoveByType } from './grid.helpers';
 import ColumnPlugin from '../../plugins/moveColumn/column.drag.plugin';
 import { getFromEvent } from '../../utils/events';
-import { MultiDimensionType, DimensionRows, DimensionCols } from '../../types/dimension';
-import { RowHeaders, ColumnRegular, ColumnGrouping, DataType, RowDefinition, ColumnType, FocusTemplateFunc, PositionItem, ColumnProp, ViewPortScrollEvent, InitialHeaderClick, ColumnDataSchema } from '../../types/interfaces';
-import { Editors, BeforeSaveDataDetails, BeforeRangeSaveDataDetails, Cell, ChangedRange, RangeArea } from '../../types/selection';
+import { isMobileDevice } from '../../utils/mobile';
+import {
+  MultiDimensionType,
+  DimensionRows,
+  DimensionCols,
+  DimensionType,
+  DimensionTypeCol,
+} from '../../types/dimension';
+import {
+  RowHeaders,
+  ColumnRegular,
+  ColumnGrouping,
+  DataType,
+  RowDefinition,
+  ColumnType,
+  FocusTemplateFunc,
+  PositionItem,
+  ColumnProp,
+  ViewPortScrollEvent,
+  InitialHeaderClick,
+  ColumnDataSchema,
+  Observable,
+} from '../../types/interfaces';
+import {
+  Editors,
+  BeforeSaveDataDetails,
+  BeforeRangeSaveDataDetails,
+  Cell,
+  ChangedRange,
+  RangeArea,
+} from '../../types/selection';
 import { Theme } from '../../types/theme';
-import { PluginBaseComponent, PluginExternalConstructor } from '../../types/plugin';
-import { PluginProviders } from '../..';
+import {
+  PluginBaseComponent,
+  PluginExternalConstructor,
+} from '../../types/plugin';
+import { HeaderProperties, PluginProviders } from '../..';
 
 /**
- * Slots
+ * `revo-grid`: High-performance, customizable grid library for managing large datasets.
+ * 
  * @slot data-{column-type}-{row-type}. @example data-rgCol-rgRow - main data slot
  * @slot focus-${view.type}-${data.type}. @example focus-rgCol-rgRow - focus layer for main data
  */
@@ -69,35 +101,42 @@ import { PluginProviders } from '../..';
   styleUrl: 'revo-grid-style.scss',
 })
 export class RevoGridComponent {
-  // --------------------------------------------------------------------------
-  //
-  //  Properties
-  //
-  // --------------------------------------------------------------------------
-
-  /** Excel like show rgRow indexe per rgRow */
+  // #region Properties
+  /** Excel like functionality.
+   * Show row numbers.
+   * Also can be used for custom row header render if object provided.
+   */
   @Prop() rowHeaders: RowHeaders | boolean;
+
   /**
    * Defines how many rows/columns should be rendered outside visible area.
    */
-  @Prop() frameSize: number = 1;
+  @Prop() frameSize = 1;
+
   /**
    * Indicates default rgRow size.
    * By default 0, means theme package size will be applied
    */
-  @Prop() rowSize: number = 0;
+  @Prop() rowSize = 0;
+
   /** Indicates default column size. */
-  @Prop() colSize: number = 100;
+  @Prop() colSize = 100;
+
   /** When true, user can range selection. */
-  @Prop() range: boolean = false;
+  @Prop() range = false;
+
   /** When true, grid in read only mode. */
-  @Prop() readonly: boolean = false;
+  @Prop() readonly = false;
+
   /** When true, columns are resizable. */
-  @Prop() resize: boolean = false;
+  @Prop() resize = false;
+
   /** When true cell focus appear. */
-  @Prop() canFocus: boolean = true;
+  @Prop() canFocus = true;
+
   /** When true enable clipboard. */
-  @Prop() useClipboard: boolean = true;
+  @Prop() useClipboard = true;
+
   /**
    * Columns - defines an array of grid columns.
    * Can be column or grouped column.
@@ -106,158 +145,155 @@ export class RevoGridComponent {
   /**
    * Source - defines main data source.
    * Can be an Object or 2 dimensional array([][]);
-   * Keys/indexes referenced from columns Prop
+   * Keys/indexes referenced from columns Prop.
    */
   @Prop() source: DataType[] = [];
+
   /** Pinned top Source: {[T in ColumnProp]: any} - defines pinned top rows data source. */
   @Prop() pinnedTopSource: DataType[] = [];
+
   /** Pinned bottom Source: {[T in ColumnProp]: any} - defines pinned bottom rows data source. */
   @Prop() pinnedBottomSource: DataType[] = [];
-  /** Row properies applied */
+
+  /** Custom row properies to be applied. See `RowDefinition` for more info. */
   @Prop() rowDefinitions: RowDefinition[] = [];
 
-  /** Custom editors register */
+  /** Custom editors register. */
   @Prop() editors: Editors = {};
 
   /**
-   * Apply changes typed in editor on editor close except Escape cases
-   * If custom editor in use @method getValue required
-   * Check interfaces.d.ts @EditorBase for more info
+   * Apply changes in editor when closed except 'Escape' cases.
+   * If custom editor in use method getValue required.
+   * Check interfaces.d.ts `EditorBase` for more info.
    */
   @Prop() applyOnClose = false;
 
   /**
-   * Custom grid plugins
-   * Has to be predefined during first grid init
-   * Every plugin should be inherited from BasePlugin
+   * Custom grid plugins.
+   * Has to be predefined during first grid init.
+   * Every plugin should be inherited from BasePlugin.
    */
   @Prop() plugins: PluginExternalConstructor[];
 
-  /** Column Types Format
-   *  Every type represent multiple column properties
-   *  Types will be merged but can be replaced with column properties
-   *  Types were made as separate objects to be reusable per multiple columns
+  /**
+   * Column Types Format.
+   * Every type represent multiple column properties.
+   * Types will be merged but can be replaced with column properties.
+   * Types were made as separate objects to be reusable per multiple columns.
    */
   @Prop() columnTypes: { [name: string]: ColumnType } = {};
 
-  /** Theme name */
+  /** Theme name. */
   @Prop({ reflect: true, mutable: true }) theme: Theme = 'default';
 
   /**
-   * Row class property
-   * Define this property in rgRow object and this will be mapped as rgRow class
+   * Row class property mapping.
+   * Map custom classes to rows from row object data.
+   * Define this property in rgRow object and this will be mapped as rgRow class.
    */
-  @Prop({ reflect: true }) rowClass: string = '';
+  @Prop({ reflect: true }) rowClass = '';
 
   /**
-   * Autosize config
-   * Enable columns autoSize, for more details check @autoSizeColumn plugin
-   * By default disabled, hence operation is not resource efficient
-   * true to enable with default params (double header separator click for autosize)
-   * or provide config
+   * Autosize config.
+   * Enables columns autoSize.
+   * For more details check `autoSizeColumn` plugin.
+   * By default disabled, hence operation is not performance efficient.
+   * `true` to enable with default params (double header separator click for autosize).
+   * Or define config. See `AutoSizeColumnConfig` for more details.
    */
   @Prop() autoSizeColumn: boolean | AutoSizeColumnConfig = false;
 
   /**
-   * Enables filter plugin
-   * Can be boolean
-   * Can be filter collection
+   * Enables filter plugin.
+   * Can be boolean.
+   * Or can be filter collection See `FilterCollection` for more info.
    */
   @Prop() filter: boolean | ColumnFilterConfig = false;
 
   /**
-   * Apply changes typed in editor on editor close except Escape cases
-   * If custom editor in use @method getValue required
-   * Check interfaces.d.ts @EditorBase for more info
+   * Apply changes typed in editor on editor close except Escape cases.
+   * If custom editor in use method `getValue` required.
+   * Check `interfaces.d.ts` `EditorBase` for more info.
    */
   @Prop() focusTemplate: FocusTemplateFunc;
 
   /**
-   * Enables column move plugin
-   * Can be boolean
+   * Enable column move plugin.
    */
-  @Prop() canMoveColumns: boolean = false;
+  @Prop() canMoveColumns = false;
   /**
-   * Trimmed rows
-   * Functionality which allows to hide rows from main data set
-   * @trimmedRows are physical rgRow indexes to hide
+   * Trimmed rows.
+   * Functionality which allows to hide rows from main data set.
+   * `trimmedRows` are physical `rgRow` indexes to hide.
    */
   @Prop() trimmedRows: Record<number, boolean> = {};
 
   /**
-   * Enables export plugin
-   * Can be boolean
-   * Can be export options
+   * Enable export plugin.
    */
   @Prop() exporting = false;
 
   /**
-   * Group models by provided properties
-   * Define properties to be groped by
+   * Group rows based on this property.
+   * Define properties to be groped by grouping plugin See `GroupingOptions`.
    */
   @Prop() grouping: GroupingOptions;
 
   /**
-   * Defines stretch strategy for columns with @StretchColumn plugin
-   * if there are more space on the right last column size would be increased
+   * Stretch strategy for columns by `StretchColumn` plugin.
+   * For example if there are more space on the right last column size would be increased.
    */
   @Prop() stretch: boolean | string = true;
 
   /**
-   * Additional data to be passed to plugins, renders, editors
+   * Additional data to be passed to plugins, renders or editors.
+   * For example if you need to pass Vue component instance.
    */
   @Prop() additionalData: any = {};
 
   /**
-   * Disable lazy rendering mode for the X axis
-   * Use when not many columns present and you don't need rerenader cells during scroll
+   * Disable lazy rendering mode for the `X axis`.
+   * Use when not many columns present and you don't need rerenader cells during scroll.
+   * Can be used for initial rendering performance improvement.
    */
   @Prop() disableVirtualX = false;
   /**
-   * Disable lazy rendering mode for the Y axis
-   * Use when not many rows present and you don't need rerenader cells during scroll
+   * Disable lazy rendering mode for the `Y axis`.
+   * Use when not many rows present and you don't need rerenader cells during scroll.
+   * Can be used for initial rendering performance improvement.
    */
   @Prop() disableVirtualY = false;
 
-
   /**
-   * Prevents rendering until job is done.
+   * Prevent rendering until job is done.
    * Can be used for initial rendering performance improvement.
    * When several plugins require initial rendering this will prevent double initial rendering.
    */
   @Prop() jobsBeforeRender: Promise<any>[] = [];
+  // #endregion
 
-  // --------------------------------------------------------------------------
-  //
-  //  Events
-  //
-  // --------------------------------------------------------------------------
-
+  // #region Events
   /**
-   * contentsizechanged event.
-   * Triggered when new content size applied.
-   * Not including header size
-   * Event is not returning size
-   * To get actual size use getContentSize after event triggered
+   * New content size has been applied. The size excludes the header.
+   * Currently, the event responsible for applying the new content size does not provide the actual size.
+   * To retrieve the actual content size, you can utilize the `getContentSize` function after the event has been triggered.
    */
   @Event() contentsizechanged: EventEmitter<MultiDimensionType>;
+
   /**
-   * Before edit event.
-   * Triggered before edit data applied.
-   * Use e.preventDefault() to prevent edit data set and use you own.
-   * Use e.val = {your value} to replace edit result with your own.
+   * This event is triggered before the data is edited.
+   * To prevent the default behavior of editing data and use your own implementation, call `e.preventDefault()`.
+   * To override the edit result with your own value, set the `e.val` property to your desired value.
    */
   @Event() beforeedit: EventEmitter<BeforeSaveDataDetails>;
 
   /**
-   * Before range edit event.
-   * Triggered before range data applied, when range selection happened.
-   * Use e.preventDefault() to prevent edit data set and use you own.
+   * This event is triggered before applying range data, specifically when a range selection occurs.
+   * To customize the data and prevent the default edit data from being set, you can call `e.preventDefault()`.
    */
   @Event() beforerangeedit: EventEmitter<BeforeRangeSaveDataDetails>;
 
   /**
-   * After edit.
    * Triggered after data applied or range changed.
    */
   @Event() afteredit: EventEmitter<
@@ -265,14 +301,12 @@ export class RevoGridComponent {
   >;
 
   /**
-   * Before autofill.
-   * Triggered before autofill applied.
-   * Use e.preventDefault() to prevent edit data apply.
+   * This event is triggered before autofill is applied.
+   * To prevent the default behavior of applying the edit data, you can call `e.preventDefault()`.
    */
   @Event() beforeautofill: EventEmitter<ChangedRange>;
 
   /**
-   * Before range apply.
    * Triggered before range applied.
    * Use e.preventDefault() to prevent range.
    */
@@ -280,7 +314,7 @@ export class RevoGridComponent {
 
   /**
    * Triggered after focus render finished.
-   * Can be used to access a focus element through @event.target
+   * Can be used to access a focus element through `event.target`
    */
   @Event() afterfocus: EventEmitter<{
     model: any;
@@ -288,15 +322,14 @@ export class RevoGridComponent {
   }>;
 
   /**
-   * Before rgRow order apply.
-   * Use e.preventDefault() to prevent rgRow order change.
+   * This event is triggered before the order of `rgRow` is applied.
+   * To prevent the default behavior of changing the order of `rgRow`, you can call `e.preventDefault()`.
    */
   @Event() roworderchanged: EventEmitter<{ from: number; to: number }>;
 
   /**
-   * Before source update sorting apply.
-   * Use this event if you intended to prevent sorting on data update.
-   * Use e.preventDefault() to prevent sorting data change during rows source update.
+   * This event is triggered before the sorting is applied during the update of the source data.
+   * To prevent sorting data from changing during the update of the source rows, you can call `e.preventDefault()`.
    */
   @Event() beforesourcesortingapply: EventEmitter;
 
@@ -309,6 +342,7 @@ export class RevoGridComponent {
     order: 'desc' | 'asc';
     additive: boolean;
   }>;
+
   /**
    * Before sorting event.
    * Initial sorting triggered, if this event stops no other event called.
@@ -321,9 +355,9 @@ export class RevoGridComponent {
   }>;
 
   /**
-   * Row order change started.
-   * Use e.preventDefault() to prevent rgRow order change.
-   * Use e.text = 'new name' to change item name on start.
+   * This event is triggered when the row order change is started.
+   * To prevent the default behavior of changing the row order, you can call `e.preventDefault()`.
+   * To change the item name at the start of the row order change, you can set `e.text` to the desired new name.
    */
   @Event() rowdragstart: EventEmitter<{
     pos: PositionItem;
@@ -336,18 +370,19 @@ export class RevoGridComponent {
   @Event() headerclick: EventEmitter<ColumnRegular>;
 
   /**
-   * Before cell focus changed.
-   * Use e.preventDefault() to prevent cell focus change.
+   * This event is triggered before the cell focus is changed.
+   * To prevent the default behavior of changing the cell focus, you can call `e.preventDefault()`.
    */
   @Event() beforecellfocus: EventEmitter<BeforeSaveDataDetails>;
 
   /**
-   * Before grid focus lost happened.
-   * Use e.preventDefault() to prevent cell focus change.
+   * This event is triggered before the grid focus is lost.
+   * To prevent the default behavior of changing the cell focus, you can call `e.preventDefault()`.
    */
   @Event() beforefocuslost: EventEmitter<FocusedData | null>;
+
   /**
-   * Before data apply.
+   * Before main source/rows data apply.
    * You can override data source here
    */
   @Event() beforesourceset: EventEmitter<{
@@ -356,32 +391,41 @@ export class RevoGridComponent {
   }>;
 
   /**
-   * Before data apply.
+   * Before data apply on any source type. Can be source from pinned and main viewport.
    * You can override data source here
    */
-  @Event({ eventName: 'before-any-source' }) beforeAnySource: EventEmitter<{
+  @Event() beforeanysource: EventEmitter<{
     type: DimensionRows;
     source: DataType[];
   }>;
 
-  /**  After rows updated */
+  /**
+   * After main source/rows updated
+   */
   @Event() aftersourceset: EventEmitter<{
     type: DimensionRows;
     source: DataType[];
   }>;
 
   /**
-   * After all rows updated. Use it if you want to track all changes from sources pinned and main
+   * Emitted after each source update, whether from the pinned or main viewport.
+   * Useful for tracking all changes originating from sources in both the pinned and main viewports.
    */
-  @Event({ eventName: 'after-any-source' }) afterAnySource: EventEmitter<{
+  @Event() afteranysource: EventEmitter<{
     type: DimensionRows;
     source: DataType[];
   }>;
 
-  /**  Before column update */
+  /**
+   * Emitted before a column update is applied.
+   * Listeners can use this event to perform any necessary actions or modifications before the column update is finalized.
+   */
   @Event() beforecolumnsset: EventEmitter<ColumnCollection>;
 
-  /**  Before column applied but after column set gathered and viewport updated */
+  /**
+   * Emitted before a column update is applied, after the column set is gathered and the viewport is updated.
+   * Useful for performing actions or modifications before the final application of the column update.
+   */
   @Event() beforecolumnapplied: EventEmitter<ColumnCollection>;
 
   /**  Column updated */
@@ -391,17 +435,17 @@ export class RevoGridComponent {
   }>;
 
   /**
-   * Before filter applied to data source
-   * Use e.preventDefault() to prevent cell focus change
-   * Update @collection if you wish to change filters
+   * Emitted before applying a filter to the data source.
+   * Use e.preventDefault() to prevent cell focus change.
+   * Modify the @collection if you need to change filters.
    */
   @Event() beforefilterapply: EventEmitter<{ collection: FilterCollection }>;
 
   /**
-   * Before filter trimmed values
-   * Use e.preventDefault() to prevent value trimming and filter apply
-   * Update @collection if you wish to change filters
-   * Update @itemsToFilter if you wish to filter indexes of trimming
+   * Emitted before applying a filter to the data source.
+   * Use e.preventDefault() to prevent the default behavior of trimming values and applying the filter.
+   * Modify the `collection` property if you want to change the filters.
+   * Modify the `itemsToFilter` property if you want to filter the indexes for trimming.
    */
   @Event() beforefiltertrimmed: EventEmitter<{
     collection: FilterCollection;
@@ -409,9 +453,9 @@ export class RevoGridComponent {
   }>;
 
   /**
-   * Before trimmed values
-   * Use e.preventDefault() to prevent value trimming
-   * Update @trimmed if you wish to filter indexes of trimming
+   * Emitted before trimming values.
+   * Use e.preventDefault() to prevent the default behavior of trimming values.
+   * Modify the `trimmed` property if you want to filter the indexes for trimming.
    */
   @Event() beforetrimmed: EventEmitter<{
     trimmed: Record<number, boolean>;
@@ -420,14 +464,17 @@ export class RevoGridComponent {
   }>;
 
   /**
-   * Notify trimmed applied
+   * Emitted after trimmed values have been applied.
+   * Useful for notifying when trimming of values has taken place.
    */
   @Event() aftertrimmed: EventEmitter;
 
   /**
-   * Triggered when view port scrolled
+   * Emitted when the viewport is scrolled.
+   * Useful for tracking viewport scrolling events.
    */
   @Event() viewportscroll: EventEmitter<ViewPortScrollEvent>;
+
   /**
    * Before export
    * Use e.preventDefault() to prevent export
@@ -436,27 +483,37 @@ export class RevoGridComponent {
   @Event() beforeexport: EventEmitter<DataInput>;
 
   /**
-   * Before edit started
-   * Use e.preventDefault() to prevent edit
+   * Emitted before editing starts.
+   * Use e.preventDefault() to prevent the default edit behavior.
    */
   @Event() beforeeditstart: EventEmitter<BeforeSaveDataDetails>;
+
   /**
-   * After column resize
-   * Get resized columns
+   * Emitted after column resizing.
+   * Useful for retrieving the resized columns.
    */
   @Event() aftercolumnresize: EventEmitter<{
     [index: number]: ColumnRegular;
   }>;
+
   /**
-   * Before row definition
+   * Emitted before the row definition is applied.
+   * Useful for modifying or preventing the default row definition behavior.
    */
   @Event() beforerowdefinition: EventEmitter<{ vals: any; oldVals: any }>;
 
-  // --------------------------------------------------------------------------
-  //
-  //  Methods
-  //
-  // --------------------------------------------------------------------------
+  /**
+   * Emitted when the filter configuration is changed
+   */
+  @Event() filterconfigchanged: EventEmitter;
+
+  /**
+   * Emmited when the row headers are changed.
+   */
+  @Event() rowheaderschanged: EventEmitter;
+  // #endregion
+
+  // #region Methods
   /**
    * Refreshes data viewport.
    * Can be specific part as rgRow or pinned rgRow or 'all' by default.
@@ -465,34 +522,52 @@ export class RevoGridComponent {
     this.dataProvider.refresh(type);
   }
 
-  /**  Scrolls view port to specified rgRow index */
-  @Method() async scrollToRow(coordinate: number = 0) {
+  /**
+   * Scrolls viewport to specified row by index
+   */
+  @Method() async scrollToRow(
+    coordinate = 0,
+    dimension: DimensionType = 'rgRow',
+  ) {
     const y = this.dimensionProvider.getViewPortPos({
       coordinate,
-      dimension: 'rgRow',
+      dimension,
     });
     await this.scrollToCoordinate({ y });
   }
 
-  /** Scrolls view port to specified column index */
-  @Method() async scrollToColumnIndex(coordinate: number = 0) {
+  /**
+   * Scrolls viewport to specified column by index
+   */
+  @Method() async scrollToColumnIndex(
+    coordinate = 0,
+    dimension: DimensionType = 'rgCol',
+  ) {
     const x = this.dimensionProvider.getViewPortPos({
       coordinate,
-      dimension: 'rgCol',
+      dimension,
     });
     await this.scrollToCoordinate({ x });
   }
 
-  /**  Scrolls view port to specified column prop */
-  @Method() async scrollToColumnProp(prop: ColumnProp) {
-    const coordinate = this.columnProvider.getColumnIndexByProp(prop, 'rgCol');
+  /**
+   * Scrolls viewport to specified column by prop
+   */
+  @Method() async scrollToColumnProp(
+    prop: ColumnProp,
+    dimension: DimensionTypeCol = 'rgCol',
+  ) {
+    const coordinate = this.columnProvider.getColumnIndexByProp(
+      prop,
+      dimension,
+    );
     if (coordinate < 0) {
       // already on the screen
       return;
     }
     const x = this.dimensionProvider.getViewPortPos({
       coordinate,
-      dimension: 'rgCol',
+      dimension,
     });
     await this.scrollToCoordinate({ x });
   }
@@ -586,7 +661,7 @@ export class RevoGridComponent {
    */
   @Method() async getSourceStore(
     type: DimensionRows = 'rgRow',
-  ): Promise<RowSource> {
+  ): Promise<Observable<DSourceState<DataType, DimensionRows>>> {
     return this.dataProvider.stores[type].store;
   }
   /**
@@ -596,7 +671,7 @@ export class RevoGridComponent {
    */
   @Method() async getColumnStore(
     type: DimensionCols = 'rgCol',
-  ): Promise<ColumnSource> {
+  ): Promise<Observable<DSourceState<ColumnRegular, DimensionCols>>> {
     return this.columnProvider.stores[type].store;
   }
 
@@ -674,12 +749,9 @@ export class RevoGridComponent {
     return this.viewport?.getSelectedRange();
   }
 
-  // --------------------------------------------------------------------------
-  //
-  //  Listeners outside scope
-  //
-  // --------------------------------------------------------------------------
+  // #endregion
 
+  // #region Listeners outside scope
   private clickTrackForFocusClear: number | null = null;
   @Listen('touchstart', { target: 'document' })
   @Listen('mousedown', { target: 'document' })
@@ -720,21 +792,17 @@ export class RevoGridComponent {
     this.clearFocus();
   }
 
-  // --------------------------------------------------------------------------
-  //
-  //  Listeners
-  //
-  // --------------------------------------------------------------------------
+  // #endregion
 
-  /** DRAG AND DROP */
-  @Listen('internalRowDragStart') onRowDragStarted(
+  // #region Listeners
+  /** Drag events */
+  @Listen('rowdragstartinit') onRowDragStarted(
     e: CustomEvent<{
       pos: PositionItem;
       text: string;
       event: MouseEvent;
     }>,
   ) {
-    // e.cancelBubble = true;
     const dragStart = this.rowdragstart.emit(e.detail);
     if (dragStart.defaultPrevented) {
       e.preventDefault();
@@ -746,27 +814,22 @@ export class RevoGridComponent {
     });
   }
 
-  @Listen('internalRowDragEnd') onRowDragEnd() {
+  @Listen('rowdragendinit') onRowDragEnd() {
     this.orderService?.end();
   }
 
-  @Listen('internalRowDrag') onRowDrag({
-    detail,
-  }: CustomEvent<PositionItem>) {
+  @Listen('rowdragmoveinit') onRowDrag({ detail }: CustomEvent<PositionItem>) {
     this.orderService?.move(detail);
   }
 
-  @Listen('internalRowMouseMove') onRowMouseMove(
-    e: CustomEvent<Cell>,
-  ): void {
+  @Listen('rowdragmousemove') onRowMouseMove(e: CustomEvent<Cell>) {
     // e.cancelBubble = true;
     this.orderService?.moveTip(e.detail);
   }
 
-  @Listen('internalCellEdit') async onBeforeEdit(
+  @Listen('beforecelledit') async onBeforeEdit(
     e: CustomEvent<BeforeSaveDataDetails>,
   ) {
-    // e.cancelBubble = true;
     const { defaultPrevented, detail } = this.beforeedit.emit(e.detail);
     await timeout();
     // apply data
@@ -776,7 +839,7 @@ export class RevoGridComponent {
     }
   }
 
-  @Listen('internalRangeDataApply') onBeforeRangeEdit(
+  @Listen('rangedataapplyinit') onBeforeRangeEdit(
     e: CustomEvent<BeforeRangeSaveDataDetails>,
   ) {
     // e.cancelBubble = true;
@@ -788,7 +851,7 @@ export class RevoGridComponent {
     this.afteredit.emit(detail);
   }
 
-  @Listen('internalSelectionChanged') onRangeChanged(
+  @Listen('selectionchangeinit') onRangeChanged(
     e: CustomEvent<ChangedRange>,
   ) {
     // e.cancelBubble = true;
@@ -802,7 +865,7 @@ export class RevoGridComponent {
     }
   }
 
-  @Listen('initialRowDropped') onRowDropped(
+  @Listen('rowdragendinit') onRowDropped(
     e: CustomEvent<{ from: number; to: number }>,
   ) {
     // e.cancelBubble = true;
@@ -812,7 +875,7 @@ export class RevoGridComponent {
     }
   }
 
-  @Listen('initialHeaderClick') onHeaderClick(
+  @Listen('beforeheaderclick') onHeaderClick(
     e: CustomEvent<InitialHeaderClick>,
   ) {
     const { defaultPrevented } = this.headerclick.emit({
@@ -824,23 +887,19 @@ export class RevoGridComponent {
     }
   }
 
-  @Listen('beforeFocusCell') onCellFocus(
+  @Listen('beforecellfocusinit') onCellFocus(
     e: CustomEvent<BeforeSaveDataDetails>,
   ) {
-    // e.cancelBubble = true;
     const { defaultPrevented } = this.beforecellfocus.emit(e.detail);
     if (!this.canFocus || defaultPrevented) {
       e.preventDefault();
     }
   }
 
-  // --------------------------------------------------------------------------
-  //
-  //  Private Properties
-  //
-  // --------------------------------------------------------------------------
+  // #endregion
 
-  // for internal plugin usage
+  // #region Private Properties
+  @Element() element: HTMLRevoGridElement;
   @State() extraElements: VNode[] = [];
 
   uuid: string | null = null;
@@ -860,13 +919,11 @@ export class RevoGridComponent {
    * Define plugins collection
    */
   private internalPlugins: PluginBaseComponent[] = [];
+  // #endregion
 
-  @Element() element: HTMLRevoGridElement;
-
-  /**
-   * Column format change will trigger column structure update
-   */
+  // #region Watchers
   @Watch('columnTypes') columnTypesChanged() {
+    // Column format change will trigger column structure update
     this.columnChanged(this.columns);
   }
   @Watch('columns') columnChanged(newVal: ColumnDataSchema[] = []) {
@@ -881,9 +938,8 @@ export class RevoGridComponent {
     for (let type of columnDimensions) {
       const items = columnGather.columns[type];
 
-
-    // for pinned col no need virtual data
-    const noVirtual = type !== 'rgCol' || this.disableVirtualX;
+      // for pinned col no need virtual data
+      const noVirtual = type !== 'rgCol' || this.disableVirtualX;
       this.dimensionProvider.setNewColumns(
         type,
         items.length,
@@ -899,7 +955,10 @@ export class RevoGridComponent {
     });
   }
 
-  @Watch('disableVirtualX') disableVirtualXChanged(newVal = false, prevVal = false) {
+  @Watch('disableVirtualX') disableVirtualXChanged(
+    newVal = false,
+    prevVal = false,
+  ) {
     if (newVal === prevVal) {
       return;
     }
@@ -956,7 +1015,7 @@ export class RevoGridComponent {
         newVal = beforesourceset.detail.source as T[];
         break;
     }
-    const beforesourceset = this.beforeAnySource.emit({
+    const beforesourceset = this.beforeanysource.emit({
       type,
       source: newVal,
     });
@@ -970,13 +1029,16 @@ export class RevoGridComponent {
         source: newVal,
       });
     }
-    this.afterAnySource.emit({
+    this.afteranysource.emit({
       type,
       source: newVal,
     });
   }
 
-  @Watch('disableVirtualY') disableVirtualYChanged(newVal = false, prevVal = false) {
+  @Watch('disableVirtualY') disableVirtualYChanged(
+    newVal = false,
+    prevVal = false,
+  ) {
     if (newVal === prevVal) {
       return;
     }
@@ -1050,9 +1112,7 @@ export class RevoGridComponent {
           viewport: this.viewportProvider,
           selection: this.selectionStoreConnector,
         };
-        this.internalPlugins.push(
-          new StretchColumn(this.element, pluginData),
-        );
+        this.internalPlugins.push(new StretchColumn(this.element, pluginData));
       } else if (isStretchPlugin(stretch)) {
         stretch.applyStretch(this.columnProvider.getRawColumns());
       }
@@ -1062,41 +1122,42 @@ export class RevoGridComponent {
     }
   }
 
-  /** External subscribe */
-  @Event() filterconfigchanged: EventEmitter;
   @Watch('filter') applyFilter(cfg: boolean | ColumnFilterConfig) {
     this.filterconfigchanged.emit(cfg);
   }
 
-  @Event() rowheaderschanged: EventEmitter;
-  @Watch('rowHeaders') rowHeadersChange(
-    rowHeaders?: RowHeaders | boolean,
-  ) {
+  @Watch('rowHeaders') rowHeadersChange(rowHeaders?: RowHeaders | boolean) {
     this.rowheaderschanged.emit(rowHeaders);
   }
+  // #endregion
 
   componentWillRender() {
     return Promise.all(this.jobsBeforeRender);
   }
 
   connectedCallback() {
+    // #region Setup Providers
     this.viewportProvider = new ViewportProvider();
     this.themeService = new ThemeService({
       rowSize: this.rowSize,
     });
-    const dimensionProviderConfig: DimensionConfig = {
-      realSizeChanged: (k: MultiDimensionType) =>
-        this.contentsizechanged.emit(k),
-    };
     this.dimensionProvider = new DimensionProvider(
       this.viewportProvider,
-      dimensionProviderConfig,
+      {
+        realSizeChanged: (k: MultiDimensionType) =>
+          this.contentsizechanged.emit(k),
+      },
     );
     this.columnProvider = new ColumnDataProvider();
     this.selectionStoreConnector = new SelectionStoreConnector();
     this.dataProvider = new DataProvider(this.dimensionProvider);
+    // #endregion
+
+    // generate uuid
     this.uuid = `${new Date().getTime()}-rvgrid`;
 
+    // #region Plugins
+    // pass data provider to plugins
     const pluginData: PluginProviders = {
       data: this.dataProvider,
       column: this.columnProvider,
@@ -1105,6 +1166,7 @@ export class RevoGridComponent {
       selection: this.selectionStoreConnector,
     };
 
+    // register auto size plugin
     if (this.autoSizeColumn) {
       this.internalPlugins.push(
         new AutoSize(
@@ -1116,6 +1178,8 @@ export class RevoGridComponent {
         ),
       );
     }
+
+    // register filter plugin
     if (this.filter) {
       this.internalPlugins.push(
         new FilterPlugin(
@@ -1126,26 +1190,33 @@ export class RevoGridComponent {
         ),
       );
     }
+
+    // register export plugin
     if (this.exporting) {
       this.internalPlugins.push(new ExportFilePlugin(this.element, pluginData));
     }
+
+    // register sorting plugin
     this.internalPlugins.push(new SortingPlugin(this.element, pluginData));
 
-    this.internalPlugins.push(
-      new GroupingRowPlugin(this.element, pluginData),
-    );
+    // register grouping plugin
+    this.internalPlugins.push(new GroupingRowPlugin(this.element, pluginData));
     if (this.canMoveColumns) {
       this.internalPlugins.push(new ColumnPlugin(this.element, pluginData));
     }
+
+    // register user plugins
     if (this.plugins) {
       this.plugins.forEach(p => {
         this.internalPlugins.push(new p(this.element, pluginData));
       });
     }
+    // #endregion
+
+    // set data
     this.applyStretch(this.stretch);
     this.themeChanged(this.theme);
     this.columnChanged(this.columns);
-
     this.dataSourceChanged(this.source, undefined, 'source');
     this.dataSourceChanged(this.pinnedTopSource, undefined, 'pinnedTopSource');
     this.dataSourceChanged(
@@ -1153,11 +1224,11 @@ export class RevoGridComponent {
       undefined,
       'pinnedBottomSource',
     );
-
     this.trimmedRowsChanged(this.trimmedRows);
     this.rowDefChanged(this.rowDefinitions);
     this.groupingChanged(this.grouping);
 
+    // init scrolling service
     this.scrollingService = new GridScrollingService(
       (e: ViewPortScrollEvent) => {
         this.dimensionProvider.setViewPortCoordinate({
@@ -1171,20 +1242,21 @@ export class RevoGridComponent {
 
   disconnectedCallback() {
     // destroy plugins on element disconnect
-    each(this.internalPlugins, p => p.destroy());
+    this.internalPlugins.forEach(p => p.destroy());
     this.internalPlugins = [];
   }
 
   render() {
     const contentHeight =
       this.dimensionProvider.stores['rgRow'].store.get('realSize');
+
+    // init viewport service helpers
     this.viewport = new ViewportService(
       {
         columnProvider: this.columnProvider,
         dataProvider: this.dataProvider,
         dimensionProvider: this.dimensionProvider,
         viewportProvider: this.viewportProvider,
-        uuid: this.uuid,
         scrollingService: this.scrollingService,
         orderService: this.orderService,
         selectionStoreConnector: this.selectionStoreConnector,
@@ -1195,10 +1267,21 @@ export class RevoGridComponent {
       contentHeight,
     );
 
-    const views: VNode[] = [];
+
+    // #region ViewportSections
+    /**
+     * The code renders a viewport divided into sections.
+     * It starts by rendering the pinned start, data, and pinned end sections.
+     * Within each section, it renders columns along with their headers, pinned top, center data, and pinned bottom.
+     * The code iterates over the columns and their data to generate the view port's HTML structure.
+     */
+
+    const viewportSections: (VNode | VNode[])[] = [];
+
+    // Row headers setting
     if (this.rowHeaders && this.viewport.columns.length) {
       const anyView = this.viewport.columns[0];
-      views.push(
+      viewportSections.push(
         <revogr-row-headers
           additionalData={this.additionalData}
           height={contentHeight}
@@ -1206,68 +1289,156 @@ export class RevoGridComponent {
           resize={this.resize}
           dataPorts={anyView.dataPorts}
           headerProp={anyView.headerProp}
-          uiid={anyView.prop[UUID]}
           rowHeaderColumn={
             typeof this.rowHeaders === 'object' ? this.rowHeaders : undefined
           }
-          onScrollViewport={({ detail: e }: CustomEvent) =>
+          onScrollview={({ detail: e }: CustomEvent) =>
             this.scrollingService.scrollService(e, 'headerRow')
           }
-          onElementToScroll={({ detail: e }: CustomEvent) =>
+          onRef={({ detail: e }: CustomEvent) =>
             this.scrollingService.registerElement(e, 'headerRow')
           }
         />,
       );
     }
-    views.push(
-      <ViewPortSections
-        additionalData={this.additionalData}
-        columnFilter={!!this.filter}
-        resize={this.resize}
-        readonly={this.readonly}
-        range={this.range}
-        rowClass={this.rowClass}
-        editors={this.editors}
-        applyEditorChangesOnClose={this.applyOnClose}
-        useClipboard={this.useClipboard}
-        columns={this.viewport.columns}
-        onSelectAll={() => {
-          this.selectionStoreConnector.selectAll();
-        }}
-        onEdit={detail => {
-          const event = this.beforeeditstart.emit(detail);
-          if (!event.defaultPrevented) {
-            this.selectionStoreConnector.setEdit(detail.val);
-          }
-        }}
-        onCancelEdit={() => {
-          this.selectionStoreConnector.setEdit(false);
-        }}
-        registerElement={(e, k) => this.scrollingService.registerElement(e, k)}
-        scrollSection={(details, k) =>
-          this.scrollingService.scrollService(details, k)
-        }
-        scrollSectionSilent={(details, k) =>
-          this.scrollingService.scrollSilentService(details, k)
-        }
-        focusTemplate={this.focusTemplate}
-      />,
-    );
+    
+    // Viewport section render
+    const isMobile = isMobileDevice();
+    const viewPortHtml: VNode[] = [];
+
+    // Render viewports column(horizontal sections)
+    for (let view of this.viewport.columns) {
+      const headerProperties: HeaderProperties = {
+        ...view.headerProp,
+        type: view.type,
+        additionalData: this.additionalData,
+        viewportCol: view.viewportCol,
+        selectionStore: view.columnSelectionStore,
+        canResize: this.resize,
+        readonly: this.readonly,
+        columnFilter: !!this.filter,
+      };
+      // Column headers
+      const dataViews: VNode[] = [
+        <revogr-header {...headerProperties} slot={HEADER_SLOT} />,
+      ];
+
+      // Render viewport data (vertical sections)
+      view.dataPorts.forEach((data, j) => {
+        const key = Number(view.prop.key) + (j + 1);
+
+        const dataView = (
+          <revogr-overlay-selection
+            {...data}
+            isMobileDevice={isMobile}
+            selectionStore={data.segmentSelectionStore}
+            onSelectall={() => this.selectionStoreConnector.selectAll()}
+            editors={this.editors}
+            readonly={this.readonly}
+            range={this.range}
+            useClipboard={this.useClipboard}
+            applyChangesOnClose={this.applyOnClose}
+            additionalData={this.additionalData}
+            slot={data.slot}
+            onCanceledit={() => this.selectionStoreConnector.setEdit(false)}
+            onSetedit={({ detail }) => {
+                const event = this.beforeeditstart.emit(detail);
+                if (!event.defaultPrevented) {
+                  this.selectionStoreConnector.setEdit(detail.val);
+                }
+              }
+            }
+          >
+            <revogr-data
+              {...data}
+              key={key}
+              readonly={this.readonly}
+              range={this.range}
+              rowClass={this.rowClass}
+              rowSelectionStore={data.rowSelectionStore}
+              additionalData={this.additionalData}
+              slot={DATA_SLOT}
+            >
+              <slot name={`data-${view.type}-${data.type}`} />
+            </revogr-data>
+            <revogr-temp-range
+              selectionStore={data.segmentSelectionStore}
+              dimensionRow={data.dimensionRow}
+              dimensionCol={data.dimensionCol}
+            />
+            <revogr-focus
+              colData={data.colData}
+              dataStore={data.dataStore}
+              focusTemplate={this.focusTemplate}
+              rowType={data.type}
+              colType={view.type}
+              selectionStore={data.segmentSelectionStore}
+              dimensionRow={data.dimensionRow}
+              dimensionCol={data.dimensionCol}
+            >
+              <slot name={`focus-${view.type}-${data.type}`} />
+            </revogr-focus>
+          </revogr-overlay-selection>
+        );
+
+        dataViews.push(dataView);
+      });
+
+      // Add viewport scroll in the end
+      viewPortHtml.push(
+        <revogr-viewport-scroll
+          {...view.prop}
+          ref={el => this.scrollingService.registerElement(el, `${view.prop.key}`)}
+          onScrollviewport={e => this.scrollingService.scrollService(e.detail, `${view.prop.key}`)}
+          onScrollviewportsilent={e => this.scrollingService.scrollSilentService(e.detail, `${view.prop.key}`)}
+        >
+          {dataViews}
+        </revogr-viewport-scroll>,
+      );
+    }
+    
+    viewportSections.push(viewPortHtml);
+    // #endregion
+
+
+    const typeRow: DimensionType = 'rgRow';
+    const typeCol: DimensionType = 'rgCol';
+
+    const viewports = this.viewportProvider.stores;
+    const dimensions = this.dimensionProvider.stores;
+
     return (
       <Host {...{ [`${UUID}`]: this.uuid }}>
-        <RevoViewPort
-          viewports={this.viewportProvider.stores}
-          dimensions={this.dimensionProvider.stores}
-          orderRef={e => (this.orderService = e)}
-          registerElement={(e, k) =>
-            this.scrollingService.registerElement(e, k)
-          }
-          nakedClick={() => this.viewport.clearEdit()}
-          onScroll={details => this.scrollingService.scrollService(details)}
+        <div
+          class="main-viewport"
+          onClick={(e: MouseEvent) => {
+            if (e.currentTarget === e.target) {
+              this.viewport.clearEdit();
+            }
+          }}
         >
-          <slot name="viewport" />
-          {views}
-        </RevoViewPort>
+          <div class="viewports">
+            <slot name="viewport" />
+            {viewportSections}
+            <revogr-scroll-virtual
+              class="vertical"
+              dimension={typeRow}
+              viewportStore={viewports[typeRow].store}
+              dimensionStore={dimensions[typeRow].store}
+              ref={el => this.scrollingService.registerElement(el, 'rowScroll')}
+              onScrollvirtual={e => this.scrollingService.scrollService(e.detail)}
+            />
+            <OrderRenderer ref={e => (this.orderService = e)} />
+          </div>
+        </div>
+        <revogr-scroll-virtual
+          class="horizontal"
+          dimension={typeCol}
+          viewportStore={viewports[typeCol].store}
+          dimensionStore={dimensions[typeCol].store}
+          ref={el => this.scrollingService.registerElement(el, 'colScroll')}
+          onScrollvirtual={e => this.scrollingService.scrollService(e.detail)}
+        />
         {this.extraElements}
       </Host>
     );

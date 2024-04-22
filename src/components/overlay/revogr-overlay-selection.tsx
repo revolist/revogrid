@@ -1,4 +1,15 @@
-import { Component, Event, EventEmitter, h, Host, Listen, Prop, VNode, Element, Watch } from '@stencil/core';
+import {
+  Component,
+  Event,
+  EventEmitter,
+  h,
+  Host,
+  Listen,
+  Prop,
+  VNode,
+  Element,
+  Watch,
+} from '@stencil/core';
 import ColumnService from '../data/column.service';
 import SelectionStoreService from '../../store/selection/selection.store.service';
 import { codesLetter } from '../../utils/key.codes';
@@ -9,33 +20,48 @@ import { getCurrentCell, getElStyle } from './selection.utils';
 import { isEditInput } from './editors/edit.utils';
 import { KeyboardService } from './keyboard.service';
 import { AutoFillService } from './autofill.service';
-import { ClipboardService } from './clipboard.service';
+import { ClipboardService } from '../clipboard/clipboard.service';
 import { getFromEvent, verifyTouchTarget } from '../../utils/events';
-import { Observable, SelectionStoreState, DimensionSettingsState, DataType, DimensionRows, ColumnRegular, DimensionCols, Cell, DragStartEvent } from '../../components';
+import {
+  Observable,
+  SelectionStoreState,
+  DimensionSettingsState,
+  DataType,
+  DimensionRows,
+  ColumnRegular,
+  DimensionCols,
+  Cell,
+  DragStartEvent,
+} from '../../components';
 import { MultiDimensionType } from '../../types/dimension';
-import { FocusRenderEvent, ApplyFocusEvent, AllDimensionType } from '../../types/interfaces';
-import { Editors, BeforeSaveDataDetails, BeforeEdit, RangeArea, TempRange, ChangedRange, BeforeRangeSaveDataDetails, SaveDataDetails } from '../../types/selection';
+import {
+  FocusRenderEvent,
+  ApplyFocusEvent,
+  AllDimensionType,
+} from '../../types/interfaces';
+import {
+  Editors,
+  BeforeSaveDataDetails,
+  BeforeEdit,
+  RangeArea,
+  TempRange,
+  ChangedRange,
+  BeforeRangeSaveDataDetails,
+  SaveDataDetails,
+} from '../../types/selection';
 
 @Component({
   tag: 'revogr-overlay-selection',
   styleUrl: 'revogr-overlay-style.scss',
 })
 export class OverlaySelection {
-
-  @Element() element: HTMLElement;
-
-  // --------------------------------------------------------------------------
-  //
-  //  Properties
-  //
-  // --------------------------------------------------------------------------
-
+  // #region Properties
   /**
-   * If readonly mode enables
+   * Readonly mode
    */
   @Prop() readonly: boolean;
   /**
-   * Range selection mode
+   * Range selection allowed
    */
   @Prop() range: boolean;
   /**
@@ -50,13 +76,12 @@ export class OverlaySelection {
    */
   @Prop() useClipboard: boolean;
 
-  // --------------------------------------------------------------------------
-  //
-  //  Dynamic stores
-  //
-  // --------------------------------------------------------------------------
+  /** Stores */
+  /** Selection, range, focus */
   @Prop() selectionStore: Observable<SelectionStoreState>;
+  /** Dimension settings Y */
   @Prop() dimensionRow: Observable<DimensionSettingsState>;
+  /** Dimension settings X */
   @Prop() dimensionCol: Observable<DimensionSettingsState>;
 
   // --------------------------------------------------------------------------
@@ -85,7 +110,7 @@ export class OverlaySelection {
   /**
    * If true applys changes when cell closes if not Escape
    */
-  @Prop() applyChangesOnClose: boolean = false;
+  @Prop() applyChangesOnClose = false;
   /**
    * Additional data to pass to renderer
    */
@@ -96,70 +121,129 @@ export class OverlaySelection {
    */
   @Prop() isMobileDevice: boolean;
 
-  // --------------------------------------------------------------------------
-  //
-  //  Events
-  //
-  // --------------------------------------------------------------------------
+  // #endregion
+
+  // #region Events
+  /**
+   * Before clipboard copy happened. Validate data before copy.
+   * To prevent the default behavior of editing data and use your own implementation, call `e.preventDefault()`.
+   */
+  @Event({ eventName: 'beforecopyregion', cancelable: true })
+  beforeCopyRegion: EventEmitter;
+  /**
+   * Before region paste happened
+   */
+  @Event({ eventName: 'beforepasteregion', cancelable: true })
+  beforeRegionPaste: EventEmitter;
 
   /**
-   * Before clipboard copy happened
+   * Before cell edit happened
    */
-  @Event({ cancelable: true }) internalCopy: EventEmitter;
-  /**
-   * Before paste happened
-   */
-  @Event({ cancelable: true }) internalPaste: EventEmitter;
+  @Event({ eventName: 'beforecelledit', cancelable: true })
+  beforeCellEdit: EventEmitter<BeforeSaveDataDetails>;
 
-  @Event({ cancelable: true }) internalCellEdit: EventEmitter<BeforeSaveDataDetails>;
-  @Event({ cancelable: true }) beforeFocusCell: EventEmitter<BeforeSaveDataDetails>;
+  /**
+   * Before cell focus
+   */
+  @Event({ eventName: 'beforecellfocusinit', cancelable: true })
+  beforeFocusCell: EventEmitter<BeforeSaveDataDetails>;
 
   /**
    * Set edit cell
    */
-  @Event() setEdit: EventEmitter<BeforeEdit>;
-  @Event({ eventName: 'before-apply-range' }) beforeApplyRange: EventEmitter<FocusRenderEvent>;
+  @Event({ eventName: 'setedit' }) setEdit: EventEmitter<BeforeEdit>;
+
+  /**
+   * Before range applied
+   */
+  @Event({ eventName: 'beforeapplyrange' })
+  beforeApplyRange: EventEmitter<FocusRenderEvent>;
   /**
    * Before range selection applied
    */
-  @Event({ eventName: 'before-set-range' }) beforeSetRange: EventEmitter;
-  @Event({ eventName: 'before-edit-render' }) beforeEditRender: EventEmitter<FocusRenderEvent>;
-  @Event() setRange: EventEmitter<RangeArea & { type: MultiDimensionType }>;
+  @Event({ eventName: 'beforesetrange' }) beforeSetRange: EventEmitter;
+
+  /**
+   * Before editor render
+   */
+  @Event({ eventName: 'beforeeditrender' })
+  beforeEditRender: EventEmitter<FocusRenderEvent>;
+
+  /**
+   * Set range
+   */
+  @Event({ eventName: 'setrange' }) setRange: EventEmitter<
+    RangeArea & { type: MultiDimensionType }
+  >;
+
+  /** Select all */
   @Event({ eventName: 'selectall' }) selectAll: EventEmitter;
   /**
-   * Used for editors support when close requested
+   * Used for editors support when editor close requested
    */
-  @Event() cancelEdit: EventEmitter;
-  @Event() setTempRange: EventEmitter<TempRange | null>;
+  @Event({ eventName: 'canceledit' }) cancelEdit: EventEmitter;
 
-  @Event() applyFocus: EventEmitter<FocusRenderEvent>;
-  @Event() focusCell: EventEmitter<ApplyFocusEvent>;
+  /**
+   * Set temp range area during autofill
+   */
+  @Event({ eventName: 'settemprange' })
+  setTempRange: EventEmitter<TempRange | null>;
+
+  /**
+   * Before cell get focused
+   * To prevent the default behavior of applying the edit data, you can call `e.preventDefault()`.
+   */
+  @Event({ eventName: 'applyfocus' })
+  applyFocus: EventEmitter<FocusRenderEvent>;
+
+  /**
+   * Cell get focused
+   * To prevent the default behavior of applying the edit data, you can call `e.preventDefault()`.
+   */
+  @Event({ eventName: 'focuscell' }) focusCell: EventEmitter<ApplyFocusEvent>;
   /** Range data apply */
-  @Event() beforeRangeDataApply: EventEmitter<FocusRenderEvent>;
+  @Event({ eventName: 'beforerangedataapply' })
+  beforeRangeDataApply: EventEmitter<FocusRenderEvent>;
   /** Selection range changed */
-  @Event({ cancelable: true }) internalSelectionChanged: EventEmitter<ChangedRange>;
-  /** Selection range changed */
-  @Event({ cancelable: true, bubbles: true }) beforeRangeCopyApply: EventEmitter<ChangedRange>;
+  @Event({ eventName: 'selectionchangeinit', cancelable: true })
+  selectionChange: EventEmitter<ChangedRange>;
+  /** Before range copy */
+  @Event({ eventName: 'beforerangecopyapply', cancelable: true, bubbles: true })
+  beforeRangeCopyApply: EventEmitter<ChangedRange>;
 
   /** Range data apply */
-  @Event({ cancelable: true }) internalRangeDataApply: EventEmitter<BeforeRangeSaveDataDetails>;
+  @Event({ eventName: 'rangedataapplyinit', cancelable: true })
+  rangeDataApply: EventEmitter<BeforeRangeSaveDataDetails>;
   /** Range copy */
-  @Event({ cancelable: true }) rangeClipboardCopy: EventEmitter;
-  @Event({ cancelable: true }) rangeClipboardPaste: EventEmitter;
+  @Event({ eventName: 'clipboardrangecopy', cancelable: true })
+  rangeClipboardCopy: EventEmitter;
+  @Event({ eventName: 'clipboardrangepaste', cancelable: true })
+  rangeClipboardPaste: EventEmitter;
 
   /**
    * Before key up event proxy, used to prevent key up trigger.
    * If you have some custom behaviour event, use this event to check if it wasn't processed by internal logic.
    * Call preventDefault()
    */
-  @Event({ eventName: 'beforekeydown' }) beforeKeyDown: EventEmitter<KeyboardEvent>;
+  @Event({ eventName: 'beforekeydown' })
+  beforeKeyDown: EventEmitter<KeyboardEvent>;
   /**
    * Before key down event proxy, used to prevent key down trigger.
    * If you have some custom behaviour event, use this event to check if it wasn't processed by internal logic.
    * Call preventDefault()
    */
   @Event({ eventName: 'beforekeyup' }) beforeKeyUp: EventEmitter<KeyboardEvent>;
+  /**
+   * Runs before cell save
+   * Can be used to override or cancel original save
+   */
+  @Event({ eventName: 'beforecellsave', cancelable: true })
+  beforeCellSave: EventEmitter;
 
+  // #endregion
+
+  // #region Private Properties
+  @Element() element: HTMLElement;
   protected columnService: ColumnService;
 
   protected selectionStoreService: SelectionStoreService;
@@ -168,16 +252,9 @@ export class OverlaySelection {
   private clipboardService: ClipboardService | null = null;
   private orderEditor: HTMLRevogrOrderEditorElement;
   private revogrEdit: HTMLRevogrEditElement | null = null;
-  /**
-   * Runs before cell save
-   * Can be used to override or cancel original save
-   */
-  @Event({ eventName: 'before-cell-save', cancelable: true }) beforeCellSave: EventEmitter;
-  // --------------------------------------------------------------------------
-  //
-  //  Listeners
-  //
-  // --------------------------------------------------------------------------
+  // #endregion
+
+  // #region Listeners
   @Listen('touchmove', { target: 'document' })
   @Listen('mousemove', { target: 'document' })
   onMouseMove(e: MouseEvent | TouchEvent) {
@@ -185,7 +262,6 @@ export class OverlaySelection {
       this.autoFillService.selectionMouseMove(e);
     }
   }
-
 
   /** Action finished inside of the document */
   /** Pointer left document, clear any active operation */
@@ -197,7 +273,7 @@ export class OverlaySelection {
   }
 
   /** Row drag started */
-  @Listen('dragStartCell') onCellDrag(e: CustomEvent<DragStartEvent>) {
+  @Listen('dragstartcell') onCellDrag(e: CustomEvent<DragStartEvent>) {
     this.orderEditor?.dragStart(e.detail);
   }
 
@@ -214,9 +290,12 @@ export class OverlaySelection {
     }
     this.keyboardService?.keyDown(e, this.range);
   }
+  // #endregion
 
   // selection & keyboard
-  @Watch('selectionStore') selectionServiceSet(s: Observable<SelectionStoreState>) {
+  @Watch('selectionStore') selectionServiceSet(
+    s: Observable<SelectionStoreState>,
+  ) {
     this.selectionStoreService = new SelectionStoreService(s, {
       changeRange: range => this.triggerRangeEvent(range),
       focus: (focus, end) => this.doFocus(focus, end),
@@ -238,7 +317,7 @@ export class OverlaySelection {
         this.closeEdit();
       },
       clearCell: () => !this.readonly && this.clearCell(),
-      internalPaste: () => !this.readonly && this.internalPaste.emit(),
+      internalPaste: () => !this.readonly && this.beforeRegionPaste.emit(),
       getData: () => this.getData(),
       selectAll: () => this.selectAll.emit(),
     });
@@ -262,9 +341,9 @@ export class OverlaySelection {
           ...this.types,
         }),
       setTempRange: e => this.setTempRange.emit(e),
-      selectionChanged: e => this.internalSelectionChanged.emit(e),
+      selectionChanged: e => this.selectionChange.emit(e),
       rangeCopy: e => this.beforeRangeCopyApply.emit(e),
-      rangeDataApply: e => this.internalRangeDataApply.emit(e),
+      rangeDataApply: e => this.rangeDataApply.emit(e),
 
       setRange: e => this.triggerRangeEvent(e),
       getData: () => this.getData(),
@@ -292,7 +371,10 @@ export class OverlaySelection {
         if (!range) {
           return undefined;
         }
-        const { data, mapping } = this.columnService.copyRangeArray(range, this.dataStore);
+        const { data, mapping } = this.columnService.copyRangeArray(
+          range,
+          this.dataStore,
+        );
         const event = this.rangeClipboardCopy.emit({
           range,
           data,
@@ -305,7 +387,7 @@ export class OverlaySelection {
         return event.detail.data;
       },
       rangeClear: () => !this.readonly && this.clearCell(),
-      beforeCopy: range => this.internalCopy.emit(range),
+      beforeCopy: range => this.beforeCopyRegion.emit(range),
       beforePaste: (data, range) => {
         return this.rangeClipboardPaste.emit({
           data,
@@ -326,11 +408,20 @@ export class OverlaySelection {
   }
 
   private renderRange(range: RangeArea) {
-    const style = getElStyle(range, this.dimensionRow.state, this.dimensionCol.state);
+    const style = getElStyle(
+      range,
+      this.dimensionRow.state,
+      this.dimensionCol.state,
+    );
     return [
       <div class={SELECTION_BORDER_CLASS} style={style}>
-        {this.isMobileDevice && <div class="range-handlers"><span class={MOBILE_CLASS}></span><span class={MOBILE_CLASS}></span></div>}
-      </div>
+        {this.isMobileDevice && (
+          <div class="range-handlers">
+            <span class={MOBILE_CLASS}></span>
+            <span class={MOBILE_CLASS}></span>
+          </div>
+        )}
+      </div>,
     ];
   }
 
@@ -340,7 +431,8 @@ export class OverlaySelection {
     if (this.readonly || !editCell) {
       return null;
     }
-    const val = editCell.val || this.columnService.getCellData(editCell.y, editCell.x);
+    const val =
+      editCell.val || this.columnService.getCellData(editCell.y, editCell.x);
     const editable = {
       ...editCell,
       ...this.columnService.getSaveData(editCell.y, editCell.x, val),
@@ -360,7 +452,11 @@ export class OverlaySelection {
     const {
       detail: { range },
     } = renderEvent;
-    const style = getElStyle(range, this.dimensionRow.state, this.dimensionCol.state);
+    const style = getElStyle(
+      range,
+      this.dimensionRow.state,
+      this.dimensionCol.state,
+    );
     return (
       <revogr-edit
         ref={el => {
@@ -381,7 +477,11 @@ export class OverlaySelection {
         editCell={editable}
         saveOnClose={this.applyChangesOnClose}
         column={this.columnService.columns[editCell.x]}
-        editor={this.columnService.getCellEditor(editCell.y, editCell.x, this.editors)}
+        editor={this.columnService.getCellEditor(
+          editCell.y,
+          editCell.x,
+          this.editors,
+        )}
         additionalData={this.additionalData}
         style={style}
       />
@@ -414,7 +514,7 @@ export class OverlaySelection {
             dimensionRow={this.dimensionRow}
             dimensionCol={this.dimensionCol}
             parent={this.element}
-            onInternalRowDragStart={e => this.onRowDragStart(e)}
+            onRowdragstartinit={e => this.onRowDragStart(e)}
           />,
         );
       }
@@ -430,7 +530,8 @@ export class OverlaySelection {
           }
         }}
         onMouseDown={(e: MouseEvent) => this.onElementMouseDown(e)}
-        onTouchStart={(e: TouchEvent) => this.onElementMouseDown(e, true)}>
+        onTouchStart={(e: TouchEvent) => this.onElementMouseDown(e, true)}
+      >
         {els}
         <slot name="data" />
       </Host>
@@ -438,7 +539,9 @@ export class OverlaySelection {
   }
 
   private doFocus(focus: Cell, end: Cell, next?: Partial<Cell>) {
-    const { defaultPrevented } = this.beforeFocusCell.emit(this.columnService.getSaveData(focus.y, focus.x));
+    const { defaultPrevented } = this.beforeFocusCell.emit(
+      this.columnService.getSaveData(focus.y, focus.x),
+    );
     if (defaultPrevented) {
       return false;
     }
@@ -478,7 +581,10 @@ export class OverlaySelection {
     if (applyEvent.defaultPrevented) {
       return false;
     }
-    const data = this.columnService.getRangeTransformedToProps(applyEvent.detail.range, this.dataStore);
+    const data = this.columnService.getRangeTransformedToProps(
+      applyEvent.detail.range,
+      this.dataStore,
+    );
     let e = this.beforeSetRange.emit(data);
     e = this.setRange.emit({ ...applyEvent.detail.range, type });
     if (e.defaultPrevented) {
@@ -511,13 +617,15 @@ export class OverlaySelection {
       this.autoFillService.selectionStart(e.target as HTMLElement, data);
       if (!touch) {
         e.preventDefault();
-      } else if (verifyTouchTarget((e as TouchEvent).touches[0], MOBILE_CLASS)) {
+      } else if (
+        verifyTouchTarget((e as TouchEvent).touches[0], MOBILE_CLASS)
+      ) {
         e.preventDefault();
       }
     }
   }
 
-  /** 
+  /**
    * Start cell editing
    */
   protected doEdit(val = '') {
@@ -545,7 +653,7 @@ export class OverlaySelection {
   /** Edit finished, close cell and save */
   protected cellEdit(e: SaveDataDetails) {
     const dataToSave = this.columnService.getSaveData(e.rgRow, e.rgCol, e.val);
-    this.internalCellEdit.emit(dataToSave);
+    this.beforeCellEdit.emit(dataToSave);
   }
 
   private async focusNext() {
@@ -561,9 +669,18 @@ export class OverlaySelection {
   }
 
   protected clearCell() {
-    if (this.selectionStoreService.ranged && !isRangeSingleCell(this.selectionStoreService.ranged)) {
-      const data = this.columnService.getRangeStaticData(this.selectionStoreService.ranged, '');
-      this.autoFillService.onRangeApply(data, this.selectionStoreService.ranged);
+    if (
+      this.selectionStoreService.ranged &&
+      !isRangeSingleCell(this.selectionStoreService.ranged)
+    ) {
+      const data = this.columnService.getRangeStaticData(
+        this.selectionStoreService.ranged,
+        '',
+      );
+      this.autoFillService.onRangeApply(
+        data,
+        this.selectionStoreService.ranged,
+      );
     } else if (this.canEdit()) {
       const focused = this.selectionStoreService.focused;
       const cell = this.columnService.getSaveData(focused.y, focused.x);
@@ -577,7 +694,9 @@ export class OverlaySelection {
     }
   }
 
-  private onRowDragStart({ detail }: CustomEvent<{ cell: Cell; text: string }>) {
+  private onRowDragStart({
+    detail,
+  }: CustomEvent<{ cell: Cell; text: string }>) {
     detail.text = this.columnService.getCellData(detail.cell.y, detail.cell.x);
   }
 

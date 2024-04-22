@@ -1,4 +1,13 @@
-import { Component, Event, Prop, EventEmitter, h, VNode, Host } from '@stencil/core';
+import {
+  Component,
+  Event,
+  Prop,
+  EventEmitter,
+  h,
+  VNode,
+  Host,
+  Build,
+} from '@stencil/core';
 
 import {
   DATA_COL,
@@ -6,9 +15,17 @@ import {
   DRAGGABLE_CLASS,
   DRAG_ICON_CLASS,
 } from '../../utils/consts';
-import ColumnService from './column.service';
-import { PADDING_DEPTH } from './row-renderer';
-import { BeforeCellRenderEvent, CellProps, ColumnDataSchemaModel, DragStartEvent, Providers, RowDrag } from '../../types/interfaces';
+import ColumnService from '../data/column.service';
+import { PADDING_DEPTH } from '../data/row-renderer';
+import {
+  BeforeCellRenderEvent,
+  CellProps,
+  ColumnDataSchemaModel,
+  DragStartEvent,
+  Providers,
+  RowDrag,
+} from '../../types/interfaces';
+
 /**
  * Component is responsible for rendering cell
  * Main purpose is to track changes and understand what exactly need to be rerendered instead of full grid render
@@ -17,6 +34,7 @@ import { BeforeCellRenderEvent, CellProps, ColumnDataSchemaModel, DragStartEvent
   tag: 'revogr-cell',
 })
 export class RevogridCellRenderer {
+  // #region Properties
   /**
    * Additional data to pass to renderer
    * Used in plugins such as vue or react to pass root app entity to cells
@@ -77,13 +95,17 @@ export class RevogridCellRenderer {
    * Column width
    */
   @Prop() colSize!: number;
-
+  // #endregion
   /**
    * Before each cell render function. Allows to override cell properties
    */
-  @Event({ eventName: 'before-cell-render' })
+  @Event({ eventName: 'beforecellrender' })
   beforeCellRender: EventEmitter<BeforeCellRenderEvent>;
-  @Event({ eventName: 'dragStartCell' })
+
+  /**
+   * Event emitted on cell drag start
+   */
+  @Event({ eventName: 'dragstartcell' })
   dragStartCell: EventEmitter<DragStartEvent>;
 
   render() {
@@ -146,7 +168,9 @@ export class RevogridCellRenderer {
     }
     // something is wrong with data
     if (!model.column) {
-      console.error('Investigate column problem');
+      if (Build.isDev) {
+        console.error('Investigate column problem.', model);
+      }
       return;
     }
 
@@ -174,7 +198,7 @@ export class RevogridCellRenderer {
 
 /**
  * Checks if the given rowDrag is a service for dragging rows.
-*/
+ */
 function isRowDragService(
   rowDrag: RowDrag,
   model: ColumnDataSchemaModel,

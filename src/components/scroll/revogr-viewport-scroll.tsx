@@ -20,31 +20,27 @@ import {
 } from '../revoGrid/viewport.helpers';
 import { DimensionType } from '../../types/dimension';
 import { ScrollCoordinateEvent, ViewPortResizeEvent, ViewPortScrollEvent } from '../../types/interfaces';
+
 type Delta = 'deltaX' | 'deltaY';
 type LocalScrollEvent = {
   preventDefault(): void;
 } & { [x in Delta]: number };
+
+/**
+ * Viewport scroll component for RevoGrid
+ * @slot - content
+ * @slot header - header
+ * @slot footer - footer
+ */
 @Component({
   tag: 'revogr-viewport-scroll',
   styleUrl: 'revogr-viewport-scroll-style.scss',
 })
 export class RevogrViewportScroll {
-  @Prop() readonly rowHeader: boolean;
-  @Event({ bubbles: true }) scrollViewport: EventEmitter<ViewPortScrollEvent>;
-  @Event() resizeViewport: EventEmitter<ViewPortResizeEvent>;
-  @Event() scrollchange: EventEmitter<{
-    type: DimensionType;
-    hasScroll: boolean;
-  }>;
-
   /**
-   * Silently scroll to coordinate
-   * Made to align negative coordinates for mobile devices
+   * Enable row header
   */
-  @Event()
-  silentScroll: EventEmitter<ViewPortScrollEvent>;
-
-  private scrollThrottling = 10;
+  @Prop() readonly rowHeader: boolean;
 
   /**
    * Width of inner content
@@ -55,10 +51,35 @@ export class RevogrViewportScroll {
    */
   @Prop() contentHeight = 0;
 
+  /**
+   * Before scroll event
+   */
+  @Event({ eventName: 'scrollviewport', bubbles: true }) scrollViewport: EventEmitter<ViewPortScrollEvent>;
+  /**
+   * Viewport resize
+   */
+  @Event({ eventName: 'resizeviewport' }) resizeViewport: EventEmitter<ViewPortResizeEvent>;
+
+  /**
+   * Triggered on scroll change, can be used to get information about scroll visibility
+   */
+  @Event() scrollchange: EventEmitter<{
+    type: DimensionType;
+    hasScroll: boolean;
+  }>;
+
+  /**
+   * Silently scroll to coordinate
+   * Made to align negative coordinates for mobile devices
+  */
+  @Event({ eventName: 'scrollviewportsilent' }) silentScroll: EventEmitter<ViewPortScrollEvent>;
+
+  @Element() horizontalScroll: HTMLElement;
+  private scrollThrottling = 10;
+
   private oldValY = this.contentHeight;
   private oldValX = this.contentWidth;
 
-  @Element() horizontalScroll: HTMLElement;
   private verticalScroll: HTMLElement;
   private header: HTMLElement;
   private footer: HTMLElement;

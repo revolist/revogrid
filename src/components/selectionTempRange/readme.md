@@ -5,7 +5,7 @@
 
 ## Overview
 
-Temporary range selection
+Temporary range selection component. Shows temporary range selection.
 
 ## Properties
 
@@ -31,4 +31,4 @@ graph TD;
 
 ----------------------------------------------
 
-*Built with [StencilJS](https://stenciljs.com/)*
+*Built with love by Revolist OU*

@@ -23,6 +23,15 @@ const initialParams: Params = {
   maxSize: 0,
 };
 const NO_COORDINATE = -1;
+
+/**
+ * Based on content size, client size and virtual size
+ * return full size
+ */
+export function getContentSize(contentSize: number, clientSize: number, virtualSize = 0): number {
+  return contentSize + (virtualSize ? clientSize - virtualSize : 0);
+}
+
 export default class LocalScrollService {
   private preventArtificialScroll: Record<DimensionType, () => void | null> = { rgRow: null, rgCol: null };
   // to check if scroll changed
@@ -31,12 +40,9 @@ export default class LocalScrollService {
 
   constructor(private cfg: Config) {}
 
-  static getVirtualContentSize(contentSize: number, clientSize: number, virtualSize: number = 0): number {
-    return contentSize + (virtualSize ? clientSize - virtualSize : 0);
-  }
 
   setParams(params: Params, dimension: DimensionType) {
-    const virtualContentSize = LocalScrollService.getVirtualContentSize(params.contentSize, params.clientSize, params.virtualSize);
+    const virtualContentSize = getContentSize(params.contentSize, params.clientSize, params.virtualSize);
     this.params[dimension] = {
       ...params,
       maxSize: virtualContentSize - params.clientSize,
@@ -123,8 +129,8 @@ export default class LocalScrollService {
   }
 
   /* convert virtual to real and back, scale range */
-  private convert(pos: number, param: Params, toReal: boolean = true): number {
-    const minRange: number = param.clientSize;
+  private convert(pos: number, param: Params, toReal = true): number {
+    const minRange = param.clientSize;
     const from: [number, number] = [0, param.virtualContentSize - minRange];
     const to: [number, number] = [0, param.contentSize - param.virtualSize];
     if (toReal) {

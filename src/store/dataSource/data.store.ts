@@ -33,12 +33,16 @@ export type DSourceState<
   groupingCustomRenderer?: GroupLabelTemplateFunc | null;
 };
 
+/**
+ * Data store
+ * Manage the state of a data source and provide methods for updating, adding, and refreshing the data.
+ */
 export default class DataStore<T extends GDataType, ST extends GDimension> {
   private readonly dataStore: Observable<DSourceState<T, ST>>;
   get store(): Observable<DSourceState<T, ST>> {
     return this.dataStore;
   }
-  constructor(type: ST) {
+  constructor(type: ST, storeData?: DSourceState<T, ST>) {
     const store = (this.dataStore = createStore<DSourceState<T, ST>>({
       items: [],
       proxyItems: [],
@@ -48,6 +52,7 @@ export default class DataStore<T extends GDataType, ST extends GDimension> {
       type,
       trimmed: {},
       groupingCustomRenderer: undefined,
+      ...storeData,
     }));
     store.use(proxyPlugin(store));
     store.use(trimmedPlugin(store));

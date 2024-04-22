@@ -26,7 +26,7 @@ function expandEvent(e: MouseEvent, model: DataType, virtualIndex: number) {
 const GroupingRowRenderer = (props: Props) => {
   const { model, itemIndex, hasExpand, groupingCustomRenderer } = props;
   const name: string = model[PSEUDO_GROUP_ITEM];
-  const expanded: boolean = model[GROUP_EXPANDED];
+  const expanded = model[GROUP_EXPANDED];
   const depth = parseInt(model[GROUP_DEPTH], 10) || 0;
   if (!hasExpand) {
     return <RowRenderer {...props} rowClass="groupingRow" depth={depth} />;

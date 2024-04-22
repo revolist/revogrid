@@ -2,7 +2,7 @@ body,
 html {
   height: 100%;
   width: 100%;
-  padding: 20px;
+  padding: 0;
   box-sizing: border-box;
   margin: 0;
   overflow: hidden;
@@ -32,4 +32,13 @@ html {
 .scrollable {
   overflow-y: auto;
   height: 100%;
+  border: 10px solid #f7f9fc;
+}
+
+.highlighted-row {
+  background-color: #fff3cf;
+}
+revo-grid .rowHeaders revogr-data .highlighted-row {
+  box-shadow: 4px 0 0 0 #ffbd00 inset !important;
+  background-color: #ffe18a;
 }

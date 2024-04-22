@@ -1,44 +1,45 @@
-import { Component, Method, Event, EventEmitter, Prop, Listen } from '@stencil/core';
+import {
+  Component,
+  Method,
+  Event,
+  EventEmitter,
+  Prop,
+  Listen,
+} from '@stencil/core';
 import debounce from 'lodash/debounce';
 
 import { DSourceState, setItems } from '../../store/dataSource/data.store';
 import { DRAGG_TEXT } from '../../utils/consts';
 import RowOrderService from './order-row.service';
 import { DimensionRows } from '../../types/dimension';
-import { DataType, DimensionSettingsState, DragStartEvent, Observable, PositionItem } from '../../types/interfaces';
+import {
+  DataType,
+  DimensionSettingsState,
+  DragStartEvent,
+  Observable,
+  PositionItem,
+} from '../../types/interfaces';
 import { Cell } from '../../types/selection';
 
 @Component({ tag: 'revogr-order-editor' })
 export class OrderEditor {
-  private rowOrderService: RowOrderService;
-  private moveFunc: ((e: Cell) => void) | null;
-  private rowMoveFunc = debounce((y: number) => {
-    const rgRow = this.rowOrderService.move(y, this.getData());
-    if (rgRow !== null) {
-      this.internalRowDrag.emit(rgRow);
-    }
-  }, 5);
-
-  // --------------------------------------------------------------------------
-  //
-  //  Properties
-  //
-  // --------------------------------------------------------------------------
+  // #region Properties
+  /** Parent element */
   @Prop() parent: HTMLElement;
+  /** Dimension settings Y */
   @Prop() dimensionRow: Observable<DimensionSettingsState>;
+  /** Dimension settings X */
   @Prop() dimensionCol: Observable<DimensionSettingsState>;
 
   /** Static stores, not expected to change during component lifetime */
   @Prop() dataStore: Observable<DSourceState<DataType, DimensionRows>>;
+  // #endregion
 
-  // --------------------------------------------------------------------------
-  //
-  //  Events
-  //
-  // --------------------------------------------------------------------------
+  // #region Events
 
   /** Row drag started */
-  @Event({ cancelable: true }) internalRowDragStart: EventEmitter<{
+  @Event({ eventName: 'rowdragstartinit', cancelable: true })
+  rowDragStart: EventEmitter<{
     cell: Cell;
     text: string;
     pos: PositionItem;
@@ -46,40 +47,47 @@ export class OrderEditor {
   }>;
 
   /** Row drag ended */
-  @Event({ cancelable: true }) internalRowDragEnd: EventEmitter;
+  @Event({ eventName: 'rowdragendinit', cancelable: true })
+  rowDragEnd: EventEmitter;
 
   /** Row move */
-  @Event({ cancelable: true }) internalRowDrag: EventEmitter<PositionItem>;
+  @Event({ eventName: 'rowdragmoveinit', cancelable: true }) rowDrag: EventEmitter<PositionItem>;
 
   /** Row mouse move */
-  @Event({ cancelable: true }) internalRowMouseMove: EventEmitter<Cell>;
+  @Event({ eventName: 'rowdragmousemove', cancelable: true })rowMouseMove: EventEmitter<Cell>;
 
   /** Row dragged, new range ready to be applied */
-  @Event({ cancelable: true }) initialRowDropped: EventEmitter<{ from: number; to: number }>;
+  @Event({ eventName: 'rowdragendinit', cancelable: true }) rowDropped: EventEmitter<{
+    from: number;
+    to: number;
+  }>;
+  // #endregion
 
-  // --------------------------------------------------------------------------
-  //
-  //  Listeners
-  //
-  // --------------------------------------------------------------------------
+  // #region Private
+  private rowOrderService: RowOrderService;
+  private moveFunc: ((e: Cell) => void) | null;
+  private rowMoveFunc = debounce((y: number) => {
+    const rgRow = this.rowOrderService.move(y, this.getData());
+    if (rgRow !== null) {
+      this.rowDrag.emit(rgRow);
+    }
+  }, 5);
+  // #endregion
 
+  // #region Listeners
   @Listen('mouseleave', { target: 'document' })
-  onMouseOut(): void {
+  onMouseOut() {
     this.clearOrder();
   }
 
   /** Action finished inside of the document */
   @Listen('mouseup', { target: 'document' })
-  onMouseUp(e: MouseEvent): void {
+  onMouseUp(e: MouseEvent) {
     this.endOrder(e);
   }
+  // #endregion
 
-  // --------------------------------------------------------------------------
-  //
-  //  Methods
-  //
-  // --------------------------------------------------------------------------
-
+  // #region Methods
   @Method() async dragStart(e: DragStartEvent) {
     e.originalEvent.preventDefault();
 
@@ -91,7 +99,12 @@ export class OrderEditor {
     const data = this.getData();
     const cell = this.rowOrderService.startOrder(e.originalEvent, data);
     const pos = this.rowOrderService.getRow(e.originalEvent.y, data);
-    const dragStartEvent = this.internalRowDragStart.emit({ cell, text: DRAGG_TEXT, pos, event: e.originalEvent });
+    const dragStartEvent = this.rowDragStart.emit({
+      cell,
+      text: DRAGG_TEXT,
+      pos,
+      event: e.originalEvent,
+    });
     if (dragStartEvent.defaultPrevented) {
       return;
     }
@@ -109,26 +122,23 @@ export class OrderEditor {
     this.rowOrderService.clear();
     document.removeEventListener('mousemove', this.moveFunc);
     this.moveFunc = null;
-    this.internalRowDragEnd.emit();
+    this.rowDragEnd.emit();
   }
+  // #endregion
 
-  // --------------------------------------------------------------------------
-  //
-  //  Component methods
-  //
-  // --------------------------------------------------------------------------
-
-  move({ x, y }: { x: number; y: number }): void {
-    this.internalRowMouseMove.emit({ x, y });
+  move({ x, y }: { x: number; y: number }) {
+    this.rowMouseMove.emit({ x, y });
     this.rowMoveFunc(y);
   }
 
-  connectedCallback(): void {
-    this.rowOrderService = new RowOrderService({ positionChanged: (f, t) => this.onPositionChanged(f, t) });
+  connectedCallback() {
+    this.rowOrderService = new RowOrderService({
+      positionChanged: (f, t) => this.onPositionChanged(f, t),
+    });
   }
 
   private onPositionChanged(from: number, to: number) {
-    const dropEvent = this.initialRowDropped.emit({ from, to });
+    const dropEvent = this.rowDropped.emit({ from, to });
     if (dropEvent.defaultPrevented) {
       return;
     }

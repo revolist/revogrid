@@ -25,10 +25,10 @@ export class ClipboardService {
   renderClipboard(readonly = false) {
     return <revogr-clipboard
       readonly={readonly}
-      onCopyRegion={e => this.onCopy(e.detail)}
-      onClearRegion={() => this.sv.rangeClear()}
+      onCopyregion={e => this.onCopy(e.detail)}
+      onClearregion={() => this.sv.rangeClear()}
       ref={e => (this.clipboard = e)}
-      onPasteRegion={e => this.onPaste(e.detail)} />;
+      onPasteregion={e => this.onPaste(e.detail)} />;
   }
   private getRegion() {
     const focus = this.sv.selectionStoreService.focused;

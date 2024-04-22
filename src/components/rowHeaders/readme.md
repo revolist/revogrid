@@ -13,21 +13,20 @@ Visible on the left side of the table
 | Property          | Attribute         | Description                         | Type                    | Default     |
 | ----------------- | ----------------- | ----------------------------------- | ----------------------- | ----------- |
 | `additionalData`  | `additional-data` | Additional data to pass to renderer | `any`                   | `undefined` |
-| `dataPorts`       | --                |                                     | `ViewportData[]`        | `undefined` |
-| `headerProp`      | --                |                                     | `{ [x: string]: any; }` | `undefined` |
-| `height`          | `height`          |                                     | `number`                | `undefined` |
-| `resize`          | `resize`          |                                     | `boolean`               | `undefined` |
-| `rowClass`        | `row-class`       |                                     | `string`                | `undefined` |
-| `rowHeaderColumn` | --                |                                     | `RowHeaders`            | `undefined` |
-| `uiid`            | `uiid`            |                                     | `string`                | `undefined` |
+| `dataPorts`       | --                | Viewport data                       | `ViewportData[]`        | `undefined` |
+| `headerProp`      | --                | Header props                        | `{ [x: string]: any; }` | `undefined` |
+| `height`          | `height`          | Header height to setup row headers  | `number`                | `undefined` |
+| `resize`          | `resize`          | Enable resize                       | `boolean`               | `undefined` |
+| `rowClass`        | `row-class`       | Row class                           | `string`                | `undefined` |
+| `rowHeaderColumn` | --                | Row header column                   | `RowHeaders`            | `undefined` |
 
 
 ## Events
 
-| Event             | Description | Type                                                                                                |
-| ----------------- | ----------- | --------------------------------------------------------------------------------------------------- |
-| `elementToScroll` |             | `CustomEvent<ElementScroll>`                                                                        |
-| `scrollViewport`  |             | `CustomEvent<{ dimension: DimensionType; coordinate: number; delta?: number; outside?: boolean; }>` |
+| Event        | Description                | Type                                                                                                |
+| ------------ | -------------------------- | --------------------------------------------------------------------------------------------------- |
+| `ref`        | Register element to scroll | `CustomEvent<ElementScroll>`                                                                        |
+| `scrollview` | Scroll viewport            | `CustomEvent<{ dimension: DimensionType; coordinate: number; delta?: number; outside?: boolean; }>` |
 
 
 ## Dependencies
@@ -55,4 +54,4 @@ graph TD;
 
 ----------------------------------------------
 
-*Built with [StencilJS](https://stenciljs.com/)*
+*Built with love by Revolist OU*

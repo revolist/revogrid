@@ -45,8 +45,9 @@ export function generateFakeDataObject(config = {}) {
     ...config,
   };
 
-  const result = [];
+  let result = [];
   const columns = {};
+  // all cells
   const all = cols * rows;
   for (let j = 0; j < all; j++) {
     let rgCol = j % cols;
@@ -54,6 +55,12 @@ export function generateFakeDataObject(config = {}) {
     if (!result[rgRow]) {
       result[rgRow] = {};
 
+      if (rgRow === 2) {
+        // highlighted
+        result[rgRow]['row-style'] = 'highlighted-row';
+      }
+
+      // apply different key for grouping
       if (rgRow % 2) {
         result[rgRow].key = 'a';
       } else {
@@ -64,7 +71,7 @@ export function generateFakeDataObject(config = {}) {
       columns[rgCol] = {
         name: generateHeader(rgCol),
         prop: rgCol,
-        filter:"myFilterType",
+        filter: 'myFilterType',
         sortable: true,
         size: 200,
         cellCompare: rgCol % 2 == 0 ? naturalSort : undefined,
@@ -99,10 +106,21 @@ export function generateFakeDataObject(config = {}) {
       columns[rgCol].order = 'desc';
     }
   }
-  // apply config
-  const pinnedTopRows = topPinned.map(i => ({ ...result[i] }));
-  // apply config
-  const pinnedBottomRows = bottomPinned.map(i => ({ ...result[i] }));
+  const pinnedTopRows = [];
+  const pinnedBottomRows = [];
+  if (topPinned?.length || bottomPinned?.length) {
+    result = result.filter((row, i) => {
+      if (topPinned.indexOf(i) > -1) {
+        pinnedTopRows.push({ ...row });
+        return false;
+      }
+      if (bottomPinned.indexOf(i) > -1) {
+        pinnedBottomRows.push({ ...row });
+        return false;
+      }
+      return true;
+    });
+  }
   let headers = Object.keys(columns).map(k => columns[k]);
 
   if (groupedHeader) {

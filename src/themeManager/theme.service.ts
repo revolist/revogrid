@@ -7,7 +7,7 @@ export const DEFAULT_THEME = 'default';
 export const allowedThemes: Theme[] = [DEFAULT_THEME, 'material', 'compact', 'darkMaterial', 'darkCompact'];
 export default class ThemeService {
   private currentTheme: ThemePackage;
-  private customRowSize: number = 0;
+  private customRowSize = 0;
 
   get theme() {
     return this.currentTheme;

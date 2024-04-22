@@ -3,11 +3,12 @@
 revo-grid[theme='default'] {
   $header-size: 30px;
   $header-bg: #f8f9fa;
-  $header-color: #61656a;
-  $header-border-color: #c0c0c0;
+  $header-color: #000;
+  $header-border-color: #cecece;
   $default-rows-size: 27px;
   $cell-border-color: #e2e3e3;
   $focused-header: rgba(#e9eaed, 0.5);
+  border: 1px solid $header-border-color;
 
   font-size: 12px;
 
@@ -36,7 +37,7 @@ revo-grid[theme='default'] {
     }
 
     .rgHeaderCell {
-      box-shadow: $shadow-left, $shadow-right, $shadow-top, $shadow-bottom;
+      box-shadow: $shadow-right, $shadow-top, $shadow-bottom;
 
       &.focused-cell {
         background: $focused-header;
@@ -46,17 +47,25 @@ revo-grid[theme='default'] {
 
   .rowHeaders {
     background-color: $header-bg;
+
+    $cell-shadow-right: -1px 0 0 0 $header-border-color inset;
+    $cell-shadow-bottom: 0 -1px 0 0 $header-border-color inset;
+    $cell-shadow-left: 1px 0 0 0 $header-border-color inset;
+    $cell-shadow-right: 1px 0 0 0 $header-border-color inset;
+
     revogr-data .rgCell {
-      $cell-shadow-bottom: 0 -1px 0 0 $header-border-color inset;
-      $cell-shadow-right: -1px 0 0 0 $header-border-color inset;
       color: $header-color;
-      box-shadow: $cell-shadow-bottom, $cell-shadow-right;
+
+      &:first-child {
+        box-shadow: $cell-shadow-bottom;
+      }
+      &:not(:first-child) {
+        box-shadow: $cell-shadow-bottom, $cell-shadow-right;
+      }
     }
 
     revogr-header {
-      $cell-shadow-right: -1px 0 0 0 $header-border-color inset;
-      $shadow-bottom: 0 -1px 0 0 $header-border-color inset;
-      box-shadow: $shadow-bottom, $cell-shadow-right;
+      box-shadow: $cell-shadow-bottom;
     }
   }
 
@@ -91,6 +100,11 @@ revo-grid[theme='default'] {
     $cell-shadow-bottom: 0 -1px 0 0 $cell-border-color inset;
     $cell-shadow-right: -1px 0 0 0 $cell-border-color inset;
     text-align: center;
+
+    .revo-draggable {
+      float: left;
+    }
+
     .rgRow {
       line-height: $default-rows-size;
       box-shadow: $cell-shadow-bottom, $cell-shadow-right;

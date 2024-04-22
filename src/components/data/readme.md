@@ -13,16 +13,16 @@ Rows, columns, groups and cells
 | Property                         | Attribute         | Description                                                                                               | Type                                                        | Default     |
 | -------------------------------- | ----------------- | --------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------- | ----------- |
 | `additionalData`                 | `additional-data` | Additional data to pass to renderer Used in plugins such as vue or react to pass root app entity to cells | `any`                                                       | `undefined` |
-| `colData` _(required)_           | --                | Static stores, not expected to change during component lifetime                                           | `ObservableMap<DSourceState<ColumnRegular, DimensionCols>>` | `undefined` |
-| `dataStore` _(required)_         | --                |                                                                                                           | `ObservableMap<DSourceState<DataType, DimensionRows>>`      | `undefined` |
-| `dimensionRow` _(required)_      | --                |                                                                                                           | `ObservableMap<DimensionSettingsState>`                     | `undefined` |
+| `colData`                        | --                | Column source                                                                                             | `ObservableMap<DSourceState<ColumnRegular, DimensionCols>>` | `undefined` |
+| `dataStore` _(required)_         | --                | Data rows source                                                                                          | `ObservableMap<DSourceState<DataType, DimensionRows>>`      | `undefined` |
+| `dimensionRow` _(required)_      | --                | Dimension settings Y                                                                                      | `ObservableMap<DimensionSettingsState>`                     | `undefined` |
 | `range`                          | `range`           | Range allowed                                                                                             | `boolean`                                                   | `undefined` |
 | `readonly`                       | `readonly`        | Readonly mode                                                                                             | `boolean`                                                   | `undefined` |
 | `rowClass`                       | `row-class`       | Defines property from which to read row class                                                             | `string`                                                    | `undefined` |
-| `rowSelectionStore` _(required)_ | --                | Stores                                                                                                    | `ObservableMap<SelectionStoreState>`                        | `undefined` |
-| `type` _(required)_              | `type`            |                                                                                                           | `"rgRow" \| "rowPinEnd" \| "rowPinStart"`                   | `undefined` |
-| `viewportCol` _(required)_       | --                |                                                                                                           | `ObservableMap<ViewportState>`                              | `undefined` |
-| `viewportRow` _(required)_       | --                |                                                                                                           | `ObservableMap<ViewportState>`                              | `undefined` |
+| `rowSelectionStore` _(required)_ | --                | Selection, range, focus for row selection                                                                 | `ObservableMap<SelectionStoreState>`                        | `undefined` |
+| `type` _(required)_              | `type`            | Data type                                                                                                 | `"rgRow" \| "rowPinEnd" \| "rowPinStart"`                   | `undefined` |
+| `viewportCol` _(required)_       | --                | Viewport X                                                                                                | `ObservableMap<ViewportState>`                              | `undefined` |
+| `viewportRow` _(required)_       | --                | Viewport Y                                                                                                | `ObservableMap<ViewportState>`                              | `undefined` |
 
 
 ## Events
@@ -42,7 +42,7 @@ Rows, columns, groups and cells
 
 ### Depends on
 
-- [revogr-cell](.)
+- [revogr-cell](../data-cell)
 
 ### Graph
 ```mermaid
@@ -55,4 +55,4 @@ graph TD;
 
 ----------------------------------------------
 
-*Built with [StencilJS](https://stenciljs.com/)*
+*Built with love by Revolist OU*

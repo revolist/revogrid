@@ -1,12 +1,8 @@
 import { columnTypes } from '../../store/storeTypes';
 import { DimensionColPin } from '../..';
 import { ViewPortScrollEvent } from '../..';
+import { ElementsScroll, ElementScroll } from '../../types/viewport.interfaces';
 
-export interface ElementScroll {
-  changeScroll?(e: ViewPortScrollEvent, silent?: boolean): Promise<ViewPortScrollEvent>;
-  setScroll(e: ViewPortScrollEvent): Promise<void>;
-}
-export type ElementsScroll = { [key: string]: ElementScroll[] };
 export default class GridScrollingService {
   private elements: ElementsScroll = {};
   constructor(private setViewport: (e: ViewPortScrollEvent) => void) {}
@@ -61,7 +57,7 @@ export default class GridScrollingService {
     return ['colPinStart', 'colPinEnd'].indexOf(key) > -1;
   }
 
-  registerElements(els: ElementsScroll): void {
+  registerElements(els: ElementsScroll) {
     this.elements = els;
   }
 
@@ -70,7 +66,7 @@ export default class GridScrollingService {
    * @param el - can be null if holder removed
    * @param key - element key
    */
-  registerElement(el: ElementScroll | null, key: string): void {
+  registerElement(el: ElementScroll | null, key: string) {
     if (!this.elements[key]) {
       this.elements[key] = [];
     }
@@ -83,7 +79,7 @@ export default class GridScrollingService {
     }
   }
 
-  unregister(): void {
+  unregister() {
     delete this.elements;
     this.elements = {};
   }

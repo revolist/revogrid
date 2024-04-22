@@ -1,21 +1,43 @@
-import { DSourceState, getSourceItem, getVisibleSourceItem, setSourceByVirtualIndex } from '../../store/dataSource/data.store';
+import {
+  DSourceState,
+  getSourceItem,
+  getVisibleSourceItem,
+  setSourceByVirtualIndex,
+} from '../../store/dataSource/data.store';
 import { CELL_CLASS, DISABLED_CLASS } from '../../utils/consts';
 import { getRange } from '../../store/selection/selection.helpers';
 
 import { isGroupingColumn } from '../../plugins/groupingRow/grouping.service';
 import slice from 'lodash/slice';
 import { DimensionCols, DimensionRows } from '../..';
-import { ColumnRegular, Observable, DataType, ReadOnlyFormat, CellProps, ColumnDataSchemaModel, ColumnProp, DataLookup, DataFormat, DataSource } from '../..';
-import { ChangedRange, OldNewRangeMapping, Cell, RangeArea, BeforeSaveDataDetails, EditorCtr, Editors } from '../..';
+import {
+  ColumnRegular,
+  Observable,
+  DataType,
+  ReadOnlyFormat,
+  CellProps,
+  ColumnDataSchemaModel,
+  ColumnProp,
+  DataLookup,
+  DataFormat,
+  DataSource,
+} from '../..';
+import {
+  ChangedRange,
+  OldNewRangeMapping,
+  Cell,
+  RangeArea,
+  BeforeSaveDataDetails,
+  EditorCtr,
+  Editors,
+} from '../..';
 
-export type ColumnSource<T = ColumnRegular> = Observable<DSourceState<T, DimensionCols>>;
-export type RowSource = Observable<DSourceState<DataType, DimensionRows>>;
 
 export type ColumnStores = {
-  [T in DimensionCols]: ColumnSource;
+  [T in DimensionCols]: Observable<DSourceState<ColumnRegular, DimensionCols>>;
 };
 export type RowStores = {
-  [T in DimensionRows]: RowSource;
+  [T in DimensionRows]: Observable<DSourceState<DataType, DimensionRows>>;
 };
 
 export default class ColumnService {
@@ -27,8 +49,13 @@ export default class ColumnService {
   hasGrouping = false;
   type: DimensionCols;
 
-  constructor(private dataStore: RowSource, private source: ColumnSource) {
-    this.unsubscribe.push(source.onChange('source', s => this.checkGrouping(s)));
+  constructor(
+    private dataStore: Observable<DSourceState<DataType, DimensionRows>>,
+    private source: Observable<DSourceState<ColumnRegular, DimensionCols>>,
+  ) {
+    this.unsubscribe.push(
+      source.onChange('source', s => this.checkGrouping(s)),
+    );
     this.checkGrouping(source.get('source'));
     this.type = source.get('type');
   }
@@ -58,7 +85,10 @@ export default class ColumnService {
     if (extra.class) {
       if (typeof extra.class === 'object' && typeof props.class === 'object') {
         props.class = { ...extra.class, ...props.class };
-      } else if (typeof extra.class === 'string' && typeof props.class === 'object') {
+      } else if (
+        typeof extra.class === 'string' &&
+        typeof props.class === 'object'
+      ) {
         props.class[extra.class] = true;
       } else if (typeof props.class === 'string') {
         props.class += ' ' + extra.class;
@@ -101,7 +131,11 @@ export default class ColumnService {
     return ColumnService.getData(data.model[data.prop as number]);
   }
 
-  getSaveData(rowIndex: number, colIndex: number, val?: string): BeforeSaveDataDetails {
+  getSaveData(
+    rowIndex: number,
+    colIndex: number,
+    val?: string,
+  ): BeforeSaveDataDetails {
     if (typeof val === 'undefined') {
       val = this.getCellData(rowIndex, colIndex);
     }
@@ -117,7 +151,11 @@ export default class ColumnService {
     };
   }
 
-  getCellEditor(_r: number, c: number, editors: Editors): EditorCtr | undefined {
+  getCellEditor(
+    _r: number,
+    c: number,
+    editors: Editors,
+  ): EditorCtr | undefined {
     const editor = this.columns[c]?.editor;
     if (!editor) {
       return undefined;
@@ -146,9 +184,12 @@ export default class ColumnService {
     };
   }
 
-  getRangeData(d: ChangedRange, columns: ColumnRegular[]): {
-    changed: DataLookup,
-    mapping: OldNewRangeMapping,
+  getRangeData(
+    d: ChangedRange,
+    columns: ColumnRegular[],
+  ): {
+    changed: DataLookup;
+    mapping: OldNewRangeMapping;
   } {
     const changed: DataLookup = {};
 
@@ -158,15 +199,28 @@ export default class ColumnService {
     const mapping: OldNewRangeMapping = {};
 
     // rows
-    for (let rowIndex = d.newRange.y, i = 0; rowIndex < d.newRange.y1 + 1; rowIndex++, i++) {
+    for (
+      let rowIndex = d.newRange.y, i = 0;
+      rowIndex < d.newRange.y1 + 1;
+      rowIndex++, i++
+    ) {
       // copy original data link
-      const oldRowIndex = d.oldRange.y + i % copyRowLength;
+      const oldRowIndex = d.oldRange.y + (i % copyRowLength);
       const copyRow = getSourceItem(this.dataStore, oldRowIndex) || {};
 
       // columns
-      for (let colIndex = d.newRange.x, j = 0; colIndex < d.newRange.x1 + 1; colIndex++, j++) {
+      for (
+        let colIndex = d.newRange.x, j = 0;
+        colIndex < d.newRange.x1 + 1;
+        colIndex++, j++
+      ) {
         // check if old range area
-        if (rowIndex >= d.oldRange.y && rowIndex <= d.oldRange.y1 && colIndex >= d.oldRange.x && colIndex <= d.oldRange.x1) {
+        if (
+          rowIndex >= d.oldRange.y &&
+          rowIndex <= d.oldRange.y1 &&
+          colIndex >= d.oldRange.x &&
+          colIndex <= d.oldRange.x1
+        ) {
           continue;
         }
 
@@ -175,7 +229,7 @@ export default class ColumnService {
           continue;
         }
         const prop = this.columns[colIndex]?.prop;
-        const copyColIndex = d.oldRange.x + j % copyColLength;
+        const copyColIndex = d.oldRange.x + (j % copyColLength);
         const copyColumnProp = columns[copyColIndex].prop;
 
         /** if can write */
@@ -192,7 +246,7 @@ export default class ColumnService {
           mapping[rowIndex][prop] = {
             colIndex: copyColIndex,
             colProp: copyColumnProp,
-            rowIndex: oldRowIndex
+            rowIndex: oldRowIndex,
           };
         }
       }
@@ -217,13 +271,21 @@ export default class ColumnService {
     // rows
     let rowIndex = start.y;
     let maxCol = 0;
-    for (let i = 0; rowIndex < rowLength && i < copyRowLength; rowIndex++, i++) {
+    for (
+      let i = 0;
+      rowIndex < rowLength && i < copyRowLength;
+      rowIndex++, i++
+    ) {
       // copy original data link
       const copyRow = data[i % copyRowLength];
       const copyColLength = copyRow?.length || 0;
       // columns
       let colIndex = start.x;
-      for (let j = 0; colIndex < colLength && j < copyColLength; colIndex++, j++) {
+      for (
+        let j = 0;
+        colIndex < colLength && j < copyColLength;
+        colIndex++, j++
+      ) {
         const p = this.columns[colIndex].prop;
         const currentCol = j % colLength;
 
@@ -251,7 +313,10 @@ export default class ColumnService {
   applyRangeData(data: DataLookup) {
     const items: Record<number, DataType> = {};
     for (let rowIndex in data) {
-      const oldModel = (items[rowIndex] = getSourceItem(this.dataStore, parseInt(rowIndex, 10)));
+      const oldModel = (items[rowIndex] = getSourceItem(
+        this.dataStore,
+        parseInt(rowIndex, 10),
+      ));
       if (!oldModel) {
         continue;
       }
@@ -293,12 +358,12 @@ export default class ColumnService {
     store: Observable<DSourceState<DataType, DimensionRows>>,
   ) {
     const area: {
-      prop: ColumnProp,
-      rowIndex: number,
-      colIndex: number,
-      model: DataSource,
-      colType: DimensionCols,
-      type: DimensionRows,
+      prop: ColumnProp;
+      rowIndex: number;
+      colIndex: number;
+      model: DataSource;
+      colType: DimensionCols;
+      type: DimensionRows;
     }[] = [];
 
     const type = this.dataStore.get('type');
@@ -351,7 +416,7 @@ export default class ColumnService {
     }
     return {
       data: toCopy,
-      mapping
+      mapping,
     };
   }
 

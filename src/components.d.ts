@@ -12,19 +12,17 @@ import { Theme } from "./types/theme";
 import { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
 import { ColumnFilterConfig, FilterCaptions, FilterCollection } from "./plugins/filter/filter.plugin";
 import { GroupingOptions } from "./plugins/groupingRow/grouping.row.types";
-import { DimensionCols, DimensionRows, DimensionType, MultiDimensionType } from "./types/dimension";
+import { DimensionCols, DimensionRows, DimensionType, DimensionTypeCol, MultiDimensionType } from "./types/dimension";
 import { FocusedData } from "./components/revoGrid/viewport.service";
 import { ColumnCollection } from "./services/column.data.provider";
 import { DataInput } from "./plugins/export/types";
 import { VNode } from "@stencil/core";
-import { ColumnSource, RowSource } from "./components/data/column.service";
+import { DSourceState, Groups } from "./store/dataSource/data.store";
 import { MultiFilterItem, ShowData } from "./plugins/filter/filter.pop";
 import { LogicFunction } from "./plugins/filter/filter.types";
-import { DSourceState, Groups } from "./store/dataSource/data.store";
 import { ResizeProps } from "./services/resizable.directive";
 import { Cell as Cell1, ColumnRegular as ColumnRegular1, DataType as DataType1, DimensionCols as DimensionCols1, DimensionRows as DimensionRows1, DimensionSettingsState as DimensionSettingsState1, Observable as Observable1, SelectionStoreState as SelectionStoreState1 } from "./components";
-import { ViewportData } from "./types/viewport.interfaces";
-import { ElementScroll } from "./components/revoGrid/viewport.scrolling.service";
+import { ElementScroll, ViewportData } from "./types/viewport.interfaces";
 export { ApplyFocusEvent, BeforeCellRenderEvent, BeforeRowRenderEvent, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionSettingsState, DragStartEvent, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, Observable, PositionItem, Providers, RowDefinition, RowHeaders, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/interfaces";
 export { BeforeEdit, BeforeRangeSaveDataDetails, BeforeSaveDataDetails, Cell, ChangedRange, EditCell, EditorCtr, Editors, RangeArea, SaveDataDetails, SelectionStoreState, TempRange } from "./types/selection";
 export { PluginBaseComponent, PluginExternalConstructor } from "./types/plugin";
@@ -32,22 +30,20 @@ export { Theme } from "./types/theme";
 export { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
 export { ColumnFilterConfig, FilterCaptions, FilterCollection } from "./plugins/filter/filter.plugin";
 export { GroupingOptions } from "./plugins/groupingRow/grouping.row.types";
-export { DimensionCols, DimensionRows, DimensionType, MultiDimensionType } from "./types/dimension";
+export { DimensionCols, DimensionRows, DimensionType, DimensionTypeCol, MultiDimensionType } from "./types/dimension";
 export { FocusedData } from "./components/revoGrid/viewport.service";
 export { ColumnCollection } from "./services/column.data.provider";
 export { DataInput } from "./plugins/export/types";
 export { VNode } from "@stencil/core";
-export { ColumnSource, RowSource } from "./components/data/column.service";
+export { DSourceState, Groups } from "./store/dataSource/data.store";
 export { MultiFilterItem, ShowData } from "./plugins/filter/filter.pop";
 export { LogicFunction } from "./plugins/filter/filter.types";
-export { DSourceState, Groups } from "./store/dataSource/data.store";
 export { ResizeProps } from "./services/resizable.directive";
 export { Cell as Cell1, ColumnRegular as ColumnRegular1, DataType as DataType1, DimensionCols as DimensionCols1, DimensionRows as DimensionRows1, DimensionSettingsState as DimensionSettingsState1, Observable as Observable1, SelectionStoreState as SelectionStoreState1 } from "./components";
-export { ViewportData } from "./types/viewport.interfaces";
-export { ElementScroll } from "./components/revoGrid/viewport.scrolling.service";
+export { ElementScroll, ViewportData } from "./types/viewport.interfaces";
 export namespace Components {
     /**
-     * Slots
+     * `revo-grid`: High-performance, customizable grid library for managing large datasets.
      * @example data-rgCol-rgRow - main data slot
      * @example focus-rgCol-rgRow - focus layer for main data
      */
@@ -57,18 +53,15 @@ export namespace Components {
          */
         "addTrimmed": (trimmed: Record<number, boolean>, trimmedType?: string, type?: DimensionRows) => Promise<CustomEvent<{ trimmed: Record<number, boolean>; trimmedType: string; type: string; }>>;
         /**
-          * Additional data to be passed to plugins, renders, editors
+          * Additional data to be passed to plugins, renders or editors. For example if you need to pass Vue component instance.
          */
         "additionalData": any;
         /**
-          * Apply changes typed in editor on editor close except Escape cases If custom editor in use
-          * @method getValue required Check interfaces.d.ts
-          * @EditorBase for more info
+          * Apply changes in editor when closed except 'Escape' cases. If custom editor in use method getValue required. Check interfaces.d.ts `EditorBase` for more info.
          */
         "applyOnClose": boolean;
         /**
-          * Autosize config Enable columns autoSize, for more details check
-          * @autoSizeColumn plugin By default disabled, hence operation is not resource efficient true to enable with default params (double header separator click for autosize) or provide config
+          * Autosize config. Enables columns autoSize. For more details check `autoSizeColumn` plugin. By default disabled, hence operation is not performance efficient. `true` to enable with default params (double header separator click for autosize). Or define config. See `AutoSizeColumnConfig` for more details.
          */
         "autoSizeColumn": boolean | AutoSizeColumnConfig;
         /**
@@ -76,7 +69,7 @@ export namespace Components {
          */
         "canFocus": boolean;
         /**
-          * Enables column move plugin Can be boolean
+          * Enable column move plugin.
          */
         "canMoveColumns": boolean;
         /**
@@ -92,7 +85,7 @@ export namespace Components {
          */
         "colSize": number;
         /**
-          * Column Types Format Every type represent multiple column properties Types will be merged but can be replaced with column properties Types were made as separate objects to be reusable per multiple columns
+          * Column Types Format. Every type represent multiple column properties. Types will be merged but can be replaced with column properties. Types were made as separate objects to be reusable per multiple columns.
          */
         "columnTypes": { [name: string]: ColumnType };
         /**
@@ -100,29 +93,27 @@ export namespace Components {
          */
         "columns": (ColumnRegular | ColumnGrouping)[];
         /**
-          * Disable lazy rendering mode for the X axis Use when not many columns present and you don't need rerenader cells during scroll
+          * Disable lazy rendering mode for the `X axis`. Use when not many columns present and you don't need rerenader cells during scroll. Can be used for initial rendering performance improvement.
          */
         "disableVirtualX": boolean;
         /**
-          * Disable lazy rendering mode for the Y axis Use when not many rows present and you don't need rerenader cells during scroll
+          * Disable lazy rendering mode for the `Y axis`. Use when not many rows present and you don't need rerenader cells during scroll. Can be used for initial rendering performance improvement.
          */
         "disableVirtualY": boolean;
         /**
-          * Custom editors register
+          * Custom editors register.
          */
         "editors": Editors;
         /**
-          * Enables export plugin Can be boolean Can be export options
+          * Enable export plugin.
          */
         "exporting": boolean;
         /**
-          * Enables filter plugin Can be boolean Can be filter collection
+          * Enables filter plugin. Can be boolean. Or can be filter collection See `FilterCollection` for more info.
          */
         "filter": boolean | ColumnFilterConfig;
         /**
-          * Apply changes typed in editor on editor close except Escape cases If custom editor in use
-          * @method getValue required Check interfaces.d.ts
-          * @EditorBase for more info
+          * Apply changes typed in editor on editor close except Escape cases. If custom editor in use method `getValue` required. Check `interfaces.d.ts` `EditorBase` for more info.
          */
         "focusTemplate": FocusTemplateFunc;
         /**
@@ -133,7 +124,7 @@ export namespace Components {
           * Provides access to column internal store observer Can be used for plugin support
           * @param type - type of column
          */
-        "getColumnStore": (type?: DimensionCols) => Promise<ColumnSource>;
+        "getColumnStore": (type?: DimensionCols) => Promise<Observable<DSourceState<ColumnRegular, DimensionCols>>>;
         /**
           * Receive all columns in data source
          */
@@ -162,18 +153,18 @@ export namespace Components {
           * Provides access to rows internal store observer Can be used for plugin support
           * @param type - type of source
          */
-        "getSourceStore": (type?: DimensionRows) => Promise<RowSource>;
+        "getSourceStore": (type?: DimensionRows) => Promise<Observable<DSourceState<DataType, DimensionRows>>>;
         /**
           * Get data from visible part of source Trimmed/filtered rows will be excluded
           * @param type - type of source
          */
         "getVisibleSource": (type?: DimensionRows) => Promise<any[]>;
         /**
-          * Group models by provided properties Define properties to be groped by
+          * Group rows based on this property. Define properties to be groped by grouping plugin See `GroupingOptions`.
          */
         "grouping": GroupingOptions;
         /**
-          * Prevents rendering until job is done. Can be used for initial rendering performance improvement. When several plugins require initial rendering this will prevent double initial rendering.
+          * Prevent rendering until job is done. Can be used for initial rendering performance improvement. When several plugins require initial rendering this will prevent double initial rendering.
          */
         "jobsBeforeRender": Promise<any>[];
         /**
@@ -185,7 +176,7 @@ export namespace Components {
          */
         "pinnedTopSource": DataType[];
         /**
-          * Custom grid plugins Has to be predefined during first grid init Every plugin should be inherited from BasePlugin
+          * Custom grid plugins. Has to be predefined during first grid init. Every plugin should be inherited from BasePlugin.
          */
         "plugins": PluginExternalConstructor[];
         /**
@@ -209,15 +200,15 @@ export namespace Components {
          */
         "resize": boolean;
         /**
-          * Row class property Define this property in rgRow object and this will be mapped as rgRow class
+          * Row class property mapping. Map custom classes to rows from row object data. Define this property in rgRow object and this will be mapped as rgRow class.
          */
         "rowClass": string;
         /**
-          * Row properies applied
+          * Custom row properies to be applied. See `RowDefinition` for more info.
          */
         "rowDefinitions": RowDefinition[];
         /**
-          * Excel like show rgRow indexe per rgRow
+          * Excel like functionality. Show row numbers. Also can be used for custom row header render if object provided.
          */
         "rowHeaders": RowHeaders | boolean;
         /**
@@ -225,21 +216,21 @@ export namespace Components {
          */
         "rowSize": number;
         /**
-          * Scrolls view port to specified column index
+          * Scrolls viewport to specified column by index
          */
-        "scrollToColumnIndex": (coordinate?: number) => Promise<void>;
+        "scrollToColumnIndex": (coordinate?: number, dimension?: DimensionType) => Promise<void>;
         /**
-          * Scrolls view port to specified column prop
+          * Scrolls viewport to specified column by prop
          */
-        "scrollToColumnProp": (prop: ColumnProp) => Promise<void>;
+        "scrollToColumnProp": (prop: ColumnProp, dimension?: DimensionTypeCol) => Promise<void>;
         /**
           * Scrolls view port to coordinate
          */
         "scrollToCoordinate": (cell: Partial<Cell>) => Promise<void>;
         /**
-          * Scrolls view port to specified rgRow index
+          * Scrolls viewport to specified row by index
          */
-        "scrollToRow": (coordinate?: number) => Promise<void>;
+        "scrollToRow": (coordinate?: number, dimension?: DimensionType) => Promise<void>;
         /**
           * Bring cell to edit mode
          */
@@ -249,21 +240,19 @@ export namespace Components {
          */
         "setCellsFocus": (cellStart?: Cell, cellEnd?: Cell, colType?: string, rowType?: string) => Promise<void>;
         /**
-          * Source - defines main data source. Can be an Object or 2 dimensional array([][]); Keys/indexes referenced from columns Prop
+          * Source - defines main data source. Can be an Object or 2 dimensional array([][]); Keys/indexes referenced from columns Prop.
          */
         "source": DataType[];
         /**
-          * Defines stretch strategy for columns with
-          * @StretchColumn plugin if there are more space on the right last column size would be increased
+          * Stretch strategy for columns by `StretchColumn` plugin. For example if there are more space on the right last column size would be increased.
          */
         "stretch": boolean | string;
         /**
-          * Theme name
+          * Theme name.
          */
         "theme": Theme;
         /**
-          * Trimmed rows Functionality which allows to hide rows from main data set
-          * @trimmedRows are physical rgRow indexes to hide
+          * Trimmed rows. Functionality which allows to hide rows from main data set. `trimmedRows` are physical `rgRow` indexes to hide.
          */
         "trimmedRows": Record<number, boolean>;
         /**
@@ -291,37 +280,55 @@ export namespace Components {
           * Additional data to pass to renderer Used in plugins such as vue or react to pass root app entity to cells
          */
         "additionalData": any;
+        /**
+          * Right side edge position in px
+         */
         "colEnd": number;
         /**
-          * Column props passed via property
+          * Column index
          */
         "colIndex": number;
+        /**
+          * Column width
+         */
         "colSize": number;
+        /**
+          * Left side edge position in px
+         */
         "colStart": number;
         /**
           * Column service
          */
         "columnService": ColumnService;
         /**
-          * Grouping
+          * Grouping depth
          */
         "depth": number;
         /**
           * Cached providers
          */
         "providers": Providers;
+        /**
+          * Bottom cell side edge position in px
+         */
         "rowEnd": number;
         /**
-          * Row props passed via property
+          * Row index viewport Y position
          */
         "rowIndex": number;
+        /**
+          * Row height in px
+         */
         "rowSize": number;
+        /**
+          * Top cell side edge position in px
+         */
         "rowStart": number;
     }
     interface RevogrClipboard {
         "doCopy": (e: DataTransfer, data?: DataFormat[][]) => Promise<void>;
         /**
-          * If readonly mode enables no need for Paste event
+          * If readonly mode - disabled Paste event
          */
         "readonly": boolean;
     }
@@ -335,10 +342,16 @@ export namespace Components {
          */
         "additionalData": any;
         /**
-          * Static stores, not expected to change during component lifetime
+          * Column source
          */
-        "colData": ColumnSource;
-        "dataStore": RowSource;
+        "colData": Observable<DSourceState<ColumnRegular, DimensionCols>>;
+        /**
+          * Data rows source
+         */
+        "dataStore": Observable<DSourceState<DataType, DimensionRows>>;
+        /**
+          * Dimension settings Y
+         */
         "dimensionRow": Observable<DimensionSettingsState>;
         /**
           * Range allowed
@@ -353,11 +366,20 @@ export namespace Components {
          */
         "rowClass": string;
         /**
-          * Stores
+          * Selection, range, focus for row selection
          */
         "rowSelectionStore": Observable<SelectionStoreState>;
+        /**
+          * Data type
+         */
         "type": DimensionRows;
+        /**
+          * Viewport X
+         */
         "viewportCol": Observable<ViewportState>;
+        /**
+          * Viewport Y
+         */
         "viewportRow": Observable<ViewportState>;
     }
     /**
@@ -391,16 +413,40 @@ export namespace Components {
         "show": (newEntity?: ShowData) => Promise<void>;
         "uuid": string;
     }
+    /**
+     * Focus component. Shows focus layer around the cell that is currently in focus.
+     */
     interface RevogrFocus {
-        "colData": ColumnSource;
+        /**
+          * Column source
+         */
+        "colData": Observable<DSourceState<ColumnRegular, DimensionCols>>;
+        /**
+          * Column type
+         */
         "colType": DimensionCols;
-        "dataStore": RowSource;
+        /**
+          * Data rows source
+         */
+        "dataStore": Observable<DSourceState<DataType, DimensionRows>>;
+        /**
+          * Dimension settings X
+         */
         "dimensionCol": Observable<DimensionSettingsState>;
+        /**
+          * Dimension settings Y
+         */
         "dimensionRow": Observable<DimensionSettingsState>;
+        /**
+          * Focus template custom function. Can be used to render custom focus layer.
+         */
         "focusTemplate": FocusTemplateFunc | null;
+        /**
+          * Row type
+         */
         "rowType": DimensionRows;
         /**
-          * Dynamic stores
+          * Selection, range, focus for selection
          */
         "selectionStore": Observable<SelectionStoreState>;
     }
@@ -421,10 +467,18 @@ export namespace Components {
           * Column filter
          */
         "columnFilter": boolean;
+        /**
+          * Dimension settings X
+         */
         "dimensionCol": Observable<DimensionSettingsState>;
+        /**
+          * Grouping depth, how many levels of grouping
+         */
         "groupingDepth": number;
+        /**
+          * Column groups
+         */
         "groups": Groups;
-        "parent": string;
         /**
           * Readonly mode
          */
@@ -433,13 +487,16 @@ export namespace Components {
           * Defines resize position
          */
         "resizeHandler": ResizeProps['active'];
+        /**
+          * Selection, range, focus
+         */
         "selectionStore": Observable<SelectionStoreState>;
         /**
           * Column type
          */
         "type": DimensionCols | 'rowHeaders';
         /**
-          * Stores
+          * Viewport X
          */
         "viewportCol": Observable<ViewportState>;
     }
@@ -449,10 +506,19 @@ export namespace Components {
           * Static stores, not expected to change during component lifetime
          */
         "dataStore": Observable<DSourceState<DataType, DimensionRows>>;
+        /**
+          * Dimension settings X
+         */
         "dimensionCol": Observable<DimensionSettingsState>;
+        /**
+          * Dimension settings Y
+         */
         "dimensionRow": Observable<DimensionSettingsState>;
         "dragStart": (e: DragStartEvent) => Promise<void>;
         "endOrder": (e: MouseEvent) => Promise<void>;
+        /**
+          * Parent element
+         */
         "parent": HTMLElement;
     }
     interface RevogrOverlaySelection {
@@ -476,7 +542,13 @@ export namespace Components {
           * Row data store
          */
         "dataStore": Observable1<DSourceState<DataType1, DimensionRows1>>;
+        /**
+          * Dimension settings X
+         */
         "dimensionCol": Observable1<DimensionSettingsState1>;
+        /**
+          * Dimension settings Y
+         */
         "dimensionRow": Observable1<DimensionSettingsState1>;
         /**
           * Custom editors register
@@ -491,13 +563,16 @@ export namespace Components {
          */
         "lastCell": Cell1;
         /**
-          * Range selection mode
+          * Range selection allowed
          */
         "range": boolean;
         /**
-          * If readonly mode enables
+          * Readonly mode
          */
         "readonly": boolean;
+        /**
+          * Selection, range, focus
+         */
         "selectionStore": Observable1<SelectionStoreState1>;
         /**
           * Enable revogr-clipboard component (read more in revogr-clipboard component) Allows copy/paste
@@ -513,23 +588,55 @@ export namespace Components {
           * Additional data to pass to renderer
          */
         "additionalData": any;
+        /**
+          * Viewport data
+         */
         "dataPorts": ViewportData[];
+        /**
+          * Header props
+         */
         "headerProp": Record<string, any>;
+        /**
+          * Header height to setup row headers
+         */
         "height": number;
+        /**
+          * Enable resize
+         */
         "resize": boolean;
+        /**
+          * Row class
+         */
         "rowClass": string;
+        /**
+          * Row header column
+         */
         "rowHeaderColumn": RowHeaders;
-        "uiid": string;
     }
+    /**
+     * Virtual scroll component
+     */
     interface RevogrScrollVirtual {
+        /**
+          * Update if `delta` exists in case we don't know current position or if it's external change
+         */
         "changeScroll": (e: ViewPortScrollEvent) => Promise<ViewPortScrollEvent>;
+        /**
+          * Scroll dimension (`X` - `rgCol` or `Y` - `rgRow`)
+         */
         "dimension": DimensionType;
+        /**
+          * Dimensions
+         */
         "dimensionStore": Observable<DimensionSettingsState>;
         "setScroll": (e: ViewPortScrollEvent) => Promise<void>;
+        /**
+          * Viewport
+         */
         "viewportStore": Observable<ViewportState>;
     }
     /**
-     * Temporary range selection
+     * Temporary range selection component. Shows temporary range selection.
      */
     interface RevogrTempRange {
         /**
@@ -545,6 +652,9 @@ export namespace Components {
          */
         "selectionStore": Observable<SelectionStoreState>;
     }
+    /**
+     * Viewport scroll component for RevoGrid
+     */
     interface RevogrViewportScroll {
         /**
           * Extra layer for scroll event monitoring, where MouseWheel event is not passing We need to trigger scroll event in case there is no mousewheel event
@@ -563,6 +673,9 @@ export namespace Components {
           * Width of inner content
          */
         "contentWidth": number;
+        /**
+          * Enable row header
+         */
         "rowHeader": boolean;
         "setScroll": (e: ViewPortScrollEvent) => Promise<void>;
     }
@@ -620,100 +733,362 @@ export interface RevogrViewportScrollCustomEvent<T> extends CustomEvent<T> {
     target: HTMLRevogrViewportScrollElement;
 }
 declare global {
+    interface HTMLRevoGridElementEventMap {
+        "contentsizechanged": MultiDimensionType;
+        "beforeedit": BeforeSaveDataDetails;
+        "beforerangeedit": BeforeRangeSaveDataDetails;
+        "afteredit": BeforeSaveDataDetails | BeforeRangeSaveDataDetails;
+        "beforeautofill": ChangedRange;
+        "beforeange": ChangedRange;
+        "afterfocus": {
+    model: any;
+    column: ColumnRegular;
+  };
+        "roworderchanged": { from: number; to: number };
+        "beforesourcesortingapply": any;
+        "beforesortingapply": {
+    column: ColumnRegular;
+    order: 'desc' | 'asc';
+    additive: boolean;
+  };
+        "beforesorting": {
+    column: ColumnRegular;
+    order: 'desc' | 'asc';
+    additive: boolean;
+  };
+        "rowdragstart": {
+    pos: PositionItem;
+    text: string;
+  };
+        "headerclick": ColumnRegular;
+        "beforecellfocus": BeforeSaveDataDetails;
+        "beforefocuslost": FocusedData | null;
+        "beforesourceset": {
+    type: DimensionRows;
+    source: DataType[];
+  };
+        "beforeanysource": {
+    type: DimensionRows;
+    source: DataType[];
+  };
+        "aftersourceset": {
+    type: DimensionRows;
+    source: DataType[];
+  };
+        "afteranysource": {
+    type: DimensionRows;
+    source: DataType[];
+  };
+        "beforecolumnsset": ColumnCollection;
+        "beforecolumnapplied": ColumnCollection;
+        "aftercolumnsset": {
+    columns: ColumnCollection;
+    order: Record<ColumnProp, 'asc' | 'desc'>;
+  };
+        "beforefilterapply": { collection: FilterCollection };
+        "beforefiltertrimmed": {
+    collection: FilterCollection;
+    itemsToFilter: Record<number, boolean>;
+  };
+        "beforetrimmed": {
+    trimmed: Record<number, boolean>;
+    trimmedType: string;
+    type: string;
+  };
+        "aftertrimmed": any;
+        "viewportscroll": ViewPortScrollEvent;
+        "beforeexport": DataInput;
+        "beforeeditstart": BeforeSaveDataDetails;
+        "aftercolumnresize": {
+    [index: number]: ColumnRegular;
+  };
+        "beforerowdefinition": { vals: any; oldVals: any };
+        "filterconfigchanged": any;
+        "rowheaderschanged": any;
+    }
     /**
-     * Slots
+     * `revo-grid`: High-performance, customizable grid library for managing large datasets.
      * @example data-rgCol-rgRow - main data slot
      * @example focus-rgCol-rgRow - focus layer for main data
      */
     interface HTMLRevoGridElement extends Components.RevoGrid, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLRevoGridElementEventMap>(type: K, listener: (this: HTMLRevoGridElement, ev: RevoGridCustomEvent<HTMLRevoGridElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLRevoGridElementEventMap>(type: K, listener: (this: HTMLRevoGridElement, ev: RevoGridCustomEvent<HTMLRevoGridElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLRevoGridElement: {
         prototype: HTMLRevoGridElement;
         new (): HTMLRevoGridElement;
     };
+    interface HTMLRevogrCellElementEventMap {
+        "beforecellrender": BeforeCellRenderEvent;
+        "dragstartcell": DragStartEvent;
+    }
     /**
      * Component is responsible for rendering cell
      * Main purpose is to track changes and understand what exactly need to be rerendered instead of full grid render
      */
     interface HTMLRevogrCellElement extends Components.RevogrCell, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLRevogrCellElementEventMap>(type: K, listener: (this: HTMLRevogrCellElement, ev: RevogrCellCustomEvent<HTMLRevogrCellElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLRevogrCellElementEventMap>(type: K, listener: (this: HTMLRevogrCellElement, ev: RevogrCellCustomEvent<HTMLRevogrCellElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLRevogrCellElement: {
         prototype: HTMLRevogrCellElement;
         new (): HTMLRevogrCellElement;
     };
+    interface HTMLRevogrClipboardElementEventMap {
+        "beforepaste": any;
+        "beforepasteapply": any;
+        "pasteregion": string[][];
+        "afterpasteapply": any;
+        "beforecut": any;
+        "clearregion": DataTransfer;
+        "beforecopy": any;
+        "beforecopyapply": any;
+        "copyregion": DataTransfer;
+    }
     interface HTMLRevogrClipboardElement extends Components.RevogrClipboard, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLRevogrClipboardElementEventMap>(type: K, listener: (this: HTMLRevogrClipboardElement, ev: RevogrClipboardCustomEvent<HTMLRevogrClipboardElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLRevogrClipboardElementEventMap>(type: K, listener: (this: HTMLRevogrClipboardElement, ev: RevogrClipboardCustomEvent<HTMLRevogrClipboardElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLRevogrClipboardElement: {
         prototype: HTMLRevogrClipboardElement;
         new (): HTMLRevogrClipboardElement;
     };
+    interface HTMLRevogrDataElementEventMap {
+        "beforerowrender": BeforeRowRenderEvent;
+        "afterrender": any;
+    }
     /**
      * This component is responsible for rendering data
      * Rows, columns, groups and cells
      */
     interface HTMLRevogrDataElement extends Components.RevogrData, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLRevogrDataElementEventMap>(type: K, listener: (this: HTMLRevogrDataElement, ev: RevogrDataCustomEvent<HTMLRevogrDataElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLRevogrDataElementEventMap>(type: K, listener: (this: HTMLRevogrDataElement, ev: RevogrDataCustomEvent<HTMLRevogrDataElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLRevogrDataElement: {
         prototype: HTMLRevogrDataElement;
         new (): HTMLRevogrDataElement;
     };
+    interface HTMLRevogrEditElementEventMap {
+        "cellEdit": SaveDataDetails;
+        "closeEdit": boolean | undefined;
+    }
     /**
      * Cell editor component
      */
     interface HTMLRevogrEditElement extends Components.RevogrEdit, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLRevogrEditElementEventMap>(type: K, listener: (this: HTMLRevogrEditElement, ev: RevogrEditCustomEvent<HTMLRevogrEditElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLRevogrEditElementEventMap>(type: K, listener: (this: HTMLRevogrEditElement, ev: RevogrEditCustomEvent<HTMLRevogrEditElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLRevogrEditElement: {
         prototype: HTMLRevogrEditElement;
         new (): HTMLRevogrEditElement;
     };
+    interface HTMLRevogrFilterPanelElementEventMap {
+        "filterChange": MultiFilterItem;
+    }
     interface HTMLRevogrFilterPanelElement extends Components.RevogrFilterPanel, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLRevogrFilterPanelElementEventMap>(type: K, listener: (this: HTMLRevogrFilterPanelElement, ev: RevogrFilterPanelCustomEvent<HTMLRevogrFilterPanelElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLRevogrFilterPanelElementEventMap>(type: K, listener: (this: HTMLRevogrFilterPanelElement, ev: RevogrFilterPanelCustomEvent<HTMLRevogrFilterPanelElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLRevogrFilterPanelElement: {
         prototype: HTMLRevogrFilterPanelElement;
         new (): HTMLRevogrFilterPanelElement;
     };
+    interface HTMLRevogrFocusElementEventMap {
+        "beforefocusrender": FocusRenderEvent;
+        "beforescrollintoview": { el: HTMLElement };
+        "afterfocus": {
+    model: any;
+    column: ColumnRegular;
+  };
+    }
+    /**
+     * Focus component. Shows focus layer around the cell that is currently in focus.
+     */
     interface HTMLRevogrFocusElement extends Components.RevogrFocus, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLRevogrFocusElementEventMap>(type: K, listener: (this: HTMLRevogrFocusElement, ev: RevogrFocusCustomEvent<HTMLRevogrFocusElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLRevogrFocusElementEventMap>(type: K, listener: (this: HTMLRevogrFocusElement, ev: RevogrFocusCustomEvent<HTMLRevogrFocusElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLRevogrFocusElement: {
         prototype: HTMLRevogrFocusElement;
         new (): HTMLRevogrFocusElement;
     };
+    interface HTMLRevogrHeaderElementEventMap {
+        "beforeheaderclick": InitialHeaderClick;
+        "headerresize": ViewSettingSizeProp;
+        "beforeheaderresize": ColumnRegular[];
+        "headerdblclick": InitialHeaderClick;
+    }
     interface HTMLRevogrHeaderElement extends Components.RevogrHeader, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLRevogrHeaderElementEventMap>(type: K, listener: (this: HTMLRevogrHeaderElement, ev: RevogrHeaderCustomEvent<HTMLRevogrHeaderElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLRevogrHeaderElementEventMap>(type: K, listener: (this: HTMLRevogrHeaderElement, ev: RevogrHeaderCustomEvent<HTMLRevogrHeaderElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLRevogrHeaderElement: {
         prototype: HTMLRevogrHeaderElement;
         new (): HTMLRevogrHeaderElement;
     };
+    interface HTMLRevogrOrderEditorElementEventMap {
+        "rowdragstartinit": {
+    cell: Cell;
+    text: string;
+    pos: PositionItem;
+    event: MouseEvent;
+  };
+        "rowdragendinit": any;
+        "rowdragmoveinit": PositionItem;
+        "rowdragmousemove": Cell;
+        "rowdragendinit": {
+    from: number;
+    to: number;
+  };
+    }
     interface HTMLRevogrOrderEditorElement extends Components.RevogrOrderEditor, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLRevogrOrderEditorElementEventMap>(type: K, listener: (this: HTMLRevogrOrderEditorElement, ev: RevogrOrderEditorCustomEvent<HTMLRevogrOrderEditorElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLRevogrOrderEditorElementEventMap>(type: K, listener: (this: HTMLRevogrOrderEditorElement, ev: RevogrOrderEditorCustomEvent<HTMLRevogrOrderEditorElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLRevogrOrderEditorElement: {
         prototype: HTMLRevogrOrderEditorElement;
         new (): HTMLRevogrOrderEditorElement;
     };
+    interface HTMLRevogrOverlaySelectionElementEventMap {
+        "beforecopyregion": any;
+        "beforepasteregion": any;
+        "beforecelledit": BeforeSaveDataDetails;
+        "beforecellfocusinit": BeforeSaveDataDetails;
+        "setedit": BeforeEdit;
+        "beforeapplyrange": FocusRenderEvent;
+        "beforesetrange": any;
+        "beforeeditrender": FocusRenderEvent;
+        "setrange": RangeArea & { type: MultiDimensionType };
+        "selectall": any;
+        "canceledit": any;
+        "settemprange": TempRange | null;
+        "applyfocus": FocusRenderEvent;
+        "focuscell": ApplyFocusEvent;
+        "beforerangedataapply": FocusRenderEvent;
+        "selectionchangeinit": ChangedRange;
+        "beforerangecopyapply": ChangedRange;
+        "rangedataapplyinit": BeforeRangeSaveDataDetails;
+        "clipboardrangecopy": any;
+        "clipboardrangepaste": any;
+        "beforekeydown": KeyboardEvent;
+        "beforekeyup": KeyboardEvent;
+        "beforecellsave": any;
+    }
     interface HTMLRevogrOverlaySelectionElement extends Components.RevogrOverlaySelection, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLRevogrOverlaySelectionElementEventMap>(type: K, listener: (this: HTMLRevogrOverlaySelectionElement, ev: RevogrOverlaySelectionCustomEvent<HTMLRevogrOverlaySelectionElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLRevogrOverlaySelectionElementEventMap>(type: K, listener: (this: HTMLRevogrOverlaySelectionElement, ev: RevogrOverlaySelectionCustomEvent<HTMLRevogrOverlaySelectionElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLRevogrOverlaySelectionElement: {
         prototype: HTMLRevogrOverlaySelectionElement;
         new (): HTMLRevogrOverlaySelectionElement;
     };
+    interface HTMLRevogrRowHeadersElementEventMap {
+        "scrollview": ViewPortScrollEvent;
+        "ref": ElementScroll;
+    }
     /**
      * Row headers component
      * Visible on the left side of the table
      */
     interface HTMLRevogrRowHeadersElement extends Components.RevogrRowHeaders, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLRevogrRowHeadersElementEventMap>(type: K, listener: (this: HTMLRevogrRowHeadersElement, ev: RevogrRowHeadersCustomEvent<HTMLRevogrRowHeadersElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLRevogrRowHeadersElementEventMap>(type: K, listener: (this: HTMLRevogrRowHeadersElement, ev: RevogrRowHeadersCustomEvent<HTMLRevogrRowHeadersElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLRevogrRowHeadersElement: {
         prototype: HTMLRevogrRowHeadersElement;
         new (): HTMLRevogrRowHeadersElement;
     };
+    interface HTMLRevogrScrollVirtualElementEventMap {
+        "scrollvirtual": ViewPortScrollEvent;
+    }
+    /**
+     * Virtual scroll component
+     */
     interface HTMLRevogrScrollVirtualElement extends Components.RevogrScrollVirtual, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLRevogrScrollVirtualElementEventMap>(type: K, listener: (this: HTMLRevogrScrollVirtualElement, ev: RevogrScrollVirtualCustomEvent<HTMLRevogrScrollVirtualElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLRevogrScrollVirtualElementEventMap>(type: K, listener: (this: HTMLRevogrScrollVirtualElement, ev: RevogrScrollVirtualCustomEvent<HTMLRevogrScrollVirtualElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLRevogrScrollVirtualElement: {
         prototype: HTMLRevogrScrollVirtualElement;
         new (): HTMLRevogrScrollVirtualElement;
     };
     /**
-     * Temporary range selection
+     * Temporary range selection component. Shows temporary range selection.
      */
     interface HTMLRevogrTempRangeElement extends Components.RevogrTempRange, HTMLStencilElement {
     }
@@ -721,7 +1096,27 @@ declare global {
         prototype: HTMLRevogrTempRangeElement;
         new (): HTMLRevogrTempRangeElement;
     };
+    interface HTMLRevogrViewportScrollElementEventMap {
+        "scrollviewport": ViewPortScrollEvent;
+        "resizeviewport": ViewPortResizeEvent;
+        "scrollchange": {
+    type: DimensionType;
+    hasScroll: boolean;
+  };
+        "scrollviewportsilent": ViewPortScrollEvent;
+    }
+    /**
+     * Viewport scroll component for RevoGrid
+     */
     interface HTMLRevogrViewportScrollElement extends Components.RevogrViewportScroll, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLRevogrViewportScrollElementEventMap>(type: K, listener: (this: HTMLRevogrViewportScrollElement, ev: RevogrViewportScrollCustomEvent<HTMLRevogrViewportScrollElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLRevogrViewportScrollElementEventMap>(type: K, listener: (this: HTMLRevogrViewportScrollElement, ev: RevogrViewportScrollCustomEvent<HTMLRevogrViewportScrollElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
     }
     var HTMLRevogrViewportScrollElement: {
         prototype: HTMLRevogrViewportScrollElement;
@@ -746,24 +1141,21 @@ declare global {
 }
 declare namespace LocalJSX {
     /**
-     * Slots
+     * `revo-grid`: High-performance, customizable grid library for managing large datasets.
      * @example data-rgCol-rgRow - main data slot
      * @example focus-rgCol-rgRow - focus layer for main data
      */
     interface RevoGrid {
         /**
-          * Additional data to be passed to plugins, renders, editors
+          * Additional data to be passed to plugins, renders or editors. For example if you need to pass Vue component instance.
          */
         "additionalData"?: any;
         /**
-          * Apply changes typed in editor on editor close except Escape cases If custom editor in use
-          * @method getValue required Check interfaces.d.ts
-          * @EditorBase for more info
+          * Apply changes in editor when closed except 'Escape' cases. If custom editor in use method getValue required. Check interfaces.d.ts `EditorBase` for more info.
          */
         "applyOnClose"?: boolean;
         /**
-          * Autosize config Enable columns autoSize, for more details check
-          * @autoSizeColumn plugin By default disabled, hence operation is not resource efficient true to enable with default params (double header separator click for autosize) or provide config
+          * Autosize config. Enables columns autoSize. For more details check `autoSizeColumn` plugin. By default disabled, hence operation is not performance efficient. `true` to enable with default params (double header separator click for autosize). Or define config. See `AutoSizeColumnConfig` for more details.
          */
         "autoSizeColumn"?: boolean | AutoSizeColumnConfig;
         /**
@@ -771,7 +1163,7 @@ declare namespace LocalJSX {
          */
         "canFocus"?: boolean;
         /**
-          * Enables column move plugin Can be boolean
+          * Enable column move plugin.
          */
         "canMoveColumns"?: boolean;
         /**
@@ -779,7 +1171,7 @@ declare namespace LocalJSX {
          */
         "colSize"?: number;
         /**
-          * Column Types Format Every type represent multiple column properties Types will be merged but can be replaced with column properties Types were made as separate objects to be reusable per multiple columns
+          * Column Types Format. Every type represent multiple column properties. Types will be merged but can be replaced with column properties. Types were made as separate objects to be reusable per multiple columns.
          */
         "columnTypes"?: { [name: string]: ColumnType };
         /**
@@ -787,29 +1179,27 @@ declare namespace LocalJSX {
          */
         "columns"?: (ColumnRegular | ColumnGrouping)[];
         /**
-          * Disable lazy rendering mode for the X axis Use when not many columns present and you don't need rerenader cells during scroll
+          * Disable lazy rendering mode for the `X axis`. Use when not many columns present and you don't need rerenader cells during scroll. Can be used for initial rendering performance improvement.
          */
         "disableVirtualX"?: boolean;
         /**
-          * Disable lazy rendering mode for the Y axis Use when not many rows present and you don't need rerenader cells during scroll
+          * Disable lazy rendering mode for the `Y axis`. Use when not many rows present and you don't need rerenader cells during scroll. Can be used for initial rendering performance improvement.
          */
         "disableVirtualY"?: boolean;
         /**
-          * Custom editors register
+          * Custom editors register.
          */
         "editors"?: Editors;
         /**
-          * Enables export plugin Can be boolean Can be export options
+          * Enable export plugin.
          */
         "exporting"?: boolean;
         /**
-          * Enables filter plugin Can be boolean Can be filter collection
+          * Enables filter plugin. Can be boolean. Or can be filter collection See `FilterCollection` for more info.
          */
         "filter"?: boolean | ColumnFilterConfig;
         /**
-          * Apply changes typed in editor on editor close except Escape cases If custom editor in use
-          * @method getValue required Check interfaces.d.ts
-          * @EditorBase for more info
+          * Apply changes typed in editor on editor close except Escape cases. If custom editor in use method `getValue` required. Check `interfaces.d.ts` `EditorBase` for more info.
          */
         "focusTemplate"?: FocusTemplateFunc;
         /**
@@ -817,22 +1207,22 @@ declare namespace LocalJSX {
          */
         "frameSize"?: number;
         /**
-          * Group models by provided properties Define properties to be groped by
+          * Group rows based on this property. Define properties to be groped by grouping plugin See `GroupingOptions`.
          */
         "grouping"?: GroupingOptions;
         /**
-          * Prevents rendering until job is done. Can be used for initial rendering performance improvement. When several plugins require initial rendering this will prevent double initial rendering.
+          * Prevent rendering until job is done. Can be used for initial rendering performance improvement. When several plugins require initial rendering this will prevent double initial rendering.
          */
         "jobsBeforeRender"?: Promise<any>[];
         /**
-          * After all rows updated. Use it if you want to track all changes from sources pinned and main
+          * Emitted after each source update, whether from the pinned or main viewport. Useful for tracking all changes originating from sources in both the pinned and main viewports.
          */
-        "onAfter-any-source"?: (event: RevoGridCustomEvent<{
+        "onAfteranysource"?: (event: RevoGridCustomEvent<{
     type: DimensionRows;
     source: DataType[];
   }>) => void;
         /**
-          * After column resize Get resized columns
+          * Emitted after column resizing. Useful for retrieving the resized columns.
          */
         "onAftercolumnresize"?: (event: RevoGridCustomEvent<{
     [index: number]: ColumnRegular;
@@ -845,61 +1235,60 @@ declare namespace LocalJSX {
     order: Record<ColumnProp, 'asc' | 'desc'>;
   }>) => void;
         /**
-          * After edit. Triggered after data applied or range changed.
+          * Triggered after data applied or range changed.
          */
         "onAfteredit"?: (event: RevoGridCustomEvent<BeforeSaveDataDetails | BeforeRangeSaveDataDetails>) => void;
         /**
-          * Triggered after focus render finished. Can be used to access a focus element through
-          * @event .target
+          * Triggered after focus render finished. Can be used to access a focus element through `event.target`
          */
         "onAfterfocus"?: (event: RevoGridCustomEvent<{
     model: any;
     column: ColumnRegular;
   }>) => void;
         /**
-          * After rows updated
+          * After main source/rows updated
          */
         "onAftersourceset"?: (event: RevoGridCustomEvent<{
     type: DimensionRows;
     source: DataType[];
   }>) => void;
         /**
-          * Notify trimmed applied
+          * Emitted after trimmed values have been applied. Useful for notifying when trimming of values has taken place.
          */
         "onAftertrimmed"?: (event: RevoGridCustomEvent<any>) => void;
         /**
-          * Before data apply. You can override data source here
+          * Triggered before range applied. Use e.preventDefault() to prevent range.
          */
-        "onBefore-any-source"?: (event: RevoGridCustomEvent<{
+        "onBeforeange"?: (event: RevoGridCustomEvent<ChangedRange>) => void;
+        /**
+          * Before data apply on any source type. Can be source from pinned and main viewport. You can override data source here
+         */
+        "onBeforeanysource"?: (event: RevoGridCustomEvent<{
     type: DimensionRows;
     source: DataType[];
   }>) => void;
         /**
-          * Before range apply. Triggered before range applied. Use e.preventDefault() to prevent range.
-         */
-        "onBeforeange"?: (event: RevoGridCustomEvent<ChangedRange>) => void;
-        /**
-          * Before autofill. Triggered before autofill applied. Use e.preventDefault() to prevent edit data apply.
+          * This event is triggered before autofill is applied. To prevent the default behavior of applying the edit data, you can call `e.preventDefault()`.
          */
         "onBeforeautofill"?: (event: RevoGridCustomEvent<ChangedRange>) => void;
         /**
-          * Before cell focus changed. Use e.preventDefault() to prevent cell focus change.
+          * This event is triggered before the cell focus is changed. To prevent the default behavior of changing the cell focus, you can call `e.preventDefault()`.
          */
         "onBeforecellfocus"?: (event: RevoGridCustomEvent<BeforeSaveDataDetails>) => void;
         /**
-          * Before column applied but after column set gathered and viewport updated
+          * Emitted before a column update is applied, after the column set is gathered and the viewport is updated. Useful for performing actions or modifications before the final application of the column update.
          */
         "onBeforecolumnapplied"?: (event: RevoGridCustomEvent<ColumnCollection>) => void;
         /**
-          * Before column update
+          * Emitted before a column update is applied. Listeners can use this event to perform any necessary actions or modifications before the column update is finalized.
          */
         "onBeforecolumnsset"?: (event: RevoGridCustomEvent<ColumnCollection>) => void;
         /**
-          * Before edit event. Triggered before edit data applied. Use e.preventDefault() to prevent edit data set and use you own. Use e.val = {your value} to replace edit result with your own.
+          * This event is triggered before the data is edited. To prevent the default behavior of editing data and use your own implementation, call `e.preventDefault()`. To override the edit result with your own value, set the `e.val` property to your desired value.
          */
         "onBeforeedit"?: (event: RevoGridCustomEvent<BeforeSaveDataDetails>) => void;
         /**
-          * Before edit started Use e.preventDefault() to prevent edit
+          * Emitted before editing starts. Use e.preventDefault() to prevent the default edit behavior.
          */
         "onBeforeeditstart"?: (event: RevoGridCustomEvent<BeforeSaveDataDetails>) => void;
         /**
@@ -907,29 +1296,27 @@ declare namespace LocalJSX {
          */
         "onBeforeexport"?: (event: RevoGridCustomEvent<DataInput>) => void;
         /**
-          * Before filter applied to data source Use e.preventDefault() to prevent cell focus change Update
-          * @collection if you wish to change filters
+          * Emitted before applying a filter to the data source. Use e.preventDefault() to prevent cell focus change. Modify the
+          * @collection if you need to change filters.
          */
         "onBeforefilterapply"?: (event: RevoGridCustomEvent<{ collection: FilterCollection }>) => void;
         /**
-          * Before filter trimmed values Use e.preventDefault() to prevent value trimming and filter apply Update
-          * @collection if you wish to change filters Update
-          * @itemsToFilter if you wish to filter indexes of trimming
+          * Emitted before applying a filter to the data source. Use e.preventDefault() to prevent the default behavior of trimming values and applying the filter. Modify the `collection` property if you want to change the filters. Modify the `itemsToFilter` property if you want to filter the indexes for trimming.
          */
         "onBeforefiltertrimmed"?: (event: RevoGridCustomEvent<{
     collection: FilterCollection;
     itemsToFilter: Record<number, boolean>;
   }>) => void;
         /**
-          * Before grid focus lost happened. Use e.preventDefault() to prevent cell focus change.
+          * This event is triggered before the grid focus is lost. To prevent the default behavior of changing the cell focus, you can call `e.preventDefault()`.
          */
         "onBeforefocuslost"?: (event: RevoGridCustomEvent<FocusedData | null>) => void;
         /**
-          * Before range edit event. Triggered before range data applied, when range selection happened. Use e.preventDefault() to prevent edit data set and use you own.
+          * This event is triggered before applying range data, specifically when a range selection occurs. To customize the data and prevent the default edit data from being set, you can call `e.preventDefault()`.
          */
         "onBeforerangeedit"?: (event: RevoGridCustomEvent<BeforeRangeSaveDataDetails>) => void;
         /**
-          * Before row definition
+          * Emitted before the row definition is applied. Useful for modifying or preventing the default row definition behavior.
          */
         "onBeforerowdefinition"?: (event: RevoGridCustomEvent<{ vals: any; oldVals: any }>) => void;
         /**
@@ -949,19 +1336,18 @@ declare namespace LocalJSX {
     additive: boolean;
   }>) => void;
         /**
-          * Before data apply. You can override data source here
+          * Before main source/rows data apply. You can override data source here
          */
         "onBeforesourceset"?: (event: RevoGridCustomEvent<{
     type: DimensionRows;
     source: DataType[];
   }>) => void;
         /**
-          * Before source update sorting apply. Use this event if you intended to prevent sorting on data update. Use e.preventDefault() to prevent sorting data change during rows source update.
+          * This event is triggered before the sorting is applied during the update of the source data. To prevent sorting data from changing during the update of the source rows, you can call `e.preventDefault()`.
          */
         "onBeforesourcesortingapply"?: (event: RevoGridCustomEvent<any>) => void;
         /**
-          * Before trimmed values Use e.preventDefault() to prevent value trimming Update
-          * @trimmed if you wish to filter indexes of trimming
+          * Emitted before trimming values. Use e.preventDefault() to prevent the default behavior of trimming values. Modify the `trimmed` property if you want to filter the indexes for trimming.
          */
         "onBeforetrimmed"?: (event: RevoGridCustomEvent<{
     trimmed: Record<number, boolean>;
@@ -969,11 +1355,11 @@ declare namespace LocalJSX {
     type: string;
   }>) => void;
         /**
-          * contentsizechanged event. Triggered when new content size applied. Not including header size Event is not returning size To get actual size use getContentSize after event triggered
+          * New content size has been applied. The size excludes the header. Currently, the event responsible for applying the new content size does not provide the actual size. To retrieve the actual content size, you can utilize the `getContentSize` function after the event has been triggered.
          */
         "onContentsizechanged"?: (event: RevoGridCustomEvent<MultiDimensionType>) => void;
         /**
-          * External subscribe
+          * Emitted when the filter configuration is changed
          */
         "onFilterconfigchanged"?: (event: RevoGridCustomEvent<any>) => void;
         /**
@@ -981,19 +1367,22 @@ declare namespace LocalJSX {
          */
         "onHeaderclick"?: (event: RevoGridCustomEvent<ColumnRegular>) => void;
         /**
-          * Row order change started. Use e.preventDefault() to prevent rgRow order change. Use e.text = 'new name' to change item name on start.
+          * This event is triggered when the row order change is started. To prevent the default behavior of changing the row order, you can call `e.preventDefault()`. To change the item name at the start of the row order change, you can set `e.text` to the desired new name.
          */
         "onRowdragstart"?: (event: RevoGridCustomEvent<{
     pos: PositionItem;
     text: string;
   }>) => void;
+        /**
+          * Emmited when the row headers are changed.
+         */
         "onRowheaderschanged"?: (event: RevoGridCustomEvent<any>) => void;
         /**
-          * Before rgRow order apply. Use e.preventDefault() to prevent rgRow order change.
+          * This event is triggered before the order of `rgRow` is applied. To prevent the default behavior of changing the order of `rgRow`, you can call `e.preventDefault()`.
          */
         "onRoworderchanged"?: (event: RevoGridCustomEvent<{ from: number; to: number }>) => void;
         /**
-          * Triggered when view port scrolled
+          * Emitted when the viewport is scrolled. Useful for tracking viewport scrolling events.
          */
         "onViewportscroll"?: (event: RevoGridCustomEvent<ViewPortScrollEvent>) => void;
         /**
@@ -1005,7 +1394,7 @@ declare namespace LocalJSX {
          */
         "pinnedTopSource"?: DataType[];
         /**
-          * Custom grid plugins Has to be predefined during first grid init Every plugin should be inherited from BasePlugin
+          * Custom grid plugins. Has to be predefined during first grid init. Every plugin should be inherited from BasePlugin.
          */
         "plugins"?: PluginExternalConstructor[];
         /**
@@ -1021,15 +1410,15 @@ declare namespace LocalJSX {
          */
         "resize"?: boolean;
         /**
-          * Row class property Define this property in rgRow object and this will be mapped as rgRow class
+          * Row class property mapping. Map custom classes to rows from row object data. Define this property in rgRow object and this will be mapped as rgRow class.
          */
         "rowClass"?: string;
         /**
-          * Row properies applied
+          * Custom row properies to be applied. See `RowDefinition` for more info.
          */
         "rowDefinitions"?: RowDefinition[];
         /**
-          * Excel like show rgRow indexe per rgRow
+          * Excel like functionality. Show row numbers. Also can be used for custom row header render if object provided.
          */
         "rowHeaders"?: RowHeaders | boolean;
         /**
@@ -1037,21 +1426,19 @@ declare namespace LocalJSX {
          */
         "rowSize"?: number;
         /**
-          * Source - defines main data source. Can be an Object or 2 dimensional array([][]); Keys/indexes referenced from columns Prop
+          * Source - defines main data source. Can be an Object or 2 dimensional array([][]); Keys/indexes referenced from columns Prop.
          */
         "source"?: DataType[];
         /**
-          * Defines stretch strategy for columns with
-          * @StretchColumn plugin if there are more space on the right last column size would be increased
+          * Stretch strategy for columns by `StretchColumn` plugin. For example if there are more space on the right last column size would be increased.
          */
         "stretch"?: boolean | string;
         /**
-          * Theme name
+          * Theme name.
          */
         "theme"?: Theme;
         /**
-          * Trimmed rows Functionality which allows to hide rows from main data set
-          * @trimmedRows are physical rgRow indexes to hide
+          * Trimmed rows. Functionality which allows to hide rows from main data set. `trimmedRows` are physical `rgRow` indexes to hide.
          */
         "trimmedRows"?: Record<number, boolean>;
         /**
@@ -1068,42 +1455,62 @@ declare namespace LocalJSX {
           * Additional data to pass to renderer Used in plugins such as vue or react to pass root app entity to cells
          */
         "additionalData"?: any;
+        /**
+          * Right side edge position in px
+         */
         "colEnd": number;
         /**
-          * Column props passed via property
+          * Column index
          */
         "colIndex": number;
+        /**
+          * Column width
+         */
         "colSize": number;
+        /**
+          * Left side edge position in px
+         */
         "colStart": number;
         /**
           * Column service
          */
         "columnService": ColumnService;
         /**
-          * Grouping
+          * Grouping depth
          */
         "depth"?: number;
         /**
           * Before each cell render function. Allows to override cell properties
          */
-        "onBefore-cell-render"?: (event: RevogrCellCustomEvent<BeforeCellRenderEvent>) => void;
-        "onDragStartCell"?: (event: RevogrCellCustomEvent<DragStartEvent>) => void;
+        "onBeforecellrender"?: (event: RevogrCellCustomEvent<BeforeCellRenderEvent>) => void;
+        /**
+          * Event emitted on cell drag start
+         */
+        "onDragstartcell"?: (event: RevogrCellCustomEvent<DragStartEvent>) => void;
         /**
           * Cached providers
          */
         "providers": Providers;
+        /**
+          * Bottom cell side edge position in px
+         */
         "rowEnd": number;
         /**
-          * Row props passed via property
+          * Row index viewport Y position
          */
         "rowIndex": number;
+        /**
+          * Row height in px
+         */
         "rowSize": number;
+        /**
+          * Top cell side edge position in px
+         */
         "rowStart": number;
     }
     interface RevogrClipboard {
         /**
-          * Fired after paste applied to the grid
-          * @event afterpasteapply
+          * Paste 4. Fired after paste applied to the grid
           * @property {string} raw - raw data from clipboard
           * @property {string[][]} parsed - parsed data
           * @property {ClipboardEvent} event - original event
@@ -1111,62 +1518,55 @@ declare namespace LocalJSX {
          */
         "onAfterpasteapply"?: (event: RevogrClipboardCustomEvent<any>) => void;
         /**
-          * Fired before copy triggered
-          * @event beforecopy
+          * Copy 1. Fired before copy triggered
           * @property {ClipboardEvent} event - original event
           * @property {boolean} defaultPrevented - if true, copy will be canceled
          */
         "onBeforecopy"?: (event: RevogrClipboardCustomEvent<any>) => void;
         /**
-          * Fired before copy applied to the clipboard
-          * @event beforecopyapply
+          * Copy Method 1. Fired before copy applied to the clipboard from outside.
           * @property {DataTransfer} event - original event
           * @property {string} data - data to copy
           * @property {boolean} defaultPrevented - if true, copy will be canceled
          */
         "onBeforecopyapply"?: (event: RevogrClipboardCustomEvent<any>) => void;
         /**
-          * Fired before cut triggered
-          * @event beforecopy
+          * Cut 1. Fired before cut triggered
           * @property {ClipboardEvent} event - original event
           * @property {boolean} defaultPrevented - if true, cut will be canceled
          */
         "onBeforecut"?: (event: RevogrClipboardCustomEvent<any>) => void;
         /**
-          * Fired before paste applied to the grid
-          * @event beforepaste
+          * Paste 1. Fired before paste applied to the grid
           * @property {string} raw - raw data from clipboard
           * @property {ClipboardEvent} event - original event
           * @property {boolean} defaultPrevented - if true, paste will be canceled
          */
         "onBeforepaste"?: (event: RevogrClipboardCustomEvent<any>) => void;
         /**
-          * Fired before paste applied to the grid and after data parsed
-          * @event beforepasteapply
+          * Paste 2. Fired before paste applied to the grid and after data parsed
           * @property {string} raw - raw data from clipboard
           * @property {string[][]} parsed - parsed data
          */
         "onBeforepasteapply"?: (event: RevogrClipboardCustomEvent<any>) => void;
         /**
-          * Clears region when cut is done
+          * Cut 2. Clears region when cut is done
          */
-        "onClearRegion"?: (event: RevogrClipboardCustomEvent<DataTransfer>) => void;
+        "onClearregion"?: (event: RevogrClipboardCustomEvent<DataTransfer>) => void;
         /**
-          * Fired when region copied
-          * @event copyregion
+          * Copy 2. Fired when region copied
           * @property {DataTransfer} data - data to copy
           * @property {boolean} defaultPrevented - if true, copy will be canceled
          */
-        "onCopyRegion"?: (event: RevogrClipboardCustomEvent<DataTransfer>) => void;
+        "onCopyregion"?: (event: RevogrClipboardCustomEvent<DataTransfer>) => void;
         /**
-          * Fired when region pasted
-          * @event pasteregion
+          * Paste 3. Internal method. When data region is ready pass it to the top.
           * @property {string[][]} data - data to paste
           * @property {boolean} defaultPrevented - if true, paste will be canceled
          */
-        "onPasteRegion"?: (event: RevogrClipboardCustomEvent<string[][]>) => void;
+        "onPasteregion"?: (event: RevogrClipboardCustomEvent<string[][]>) => void;
         /**
-          * If readonly mode enables no need for Paste event
+          * If readonly mode - disabled Paste event
          */
         "readonly"?: boolean;
     }
@@ -1180,10 +1580,16 @@ declare namespace LocalJSX {
          */
         "additionalData"?: any;
         /**
-          * Static stores, not expected to change during component lifetime
+          * Column source
          */
-        "colData": ColumnSource;
-        "dataStore": RowSource;
+        "colData"?: Observable<DSourceState<ColumnRegular, DimensionCols>>;
+        /**
+          * Data rows source
+         */
+        "dataStore": Observable<DSourceState<DataType, DimensionRows>>;
+        /**
+          * Dimension settings Y
+         */
         "dimensionRow": Observable<DimensionSettingsState>;
         /**
           * When data render finished for the designated type
@@ -1206,11 +1612,20 @@ declare namespace LocalJSX {
          */
         "rowClass"?: string;
         /**
-          * Stores
+          * Selection, range, focus for row selection
          */
         "rowSelectionStore": Observable<SelectionStoreState>;
+        /**
+          * Data type
+         */
         "type": DimensionRows;
+        /**
+          * Viewport X
+         */
         "viewportCol": Observable<ViewportState>;
+        /**
+          * Viewport Y
+         */
         "viewportRow": Observable<ViewportState>;
     }
     /**
@@ -1250,12 +1665,33 @@ declare namespace LocalJSX {
         "onFilterChange"?: (event: RevogrFilterPanelCustomEvent<MultiFilterItem>) => void;
         "uuid"?: string;
     }
+    /**
+     * Focus component. Shows focus layer around the cell that is currently in focus.
+     */
     interface RevogrFocus {
-        "colData": ColumnSource;
+        /**
+          * Column source
+         */
+        "colData": Observable<DSourceState<ColumnRegular, DimensionCols>>;
+        /**
+          * Column type
+         */
         "colType": DimensionCols;
-        "dataStore": RowSource;
+        /**
+          * Data rows source
+         */
+        "dataStore": Observable<DSourceState<DataType, DimensionRows>>;
+        /**
+          * Dimension settings X
+         */
         "dimensionCol": Observable<DimensionSettingsState>;
+        /**
+          * Dimension settings Y
+         */
         "dimensionRow": Observable<DimensionSettingsState>;
+        /**
+          * Focus template custom function. Can be used to render custom focus layer.
+         */
         "focusTemplate"?: FocusTemplateFunc | null;
         /**
           * Used to setup properties after focus was rendered
@@ -1264,14 +1700,20 @@ declare namespace LocalJSX {
     model: any;
     column: ColumnRegular;
   }>) => void;
-        "onBefore-focus-render"?: (event: RevogrFocusCustomEvent<FocusRenderEvent>) => void;
+        /**
+          * Before focus render event. Can be prevented by event.preventDefault()
+         */
+        "onBeforefocusrender"?: (event: RevogrFocusCustomEvent<FocusRenderEvent>) => void;
         /**
           * Before focus changed verify if it's in view and scroll viewport into this view Can be prevented by event.preventDefault()
          */
         "onBeforescrollintoview"?: (event: RevogrFocusCustomEvent<{ el: HTMLElement }>) => void;
+        /**
+          * Row type
+         */
         "rowType": DimensionRows;
         /**
-          * Dynamic stores
+          * Selection, range, focus for selection
          */
         "selectionStore": Observable<SelectionStoreState>;
     }
@@ -1292,14 +1734,34 @@ declare namespace LocalJSX {
           * Column filter
          */
         "columnFilter"?: boolean;
+        /**
+          * Dimension settings X
+         */
         "dimensionCol"?: Observable<DimensionSettingsState>;
+        /**
+          * Grouping depth, how many levels of grouping
+         */
         "groupingDepth"?: number;
+        /**
+          * Column groups
+         */
         "groups"?: Groups;
-        "onBefore-resize"?: (event: RevogrHeaderCustomEvent<ColumnRegular[]>) => void;
-        "onHeaderdblClick"?: (event: RevogrHeaderCustomEvent<InitialHeaderClick>) => void;
+        /**
+          * On initial header click
+         */
+        "onBeforeheaderclick"?: (event: RevogrHeaderCustomEvent<InitialHeaderClick>) => void;
+        /**
+          * On before header resize
+         */
+        "onBeforeheaderresize"?: (event: RevogrHeaderCustomEvent<ColumnRegular[]>) => void;
+        /**
+          * On header double click
+         */
+        "onHeaderdblclick"?: (event: RevogrHeaderCustomEvent<InitialHeaderClick>) => void;
+        /**
+          * On header resize
+         */
         "onHeaderresize"?: (event: RevogrHeaderCustomEvent<ViewSettingSizeProp>) => void;
-        "onInitialHeaderClick"?: (event: RevogrHeaderCustomEvent<InitialHeaderClick>) => void;
-        "parent"?: string;
         /**
           * Readonly mode
          */
@@ -1308,13 +1770,16 @@ declare namespace LocalJSX {
           * Defines resize position
          */
         "resizeHandler"?: ResizeProps['active'];
+        /**
+          * Selection, range, focus
+         */
         "selectionStore"?: Observable<SelectionStoreState>;
         /**
           * Column type
          */
         "type": DimensionCols | 'rowHeaders';
         /**
-          * Stores
+          * Viewport X
          */
         "viewportCol"?: Observable<ViewportState>;
     }
@@ -1323,33 +1788,45 @@ declare namespace LocalJSX {
           * Static stores, not expected to change during component lifetime
          */
         "dataStore"?: Observable<DSourceState<DataType, DimensionRows>>;
+        /**
+          * Dimension settings X
+         */
         "dimensionCol"?: Observable<DimensionSettingsState>;
+        /**
+          * Dimension settings Y
+         */
         "dimensionRow"?: Observable<DimensionSettingsState>;
-        /**
-          * Row dragged, new range ready to be applied
-         */
-        "onInitialRowDropped"?: (event: RevogrOrderEditorCustomEvent<{ from: number; to: number }>) => void;
-        /**
-          * Row move
-         */
-        "onInternalRowDrag"?: (event: RevogrOrderEditorCustomEvent<PositionItem>) => void;
         /**
           * Row drag ended
          */
-        "onInternalRowDragEnd"?: (event: RevogrOrderEditorCustomEvent<any>) => void;
+        "onRowdragendinit"?: (event: RevogrOrderEditorCustomEvent<any>) => void;
+        /**
+          * Row dragged, new range ready to be applied
+         */
+        "onRowdragendinit"?: (event: RevogrOrderEditorCustomEvent<{
+    from: number;
+    to: number;
+  }>) => void;
+        /**
+          * Row mouse move
+         */
+        "onRowdragmousemove"?: (event: RevogrOrderEditorCustomEvent<Cell>) => void;
+        /**
+          * Row move
+         */
+        "onRowdragmoveinit"?: (event: RevogrOrderEditorCustomEvent<PositionItem>) => void;
         /**
           * Row drag started
          */
-        "onInternalRowDragStart"?: (event: RevogrOrderEditorCustomEvent<{
+        "onRowdragstartinit"?: (event: RevogrOrderEditorCustomEvent<{
     cell: Cell;
     text: string;
     pos: PositionItem;
     event: MouseEvent;
   }>) => void;
         /**
-          * Row mouse move
+          * Parent element
          */
-        "onInternalRowMouseMove"?: (event: RevogrOrderEditorCustomEvent<Cell>) => void;
         "parent"?: HTMLElement;
     }
     interface RevogrOverlaySelection {
@@ -1373,7 +1850,13 @@ declare namespace LocalJSX {
           * Row data store
          */
         "dataStore"?: Observable1<DSourceState<DataType1, DimensionRows1>>;
+        /**
+          * Dimension settings X
+         */
         "dimensionCol"?: Observable1<DimensionSettingsState1>;
+        /**
+          * Dimension settings Y
+         */
         "dimensionRow"?: Observable1<DimensionSettingsState1>;
         /**
           * Custom editors register
@@ -1387,26 +1870,34 @@ declare namespace LocalJSX {
           * Last cell position
          */
         "lastCell"?: Cell1;
-        "onApplyFocus"?: (event: RevogrOverlaySelectionCustomEvent<FocusRenderEvent>) => void;
-        "onBefore-apply-range"?: (event: RevogrOverlaySelectionCustomEvent<FocusRenderEvent>) => void;
+        /**
+          * Before cell get focused To prevent the default behavior of applying the edit data, you can call `e.preventDefault()`.
+         */
+        "onApplyfocus"?: (event: RevogrOverlaySelectionCustomEvent<FocusRenderEvent>) => void;
+        /**
+          * Before range applied
+         */
+        "onBeforeapplyrange"?: (event: RevogrOverlaySelectionCustomEvent<FocusRenderEvent>) => void;
+        /**
+          * Before cell edit happened
+         */
+        "onBeforecelledit"?: (event: RevogrOverlaySelectionCustomEvent<BeforeSaveDataDetails>) => void;
+        /**
+          * Before cell focus
+         */
+        "onBeforecellfocusinit"?: (event: RevogrOverlaySelectionCustomEvent<BeforeSaveDataDetails>) => void;
         /**
           * Runs before cell save Can be used to override or cancel original save
          */
-        "onBefore-cell-save"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
-        "onBefore-edit-render"?: (event: RevogrOverlaySelectionCustomEvent<FocusRenderEvent>) => void;
+        "onBeforecellsave"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
         /**
-          * Before range selection applied
+          * Before clipboard copy happened. Validate data before copy. To prevent the default behavior of editing data and use your own implementation, call `e.preventDefault()`.
          */
-        "onBefore-set-range"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
-        "onBeforeFocusCell"?: (event: RevogrOverlaySelectionCustomEvent<BeforeSaveDataDetails>) => void;
+        "onBeforecopyregion"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
         /**
-          * Selection range changed
+          * Before editor render
          */
-        "onBeforeRangeCopyApply"?: (event: RevogrOverlaySelectionCustomEvent<ChangedRange>) => void;
-        /**
-          * Range data apply
-         */
-        "onBeforeRangeDataApply"?: (event: RevogrOverlaySelectionCustomEvent<FocusRenderEvent>) => void;
+        "onBeforeeditrender"?: (event: RevogrOverlaySelectionCustomEvent<FocusRenderEvent>) => void;
         /**
           * Before key up event proxy, used to prevent key up trigger. If you have some custom behaviour event, use this event to check if it wasn't processed by internal logic. Call preventDefault()
          */
@@ -1416,47 +1907,69 @@ declare namespace LocalJSX {
          */
         "onBeforekeyup"?: (event: RevogrOverlaySelectionCustomEvent<KeyboardEvent>) => void;
         /**
-          * Used for editors support when close requested
+          * Before region paste happened
          */
-        "onCancelEdit"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
-        "onFocusCell"?: (event: RevogrOverlaySelectionCustomEvent<ApplyFocusEvent>) => void;
-        "onInternalCellEdit"?: (event: RevogrOverlaySelectionCustomEvent<BeforeSaveDataDetails>) => void;
+        "onBeforepasteregion"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
         /**
-          * Before clipboard copy happened
+          * Before range copy
          */
-        "onInternalCopy"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
-        /**
-          * Before paste happened
-         */
-        "onInternalPaste"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
+        "onBeforerangecopyapply"?: (event: RevogrOverlaySelectionCustomEvent<ChangedRange>) => void;
         /**
           * Range data apply
          */
-        "onInternalRangeDataApply"?: (event: RevogrOverlaySelectionCustomEvent<BeforeRangeSaveDataDetails>) => void;
+        "onBeforerangedataapply"?: (event: RevogrOverlaySelectionCustomEvent<FocusRenderEvent>) => void;
         /**
-          * Selection range changed
+          * Before range selection applied
          */
-        "onInternalSelectionChanged"?: (event: RevogrOverlaySelectionCustomEvent<ChangedRange>) => void;
+        "onBeforesetrange"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
+        /**
+          * Used for editors support when editor close requested
+         */
+        "onCanceledit"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
         /**
           * Range copy
          */
-        "onRangeClipboardCopy"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
-        "onRangeClipboardPaste"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
+        "onClipboardrangecopy"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
+        "onClipboardrangepaste"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
+        /**
+          * Cell get focused To prevent the default behavior of applying the edit data, you can call `e.preventDefault()`.
+         */
+        "onFocuscell"?: (event: RevogrOverlaySelectionCustomEvent<ApplyFocusEvent>) => void;
+        /**
+          * Range data apply
+         */
+        "onRangedataapplyinit"?: (event: RevogrOverlaySelectionCustomEvent<BeforeRangeSaveDataDetails>) => void;
+        /**
+          * Select all
+         */
         "onSelectall"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
+        /**
+          * Selection range changed
+         */
+        "onSelectionchangeinit"?: (event: RevogrOverlaySelectionCustomEvent<ChangedRange>) => void;
         /**
           * Set edit cell
          */
-        "onSetEdit"?: (event: RevogrOverlaySelectionCustomEvent<BeforeEdit>) => void;
-        "onSetRange"?: (event: RevogrOverlaySelectionCustomEvent<RangeArea & { type: MultiDimensionType }>) => void;
-        "onSetTempRange"?: (event: RevogrOverlaySelectionCustomEvent<TempRange | null>) => void;
+        "onSetedit"?: (event: RevogrOverlaySelectionCustomEvent<BeforeEdit>) => void;
         /**
-          * Range selection mode
+          * Set range
+         */
+        "onSetrange"?: (event: RevogrOverlaySelectionCustomEvent<RangeArea & { type: MultiDimensionType }>) => void;
+        /**
+          * Set temp range area during autofill
+         */
+        "onSettemprange"?: (event: RevogrOverlaySelectionCustomEvent<TempRange | null>) => void;
+        /**
+          * Range selection allowed
          */
         "range"?: boolean;
         /**
-          * If readonly mode enables
+          * Readonly mode
          */
         "readonly"?: boolean;
+        /**
+          * Selection, range, focus
+         */
         "selectionStore"?: Observable1<SelectionStoreState1>;
         /**
           * Enable revogr-clipboard component (read more in revogr-clipboard component) Allows copy/paste
@@ -1472,24 +1985,62 @@ declare namespace LocalJSX {
           * Additional data to pass to renderer
          */
         "additionalData"?: any;
+        /**
+          * Viewport data
+         */
         "dataPorts"?: ViewportData[];
+        /**
+          * Header props
+         */
         "headerProp"?: Record<string, any>;
+        /**
+          * Header height to setup row headers
+         */
         "height"?: number;
-        "onElementToScroll"?: (event: RevogrRowHeadersCustomEvent<ElementScroll>) => void;
-        "onScrollViewport"?: (event: RevogrRowHeadersCustomEvent<ViewPortScrollEvent>) => void;
+        /**
+          * Register element to scroll
+         */
+        "onRef"?: (event: RevogrRowHeadersCustomEvent<ElementScroll>) => void;
+        /**
+          * Scroll viewport
+         */
+        "onScrollview"?: (event: RevogrRowHeadersCustomEvent<ViewPortScrollEvent>) => void;
+        /**
+          * Enable resize
+         */
         "resize"?: boolean;
+        /**
+          * Row class
+         */
         "rowClass"?: string;
+        /**
+          * Row header column
+         */
         "rowHeaderColumn"?: RowHeaders;
-        "uiid"?: string;
-    }
-    interface RevogrScrollVirtual {
-        "dimension"?: DimensionType;
-        "dimensionStore"?: Observable<DimensionSettingsState>;
-        "onScrollVirtual"?: (event: RevogrScrollVirtualCustomEvent<ViewPortScrollEvent>) => void;
-        "viewportStore"?: Observable<ViewportState>;
     }
     /**
-     * Temporary range selection
+     * Virtual scroll component
+     */
+    interface RevogrScrollVirtual {
+        /**
+          * Scroll dimension (`X` - `rgCol` or `Y` - `rgRow`)
+         */
+        "dimension"?: DimensionType;
+        /**
+          * Dimensions
+         */
+        "dimensionStore": Observable<DimensionSettingsState>;
+        /**
+          * Scroll event
+         */
+        "onScrollvirtual"?: (event: RevogrScrollVirtualCustomEvent<ViewPortScrollEvent>) => void;
+        /**
+          * Viewport
+         */
+        "viewportStore": Observable<ViewportState>;
+    }
+    /**
+     * Temporary range selection component. Shows temporary range selection.
      */
     interface RevogrTempRange {
         /**
@@ -1505,6 +2056,9 @@ declare namespace LocalJSX {
          */
         "selectionStore"?: Observable<SelectionStoreState>;
     }
+    /**
+     * Viewport scroll component for RevoGrid
+     */
     interface RevogrViewportScroll {
         /**
           * Height of inner content
@@ -1514,16 +2068,28 @@ declare namespace LocalJSX {
           * Width of inner content
          */
         "contentWidth"?: number;
-        "onResizeViewport"?: (event: RevogrViewportScrollCustomEvent<ViewPortResizeEvent>) => void;
-        "onScrollViewport"?: (event: RevogrViewportScrollCustomEvent<ViewPortScrollEvent>) => void;
+        /**
+          * Viewport resize
+         */
+        "onResizeviewport"?: (event: RevogrViewportScrollCustomEvent<ViewPortResizeEvent>) => void;
+        /**
+          * Triggered on scroll change, can be used to get information about scroll visibility
+         */
         "onScrollchange"?: (event: RevogrViewportScrollCustomEvent<{
     type: DimensionType;
     hasScroll: boolean;
   }>) => void;
         /**
+          * Before scroll event
+         */
+        "onScrollviewport"?: (event: RevogrViewportScrollCustomEvent<ViewPortScrollEvent>) => void;
+        /**
           * Silently scroll to coordinate Made to align negative coordinates for mobile devices
          */
-        "onSilentScroll"?: (event: RevogrViewportScrollCustomEvent<ViewPortScrollEvent>) => void;
+        "onScrollviewportsilent"?: (event: RevogrViewportScrollCustomEvent<ViewPortScrollEvent>) => void;
+        /**
+          * Enable row header
+         */
         "rowHeader"?: boolean;
     }
     interface IntrinsicElements {
@@ -1548,7 +2114,7 @@ declare module "@stencil/core" {
     export namespace JSX {
         interface IntrinsicElements {
             /**
-             * Slots
+             * `revo-grid`: High-performance, customizable grid library for managing large datasets.
              * @example data-rgCol-rgRow - main data slot
              * @example focus-rgCol-rgRow - focus layer for main data
              */
@@ -1569,6 +2135,9 @@ declare module "@stencil/core" {
              */
             "revogr-edit": LocalJSX.RevogrEdit & JSXBase.HTMLAttributes<HTMLRevogrEditElement>;
             "revogr-filter-panel": LocalJSX.RevogrFilterPanel & JSXBase.HTMLAttributes<HTMLRevogrFilterPanelElement>;
+            /**
+             * Focus component. Shows focus layer around the cell that is currently in focus.
+             */
             "revogr-focus": LocalJSX.RevogrFocus & JSXBase.HTMLAttributes<HTMLRevogrFocusElement>;
             "revogr-header": LocalJSX.RevogrHeader & JSXBase.HTMLAttributes<HTMLRevogrHeaderElement>;
             "revogr-order-editor": LocalJSX.RevogrOrderEditor & JSXBase.HTMLAttributes<HTMLRevogrOrderEditorElement>;
@@ -1578,11 +2147,17 @@ declare module "@stencil/core" {
              * Visible on the left side of the table
              */
             "revogr-row-headers": LocalJSX.RevogrRowHeaders & JSXBase.HTMLAttributes<HTMLRevogrRowHeadersElement>;
+            /**
+             * Virtual scroll component
+             */
             "revogr-scroll-virtual": LocalJSX.RevogrScrollVirtual & JSXBase.HTMLAttributes<HTMLRevogrScrollVirtualElement>;
             /**
-             * Temporary range selection
+             * Temporary range selection component. Shows temporary range selection.
              */
             "revogr-temp-range": LocalJSX.RevogrTempRange & JSXBase.HTMLAttributes<HTMLRevogrTempRangeElement>;
+            /**
+             * Viewport scroll component for RevoGrid
+             */
             "revogr-viewport-scroll": LocalJSX.RevogrViewportScroll & JSXBase.HTMLAttributes<HTMLRevogrViewportScrollElement>;
         }
     }

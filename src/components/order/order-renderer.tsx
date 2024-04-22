@@ -8,13 +8,13 @@ type Props = { ref: { (e: OrdererService): void } };
  * Draw drag
  */
 export class OrdererService {
-  private parentY: number = 0;
+  private parentY = 0;
   el!: HTMLElement;
   rgRow!: HTMLElement;
   text!: HTMLElement;
   draggable!: HTMLElement;
 
-  start(parent: HTMLElement, { pos, text, event }: { pos: PositionItem; text: string; event: MouseEvent }): void {
+  start(parent: HTMLElement, { pos, text, event }: { pos: PositionItem; text: string; event: MouseEvent }) {
     const { top } = parent.getBoundingClientRect();
     this.parentY = top;
     if (this.text) {
@@ -24,13 +24,13 @@ export class OrdererService {
     this.moveTip({ x: event.x, y: event.y });
     this.el?.classList.remove('hidden');
   }
-  end(): void {
+  end() {
     this.el?.classList.add('hidden');
   }
-  move(pos: PositionItem): void {
+  move(pos: PositionItem) {
     this.moveElement(pos.end - this.parentY);
   }
-  moveTip({ x, y }: Cell): void {
+  moveTip({ x, y }: Cell) {
     if (!this.draggable) {
       return;
     }
@@ -38,7 +38,7 @@ export class OrdererService {
     this.draggable.style.top = `${y}px`;
   }
 
-  private moveElement(y: number): void {
+  private moveElement(y: number) {
     if (!this.rgRow) {
       return;
     }

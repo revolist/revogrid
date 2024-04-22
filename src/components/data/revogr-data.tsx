@@ -11,15 +11,23 @@ import {
 } from '@stencil/core';
 import { HTMLStencilElement, State } from '@stencil/core/internal';
 
-import ColumnService, { ColumnSource, RowSource } from './column.service';
+import ColumnService from './column.service';
 import { ROW_FOCUSED_CLASS } from '../../utils/consts';
 
-import { getSourceItem } from '../../store/dataSource/data.store';
+import { DSourceState, getSourceItem } from '../../store/dataSource/data.store';
 import RowRenderer from './row-renderer';
 import GroupingRowRenderer from '../../plugins/groupingRow/grouping.row.renderer';
 import { isGrouping } from '../../plugins/groupingRow/grouping.service';
-import { DimensionRows } from '../../types/dimension';
-import { Observable, ViewportState, DimensionSettingsState, BeforeRowRenderEvent, Providers } from '../../types/interfaces';
+import { DimensionCols, DimensionRows } from '../../types/dimension';
+import {
+  Observable,
+  ViewportState,
+  DimensionSettingsState,
+  BeforeRowRenderEvent,
+  Providers,
+  ColumnRegular,
+  DataType,
+} from '../../types/interfaces';
 import { SelectionStoreState, RangeArea } from '../../types/selection';
 
 /**
@@ -31,10 +39,7 @@ import { SelectionStoreState, RangeArea } from '../../types/selection';
   styleUrl: 'revogr-data-style.scss',
 })
 export class RevogrData {
-  private columnService: ColumnService;
-
-  @Element() element!: HTMLStencilElement;
-
+  // #region Properties
   /**
    * Readonly mode
    */
@@ -54,16 +59,29 @@ export class RevogrData {
    */
   @Prop() additionalData: any;
   /** Stores */
+  /** Selection, range, focus for row selection */
   @Prop() rowSelectionStore!: Observable<SelectionStoreState>;
+  /** Viewport Y */
   @Prop() viewportRow!: Observable<ViewportState>;
+  /** Viewport X */
   @Prop() viewportCol!: Observable<ViewportState>;
-
+  /** Dimension settings Y */
   @Prop() dimensionRow!: Observable<DimensionSettingsState>;
 
   /** Static stores, not expected to change during component lifetime */
-  @Prop() colData!: ColumnSource;
-  @Prop() dataStore!: RowSource;
+  /**
+   * Column source
+   */
+  @Prop() colData: Observable<DSourceState<ColumnRegular, DimensionCols>>;
+  /**
+   * Data rows source
+   */
+  @Prop() dataStore!: Observable<DSourceState<DataType, DimensionRows>>;
+  /**
+   * Data type
+   */
   @Prop() type!: DimensionRows;
+  // #endregion
 
   /**
    * Before each row render
@@ -74,15 +92,19 @@ export class RevogrData {
    */
   @Event() afterrender: EventEmitter;
 
+  @Element() element!: HTMLStencilElement;
+  @State() providers: Providers;
+  private columnService: ColumnService;
   private renderedRows = new Map<number, VNode>();
   private currentRange: RangeArea | null = null;
-
   private rangeUnsubscribe: (() => void) | undefined;
 
-  @State() providers: Providers;
-
-  @Watch('dataStore')
-  @Watch('colData')
+  @Watch('dataStore') onDataStoreChange() {
+    this.onStoreChange();
+  }
+  @Watch('colData') onColDataChange() {
+    this.onStoreChange();
+  }
   onStoreChange() {
     this.columnService?.destroy();
     this.columnService = new ColumnService(this.dataStore, this.colData);
@@ -153,12 +175,11 @@ export class RevogrData {
       return '';
     }
     const rowsEls: VNode[] = [];
-
     const depth = this.dataStore.get('groupingDepth');
     const groupingCustomRenderer = this.dataStore.get('groupingCustomRenderer');
     for (let rgRow of rows) {
       const dataItem = getSourceItem(this.dataStore, rgRow.itemIndex);
-      /** grouping */
+      // #region grouping
       if (isGrouping(dataItem)) {
         rowsEls.push(
           <GroupingRowRenderer
@@ -171,7 +192,7 @@ export class RevogrData {
         );
         continue;
       }
-      /** grouping end */
+      // #endregion
       const cells: (VNode | string | void)[] = [];
       let rowClass = this.rowClass
         ? this.columnService.getRowClass(rgRow.itemIndex, this.rowClass)

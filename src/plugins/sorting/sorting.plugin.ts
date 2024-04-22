@@ -95,9 +95,9 @@ export default class SortingPlugin extends BasePlugin {
       );
     };
 
-    this.addEventListener('after-any-source', aftersourceset);
+    this.addEventListener('afteranysource', aftersourceset);
     this.addEventListener('aftercolumnsset', aftercolumnsset);
-    this.addEventListener('initialHeaderClick', headerclick);
+    this.addEventListener('beforeheaderclick', headerclick);
   }
 
   private getComparer(column: ColumnRegular, order: Order): CellCompareFunc {

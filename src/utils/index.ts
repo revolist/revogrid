@@ -7,7 +7,7 @@ interface CSSStyleDeclarationExtended extends CSSStyleDeclaration {
 
 /* Generate range on size
  */
-export function range(size: number, startAt: number = 0): number[] {
+export function range(size: number, startAt = 0): number[] {
   const res: number[] = [];
   const end = startAt + size;
   for (let i = startAt; i < end; i++) {
@@ -19,12 +19,12 @@ export function range(size: number, startAt: number = 0): number[] {
 /* Find index position in array */
 export function findPositionInArray<T>(this: T[], el: T, compareFn: (el: T, el2: T) => number): number {
   return (function (arr): number {
-    let m: number = 0;
-    let n: number = arr.length - 1;
+    let m = 0;
+    let n = arr.length - 1;
 
     while (m <= n) {
-      const k: number = (n + m) >> 1;
-      const cmp: number = compareFn(el, arr[k]);
+      const k = (n + m) >> 1;
+      const cmp = compareFn(el, arr[k]);
 
       if (cmp > 0) {
         m = k + 1;
@@ -57,9 +57,9 @@ function simpleCompare<T>(el1: T, el2: T): boolean {
  */
 export function mergeSortedArray<T>(arr1: T[], arr2: T[], compareFn: (el: T, el2: T) => boolean = simpleCompare): T[] {
   const merged: T[] = [];
-  let index1: number = 0;
-  let index2: number = 0;
-  let current: number = 0;
+  let index1 = 0;
+  let index2 = 0;
+  let current = 0;
 
   while (current < arr1.length + arr2.length) {
     let isArr1Depleted = index1 >= arr1.length;
@@ -79,27 +79,29 @@ export function mergeSortedArray<T>(arr1: T[], arr2: T[], compareFn: (el: T, el2
   return merged;
 }
 
-/* Calculate system scrollbar width */
-export function getScrollbarWidth(doc: Document): number {
+/**
+ * Calculate system scrollbar size
+ */
+export function getScrollbarSize(doc: Document): number {
   // Creating invisible container
-  const outer: HTMLElement = doc.createElement('div');
-  const styles: CSSStyleDeclarationExtended = outer.style as CSSStyleDeclarationExtended;
+  const outer = doc.createElement('div');
+
+  const styles = outer.style as CSSStyleDeclarationExtended;
   styles.visibility = 'hidden';
   styles.overflow = 'scroll'; // forcing scrollbar to appear
   styles.msOverflowStyle = 'scrollbar'; // needed for WinJS apps
   doc.body.appendChild(outer);
 
   // Creating inner element and placing it in the container
-  const inner: HTMLDivElement = doc.createElement('div');
+  const inner = doc.createElement('div');
   outer.appendChild(inner);
 
   // Calculating difference between container's full width and the child width
-  const scrollbarWidth: number = outer.offsetWidth - inner.offsetWidth;
+  const size = outer.offsetWidth - inner.offsetWidth;
 
   // Removing temporary elements from the DOM
   outer.parentNode.removeChild(outer);
-
-  return scrollbarWidth;
+  return size;
 }
 
 /* Scale a value between 2 ranges

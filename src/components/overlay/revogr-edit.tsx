@@ -20,7 +20,7 @@ export class RevoEdit {
   @Prop() editor: EditorCtr | null;
 
   /** Save on editor close */
-  @Prop() saveOnClose: boolean = false;
+  @Prop() saveOnClose = false;
   /** Additional data to pass to renderer */
   @Prop() additionalData: any;
 
@@ -59,7 +59,7 @@ export class RevoEdit {
    * Closes editor when called
    * @param preventFocus - if true editor will not be closed and next cell will not be focused
    */
-  onSave(val: SaveData, preventFocus?: boolean): void {
+  onSave(val: SaveData, preventFocus?: boolean) {
     this.saveRunning = true;
     if (this.editCell) {
       this.cellEdit.emit({
@@ -73,7 +73,7 @@ export class RevoEdit {
     }
   }
 
-  componentWillRender(): void {
+  componentWillRender() {
     // we have active editor
     if (this.currentEditor) {
       return;
@@ -101,7 +101,7 @@ export class RevoEdit {
     this.currentEditor = new TextEditor(this.column, (e, preventFocus) => this.onSave(e, preventFocus));
   }
 
-  componentDidRender(): void {
+  componentDidRender() {
     if (!this.currentEditor) {
       return;
     }
@@ -109,7 +109,7 @@ export class RevoEdit {
     this.currentEditor.componentDidRender?.();
   }
 
-  disconnectedCallback(): void {
+  disconnectedCallback() {
     if (this.saveOnClose) {
       // shouldn't be cancelled by saveRunning
       // editor requires getValue to be able to save

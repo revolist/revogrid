@@ -26,7 +26,11 @@ window.clearGrouping = function () {
   const grid = document.querySelector('revo-grid');
   grid.grouping = {};
 };
-window.setGrouping = function (props = [], expandedAll = false, groupLabelTemplate) {
+window.setGrouping = function (
+  props = [],
+  expandedAll = false,
+  groupLabelTemplate,
+) {
   const grid = document.querySelector('revo-grid');
   groupLabelTemplate = (createElement, { name, depth }) => {
     return createElement('span', null, `${props[depth]}: ${name}`);
@@ -101,23 +105,49 @@ window.setPinned = function (type, checked) {
     [type]: val,
   });
 };
+
+// prevent event debug
 window.preventEvent = function (name, checked) {
   eventsPrevented[name] = checked;
 };
 let keys = 2;
+let attrs = {};
 window.toggleVisibility = function (checked) {
   if (!checked) {
     const grid = document.querySelector('revo-grid');
+    attrs = {};
+    // Get all attributes from the source element
+    const attributes = grid.attributes;
+
+    // Loop through the attributes and set them on the target element
+    for (let i = 0; i < attributes.length; i++) {
+      const attribute = attributes[i];
+      attrs[attribute.name] = attribute.value;
+    }
     grid.remove();
   } else {
     const holder = document.querySelector('.grid-holder');
     const grid = document.createElement('revo-grid', { is: 'revo-grid' });
+    // Recover attributes
+    Object.keys(attrs).forEach(key => {
+      grid.setAttribute(key, attrs[key]);
+    });
     grid.setAttribute('key', keys++);
     holder.appendChild(grid);
     setData();
   }
 };
 
+let timerUpdateInterval;
+window.timerUpdate = function (checked, inteval = 3) {
+  clearInterval(timerUpdateInterval);
+  if (checked) {
+    timerUpdateInterval = setInterval(() => {
+      const grid = document.querySelector('revo-grid');
+      grid.source = [...grid.source];
+    }, inteval * 1000);
+  }
+};
 
 window.onload = onLoad;
 
@@ -128,32 +158,33 @@ function onLoad() {
   grid.range = true;
   grid.resize = true;
 
-  const filterFunc = (cellValue, extraValue) => {
-    if (!cellValue) {
-      return false;
-    }
-    if (typeof cellValue !== 'string') {
-      cellValue = JSON.stringify(cellValue);
-    }
-    return cellValue === extraValue;
-  };
-  // if you want extra input field for @extraValue
-  filterFunc.extra = 'input';
+  // const filterFunc = (cellValue, extraValue) => {
+  //   if (!cellValue) {
+  //     return false;
+  //   }
+  //   if (typeof cellValue !== 'string') {
+  //     cellValue = JSON.stringify(cellValue);
+  //   }
+  //   return cellValue === extraValue;
+  // };
+  // // if you want extra input field for @extraValue
+  // filterFunc.extra = 'input';
 
-  const filterConfig = {
-    include: ['newEqual'],
-    customFilters: {
-      newEqual: {
-        columnFilterType: 'myFilterType', // column filter type id
-        name: 'myEqual',
-        func: filterFunc,
-      },
-    },
-    disableDynamicFiltering: true,
-  };
+  // const filterConfig = {
+  //   include: ['newEqual'],
+  //   customFilters: {
+  //     newEqual: {
+  //       columnFilterType: 'myFilterType', // column filter type id
+  //       name: 'myEqual',
+  //       func: filterFunc,
+  //     },
+  //   },
+  //   disableDynamicFiltering: true,
+  // };
 
-  grid.filter = filterConfig;
-  // grid.stretch = true;
+  // grid.filter = filterConfig;
+
+  grid.filter = true;
   grid.exporting = true;
   grid.rowDefinitions = [
     {
@@ -162,6 +193,8 @@ function onLoad() {
       size: 100,
     },
   ];
+  grid.rowClass = 'row-style';
+  // grid.stretch = true;
   /* 
   grid.autoSizeColumn = {
     mode: 'autoSizeAll',
@@ -177,7 +210,11 @@ function onLoad() {
       if (window.eventsPrevented[e]) {
         $e.preventDefault();
       }
-      console.log(`%c${e}`, 'background: #50d260; color: #fff; border-radius: 3px; padding: 2px 5px;', $e);
+      console.log(
+        `%c${e}`,
+        'background: #50d260; color: #fff; border-radius: 3px; padding: 2px 5px;',
+        $e,
+      );
     });
   });
 }

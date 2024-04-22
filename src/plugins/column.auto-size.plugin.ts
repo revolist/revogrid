@@ -108,7 +108,7 @@ export default class AutoSizeColumnPlugin extends BasePlugin {
         this.addEventListener('afteredit', afterEditAll);
         break;
       default:
-        this.addEventListener('headerdblClick', headerDblClick);
+        this.addEventListener('headerdblclick', headerDblClick);
         break;
     }
   }
@@ -163,7 +163,7 @@ export default class AutoSizeColumnPlugin extends BasePlugin {
     }
   }
 
-  private afteredit(e: EditEvent): void {
+  private afteredit(e: EditEvent) {
     let data: Record<string, DataType>;
     if (this.isRangeEdit(e)) {
       data = e.data;
@@ -195,7 +195,7 @@ export default class AutoSizeColumnPlugin extends BasePlugin {
     });
   }
 
-  private afterEditAll(e: EditEvent): void {
+  private afterEditAll(e: EditEvent) {
     const props: Record<any, true> = {};
     if (this.isRangeEdit(e)) {
       each(e.data, r => each(r, (_v, p) => (props[p] = true)));
@@ -239,7 +239,7 @@ export default class AutoSizeColumnPlugin extends BasePlugin {
     );
   }
 
-  private columnSet(columns: ColumnItems): void {
+  private columnSet(columns: ColumnItems) {
     for (let t of columnTypes) {
       const type = t as DimensionCols;
       const cols = columns[type];

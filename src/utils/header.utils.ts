@@ -15,7 +15,7 @@ export function generateHeader(index: number): string {
 
 export function generateHeaderByCount(colsNumber: number): string[] {
   const rowData: string[] = [];
-  for (let j: number = 0; j < colsNumber; j++) {
+  for (let j = 0; j < colsNumber; j++) {
     rowData.push(generateHeader(j));
   }
   return rowData;

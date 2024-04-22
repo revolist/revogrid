@@ -8,20 +8,20 @@
 | Property       | Attribute | Description                                                     | Type                                                   | Default     |
 | -------------- | --------- | --------------------------------------------------------------- | ------------------------------------------------------ | ----------- |
 | `dataStore`    | --        | Static stores, not expected to change during component lifetime | `ObservableMap<DSourceState<DataType, DimensionRows>>` | `undefined` |
-| `dimensionCol` | --        |                                                                 | `ObservableMap<DimensionSettingsState>`                | `undefined` |
-| `dimensionRow` | --        |                                                                 | `ObservableMap<DimensionSettingsState>`                | `undefined` |
-| `parent`       | --        |                                                                 | `HTMLElement`                                          | `undefined` |
+| `dimensionCol` | --        | Dimension settings X                                            | `ObservableMap<DimensionSettingsState>`                | `undefined` |
+| `dimensionRow` | --        | Dimension settings Y                                            | `ObservableMap<DimensionSettingsState>`                | `undefined` |
+| `parent`       | --        | Parent element                                                  | `HTMLElement`                                          | `undefined` |
 
 
 ## Events
 
-| Event                  | Description                                | Type                                                                               |
-| ---------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------- |
-| `initialRowDropped`    | Row dragged, new range ready to be applied | `CustomEvent<{ from: number; to: number; }>`                                       |
-| `internalRowDrag`      | Row move                                   | `CustomEvent<PositionItem>`                                                        |
-| `internalRowDragEnd`   | Row drag ended                             | `CustomEvent<any>`                                                                 |
-| `internalRowDragStart` | Row drag started                           | `CustomEvent<{ cell: Cell; text: string; pos: PositionItem; event: MouseEvent; }>` |
-| `internalRowMouseMove` | Row mouse move                             | `CustomEvent<Cell>`                                                                |
+| Event              | Description                                | Type                                                                               |
+| ------------------ | ------------------------------------------ | ---------------------------------------------------------------------------------- |
+| `rowdragendinit`   | Row drag ended                             | `CustomEvent<any>`                                                                 |
+| `rowdragendinit`   | Row dragged, new range ready to be applied | `CustomEvent<{ from: number; to: number; }>`                                       |
+| `rowdragmousemove` | Row mouse move                             | `CustomEvent<Cell>`                                                                |
+| `rowdragmoveinit`  | Row move                                   | `CustomEvent<PositionItem>`                                                        |
+| `rowdragstartinit` | Row drag started                           | `CustomEvent<{ cell: Cell; text: string; pos: PositionItem; event: MouseEvent; }>` |
 
 
 ## Methods
@@ -40,6 +40,12 @@ Type: `Promise<void>`
 
 
 
+#### Parameters
+
+| Name | Type                                                           | Description |
+| ---- | -------------------------------------------------------------- | ----------- |
+| `e`  | `{ originalEvent: MouseEvent; model: ColumnDataSchemaModel; }` |             |
+
 #### Returns
 
 Type: `Promise<void>`
@@ -49,6 +55,12 @@ Type: `Promise<void>`
 ### `endOrder(e: MouseEvent) => Promise<void>`
 
 
+
+#### Parameters
+
+| Name | Type         | Description |
+| ---- | ------------ | ----------- |
+| `e`  | `MouseEvent` |             |
 
 #### Returns
 
@@ -72,4 +84,4 @@ graph TD;
 
 ----------------------------------------------
 
-*Built with [StencilJS](https://stenciljs.com/)*
+*Built with love by Revolist OU*

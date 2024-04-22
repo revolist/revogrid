@@ -241,7 +241,7 @@ export default class SelectionStoreConnector {
     return focus;
   }
 
-  clearAll(): void {
+  clearAll() {
     for (let y in this.stores) {
       for (let x in this.stores[y]) {
         this.stores[y][x]?.clearFocus();

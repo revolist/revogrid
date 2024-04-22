@@ -206,11 +206,11 @@ export function recombineByOffset(
     // push item to the end
     let lastItem: VirtualPositionItem = getLastItem(data);
 
-    let i: number = newRange.start;
+    let i = newRange.start;
     const length = i + offset;
     for (; i < length; i++) {
-      const newIndex: number = lastItem.itemIndex + 1;
-      const size: number = getItemSize(
+      const newIndex = lastItem.itemIndex + 1;
+      const size = getItemSize(
         newIndex,
         data.sizes,
         data.originItemSize,
@@ -248,8 +248,8 @@ export function recombineByOffset(
 
     const end = newRange.end;
     for (let i = 0; i < offset; i++) {
-      const newIndex: number = firstItem.itemIndex - 1;
-      const size: number = getItemSize(
+      const newIndex = firstItem.itemIndex - 1;
+      const size = getItemSize(
         newIndex,
         data.sizes,
         data.originItemSize,
@@ -293,7 +293,7 @@ export function recombineByOffset(
 function getItemSize(
   index: number,
   sizes?: ViewSettingSizeProp,
-  origSize: number = 0,
+  origSize = 0,
 ): number {
   if (sizes && sizes[index]) {
     return sizes[index];

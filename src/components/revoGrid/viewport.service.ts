@@ -11,7 +11,6 @@ import {
   getVisibleSourceItem,
 } from '../../store/dataSource/data.store';
 import { columnTypes, rowTypes } from '../../store/storeTypes';
-import { UUID } from '../../utils/consts';
 import { OrdererService } from '../order/order-renderer';
 import GridScrollingService from './viewport.scrolling.service';
 import {
@@ -35,6 +34,7 @@ import {
   SlotType,
   ViewportColumn,
   ViewportData,
+  ViewportProperties,
   ViewportProps,
 } from '../../types/viewport.interfaces';
 import { Cell, RangeArea } from '../..';
@@ -45,7 +45,6 @@ type Config = {
   dataProvider: DataProvider;
   dimensionProvider: DimensionProvider;
   viewportProvider: ViewportProvider;
-  uuid: string | null;
   scrollingService: GridScrollingService;
   orderService: OrdererService;
   selectionStoreConnector: SelectionStoreConnector;
@@ -66,25 +65,24 @@ export type FocusedData = {
 
 /** Collect Column data */
 function gatherColumnData(data: ViewportColumn) {
-  const parent = data.uuid;
   const colDimension = data.dimensions[data.colType].store;
   const realWidth = colDimension.get('realSize');
-  const prop: Record<string, any> = {
+
+
+  const prop: ViewportProperties = {
     contentWidth: realWidth,
     class: data.colType,
-    [`${UUID}`]: data.uuid,
     contentHeight: data.contentHeight,
     key: data.colType,
-    onResizeViewport: data.onResizeViewport,
+    onResizeviewport: data.onResizeviewport,
+    // set viewport size to real size
+    style: data.fixWidth ? { minWidth: `${realWidth}px` } : undefined,
   };
-  // set viewport size to real size
-  if (data.fixWidth) {
-    prop.style = { minWidth: `${realWidth}px` };
-  }
+
   const headerProp: HeaderProperties = {
-    parent,
     colData: getVisibleSourceItem(data.colStore),
     dimensionCol: colDimension,
+    type: data.colType,
     groups: data.colStore.get('groups'),
     groupingDepth: data.colStore.get('groupingDepth'),
     resizeHandler: data.colType === 'colPinEnd' ? ['l'] : undefined,
@@ -96,7 +94,6 @@ function gatherColumnData(data: ViewportColumn) {
     type: data.colType,
     position: data.position,
     headerProp,
-    parent,
     viewportCol: data.viewports[data.colType].store,
   };
 }
@@ -127,7 +124,6 @@ export default class ViewportService {
         contentHeight,
         // only central column has dynamic width
         fixWidth: val !== 'rgCol',
-        uuid: `${config.uuid}-${x}`,
 
         viewports: config.viewportProvider.stores,
         dimensions: config.dimensionProvider.stores,
@@ -137,7 +133,7 @@ export default class ViewportService {
         onHeaderresize: e => this.onColumnResize(val, e, colStore),
       };
       if (val === 'rgCol') {
-        column.onResizeViewport = (e: CustomEvent<ViewPortResizeEvent>) => {
+        column.onResizeviewport = (e: CustomEvent<ViewPortResizeEvent>) => {
           if (config.disableVirtualY && e.detail.dimension === 'rgRow') {
             return;
           } else if (config.disableVirtualX && e.detail.dimension === 'rgCol') {
@@ -169,13 +165,13 @@ export default class ViewportService {
             segmentSelectionStore: segmentSelection.store,
             ref: (e: Element) =>
               config.selectionStoreConnector.registerSection(e),
-            onSetRange: e => {
+            onSetrange: e => {
               segmentSelection.setRangeArea(e.detail);
             },
-            onSetTempRange: e => {
+            onSettemprange: e => {
               segmentSelection.setTempArea(e.detail);
             },
-            onFocusCell: e => {
+            onFocuscell: e => {
               // todo: multi focus
               segmentSelection.clearFocus();
               config.selectionStoreConnector.focus(segmentSelection, e.detail);
@@ -283,7 +279,6 @@ export default class ViewportService {
       type,
       canDrag: !fixed,
       position: data.position,
-      uuid: `${data.uuid}-${data.position.x}-${data.position.y}`,
       dataStore: data.rowStores[type].store,
       dimensionCol: data.dimensions[data.colType].store,
       dimensionRow: data.dimensions[type].store,

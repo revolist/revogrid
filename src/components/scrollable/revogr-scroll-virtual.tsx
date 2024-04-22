@@ -1,26 +1,56 @@
-import { Component, Element, Event, EventEmitter, h, Host, Method, Prop } from '@stencil/core';
-import LocalScrollService from '../../services/local.scroll.service';
-import { getScrollbarWidth } from '../../utils';
+import {
+  Component,
+  Element as StencilElement,
+  Event,
+  EventEmitter,
+  h,
+  Host,
+  Method,
+  Prop,
+} from '@stencil/core';
+import LocalScrollService, { getContentSize } from '../../services/local.scroll.service';
+import { getScrollbarSize } from '../../utils';
 import { DimensionType } from '../../types/dimension';
-import { Observable, ViewportState, DimensionSettingsState, ViewPortScrollEvent } from '../../types/interfaces';
+import {
+  Observable,
+  ViewportState,
+  DimensionSettingsState,
+  ViewPortScrollEvent,
+} from '../../types/interfaces';
+import { AutohideScrollPlugin } from './autohide-scroll.plugin';
 
+/**
+ * Virtual scroll component
+ */
 @Component({
   tag: 'revogr-scroll-virtual',
   styleUrl: 'revogr-scroll-style.scss',
 })
 export class RevogrScrollVirtual {
-  private scrollSize: number = 0;
-  private isAutoHide: boolean = false;
-  private autoHideTimeout: number = 0;
-  private scrollService: LocalScrollService;
-
-  @Element() element: HTMLElement;
-
+  /**
+   * Scroll dimension (`X` - `rgCol` or `Y` - `rgRow`)
+   */
   @Prop() dimension: DimensionType = 'rgRow';
-  @Prop() viewportStore: Observable<ViewportState>;
-  @Prop() dimensionStore: Observable<DimensionSettingsState>;
 
-  @Event() scrollVirtual: EventEmitter<ViewPortScrollEvent>;
+  /**
+   * Viewport
+   */
+  @Prop() viewportStore!: Observable<ViewportState>;
+  /**
+   * Dimensions
+   */
+  @Prop() dimensionStore!: Observable<DimensionSettingsState>;
+
+  /**
+   * Scroll event
+   */
+  @Event({ eventName: 'scrollvirtual' })
+  scrollVirtual: EventEmitter<ViewPortScrollEvent>;
+
+  @StencilElement() element: HTMLElement;
+  private autohideScrollPlugin = new AutohideScrollPlugin();
+  private scrollSize = 0;
+  private scrollService: LocalScrollService;
 
   @Method()
   async setScroll(e: ViewPortScrollEvent): Promise<void> {
@@ -30,7 +60,9 @@ export class RevogrScrollVirtual {
     this.scrollService?.setScroll(e);
   }
 
-  // update on delta in case we don't know existing position or external change
+  /**
+   * Update if `delta` exists in case we don't know current position or if it's external change
+   */
   @Method()
   async changeScroll(e: ViewPortScrollEvent): Promise<ViewPortScrollEvent> {
     if (e.delta) {
@@ -48,6 +80,11 @@ export class RevogrScrollVirtual {
   }
 
   set size(s: number) {
+    if (!s) {
+      this.element.classList.add('hidden-scroll');
+    } else {
+      this.element.classList.remove('hidden-scroll');
+    }
     if (this.dimension === 'rgRow') {
       this.element.style.minWidth = `${s}px`;
       return;
@@ -62,7 +99,7 @@ export class RevogrScrollVirtual {
     return this.element.clientWidth;
   }
 
-  connectedCallback(): void {
+  connectedCallback() {
     this.scrollService = new LocalScrollService({
       beforeScroll: e => this.scrollVirtual.emit(e),
       afterScroll: e => {
@@ -72,16 +109,15 @@ export class RevogrScrollVirtual {
     });
   }
 
-  disconnectedCallback(): void {
-    clearTimeout(this.autoHideTimeout);
+  disconnectedCallback() {
+    this.autohideScrollPlugin.clear();
   }
 
-  componentWillLoad(): void {
-    this.scrollSize = getScrollbarWidth(document);
-    this.isAutoHide = !this.scrollSize;
+  componentWillLoad() {
+    this.scrollSize = getScrollbarSize(this.element.ownerDocument);
   }
 
-  componentDidRender(): void {
+  componentDidRender() {
     const type = this.dimension === 'rgRow' ? 'scrollHeight' : 'scrollWidth';
     if (this.element[type] > this.size) {
       this.size = this.scrollSize;
@@ -98,36 +134,39 @@ export class RevogrScrollVirtual {
     );
   }
 
-  onScroll(e: MouseEvent): void {
+  onScroll(e: MouseEvent) {
     let type: 'scrollLeft' | 'scrollTop' = 'scrollLeft';
     if (this.dimension === 'rgRow') {
       type = 'scrollTop';
     }
-    if (this.isAutoHide) {
-      this.size = 20;
-      this.autoHideTimeout = this.autoHide(this.autoHideTimeout);
+    this.autohideScrollPlugin.scroll({
+      element: this.element,
+      scrollSize: this.scrollSize,
+      contentSize: this.dimensionStore.get('realSize'),
+      virtualSize: this.viewportStore.get('virtualSize'),
+    });
+    if (!(e.target instanceof Element)) {
+      return;
     }
-    const target: HTMLElement = e.target as HTMLElement;
+    const target = e.target;
     this.scrollService?.scroll(target[type] || 0, this.dimension);
-  }
-
-  autoHide(timeout?: number): number {
-    clearTimeout(timeout);
-    return (setTimeout(() => {
-      this.size = 0;
-    }, 6000) as unknown) as number;
   }
 
   render() {
     const sizeType = this.dimension === 'rgRow' ? 'height' : 'width';
     return (
-      <Host {...{ 'auto-hide': this.isAutoHide }} onScroll={(e: MouseEvent) => this.onScroll(e)}>
-        <div style={{ [sizeType]: `${this.extContentSize(this.viewportStore.get('virtualSize'), this.dimensionStore.get('realSize'))}px` }} />
+      <Host onScroll={(e: MouseEvent) => this.onScroll(e)}>
+        <div
+          style={{
+            [sizeType]: `${
+              getContentSize(
+                this.dimensionStore.get('realSize'),
+                this.size,
+                this.viewportStore.get('virtualSize')
+              )}px`,
+          }}
+        />
       </Host>
     );
-  }
-
-  private extContentSize(vsize: number, contentSize: number): number {
-    return LocalScrollService.getVirtualContentSize(contentSize, this.size, vsize);
   }
 }

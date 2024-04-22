@@ -1,4 +1,11 @@
-import { Component, Element, Event, EventEmitter, h, Prop } from '@stencil/core';
+import {
+  Component,
+  Element,
+  Event,
+  EventEmitter,
+  h,
+  Prop,
+} from '@stencil/core';
 import { HTMLStencilElement, VNode } from '@stencil/core/internal';
 import keyBy from 'lodash/keyBy';
 
@@ -7,7 +14,15 @@ import { Groups } from '../../store/dataSource/data.store';
 import HeaderRenderer from './header-renderer';
 import ColumnGroupsRenderer from '../../plugins/groupingColumn/columnGroupsRenderer';
 import { ResizeProps } from '../../services/resizable.directive';
-import { ColumnRegular, DimensionSettingsState, InitialHeaderClick, Observable, Providers, ViewportState, ViewSettingSizeProp } from '../../types/interfaces';
+import {
+  ColumnRegular,
+  DimensionSettingsState,
+  InitialHeaderClick,
+  Observable,
+  Providers,
+  ViewportState,
+  ViewSettingSizeProp,
+} from '../../types/interfaces';
 import { DimensionCols } from '../../types/dimension';
 import { SelectionStoreState } from '../../types/selection';
 
@@ -16,18 +31,25 @@ import { SelectionStoreState } from '../../types/selection';
   styleUrl: 'revogr-header-style.scss',
 })
 export class RevogrHeaderComponent {
-  @Element() element!: HTMLStencilElement;
-
+  // #region Properties
   /**
    * Stores
-  */
+   */
+  /** Viewport X */
   @Prop() viewportCol: Observable<ViewportState>;
+  /** Dimension settings X */
   @Prop() dimensionCol: Observable<DimensionSettingsState>;
+  /** Selection, range, focus */
   @Prop() selectionStore: Observable<SelectionStoreState>;
 
-  @Prop() parent: string = '';
+  /**
+   * Column groups
+   */
   @Prop() groups: Groups;
-  @Prop() groupingDepth: number = 0;
+  /**
+   * Grouping depth, how many levels of grouping
+   */
+  @Prop() groupingDepth = 0;
 
   /**
    * Readonly mode
@@ -55,32 +77,68 @@ export class RevogrHeaderComponent {
   /**
    * Column type
    */
-  @Prop() type!:  DimensionCols | 'rowHeaders';
+  @Prop() type!: DimensionCols | 'rowHeaders';
 
   /**
    * Extra properties to pass into header renderer, such as vue or react components to handle parent
    */
   @Prop() additionalData: any = {};
+  // #endregion
 
+  // #region Events
 
-  @Event() initialHeaderClick: EventEmitter<InitialHeaderClick>;
-  @Event() headerresize: EventEmitter<ViewSettingSizeProp>;
-  @Event({ eventName: 'before-resize', cancelable: true }) beforeResize: EventEmitter<ColumnRegular[]>;
-  @Event() headerdblClick: EventEmitter<InitialHeaderClick>;
+  /**
+   * On initial header click
+  */
+  @Event({
+    eventName: 'beforeheaderclick',
+  })
+  initialHeaderClick: EventEmitter<InitialHeaderClick>;
 
-  private onResize({ width }: { width?: number }, index: number): void {
+  /**
+   * On header resize
+  */
+  @Event({
+    eventName: 'headerresize',
+  })
+  headerresize: EventEmitter<ViewSettingSizeProp>;
+
+  /**
+   * On before header resize
+  */
+  @Event({ eventName: 'beforeheaderresize', cancelable: true })
+  beforeResize: EventEmitter<ColumnRegular[]>;
+
+  /**
+   * On header double click
+   */
+  @Event({
+    eventName: 'headerdblclick',
+  })
+  headerdblClick: EventEmitter<InitialHeaderClick>;
+  // #endregion
+
+  @Element() element!: HTMLStencilElement;
+
+  private onResize({ width }: { width?: number }, index: number) {
     const col = this.colData[index];
-    const event = this.beforeResize.emit([{
-      ...col,
-      size: width || undefined
-    }]);
+    const event = this.beforeResize.emit([
+      {
+        ...col,
+        size: width || undefined,
+      },
+    ]);
     if (event.defaultPrevented) {
       return;
     }
     this.headerresize.emit({ [index]: width || 0 });
   }
 
-  private onResizeGroup(changedX: number, startIndex: number, endIndex: number): void {
+  private onResizeGroup(
+    changedX: number,
+    startIndex: number,
+    endIndex: number,
+  ) {
     const sizes: ViewSettingSizeProp = {};
     const cols = keyBy(this.viewportCol.get('items'), 'itemIndex');
     const change = changedX / (endIndex - startIndex + 1);
@@ -133,11 +191,15 @@ export class RevogrHeaderComponent {
           groups={this.groups}
           dimensionCol={this.dimensionCol.state}
           depth={this.groupingDepth}
-          onResize={(changedX, startIndex, endIndex) => this.onResizeGroup(changedX, startIndex, endIndex)}
+          onResize={(changedX, startIndex, endIndex) =>
+            this.onResizeGroup(changedX, startIndex, endIndex)
+          }
           additionalData={this.additionalData}
         />
       </div>,
-      <div class={`${HEADER_ROW_CLASS} ${HEADER_ACTUAL_ROW_CLASS}`}>{cells}</div>,
+      <div class={`${HEADER_ROW_CLASS} ${HEADER_ACTUAL_ROW_CLASS}`}>
+        {cells}
+      </div>,
     ];
   }
 

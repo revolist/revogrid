@@ -1,15 +1,20 @@
-import { h, Host } from '@stencil/core';
-import { Component, Prop, Event, EventEmitter } from '@stencil/core';
+import { h, Host, Component, Prop, Event, EventEmitter } from '@stencil/core';
+import { JSXBase } from '@stencil/core/internal';
+
 import DataStore from '../../store/dataSource/data.store';
 import ViewportStore from '../../store/viewport/viewport.store';
-import { ROW_HEADER_TYPE, UUID } from '../../utils/consts';
-import { ElementScroll } from '../revoGrid/viewport.scrolling.service';
+import { ROW_HEADER_TYPE } from '../../utils/consts';
 import { RowHeaderRender } from './row-header-render';
 import { calculateRowHeaderSize } from '../../utils/row-header-utils';
 import { HEADER_SLOT } from '../revoGrid/viewport.helpers';
 import { DimensionRows, DimensionCols } from '../../types/dimension';
-import { RowHeaders, ViewPortScrollEvent, DataType, ColumnRegular } from '../../types/interfaces';
-import { ViewportData } from '../../types/viewport.interfaces';
+import {
+  RowHeaders,
+  ViewPortScrollEvent,
+  DataType,
+  ColumnRegular,
+} from '../../types/interfaces';
+import { ViewportData, ElementScroll } from '../../types/viewport.interfaces';
 import { JSX } from '../..';
 
 /**
@@ -19,21 +24,50 @@ import { JSX } from '../..';
 
 @Component({ tag: 'revogr-row-headers' })
 export class RevogrRowHeaders {
+  // #region Properties
+  /**
+   * Header height to setup row headers
+   */
   @Prop() height: number;
 
+  /**
+   * Viewport data
+   */
   @Prop() dataPorts: ViewportData[];
+  /**
+   * Header props
+   */
   @Prop() headerProp: Record<string, any>;
-  @Prop() uiid: string;
+
+  /**
+   * Row class
+   */
   @Prop() rowClass: string;
 
+  /**
+   * Enable resize
+   */
   @Prop() resize: boolean;
+  /**
+   * Row header column
+   */
   @Prop() rowHeaderColumn: RowHeaders;
-  /** Additional data to pass to renderer */
+  /**
+   * Additional data to pass to renderer
+   */
   @Prop() additionalData: any;
+  // #endregion
 
-  @Event({ bubbles: false })
+  /**
+   * Scroll viewport
+   */
+  @Event({ eventName: 'scrollview', bubbles: false })
   scrollViewport: EventEmitter<ViewPortScrollEvent>;
-  @Event({ bubbles: false }) elementToScroll: EventEmitter<ElementScroll>;
+  /**
+   * Register element to scroll
+   */
+  @Event({ eventName: 'ref', bubbles: false })
+  elementToScroll: EventEmitter<ElementScroll>;
 
   render() {
     const dataViews: HTMLElement[] = [];
@@ -41,36 +75,34 @@ export class RevogrRowHeaders {
 
     /** render viewports rows */
     let totalLength = 1;
+    // todo: this part could be optimized to avoid to often re-render dataPorts can be cached
     for (let data of this.dataPorts) {
       const itemCount = data.dataStore.get('items').length;
+
       // initiate row data
-      const dataStore = new DataStore<
-        DataType,
-        DimensionRows
-      >(data.type);
-      dataStore.updateData(data.dataStore.get('source'));
+      const dataStore = new DataStore<DataType, DimensionRows>(data.type, {
+        ...data.dataStore.state,
+      });
+
       // initiate column data
-      const colData = new DataStore<
-        ColumnRegular,
-        DimensionCols
-      >('colPinStart');
+      const colData = new DataStore<ColumnRegular, DimensionCols>(
+        'colPinStart',
+      );
       const column: ColumnRegular = {
         cellTemplate: RowHeaderRender(totalLength),
         ...this.rowHeaderColumn,
       };
       colData.updateData([column]);
-
-      const viewData = {
-        ...data,
-        rowClass: this.rowClass,
-        dataStore: dataStore.store,
-        colData: colData.store,
-        viewportCol: viewport.store,
-        readonly: true,
-        range: false,
-      };
       dataViews.push(
-        <revogr-data {...viewData}></revogr-data>,
+        <revogr-data
+          {...data}
+          rowClass={this.rowClass}
+          dataStore={dataStore.store}
+          colData={colData.store}
+          viewportCol={viewport.store}
+          readonly={true}
+          range={false}
+        />,
       );
       totalLength += itemCount;
     }
@@ -89,14 +121,13 @@ export class RevogrRowHeaders {
       ],
     });
 
-    const parent = `${this.uiid}-rowHeaders`;
-    const viewportScroll = {
-      [UUID]: parent,
+    const viewportScroll: JSX.RevogrViewportScroll &
+      JSXBase.HTMLAttributes<HTMLRevogrViewportScrollElement> = {
       contentHeight: this.height,
       contentWidth: 0,
       style: { minWidth: `${colSize}px` },
       ref: (el: ElementScroll) => this.elementToScroll.emit(el),
-      onScrollViewport: (e: CustomEvent) => this.scrollViewport.emit(e.detail),
+      onScrollviewport: (e: CustomEvent) => this.scrollViewport.emit(e.detail),
     };
     const viewportHeader: JSX.RevogrHeader & { slot: string } = {
       ...this.headerProp,
@@ -105,7 +136,7 @@ export class RevogrRowHeaders {
       viewportCol: viewport.store,
       canResize: false,
       type: ROW_HEADER_TYPE,
-      parent,
+      // parent,
       slot: HEADER_SLOT,
     };
     return (

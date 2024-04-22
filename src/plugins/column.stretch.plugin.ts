@@ -2,7 +2,7 @@ import each from 'lodash/each';
 import { calculateRowHeaderSize } from '../utils/row-header-utils';
 import { ColumnCollection } from '../services/column.data.provider';
 import { ColumnItems } from '../services/dimension.provider';
-import { getScrollbarWidth } from '../utils';
+import { getScrollbarSize } from '../utils';
 import { BasePlugin } from './base.plugin';
 import { DimensionCols, DimensionType } from '..';
 import { PluginBaseComponent } from '../';
@@ -33,7 +33,7 @@ export default class StretchColumn extends BasePlugin {
     super(revogrid, providers);
 
     // calculate scroll bar size for current user session
-    this.scrollSize = getScrollbarWidth(document);
+    this.scrollSize = getScrollbarSize(document);
 
     // subscribe to column changes
     const beforecolumnapplied = ({

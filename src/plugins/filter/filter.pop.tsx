@@ -1,7 +1,6 @@
 import { Component, h, Host, Listen, Prop, State, Event, EventEmitter, VNode, Method } from '@stencil/core';
 import { FilterType } from './filter.service';
 import { AndOrButton, isFilterBtn, TrashButton } from './filter.button';
-import { RevoButton } from '../../components/button/button';
 import '../../utils/closest.polifill';
 import { LogicFunction } from './filter.types';
 import { FilterCaptions } from './filter.plugin';
@@ -55,7 +54,7 @@ export class FilterPanel {
   };
   @State() isFilterIdSet = false;
   @State() filterId = 0;
-  @State() currentFilterId: number = -1;
+  @State() currentFilterId = -1;
   @State() currentFilterType: FilterType = defaultType;
   @State() changes: ShowData | undefined;
   @Prop({ mutable: true, reflect: true }) uuid: string;
@@ -64,9 +63,9 @@ export class FilterPanel {
   @Prop() filterNames: Record<string, string> = {};
   @Prop() filterEntities: Record<string, LogicFunction> = {};
   @Prop() filterCaptions: FilterCaptions | undefined;
-  @Prop() disableDynamicFiltering: boolean = false;
+  @Prop() disableDynamicFiltering = false;
   @Event() filterChange: EventEmitter<MultiFilterItem>;
-  @Listen('mousedown', { target: 'document' }) onMouseDown(e: MouseEvent): void {
+  @Listen('mousedown', { target: 'document' }) onMouseDown(e: MouseEvent) {
     if (this.changes && !e.defaultPrevented) {
       const el = e.target as HTMLElement;
       if (this.isOutside(el) && !isFilterBtn(el)) {
@@ -179,7 +178,7 @@ export class FilterPanel {
       </div>
     );
   }
-
+  
   render() {
     if (!this.changes) {
       return <Host style={{ display: 'none' }}></Host>;
@@ -204,16 +203,16 @@ export class FilterPanel {
         </div>
         <div class="filter-actions">
           {this.disableDynamicFiltering &&
-            <RevoButton class={{ red: true, save: true }} onClick={() => this.onSave()}>
+            <button class="revo-button green save"  onClick={() => this.onSave()}>
               {capts.save}
-            </RevoButton>
+            </button>
           }
-          <RevoButton class={{ red: true, reset: true }} onClick={() => this.onReset()}>
+          <button class="revo-button light reset" onClick={() => this.onReset()}>
             {capts.reset}
-          </RevoButton>
-          <RevoButton class={{ light: true, cancel: true }} onClick={() => this.onCancel()}>
+          </button>
+          <button class="revo-button light cancel" onClick={() => this.onCancel()}>
             {capts.cancel}
-          </RevoButton>
+          </button>
         </div>
       </Host>
     );

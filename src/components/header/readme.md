@@ -1,4 +1,6 @@
-# viewport-header-data-component
+# revogr-header
+
+
 
 <!-- Auto Generated Below -->
 
@@ -11,25 +13,24 @@
 | `canResize`         | `can-resize`      | If columns can be resized                                                                       | `boolean`                                                      | `undefined` |
 | `colData`           | --                | Columns - defines an array of grid columns.                                                     | `ColumnRegular[]`                                              | `undefined` |
 | `columnFilter`      | `column-filter`   | Column filter                                                                                   | `boolean`                                                      | `undefined` |
-| `dimensionCol`      | --                |                                                                                                 | `ObservableMap<DimensionSettingsState>`                        | `undefined` |
-| `groupingDepth`     | `grouping-depth`  |                                                                                                 | `number`                                                       | `0`         |
-| `groups`            | --                |                                                                                                 | `{ [x: string]: any; }`                                        | `undefined` |
-| `parent`            | `parent`          |                                                                                                 | `string`                                                       | `''`        |
+| `dimensionCol`      | --                | Dimension settings X                                                                            | `ObservableMap<DimensionSettingsState>`                        | `undefined` |
+| `groupingDepth`     | `grouping-depth`  | Grouping depth, how many levels of grouping                                                     | `number`                                                       | `0`         |
+| `groups`            | --                | Column groups                                                                                   | `{ [x: string]: any; }`                                        | `undefined` |
 | `readonly`          | `readonly`        | Readonly mode                                                                                   | `boolean`                                                      | `undefined` |
-| `resizeHandler`     | --                | Defines resize position                                                                         | `("b" \| "rt" \| "lt" \| "r" \| "rb" \| "lb" \| "l" \| "t")[]` | `undefined` |
-| `selectionStore`    | --                |                                                                                                 | `ObservableMap<SelectionStoreState>`                           | `undefined` |
+| `resizeHandler`     | --                | Defines resize position                                                                         | `("r" \| "b" \| "rt" \| "lt" \| "rb" \| "lb" \| "l" \| "t")[]` | `undefined` |
+| `selectionStore`    | --                | Selection, range, focus                                                                         | `ObservableMap<SelectionStoreState>`                           | `undefined` |
 | `type` _(required)_ | `type`            | Column type                                                                                     | `"colPinEnd" \| "colPinStart" \| "rgCol" \| "rowHeaders"`      | `undefined` |
-| `viewportCol`       | --                | Stores                                                                                          | `ObservableMap<ViewportState>`                                 | `undefined` |
+| `viewportCol`       | --                | Viewport X                                                                                      | `ObservableMap<ViewportState>`                                 | `undefined` |
 
 
 ## Events
 
-| Event                | Description | Type                                                                                |
-| -------------------- | ----------- | ----------------------------------------------------------------------------------- |
-| `before-resize`      |             | `CustomEvent<ColumnRegular[]>`                                                      |
-| `headerdblClick`     |             | `CustomEvent<{ index: number; originalEvent: MouseEvent; column: ColumnRegular; }>` |
-| `headerresize`       |             | `CustomEvent<{ [x: string]: number; }>`                                             |
-| `initialHeaderClick` |             | `CustomEvent<{ index: number; originalEvent: MouseEvent; column: ColumnRegular; }>` |
+| Event                | Description             | Type                                                                                |
+| -------------------- | ----------------------- | ----------------------------------------------------------------------------------- |
+| `beforeheaderclick`  | On initial header click | `CustomEvent<{ index: number; originalEvent: MouseEvent; column: ColumnRegular; }>` |
+| `beforeheaderresize` | On before header resize | `CustomEvent<ColumnRegular[]>`                                                      |
+| `headerdblclick`     | On header double click  | `CustomEvent<{ index: number; originalEvent: MouseEvent; column: ColumnRegular; }>` |
+| `headerresize`       | On header resize        | `CustomEvent<{ [x: string]: number; }>`                                             |
 
 
 ## Dependencies
@@ -49,4 +50,4 @@ graph TD;
 
 ----------------------------------------------
 
-*Built with [StencilJS](https://stenciljs.com/)*
+*Built with love by Revolist OU*

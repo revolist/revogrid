@@ -44,10 +44,9 @@ revogr-data {
     width: $w;
     height: 100%;
     cursor: pointer;
+    display: inline-flex;
 
     > .revo-drag-icon {
-      vertical-align: middle;
-      display: inline-block;
       pointer-events: none;
       transition: background-color 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms, box-shadow 300ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
     }

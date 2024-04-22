@@ -1,12 +1,14 @@
 import { Component, Prop, h, Host, Event, Element, EventEmitter } from '@stencil/core';
 import { FOCUS_CLASS } from '../../utils/consts';
-import { ColumnSource, RowSource } from '../data/column.service';
 import { getElStyle } from '../overlay/selection.utils';
-import { getSourceItem } from '../../store/dataSource/data.store';
+import { DSourceState, getSourceItem } from '../../store/dataSource/data.store';
 import { Cell, SelectionStoreState } from '../../types/selection';
-import { ColumnRegular, DimensionSettingsState, FocusRenderEvent, FocusTemplateFunc, Observable } from '../../types/interfaces';
+import { ColumnRegular, DataType, DimensionSettingsState, FocusRenderEvent, FocusTemplateFunc, Observable } from '../../types/interfaces';
 import { DimensionCols, DimensionRows } from '../../types/dimension';
 
+/**
+ * Focus component. Shows focus layer around the cell that is currently in focus.
+*/
 @Component({
   tag: 'revogr-focus',
   styleUrl: 'revogr-focus-style.scss',
@@ -14,17 +16,40 @@ import { DimensionCols, DimensionRows } from '../../types/dimension';
 export class RevogrFocus {
   @Element() el: HTMLElement;
 
-  /** Dynamic stores */
-  @Prop() selectionStore!: Observable<SelectionStoreState>;
-  @Prop() dimensionRow!: Observable<DimensionSettingsState>;
-  @Prop() dimensionCol!: Observable<DimensionSettingsState>;
-  @Prop() dataStore!: RowSource;
-  @Prop() colData!: ColumnSource;
+  /**
+   * Column type
+   */
   @Prop() colType!: DimensionCols;
+  /**
+   * Row type
+   */
   @Prop() rowType!: DimensionRows;
 
+  /** Dynamic stores */
+  /** Selection, range, focus for selection */
+  @Prop() selectionStore!: Observable<SelectionStoreState>;
+  /** Dimension settings Y */
+  @Prop() dimensionRow!: Observable<DimensionSettingsState>;
+  /** Dimension settings X */
+  @Prop() dimensionCol!: Observable<DimensionSettingsState>;
+  /**
+   * Data rows source
+   */
+  @Prop() dataStore!: Observable<DSourceState<DataType, DimensionRows>>;
+  /**
+   * Column source
+   */
+  @Prop() colData!: Observable<DSourceState<ColumnRegular, DimensionCols>>;
+
+  /**
+   * Focus template custom function. Can be used to render custom focus layer.
+   */
   @Prop() focusTemplate: FocusTemplateFunc | null = null;
-  @Event({ eventName: 'before-focus-render' }) beforeFocusRender: EventEmitter<FocusRenderEvent>;
+
+  /**
+   * Before focus render event. Can be prevented by event.preventDefault()
+   */
+  @Event({ eventName: 'beforefocusrender' }) beforeFocusRender: EventEmitter<FocusRenderEvent>;
   /**
    * Before focus changed verify if it's in view and scroll viewport into this view
    * Can be prevented by event.preventDefault()
@@ -40,7 +65,7 @@ export class RevogrFocus {
 
   private activeFocus: Cell = null;
 
-  private changed(e: HTMLElement, focus: Cell): void {
+  private changed(e: HTMLElement, focus: Cell) {
     const beforeScrollIn = this.beforeScrollIntoView.emit({ el: e });
     if (!beforeScrollIn.defaultPrevented) {
       e.scrollIntoView({
@@ -56,7 +81,7 @@ export class RevogrFocus {
     });
   }
 
-  componentDidRender(): void {
+  componentDidRender() {
     const currentFocus = this.selectionStore.get('focus');
     if (this.activeFocus?.x === currentFocus?.x && this.activeFocus?.y === currentFocus?.y) {
       return;

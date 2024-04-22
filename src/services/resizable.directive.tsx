@@ -63,19 +63,19 @@ export class ResizeDirective {
   private maxW: number;
   private maxH: number;
 
-  private mouseX: number = 0;
-  private mouseY: number = 0;
+  private mouseX = 0;
+  private mouseY = 0;
 
-  private width: number = 0;
-  private height: number = 0;
+  private width = 0;
+  private height = 0;
 
-  private changeX: number = 0;
-  private changeY: number = 0;
+  private changeX = 0;
+  private changeY = 0;
 
   private parent: { width: number; height: number };
   private resizeState: number;
   private activeResizer: HTMLElement | null;
-  private disableCalcMap: number = 0b1111;
+  private disableCalcMap = 0b1111;
 
   private mouseMoveFunc: () => void;
   private mouseUpFunc: () => void;
