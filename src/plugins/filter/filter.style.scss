@@ -22,9 +22,7 @@ revogr-filter-panel {
   }
 
   label {
-    color: gray;
     font-size: 13px;
-    font-weight: 600;
     display: block;
     padding: 8px 0;
   }
@@ -177,9 +175,8 @@ revogr-filter-panel {
     cursor: pointer;
 
     width: $btn-remove-size;
-    height: $btn-remove-size;
-    color: gray;
-    font-size: 18px;
+    height: 100%;
+    font-size: 16px;
 
 
     .trash-img {
@@ -194,7 +191,6 @@ revogr-filter-panel {
 
   border-bottom: 1px solid #d9d9d9;
   height: 10px;
-  box-shadow: 0 4px 5px rgb(0 0 0 / 5%);
 }
 
 .select-input {

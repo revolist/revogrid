@@ -1,5 +1,3 @@
-import { h } from '@stencil/core';
-
 const COLUMN_DRAG_CLASS = 'column-drag-start';
 
 export class ColumnOrderHandler {
@@ -71,6 +69,9 @@ export class ColumnOrderHandler {
   }
 
   render() {
-    return <div class="drag-position-y" hidden ref={(el?: HTMLDivElement) => (this.element = el)}></div>;
+    const el = this.element = document.createElement('div');
+    el.classList.add('drag-position-y');
+    el.hidden = true;
+    return el;
   }
 }

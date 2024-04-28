@@ -154,13 +154,15 @@ export const getSourceItem = (
 };
 
 /**
- * set item to source
- * @param store  - store to process
- * @param modelByIndex - collection of rows with virtual indexes to setup
+ * Apple item/model/row value to data source
+ * @param store  - data source with changes
+ * @param modelByIndex - collection of rows/values with virtual indexes to setup/replace in store/data source
+ * @param mutate - if true, store will be mutated and whole viewport will be re-rendered
  */
 export function setSourceByVirtualIndex<T>(
   store: Observable<DSourceState<T, any>>,
   modelByIndex: Record<number, T>,
+  mutate = true,
 ) {
   const items = store.get('items');
   const source = store.get('source');
@@ -169,23 +171,29 @@ export function setSourceByVirtualIndex<T>(
     const realIndex = items[virtualIndex];
     source[realIndex] = modelByIndex[virtualIndex];
   }
-  store.set('source', [...source]);
+  if (mutate) {
+    store.set('source', [...source]);
+  }
 }
 
 /**
  * set item to source
  * @param store  - store to process
  * @param modelByIndex - collection of rows with physical indexes to setup
+ * @param mutate - if true, store will be mutated and whole viewport will be re-rendered
  */
 export function setSourceByPhysicalIndex<T>(
   store: Observable<DSourceState<T, any>>,
   modelByIndex: Record<number, T>,
+  mutate = true,
 ) {
   const source = store.get('source');
   for (let index in modelByIndex) {
     source[index] = modelByIndex[index];
   }
-  store.set('source', [...source]);
+  if (mutate) {
+    store.set('source', [...source]);
+  }
 }
 
 export function setItems<T>(

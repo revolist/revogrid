@@ -27,7 +27,7 @@ type ColumnSetEvent = {
  * 1) @event beforesorting - sorting just started, nothing happened yet, can be from column or from source, if type is from rows - column will be undefined
  * 2) @metod updateColumnSorting - column sorting icon applied to grid and column get updated, data still untiuched
  * 3) @event beforesortingapply - before we applied sorting data to data source, you can prevent event and data will not be sorted. It's called only from column sorting click
- * 4) @event afterSortingApply - sorting applied, just finished event, from rows and columns
+ * 4) @event aftersortingapply - sorting applied, just finished event, from rows and columns
  *
  * If you prevent event it'll not reach farther steps
  */
@@ -38,11 +38,17 @@ export default class SortingPlugin extends BasePlugin {
 
   // sorting function per column, multiple columns sorting supported
   private sortingFunc: SortingOrderFunction | null = null;
-  private doSort = debounce(
-    (order: SortingOrder, comparison: SortingOrderFunction) =>
-      this.sort(order, comparison),
+  private sortingPromise: (() => void) | null = null;
+  private postponeSort = debounce(
+    async (order: SortingOrder, comparison: SortingOrderFunction) => this.runSorting(order, comparison),
     50,
   );
+
+  private async runSorting(order: SortingOrder, comparison: SortingOrderFunction) {
+    await this.sort(order, comparison);
+    this.sortingPromise?.();
+    this.sortingPromise = null;
+  }
 
   constructor(
     protected revogrid: HTMLRevoGridElement,
@@ -50,10 +56,11 @@ export default class SortingPlugin extends BasePlugin {
   ) {
     super(revogrid, providers);
 
-    const aftersourceset = async ({
-      detail: { type },
+    const beforeanysource = async ({
+      detail: { type, },
     }: CustomEvent<{
       type: DimensionRows;
+      source: any[];
     }>) => {
       // if sorting was provided - sort data
       if (!!this.sorting && this.sortingFunc) {
@@ -61,7 +68,7 @@ export default class SortingPlugin extends BasePlugin {
         if (beforeEvent.defaultPrevented) {
           return;
         }
-        this.doSort(this.sorting, this.sortingFunc);
+        this.startSorting(this.sorting, this.sortingFunc);
       }
     };
     const aftercolumnsset = async ({
@@ -77,7 +84,7 @@ export default class SortingPlugin extends BasePlugin {
         );
         sortingFunc[prop] = cmp;
       }
-      this.doSort(order, sortingFunc);
+      this.runSorting(order, sortingFunc);
     };
     const headerclick = async (e: CustomEvent<InitialHeaderClick>) => {
       if (e.defaultPrevented) {
@@ -95,9 +102,18 @@ export default class SortingPlugin extends BasePlugin {
       );
     };
 
-    this.addEventListener('afteranysource', aftersourceset);
+    this.addEventListener('beforeanysource', beforeanysource);
     this.addEventListener('aftercolumnsset', aftercolumnsset);
     this.addEventListener('beforeheaderclick', headerclick);
+  }
+
+  private startSorting(order: SortingOrder, sortingFunc: SortingOrderFunction) {
+    if (!this.sortingPromise) {
+      this.revogrid.jobsBeforeRender.push(new Promise<void>((resolve) => {
+        this.sortingPromise = resolve;
+      }));
+    }
+    this.postponeSort(order, sortingFunc);
   }
 
   private getComparer(column: ColumnRegular, order: Order): CellCompareFunc {
@@ -174,7 +190,7 @@ export default class SortingPlugin extends BasePlugin {
       }
     }
 
-    this.doSort(this.sorting, this.sortingFunc);
+    this.startSorting(this.sorting, this.sortingFunc);
   }
 
   /**
@@ -230,7 +246,7 @@ export default class SortingPlugin extends BasePlugin {
         });
       }
     }
-    this.emit('afterSortingApply');
+    this.emit('aftersortingapply');
   }
 
   defaultCellCompare(prop: ColumnProp, a: DataType, b: DataType) {

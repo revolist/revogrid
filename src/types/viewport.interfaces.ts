@@ -12,7 +12,7 @@ export type SlotType = 'content' | 'header' | 'footer';
 
 export interface ElementScroll {
   changeScroll?(e: ViewPortScrollEvent, silent?: boolean): Promise<ViewPortScrollEvent>;
-  setScroll(e: ViewPortScrollEvent): Promise<void>;
+  setScroll?(e: ViewPortScrollEvent): Promise<void>;
 }
 export type ElementsScroll = { [key: string]: ElementScroll[] };
 

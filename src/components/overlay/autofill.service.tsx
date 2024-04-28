@@ -220,17 +220,12 @@ export class AutoFillService {
     for (let rowIndex in data) {
       models[rowIndex] = getSourceItem(this.sv.dataStore, parseInt(rowIndex, 10));
     }
-    const {
-      defaultPrevented: stopRange,
-      detail,
-    } = this.sv.rangeDataApply({
+    this.sv.rangeDataApply({
       data,
       models,
       type: this.sv.dataStore.get('type'),
     });
-    if (!stopRange) {
-      this.sv.columnService.applyRangeData(detail.data);
-    }
+
     this.sv.setRange(range);
   }
 

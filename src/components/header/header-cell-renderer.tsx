@@ -1,6 +1,6 @@
 import { h, VNode } from '@stencil/core';
 import { dispatch } from '../../plugins/dispatcher';
-import ColumnService from '../data/column.service';
+import { doPropMerge } from '../data/column.service';
 import { ResizableElement } from '../../services/resizable.element';
 import { ResizeProps } from '../../services/resizable.directive';
 import { CellProps, ColumnTemplateProp } from '../../types/interfaces';
@@ -11,7 +11,7 @@ type Props = {
   data?: ColumnTemplateProp;
 };
 
-const ON_COLUMN_CLICK = 'column-click';
+export const ON_COLUMN_CLICK = 'columnclick';
 
 export const HeaderCellRenderer = ({ data, props, additionalData }: Props, children: VNode[]): VNode => {
   let colTemplate: VNode | VNode[] | string = data?.name || '';
@@ -22,7 +22,7 @@ export const HeaderCellRenderer = ({ data, props, additionalData }: Props, child
   if (data?.columnProperties) {
     const extra = data.columnProperties(data);
     if (extra && typeof extra === 'object') {
-      cellProps = ColumnService.doMerge(props, extra);
+      cellProps = doPropMerge(props, extra);
     }
   }
   return (

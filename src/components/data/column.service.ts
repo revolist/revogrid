@@ -2,14 +2,13 @@ import {
   DSourceState,
   getSourceItem,
   getVisibleSourceItem,
-  setSourceByVirtualIndex,
 } from '../../store/dataSource/data.store';
 import { CELL_CLASS, DISABLED_CLASS } from '../../utils/consts';
 import { getRange } from '../../store/selection/selection.helpers';
 
 import { isGroupingColumn } from '../../plugins/groupingRow/grouping.service';
 import slice from 'lodash/slice';
-import { DimensionCols, DimensionRows } from '../..';
+import { DimensionCols, DimensionRows, RowDrag } from '../..';
 import {
   ColumnRegular,
   Observable,
@@ -31,7 +30,6 @@ import {
   EditorCtr,
   Editors,
 } from '../..';
-
 
 export type ColumnStores = {
   [T in DimensionCols]: Observable<DSourceState<ColumnRegular, DimensionCols>>;
@@ -79,28 +77,13 @@ export default class ColumnService {
     return readOnly;
   }
 
-  static doMerge(existing: CellProps, extra: CellProps) {
-    let props: CellProps = { ...extra, ...existing };
-    // extend existing props
-    if (extra.class) {
-      if (typeof extra.class === 'object' && typeof props.class === 'object') {
-        props.class = { ...extra.class, ...props.class };
-      } else if (
-        typeof extra.class === 'string' &&
-        typeof props.class === 'object'
-      ) {
-        props.class[extra.class] = true;
-      } else if (typeof props.class === 'string') {
-        props.class += ' ' + extra.class;
-      }
-    }
-    if (extra.style) {
-      props.style = { ...extra.style, ...props.style };
-    }
-    return props;
-  }
-
-  mergeProperties(r: number, c: number, defaultProps: CellProps): CellProps {
+  mergeProperties(
+    r: number,
+    c: number,
+    defaultProps: CellProps,
+    model: ColumnDataSchemaModel,
+    extraPropsFunc: ColumnRegular['cellProperties'],
+  ): CellProps {
     const cellClass: { [key: string]: boolean } = {
       [CELL_CLASS]: true,
       [DISABLED_CLASS]: this.isReadOnly(r, c),
@@ -109,16 +92,11 @@ export default class ColumnService {
       ...defaultProps,
       class: cellClass,
     };
-    const extraPropsFunc = this.columns[c]?.cellProperties;
-    if (extraPropsFunc) {
-      const data = this.rowDataModel(r, c);
-      const extra = extraPropsFunc(data);
-      if (!extra) {
-        return props;
-      }
-      return ColumnService.doMerge(props, extra);
+    const extra = extraPropsFunc?.(model);
+    if (!extra) {
+      return props;
     }
-    return props;
+    return doPropMerge(props, extra);
   }
 
   getRowClass(r: number, prop: string): string {
@@ -128,7 +106,7 @@ export default class ColumnService {
 
   getCellData(r: number, c: number): string {
     const data = this.rowDataModel(r, c);
-    return ColumnService.getData(data.model[data.prop as number]);
+    return getCellData(data.model[data.prop as number]);
   }
 
   getSaveData(
@@ -310,23 +288,6 @@ export default class ColumnService {
     };
   }
 
-  applyRangeData(data: DataLookup) {
-    const items: Record<number, DataType> = {};
-    for (let rowIndex in data) {
-      const oldModel = (items[rowIndex] = getSourceItem(
-        this.dataStore,
-        parseInt(rowIndex, 10),
-      ));
-      if (!oldModel) {
-        continue;
-      }
-      for (let prop in data[rowIndex]) {
-        oldModel[prop] = data[rowIndex][prop];
-      }
-    }
-    setSourceByVirtualIndex(this.dataStore, items);
-  }
-
   getRangeStaticData(d: RangeArea, value: DataFormat): DataLookup {
     const changed: DataLookup = {};
 
@@ -420,14 +381,47 @@ export default class ColumnService {
     };
   }
 
-  static getData(val?: any) {
-    if (typeof val === 'undefined' || val === null) {
-      return '';
-    }
-    return val;
-  }
-
   destroy() {
     this.unsubscribe.forEach(f => f());
   }
+}
+
+export function getCellData(val?: any) {
+  if (typeof val === 'undefined' || val === null) {
+    return '';
+  }
+  return val;
+}
+
+/**
+ * Checks if the given rowDrag is a service for dragging rows.
+ */
+export function isRowDragService(
+  rowDrag: RowDrag,
+  model: ColumnDataSchemaModel,
+): boolean {
+  if (typeof rowDrag === 'function') {
+    return rowDrag(model);
+  }
+  return !!rowDrag;
+}
+export function doPropMerge(existing: CellProps, extra: CellProps) {
+  let props: CellProps = { ...extra, ...existing };
+  // extend existing props
+  if (extra.class) {
+    if (typeof extra.class === 'object' && typeof props.class === 'object') {
+      props.class = { ...extra.class, ...props.class };
+    } else if (
+      typeof extra.class === 'string' &&
+      typeof props.class === 'object'
+    ) {
+      props.class[extra.class] = true;
+    } else if (typeof props.class === 'string') {
+      props.class += ' ' + extra.class;
+    }
+  }
+  if (extra.style) {
+    props.style = { ...extra.style, ...props.style };
+  }
+  return props;
 }

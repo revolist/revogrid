@@ -1,10 +1,5 @@
 export * from '../store/dimension/dimension.helpers';
 
-
-interface CSSStyleDeclarationExtended extends CSSStyleDeclaration {
-  msOverflowStyle: string;
-}
-
 /* Generate range on size
  */
 export function range(size: number, startAt = 0): number[] {
@@ -82,26 +77,29 @@ export function mergeSortedArray<T>(arr1: T[], arr2: T[], compareFn: (el: T, el2
 /**
  * Calculate system scrollbar size
  */
-export function getScrollbarSize(doc: Document): number {
-  // Creating invisible container
-  const outer = doc.createElement('div');
+export function getScrollbarSize(document: Document): number {
+  // Create a temporary div container and append it to the body
+  const container = document.createElement('div');
 
-  const styles = outer.style as CSSStyleDeclarationExtended;
-  styles.visibility = 'hidden';
-  styles.overflow = 'scroll'; // forcing scrollbar to appear
-  styles.msOverflowStyle = 'scrollbar'; // needed for WinJS apps
-  doc.body.appendChild(outer);
+  // Apply styling to ensure the div is scrollable
+  container.style.overflow = 'scroll';
+  container.style.visibility = 'hidden'; // make sure the container isn't visible
+  container.style.position = 'absolute';
+  container.style.top = '-9999px'; // move it out of the screen
+  container.style.width = '50px'; // arbitrary width
+  container.style.height = '50px'; // arbitrary height
 
-  // Creating inner element and placing it in the container
-  const inner = doc.createElement('div');
-  outer.appendChild(inner);
+  // Append the div to the body
+  document.body.appendChild(container);
 
-  // Calculating difference between container's full width and the child width
-  const size = outer.offsetWidth - inner.offsetWidth;
+  // Calculate the width of the scrollbar
+  const scrollbarWidth = container.offsetWidth - container.clientWidth;
 
-  // Removing temporary elements from the DOM
-  outer.parentNode.removeChild(outer);
-  return size;
+  // Remove the div from the body after calculation
+  document.body.removeChild(container);
+
+  // Return the calculated width of the scrollbar
+  return scrollbarWidth;
 }
 
 /* Scale a value between 2 ranges

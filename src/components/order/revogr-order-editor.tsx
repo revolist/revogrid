@@ -4,7 +4,6 @@ import {
   Event,
   EventEmitter,
   Prop,
-  Listen,
 } from '@stencil/core';
 import debounce from 'lodash/debounce';
 
@@ -36,7 +35,6 @@ export class OrderEditor {
   // #endregion
 
   // #region Events
-
   /** Row drag started */
   @Event({ eventName: 'rowdragstartinit', cancelable: true })
   rowDragStart: EventEmitter<{
@@ -65,7 +63,7 @@ export class OrderEditor {
 
   // #region Private
   private rowOrderService: RowOrderService;
-  private moveFunc: ((e: Cell) => void) | null;
+  private events: { name: keyof DocumentEventMap; listener: (e: MouseEvent) => void; }[] = [];
   private rowMoveFunc = debounce((y: number) => {
     const rgRow = this.rowOrderService.move(y, this.getData());
     if (rgRow !== null) {
@@ -74,25 +72,12 @@ export class OrderEditor {
   }, 5);
   // #endregion
 
-  // #region Listeners
-  @Listen('mouseleave', { target: 'document' })
-  onMouseOut() {
-    this.clearOrder();
-  }
-
-  /** Action finished inside of the document */
-  @Listen('mouseup', { target: 'document' })
-  onMouseUp(e: MouseEvent) {
-    this.endOrder(e);
-  }
-  // #endregion
-
   // #region Methods
   @Method() async dragStart(e: DragStartEvent) {
     e.originalEvent.preventDefault();
 
     // extra check if previous ended
-    if (this.moveFunc) {
+    if (this.events.length) {
       this.clearOrder();
     }
 
@@ -109,8 +94,24 @@ export class OrderEditor {
       return;
     }
 
-    this.moveFunc = (e: MouseEvent) => this.move(e);
-    document.addEventListener('mousemove', this.moveFunc);
+    const moveMove = (e: MouseEvent) => this.move(e);
+    const mouseUp = (e: MouseEvent) => this.endOrder(e);
+    const mouseLeave = () => this.clearOrder();
+
+    this.events.push({
+      name: 'mousemove',
+      listener: moveMove,
+    }, {
+      name: 'mouseup',
+      listener: mouseUp,
+    }, {
+      name: 'mouseleave',
+      listener: mouseLeave,
+    });
+    document.addEventListener('mousemove', moveMove);
+    // Action finished inside of the document
+    document.addEventListener('mouseup', mouseUp);
+    document.addEventListener('mouseleave', mouseLeave);
   }
 
   @Method() async endOrder(e: MouseEvent) {
@@ -120,8 +121,8 @@ export class OrderEditor {
 
   @Method() async clearOrder() {
     this.rowOrderService.clear();
-    document.removeEventListener('mousemove', this.moveFunc);
-    this.moveFunc = null;
+    this.events.forEach(v => document.removeEventListener(v.name, v.listener));
+    this.events.length = 0;
     this.rowDragEnd.emit();
   }
   // #endregion

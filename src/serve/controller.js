@@ -26,16 +26,18 @@ window.clearGrouping = function () {
   const grid = document.querySelector('revo-grid');
   grid.grouping = {};
 };
+
+// Row group
 window.setGrouping = function (
   props = [],
   expandedAll = false,
-  groupLabelTemplate,
 ) {
   const grid = document.querySelector('revo-grid');
-  groupLabelTemplate = (createElement, { name, depth }) => {
-    return createElement('span', null, `${props[depth]}: ${name}`);
+  grid.grouping = {
+    props,
+    expandedAll,
+    groupLabelTemplate: (createElement, { name, depth }) => createElement('span', null, ` ${props[depth]}: ${name}`),
   };
-  grid.grouping = { props, expandedAll, groupLabelTemplate };
 };
 window.setTrimmed = function (rows = []) {
   const grid = document.querySelector('revo-grid');
@@ -186,6 +188,7 @@ function onLoad() {
 
   grid.filter = true;
   grid.exporting = true;
+  grid.rowHeaders = true;
   grid.rowDefinitions = [
     {
       type: 'rgRow',

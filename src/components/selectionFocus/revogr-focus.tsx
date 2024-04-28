@@ -8,14 +8,13 @@ import { DimensionCols, DimensionRows } from '../../types/dimension';
 
 /**
  * Focus component. Shows focus layer around the cell that is currently in focus.
+ * @slot focus-${view.type}-${data.type}. @example focus-rgCol-rgRow
 */
 @Component({
   tag: 'revogr-focus',
   styleUrl: 'revogr-focus-style.scss',
 })
 export class RevogrFocus {
-  @Element() el: HTMLElement;
-
   /**
    * Column type
    */
@@ -47,7 +46,9 @@ export class RevogrFocus {
   @Prop() focusTemplate: FocusTemplateFunc | null = null;
 
   /**
-   * Before focus render event. Can be prevented by event.preventDefault()
+   * Before focus render event.
+   * Can be prevented by event.preventDefault().
+   * If preventDefault used slot will be rendered.
    */
   @Event({ eventName: 'beforefocusrender' }) beforeFocusRender: EventEmitter<FocusRenderEvent>;
   /**
@@ -63,6 +64,7 @@ export class RevogrFocus {
     column: ColumnRegular;
   }>;
 
+  @Element() el: HTMLElement;
   private activeFocus: Cell = null;
 
   private changed(e: HTMLElement, focus: Cell) {
@@ -87,7 +89,9 @@ export class RevogrFocus {
       return;
     }
     this.activeFocus = currentFocus;
-    currentFocus && this.el && this.changed(this.el, currentFocus);
+    if (currentFocus && this.el) {
+      this.changed(this.el, currentFocus);
+    }
   }
 
   render() {
@@ -95,28 +99,36 @@ export class RevogrFocus {
     if (editCell) {
       return;
     }
-    const data = this.selectionStore.get('focus');
-    if (data) {
-      const event = this.beforeFocusRender.emit({
-        range: {
-          ...data,
-          x1: data.x,
-          y1: data.y,
-        },
-        rowType: this.rowType,
-        colType: this.colType,
-      });
-      if (event.defaultPrevented) {
-        return <slot/>;
-      }
-      const { detail } = event;
-      const style = getElStyle(
-        detail.range,
-        this.dimensionRow.state,
-        this.dimensionCol.state,
-      );
-      const extra = this.focusTemplate && this.focusTemplate(h, detail);
-      return <Host class={FOCUS_CLASS} style={style}><slot/>{ extra }</Host>;
+    const focusCell = this.selectionStore.get('focus');
+    if (!focusCell) {
+      return;
     }
+    const event = this.beforeFocusRender.emit({
+      range: {
+        ...focusCell,
+        x1: focusCell.x,
+        y1: focusCell.y,
+      },
+      rowType: this.rowType,
+      colType: this.colType,
+    });
+    if (event.defaultPrevented) {
+      return <slot/>;
+    }
+    const { detail } = event;
+    const style = getElStyle(
+      detail.range,
+      this.dimensionRow.state,
+      this.dimensionCol.state,
+    );
+    const extra = this.focusTemplate?.(h, detail);
+    return (
+      <Host
+        class={FOCUS_CLASS}
+        style={style}>
+          <slot/>
+          { extra }
+      </Host>
+    );
   }
 }

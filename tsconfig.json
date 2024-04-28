@@ -12,6 +12,7 @@
     "noUnusedParameters": true,
     "jsx": "react",
     "jsxFactory": "h",
+    "jsxFragmentFactory": "Fragment",
     "noImplicitAny": true,
     "noImplicitThis": true,
     "noImplicitReturns": true,

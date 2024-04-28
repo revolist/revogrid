@@ -13,21 +13,22 @@ import { BasePlugin } from '../base.plugin';
 import { ColumnOrderHandler } from './order-column.handler';
 import { dispatch } from '../dispatcher';
 import { isColGrouping } from '../groupingColumn/grouping.col.plugin';
-import { ColumnDataSchema, ColumnRegular, DimensionSettingsState, PositionItem } from '../..';
+import { ColumnPropProp, ColumnRegular, DimensionSettingsState, PositionItem } from '../..';
 import { DimensionCols, MultiDimensionType } from '../..';
 import { PluginProviders } from '../../';
+import { ON_COLUMN_CLICK } from '../../components/header/header-cell-renderer';
 
-const COLUMN_CLICK = 'column-click';
-const MOVE = 'column-mouse-move';
-const DRAG_END = 'column-drag-end';
-const BEFORE_DRAG_END = 'before-column-drag-end';
+const COLUMN_CLICK = ON_COLUMN_CLICK;
+const MOVE = 'columndragmousemove';
+const DRAG_END = 'columndragend';
+const BEFORE_DRAG_END = 'beforecolumndragend';
 
 // use this event subscription to drop D&D for particular columns
-const DRAG_START = 'column-drag-start';
+const DRAG_START = 'columndragstart';
 
 export type DragStartEventDetails = {
   event: MouseEvent;
-  data: ColumnDataSchema;
+  data: ColumnPropProp;
 };
 
 export type Providers = {
@@ -67,11 +68,10 @@ export default class ColumnPlugin extends BasePlugin {
   constructor(protected revogrid: HTMLRevoGridElement, protected providers: PluginProviders) {
     super(revogrid, providers);
     this.orderUi = new ColumnOrderHandler();
-    revogrid.registerVNode([this.orderUi.render()]);
-
+    revogrid.appendChild(this.orderUi.render());
     revogrid.classList.add('column-draggable');
 
-    /** Register events */
+    // Register events
     this.localSubscriptions['mouseleave'] = {
       target: document,
       callback: (e: MouseEvent) => this.onMouseOut(e),
@@ -109,7 +109,8 @@ export default class ColumnPlugin extends BasePlugin {
       return;
     }
 
-    if (isColGrouping(data)) {
+    // no grouping drag and no row header column drag
+    if (isColGrouping(data) || data.providers.type === 'rowHeaders') {
       return;
     }
 

@@ -291,7 +291,7 @@ export default class ViewportService {
   scrollToCell(cell: Partial<Cell>) {
     for (let key in cell) {
       const coordinate = cell[key as keyof Cell];
-      this.config.scrollingService.scrollService({
+      this.config.scrollingService.proxyScroll({
         dimension: key === 'x' ? 'rgCol' : 'rgRow',
         coordinate,
       });

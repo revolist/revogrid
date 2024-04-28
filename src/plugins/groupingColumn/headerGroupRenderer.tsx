@@ -3,8 +3,8 @@ import { ResizeEvent, ResizeProps } from '../../services/resizable.directive';
 import { Group } from '../../store/dataSource/data.store';
 import { HEADER_CLASS, MIN_COL_SIZE } from '../../utils/consts';
 import { HeaderCellRenderer } from '../../components/header/header-cell-renderer';
-import { Providers, DimensionCols } from '../../components';
-import { CellProps } from '../../types/interfaces';
+import { DimensionCols } from '../../components';
+import { CellProps, Providers } from '../../types/interfaces';
 
 type Props = {
   start: number;

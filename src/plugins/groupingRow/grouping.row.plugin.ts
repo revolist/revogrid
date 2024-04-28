@@ -1,6 +1,4 @@
-import {
-  ColumnCollection,
-} from '../../services/column.data.provider';
+import { ColumnCollection } from '../../services/column.data.provider';
 import { getPhysical, setItems } from '../../store/dataSource/data.store';
 import { columnTypes } from '../../store/storeTypes';
 import { BasePlugin } from '../base.plugin';
@@ -56,7 +54,7 @@ export default class GroupingRowPlugin extends BasePlugin {
 
   constructor(
     protected revogrid: HTMLRevoGridElement,
-    protected providers: PluginProviders
+    protected providers: PluginProviders,
   ) {
     super(revogrid, providers);
   }
@@ -198,7 +196,7 @@ export default class GroupingRowPlugin extends BasePlugin {
      * sorting applied need to clear grouping and apply again
      * based on new results whole grouping order will changed
      */
-    this.addEventListener('afterSortingApply', () =>
+    this.addEventListener('aftersortingapply', () =>
       this.doSourceUpdate({ ...this.options }),
     );
 

@@ -2,20 +2,26 @@ revogr-scroll-virtual {
   $min-size: 20px;
 
   // show scroll only for 1 sec
-  &.autohide {
+  &[autohide] {
     position: absolute;
     z-index: 100 !important;
 
     &.vertical {
-      right: 0;
       top: 0;
-      min-width: $min-size !important;
+      right: 0;
+
+      &:hover, &[visible] {
+        min-width: $min-size !important;
+      }
     }
 
     &.horizontal {
       bottom: 0;
       left: 0;
-      min-height: $min-size !important;
+
+      &:hover, &[visible] {
+        min-height: $min-size !important;
+      }
     }
   }
 
@@ -23,11 +29,6 @@ revogr-scroll-virtual {
     overflow-y: auto;
     overflow-x: hidden;
     height: 100%;
-
-    // show autohide on hover
-    &.hidden-scroll:hover {
-      min-width: $min-size !important;
-    }
 
     > div {
       width: 1px;
@@ -38,11 +39,6 @@ revogr-scroll-virtual {
     overflow-x: auto;
     overflow-y: hidden;
     width: 100%;
-
-    // show autohide on hover
-    &.hidden-scroll:hover {
-      min-height: $min-size !important;
-    }
 
     > div {
       height: 1px;

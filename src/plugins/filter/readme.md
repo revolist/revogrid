@@ -3,6 +3,10 @@
 <!-- Auto Generated Below -->
 
 
+## Overview
+
+Filter panel for editing filters
+
 ## Properties
 
 | Property                  | Attribute                   | Description | Type                                                              | Default     |

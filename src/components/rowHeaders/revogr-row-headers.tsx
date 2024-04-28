@@ -56,6 +56,12 @@ export class RevogrRowHeaders {
    * Additional data to pass to renderer
    */
   @Prop() additionalData: any;
+  /**
+   * Prevent rendering until job is done.
+   * Can be used for initial rendering performance improvement.
+   * When several plugins require initial rendering this will prevent double initial rendering.
+   */
+  @Prop() jobsBeforeRender: Promise<any>[] = [];
   // #endregion
 
   /**
@@ -96,6 +102,8 @@ export class RevogrRowHeaders {
       dataViews.push(
         <revogr-data
           {...data}
+          colType='rowHeaders'
+          jobsBeforeRender={this.jobsBeforeRender}
           rowClass={this.rowClass}
           dataStore={dataStore.store}
           colData={colData.store}

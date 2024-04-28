@@ -9,7 +9,6 @@ import {
   EventEmitter,
   Method,
   VNode,
-  State,
   Host,
 } from '@stencil/core';
 import each from 'lodash/each';
@@ -74,6 +73,7 @@ import {
   InitialHeaderClick,
   ColumnDataSchema,
   Observable,
+  AllDimensionType,
 } from '../../types/interfaces';
 import {
   Editors,
@@ -93,8 +93,8 @@ import { HeaderProperties, PluginProviders } from '../..';
 /**
  * `revo-grid`: High-performance, customizable grid library for managing large datasets.
  * 
- * @slot data-{column-type}-{row-type}. @example data-rgCol-rgRow - main data slot
- * @slot focus-${view.type}-${data.type}. @example focus-rgCol-rgRow - focus layer for main data
+ * @slot data-{column-type}-{row-type}. @example data-rgCol-rgRow - main data slot. Applies extra elements in <revogr-data />.
+ * @slot focus-${view.type}-${data.type}. @example focus-rgCol-rgRow - focus layer for main data. Applies extra elements in <revogr-focus />.
  */
 @Component({
   tag: 'revo-grid',
@@ -328,12 +328,7 @@ export class RevoGridComponent {
   @Event() roworderchanged: EventEmitter<{ from: number; to: number }>;
 
   /**
-   * This event is triggered before the sorting is applied during the update of the source data.
-   * To prevent sorting data from changing during the update of the source rows, you can call `e.preventDefault()`.
-   */
-  @Event() beforesourcesortingapply: EventEmitter;
-
-  /**
+   * Triggered by sorting.plugin.ts
    * Before sorting apply.
    * Use e.preventDefault() to prevent sorting data change.
    */
@@ -344,6 +339,7 @@ export class RevoGridComponent {
   }>;
 
   /**
+   * Triggered by sorting.plugin.ts
    * Before sorting event.
    * Initial sorting triggered, if this event stops no other event called.
    * Use e.preventDefault() to prevent sorting.
@@ -511,6 +507,12 @@ export class RevoGridComponent {
    * Emmited when the row headers are changed.
    */
   @Event() rowheaderschanged: EventEmitter;
+
+  /**
+   * Emmited before the grid is rendered.
+   */
+  @Event() beforegridrender: EventEmitter;
+
   // #endregion
 
   // #region Methods
@@ -523,29 +525,44 @@ export class RevoGridComponent {
   }
 
   /**
-   * Scrolls viewport to specified row by index
+   * Sets data at specified cell.
+   * Useful for performance optimization.
+   * No viewport update will be triggered.
+   */
+  @Method() async setDataAt(data: {
+    row: number;
+    col: number;
+  } & AllDimensionType) {
+    const dataElement: HTMLRevogrDataElement | null =
+      this.element.querySelector(`revogr-data[type="${data.rowType}"][col-type="${data.colType}"]`);
+    return dataElement?.updateCell({
+      row: data.row,
+      col: data.col,
+    });
+  }
+
+  /**
+   * Scrolls viewport to specified row by index.
    */
   @Method() async scrollToRow(
     coordinate = 0,
-    dimension: DimensionType = 'rgRow',
   ) {
     const y = this.dimensionProvider.getViewPortPos({
       coordinate,
-      dimension,
+      dimension: 'rgRow',
     });
     await this.scrollToCoordinate({ y });
   }
 
   /**
-   * Scrolls viewport to specified column by index
+   * Scrolls viewport to specified column by index.
    */
   @Method() async scrollToColumnIndex(
     coordinate = 0,
-    dimension: DimensionType = 'rgCol',
   ) {
     const x = this.dimensionProvider.getViewPortPos({
       coordinate,
-      dimension,
+      dimension: 'rgCol',
     });
     await this.scrollToCoordinate({ x });
   }
@@ -601,7 +618,7 @@ export class RevoGridComponent {
     this.viewport?.scrollToCell(cell);
   }
 
-  /**  Bring cell to edit mode */
+  /**  Open editor for cell. */
   @Method() async setCellEdit(
     rgRow: number,
     prop: ColumnProp,
@@ -621,7 +638,7 @@ export class RevoGridComponent {
     );
   }
 
-  /**  Set focus range */
+  /**  Set focus range. */
   @Method() async setCellsFocus(
     cellStart: Cell = { x: 0, y: 0 },
     cellEnd: Cell = { x: 0, y: 0 },
@@ -632,12 +649,12 @@ export class RevoGridComponent {
   }
 
   /**
-   * Register new virtual node inside of grid
-   * Used for additional items creation such as plugin elements
+   * Register new virtual node inside of grid.
+   * Used for additional items creation such as plugin elements.
+   * Should be called before render inside of plugins.
    */
   @Method() async registerVNode(elements: VNode[]) {
-    this.extraElements.push(...elements);
-    this.extraElements = [...this.extraElements];
+    this.extraElements = [...this.extraElements, ...elements];
   }
 
   /**  Get data from source */
@@ -791,7 +808,6 @@ export class RevoGridComponent {
     }
     this.clearFocus();
   }
-
   // #endregion
 
   // #region Listeners
@@ -823,11 +839,10 @@ export class RevoGridComponent {
   }
 
   @Listen('rowdragmousemove') onRowMouseMove(e: CustomEvent<Cell>) {
-    // e.cancelBubble = true;
     this.orderService?.moveTip(e.detail);
   }
 
-  @Listen('beforecelledit') async onBeforeEdit(
+  @Listen('celleditapply') async onCellEdit(
     e: CustomEvent<BeforeSaveDataDetails>,
   ) {
     const { defaultPrevented, detail } = this.beforeedit.emit(e.detail);
@@ -835,26 +850,34 @@ export class RevoGridComponent {
     // apply data
     if (!defaultPrevented) {
       this.dataProvider.setCellData(detail);
+
+      // @feature: incrimental update for cells
+      // this.dataProvider.setCellData(detail, false);
+      // await this.setDataAt({
+      //   row: detail.rowIndex,
+      //   col: detail.colIndex,
+      //   rowType: detail.type,
+      //   colType: detail.colType,
+      // });
       this.afteredit.emit(detail);
     }
   }
 
-  @Listen('rangedataapplyinit') onBeforeRangeEdit(
+  @Listen('rangeeditapply') onRangeEdit(
     e: CustomEvent<BeforeRangeSaveDataDetails>,
   ) {
-    // e.cancelBubble = true;
     const { defaultPrevented, detail } = this.beforerangeedit.emit(e.detail);
     if (defaultPrevented) {
       e.preventDefault();
       return;
     }
+    this.dataProvider.setRangeData(detail.data, detail.type);
     this.afteredit.emit(detail);
   }
 
   @Listen('selectionchangeinit') onRangeChanged(
     e: CustomEvent<ChangedRange>,
   ) {
-    // e.cancelBubble = true;
     const beforeange = this.beforeange.emit(e.detail);
     if (beforeange.defaultPrevented) {
       e.preventDefault();
@@ -900,7 +923,7 @@ export class RevoGridComponent {
 
   // #region Private Properties
   @Element() element: HTMLRevoGridElement;
-  @State() extraElements: VNode[] = [];
+  private extraElements: VNode[] = [];
 
   uuid: string | null = null;
   columnProvider: ColumnDataProvider;
@@ -1132,6 +1155,10 @@ export class RevoGridComponent {
   // #endregion
 
   componentWillRender() {
+    const event = this.beforegridrender.emit();
+    if (event.defaultPrevented) {
+      return false;
+    }
     return Promise.all(this.jobsBeforeRender);
   }
 
@@ -1289,11 +1316,12 @@ export class RevoGridComponent {
           resize={this.resize}
           dataPorts={anyView.dataPorts}
           headerProp={anyView.headerProp}
+          jobsBeforeRender={this.jobsBeforeRender}
           rowHeaderColumn={
             typeof this.rowHeaders === 'object' ? this.rowHeaders : undefined
           }
           onScrollview={({ detail: e }: CustomEvent) =>
-            this.scrollingService.scrollService(e, 'headerRow')
+            this.scrollingService.proxyScroll(e, 'headerRow')
           }
           onRef={({ detail: e }: CustomEvent) =>
             this.scrollingService.registerElement(e, 'headerRow')
@@ -1351,12 +1379,14 @@ export class RevoGridComponent {
           >
             <revogr-data
               {...data}
+              colType={view.type}
               key={key}
               readonly={this.readonly}
               range={this.range}
               rowClass={this.rowClass}
               rowSelectionStore={data.rowSelectionStore}
               additionalData={this.additionalData}
+              jobsBeforeRender={this.jobsBeforeRender}
               slot={DATA_SLOT}
             >
               <slot name={`data-${view.type}-${data.type}`} />
@@ -1389,7 +1419,7 @@ export class RevoGridComponent {
         <revogr-viewport-scroll
           {...view.prop}
           ref={el => this.scrollingService.registerElement(el, `${view.prop.key}`)}
-          onScrollviewport={e => this.scrollingService.scrollService(e.detail, `${view.prop.key}`)}
+          onScrollviewport={e => this.scrollingService.proxyScroll(e.detail, `${view.prop.key}`)}
           onScrollviewportsilent={e => this.scrollingService.scrollSilentService(e.detail, `${view.prop.key}`)}
         >
           {dataViews}
@@ -1426,7 +1456,7 @@ export class RevoGridComponent {
               viewportStore={viewports[typeRow].store}
               dimensionStore={dimensions[typeRow].store}
               ref={el => this.scrollingService.registerElement(el, 'rowScroll')}
-              onScrollvirtual={e => this.scrollingService.scrollService(e.detail)}
+              onScrollvirtual={e => this.scrollingService.proxyScroll(e.detail)}
             />
             <OrderRenderer ref={e => (this.orderService = e)} />
           </div>
@@ -1437,7 +1467,7 @@ export class RevoGridComponent {
           viewportStore={viewports[typeCol].store}
           dimensionStore={dimensions[typeCol].store}
           ref={el => this.scrollingService.registerElement(el, 'colScroll')}
-          onScrollvirtual={e => this.scrollingService.scrollService(e.detail)}
+          onScrollvirtual={e => this.scrollingService.proxyScroll(e.detail)}
         />
         {this.extraElements}
       </Host>

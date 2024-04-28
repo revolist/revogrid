@@ -8,17 +8,25 @@ import {
   VNode,
   EventEmitter,
   h,
+  Method,
+  State,
 } from '@stencil/core';
-import { HTMLStencilElement, State } from '@stencil/core/internal';
 
 import ColumnService from './column.service';
-import { ROW_FOCUSED_CLASS } from '../../utils/consts';
+import {
+  DATA_COL,
+  DATA_ROW,
+  ROW_FOCUSED_CLASS,
+} from '../../utils/consts';
 
 import { DSourceState, getSourceItem } from '../../store/dataSource/data.store';
-import RowRenderer from './row-renderer';
+import RowRenderer, { PADDING_DEPTH } from './row-renderer';
 import GroupingRowRenderer from '../../plugins/groupingRow/grouping.row.renderer';
 import { isGrouping } from '../../plugins/groupingRow/grouping.service';
 import { DimensionCols, DimensionRows } from '../../types/dimension';
+import { RowHighlightPlugin } from './row-highlight.plugin';
+import { convertVNodeToHTML } from '../vnode/vnode.utils';
+import { CellRenderer } from './cell-renderer';
 import {
   Observable,
   ViewportState,
@@ -27,8 +35,13 @@ import {
   Providers,
   ColumnRegular,
   DataType,
+  CellProps,
+  BeforeCellRenderEvent,
+  DragStartEvent,
+  ColumnDataSchemaModel,
+  VirtualPositionItem,
 } from '../../types/interfaces';
-import { SelectionStoreState, RangeArea } from '../../types/selection';
+import { SelectionStoreState } from '../../types/selection';
 
 /**
  * This component is responsible for rendering data
@@ -78,9 +91,21 @@ export class RevogrData {
    */
   @Prop() dataStore!: Observable<DSourceState<DataType, DimensionRows>>;
   /**
-   * Data type
+   * Row data type
    */
-  @Prop() type!: DimensionRows;
+  @Prop({ reflect: true }) type!: DimensionRows;
+
+  /**
+   * Column data type
+   */
+  @Prop({ reflect: true }) colType!: DimensionCols | 'rowHeaders';
+
+  /**
+   * Prevent rendering until job is done.
+   * Can be used for initial rendering performance improvement.
+   * When several plugins require initial rendering this will prevent double initial rendering.
+   */
+  @Prop() jobsBeforeRender: Promise<any>[] = [];
   // #endregion
 
   /**
@@ -90,13 +115,46 @@ export class RevogrData {
   /**
    * When data render finished for the designated type
    */
-  @Event() afterrender: EventEmitter;
+  @Event() afterrender: EventEmitter<{ type: DimensionRows }>;
+  /**
+   * Before each cell render function. Allows to override cell properties
+   */
+  @Event({ eventName: 'beforecellrender' })
+  beforeCellRender: EventEmitter<BeforeCellRenderEvent>;
 
-  @Element() element!: HTMLStencilElement;
+  /**
+   * Event emitted on cell drag start
+   */
+  @Event({ eventName: 'dragstartcell' })
+  dragStartCell: EventEmitter<DragStartEvent>;
+
+  /**
+   * Pointed cell update.
+   */
+  @Method() async updateCell(e: {
+    row: number; // virtual
+    col: number; // virtual
+  }) {
+    // Stencil tweak to update cell content
+    const cell = this.renderedRows.get(e.row)?.$children$?.[e.col];
+    if (cell?.$attrs$?.redraw) {
+      const children = await convertVNodeToHTML(
+        this.element,
+        cell.$attrs$.redraw,
+      );
+      cell.$elm$.innerHTML = children.html;
+      cell.$key$ = Math.random();
+    }
+  }
+
+  @Element() element!: Element;
   @State() providers: Providers;
   private columnService: ColumnService;
+  private rowHighlightPlugin: RowHighlightPlugin;
+  /**
+   * Rendered rows - virtual index vs vnode
+   */
   private renderedRows = new Map<number, VNode>();
-  private currentRange: RangeArea | null = null;
   private rangeUnsubscribe: (() => void) | undefined;
 
   @Watch('dataStore') onDataStoreChange() {
@@ -119,48 +177,23 @@ export class RevogrData {
     };
 
     this.rangeUnsubscribe?.();
-    this.rangeUnsubscribe = this.rowSelectionStore.onChange('range', e => {
-      // clear prev range
-      if (this.currentRange) {
-        this.renderedRows.forEach((row, y) => {
-          // skip current range
-          if (e && y >= e.y && y <= e.y1) {
-            return;
-          }
-          if (
-            row &&
-            row.$elm$ instanceof HTMLElement &&
-            row.$elm$.classList.contains(ROW_FOCUSED_CLASS)
-          ) {
-            row.$elm$.classList.remove(ROW_FOCUSED_CLASS);
-          }
-        });
-      }
-
-      // apply new range
-      if (e) {
-        for (let y = e.y; y <= e.y1; y++) {
-          const row = this.renderedRows.get(y);
-          if (
-            row &&
-            row.$elm$ instanceof HTMLElement &&
-            !row.$elm$.classList.contains(ROW_FOCUSED_CLASS)
-          ) {
-            row.$elm$.classList.add(ROW_FOCUSED_CLASS);
-          }
-        }
-      }
-      this.currentRange = e;
-    });
+    this.rangeUnsubscribe = this.rowSelectionStore.onChange('range', e =>
+      this.rowHighlightPlugin.selectionChange(e, this.renderedRows),
+    );
   }
 
   connectedCallback() {
+    this.rowHighlightPlugin = new RowHighlightPlugin();
     this.onStoreChange();
   }
 
   disconnectedCallback() {
     this.columnService?.destroy();
     this.rangeUnsubscribe?.();
+  }
+
+  async componentWillRender() {
+    return Promise.all(this.jobsBeforeRender);
   }
 
   componentDidRender() {
@@ -171,15 +204,19 @@ export class RevogrData {
     this.renderedRows = new Map();
     const rows = this.viewportRow.get('items');
     const cols = this.viewportCol.get('items');
-    if (!this.columnService.columns.length || !rows.length || !cols.length) {
+
+    const columnsData = this.columnService.columns;
+    if (!columnsData.length || !rows.length || !cols.length) {
       return '';
     }
     const rowsEls: VNode[] = [];
     const depth = this.dataStore.get('groupingDepth');
     const groupingCustomRenderer = this.dataStore.get('groupingCustomRenderer');
+    const groupDepth = this.columnService.hasGrouping ? depth : 0;
     for (let rgRow of rows) {
       const dataItem = getSourceItem(this.dataStore, rgRow.itemIndex);
-      // #region grouping
+
+      // #region Grouping
       if (isGrouping(dataItem)) {
         rowsEls.push(
           <GroupingRowRenderer
@@ -194,35 +231,73 @@ export class RevogrData {
       }
       // #endregion
       const cells: (VNode | string | void)[] = [];
+
+      // #region Cells
+      for (let rgCol of cols) {
+        const model = this.columnService.rowDataModel(
+          rgRow.itemIndex,
+          rgCol.itemIndex,
+        );
+
+        // call before cell render
+        const cellEvent = this.triggerBeforeCellRender(model, rgRow, rgCol);
+
+        // if event was prevented
+        if (cellEvent.defaultPrevented) {
+          continue;
+        }
+
+        const {
+          detail: { column: columnProps, row: rowProps },
+        } = cellEvent;
+
+        const defaultProps: CellProps = {
+          [DATA_COL]: columnProps.itemIndex,
+          [DATA_ROW]: rowProps.itemIndex,
+          style: {
+            width: `${columnProps.size}px`,
+            transform: `translateX(${columnProps.start}px)`,
+            height: rowProps.size ? `${rowProps.size}px` : undefined,
+          },
+        };
+        /**
+         * For grouping, can be removed in the future and replaced with event
+         */
+        if (groupDepth && !columnProps.itemIndex) {
+          defaultProps.style.paddingLeft = `${PADDING_DEPTH * groupDepth}px`;
+        }
+
+        const props = this.columnService.mergeProperties(
+          rowProps.itemIndex,
+          columnProps.itemIndex,
+          defaultProps,
+          model,
+          columnsData[columnProps.itemIndex]?.cellProperties,
+        );
+
+        // Never use webcomponent for cell render
+        // It's very slow because of webcomponent initialization takes time
+        cells.push(
+          <CellRenderer
+            renderProps={{
+              model,
+              providers: this.providers,
+              template: columnsData[columnProps.itemIndex]?.cellTemplate,
+              additionalData: this.additionalData,
+              dragStartCell: this.dragStartCell,
+            }}
+            cellProps={props}
+          />,
+        );
+      }
+      // #endregion
+
+      // #region Rows
       let rowClass = this.rowClass
         ? this.columnService.getRowClass(rgRow.itemIndex, this.rowClass)
         : '';
-
-      // highlight row if it is in range
-      if (
-        this.currentRange &&
-        rgRow.itemIndex >= this.currentRange.y &&
-        rgRow.itemIndex <= this.currentRange.y1
-      ) {
+      if (this.rowHighlightPlugin.isRowFocused(rgRow.itemIndex)) {
         rowClass += ` ${ROW_FOCUSED_CLASS}`;
-      }
-      for (let rgCol of cols) {
-        cells.push(
-          <revogr-cell
-            additionalData={this.additionalData}
-            columnService={this.columnService}
-            providers={this.providers}
-            depth={this.columnService.hasGrouping ? depth : 0}
-            rowIndex={rgRow.itemIndex}
-            rowStart={rgRow.start}
-            rowEnd={rgRow.end}
-            rowSize={rgRow.size}
-            colIndex={rgCol.itemIndex}
-            colStart={rgCol.start}
-            colEnd={rgCol.end}
-            colSize={rgCol.size}
-          />,
-        );
       }
       const row: VNode = (
         <RowRenderer
@@ -243,6 +318,7 @@ export class RevogrData {
       });
       rowsEls.push(row);
       this.renderedRows.set(rgRow.itemIndex, row);
+      // #endregion
     }
     return (
       <Host>
@@ -250,5 +326,19 @@ export class RevogrData {
         {rowsEls}
       </Host>
     );
+  }
+
+  triggerBeforeCellRender(
+    model: ColumnDataSchemaModel,
+    row: VirtualPositionItem,
+    column: VirtualPositionItem,
+  ) {
+    return this.beforeCellRender.emit({
+      column: { ...column },
+      row: { ...row },
+      model,
+      rowType: model.type,
+      colType: model.colType,
+    });
   }
 }

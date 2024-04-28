@@ -160,7 +160,7 @@ export default class DimensionProvider {
   }
 
   getViewPortPos(e: ViewPortScrollEvent): number {
-    const dimension: DimensionSettingsState = this.stores[e.dimension].getCurrentState();
+    const dimension = this.stores[e.dimension].getCurrentState();
     const item = getItemByIndex(dimension, e.coordinate);
 
     return item.start;

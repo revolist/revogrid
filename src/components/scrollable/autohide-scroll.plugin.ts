@@ -5,14 +5,28 @@
  */
 export class AutohideScrollPlugin {
   private autohideScrollTimeout = 0;
+  constructor(private element: HTMLElement) {
+  }
 
-  scroll({
-    element,
+  /**
+   * When scroll size updates set it up for autohide
+   */
+  setScrollSize(s: number) {
+    if (!s) {
+      this.element.setAttribute('autohide', 'true');
+    } else {
+      this.element.removeAttribute('autohide');
+    }
+  }
+
+  /**
+   * On each scroll check if it's time to show
+   */
+  checkScroll({
     scrollSize,
     contentSize,
     virtualSize,
   }: {
-    element: HTMLElement;
     scrollSize: number;
     contentSize: number;
     virtualSize: number;
@@ -20,19 +34,19 @@ export class AutohideScrollPlugin {
     const hasScroll = contentSize > virtualSize;
     const isHidden = !scrollSize && hasScroll;
     if (isHidden) {
-      element.classList.add('autohide');
+      this.element.setAttribute('visible', 'true');
       this.autohideScrollTimeout = this.show(
-        element,
+        this.element,
         this.autohideScrollTimeout,
       );
     }
   }
 
-  show(element?: HTMLElement, timeout?: number): number {
+  private show(element?: HTMLElement, timeout?: number): number {
     clearTimeout(timeout);
     return Number(
       setTimeout(() => {
-        element?.classList.remove('autohide');
+        element.removeAttribute('visible');
       }, 1000),
     );
   }

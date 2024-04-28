@@ -12,8 +12,14 @@ function generateHeader(index) {
   return label.toLowerCase();
 }
 
+/**
+ * Custom sorting apply
+ */
 function naturalSort(prop, a, b) {
-  return a[prop].localeCompare(b[prop], 'en', { numeric: true });
+  // check if it's grouping
+  const aValue = a['__rvgr-value'] || a[prop];
+  const bValue = b['__rvgr-value'] || b[prop];
+  return aValue.localeCompare(bValue, 'en', { numeric: true });
 }
 
 const DEFAULT_CONFIG = {
@@ -71,16 +77,21 @@ export function generateFakeDataObject(config = {}) {
       columns[rgCol] = {
         name: generateHeader(rgCol),
         prop: rgCol,
-        filter: 'myFilterType',
         sortable: true,
-        size: 200,
+        size: 100,
+        // custom sorting
         cellCompare: rgCol % 2 == 0 ? naturalSort : undefined,
-        // cellTemplate: (h, v) => {
-        //   for(let i = 0; i < 1000000; i++) {
-        //     // do nothing, this is just to slow down to test performance
-        //   }
-        //   return v.model[v.prop];
-        // }
+
+        // custom filter
+        // filter: 'myFilterType',
+
+        cellTemplate: (h, v) => {
+          // delay
+          // for(let i = 0; i < 10000000; i++) {
+          //   // do nothing, this is just to slow down to test performance
+          // }
+          return v.model[v.prop];
+        }
       };
 
       // apply config

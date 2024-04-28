@@ -5,15 +5,15 @@
 
 ## Overview
 
-Virtual scroll component for RevoGrid
+Virtual scroll component
 
 ## Properties
 
-| Property                      | Attribute   | Description                               | Type                                    | Default     |
-| ----------------------------- | ----------- | ----------------------------------------- | --------------------------------------- | ----------- |
-| `dimension`                   | `dimension` | Scroll dimension (X - rgCol or Y - rgRow) | `"rgCol" \| "rgRow"`                    | `'rgRow'`   |
-| `dimensionStore` _(required)_ | --          | Dimensions                                | `ObservableMap<DimensionSettingsState>` | `undefined` |
-| `viewportStore` _(required)_  | --          | Viewport                                  | `ObservableMap<ViewportState>`          | `undefined` |
+| Property                      | Attribute   | Description                                       | Type                                    | Default     |
+| ----------------------------- | ----------- | ------------------------------------------------- | --------------------------------------- | ----------- |
+| `dimension`                   | `dimension` | Scroll dimension (`X` - `rgCol` or `Y` - `rgRow`) | `"rgCol" \| "rgRow"`                    | `'rgRow'`   |
+| `dimensionStore` _(required)_ | --          | Dimensions                                        | `ObservableMap<DimensionSettingsState>` | `undefined` |
+| `viewportStore` _(required)_  | --          | Viewport                                          | `ObservableMap<ViewportState>`          | `undefined` |
 
 
 ## Events
@@ -27,7 +27,7 @@ Virtual scroll component for RevoGrid
 
 ### `changeScroll(e: ViewPortScrollEvent) => Promise<ViewPortScrollEvent>`
 
-Update on delta in case we don't know existing position or external change
+Update if `delta` exists in case we don't know current position or if it's external change
 
 #### Parameters
 

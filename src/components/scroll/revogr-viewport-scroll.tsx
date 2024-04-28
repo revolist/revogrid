@@ -13,6 +13,7 @@ import each from 'lodash/each';
 
 import GridResizeService from '../revoGrid/viewport.resize.service';
 import LocalScrollService from '../../services/local.scroll.service';
+import { LocalScrollTimer } from '../../services/local.scroll.timer';
 import {
   CONTENT_SLOT,
   FOOTER_SLOT,
@@ -75,7 +76,6 @@ export class RevogrViewportScroll {
   @Event({ eventName: 'scrollviewportsilent' }) silentScroll: EventEmitter<ViewPortScrollEvent>;
 
   @Element() horizontalScroll: HTMLElement;
-  private scrollThrottling = 10;
 
   private oldValY = this.contentHeight;
   private oldValX = this.contentWidth;
@@ -91,23 +91,13 @@ export class RevogrViewportScroll {
   private verticalMouseWheel: (e: Partial<LocalScrollEvent>) => void;
 
   private resizeService: GridResizeService;
-  private scrollService: LocalScrollService;
+  private localScrollService: LocalScrollService;
+  private localScrollTimer: LocalScrollTimer;
 
-  /**
-   * Last mw event time for trigger scroll function below
-   * If mousewheel function was ignored we still need to trigger render
-   */
-  private mouseWheelScrollTimestamp: Record<DimensionType, number> = {
-    rgCol: 0,
-    rgRow: 0,
-  };
-  private lastKnownScrollCoordinate: Record<DimensionType, number> = {
-    rgCol: 0,
-    rgRow: 0,
-  };
+
   @Method() async setScroll(e: ViewPortScrollEvent) {
-    this.latestScrollUpdate(e.dimension);
-    this.scrollService?.setScroll(e);
+    this.localScrollTimer.latestScrollUpdate(e.dimension);
+    this.localScrollService?.setScroll(e);
   }
 
   /**
@@ -172,9 +162,6 @@ export class RevogrViewportScroll {
     /**
      * Bind scroll functions for farther usage
      */
-    if ('ontouchstart' in document.documentElement) {
-      this.scrollThrottling = 0;
-    }
     // allow mousewheel for all devices including mobile
     this.verticalMouseWheel = this.onVerticalMouseWheel.bind(
       this,
@@ -186,17 +173,19 @@ export class RevogrViewportScroll {
       'rgCol',
       'deltaX',
     );
+    this.localScrollTimer = new LocalScrollTimer('ontouchstart' in document.documentElement ? 0 : 10);
     /**
      * Create local scroll service
      */
-    this.scrollService = new LocalScrollService({
+    this.localScrollService = new LocalScrollService({
       // to improve safari smoothnes on scroll
       // skipAnimationFrame: isSafariDesktop(),
-      beforeScroll: e => this.scrollViewport.emit(e),
-      afterScroll: e => {
-        this.lastKnownScrollCoordinate[e.dimension] = e.coordinate;
+      runScroll: e => this.scrollViewport.emit(e),
+      applyScroll: e => {
+        this.localScrollTimer.setCoordinate(e);
         switch (e.dimension) {
           case 'rgCol':
+            // this will trigger on scroll event
             this.horizontalScroll.scrollLeft = e.coordinate;
             break;
           case 'rgRow':
@@ -234,7 +223,7 @@ export class RevogrViewportScroll {
         };
         each(els, (item, dimension: DimensionType) => {
           this.resizeViewport.emit({ dimension, size: item.size, rowHeader: this.rowHeader });
-          this.scrollService?.scroll(item.scroll, dimension, true);
+          this.localScrollService?.scroll(item.scroll, dimension, true);
           // track scroll visibility on outer element change
           this.setScrollVisibility(dimension, item.size, item.contentSize);
         });
@@ -293,7 +282,7 @@ export class RevogrViewportScroll {
     }
     this.oldValX = this.contentWidth;
 
-    this.scrollService.setParams(
+    this.localScrollService.setParams(
       {
         contentSize: this.contentHeight,
         clientSize: this.verticalScroll.clientHeight,
@@ -302,7 +291,7 @@ export class RevogrViewportScroll {
       'rgRow',
     );
 
-    this.scrollService.setParams(
+    this.localScrollService.setParams(
       {
         contentSize: this.contentWidth,
         clientSize: this.horizontalScroll.clientWidth,
@@ -363,14 +352,13 @@ export class RevogrViewportScroll {
     if (!(e.target instanceof HTMLElement)) {
       return;
     }
-    const target = e.target;
     let scroll = 0;
     switch (type) {
       case 'rgCol':
-        scroll = target?.scrollLeft;
+        scroll = e.target.scrollLeft;
         break;
       case 'rgRow':
-        scroll = target?.scrollTop;
+        scroll = e.target.scrollTop;
         break;
     }
 
@@ -383,17 +371,16 @@ export class RevogrViewportScroll {
   }
 
   /**
-   * Applies scroll on scroll event only if mousewheel event was some time ago
+   * Applies change on scroll event only if mousewheel event happened some time ago
    */
   private applyOnScroll(
     type: DimensionType,
     coordinate: number,
     outside = false,
   ) {
-    const change = new Date().getTime() - this.mouseWheelScrollTimestamp[type];
     // apply after throttling
-    if (change > this.scrollThrottling && coordinate !== this.lastKnownScrollCoordinate[type]) {
-      this.scrollService?.scroll(
+    if (this.localScrollTimer.isReady(type, coordinate)) {
+      this.localScrollService?.scroll(
         coordinate,
         type,
         undefined,
@@ -401,11 +388,6 @@ export class RevogrViewportScroll {
         outside,
       );
     }
-  }
-
-  /** remember last mw event time */
-  private latestScrollUpdate(dimension: DimensionType) {
-    this.mouseWheelScrollTimestamp[dimension] = new Date().getTime();
   }
 
   /**
@@ -419,10 +401,10 @@ export class RevogrViewportScroll {
     delta: Delta,
     e: LocalScrollEvent,
   ) {
-    e.preventDefault && e.preventDefault();
+    e.preventDefault?.();
     const pos = this.verticalScroll.scrollTop + e[delta];
-    this.scrollService?.scroll(pos, type, undefined, e[delta]);
-    this.latestScrollUpdate(type);
+    this.localScrollService?.scroll(pos, type, undefined, e[delta]);
+    this.localScrollTimer.latestScrollUpdate(type);
   }
 
   /**
@@ -436,9 +418,9 @@ export class RevogrViewportScroll {
     delta: Delta,
     e: LocalScrollEvent,
   ) {
-    e.preventDefault && e.preventDefault();
+    e.preventDefault?.();
     const pos = this.horizontalScroll.scrollLeft + e[delta];
-    this.scrollService?.scroll(pos, type, undefined, e[delta]);
-    this.latestScrollUpdate(type);
+    this.localScrollService?.scroll(pos, type, undefined, e[delta]);
+    this.localScrollTimer.latestScrollUpdate(type);
   }
 }

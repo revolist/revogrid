@@ -12,10 +12,14 @@ type Config = {
   selectionStoreService: SelectionStoreService;
   selectionStore: Observable<SelectionStoreState>;
 
-  applyEdit(val?: any): void;
-  cancelEdit(): void;
+  // Apply changes from edit.
+  change(val?: any): void;
+  // Cancels edit. Escape changes.
+  cancel(): void;
+
   clearCell(): void;
   focusNext(focus: Cell, next: Partial<Cell>): boolean;
+
   getData(): any;
   internalPaste(): void;
   range(range: RangeArea): boolean;
@@ -38,7 +42,7 @@ export class KeyboardService {
     if (this.sv.selectionStoreService.edited) {
       switch (e.code) {
         case codesLetter.ESCAPE:
-          this.sv.cancelEdit();
+          this.sv.cancel();
           break;
       }
       return;
@@ -65,7 +69,7 @@ export class KeyboardService {
 
     // pressed enter
     if (isEnterKey(e.code)) {
-      this.sv.applyEdit();
+      this.sv.change();
       return;
     }
 
@@ -95,7 +99,7 @@ export class KeyboardService {
 
     // pressed letter key
     if (isLetterKey(e.keyCode)) {
-      this.sv.applyEdit(e.key);
+      this.sv.change(e.key);
       return;
     }
 

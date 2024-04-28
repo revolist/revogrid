@@ -7,16 +7,12 @@ import { FilterCaptions } from './filter.plugin';
 import debounce from 'lodash/debounce';
 import { ColumnProp } from '../../types/interfaces';
 
-/**
- * @typedef FilterItem
- * @type {object}
- * @property {ColumnProp} prop - column id
- * @property {FilterType} type - filter type definition
- * @property {any} value - value for additional filtering, text value or some id
- */
 export type FilterItem = {
+  // column id
   prop?: ColumnProp;
+  // filter type definition
   type?: FilterType;
+  // value for additional filtering, text value or some id
   value?: any;
 };
 
@@ -41,15 +37,19 @@ const defaultType: FilterType = 'none';
 const FILTER_LIST_CLASS = 'multi-filter-list';
 const FILTER_LIST_CLASS_ACTION = 'multi-filter-list-action';
 
+/**
+ * Filter panel for editing filters
+ */
 @Component({
   tag: 'revogr-filter-panel',
   styleUrl: 'filter.style.scss',
 })
 export class FilterPanel {
   private filterCaptionsInternal: FilterCaptions = {
-    title: 'Filter by condition',
+    title: 'Filter by',
     save: 'Save',
-    reset: 'Reset',
+    // drops the filter
+    reset: 'Cancel',
     cancel: 'Close',
   };
   @State() isFilterIdSet = false;

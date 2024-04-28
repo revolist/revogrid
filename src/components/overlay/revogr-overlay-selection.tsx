@@ -17,7 +17,7 @@ import { MOBILE_CLASS, SELECTION_BORDER_CLASS } from '../../utils/consts';
 import { DSourceState } from '../../store/dataSource/data.store';
 import { isRangeSingleCell } from '../../store/selection/selection.helpers';
 import { getCurrentCell, getElStyle } from './selection.utils';
-import { isEditInput } from './editors/edit.utils';
+import { isEditInput } from '../editors/edit.utils';
 import { KeyboardService } from './keyboard.service';
 import { AutoFillService } from './autofill.service';
 import { ClipboardService } from '../clipboard/clipboard.service';
@@ -57,31 +57,31 @@ import {
 export class OverlaySelection {
   // #region Properties
   /**
-   * Readonly mode
+   * Readonly mode.
    */
   @Prop() readonly: boolean;
   /**
-   * Range selection allowed
+   * Range selection allowed.
    */
   @Prop() range: boolean;
   /**
-   * Enable revogr-order-editor component (read more in revogr-order-editor component)
-   * Allows D&D
+   * Enable revogr-order-editor component (read more in revogr-order-editor component).
+   * Allows D&D.
    */
   @Prop() canDrag: boolean;
 
   /**
-   * Enable revogr-clipboard component (read more in revogr-clipboard component)
-   * Allows copy/paste
+   * Enable revogr-clipboard component (read more in revogr-clipboard component).
+   * Allows copy/paste.
    */
   @Prop() useClipboard: boolean;
 
   /** Stores */
-  /** Selection, range, focus */
+  /** Selection, range, focus. */
   @Prop() selectionStore: Observable<SelectionStoreState>;
-  /** Dimension settings Y */
+  /** Dimension settings Y. */
   @Prop() dimensionRow: Observable<DimensionSettingsState>;
-  /** Dimension settings X */
+  /** Dimension settings X. */
   @Prop() dimensionCol: Observable<DimensionSettingsState>;
 
   // --------------------------------------------------------------------------
@@ -91,33 +91,33 @@ export class OverlaySelection {
   // --------------------------------------------------------------------------
 
   /**
-   * Row data store
+   * Row data store.
    */
   @Prop() dataStore: Observable<DSourceState<DataType, DimensionRows>>;
 
   /**
-   * Column data store
+   * Column data store.
    */
   @Prop() colData: Observable<DSourceState<ColumnRegular, DimensionCols>>;
   /**
-   * Last cell position
+   * Last cell position.
    */
   @Prop() lastCell: Cell;
   /**
-   * Custom editors register
+   * Custom editors register.
    */
   @Prop() editors: Editors;
   /**
-   * If true applys changes when cell closes if not Escape
+   * If true applys changes when cell closes if not Escape.
    */
   @Prop() applyChangesOnClose = false;
   /**
-   * Additional data to pass to renderer
+   * Additional data to pass to renderer.
    */
   @Prop() additionalData: any;
 
   /**
-   * Is mobile view mode
+   * Is mobile view mode.
    */
   @Prop() isMobileDevice: boolean;
 
@@ -131,90 +131,93 @@ export class OverlaySelection {
   @Event({ eventName: 'beforecopyregion', cancelable: true })
   beforeCopyRegion: EventEmitter;
   /**
-   * Before region paste happened
+   * Before region paste happened.
    */
   @Event({ eventName: 'beforepasteregion', cancelable: true })
   beforeRegionPaste: EventEmitter;
 
   /**
-   * Before cell edit happened
+   * Cell edit apply to the data source.
+   * Triggers datasource edit on the root level.
    */
-  @Event({ eventName: 'beforecelledit', cancelable: true })
-  beforeCellEdit: EventEmitter<BeforeSaveDataDetails>;
+  @Event({ eventName: 'celleditapply', cancelable: true })
+  cellEditApply: EventEmitter<BeforeSaveDataDetails>;
 
   /**
-   * Before cell focus
+   * Before cell focus.
    */
   @Event({ eventName: 'beforecellfocusinit', cancelable: true })
   beforeFocusCell: EventEmitter<BeforeSaveDataDetails>;
 
   /**
-   * Set edit cell
+   * Set edit cell.
    */
   @Event({ eventName: 'setedit' }) setEdit: EventEmitter<BeforeEdit>;
 
   /**
-   * Before range applied
+   * Before range applied.
    */
   @Event({ eventName: 'beforeapplyrange' })
   beforeApplyRange: EventEmitter<FocusRenderEvent>;
   /**
-   * Before range selection applied
+   * Before range selection applied.
    */
   @Event({ eventName: 'beforesetrange' }) beforeSetRange: EventEmitter;
 
   /**
-   * Before editor render
+   * Before editor render.
    */
   @Event({ eventName: 'beforeeditrender' })
   beforeEditRender: EventEmitter<FocusRenderEvent>;
 
   /**
-   * Set range
+   * Set range.
    */
   @Event({ eventName: 'setrange' }) setRange: EventEmitter<
     RangeArea & { type: MultiDimensionType }
   >;
 
-  /** Select all */
+  /** Select all. */
   @Event({ eventName: 'selectall' }) selectAll: EventEmitter;
   /**
-   * Used for editors support when editor close requested
+   * Used for editors support when editor close requested.
    */
   @Event({ eventName: 'canceledit' }) cancelEdit: EventEmitter;
 
   /**
-   * Set temp range area during autofill
+   * Set temp range area during autofill.
    */
   @Event({ eventName: 'settemprange' })
   setTempRange: EventEmitter<TempRange | null>;
 
   /**
-   * Before cell get focused
+   * Before cell get focused.
    * To prevent the default behavior of applying the edit data, you can call `e.preventDefault()`.
    */
   @Event({ eventName: 'applyfocus' })
   applyFocus: EventEmitter<FocusRenderEvent>;
 
   /**
-   * Cell get focused
+   * Cell get focused.
    * To prevent the default behavior of applying the edit data, you can call `e.preventDefault()`.
    */
   @Event({ eventName: 'focuscell' }) focusCell: EventEmitter<ApplyFocusEvent>;
-  /** Range data apply */
+  /** Range data apply. */
   @Event({ eventName: 'beforerangedataapply' })
   beforeRangeDataApply: EventEmitter<FocusRenderEvent>;
-  /** Selection range changed */
+  /** Selection range changed. */
   @Event({ eventName: 'selectionchangeinit', cancelable: true })
   selectionChange: EventEmitter<ChangedRange>;
-  /** Before range copy */
+  /** Before range copy. */
   @Event({ eventName: 'beforerangecopyapply', cancelable: true, bubbles: true })
   beforeRangeCopyApply: EventEmitter<ChangedRange>;
 
-  /** Range data apply */
-  @Event({ eventName: 'rangedataapplyinit', cancelable: true })
-  rangeDataApply: EventEmitter<BeforeRangeSaveDataDetails>;
-  /** Range copy */
+  /** Range data apply.
+   * Triggers datasource edit on the root level.
+   */
+  @Event({ eventName: 'rangeeditapply', cancelable: true })
+  rangeEditApply: EventEmitter<BeforeRangeSaveDataDetails>;
+  /** Range copy. */
   @Event({ eventName: 'clipboardrangecopy', cancelable: true })
   rangeClipboardCopy: EventEmitter;
   @Event({ eventName: 'clipboardrangepaste', cancelable: true })
@@ -223,19 +226,19 @@ export class OverlaySelection {
   /**
    * Before key up event proxy, used to prevent key up trigger.
    * If you have some custom behaviour event, use this event to check if it wasn't processed by internal logic.
-   * Call preventDefault()
+   * Call preventDefault().
    */
   @Event({ eventName: 'beforekeydown' })
   beforeKeyDown: EventEmitter<KeyboardEvent>;
   /**
    * Before key down event proxy, used to prevent key down trigger.
    * If you have some custom behaviour event, use this event to check if it wasn't processed by internal logic.
-   * Call preventDefault()
+   * Call preventDefault().
    */
   @Event({ eventName: 'beforekeyup' }) beforeKeyUp: EventEmitter<KeyboardEvent>;
   /**
-   * Runs before cell save
-   * Can be used to override or cancel original save
+   * Runs before cell save.
+   * Can be used to override or cancel original save.
    */
   @Event({ eventName: 'beforecellsave', cancelable: true })
   beforeCellSave: EventEmitter;
@@ -263,8 +266,8 @@ export class OverlaySelection {
     }
   }
 
-  /** Action finished inside of the document */
-  /** Pointer left document, clear any active operation */
+  /** Action finished inside of the document. */
+  /** Pointer left document, clear any active operation. */
   @Listen('touchend', { target: 'document' })
   @Listen('mouseup', { target: 'document' })
   @Listen('mouseleave', { target: 'document' })
@@ -272,17 +275,17 @@ export class OverlaySelection {
     this.autoFillService.clearAutoFillSelection();
   }
 
-  /** Row drag started */
+  /** Row drag started. */
   @Listen('dragstartcell') onCellDrag(e: CustomEvent<DragStartEvent>) {
     this.orderEditor?.dragStart(e.detail);
   }
 
-  /** Get keyboard down from element */
+  /** Get keyboard down from element. */
   @Listen('keyup', { target: 'document' }) onKeyUp(e: KeyboardEvent) {
     this.beforeKeyUp.emit(e);
   }
 
-  /** Get keyboard down from element */
+  /** Get keyboard down from element. */
   @Listen('keydown', { target: 'document' }) onKeyDown(e: KeyboardEvent) {
     const proxy = this.beforeKeyDown.emit(e);
     if (e.defaultPrevented || proxy.defaultPrevented) {
@@ -292,7 +295,7 @@ export class OverlaySelection {
   }
   // #endregion
 
-  // selection & keyboard
+  /** Selection & Keyboard */
   @Watch('selectionStore') selectionServiceSet(
     s: Observable<SelectionStoreState>,
   ) {
@@ -306,14 +309,14 @@ export class OverlaySelection {
       selectionStore: s,
       range: r => this.selectionStoreService.changeRange(r),
       focusNext: (f, next) => this.doFocus(f, f, next),
-      applyEdit: val => {
+      change: val => {
         if (this.readonly) {
           return;
         }
         this.doEdit(val);
       },
-      cancelEdit: async () => {
-        await this.revogrEdit.cancel();
+      cancel: async () => {
+        await this.revogrEdit.cancelChanges();
         this.closeEdit();
       },
       clearCell: () => !this.readonly && this.clearCell(),
@@ -324,7 +327,7 @@ export class OverlaySelection {
     this.createAutoFillService();
     this.createClipboardService();
   }
-  // autofill
+  /** Autofill */
   @Watch('dimensionRow')
   @Watch('dimensionCol')
   createAutoFillService() {
@@ -342,15 +345,16 @@ export class OverlaySelection {
         }),
       setTempRange: e => this.setTempRange.emit(e),
       selectionChanged: e => this.selectionChange.emit(e),
+
       rangeCopy: e => this.beforeRangeCopyApply.emit(e),
-      rangeDataApply: e => this.rangeDataApply.emit(e),
+      rangeDataApply: e => this.rangeEditApply.emit(e),
 
       setRange: e => this.triggerRangeEvent(e),
       getData: () => this.getData(),
     });
   }
 
-  // columns
+  /** Columns */
   @Watch('dataStore')
   @Watch('colData')
   columnServiceSet() {
@@ -360,7 +364,7 @@ export class OverlaySelection {
     this.createClipboardService();
   }
 
-  // clipboard
+  /** Clipboard */
   createClipboardService() {
     this.clipboardService = new ClipboardService({
       selectionStoreService: this.selectionStoreService,
@@ -407,6 +411,13 @@ export class OverlaySelection {
     this.columnService?.destroy();
   }
 
+  async componentWillRender() {
+    const editCell = this.selectionStore.get('edit');
+    if (!editCell) {
+      await this.revogrEdit?.beforeDisconnect?.();
+    }
+  }
+
   private renderRange(range: RangeArea) {
     const style = getElStyle(
       range,
@@ -425,9 +436,10 @@ export class OverlaySelection {
     ];
   }
 
-  private renderEditCell() {
-    // if can edit
+  private renderEditor() {
+    // Check if edit access
     const editCell = this.selectionStore.get('edit');
+    // Readonly or Editor closed
     if (this.readonly || !editCell) {
       return null;
     }
@@ -445,24 +457,32 @@ export class OverlaySelection {
       },
       ...this.types,
     });
+
+    // Render prevented
     if (renderEvent.defaultPrevented) {
       return null;
     }
 
-    const {
-      detail: { range },
-    } = renderEvent;
     const style = getElStyle(
-      range,
+      renderEvent.detail.range,
       this.dimensionRow.state,
       this.dimensionCol.state,
     );
     return (
       <revogr-edit
-        ref={el => {
-          this.revogrEdit = el;
-        }}
-        onCellEdit={e => {
+        style={style}
+        ref={el => (this.revogrEdit = el)}
+        additionalData={this.additionalData}
+        editCell={editable}
+        saveOnClose={this.applyChangesOnClose}
+        column={this.columnService.columns[editCell.x]}
+        editor={this.columnService.getCellEditor(
+          editCell.y,
+          editCell.x,
+          this.editors,
+        )}
+        onCloseedit={e => this.closeEdit(e)}
+        onCelledit={e => {
           const saveEv = this.beforeCellSave.emit(e.detail);
           if (!saveEv.defaultPrevented) {
             this.cellEdit(saveEv.detail);
@@ -473,48 +493,45 @@ export class OverlaySelection {
             this.focusNext();
           }
         }}
-        onCloseEdit={e => this.closeEdit(e)}
-        editCell={editable}
-        saveOnClose={this.applyChangesOnClose}
-        column={this.columnService.columns[editCell.x]}
-        editor={this.columnService.getCellEditor(
-          editCell.y,
-          editCell.x,
-          this.editors,
-        )}
-        additionalData={this.additionalData}
-        style={style}
       />
     );
   }
 
   render() {
-    const els: VNode[] = [];
-    const editCell = this.renderEditCell();
+    const nodes: VNode[] = [];
+    const editCell = this.renderEditor();
+
+    // Editor
     if (editCell) {
-      els.push(editCell);
+      nodes.push(editCell);
     } else {
       const range = this.selectionStoreService.ranged;
       const selectionFocus = this.selectionStoreService.focused;
+
+      // Clipboard
       if ((range || selectionFocus) && this.useClipboard) {
-        els.push(this.clipboardService.renderClipboard(this.readonly));
+        nodes.push(this.clipboardService.renderClipboard(this.readonly));
       }
 
+      // Range
       if (range) {
-        els.push(...this.renderRange(range));
+        nodes.push(...this.renderRange(range));
       }
+      // Autofill
       if (selectionFocus && !this.readonly && this.range) {
-        els.push(this.autoFillService.renderAutofill(range, selectionFocus));
+        nodes.push(this.autoFillService.renderAutofill(range, selectionFocus));
       }
+
+      // Order
       if (this.canDrag) {
-        els.push(
+        nodes.push(
           <revogr-order-editor
             ref={e => (this.orderEditor = e)}
             dataStore={this.dataStore}
             dimensionRow={this.dimensionRow}
             dimensionCol={this.dimensionCol}
             parent={this.element}
-            onRowdragstartinit={e => this.onRowDragStart(e)}
+            onRowdragstartinit={e => this.rowDragStart(e)}
           />,
         );
       }
@@ -522,9 +539,10 @@ export class OverlaySelection {
     return (
       <Host
         class={{ mobile: this.isMobileDevice }}
-        // run edit on dblclick
+
+        // Open Editor on DblClick
         onDblClick={(e: MouseEvent) => {
-          // if dblclick prevented outside edit will not start
+          // DblClick prevented outside - Editor will not open
           if (!e.defaultPrevented) {
             this.doEdit();
           }
@@ -532,7 +550,7 @@ export class OverlaySelection {
         onMouseDown={(e: MouseEvent) => this.onElementMouseDown(e)}
         onTouchStart={(e: TouchEvent) => this.onElementMouseDown(e, true)}
       >
-        {els}
+        {nodes}
         <slot name="data" />
       </Host>
     );
@@ -650,10 +668,13 @@ export class OverlaySelection {
     }
   }
 
-  /** Edit finished, close cell and save */
+  /**
+   * Edit finished.
+   * Close Editor and save.
+   */
   protected cellEdit(e: SaveDataDetails) {
     const dataToSave = this.columnService.getSaveData(e.rgRow, e.rgCol, e.val);
-    this.beforeCellEdit.emit(dataToSave);
+    this.cellEditApply.emit(dataToSave);
   }
 
   private async focusNext() {
@@ -694,13 +715,15 @@ export class OverlaySelection {
     }
   }
 
-  private onRowDragStart({
+  private rowDragStart({
     detail,
   }: CustomEvent<{ cell: Cell; text: string }>) {
     detail.text = this.columnService.getCellData(detail.cell.y, detail.cell.x);
   }
 
-  /** Check if edit possible */
+  /**
+   * Verify if edit allowed.
+   */
   protected canEdit() {
     if (this.readonly) {
       return false;
@@ -716,7 +739,9 @@ export class OverlaySelection {
     };
   }
 
-  /** Collect data from element */
+  /**
+   * Collect data
+   */
   protected getData() {
     return {
       el: this.element,

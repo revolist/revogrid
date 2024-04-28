@@ -1,15 +1,26 @@
 import reduce from 'lodash/reduce';
 
-import DataStore, { getSourceItem, getVisibleSourceItem, Groups, setSourceByVirtualIndex } from '../store/dataSource/data.store';
+import DataStore, {
+  getSourceItem,
+  getVisibleSourceItem,
+  Groups,
+  setSourceByVirtualIndex,
+} from '../store/dataSource/data.store';
 import { isRowType, rowTypes } from '../store/storeTypes';
 import DimensionProvider from './dimension.provider';
 import { Trimmed } from '../store/dataSource/trimmed.plugin';
 import { GroupLabelTemplateFunc } from '../plugins/groupingRow/grouping.row.types';
-import { DimensionRows } from '..';
+import { DataLookup, DimensionRows } from '..';
 import { DataType } from '..';
 import { BeforeSaveDataDetails } from '..';
 
-export type RowDataSources = { [T in DimensionRows]: DataStore<DataType, DimensionRows> };
+export type RowDataSources = {
+  [T in DimensionRows]: DataStore<DataType, DimensionRows>;
+};
+
+/**
+ * Data source provider
+ */
 
 export class DataProvider {
   public readonly stores: RowDataSources;
@@ -28,7 +39,11 @@ export class DataProvider {
     data: DataType[],
     type: DimensionRows = 'rgRow',
     disableVirtualRows = false,
-    grouping?: { depth: number; groups?: Groups, customRenderer?: GroupLabelTemplateFunc },
+    grouping?: {
+      depth: number;
+      groups?: Groups;
+      customRenderer?: GroupLabelTemplateFunc;
+    },
     silent = false,
   ): DataType[] {
     // set rgRow data
@@ -45,10 +60,29 @@ export class DataProvider {
     return getSourceItem(store, virtualIndex);
   }
 
-  setCellData({ type, rowIndex, prop, val }: BeforeSaveDataDetails) {
+  setCellData({ type, rowIndex, prop, val }: BeforeSaveDataDetails, mutate = true) {
     const model = this.getModel(rowIndex, type);
     model[prop] = val;
-    setSourceByVirtualIndex(this.stores[type].store, { [rowIndex]: model });
+    // apply data to source
+    setSourceByVirtualIndex(this.stores[type].store, { [rowIndex]: model }, mutate);
+  }
+
+  setRangeData(data: DataLookup, type: DimensionRows) {
+    const items: Record<number, DataType> = {};
+    for (let rowIndex in data) {
+      const oldModel = (items[rowIndex] = getSourceItem(
+        this.stores[type].store,
+        parseInt(rowIndex, 10),
+      ));
+      if (!oldModel) {
+        continue;
+      }
+      for (let prop in data[rowIndex]) {
+        oldModel[prop] = data[rowIndex][prop];
+      }
+    }
+    // apply data to source
+    setSourceByVirtualIndex(this.stores[type].store, items);
   }
 
   refresh(type: DimensionRows | 'all' = 'all') {
@@ -72,7 +106,10 @@ export class DataProvider {
     store.addTrimmed(trimmed);
     this.dimensionProvider.setTrimmed(trimmed, type);
     if (type === 'rgRow') {
-      this.dimensionProvider.setData(getVisibleSourceItem(store.store).length, type);
+      this.dimensionProvider.setData(
+        getVisibleSourceItem(store.store).length,
+        type,
+      );
     }
   }
 }
