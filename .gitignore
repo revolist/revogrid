@@ -3,7 +3,7 @@ custom-element/
 www/
 loader/
 demo/
-demo/node_modules
+demo/*
 fw/
 
 *~

@@ -7,7 +7,7 @@ import { svelteOutputTarget } from '@stencil/svelte-output-target';
 import { vueOutputTarget as vue2OutputTarget } from '@revolist/stencil-vue2-output-target';
 
 const componentCorePackage = '@revolist/revogrid';
-const parent = '../revogrid-proxy';
+const parent = './packages';
 const entry = 'revogrid.ts';
 const directivesProxyFile = (name: string, filepath = entry) =>
   `${parent}/${name}/src/${filepath}`;
@@ -49,29 +49,7 @@ export const config: Config = {
   ],
   // proxies
   outputTargets: [
-    angularOutputTarget({
-      componentCorePackage,
-      directivesProxyFile: directivesProxyFile('angular', `proxies/${entry}`),
-      valueAccessorConfigs: [],
-    }),
-    reactOutputTarget({
-      componentCorePackage,
-      proxiesFile: directivesProxyFile('react'),
-    }),
-
-    vueOutputTarget({
-      componentCorePackage,
-      proxiesFile: directivesProxyFile('vue'),
-      includeDefineCustomElements: true,
-      componentModels: [],
-    }),
-    svelteOutputTarget({
-      componentCorePackage,
-      proxiesFile: directivesProxyFile('svelte'),
-      includeDefineCustomElements: true,
-      legacy: false,
-      includePolyfills: false,
-    }),
+    // #region Vue
     vue2OutputTarget({
       componentCorePackage,
       proxiesFile: directivesProxyFile('vue2'),
@@ -79,6 +57,38 @@ export const config: Config = {
       loaderDir: 'custom-element',
       componentModels: [],
     }),
+    vueOutputTarget({
+      componentCorePackage,
+      proxiesFile: directivesProxyFile('vue3'),
+      includeDefineCustomElements: true,
+      componentModels: [],
+    }),
+    // #endregion
+
+    // #region Angular
+    angularOutputTarget({
+      componentCorePackage,
+      directivesProxyFile: directivesProxyFile('angular', `proxies/${entry}`),
+      valueAccessorConfigs: [],
+    }),
+    // #endregion
+    
+    // #region React
+    reactOutputTarget({
+      componentCorePackage,
+      proxiesFile: directivesProxyFile('react'),
+    }),
+    // #endregion
+
+    // #region Svelte
+    svelteOutputTarget({
+      componentCorePackage,
+      proxiesFile: directivesProxyFile('svelte'),
+      includeDefineCustomElements: true,
+      legacy: false,
+      includePolyfills: false,
+    }),
+    // #endregion
     // custom element, no polifil
     {
       type: 'dist-custom-elements',

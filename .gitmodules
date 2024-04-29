@@ -1,0 +1,15 @@
+[submodule "packages/vue3"]
+	path = packages/vue3
+	url = https://github.com/revolist/vue3-datagrid.git
+[submodule "packages/angular"]
+	path = packages/angular
+	url = https://github.com/revolist/angular-datagrid.git
+[submodule "packages/vue2"]
+	path = packages/vue2
+	url = https://github.com/revolist/vue-datagrid.git
+[submodule "packages/react"]
+	path = packages/react
+	url = https://github.com/revolist/react-datagrid.git
+[submodule "packages/svelte"]
+	path = packages/svelte
+	url = https://github.com/revolist/svelte-datagrid.git
