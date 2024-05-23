@@ -17,11 +17,11 @@
 
 | Event              | Description                                | Type                                                                               |
 | ------------------ | ------------------------------------------ | ---------------------------------------------------------------------------------- |
-| `rowdragendinit`   | Row drag ended                             | `CustomEvent<any>`                                                                 |
-| `rowdragendinit`   | Row dragged, new range ready to be applied | `CustomEvent<{ from: number; to: number; }>`                                       |
-| `rowdragmousemove` | Row mouse move                             | `CustomEvent<Cell>`                                                                |
-| `rowdragmoveinit`  | Row move                                   | `CustomEvent<PositionItem>`                                                        |
+| `rowdragendinit`   | Row drag ended started                     | `CustomEvent<any>`                                                                 |
+| `rowdragmousemove` | Row mouse move started                     | `CustomEvent<Cell>`                                                                |
+| `rowdragmoveinit`  | Row move started                           | `CustomEvent<PositionItem>`                                                        |
 | `rowdragstartinit` | Row drag started                           | `CustomEvent<{ cell: Cell; text: string; pos: PositionItem; event: MouseEvent; }>` |
+| `rowdropinit`      | Row dragged, new range ready to be applied | `CustomEvent<{ from: number; to: number; }>`                                       |
 
 
 ## Methods

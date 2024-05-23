@@ -90,6 +90,9 @@ export type BeforeRangeSaveDataDetails = {
   };
   type: DimensionRows;
 };
+
+export type AfterEditEvent = BeforeRangeSaveDataDetails | BeforeSaveDataDetails;
+
 export interface EditCellStore extends Cell {
   val?: SaveData;
 }

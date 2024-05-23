@@ -82,6 +82,7 @@ import {
   Cell,
   ChangedRange,
   RangeArea,
+  AfterEditEvent,
 } from '../../types/selection';
 import { Theme } from '../../types/theme';
 import {
@@ -296,9 +297,7 @@ export class RevoGridComponent {
   /**
    * Triggered after data applied or range changed.
    */
-  @Event() afteredit: EventEmitter<
-    BeforeSaveDataDetails | BeforeRangeSaveDataDetails
-  >;
+  @Event() afteredit: EventEmitter<AfterEditEvent>;
 
   /**
    * This event is triggered before autofill is applied.
@@ -727,7 +726,7 @@ export class RevoGridComponent {
   }
 
   /**
-   * Clear current grid focus
+   * Clear current grid focus. Grid has no longer focus on it.
    */
   @Method() async clearFocus() {
     const focused = this.viewport?.getFocused();
@@ -888,7 +887,7 @@ export class RevoGridComponent {
     }
   }
 
-  @Listen('rowdragendinit') onRowDropped(
+  @Listen('rowdropinit') onRowDropped(
     e: CustomEvent<{ from: number; to: number }>,
   ) {
     // e.cancelBubble = true;

@@ -44,18 +44,18 @@ export class OrderEditor {
     event: MouseEvent;
   }>;
 
-  /** Row drag ended */
-  @Event({ eventName: 'rowdragendinit', cancelable: true })
+  /** Row drag ended started */
+  @Event({ eventName: 'rowdragendinit' })
   rowDragEnd: EventEmitter;
 
-  /** Row move */
+  /** Row move started */
   @Event({ eventName: 'rowdragmoveinit', cancelable: true }) rowDrag: EventEmitter<PositionItem>;
 
-  /** Row mouse move */
+  /** Row mouse move started */
   @Event({ eventName: 'rowdragmousemove', cancelable: true })rowMouseMove: EventEmitter<Cell>;
 
   /** Row dragged, new range ready to be applied */
-  @Event({ eventName: 'rowdragendinit', cancelable: true }) rowDropped: EventEmitter<{
+  @Event({ eventName: 'rowdropinit', cancelable: true }) rowDropped: EventEmitter<{
     from: number;
     to: number;
   }>;

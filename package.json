@@ -1,7 +1,7 @@
 {
   "name": "@revolist/revogrid",
   "version": "4.0.0",
-  "description": "Virtual reactive data grid component - RevoGrid.",
+  "description": "Virtual reactive data grid spreadsheet component - RevoGrid.",
   "license": "MIT",
   "directories": {
     "doc": "docs"
@@ -18,25 +18,47 @@
   "keywords": [
     "revo-grid",
     "revolist",
+    "csv",
     "datagrid",
-    "storybook",
-    "stenciljs",
-    "reactive",
-    "grid",
-    "datagrid",
-    "virtualgrid",
-    "virtual",
-    "vue",
-    "react",
-    "react-grid",
-    "vue-grid",
-    "vue-datagrid",
-    "fast-grid",
-    "excel-grid",
+    "datalist",
+    "datamanager",
     "editable",
     "excel",
+    "excel-grid",
     "export",
-    "filtering"
+    "fast-grid",
+    "filtering",
+    "grid",
+    "grouping",
+    "infinity-grid",
+    "reactive",
+    "spreadsheet",
+    "stenciljs",
+    "storybook",
+    "treeview",
+    "virtualgrid",
+    "virtual",
+    "virtuallist",
+    "virtual-scroll",
+
+    "vue",
+    "vue-grid",
+    "vue-datagrid",
+    "vue3",
+    "vue3-datagrid",
+
+    "react",
+    "react-grid",
+    "react-datagrid",
+
+    "svelte",
+    "svelte-grid",
+    "svelte-datagrid",
+
+    "angular",
+    "angular-grid",
+    "angular-datagrid",
+    "angular-tree"
   ],
   "main": "dist/index.cjs.js",
   "module": "dist/index.js",
@@ -90,7 +112,10 @@
     "typescript": "^5.2.2"
   },
   "dependencies": {
-    "@stencil/core": "^4.16.0",
+    "@stencil/core": "^4.17.1",
     "lodash": "^4.17.21"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

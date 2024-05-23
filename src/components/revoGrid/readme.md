@@ -106,7 +106,7 @@ Type: `Promise<CustomEvent<{ trimmed: Record<number, boolean>; trimmedType: stri
 
 ### `clearFocus() => Promise<void>`
 
-Clear current grid focus
+Clear current grid focus. Grid has no longer focus on it.
 
 #### Returns
 

@@ -6,7 +6,7 @@
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 import { AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeRowRenderEvent, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionSettingsState, DragStartEvent, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, Observable, PositionItem, RowDefinition, RowHeaders, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/interfaces";
-import { BeforeEdit, BeforeRangeSaveDataDetails, BeforeSaveDataDetails, Cell, ChangedRange, EditCell, EditorCtr, Editors, RangeArea, SaveDataDetails, SelectionStoreState, TempRange } from "./types/selection";
+import { AfterEditEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeSaveDataDetails, Cell, ChangedRange, EditCell, EditorCtr, Editors, RangeArea, SaveDataDetails, SelectionStoreState, TempRange } from "./types/selection";
 import { PluginBaseComponent, PluginExternalConstructor } from "./types/plugin";
 import { Theme } from "./types/theme";
 import { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
@@ -24,7 +24,7 @@ import { ResizeProps } from "./services/resizable.directive";
 import { Cell as Cell1, ColumnRegular as ColumnRegular1, DataType as DataType1, DimensionCols as DimensionCols1, DimensionRows as DimensionRows1, DimensionSettingsState as DimensionSettingsState1, Observable as Observable1, SelectionStoreState as SelectionStoreState1 } from "./components";
 import { ElementScroll, ViewportData } from "./types/viewport.interfaces";
 export { AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeRowRenderEvent, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionSettingsState, DragStartEvent, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, Observable, PositionItem, RowDefinition, RowHeaders, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/interfaces";
-export { BeforeEdit, BeforeRangeSaveDataDetails, BeforeSaveDataDetails, Cell, ChangedRange, EditCell, EditorCtr, Editors, RangeArea, SaveDataDetails, SelectionStoreState, TempRange } from "./types/selection";
+export { AfterEditEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeSaveDataDetails, Cell, ChangedRange, EditCell, EditorCtr, Editors, RangeArea, SaveDataDetails, SelectionStoreState, TempRange } from "./types/selection";
 export { PluginBaseComponent, PluginExternalConstructor } from "./types/plugin";
 export { Theme } from "./types/theme";
 export { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
@@ -73,7 +73,7 @@ export namespace Components {
          */
         "canMoveColumns": boolean;
         /**
-          * Clear current grid focus
+          * Clear current grid focus. Grid has no longer focus on it.
          */
         "clearFocus": () => Promise<void>;
         /**
@@ -729,7 +729,7 @@ declare global {
         "contentsizechanged": MultiDimensionType;
         "beforeedit": BeforeSaveDataDetails;
         "beforerangeedit": BeforeRangeSaveDataDetails;
-        "afteredit": BeforeSaveDataDetails | BeforeRangeSaveDataDetails;
+        "afteredit": AfterEditEvent;
         "beforeautofill": ChangedRange;
         "beforeange": ChangedRange;
         "afterfocus": {
@@ -965,7 +965,7 @@ declare global {
         "rowdragendinit": any;
         "rowdragmoveinit": PositionItem;
         "rowdragmousemove": Cell;
-        "rowdragendinit": {
+        "rowdropinit": {
     from: number;
     to: number;
   };
@@ -1236,7 +1236,7 @@ declare namespace LocalJSX {
         /**
           * Triggered after data applied or range changed.
          */
-        "onAfteredit"?: (event: RevoGridCustomEvent<BeforeSaveDataDetails | BeforeRangeSaveDataDetails>) => void;
+        "onAfteredit"?: (event: RevoGridCustomEvent<AfterEditEvent>) => void;
         /**
           * Triggered after focus render finished. Can be used to access a focus element through `event.target`
          */
@@ -1762,22 +1762,15 @@ declare namespace LocalJSX {
          */
         "dimensionRow"?: Observable<DimensionSettingsState>;
         /**
-          * Row drag ended
+          * Row drag ended started
          */
         "onRowdragendinit"?: (event: RevogrOrderEditorCustomEvent<any>) => void;
         /**
-          * Row dragged, new range ready to be applied
-         */
-        "onRowdragendinit"?: (event: RevogrOrderEditorCustomEvent<{
-    from: number;
-    to: number;
-  }>) => void;
-        /**
-          * Row mouse move
+          * Row mouse move started
          */
         "onRowdragmousemove"?: (event: RevogrOrderEditorCustomEvent<Cell>) => void;
         /**
-          * Row move
+          * Row move started
          */
         "onRowdragmoveinit"?: (event: RevogrOrderEditorCustomEvent<PositionItem>) => void;
         /**
@@ -1788,6 +1781,13 @@ declare namespace LocalJSX {
     text: string;
     pos: PositionItem;
     event: MouseEvent;
+  }>) => void;
+        /**
+          * Row dragged, new range ready to be applied
+         */
+        "onRowdropinit"?: (event: RevogrOrderEditorCustomEvent<{
+    from: number;
+    to: number;
   }>) => void;
         /**
           * Parent element

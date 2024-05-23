@@ -10,7 +10,9 @@ const componentCorePackage = '@revolist/revogrid';
 const parent = './packages';
 const entry = 'revogrid.ts';
 const directivesProxyFile = (name: string, filepath = entry) =>
-  `${parent}/${name}/src/${filepath}`;
+  `${parent}/${name}/lib/${filepath}`;
+
+const angularPath = (name: string, filepath = entry) => `${parent}/angular/projects/${name}/src/lib/${filepath}`;
 
 export const config: Config = {
   // https://github.com/ionic-team/stencil/blob/master/src/declarations/stencil-public-compiler.ts
@@ -68,7 +70,9 @@ export const config: Config = {
     // #region Angular
     angularOutputTarget({
       componentCorePackage,
-      directivesProxyFile: directivesProxyFile('angular', `proxies/${entry}`),
+      outputType: 'component',
+      directivesProxyFile: angularPath('angular-datagrid', `components.ts`),
+      directivesArrayFile: angularPath('angular-datagrid', entry),
       valueAccessorConfigs: [],
     }),
     // #endregion

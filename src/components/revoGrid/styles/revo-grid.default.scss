@@ -1,6 +1,7 @@
 @import './revo-grid.mixin.scss';
 
-revo-grid[theme='default'] {
+revo-grid[theme='default'],
+revo-grid:not([theme]) {
   $header-size: 30px;
   $header-bg: #f8f9fa;
   $header-color: #000;
