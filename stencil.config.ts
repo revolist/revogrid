@@ -93,6 +93,7 @@ export const config: Config = {
       includePolyfills: false,
     }),
     // #endregion
+
     // custom element, no polifil
     {
       type: 'dist-custom-elements',
@@ -108,6 +109,7 @@ export const config: Config = {
     },
     {
       type: 'docs-readme',
+      dir: './docs',
       footer: '*Built with love by Revolist OU*',
     },
     {

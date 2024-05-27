@@ -78,7 +78,6 @@
     "copy:type": "cp -r ./dist/types/* ./dist/collection",
     "build:demo": "cd ./demo/ && rm -rf node_modules && npm i && npm run build",
     "serve": "stencil build --dev --watch --serve",
-    "generate": "stencil generate",
     "deploy": "git submodule update && npm run build:demo && gh-pages -d ./demo/src/.vuepress/dist",
     "prettier": "npx prettier --write ./src"
   },

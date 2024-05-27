@@ -1,0 +1,5 @@
+## License
+
+MIT
+
+---
