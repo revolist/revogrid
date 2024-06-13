@@ -1,6 +1,8 @@
 import { Component, Listen, Method, Event, EventEmitter, Prop } from '@stencil/core';
 import { DataFormat } from '../../types/interfaces';
-
+/**
+ * This Clipboard provides functionality for handling clipboard events in a web application.
+ */
 @Component({ tag: 'revogr-clipboard' })
 export class Clipboard {
   /**

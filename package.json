@@ -3,9 +3,6 @@
   "version": "4.0.0",
   "description": "Virtual reactive data grid spreadsheet component - RevoGrid.",
   "license": "MIT",
-  "directories": {
-    "doc": "docs"
-  },
   "author": "revolist",
   "homepage": "https://github.com/revolist/revogrid#readme",
   "repository": {
@@ -60,22 +57,42 @@
     "angular-datagrid",
     "angular-tree"
   ],
+
   "main": "dist/index.cjs.js",
   "module": "dist/index.js",
-  "es2015": "dist/esm/index.mjs",
-  "es2017": "dist/esm/index.mjs",
-  "types": "dist/types/index.d.ts",
+  "unpkg": "dist/revo-grid/revo-grid.esm.js",
+  
   "collection": "dist/collection/collection-manifest.json",
   "collection:main": "dist/collection/index.js",
-  "unpkg": "dist/revo-grid/revo-grid.esm.js",
+
+  "types": "dist/types/index.d.ts",
+
+  "exports": {
+    ".": {
+      "import": "./dist/revo-grid/revo-grid.esm.js",
+      "require": "./dist/revo-grid/revo-grid.cjs.js",
+      "types": "./dist/types/index.d.ts"
+    },
+    "./standalone": {
+      "import": "./dist/components/revo-grid.js",
+      "types": "./dist/components/revo-grid.d.ts"
+    },
+    "./loader": {
+      "import": "./loader/index.js",
+      "require": "./loader/index.cjs",
+      "types": "./loader/index.d.ts"
+    }
+  },
+
   "files": [
     "dist/",
     "loader/",
-    "custom-element"
+    "hydrate/"
   ],
   "scripts": {
-    "build": "stencil build --prod --docs",
-    "copy:type": "cp -r ./dist/types/* ./dist/collection",
+    "build": "stencil build --prod",
+    "readme": "./readme/generate_readme.sh",
+    "copy:type": "cp -r dist/types/* dist/collection",
     "build:demo": "cd ./demo/ && rm -rf node_modules && npm i && npm run build",
     "serve": "stencil build --dev --watch --serve",
     "deploy": "git submodule update && npm run build:demo && gh-pages -d ./demo/src/.vuepress/dist",

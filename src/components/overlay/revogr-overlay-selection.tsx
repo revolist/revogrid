@@ -15,12 +15,11 @@ import SelectionStoreService from '../../store/selection/selection.store.service
 import { codesLetter } from '../../utils/key.codes';
 import { MOBILE_CLASS, SELECTION_BORDER_CLASS } from '../../utils/consts';
 import { DSourceState } from '../../store/dataSource/data.store';
-import { isRangeSingleCell } from '../../store/selection/selection.helpers';
+import { getRange, isRangeSingleCell } from '../../store/selection/selection.helpers';
 import { getCurrentCell, getElStyle } from './selection.utils';
 import { isEditInput } from '../editors/edit.utils';
 import { KeyboardService } from './keyboard.service';
 import { AutoFillService } from './autofill.service';
-import { ClipboardService } from '../clipboard/clipboard.service';
 import { getFromEvent, verifyTouchTarget } from '../../utils/events';
 import {
   Observable,
@@ -247,12 +246,13 @@ export class OverlaySelection {
 
   // #region Private Properties
   @Element() element: HTMLElement;
+  private clipboard: HTMLRevogrClipboardElement;
+
   protected columnService: ColumnService;
 
   protected selectionStoreService: SelectionStoreService;
   private keyboardService: KeyboardService | null = null;
   private autoFillService: AutoFillService | null = null;
-  private clipboardService: ClipboardService | null = null;
   private orderEditor: HTMLRevogrOrderEditorElement;
   private revogrEdit: HTMLRevogrEditElement | null = null;
   // #endregion
@@ -325,7 +325,6 @@ export class OverlaySelection {
       selectAll: () => this.selectAll.emit(),
     });
     this.createAutoFillService();
-    this.createClipboardService();
   }
   /** Autofill */
   @Watch('dimensionRow')
@@ -361,45 +360,6 @@ export class OverlaySelection {
     this.columnService?.destroy();
     this.columnService = new ColumnService(this.dataStore, this.colData);
     this.createAutoFillService();
-    this.createClipboardService();
-  }
-
-  /** Clipboard */
-  createClipboardService() {
-    this.clipboardService = new ClipboardService({
-      selectionStoreService: this.selectionStoreService,
-      columnService: this.columnService,
-      dataStore: this.dataStore,
-      rangeApply: (d, r) => this.autoFillService.onRangeApply(d, r),
-      rangeCopy: range => {
-        if (!range) {
-          return undefined;
-        }
-        const { data, mapping } = this.columnService.copyRangeArray(
-          range,
-          this.dataStore,
-        );
-        const event = this.rangeClipboardCopy.emit({
-          range,
-          data,
-          mapping,
-          ...this.types,
-        });
-        if (event.defaultPrevented) {
-          return undefined;
-        }
-        return event.detail.data;
-      },
-      rangeClear: () => !this.readonly && this.clearCell(),
-      beforeCopy: range => this.beforeCopyRegion.emit(range),
-      beforePaste: (data, range) => {
-        return this.rangeClipboardPaste.emit({
-          data,
-          range,
-          ...this.types,
-        });
-      },
-    });
   }
 
   connectedCallback() {
@@ -510,7 +470,15 @@ export class OverlaySelection {
 
       // Clipboard
       if ((range || selectionFocus) && this.useClipboard) {
-        nodes.push(this.clipboardService.renderClipboard(this.readonly));
+        nodes.push(
+          <revogr-clipboard
+            readonly={this.readonly}
+            onCopyregion={e => this.onCopy(e.detail)}
+            onClearregion={() => !this.readonly && this.clearCell()}
+            ref={e => (this.clipboard = e)}
+            onPasteregion={e => this.onPaste(e.detail)}
+          />,
+        );
       }
 
       // Range
@@ -539,7 +507,6 @@ export class OverlaySelection {
     return (
       <Host
         class={{ mobile: this.isMobileDevice }}
-
         // Open Editor on DblClick
         onDblClick={(e: MouseEvent) => {
           // DblClick prevented outside - Editor will not open
@@ -677,6 +644,63 @@ export class OverlaySelection {
     this.cellEditApply.emit(dataToSave);
   }
 
+  private getRegion() {
+    const focus = this.selectionStoreService.focused;
+    let range = this.selectionStoreService.ranged;
+    if (!range) {
+      range = getRange(focus, focus);
+    }
+    return range;
+  }
+  private onCopy(e: DataTransfer) {
+    const range = this.getRegion();
+    const canCopyEvent = this.beforeCopyRegion.emit(range);
+    if (canCopyEvent.defaultPrevented) {
+      return false;
+    }
+    let rangeData: (any[][]) | undefined;
+
+    if (range) {
+      const { data, mapping } = this.columnService.copyRangeArray(
+        range,
+        this.dataStore,
+      );
+      const event = this.rangeClipboardCopy.emit({
+        range,
+        data,
+        mapping,
+        ...this.types,
+      });
+      if (!event.defaultPrevented) {
+        rangeData = event.detail.data;
+      }
+    }
+
+    this.clipboard.doCopy(e, rangeData);
+    return true;
+  }
+
+  private onPaste(data: string[][]) {
+    const focus = this.selectionStoreService.focused;
+    const isEditing = this.selectionStoreService.edited !== null;
+    if (!focus || isEditing) {
+      return;
+    }
+    let { changed, range } = this.columnService.getTransformedDataToApply(
+      focus,
+      data,
+    );
+    const { defaultPrevented: canPaste } = this.rangeClipboardPaste.emit({
+      data: changed,
+      range,
+      ...this.types,
+    });
+    if (canPaste) {
+      return;
+    }
+    this.autoFillService.onRangeApply(changed, range);
+  }
+
   private async focusNext() {
     const canFocus = await this.keyboardService.keyChangeSelection(
       new KeyboardEvent('keydown', {
@@ -715,9 +739,7 @@ export class OverlaySelection {
     }
   }
 
-  private rowDragStart({
-    detail,
-  }: CustomEvent<{ cell: Cell; text: string }>) {
+  private rowDragStart({ detail }: CustomEvent<{ cell: Cell; text: string }>) {
     detail.text = this.columnService.getCellData(detail.cell.y, detail.cell.x);
   }
 

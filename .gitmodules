@@ -13,3 +13,15 @@
 [submodule "packages/svelte"]
 	path = packages/svelte
 	url = https://github.com/revolist/svelte-datagrid.git
+[submodule "formats/date"]
+	path = formats/date
+	url = https://github.com/revolist/revogrid-column-date.git
+[submodule "formats/number"]
+	path = formats/number
+	url = https://github.com/revolist/revogrid-column-numeral.git
+[submodule "formats/select"]
+	path = formats/select
+	url = https://github.com/revolist/revogrid-column-select.git
+[submodule "docs"]
+	path = docs
+	url = https://github.com/revolist/revogrid-docs.git

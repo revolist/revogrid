@@ -42,7 +42,8 @@ export default {
   },
 };
 </script>
-
+```
+```vue
 // Cell.vue
 <template>Custom cell</template>
 <script>

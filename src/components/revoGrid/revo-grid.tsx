@@ -92,10 +92,20 @@ import {
 import { HeaderProperties, PluginProviders } from '../..';
 
 /**
- * `revo-grid`: High-performance, customizable grid library for managing large datasets.
+ * Revogrid - High-performance, customizable grid library for managing large datasets.
+ * 
+ * :::tip
+ * Read [type definition file](https://github.com/revolist/revogrid/blob/master/src/interfaces.d.ts) for the full interface information.
+ * All complex property types such as `ColumnRegular`, `ColumnProp`, `ColumnDataSchemaModel` can be found there.
+ * :::
+ * 
+ * :::tip
+ * For a comprehensive events guide, check the [dependency tree](#Dependencies).
+ * All events propagate to the root level of the grid.
+ * :::
  * 
  * @slot data-{column-type}-{row-type}. @example data-rgCol-rgRow - main data slot. Applies extra elements in <revogr-data />.
- * @slot focus-${view.type}-${data.type}. @example focus-rgCol-rgRow - focus layer for main data. Applies extra elements in <revogr-focus />.
+ * @slot focus-{column-type}-{row-type}. @example focus-rgCol-rgRow - focus layer for main data. Applies extra elements in <revogr-focus />.
  */
 @Component({
   tag: 'revo-grid',
@@ -271,6 +281,14 @@ export class RevoGridComponent {
    * When several plugins require initial rendering this will prevent double initial rendering.
    */
   @Prop() jobsBeforeRender: Promise<any>[] = [];
+
+  /**
+   * Register new virtual node inside of grid.
+   * Used for additional items creation such as plugin elements.
+   * Should be set before grid render inside of plugins.
+   */
+  @Prop() registerVNode: VNode[] = [];
+
   // #endregion
 
   // #region Events
@@ -645,15 +663,6 @@ export class RevoGridComponent {
     rowType = 'rgRow',
   ) {
     this.viewport?.setFocus(colType, rowType, cellStart, cellEnd);
-  }
-
-  /**
-   * Register new virtual node inside of grid.
-   * Used for additional items creation such as plugin elements.
-   * Should be called before render inside of plugins.
-   */
-  @Method() async registerVNode(elements: VNode[]) {
-    this.extraElements = [...this.extraElements, ...elements];
   }
 
   /**  Get data from source */
@@ -1151,6 +1160,13 @@ export class RevoGridComponent {
   @Watch('rowHeaders') rowHeadersChange(rowHeaders?: RowHeaders | boolean) {
     this.rowheaderschanged.emit(rowHeaders);
   }
+
+  /**
+   * Register external VNodes
+   */
+  @Watch('registerVNode') registerOutsideVNodes(elements: VNode[] = []) {
+    this.extraElements = [...this.extraElements, ...elements];
+  }
   // #endregion
 
   componentWillRender() {
@@ -1264,6 +1280,9 @@ export class RevoGridComponent {
         this.viewportscroll.emit(e);
       },
     );
+
+    // Should be in the end, some plugins can update @registerVNode
+    this.registerOutsideVNodes(this.registerVNode);
   }
 
   disconnectedCallback() {

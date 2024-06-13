@@ -40,6 +40,9 @@ const FILTER_LIST_CLASS_ACTION = 'multi-filter-list-action';
 /**
  * Filter panel for editing filters
  */
+/**
+ * @internal
+ */
 @Component({
   tag: 'revogr-filter-panel',
   styleUrl: 'filter.style.scss',
@@ -174,7 +177,7 @@ export class FilterPanel {
           );
         })}
 
-        {propFilters.length > 0 ? <div class="add-filter-divider"></div> : ''}
+        {propFilters.length > 0 ? <div class="add-filter-divider"/> : ''}
       </div>
     );
   }

@@ -68,12 +68,6 @@ export interface CellTemplate {
 export interface ColumnType extends ColumnProperties {
   /** is column or cell readonly */
   readonly?: ReadOnlyFormat;
-  /** cell properties */
-  cellProperties?: PropertiesFunc;
-  /** cell inner template, now template is async */
-  cellTemplate?: CellTemplate;
-  /** cell compare function */
-  cellCompare?: CellCompareFunc;
   /** default column size */
   size?: number;
   /**
@@ -86,6 +80,12 @@ export interface ColumnType extends ColumnProperties {
   maxSize?: number;
   /** represents custom editor defined in @editors property */
   editor?: string | EditorCtr;
+  /** cell properties */
+  cellProperties?: PropertiesFunc;
+  /** cell inner template, now template is async */
+  cellTemplate?: CellTemplate;
+  /** cell compare function */
+  cellCompare?: CellCompareFunc;
 }
 export type Order = 'asc' | 'desc' | undefined;
 export interface ColumnRegular extends ColumnType {
@@ -95,12 +95,13 @@ export interface ColumnRegular extends ColumnType {
   pin?: DimensionColPin;
   // column header
   name?: DataFormat;
-  // is column can be sorted
-  sortable?: boolean;
   // column size would be changed based on content size
   autoSize?: boolean;
   // filter
   filter?: boolean | string | string[];
+  // is column can be sorted, check @cellCompare function for custom sorting
+  sortable?: boolean;
+  // sort order
   order?: Order;
   // is cell in column or individual can be dragged
   rowDrag?: RowDrag;

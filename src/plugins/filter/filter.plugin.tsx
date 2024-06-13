@@ -4,7 +4,12 @@ import reduce from 'lodash/reduce';
 import { BasePlugin } from '../base.plugin';
 import { FILTER_PROP, isFilterBtn } from './filter.button';
 import { MultiFilterItem } from './filter.pop';
-import { filterEntities, filterNames, FilterType, filterTypes } from './filter.service';
+import {
+  filterEntities,
+  filterNames,
+  FilterType,
+  filterTypes,
+} from './filter.service';
 import { LogicFunction } from './filter.types';
 import { ColumnProp, ColumnRegular, DataType } from '../../types/interfaces';
 import { PluginProviders } from '../..';
@@ -38,6 +43,9 @@ export type FilterLocalization = {
  * @property {boolean|undefined} disableDynamicFiltering - disables dynamic filtering.
  * A way to define your own filter types per column
  */
+/**
+ * @internal
+ */
 export type ColumnFilterConfig = {
   collection?: FilterCollection;
   include?: string[];
@@ -65,10 +73,17 @@ export class FilterPlugin extends BasePlugin {
   private multiFilterItems: MultiFilterItem = {};
   private possibleFilters: Record<string, string[]> = { ...filterTypes };
   private possibleFilterNames: Record<string, string> = { ...filterNames };
-  private possibleFilterEntities: Record<string, LogicFunction> = { ...filterEntities };
+  private possibleFilterEntities: Record<string, LogicFunction> = {
+    ...filterEntities,
+  };
   private filterProp = FILTER_PROP;
 
-  constructor(protected revogrid: HTMLRevoGridElement, providers: PluginProviders, uiid: string, config?: ColumnFilterConfig) {
+  constructor(
+    protected revogrid: HTMLRevoGridElement,
+    providers: PluginProviders,
+    uiid: string,
+    config?: ColumnFilterConfig,
+  ) {
     super(revogrid, providers);
     if (config) {
       this.initConfig(config);
@@ -96,20 +111,26 @@ export class FilterPlugin extends BasePlugin {
       await this.runFiltering();
     };
     this.addEventListener('headerclick', headerclick);
-    this.addEventListener(FILTER_CONFIG_CHANGED_EVENT, ({ detail }: CustomEvent<ColumnFilterConfig | boolean>) => {
-      if (!detail) {
-        this.clearFiltering();
-        return;
-      }
-      if (typeof detail === 'object') {
-        this.initConfig(detail);
-      }
-      aftersourceset();
-    });
+    this.addEventListener(
+      FILTER_CONFIG_CHANGED_EVENT,
+      ({ detail }: CustomEvent<ColumnFilterConfig | boolean>) => {
+        if (!detail) {
+          this.clearFiltering();
+          return;
+        }
+        if (typeof detail === 'object') {
+          this.initConfig(detail);
+        }
+        aftersourceset();
+      },
+    );
     this.addEventListener('aftersourceset', aftersourceset);
-    this.addEventListener('filter', ({ detail }: CustomEvent) => this.onFilterChange(detail));
+    this.addEventListener('filter', ({ detail }: CustomEvent) =>
+      this.onFilterChange(detail),
+    );
 
-    this.revogrid.registerVNode([
+    this.revogrid.registerVNode = [
+      ...this.revogrid.registerVNode,
       <revogr-filter-panel
         uuid={`filter-${uiid}`}
         filterItems={this.multiFilterItems}
@@ -120,7 +141,7 @@ export class FilterPlugin extends BasePlugin {
         disableDynamicFiltering={config?.disableDynamicFiltering}
         ref={e => (this.pop = e)}
       />,
-    ]);
+    ];
   }
 
   private initConfig(config: ColumnFilterConfig) {
@@ -152,7 +173,9 @@ export class FilterPlugin extends BasePlugin {
 
       for (let t in this.possibleFilters) {
         // validate filters, if appropriate function present
-        const newTypes = this.possibleFilters[t].filter(f => config.include.indexOf(f) > -1);
+        const newTypes = this.possibleFilters[t].filter(
+          f => config.include.indexOf(f) > -1,
+        );
         if (newTypes.length) {
           filters[t] = newTypes;
         }
@@ -163,14 +186,18 @@ export class FilterPlugin extends BasePlugin {
       }
     }
     if (config.collection) {
-      this.filterCollection = reduce(config.collection, (result: FilterCollection, item, prop) => {
-        if (this.possibleFilterEntities[item.type]) {
-          result[prop] = item;
-        } else {
-          console.warn(`${item.type} type is not found.`);
-        }
-        return result;
-      }, {});
+      this.filterCollection = reduce(
+        config.collection,
+        (result: FilterCollection, item, prop) => {
+          if (this.possibleFilterEntities[item.type]) {
+            result[prop] = item;
+          } else {
+            console.warn(`${item.type} type is not found.`);
+          }
+          return result;
+        },
+        {},
+      );
     }
 
     if (config.localization) {
@@ -211,7 +238,9 @@ export class FilterPlugin extends BasePlugin {
     });
   }
 
-  private getColumnFilter(type?: boolean | string | string[]): Record<string, string[]> {
+  private getColumnFilter(
+    type?: boolean | string | string[],
+  ): Record<string, string[]> {
     let filterType = 'string';
     if (!type) {
       return { [filterType]: this.possibleFilters[filterType] };
@@ -246,7 +275,12 @@ export class FilterPlugin extends BasePlugin {
   /**
    * Triggers grid filtering
    */
-  async doFiltering(collection: FilterCollection, items: DataType[], columns: ColumnRegular[], filterItems: MultiFilterItem) {
+  async doFiltering(
+    collection: FilterCollection,
+    items: DataType[],
+    columns: ColumnRegular[],
+    filterItems: MultiFilterItem,
+  ) {
     const columnsToUpdate: ColumnRegular[] = [];
 
     columns.forEach(rgCol => {
@@ -263,13 +297,21 @@ export class FilterPlugin extends BasePlugin {
     });
     const itemsToFilter = this.getRowFilter(items, filterItems);
     // check is filter event prevented
-    const { defaultPrevented, detail } = this.emit('beforefiltertrimmed', { collection, itemsToFilter, source: items, filterItems });
+    const { defaultPrevented, detail } = this.emit('beforefiltertrimmed', {
+      collection,
+      itemsToFilter,
+      source: items,
+      filterItems,
+    });
     if (defaultPrevented) {
       return;
     }
 
     // check is trimmed event prevented
-    const isAddedEvent = await this.revogrid.addTrimmed(detail.itemsToFilter, FILTER_TRIMMED_TYPE);
+    const isAddedEvent = await this.revogrid.addTrimmed(
+      detail.itemsToFilter,
+      FILTER_TRIMMED_TYPE,
+    );
     if (isAddedEvent.defaultPrevented) {
       return;
     }
@@ -305,11 +347,21 @@ export class FilterPlugin extends BasePlugin {
     this.filterCollection = collection;
 
     const { source, columns } = await this.getData();
-    const { defaultPrevented, detail } = this.emit('beforefilterapply', { collection: this.filterCollection, source, columns, filterItems: this.multiFilterItems });
+    const { defaultPrevented, detail } = this.emit('beforefilterapply', {
+      collection: this.filterCollection,
+      source,
+      columns,
+      filterItems: this.multiFilterItems,
+    });
     if (defaultPrevented) {
       return;
     }
-    this.doFiltering(detail.collection, detail.source, detail.columns, detail.filterItems);
+    this.doFiltering(
+      detail.collection,
+      detail.source,
+      detail.columns,
+      detail.filterItems,
+    );
   }
 
   private async getData() {
@@ -370,7 +422,8 @@ export class FilterPlugin extends BasePlugin {
         } // end of propFilters forEach
 
         // add to the list of removed/trimmed rows of filter condition is satisfied
-        if (propFilterSatisfiedCount === propFilters.length) trimmed[rowIndex] = true;
+        if (propFilterSatisfiedCount === propFilters.length)
+          trimmed[rowIndex] = true;
       } // end of for-of propKeys
     });
     return trimmed;

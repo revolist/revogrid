@@ -36,8 +36,9 @@ import { EditorComponent } from './editor.component';
   bootstrap: [AppComponent]
 })
 export class AppModule {}
+```
 
-
+```ts
 // app.component.ts
 import { Component, Injector } from '@angular/core';
 import { ColumnRegular, Editors } from '@revolist/revogrid';
@@ -83,8 +84,9 @@ export class AppComponent {
     this.editors = { [MY_EDITOR]: Editor(EditorComponent, ref) };
   }
 }
+```
 
-
+```ts
 // cell.component.ts
 import { Component, Input } from '@angular/core';
 import { ColumnDataSchemaModel } from '@revolist/revogrid';
@@ -101,8 +103,9 @@ export class CellComponent {
     return this.props.rowIndex;
   }
 }
+```
 
-
+```ts
 // editor.component.ts
 import { Component, Input } from '@angular/core';
 import { type EditorType } from '@revolist/angular-datagrid';

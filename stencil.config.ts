@@ -35,10 +35,10 @@ export const config: Config = {
     enableImportInjection: true,
   },
 
-  // buildEs5: 'prod',
   namespace: 'revo-grid',
   taskQueue: 'async',
   globalScript: './src/global/global.ts',
+  validatePrimaryPackageOutputTarget: true,
   plugins: [
     sass({
       injectGlobalPaths: [
@@ -62,7 +62,6 @@ export const config: Config = {
     vueOutputTarget({
       componentCorePackage,
       proxiesFile: directivesProxyFile('vue3'),
-      includeDefineCustomElements: true,
       componentModels: [],
     }),
     // #endregion
@@ -97,24 +96,28 @@ export const config: Config = {
     // custom element, no polifil
     {
       type: 'dist-custom-elements',
-      dir: 'custom-element',
-      customElementsExportBehavior: 'bundle',
+      customElementsExportBehavior: 'auto-define-custom-elements',
       externalRuntime: true,
+      generateTypeDeclarations: true,
       empty: true,
     },
     {
       type: 'dist',
       esmLoaderPath: '../loader',
       empty: true,
+      isPrimaryPackageOutputTarget: true,
     },
     {
       type: 'docs-readme',
-      dir: './docs',
-      footer: '*Built with love by Revolist OU*',
+      dir: './docs/guide/api',
+      footer: '*Built with ❤️ by Revolist OU*',
     },
     {
       type: 'docs-vscode',
       file: 'vscode-data.json',
+    },
+    {
+      type: 'dist-hydrate-script',
     },
     {
       type: 'www',

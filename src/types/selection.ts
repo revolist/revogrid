@@ -103,8 +103,8 @@ export type Editors = {
 export interface EditorCtr {
   new (
     column: ColumnRegular,
-    saveCallback: (value: SaveData, preventFocus?: boolean) => void,
-    cancelEditCallback: (focusNext?: boolean) => void,
+    save: (value: SaveData, preventFocus?: boolean) => void,
+    close: (focusNext?: boolean) => void,
   ): EditorBase;
 }
 export interface EditorBase {

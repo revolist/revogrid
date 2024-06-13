@@ -12,11 +12,11 @@ import { Theme } from "./types/theme";
 import { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
 import { ColumnFilterConfig, FilterCaptions, FilterCollection } from "./plugins/filter/filter.plugin";
 import { GroupingOptions } from "./plugins/groupingRow/grouping.row.types";
+import { VNode } from "@stencil/core";
 import { DimensionCols, DimensionRows, DimensionType, DimensionTypeCol, MultiDimensionType } from "./types/dimension";
 import { FocusedData } from "./components/revoGrid/viewport.service";
 import { ColumnCollection } from "./services/column.data.provider";
 import { DataInput } from "./plugins/export/types";
-import { VNode } from "@stencil/core";
 import { DSourceState, Groups } from "./store/dataSource/data.store";
 import { MultiFilterItem, ShowData } from "./plugins/filter/filter.pop";
 import { LogicFunction } from "./plugins/filter/filter.types";
@@ -30,11 +30,11 @@ export { Theme } from "./types/theme";
 export { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
 export { ColumnFilterConfig, FilterCaptions, FilterCollection } from "./plugins/filter/filter.plugin";
 export { GroupingOptions } from "./plugins/groupingRow/grouping.row.types";
+export { VNode } from "@stencil/core";
 export { DimensionCols, DimensionRows, DimensionType, DimensionTypeCol, MultiDimensionType } from "./types/dimension";
 export { FocusedData } from "./components/revoGrid/viewport.service";
 export { ColumnCollection } from "./services/column.data.provider";
 export { DataInput } from "./plugins/export/types";
-export { VNode } from "@stencil/core";
 export { DSourceState, Groups } from "./store/dataSource/data.store";
 export { MultiFilterItem, ShowData } from "./plugins/filter/filter.pop";
 export { LogicFunction } from "./plugins/filter/filter.types";
@@ -43,7 +43,15 @@ export { Cell as Cell1, ColumnRegular as ColumnRegular1, DataType as DataType1, 
 export { ElementScroll, ViewportData } from "./types/viewport.interfaces";
 export namespace Components {
     /**
-     * `revo-grid`: High-performance, customizable grid library for managing large datasets.
+     * High-performance, customizable grid library for managing large datasets.
+     * :::tip
+     * Read [type definition file](https://github.com/revolist/revogrid/blob/master/src/interfaces.d.ts) for the full interface information.
+     * All complex property types such as `ColumnRegular`, `ColumnProp`, `ColumnDataSchemaModel` can be found there.
+     * :::
+     * :::tip
+     * For a comprehensive events guide, check the [dependency tree](#Dependencies).
+     * All events propagate to the root level of the grid.
+     * :::
      * @example data-rgCol-rgRow - main data slot. Applies extra elements in <revogr-data />.
      * @example focus-rgCol-rgRow - focus layer for main data. Applies extra elements in <revogr-focus />.
      */
@@ -192,9 +200,9 @@ export namespace Components {
          */
         "refresh": (type?: DimensionRows | 'all') => Promise<void>;
         /**
-          * Register new virtual node inside of grid. Used for additional items creation such as plugin elements. Should be called before render inside of plugins.
+          * Register new virtual node inside of grid. Used for additional items creation such as plugin elements. Should be set before grid render inside of plugins.
          */
-        "registerVNode": (elements: VNode[]) => Promise<void>;
+        "registerVNode": VNode[];
         /**
           * When true, columns are resizable.
          */
@@ -275,6 +283,9 @@ export namespace Components {
          */
         "useClipboard": boolean;
     }
+    /**
+     * This Clipboard provides functionality for handling clipboard events in a web application.
+     */
     interface RevogrClipboard {
         "doCopy": (e: DataTransfer, data?: DataFormat[][]) => Promise<void>;
         /**
@@ -379,9 +390,6 @@ export namespace Components {
          */
         "saveOnClose": boolean;
     }
-    /**
-     * Filter panel for editing filters
-     */
     interface RevogrFilterPanel {
         "disableDynamicFiltering": boolean;
         "filterCaptions": FilterCaptions | undefined;
@@ -799,7 +807,15 @@ declare global {
         "beforegridrender": any;
     }
     /**
-     * `revo-grid`: High-performance, customizable grid library for managing large datasets.
+     * High-performance, customizable grid library for managing large datasets.
+     * :::tip
+     * Read [type definition file](https://github.com/revolist/revogrid/blob/master/src/interfaces.d.ts) for the full interface information.
+     * All complex property types such as `ColumnRegular`, `ColumnProp`, `ColumnDataSchemaModel` can be found there.
+     * :::
+     * :::tip
+     * For a comprehensive events guide, check the [dependency tree](#Dependencies).
+     * All events propagate to the root level of the grid.
+     * :::
      * @example data-rgCol-rgRow - main data slot. Applies extra elements in <revogr-data />.
      * @example focus-rgCol-rgRow - focus layer for main data. Applies extra elements in <revogr-focus />.
      */
@@ -828,6 +844,9 @@ declare global {
         "beforecopyapply": any;
         "copyregion": DataTransfer;
     }
+    /**
+     * This Clipboard provides functionality for handling clipboard events in a web application.
+     */
     interface HTMLRevogrClipboardElement extends Components.RevogrClipboard, HTMLStencilElement {
         addEventListener<K extends keyof HTMLRevogrClipboardElementEventMap>(type: K, listener: (this: HTMLRevogrClipboardElement, ev: RevogrClipboardCustomEvent<HTMLRevogrClipboardElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
         addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
@@ -892,9 +911,6 @@ declare global {
     interface HTMLRevogrFilterPanelElementEventMap {
         "filterChange": MultiFilterItem;
     }
-    /**
-     * Filter panel for editing filters
-     */
     interface HTMLRevogrFilterPanelElement extends Components.RevogrFilterPanel, HTMLStencilElement {
         addEventListener<K extends keyof HTMLRevogrFilterPanelElementEventMap>(type: K, listener: (this: HTMLRevogrFilterPanelElement, ev: RevogrFilterPanelCustomEvent<HTMLRevogrFilterPanelElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
         addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
@@ -1140,7 +1156,15 @@ declare global {
 }
 declare namespace LocalJSX {
     /**
-     * `revo-grid`: High-performance, customizable grid library for managing large datasets.
+     * High-performance, customizable grid library for managing large datasets.
+     * :::tip
+     * Read [type definition file](https://github.com/revolist/revogrid/blob/master/src/interfaces.d.ts) for the full interface information.
+     * All complex property types such as `ColumnRegular`, `ColumnProp`, `ColumnDataSchemaModel` can be found there.
+     * :::
+     * :::tip
+     * For a comprehensive events guide, check the [dependency tree](#Dependencies).
+     * All events propagate to the root level of the grid.
+     * :::
      * @example data-rgCol-rgRow - main data slot. Applies extra elements in <revogr-data />.
      * @example focus-rgCol-rgRow - focus layer for main data. Applies extra elements in <revogr-focus />.
      */
@@ -1405,6 +1429,10 @@ declare namespace LocalJSX {
          */
         "readonly"?: boolean;
         /**
+          * Register new virtual node inside of grid. Used for additional items creation such as plugin elements. Should be set before grid render inside of plugins.
+         */
+        "registerVNode"?: VNode[];
+        /**
           * When true, columns are resizable.
          */
         "resize"?: boolean;
@@ -1445,6 +1473,9 @@ declare namespace LocalJSX {
          */
         "useClipboard"?: boolean;
     }
+    /**
+     * This Clipboard provides functionality for handling clipboard events in a web application.
+     */
     interface RevogrClipboard {
         /**
           * Paste 4. Fired after paste applied to the grid
@@ -1616,9 +1647,6 @@ declare namespace LocalJSX {
          */
         "saveOnClose"?: boolean;
     }
-    /**
-     * Filter panel for editing filters
-     */
     interface RevogrFilterPanel {
         "disableDynamicFiltering"?: boolean;
         "filterCaptions"?: FilterCaptions | undefined;
@@ -2091,11 +2119,22 @@ declare module "@stencil/core" {
     export namespace JSX {
         interface IntrinsicElements {
             /**
-             * `revo-grid`: High-performance, customizable grid library for managing large datasets.
+             * High-performance, customizable grid library for managing large datasets.
+             * :::tip
+             * Read [type definition file](https://github.com/revolist/revogrid/blob/master/src/interfaces.d.ts) for the full interface information.
+             * All complex property types such as `ColumnRegular`, `ColumnProp`, `ColumnDataSchemaModel` can be found there.
+             * :::
+             * :::tip
+             * For a comprehensive events guide, check the [dependency tree](#Dependencies).
+             * All events propagate to the root level of the grid.
+             * :::
              * @example data-rgCol-rgRow - main data slot. Applies extra elements in <revogr-data />.
              * @example focus-rgCol-rgRow - focus layer for main data. Applies extra elements in <revogr-focus />.
              */
             "revo-grid": LocalJSX.RevoGrid & JSXBase.HTMLAttributes<HTMLRevoGridElement>;
+            /**
+             * This Clipboard provides functionality for handling clipboard events in a web application.
+             */
             "revogr-clipboard": LocalJSX.RevogrClipboard & JSXBase.HTMLAttributes<HTMLRevogrClipboardElement>;
             /**
              * This component is responsible for rendering data
@@ -2108,9 +2147,6 @@ declare module "@stencil/core" {
              * and managing the lifecycle of the editor instance.
              */
             "revogr-edit": LocalJSX.RevogrEdit & JSXBase.HTMLAttributes<HTMLRevogrEditElement>;
-            /**
-             * Filter panel for editing filters
-             */
             "revogr-filter-panel": LocalJSX.RevogrFilterPanel & JSXBase.HTMLAttributes<HTMLRevogrFilterPanelElement>;
             /**
              * Focus component. Shows focus layer around the cell that is currently in focus.

@@ -13,9 +13,8 @@ yarn add @revolist/vue3-datagrid;
 ```
 
 
-App.vue
-
 ```vue
+// App.vue
 <template>
     <Grid
       :editors="gridEditors"
@@ -83,8 +82,9 @@ function testAction(e: CustomEvent) {
 </script>
 ```
 
-Cell.vue
+
 ```vue
+// Cell.vue
 <template>
   <div ref="cell" @click="customCellClickEvent">{{ rowIndex }}</div>
 </template>
@@ -108,8 +108,8 @@ function customCellClickEvent() {
 </script>
 ```
 
-Editor.vue
 ```vue
+// Editor.vue
 <template>
   <button @click="onBtn">Finish edit</button>
 </template>
