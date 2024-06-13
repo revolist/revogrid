@@ -26,7 +26,6 @@ import AutoSize, {
   AutoSizeColumnConfig,
 } from '../../plugins/column.auto-size.plugin';
 import {
-  columnTypes as columnDimensions,
   rowTypes as rowDimensions,
 } from '../../store/storeTypes';
 import {
@@ -964,26 +963,13 @@ export class RevoGridComponent {
     this.columnChanged(this.columns);
   }
   @Watch('columns') columnChanged(newVal: ColumnDataSchema[] = []) {
-    // clear existing data
-    this.dimensionProvider.dropColumns();
     const columnGather = ColumnDataProvider.getColumns(
       newVal,
       0,
       this.columnTypes,
     );
     this.beforecolumnsset.emit(columnGather);
-    for (let type of columnDimensions) {
-      const items = columnGather.columns[type];
-
-      // for pinned col no need virtual data
-      const noVirtual = type !== 'rgCol' || this.disableVirtualX;
-      this.dimensionProvider.setNewColumns(
-        type,
-        items.length,
-        ColumnDataProvider.getSizes(items),
-        noVirtual,
-      );
-    }
+    this.dimensionProvider.applyNewColumns(columnGather.columns, this.disableVirtualX);
     this.beforecolumnapplied.emit(columnGather);
     const columns = this.columnProvider.setColumns(columnGather);
     this.aftercolumnsset.emit({
@@ -1377,9 +1363,8 @@ export class RevoGridComponent {
       ];
 
       // Render viewport data (vertical sections)
-      view.dataPorts.forEach((data, j) => {
-        const key = Number(view.prop.key) + (j + 1);
-
+      view.dataPorts.forEach((data) => {
+        const key = `${data.type}_${view.type}`;
         const dataView = (
           <revogr-overlay-selection
             {...data}

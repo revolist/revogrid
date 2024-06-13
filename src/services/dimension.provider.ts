@@ -1,14 +1,25 @@
 import reduce from 'lodash/reduce';
 import debounce from 'lodash/debounce';
 import { columnTypes, rowTypes } from '../store/storeTypes';
-import DimensionStore, { DimensionStoreCollection } from '../store/dimension/dimension.store';
+import DimensionStore, {
+  DimensionStoreCollection,
+} from '../store/dimension/dimension.store';
 import ViewportProvider from './viewport.provider';
 import { getItemByIndex } from '../store/dimension/dimension.helpers';
-import { gatherTrimmedItems, Trimmed } from '../store/dataSource/trimmed.plugin';
+import {
+  gatherTrimmedItems,
+  Trimmed,
+} from '../store/dataSource/trimmed.plugin';
 import { RESIZE_INTERVAL } from '../utils/consts';
-import { ColumnRegular, DimensionSettingsState, ViewPortScrollEvent, ViewSettingSizeProp } from '..';
+import {
+  ColumnRegular,
+  DimensionSettingsState,
+  ViewPortScrollEvent,
+  ViewSettingSizeProp,
+  ViewportState,
+} from '..';
 import { DimensionCols, DimensionType, MultiDimensionType } from '..';
-
+import ColumnDataProvider from '../services/column.data.provider';
 export type ColumnItems = Record<DimensionCols, ColumnRegular[]>;
 
 export type DimensionConfig = {
@@ -20,8 +31,14 @@ export type DimensionConfig = {
  */
 export default class DimensionProvider {
   readonly stores: DimensionStoreCollection;
-  constructor(private viewports: ViewportProvider, config: DimensionConfig) {
-    const sizeChanged = debounce((k: MultiDimensionType) => config.realSizeChanged(k), RESIZE_INTERVAL);
+  constructor(
+    private viewports: ViewportProvider,
+    config: DimensionConfig,
+  ) {
+    const sizeChanged = debounce(
+      (k: MultiDimensionType) => config.realSizeChanged(k),
+      RESIZE_INTERVAL,
+    );
     this.stores = reduce(
       [...rowTypes, ...columnTypes],
       (sources: Partial<DimensionStoreCollection>, k: MultiDimensionType) => {
@@ -32,7 +49,7 @@ export default class DimensionProvider {
       {},
     ) as DimensionStoreCollection;
   }
-  
+
   /**
    * Clear old sizes from dimension and viewports
    * @param type - dimension type
@@ -41,7 +58,9 @@ export default class DimensionProvider {
   clearSize(t: MultiDimensionType, count: number) {
     this.stores[t].drop();
     // after we done with drop trigger viewport recalculaction
-    this.viewports.stores[t].setOriginalSizes(this.stores[t].store.get('originItemSize'));
+    this.viewports.stores[t].setOriginalSizes(
+      this.stores[t].store.get('originItemSize'),
+    );
     this.setItemCount(count, t);
   }
 
@@ -51,7 +70,11 @@ export default class DimensionProvider {
    * @param sizes - new custom sizes
    * @param keepOld - keep old sizes merge new with old
    */
-  setCustomSizes(type: MultiDimensionType, sizes: ViewSettingSizeProp, keepOld = false) {
+  setCustomSizes(
+    type: MultiDimensionType,
+    sizes: ViewSettingSizeProp,
+    keepOld = false,
+  ) {
     let newSizes = sizes;
     if (keepOld) {
       const oldSizes = this.stores[type].store.get('sizes');
@@ -63,7 +86,7 @@ export default class DimensionProvider {
     this.stores[type].setDimensionSize(newSizes);
     this.viewports.stores[type].setViewPortDimensionSizes(
       newSizes,
-      !keepOld ? this.stores[type].store.get('originItemSize') : undefined
+      !keepOld ? this.stores[type].store.get('originItemSize') : undefined,
     );
   }
 
@@ -75,13 +98,15 @@ export default class DimensionProvider {
   /**
    * Apply trimmed items
    * @param trimmed - trimmed items
-   * @param type 
+   * @param type
    */
   setTrimmed(trimmed: Partial<Trimmed>, type: MultiDimensionType) {
     const allTrimmed = gatherTrimmedItems(trimmed);
     const dimStoreType = this.stores[type];
     dimStoreType.setStore({ trimmed: allTrimmed });
-    this.viewports.stores[type].setViewPortDimensionSizes(dimStoreType.store.get('sizes'));
+    this.viewports.stores[type].setViewPortDimensionSizes(
+      dimStoreType.store.get('sizes'),
+    );
   }
 
   /**
@@ -89,36 +114,54 @@ export default class DimensionProvider {
    * @param items - data/column items
    * @param type - dimension type
    */
-  setData(
-    itemCount: number,
-    type: MultiDimensionType,
-    noVirtual = false
-  ) {
+  setData(itemCount: number, type: MultiDimensionType, noVirtual = false) {
     this.setItemCount(itemCount, type);
+
+    // Virtualization will get disabled
     if (noVirtual) {
-      this.setNoVirtual(type);
+      const dimension = this.stores[type].getCurrentState();
+      this.viewports.stores[type].setViewport({
+        virtualSize: dimension.realSize,
+      });
     }
     this.updateViewport(type);
   }
-  /**
-   * Virtualization will get disabled
-   * @param type - dimension type
-   */
 
-  private setNoVirtual(type: MultiDimensionType) {
-    const dimension = this.stores[type].getCurrentState();
-    this.viewports.stores[type].setViewport({ virtualSize: dimension.realSize });
-  }
-
-  /**
-   * Drop all dimension data
-   */
-  dropColumns(types: MultiDimensionType[] = columnTypes) {
-    for (let type of types) {
+  applyNewColumns(columns: Record<DimensionCols, ColumnRegular[]>, disableVirtualX: boolean) {
+    for (let type of columnTypes) {
+      // clear existing data
       this.stores[type].drop();
-      this.viewports.stores[type].clearItems(); // check if needed
+
+      const items = columns[type];
+
+      // for pinned col no need virtual data
+      const noVirtual = type !== 'rgCol' || disableVirtualX;
+      
+      // setItemCount
+      this.stores[type].setStore({ count: items.length });
+
+      // setCustomSizes
+      const newSizes = ColumnDataProvider.getSizes(items);
+      this.stores[type].setDimensionSize(newSizes);
+
+      const vpUpdate: Partial<ViewportState> = {
+        // this triggers drop on realCount change
+        realCount: items.length,
+      };
+
+      // Virtualization will get disabled
+      if (noVirtual) {
+        vpUpdate.virtualSize = this.stores[type].getCurrentState().realSize;
+      }
+
+      this.viewports.stores[type].setViewport(vpUpdate);
+      this.setViewPortCoordinate({
+        coordinate: this.viewports.stores[type].lastCoordinate,
+        type,
+      });
     }
   }
+
 
   getFullSize(): { x: number; y: number } {
     let x = 0;
@@ -132,21 +175,6 @@ export default class DimensionProvider {
     return { y, x };
   }
 
-  setNewColumns(
-    type: MultiDimensionType,
-    newLength: number,
-    sizes?: ViewSettingSizeProp,
-    noVirtual = false
-  ) {
-    this.setItemCount(newLength, type);
-    this.setCustomSizes(type, sizes);
-
-    if (noVirtual) {
-      this.setNoVirtual(type);
-    }
-    this.updateViewport(type);
-  }
-  
   updateViewport(type: MultiDimensionType) {
     this.setViewPortCoordinate({
       coordinate: this.viewports.stores[type].lastCoordinate,
@@ -154,7 +182,13 @@ export default class DimensionProvider {
     });
   }
 
-  setViewPortCoordinate({ coordinate, type }: { coordinate: number; type: MultiDimensionType }) {
+  setViewPortCoordinate({
+    coordinate,
+    type,
+  }: {
+    coordinate: number;
+    type: MultiDimensionType;
+  }) {
     const dimension = this.stores[type].getCurrentState();
     this.viewports.stores[type].setViewPortCoordinate(coordinate, dimension);
   }
@@ -166,7 +200,10 @@ export default class DimensionProvider {
     return item.start;
   }
 
-  setSettings(data: Partial<DimensionSettingsState>, dimensionType: DimensionType) {
+  setSettings(
+    data: Partial<DimensionSettingsState>,
+    dimensionType: DimensionType,
+  ) {
     let stores: MultiDimensionType[] = [];
     switch (dimensionType) {
       case 'rgCol':

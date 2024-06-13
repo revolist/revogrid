@@ -19,7 +19,7 @@ import {
   FOOTER_SLOT,
   HEADER_SLOT,
 } from '../revoGrid/viewport.helpers';
-import { DimensionType } from '../../types/dimension';
+import { DimensionCols, DimensionType } from '../../types/dimension';
 import { ScrollCoordinateEvent, ViewPortResizeEvent, ViewPortScrollEvent } from '../../types/interfaces';
 
 type Delta = 'deltaX' | 'deltaY';
@@ -51,6 +51,8 @@ export class RevogrViewportScroll {
    * Height of inner content
    */
   @Prop() contentHeight = 0;
+
+  @Prop() colType!: DimensionCols | 'rowHeaders';
 
   /**
    * Before scroll event
@@ -214,15 +216,20 @@ export class RevogrViewportScroll {
             size: height,
             contentSize: this.contentHeight,
             scroll: this.verticalScroll.scrollTop,
+            noScroll: false,
           },
           rgCol: {
             size: entries[0]?.contentRect.width || 0,
             contentSize: this.contentWidth,
             scroll: this.horizontalScroll.scrollLeft,
+            noScroll: this.colType !== 'rgCol' ? true : false,
           },
         };
         each(els, (item, dimension: DimensionType) => {
           this.resizeViewport.emit({ dimension, size: item.size, rowHeader: this.rowHeader });
+          if (item.noScroll) {
+            return;
+          }
           this.localScrollService?.scroll(item.scroll, dimension, true);
           // track scroll visibility on outer element change
           this.setScrollVisibility(dimension, item.size, item.contentSize);

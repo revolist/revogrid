@@ -74,6 +74,7 @@ function gatherColumnData(data: ViewportColumn) {
     class: data.colType,
     contentHeight: data.contentHeight,
     key: data.colType,
+    colType: data.colType,
     onResizeviewport: data.onResizeviewport,
     // set viewport size to real size
     style: data.fixWidth ? { minWidth: `${realWidth}px` } : undefined,

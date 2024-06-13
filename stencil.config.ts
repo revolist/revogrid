@@ -55,8 +55,7 @@ export const config: Config = {
     vue2OutputTarget({
       componentCorePackage,
       proxiesFile: directivesProxyFile('vue2'),
-      includeDefineCustomElements: true,
-      loaderDir: 'custom-element',
+      loaderDir: '../loader',
       componentModels: [],
     }),
     vueOutputTarget({

@@ -65,16 +65,20 @@ export default class ViewportStore {
   }
   constructor(readonly type: MultiDimensionType) {
     this.store = createStore(initialState());
+    // drop items on real size change, require a new item set
     this.store.onChange('realCount', () => this.clearItems());
     // drop items on virtual size change, require a new item set
-    this.store.onChange('virtualSize', () => this.setViewport({ items: [] }));
+    this.store.onChange('virtualSize', () => this.clearItems());
   }
 
   /**
    * Render viewport based on coordinate
    * It's the main method for draw
    */
-  setViewPortCoordinate(position: number, dimension: DimensionDataViewport) {
+  setViewPortCoordinate(
+    position: number,
+    dimension: DimensionDataViewport,
+  ) {
     const viewportSize = this.store.get('virtualSize');
     // no visible data to calculate
     if (!viewportSize) {
@@ -112,10 +116,13 @@ export default class ViewportStore {
     pos = pos < 0 ? 0 : pos < maxCoordinate ? pos : maxCoordinate;
 
     const allItems = this.getItems();
+    const items = [...allItems.items];
+
     const firstItem: VirtualPositionItem | undefined = getFirstItem(allItems);
     const lastItem: VirtualPositionItem | undefined = getLastItem(allItems);
 
     let toUpdate: Partial<ViewportState> = {};
+
     // left position changed
     // verify if new position is in range of previously rendered first item
     if (!isActiveRange(pos, dimension.realSize, firstItem, lastItem)) {
@@ -140,12 +147,14 @@ export default class ViewportStore {
         this.store.get('realCount'),
         virtualSize + pos - firstItem.start,
         allItems,
-        dimension,
+        {
+          sizes: dimension.sizes,
+          originItemSize: dimension.originItemSize,
+        },
       );
 
       // update missing items
       if (missing.length) {
-        const items = [...this.store.get('items')];
         const range = {
           start: this.store.get('start'),
           end: this.store.get('end'),

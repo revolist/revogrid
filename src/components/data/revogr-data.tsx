@@ -157,6 +157,7 @@ export class RevogrData {
   private renderedRows = new Map<number, VNode>();
   private rangeUnsubscribe: (() => void) | undefined;
 
+
   @Watch('dataStore') onDataStoreChange() {
     this.onStoreChange();
   }
@@ -202,12 +203,17 @@ export class RevogrData {
 
   render() {
     this.renderedRows = new Map();
-    const rows = this.viewportRow.get('items');
-    const cols = this.viewportCol.get('items');
-
     const columnsData = this.columnService.columns;
-    if (!columnsData.length || !rows.length || !cols.length) {
-      return '';
+    if (!columnsData.length) {
+      return;
+    }
+    const rows = this.viewportRow.get('items');
+    if (!rows.length) {
+      return;
+    }
+    const cols = this.viewportCol.get('items');
+    if (!cols.length) {
+      return;
     }
     const rowsEls: VNode[] = [];
     const depth = this.dataStore.get('groupingDepth');

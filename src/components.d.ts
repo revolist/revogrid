@@ -658,6 +658,7 @@ export namespace Components {
           * @param e
          */
         "changeScroll": (e: ViewPortScrollEvent, silent?: boolean) => Promise<ViewPortScrollEvent>;
+        "colType": DimensionCols | 'rowHeaders';
         /**
           * Height of inner content
          */
@@ -2062,6 +2063,7 @@ declare namespace LocalJSX {
      * Viewport scroll component for RevoGrid
      */
     interface RevogrViewportScroll {
+        "colType": DimensionCols | 'rowHeaders';
         /**
           * Height of inner content
          */
