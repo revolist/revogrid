@@ -43,7 +43,7 @@ export { Cell as Cell1, ColumnRegular as ColumnRegular1, DataType as DataType1, 
 export { ElementScroll, ViewportData } from "./types/viewport.interfaces";
 export namespace Components {
     /**
-     * High-performance, customizable grid library for managing large datasets.
+     * Revogrid - High-performance, customizable grid library for managing large datasets.
      * :::tip
      * Read [type definition file](https://github.com/revolist/revogrid/blob/master/src/interfaces.d.ts) for the full interface information.
      * All complex property types such as `ColumnRegular`, `ColumnProp`, `ColumnDataSchemaModel` can be found there.
@@ -805,9 +805,10 @@ declare global {
         "filterconfigchanged": any;
         "rowheaderschanged": any;
         "beforegridrender": any;
+        "aftergridinit": any;
     }
     /**
-     * High-performance, customizable grid library for managing large datasets.
+     * Revogrid - High-performance, customizable grid library for managing large datasets.
      * :::tip
      * Read [type definition file](https://github.com/revolist/revogrid/blob/master/src/interfaces.d.ts) for the full interface information.
      * All complex property types such as `ColumnRegular`, `ColumnProp`, `ColumnDataSchemaModel` can be found there.
@@ -1156,7 +1157,7 @@ declare global {
 }
 declare namespace LocalJSX {
     /**
-     * High-performance, customizable grid library for managing large datasets.
+     * Revogrid - High-performance, customizable grid library for managing large datasets.
      * :::tip
      * Read [type definition file](https://github.com/revolist/revogrid/blob/master/src/interfaces.d.ts) for the full interface information.
      * All complex property types such as `ColumnRegular`, `ColumnProp`, `ColumnDataSchemaModel` can be found there.
@@ -1268,6 +1269,10 @@ declare namespace LocalJSX {
     model: any;
     column: ColumnRegular;
   }>) => void;
+        /**
+          * Emmited after the grid is initialized. Connected to the DOM.
+         */
+        "onAftergridinit"?: (event: RevoGridCustomEvent<any>) => void;
         /**
           * After main source/rows updated
          */
@@ -2119,7 +2124,7 @@ declare module "@stencil/core" {
     export namespace JSX {
         interface IntrinsicElements {
             /**
-             * High-performance, customizable grid library for managing large datasets.
+             * Revogrid - High-performance, customizable grid library for managing large datasets.
              * :::tip
              * Read [type definition file](https://github.com/revolist/revogrid/blob/master/src/interfaces.d.ts) for the full interface information.
              * All complex property types such as `ColumnRegular`, `ColumnProp`, `ColumnDataSchemaModel` can be found there.

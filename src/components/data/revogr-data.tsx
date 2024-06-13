@@ -41,7 +41,7 @@ import {
   ColumnDataSchemaModel,
   VirtualPositionItem,
 } from '../../types/interfaces';
-import { SelectionStoreState } from '../../types/selection';
+import { RangeArea, SelectionStoreState } from '../../types/selection';
 
 /**
  * This component is responsible for rendering data
@@ -177,7 +177,7 @@ export class RevogrData {
     };
 
     this.rangeUnsubscribe?.();
-    this.rangeUnsubscribe = this.rowSelectionStore.onChange('range', e =>
+    this.rangeUnsubscribe = this.rowSelectionStore.onChange('range', (e: RangeArea) =>
       this.rowHighlightPlugin.selectionChange(e, this.renderedRows),
     );
   }

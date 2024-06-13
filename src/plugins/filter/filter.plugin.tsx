@@ -129,8 +129,9 @@ export class FilterPlugin extends BasePlugin {
       this.onFilterChange(detail),
     );
 
+    const existingNodes = this.revogrid.registerVNode.filter((n) => n.$tag$ !== 'revogr-filter-panel');
     this.revogrid.registerVNode = [
-      ...this.revogrid.registerVNode,
+      ...existingNodes,
       <revogr-filter-panel
         uuid={`filter-${uiid}`}
         filterItems={this.multiFilterItems}

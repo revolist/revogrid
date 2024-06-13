@@ -530,6 +530,11 @@ export class RevoGridComponent {
    */
   @Event() beforegridrender: EventEmitter;
 
+  /**
+   * Emmited after the grid is initialized. Connected to the DOM.
+   */
+  @Event() aftergridinit: EventEmitter;
+
   // #endregion
 
   // #region Methods
@@ -933,6 +938,7 @@ export class RevoGridComponent {
   @Element() element: HTMLRevoGridElement;
   private extraElements: VNode[] = [];
 
+  // UUID required to support multiple grids in one page and avoid collision
   uuid: string | null = null;
   columnProvider: ColumnDataProvider;
   dataProvider: DataProvider;
@@ -1195,8 +1201,10 @@ export class RevoGridComponent {
     this.dataProvider = new DataProvider(this.dimensionProvider);
     // #endregion
 
-    // generate uuid
+    // generate uuid for this grid
     this.uuid = `${new Date().getTime()}-rvgrid`;
+
+    this.registerOutsideVNodes(this.registerVNode);
 
     // #region Plugins
     // pass data provider to plugins
@@ -1281,8 +1289,7 @@ export class RevoGridComponent {
       },
     );
 
-    // Should be in the end, some plugins can update @registerVNode
-    this.registerOutsideVNodes(this.registerVNode);
+    this.aftergridinit.emit();
   }
 
   disconnectedCallback() {
