@@ -6,9 +6,9 @@ html {
   box-sizing: border-box;
   margin: 0;
   overflow: hidden;
-  background-color: #f7f9fc;
   display: flex;
 }
+
 
 .inner-cell {
   width: 100%;
@@ -32,7 +32,7 @@ html {
 .scrollable {
   overflow-y: auto;
   height: 100%;
-  border: 10px solid #f7f9fc;
+  border: 10px solid var(--bs-tertiary-bg);
 }
 
 .highlighted-row {
@@ -41,4 +41,11 @@ html {
 revo-grid .rowHeaders revogr-data .highlighted-row {
   box-shadow: 4px 0 0 0 #ffbd00 inset !important;
   background-color: #ffe18a;
+}
+
+revo-grid[theme="darkCompact"] .highlighted-row,
+revo-grid[theme="darkMaterial"] .highlighted-row,
+revo-grid[theme="darkCompact"] .rowHeaders revogr-data .highlighted-row,
+revo-grid[theme="darkMaterial"] .rowHeaders revogr-data .highlighted-row {
+  background-color: rgba(64, 64, 64, 0.5);
 }

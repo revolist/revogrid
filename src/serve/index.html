@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
-  <title>Revo Grid Component Demo</title>
+  <title>Revo Grid - Virtual reactive data grid spreadsheet component</title>
   <style type="text/css">
     revo-grid {
       display: block;
@@ -20,6 +20,7 @@
   <link rel="stylesheet" href="./style.css" />
   <link rel="stylesheet" href="./bootstrap/css/bootstrap.min.css" />
   <link rel="stylesheet" href="./bootstrap/js/bootstrap.min.js" />
+  
   <script type="module" src="./controller.js"></script>
   <script type="module" src="/build/revo-grid.esm.js"></script>
   <script nomodule src="/build/revo-grid.js"></script>
@@ -36,13 +37,13 @@
         <div class="py-2 mb-auto">
           <h6>Data size</h6>
           <div class="btn-group" role="group" aria-label="Basic example">
-            <button type="button" class="btn btn-outline-dark btn-sm" onclick="setData({ rows: 1, cols: 1 })">1x1</button>
-            <button type="button" class="btn btn-outline-dark btn-sm" onclick="setData({ rows: 2, cols: 5 })">2x5</button>
-            <button type="button" class="btn btn-outline-dark btn-sm"
+            <button type="button" class="btn btn-outline-primary btn-sm" onclick="setData({ rows: 1, cols: 1 })">1x1</button>
+            <button type="button" class="btn btn-outline-primary btn-sm" onclick="setData({ rows: 2, cols: 5 })">2x5</button>
+            <button type="button" class="btn btn-outline-primary btn-sm"
               onclick="setData({ rows: 100, cols: 100 })">100x100</button>
-            <button type="button" class="btn btn-outline-dark btn-sm"
+            <button type="button" class="btn btn-outline-primary btn-sm"
               onclick="setData({ rows: 1000, cols: 1000 })">1Kx1K</button>
-            <button type="button" class="btn btn-outline-dark btn-sm"
+            <button type="button" class="btn btn-outline-primary btn-sm"
               onclick="setData({ rows: 10000, cols: 5000 })">10Kx5K</button>
           </div>
 
@@ -102,13 +103,27 @@
             <tr><td><label><input class="form-check-input me-1" type="checkbox"
               onchange="toggleVisibility(event.target.checked)" checked="true" />Toggle Visibility</label></td></tr>
           </table>
+
+          <h6 class="mt-4">Themes</h6>
+          <table class="table table-bordered">
+            <tr>
+              <td><label><input name="theme" class="form-check-input me-1" type="radio" checked
+                onchange="theme(undefined)" />Excel</label></td>
+            </tr>
+            <tr><td><label><input name="theme" value="material" class="form-check-input me-1" type="radio"
+              onchange="theme(event.target.value)" />Material</label></td></tr>
+            <tr><td><label><input name="theme" value="darkMaterial" class="form-check-input me-1" type="radio"
+              onchange="theme(event.target.value)" />Material dark</label></td></tr>
+            <tr><td><label><input name="theme" value="compact" class="form-check-input me-1" type="radio"
+              onchange="theme(event.target.value)" />Compact</label></td></tr>
+            <tr><td><label><input name="theme" value="darkCompact" class="form-check-input me-1" type="radio"
+              onchange="theme(event.target.value)" />Compact dark</label></td></tr>
+          </table>
         </div>
       </div>
       <!-- grid-holder is used for visibility toggling -->
       <div class="grid-holder col-lg-9 order-lg-2 flex-grow-1">
-        <revo-grid can-move-columns apply-on-close="true" stretch="false" class="my" key="1">
-        </revo-grid>
-
+        <revo-grid can-move-columns apply-on-close="true" stretch="false" class="my" key="1"></revo-grid>
       </div>
     </div>
   </div>

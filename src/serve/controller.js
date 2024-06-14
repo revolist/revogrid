@@ -151,6 +151,16 @@ window.timerUpdate = function (checked, inteval = 3) {
   }
 };
 
+window.theme = function (theme) {
+  const grid = document.querySelector('revo-grid');
+  if (theme && theme.indexOf('dark') > -1) {
+    document.documentElement.setAttribute('data-bs-theme', 'dark');
+  } else {
+    document.documentElement.removeAttribute('data-bs-theme');
+  }
+  grid.theme = theme || 'default';
+};
+
 window.onload = onLoad;
 
 function onLoad() {
@@ -160,31 +170,31 @@ function onLoad() {
   grid.range = true;
   grid.resize = true;
 
-  // const filterFunc = (cellValue, extraValue) => {
-  //   if (!cellValue) {
-  //     return false;
-  //   }
-  //   if (typeof cellValue !== 'string') {
-  //     cellValue = JSON.stringify(cellValue);
-  //   }
-  //   return cellValue === extraValue;
-  // };
-  // // if you want extra input field for @extraValue
-  // filterFunc.extra = 'input';
+  const filterFunc = (cellValue, extraValue) => {
+    if (!cellValue) {
+      return false;
+    }
+    if (typeof cellValue !== 'string') {
+      cellValue = JSON.stringify(cellValue);
+    }
+    return cellValue === extraValue;
+  };
+  // if you want extra input field for @extraValue
+  filterFunc.extra = 'input';
 
-  // const filterConfig = {
-  //   include: ['newEqual'],
-  //   customFilters: {
-  //     newEqual: {
-  //       columnFilterType: 'myFilterType', // column filter type id
-  //       name: 'myEqual',
-  //       func: filterFunc,
-  //     },
-  //   },
-  //   disableDynamicFiltering: true,
-  // };
+  const filterConfig = {
+    include: ['newEqual'],
+    customFilters: {
+      newEqual: {
+        columnFilterType: 'myFilterType', // column filter type id
+        name: 'myEqual',
+        func: filterFunc,
+      },
+    },
+    disableDynamicFiltering: true,
+  };
 
-  // grid.filter = filterConfig;
+  grid.filter = filterConfig;
 
   grid.filter = true;
   grid.exporting = true;

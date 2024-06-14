@@ -4,7 +4,14 @@ import ThemeDefault from './theme.default';
 import ThemeMaterial from './theme.material';
 
 export const DEFAULT_THEME = 'default';
-export const allowedThemes: Theme[] = [DEFAULT_THEME, 'material', 'compact', 'darkMaterial', 'darkCompact'];
+
+export const allowedThemes: Theme[] = [
+  DEFAULT_THEME,
+  'material',
+  'compact',
+  'darkMaterial',
+  'darkCompact',
+];
 export default class ThemeService {
   private currentTheme: ThemePackage;
   private customRowSize = 0;

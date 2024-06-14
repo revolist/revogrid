@@ -13,6 +13,9 @@ import {
  * VNode to html converter for stencil components.
  * Transform VNode to html string.
  */
+/**
+ * @internal
+ */
 @Component({
   tag: 'vnode-html',
 })

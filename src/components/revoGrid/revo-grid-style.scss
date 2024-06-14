@@ -15,6 +15,47 @@ revo-grid {
 
   @include noSelect;
 
+  .attribution {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    width: 0;
+    height: 0;
+    border-left: 6px solid #0049cf;
+    border-top: 6px solid #0049cf;
+    border-bottom: 6px solid transparent;
+    border-right: 6px solid transparent;
+    cursor: pointer;
+
+    .value {
+      position: absolute;
+      top: 0;
+      left: 0;
+      background-color: rgba(255, 255, 255, 0.9);
+      padding: 4px;
+      border-radius: 4px;
+      box-shadow: 0 1px 10px rgba(0, 0, 0, 0.2);
+      white-space: nowrap;
+      text-decoration: none;
+      color: black;
+      letter-spacing: 0.3px;
+      font-size: 11px;
+      opacity: 0;
+      width: 6px;
+      overflow: hidden;
+      transition: opacity 0.5s ease-in-out, width 0.3s ease-in-out;
+    }
+
+    &:hover {
+      .value {
+        width: 63px;
+        opacity: 1;
+      }
+    }
+  }
+
   &.column-draggable.column-drag-start {
     &, * {
       &:hover {

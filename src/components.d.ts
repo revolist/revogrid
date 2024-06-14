@@ -172,6 +172,10 @@ export namespace Components {
          */
         "grouping": GroupingOptions;
         /**
+          * Please only hide the attribution if you are subscribed to Pro version
+         */
+        "hideAttribution": boolean;
+        /**
           * Prevent rendering until job is done. Can be used for initial rendering performance improvement. When several plugins require initial rendering this will prevent double initial rendering.
          */
         "jobsBeforeRender": Promise<any>[];
@@ -220,7 +224,7 @@ export namespace Components {
          */
         "rowHeaders": RowHeaders | boolean;
         /**
-          * Indicates default rgRow size. By default 0, means theme package size will be applied
+          * Indicates default rgRow size. By default 0, means theme package size will be applied  Alternatively you can use `rowSize` to reset viewport
          */
         "rowSize": number;
         /**
@@ -282,6 +286,8 @@ export namespace Components {
           * When true enable clipboard.
          */
         "useClipboard": boolean;
+    }
+    interface RevogrAttribution {
     }
     /**
      * This Clipboard provides functionality for handling clipboard events in a web application.
@@ -673,10 +679,6 @@ export namespace Components {
         "rowHeader": boolean;
         "setScroll": (e: ViewPortScrollEvent) => Promise<void>;
     }
-    /**
-     * VNode to html converter for stencil components.
-     * Transform VNode to html string.
-     */
     interface VnodeHtml {
         "redraw": (() => VNode[]) | null;
     }
@@ -834,6 +836,12 @@ declare global {
     var HTMLRevoGridElement: {
         prototype: HTMLRevoGridElement;
         new (): HTMLRevoGridElement;
+    };
+    interface HTMLRevogrAttributionElement extends Components.RevogrAttribution, HTMLStencilElement {
+    }
+    var HTMLRevogrAttributionElement: {
+        prototype: HTMLRevogrAttributionElement;
+        new (): HTMLRevogrAttributionElement;
     };
     interface HTMLRevogrClipboardElementEventMap {
         "beforepaste": any;
@@ -1121,10 +1129,6 @@ declare global {
     interface HTMLVnodeHtmlElementEventMap {
         "html": { html: string; vnodes: VNode[] };
     }
-    /**
-     * VNode to html converter for stencil components.
-     * Transform VNode to html string.
-     */
     interface HTMLVnodeHtmlElement extends Components.VnodeHtml, HTMLStencilElement {
         addEventListener<K extends keyof HTMLVnodeHtmlElementEventMap>(type: K, listener: (this: HTMLVnodeHtmlElement, ev: VnodeHtmlCustomEvent<HTMLVnodeHtmlElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
         addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
@@ -1141,6 +1145,7 @@ declare global {
     };
     interface HTMLElementTagNameMap {
         "revo-grid": HTMLRevoGridElement;
+        "revogr-attribution": HTMLRevogrAttributionElement;
         "revogr-clipboard": HTMLRevogrClipboardElement;
         "revogr-data": HTMLRevogrDataElement;
         "revogr-edit": HTMLRevogrEditElement;
@@ -1235,6 +1240,10 @@ declare namespace LocalJSX {
           * Group rows based on this property. Define properties to be groped by grouping plugin See `GroupingOptions`.
          */
         "grouping"?: GroupingOptions;
+        /**
+          * Please only hide the attribution if you are subscribed to Pro version
+         */
+        "hideAttribution"?: boolean;
         /**
           * Prevent rendering until job is done. Can be used for initial rendering performance improvement. When several plugins require initial rendering this will prevent double initial rendering.
          */
@@ -1455,7 +1464,7 @@ declare namespace LocalJSX {
          */
         "rowHeaders"?: RowHeaders | boolean;
         /**
-          * Indicates default rgRow size. By default 0, means theme package size will be applied
+          * Indicates default rgRow size. By default 0, means theme package size will be applied  Alternatively you can use `rowSize` to reset viewport
          */
         "rowSize"?: number;
         /**
@@ -1478,6 +1487,8 @@ declare namespace LocalJSX {
           * When true enable clipboard.
          */
         "useClipboard"?: boolean;
+    }
+    interface RevogrAttribution {
     }
     /**
      * This Clipboard provides functionality for handling clipboard events in a web application.
@@ -2096,16 +2107,13 @@ declare namespace LocalJSX {
          */
         "rowHeader"?: boolean;
     }
-    /**
-     * VNode to html converter for stencil components.
-     * Transform VNode to html string.
-     */
     interface VnodeHtml {
         "onHtml"?: (event: VnodeHtmlCustomEvent<{ html: string; vnodes: VNode[] }>) => void;
         "redraw"?: (() => VNode[]) | null;
     }
     interface IntrinsicElements {
         "revo-grid": RevoGrid;
+        "revogr-attribution": RevogrAttribution;
         "revogr-clipboard": RevogrClipboard;
         "revogr-data": RevogrData;
         "revogr-edit": RevogrEdit;
@@ -2139,6 +2147,7 @@ declare module "@stencil/core" {
              * @example focus-rgCol-rgRow - focus layer for main data. Applies extra elements in <revogr-focus />.
              */
             "revo-grid": LocalJSX.RevoGrid & JSXBase.HTMLAttributes<HTMLRevoGridElement>;
+            "revogr-attribution": LocalJSX.RevogrAttribution & JSXBase.HTMLAttributes<HTMLRevogrAttributionElement>;
             /**
              * This Clipboard provides functionality for handling clipboard events in a web application.
              */
@@ -2180,10 +2189,6 @@ declare module "@stencil/core" {
              * Viewport scroll component for RevoGrid
              */
             "revogr-viewport-scroll": LocalJSX.RevogrViewportScroll & JSXBase.HTMLAttributes<HTMLRevogrViewportScrollElement>;
-            /**
-             * VNode to html converter for stencil components.
-             * Transform VNode to html string.
-             */
             "vnode-html": LocalJSX.VnodeHtml & JSXBase.HTMLAttributes<HTMLVnodeHtmlElement>;
         }
     }

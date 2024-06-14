@@ -25,9 +25,7 @@ import { timeout } from '../../utils';
 import AutoSize, {
   AutoSizeColumnConfig,
 } from '../../plugins/column.auto-size.plugin';
-import {
-  rowTypes as rowDimensions,
-} from '../../store/storeTypes';
+
 import {
   FilterPlugin,
   ColumnFilterConfig,
@@ -126,6 +124,8 @@ export class RevoGridComponent {
   /**
    * Indicates default rgRow size.
    * By default 0, means theme package size will be applied
+   * 
+   * Alternatively you can use `rowSize` to reset viewport
    */
   @Prop() rowSize = 0;
 
@@ -273,6 +273,11 @@ export class RevoGridComponent {
    * Can be used for initial rendering performance improvement.
    */
   @Prop() disableVirtualY = false;
+
+  /**
+   * Please only hide the attribution if you are subscribed to Pro version
+   */
+  @Prop() hideAttribution = false;
 
   /**
    * Prevent rendering until job is done.
@@ -991,16 +996,10 @@ export class RevoGridComponent {
   @Watch('rowSize') rowSizeChanged(s: number) {
     // clear existing data
     this.dimensionProvider.setSettings({ originItemSize: s }, 'rgRow');
-    rowDimensions.forEach(t => {
-      this.dimensionProvider.clearSize(
-        t,
-        this.dataProvider.stores[t].store.get('source').length,
-      );
-      this.dimensionProvider.setCustomSizes(t, {}, true);
-    });
+    this.rowDefChanged(this.rowDefinitions, this.rowDefinitions);
   }
 
-  @Watch('theme') themeChanged(t: Theme) {
+  @Watch('theme') themeChanged(t: Theme, _?: Theme, __ = 'theme', init = false) {
     this.themeService.register(t);
     this.dimensionProvider.setSettings(
       { originItemSize: this.themeService.rowSize },
@@ -1010,6 +1009,10 @@ export class RevoGridComponent {
       { originItemSize: this.colSize },
       'rgCol',
     );
+    // if theme change we need to reapply row size and reset viewport
+    if (!init) {
+      this.rowSizeChanged(this.themeService.rowSize);
+    }
   }
 
   @Watch('source')
@@ -1251,7 +1254,7 @@ export class RevoGridComponent {
 
     // set data
     this.applyStretch(this.stretch);
-    this.themeChanged(this.theme);
+    this.themeChanged(this.theme, undefined, undefined, true);
     this.columnChanged(this.columns);
     this.dataSourceChanged(this.source, undefined, 'source');
     this.dataSourceChanged(this.pinnedTopSource, undefined, 'pinnedTopSource');
@@ -1449,6 +1452,7 @@ export class RevoGridComponent {
 
     return (
       <Host {...{ [`${UUID}`]: this.uuid }}>
+        { this.hideAttribution ? null : <revogr-attribution class="attribution" /> }
         <div
           class="main-viewport"
           onClick={(e: MouseEvent) => {
