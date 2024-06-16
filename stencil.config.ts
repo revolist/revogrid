@@ -9,10 +9,26 @@ import { vueOutputTarget as vue2OutputTarget } from '@revolist/stencil-vue2-outp
 const componentCorePackage = '@revolist/revogrid';
 const parent = './packages';
 const entry = 'revogrid.ts';
+
+const excludeComponents = [
+  'revogr-clipboard',
+  'revogr-data',
+  'revogr-edit',
+  'revogr-focus',
+  'revogr-header',
+  'revogr-order-editor',
+  'revogr-overlay-selection',
+  'revogr-row-headers',
+  'revogr-scroll-virtual',
+  'revogr-temp-range',
+  'revogr-viewport-scroll',
+];
+
 const directivesProxyFile = (name: string, filepath = entry) =>
   `${parent}/${name}/lib/${filepath}`;
 
-const angularPath = (name: string, filepath = entry) => `${parent}/angular/projects/${name}/src/lib/${filepath}`;
+const angularPath = (name: string, filepath = entry) =>
+  `${parent}/angular/projects/${name}/src/lib/${filepath}`;
 
 export const config: Config = {
   // https://github.com/ionic-team/stencil/blob/master/src/declarations/stencil-public-compiler.ts
@@ -55,13 +71,13 @@ export const config: Config = {
     vue2OutputTarget({
       componentCorePackage,
       proxiesFile: directivesProxyFile('vue2'),
-      loaderDir: '../loader',
-      componentModels: [],
+      excludeComponents,
     }),
     vueOutputTarget({
       componentCorePackage,
       proxiesFile: directivesProxyFile('vue3'),
-      componentModels: [],
+      excludeComponents,
+      includePolyfills: true,
     }),
     // #endregion
 
@@ -71,14 +87,15 @@ export const config: Config = {
       outputType: 'component',
       directivesProxyFile: angularPath('angular-datagrid', `components.ts`),
       directivesArrayFile: angularPath('angular-datagrid', entry),
-      valueAccessorConfigs: [],
+      excludeComponents,
     }),
     // #endregion
-    
+
     // #region React
     reactOutputTarget({
       componentCorePackage,
       proxiesFile: directivesProxyFile('react'),
+      excludeComponents,
     }),
     // #endregion
 
@@ -88,15 +105,16 @@ export const config: Config = {
       proxiesFile: directivesProxyFile('svelte'),
       includeDefineCustomElements: true,
       legacy: false,
-      includePolyfills: false,
+      excludeComponents,
     }),
     // #endregion
 
     // custom element, no polifil
     {
       type: 'dist-custom-elements',
-      customElementsExportBehavior: 'auto-define-custom-elements',
-      externalRuntime: true,
+      customElementsExportBehavior: 'single-export-module',
+      minify: true,
+      dir: './standalone',
       generateTypeDeclarations: true,
       empty: true,
     },

@@ -24,14 +24,22 @@ export type Observable<T> = ObservableMap<T>;
 export type PluginSubscribe<T> = Subscription<T>;
 
 export type ColumnDataSchemaModel = {
+  // Column prop used for mapping value to cell from data source model/row
   prop: ColumnProp;
+  // Row data object
   model: DataType;
+  // Column data object
   column: ColumnRegular;
   rowIndex: number;
   colIndex: number;
+  // Column type based on viewport
   colType: DimensionCols;
+  // Row type based on viewport
   type: DimensionRows;
+  // Row models based on viewport
   data: DataSource;
+  // Current cell data
+  value: any;
 };
 export type CellTemplateProp = {
   providers: Providers;

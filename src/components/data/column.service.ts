@@ -145,10 +145,15 @@ export default class ColumnService {
     return editor;
   }
 
+  /**
+   * Get cell data model for given rowIndex and colIndex
+   * Used to pass data to editor/renderer
+   */
   rowDataModel(rowIndex: number, colIndex: number): ColumnDataSchemaModel {
     const column = this.columns[colIndex];
     const prop: ColumnProp | undefined = column?.prop;
     const model = getSourceItem(this.dataStore, rowIndex) || {};
+    const value = model[prop];
     const type = this.dataStore.get('type');
     return {
       prop,
@@ -159,6 +164,7 @@ export default class ColumnService {
       colIndex,
       colType: this.type,
       type,
+      value,
     };
   }
 

@@ -1,6 +1,7 @@
 {
   "name": "@revolist/revogrid",
-  "version": "4.0.0",
+  "version": "4.0.5",
+  "type": "module",
   "description": "Virtual reactive data grid spreadsheet component - RevoGrid.",
   "license": "MIT",
   "author": "revolist",
@@ -74,8 +75,8 @@
       "types": "./dist/types/index.d.ts"
     },
     "./standalone": {
-      "import": "./dist/components/revo-grid.js",
-      "types": "./dist/components/revo-grid.d.ts"
+      "import": "./standalone/revo-grid.js",
+      "types": "./standalone/revo-grid.d.ts"
     },
     "./loader": {
       "import": "./loader/index.js",
@@ -86,18 +87,17 @@
 
   "files": [
     "dist/",
-    "loader/",
-    "hydrate/"
+    "hydrate/",
+    "standalone/",
+    "loader/"
   ],
   "scripts": {
-    "build": "stencil build --prod",
-    "clear": "rm -rf docs/guide/api",
+    "build": "npm run api:clear && stencil build --prod && npm run api:update",
+    "api:clear": "rm -rf docs/guide/api",
+    "api:update": "./generate_api.sh",
     "readme": "./readme/generate_readme.sh",
-    "copy:type": "cp -r dist/types/* dist/collection",
-    "build:demo": "cd ./demo/ && rm -rf node_modules && npm i && npm run build",
     "serve": "stencil build --dev --watch --serve",
-    "deploy": "git submodule update && npm run build:demo",
-    "prettier": "npx prettier --write ./src"
+    "deploy": "git submodule update && npm run build:demo"
   },
   "devDependencies": {
     "@angular/core": "^18.0.3",
@@ -125,11 +125,9 @@
     "svelte": "^4.2.18",
     "vue": "^3.4.27",
     "bootstrap": "^5.3.2",
-    "typescript": "^5.4.5"
-  },
-  "dependencies": {
-    "@stencil/core": "^4.18.3",
-    "lodash": "^4.17.21"
+    "typescript": "^5.4.5",
+    "lodash": "^4.17.21",
+    "@stencil/core": "^4.18.3"
   },
   "publishConfig": {
     "access": "public"

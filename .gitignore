@@ -2,6 +2,7 @@ dist/
 hydrate/
 www/
 loader/
+standalone/
 demo/
 demo/*
 fw/

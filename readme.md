@@ -69,10 +69,10 @@ Support Millions of cells and thousands of columns easy and efficiently for fast
 - **Cell Editing**: In-place editing of cell data.
 
 - **Customizations**:
-  - Column header template.
-  - Row header template.
+  - Column header templates.
+  - Row header templates.
   - Cell template (create your own cell views).
-  - Cell editor (apply custom editors and cell types).
+  - Cell editor (use predefined or apply your own custom editors and cell types).
   - Cell properties (define custom properties for rendered cells).
 
 - **Column Types**: [More details](https://revolist.github.io/revogrid/guide/column.types.html)
@@ -101,6 +101,8 @@ Support Millions of cells and thousands of columns easy and efficiently for fast
 - **Additional Customizations and Improvements**: Explore hundreds of other small customizations and improvements in [RevoGrid](https://revolist.github.io/revogrid).
 
 <br>
+
+
 
 <h2 align="center">Framework Friendly</h2>
 
@@ -194,59 +196,29 @@ grid.columns = columns;
 grid.source = items;
 ```
 
-### Framework Usage Vue.js Example
-
-```vue
-<template>
-  <!-- Use the VGrid component and bind the data source and columns -->
-  <v-grid :source="rows" :columns="columns"/>
-</template>
-
-<script>
-import VGrid from '@revolist/vue-datagrid'; // Import the VGrid component
-
-export default {
-  name: 'App',
-  data() {
-    return {
-      // Define the columns for the grid
-      columns: [
-        { prop: 'name', name: 'First' }, // Simple column definition
-        { prop: 'details', name: 'Second' } // Another column definition
-      ],
-      // Define the data source for the grid
-      rows: [{ name: '1', details: 'Item 1' }]
-    };
-  },
-  components: {
-    VGrid // Register the VGrid component
-  }
-};
-</script>
-```
-
 ## Versions
 
 - **2.0+**: Introduced the plugin system, grouping, sorting, and filtering.
-- **3.0+**: Breaking changes introduced. See the [migration guide](./docs/migration.3.0.md). This version features new component loading, ESM modules, Bootstrap support, and much [more](./docs/migration.3.0.md).
-- **4.0+**: Breaking changes introduced. See the [migration guide](./docs/migration.4.0.md). In this version, we rethought our framework approach, updated typings, fixed major issues, updated core and significantly improved overall performance. The grid is now much faster, with better plugin support and full framework support for Angular, React, and Vue, along with partial support for Ember and Svelte. Redesigned the documentation, and added more examples.
+- **3.0+**: Breaking changes introduced. See the [migration guide](./docs/guide/migration.md).
+This version features new component loading, ESM modules, Bootstrap support, and much [more](./docs/guide/migration.md).
+- **4.0+**: Breaking changes introduced. See the [migration guide](./docs/guide/migration.md). In this version, we rethought our framework approach, updated typings, fixed major issues, updated core and significantly improved overall performance. The grid is now much faster, with better plugin support and full framework support for Angular, React, and Vue, along with partial support for Ember and Svelte. Redesigned the documentation, and added more examples.
 
 
 
 ## Contributing
 
-We invite you to join our vibrant community and contribute to the growth and success of RevoGrid. By getting involved, you'll have the opportunity to enhance your skills, gain valuable experience, and make a significant impact on an innovative project.
+We invite you to join our community and contribute to the growth and success of open-source projects. By getting involved, you'll have the opportunity to enhance your skills, gain valuable experience, and make a significant impact for the open-source community.
 
 ### Why Contribute?
 
-- **Expand Your Knowledge**: Working on RevoGrid allows you to dive deep into modern web technologies, improve your coding skills, and learn best practices in performance optimization, data handling, and component-based architecture.
-- **Valuable Experience**: Contributing to an open-source project like RevoGrid provides you with practical experience that can be a great addition to your portfolio. It demonstrates your ability to work collaboratively, solve complex problems, and contribute to a project's success.
-- **Professional Growth**: By contributing, you become part of a network of talented developers. This can lead to mentorship opportunities, collaborations, and professional connections that can benefit your career.
-- **Make a Difference**: Your contributions can help improve RevoGrid, making it more powerful and user-friendly for developers around the world. Your input can shape the future of the project and drive innovation.
+- **Expand Your Knowledge**: Working on RevoGrid allows you to dive deep into modern web technologies (like webcomponents), improve your coding skills, and learn best practices in performance optimization, data handling, and component-based architecture.
+- **Valuable Experience**: Contributing to an open-source project like RevoGrid provides you with practical experience that can be a great addition to your portfolio. It demonstrates your ability to work collaboratively, solve complex problems.
+- **Professional Growth**: Contributing leads to mentorship opportunities, collaborations, and professional connections that can benefit your career.
+- **Make a Difference**: Your contributions can help improve RevoGrid, making it more user-friendly for developers around the world. Your input can shape the the project and drive innovation.
 
 ### Join Us
 
-Your contribution, no matter how big or small, is valuable. By working on RevoGrid, you'll be part of an exciting project that's making a difference in the world of data grids. Join us today and let's build something amazing together!
+Your contribution, no matter how big or small, is valuable. By working on RevoGrid, you'll be part of an exciting project that's making a difference in the world of data grids.
 
 ## License
 

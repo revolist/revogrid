@@ -38,7 +38,7 @@
   - Column header template.
   - Row header template.
   - Cell template (create your own cell views).
-  - Cell editor (apply custom editors and cell types).
+  - Cell editor (use predefined or apply your own custom editors and cell types).
   - Cell properties (define custom properties for rendered cells).
 
 - **Column Types**: [More details](https://revolist.github.io/revogrid/guide/column.types.html)

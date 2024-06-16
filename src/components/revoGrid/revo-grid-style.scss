@@ -8,6 +8,10 @@
 revo-grid {
   display: block;
   height: 100%;
+  /**
+  * In some cases the min-height is not enough for safari
+  * so setting up the grid  height works
+  */
   min-height: 300px;
   font-family: Helvetica, Arial, Sans-Serif, serif;
   font-size: 14px;

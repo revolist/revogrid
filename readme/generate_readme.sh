@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Define the list of markdown files to be concatenated
-files=("banner.md" "features.md" "framework.md" "install.md" "usage.basic.md" "usage.js.md" "usage.vue2.md" "version.md" "contribute.md" "LICENSE.md")
+files=("banner.md" "features.md" "framework.md" "install.md" "usage.basic.md" "usage.js.md" "version.md" "contribute.md" "LICENSE.md")
 
 # Output file
 output="README.md"
