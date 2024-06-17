@@ -10,7 +10,7 @@ import {
 } from '@stencil/core';
 import { EDIT_INPUT_WR } from '../../utils/consts';
 import { TextEditor } from './text-editor';
-import { ColumnRegular } from '../../types/interfaces';
+import { ColumnDataSchemaModel } from '../../types/interfaces';
 import {
   EditCell,
   EditorCtr,
@@ -37,7 +37,7 @@ export class RevoEdit {
   /**
    * Column data for editor.
    */
-  @Prop() column: ColumnRegular | null;
+  @Prop() column: ColumnDataSchemaModel | null;
   /**
    * Custom editors register
    */

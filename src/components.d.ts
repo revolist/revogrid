@@ -5,7 +5,7 @@
  * It contains typing information for all components that exist in this project.
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
-import { AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeRowRenderEvent, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionSettingsState, DragStartEvent, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, Observable, PositionItem, RowDefinition, RowHeaders, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/interfaces";
+import { AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeRowRenderEvent, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionSettingsState, DragStartEvent, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, Observable, PositionItem, RowDefinition, RowHeaders, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/interfaces";
 import { AfterEditEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeSaveDataDetails, Cell, ChangedRange, EditCell, EditorCtr, Editors, RangeArea, SaveDataDetails, SelectionStoreState, TempRange } from "./types/selection";
 import { PluginBaseComponent, PluginExternalConstructor } from "./types/plugin";
 import { Theme } from "./types/theme";
@@ -23,7 +23,7 @@ import { LogicFunction } from "./plugins/filter/filter.types";
 import { ResizeProps } from "./services/resizable.directive";
 import { Cell as Cell1, ColumnRegular as ColumnRegular1, DataType as DataType1, DimensionCols as DimensionCols1, DimensionRows as DimensionRows1, DimensionSettingsState as DimensionSettingsState1, Observable as Observable1, SelectionStoreState as SelectionStoreState1 } from "./components";
 import { ElementScroll, ViewportData } from "./types/viewport.interfaces";
-export { AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeRowRenderEvent, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionSettingsState, DragStartEvent, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, Observable, PositionItem, RowDefinition, RowHeaders, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/interfaces";
+export { AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeRowRenderEvent, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionSettingsState, DragStartEvent, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, Observable, PositionItem, RowDefinition, RowHeaders, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/interfaces";
 export { AfterEditEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeSaveDataDetails, Cell, ChangedRange, EditCell, EditorCtr, Editors, RangeArea, SaveDataDetails, SelectionStoreState, TempRange } from "./types/selection";
 export { PluginBaseComponent, PluginExternalConstructor } from "./types/plugin";
 export { Theme } from "./types/theme";
@@ -382,7 +382,7 @@ export namespace Components {
         /**
           * Column data for editor.
          */
-        "column": ColumnRegular | null;
+        "column": ColumnDataSchemaModel | null;
         /**
           * Cell to edit data.
          */
@@ -1642,7 +1642,7 @@ declare namespace LocalJSX {
         /**
           * Column data for editor.
          */
-        "column"?: ColumnRegular | null;
+        "column"?: ColumnDataSchemaModel | null;
         /**
           * Cell to edit data.
          */

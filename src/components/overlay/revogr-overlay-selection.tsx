@@ -435,7 +435,7 @@ export class OverlaySelection {
         additionalData={this.additionalData}
         editCell={editable}
         saveOnClose={this.applyChangesOnClose}
-        column={this.columnService.columns[editCell.x]}
+        column={this.columnService.rowDataModel(editCell.y, editCell.x)}
         editor={this.columnService.getCellEditor(
           editCell.y,
           editCell.x,

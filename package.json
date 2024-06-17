@@ -1,6 +1,6 @@
 {
   "name": "@revolist/revogrid",
-  "version": "4.0.5",
+  "version": "4.0.9",
   "type": "module",
   "description": "Virtual reactive data grid spreadsheet component - RevoGrid.",
   "license": "MIT",
@@ -38,36 +38,28 @@
     "virtual",
     "virtuallist",
     "virtual-scroll",
-
     "vue",
     "vue-grid",
     "vue-datagrid",
     "vue3",
     "vue3-datagrid",
-
     "react",
     "react-grid",
     "react-datagrid",
-
     "svelte",
     "svelte-grid",
     "svelte-datagrid",
-
     "angular",
     "angular-grid",
     "angular-datagrid",
     "angular-tree"
   ],
-
   "main": "dist/index.cjs.js",
   "module": "dist/index.js",
   "unpkg": "dist/revo-grid/revo-grid.esm.js",
-  
   "collection": "dist/collection/collection-manifest.json",
   "collection:main": "dist/collection/index.js",
-
   "types": "dist/types/index.d.ts",
-
   "exports": {
     ".": {
       "import": "./dist/revo-grid/revo-grid.esm.js",
@@ -84,7 +76,6 @@
       "types": "./loader/index.d.ts"
     }
   },
-
   "files": [
     "dist/",
     "hydrate/",
@@ -92,11 +83,16 @@
     "loader/"
   ],
   "scripts": {
-    "build": "npm run api:clear && stencil build --prod && npm run api:update",
+    "build": "npm run api:clear && stencil build --prod && rm -f loader/package.json && npm run api:update",
     "api:clear": "rm -rf docs/guide/api",
     "api:update": "./generate_api.sh",
+
     "readme": "./readme/generate_readme.sh",
+    "package:update": "node ./scripts/package-version.mjs --version=4.0.9",
+
+    "test": "stencil test",
     "serve": "stencil build --dev --watch --serve",
+    "publish": "npm run build && npm publish --public --tag pre-release && npm run package:update",
     "deploy": "git submodule update && npm run build:demo"
   },
   "devDependencies": {
@@ -104,6 +100,7 @@
     "@juggle/resize-observer": "^3.4.0",
     "@revolist/stencil-vue2-output-target": "^0.0.3",
     "@stencil/angular-output-target": "0.8.4",
+    "@stencil/core": "^4.18.3",
     "@stencil/react-output-target": "0.5.3",
     "@stencil/sass": "^3.0.12",
     "@stencil/store": "^2.0.16",
@@ -116,18 +113,23 @@
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@types/resize-observer-browser": "^0.1.11",
+    "bootstrap": "^5.3.2",
+    "chalk": "^5.3.0",
+    "execa": "^9.2.0",
+    "fs": "^0.0.1-security",
     "jest": "26.0.1",
     "jest-cli": "26.0.1",
+    "lodash": "^4.17.21",
+    "minimist": "^1.2.8",
+    "path": "^0.12.7",
     "prettier": "3.3.2",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "rxjs": "^7.8.1",
     "svelte": "^4.2.18",
-    "vue": "^3.4.27",
-    "bootstrap": "^5.3.2",
     "typescript": "^5.4.5",
-    "lodash": "^4.17.21",
-    "@stencil/core": "^4.18.3"
+    "url": "^0.11.3",
+    "vue": "^3.4.27"
   },
   "publishConfig": {
     "access": "public"

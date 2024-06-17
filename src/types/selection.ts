@@ -4,8 +4,8 @@ import {
   ColumnProp,
   DataType,
   DataLookup,
-  ColumnRegular,
   HyperFunc,
+  ColumnDataSchemaModel,
 } from './interfaces';
 
 export type RowIndex = number;
@@ -100,19 +100,30 @@ export type EditCell = EditCellStore & BeforeSaveDataDetails;
 export type Editors = {
   [name: string]: EditorCtr;
 };
-export interface EditorCtr {
-  new (
-    column: ColumnRegular,
+export type EditorCtr = EditorCtrCallable & EditorCtrConstructible;
+
+export interface EditorCtrCallable {
+  (
+    column: ColumnDataSchemaModel,
     save: (value: SaveData, preventFocus?: boolean) => void,
     close: (focusNext?: boolean) => void,
   ): EditorBase;
 }
+
+export interface EditorCtrConstructible {
+  new (
+    column: ColumnDataSchemaModel,
+    save: (value: SaveData, preventFocus?: boolean) => void,
+    close: (focusNext?: boolean) => void,
+  ): EditorBase;
+}
+
 export interface EditorBase {
   element?: Element | null;
   editCell?: EditCell;
-  /** 
+  /**
    * Autosave usage when you want to return value for models.
-  */
+   */
   getValue?(): any;
   /**
    * For Editor plugin internal usage.
@@ -120,7 +131,7 @@ export interface EditorBase {
    */
   beforeAutoSave?(val?: any): boolean;
   beforeUpdate?(): void;
-    /**
+  /**
    * Before editor got disconnected.
    * Can be triggered multiple times before actual disconnect.
    */
