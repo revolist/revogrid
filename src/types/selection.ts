@@ -100,7 +100,7 @@ export type EditCell = EditCellStore & BeforeSaveDataDetails;
 export type Editors = {
   [name: string]: EditorCtr;
 };
-export type EditorCtr = EditorCtrCallable & EditorCtrConstructible;
+export type EditorCtr = EditorCtrCallable | EditorCtrConstructible;
 
 export interface EditorCtrCallable {
   (

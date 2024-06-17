@@ -19,6 +19,8 @@ import {
   SaveData,
 } from '../../types/selection';
 
+import { isEditorCtrConstructible } from './edit.utils';
+
 /**
  * Represents a cell editor in a grid.
  * It manages the editing of cells by handling events, saving data, rendering the editor UI,
@@ -127,19 +129,37 @@ export class RevoEdit {
 
     // Custom editor usage.
     // Start with TextEditor (editors/text.tsx) for Custom editor.
+    // It can be class or function
     if (this.editor) {
-      this.currentEditor = new this.editor(
-        this.column,
-        // save callback
-        (e, preventFocus) => {
-          this.onSave(e, preventFocus);
-        },
-        // cancel callback
-        focusNext => {
-          this.preventSaveOnClose = true;
-          this.closeEdit.emit(focusNext);
-        },
-      );
+      // if editor is constructible
+      if (isEditorCtrConstructible(this.editor)) {
+        this.currentEditor = new this.editor(
+          this.column,
+          // save callback
+          (e, preventFocus) => {
+            this.onSave(e, preventFocus);
+          },
+          // cancel callback
+          focusNext => {
+            this.preventSaveOnClose = true;
+            this.closeEdit.emit(focusNext);
+          },
+        );
+      // if editor is function
+      } else {
+        this.currentEditor = this.editor(
+          this.column,
+          // save callback
+          (e, preventFocus) => {
+            this.onSave(e, preventFocus);
+          },
+          // cancel callback
+          focusNext => {
+            this.preventSaveOnClose = true;
+            this.closeEdit.emit(focusNext);
+          },
+        );
+      }
       return;
     }
     // Default text editor usage

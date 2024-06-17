@@ -1,6 +1,6 @@
 {
   "name": "@revolist/revogrid",
-  "version": "4.0.9",
+  "version": "4.0.11",
   "type": "module",
   "description": "Virtual reactive data grid spreadsheet component - RevoGrid.",
   "license": "MIT",
@@ -88,11 +88,11 @@
     "api:update": "./generate_api.sh",
 
     "readme": "./readme/generate_readme.sh",
-    "package:update": "node ./scripts/package-version.mjs --version=4.0.9",
+    "package:update": "node ./scripts/package-version.mjs --version=4.0.11",
 
     "test": "stencil test",
     "serve": "stencil build --dev --watch --serve",
-    "publish": "npm run build && npm publish --public --tag pre-release && npm run package:update",
+    "release": "npm run build && npm publish --public --tag pre-release && npm run package:update",
     "deploy": "git submodule update && npm run build:demo"
   },
   "devDependencies": {
