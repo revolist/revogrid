@@ -83,7 +83,8 @@
     "loader/"
   ],
   "scripts": {
-    "build": "npm run api:clear && stencil build --prod && rm -f loader/package.json && npm run api:update",
+    "docs": "typedoc",
+    "build": "npm run api:clear && stencil build --prod && rm -f loader/package.json && npm run api:update && npm run docs",
     "api:clear": "rm -rf docs/guide/api",
     "api:update": "./generate_api.sh",
 

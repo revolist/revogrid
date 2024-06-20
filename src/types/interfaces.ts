@@ -24,26 +24,61 @@ export type Observable<T> = ObservableMap<T>;
 export type PluginSubscribe<T> = Subscription<T>;
 
 export type ColumnDataSchemaModel = {
-  // Column prop used for mapping value to cell from data source model/row
+  /**
+   * Column prop used for mapping value to cell from data source model/row
+   */
   prop: ColumnProp;
-  // Row data object
+  /**
+   * Row data object
+   */
   model: DataType;
-  // Column data object
+  /**
+   * Column data object
+   */
   column: ColumnRegular;
+  /**
+   * Index of the row in the viewport
+   */
   rowIndex: number;
+  /**
+   * Index of the column in the viewport
+   */
   colIndex: number;
-  // Column type based on viewport
+  /**
+   * Column type based on viewport
+   */
   colType: DimensionCols;
-  // Row type based on viewport
+  /**
+   * Row type based on viewport
+   */
   type: DimensionRows;
-  // Row models based on viewport
+  /**
+   * Row models based on viewport
+   */
   data: DataSource;
-  // Current cell data
+  /**
+   * Current cell data
+   */
   value: any;
 };
-export type CellTemplateProp = {
+/**
+ * Template property for each cell, extends the column data schema model.
+ * Additionally, it provides access to the providers injected into the template.
+ */
+export interface CellTemplateProp extends ColumnDataSchemaModel {
+  /**
+   * Providers injected into the template
+   */
   providers: Providers;
-} & ColumnDataSchemaModel;
+}
+/**
+ * The ReadOnlyFormat type is a boolean value or a function that takes ColumnDataSchemaModel
+ * as a parameter and returns a boolean value.
+ *
+ * If it is a boolean value, it represents whether the cell in question is read-only.
+ * If it is a function, it returns whether the cell in question is read-only based on the provided
+ * ColumnDataSchemaModel.
+ */
 export type ReadOnlyFormat =
   | boolean
   | ((params: ColumnDataSchemaModel) => boolean);
@@ -52,17 +87,42 @@ export type RowDrag =
   | {
       (params: ColumnDataSchemaModel): boolean;
     };
-export interface ColumnGrouping {
+/**
+ * `ColumnGrouping` type is used to define a grouping in a column.
+ */
+export type ColumnGrouping = {
+  /**
+   * An array of `ColumnDataSchema` objects that represent the children of the grouping.
+   */
   children: ColumnDataSchema[];
+  /**
+   * A `DataFormat` object that represents the name of the grouping.
+   */
   name: DataFormat;
-}
+};
+/**
+ * Configuration for header inner template properties
+ */
 export interface ColumnProperties {
-  /** column inner template */
+  /**
+   * Header inner template
+   * Function/component to render custom header content
+   */
   columnTemplate?: ColumnTemplateFunc;
-  /** cell properties */
+  /**
+   * Header Cell properties
+   * Custom function/component to render header properties
+   */
   columnProperties?: ColPropertiesFunc;
 }
+/**
+ * Type that represents a collection of column types.
+ * The keys are the names of the column types and the values are the corresponding column type objects.
+ */
 export type ColumnTypes = {
+  /**
+   * The name of the column type.
+   */
   [name: string]: ColumnType;
 };
 export interface CellTemplate {
@@ -73,120 +133,266 @@ export interface CellTemplate {
     additionalData?: any,
   ): any;
 }
+/**
+ * Interface for regular column definition.
+ * Regular column can be any column that is not a grouping column.
+ */
 export interface ColumnType extends ColumnProperties {
-  /** is column or cell readonly */
+  /**
+   * Represents whether the column or cell is read-only.
+   * Can be a boolean or a function that returns a boolean.
+   * The function receives column data as a parameter.
+   */
   readonly?: ReadOnlyFormat;
-  /** default column size */
+  /**
+   * Represents the default column size.
+   */
   size?: number;
   /**
-   * minimal column size
-   * this property can not be less than cell padding
-   * in order to keep performance on top and minimize dom elements number
+   * Represents the minimal column size.
+   * This property cannot be less than cell padding
+   * in order to keep performance on top and minimize DOM elements number.
    */
   minSize?: number;
-  /**  max column size */
+  /**
+   * Represents the maximum column size.
+   */
   maxSize?: number;
-  /** represents custom editor defined in @editors property */
+  /**
+   * Represents a custom editor defined in @editors property.
+   * Can be a string or an editor constructor function.
+   */
   editor?: string | EditorCtr;
-  /** cell properties */
+  /**
+   * Represents cell properties for custom styling, classes, and events.
+   */
   cellProperties?: PropertiesFunc;
-  /** cell inner template, now template is async */
+  /**
+   * Represents the cell template for custom rendering.
+   */
   cellTemplate?: CellTemplate;
-  /** cell compare function */
+  /**
+   * Represents the cell compare function for custom sorting.
+   */
   cellCompare?: CellCompareFunc;
 }
 export type Order = 'asc' | 'desc' | undefined;
+/**
+ * Interface for regular column definition.
+ * Regular column can be any column that is not a grouping column.
+ * 
+ */
+/**
+ * ColumnRegular interface represents regular column definition.
+ * Regular column can be any column that is not a grouping column.
+ */
 export interface ColumnRegular extends ColumnType {
-  // mapping to data, it's object keys/props, @required used for indexing
+  /**
+   * Column prop used for mapping value to cell from data source model/row, used for indexing.
+   */
   prop: ColumnProp;
-  // column pin 'colPinStart'|'colPinEnd'
+  /**
+   * Column pin 'colPinStart'|'colPinEnd'.
+   */
   pin?: DimensionColPin;
-  // column header
+  /**
+   * Column header text.
+   */
   name?: DataFormat;
-  // column size would be changed based on content size
+  /**
+   * Column size would be changed based on space left.
+   */
   autoSize?: boolean;
-  // filter
+  /**
+   * Filter. Require filter plugin to be installed and activated through grid config @filter.
+   */
   filter?: boolean | string | string[];
-  // is column can be sorted, check @cellCompare function for custom sorting
+  /**
+   * Is column can be sorted, check @cellCompare function for custom sorting.
+   */
   sortable?: boolean;
-  // sort order
+  /**
+   * Sort order.
+   */
   order?: Order;
-  // is cell in column or individual can be dragged
+  /**
+   * Is cell in column or individual can be dragged.
+   */
   rowDrag?: RowDrag;
-  // represents type defined in @columnTypes property
+  /**
+   * Represents type defined in @columnTypes property through grid config.
+   */
   columnType?: string;
-  // called before column applied to the store
+  /**
+   * Function called before column applied to the store.
+   */
   beforeSetup?(rgCol: ColumnRegular): void;
-  // other keys
+  /**
+   * Additional properties can be added to the column definition.
+   */
   [key: string]: any;
 }
+
 export type ColumnDataSchema = ColumnGrouping | ColumnRegular;
+
 export type ColumnData = ColumnDataSchema[];
-export type ColumnTemplateProp = ColumnRegular & {
+/**
+ * Column template property.
+ * Contains extended properties for column.
+ */
+export interface ColumnTemplateProp extends ColumnRegular {
+  /**
+   * Providers injected into the template.
+   */
   providers: Providers<DimensionCols | 'rowHeaders'>;
+  /**
+   * Index of the column, used for mapping value to cell from data source model/row.
+   */
   index: number;
 };
+
 export type ColumnPropProp = ColumnGrouping | ColumnTemplateProp;
-// Regularly all column are indexed by prop
+// Column prop used for mapping value to cell from data source model/row, used for indexing.
 export type ColumnProp = string | number;
+
 export type DataFormat = any;
+
 export type CellProp = string | number | object | boolean | undefined;
+
+/**
+ * Additional properties applied to the cell.
+ * Contains style object where key is CSS property and value is CSS property value.
+ * Contains class object where key is CSS class and value is boolean flag indicating if class should be applied.
+ * Contains additional properties for custom cell rendering.
+ */
 export type CellProps = {
+  // CSS styles applied to the cell
   style?: {
     [key: string]: string | undefined;
   };
+  // CSS classes applied to the cell
   class?:
     | {
+        // CSS class name
         [key: string]: boolean;
       }
     | string;
+  // Additional properties for custom cell rendering
   [attr: string]: CellProp;
 };
+
 /**
  * Providers for grid which are going to be injected into each cell template
  */
 export type Providers<T = DimensionRows> = {
-  // dimension type
+  /**
+   * Dimension type (e.g. row or column)
+   */
   type: T;
-  // is grid in readonly mode
+  /**
+   * Flag indicating if grid is in readonly mode
+   */
   readonly: boolean;
-  // data source store
+  /**
+   * Data source store
+   */
   data: Observable<DataSourceState<any, any>> | ColumnRegular[];
-  // viewport store
+  /**
+   * Viewport store
+   */
   viewport: Observable<ViewportState>;
-  // dimension store
+  /**
+   * Dimension store
+   */
   dimension: Observable<DimensionSettingsState>;
-  // selection store
+  /**
+   * Selection store
+   */
   selection: Observable<SelectionStoreState>;
 };
+/**
+ * `HyperFunc` is a function that takes an HTML tag or component, and returns a
+ * JSX element. This function is used to create JSX elements in a context where
+ * JSX is not valid.
+ */
 export interface HyperFunc<T> {
+  // (tag: any): T;
   (tag: any): T;
 }
+/**
+ * `HyperFunc` is a function that takes an HTML tag or component, and returns a
+ * JSX element. This function is used to create JSX elements in a context where
+ * JSX is not valid.
+ */
 export interface HyperFunc<T> {
   (tag: any, data: any): T;
 }
+/**
+ * `HyperFunc` is a function that takes an HTML tag or component, and returns a
+ * JSX element. This function is used to create JSX elements in a context where
+ * JSX is not valid.
+ */
 export interface HyperFunc<T> {
   (tag: any, text: string): T;
 }
+
+/**
+ * `HyperFunc` is a function that takes an HTML tag or component, and returns a
+ * JSX element. This function is used to create JSX elements in a context where
+ * JSX is not valid.
+ */
 export interface HyperFunc<T> {
   (sel: any, children: Array<T | undefined | null>): T;
 }
+
+/**
+ * `HyperFunc` is a function that takes an HTML tag or component, and returns a
+ * JSX element. This function is used to create JSX elements in a context where
+ * JSX is not valid.
+ */
 export interface HyperFunc<T> {
   (sel: any, data: any, text: string): T;
 }
+
+/**
+ * `HyperFunc` is a function that takes an HTML tag or component, and returns a
+ * JSX element. This function is used to create JSX elements in a context where
+ * JSX is not valid.
+ */
 export interface HyperFunc<T> {
   (sel: any, data: any, children: Array<T | undefined | null>): T;
 }
+
+/**
+ * `HyperFunc` is a function that takes an HTML tag or component, and returns a
+ * JSX element. This function is used to create JSX elements in a context where
+ * JSX is not valid.
+ */
 export interface HyperFunc<T> {
   (sel: any, data: any, children: T): T;
 }
+/**
+ * `FocusTemplateFunc` is a function that takes an HTML tag or component, and
+ * returns a JSX element. This function is used to create JSX elements in a
+ * context where JSX is not valid.
+ */
 export type FocusTemplateFunc = (
   createElement: HyperFunc<VNode>,
   detail: FocusRenderEvent,
 ) => any;
+
+
+/**
+ * `CellCompareFunc` is a function that takes the column property to compare,
+ * the data of the first cell, and the data of the second cell. It returns a
+ * number indicating the relative order of the two cells.
+ */
 export type CellCompareFunc = (
+  // The column property to compare.
   prop: ColumnProp,
+  // The data of the first cell.
   a: DataType,
+  // The data of the second cell.
   b: DataType,
 ) => number;
 export type ColumnTemplateFunc = (
@@ -207,41 +413,133 @@ export type DataSource = DataType[];
 export type DataLookup = {
   [rowIndex: number]: DataType;
 };
+/**
+ * `RowDefinition` is a type that represents a row definition in the
+ * viewport.
+ */
 export type RowDefinition = {
+  /**
+   * The type of the row.
+   */
   type: DimensionRows;
+  /**
+   * The size of the row.
+   */
   size: number;
+  /**
+   * The index of the row.
+   */
   index: number;
 };
 export interface RowHeaders extends ColumnRegular {}
+/**
+ * `ViewPortResizeEvent` is an object that contains information about a resize
+ * event in the viewport.
+ */
 export type ViewPortResizeEvent = {
+  /* The dimension of the viewport being resized. */
   dimension: DimensionType;
+  /* The new size of the viewport. */
   size: number;
+  /* Indicates whether the resize event is for a row header. */
   rowHeader?: boolean;
 };
+
+/**
+ * `ViewPortScrollEvent` is an object that contains information about a scroll
+ * event in the viewport.
+ */
 export type ViewPortScrollEvent = {
+  /**
+   * The dimension of the viewport being scrolled.
+   */
   dimension: DimensionType;
+  /**
+   * The coordinate of the scroll event.
+   */
   coordinate: number;
+  /**
+   * The change in coordinate between scroll events.
+   */
   delta?: number;
+  /**
+   * Indicates whether the scroll event occurred outside the viewport.
+   */
   outside?: boolean;
 };
+
+/**
+ * `InitialHeaderClick` represents the information needed to handle a click
+ * event on the initial column header.
+ */
 export type InitialHeaderClick = {
+  /**
+   * The index of the column header that was clicked.
+   */
   index: number;
+  /**
+   * The original mouse event that triggered the click.
+   */
   originalEvent: MouseEvent;
+  /**
+   * The column that was clicked.
+   */
   column: ColumnRegular;
 };
+
+/**
+ * `Range` is an object that represents a range of values.
+ */
 export type Range = {
+  /**
+   * The start of the range.
+   */
   start: number;
+  /**
+   * The end of the range.
+   */
   end: number;
 };
+
+/**
+ * `ViewportStateItems` is an object that represents the items in a viewport
+ * along with their corresponding range.
+ */
 export type ViewportStateItems = {
+  /**
+   * The items in the viewport.
+   */
   items: VirtualPositionItem[];
 } & Range;
+
+/**
+ * `ViewportState` is an object that represents the state of a viewport.
+ */
 export interface ViewportState extends ViewportStateItems {
+  /**
+   * The number of real items in the viewport.
+   */
   realCount: number;
+  /**
+   * The virtual size of the viewport.
+   */
   virtualSize: number;
 }
+
+/**
+ * `ViewSettingSizeProp` is a record that maps column or row indexes to their
+ * corresponding sizes.
+ */
 export type ViewSettingSizeProp = Record<string, number>;
+
+/**
+ * `VirtualPositionItem` is an object that represents a virtual position item
+ * in the viewport.
+ */
 export interface VirtualPositionItem extends PositionItem {
+  /**
+   * The size of the virtual position item.
+   */
   size: number;
 }
 export type DataSourceState<
@@ -267,64 +565,210 @@ export interface PositionItem {
   start: number;
   end: number;
 }
+/**
+ * Object containing information about calculated dimensions.
+ * Used for both columns and rows.
+ */
 export interface DimensionCalc {
+  /**
+   * Array of indexes of visible items.
+   */
   indexes: number[];
+
+  /**
+   * Count of visible items.
+   */
   count: number;
+
+  /**
+   * Array of indexes of visible items.
+   * Used for mapping items to their position in DOM.
+   */
   positionIndexes: number[];
+
+  /**
+   * Mapping of position to item.
+   * Used for mapping position in DOM to item.
+   */
   positionIndexToItem: {
+    /**
+     * Position in DOM.
+     */
     [position: number]: PositionItem;
   };
+
+  /**
+   * Mapping of index to item.
+   * Used for mapping index in data source to item.
+   */
   indexToItem: {
+    /**
+     * Index in data source.
+     */
     [index: number]: PositionItem;
   };
+
+  /**
+   * Object containing information about trimmed data.
+   * Used for hiding entities from visible data source.
+   */
   trimmed: Record<any, any>;
+
+  /**
+   * Object containing size for each visible item.
+   */
   sizes: ViewSettingSizeProp;
 }
+/**
+ * Represents the settings state of a dimension.
+ * It extends the calculation properties of a dimension.
+ * It also includes the real size and origin item size of the dimension.
+ */
 export interface DimensionSettingsState extends DimensionCalc {
+  /**
+   * Represents the real size of the dimension.
+   */
   realSize: number;
+
+  /**
+   * Represents the origin item size of the dimension.
+   */
   originItemSize: number;
 }
 
+/**
+ * Represents the mapping of dimension types to their corresponding observable stores.
+ */
 export type DimensionStores = {
   [T in MultiDimensionType]: Observable<DimensionSettingsState>;
 };
 
+/**
+ * Represents the mapping of dimension types to their corresponding observable stores for the viewport.
+ */
 export type ViewportStores = {
   [T in MultiDimensionType]: Observable<ViewportState>;
 };
 
-export type DragStartEvent = {
+/**
+ * Represents the event object that is emitted when the drag operation starts.
+ */
+export interface DragStartEvent {
+  /**
+   * Represents the original mouse event that triggered the drag operation.
+   */
   originalEvent: MouseEvent;
-  model: ColumnDataSchemaModel;
-};
 
+  /**
+   * Represents the model of the column being dragged.
+   */
+  model: ColumnDataSchemaModel;
+}
+
+/**
+ * Represents the event object that is emitted before cell rendering.
+ * It includes information about the dimension type, column, row, and model.
+ */
 export interface BeforeCellRenderEvent<T = any> extends AllDimensionType {
+  /**
+   * Represents the column being rendered.
+   */
   column: VirtualPositionItem;
+
+  /**
+   * Represents the row being rendered.
+   */
   row: VirtualPositionItem;
+
+  /**
+   * Represents the model being rendered.
+   */
   model: T;
 }
 
+/**
+ * Represents the event object that is emitted before row rendering.
+ * It includes information about the dimension type, data item, item, and node.
+ */
 export interface BeforeRowRenderEvent<T = any> extends AllDimensionType {
+  /**
+   * Represents the data item being rendered.
+   */
   dataItem: T;
+
+  /**
+   * Represents the item being rendered.
+   */
   item: VirtualPositionItem;
+
+  /**
+   * Represents the node being rendered.
+   */
   node: VNode;
 }
 
+/**
+ * Represents the event object that is emitted after rendering.
+ * It includes information about the dimension type.
+ */
 export type AfterRendererEvent = {
+  /**
+   * Represents the type of dimension being rendered.
+   */
   type: DimensionType;
 };
 
+/**
+ * Represents the mapping of dimension types to their corresponding dimension types.
+ */
 export interface AllDimensionType {
+  /**
+   * Represents the dimension type for rows.
+   */
   rowType: DimensionRows;
+
+  /**
+   * Represents the dimension type for columns.
+   */
   colType: DimensionCols;
 }
 
-export type ApplyFocusEvent = AllDimensionType & FocusedCells;
+/**
+ * Represents the event object that is emitted when applying focus.
+ * It includes information about the dimension type and focused cells.
+ */
+export interface ApplyFocusEvent extends AllDimensionType, FocusedCells {}
+
+/**
+ * Represents the event object that is emitted before focus rendering.
+ * It includes information about the dimension type and range area.
+ */
 export interface FocusRenderEvent extends AllDimensionType {
+  /**
+   * Represents the range area of the focus.
+   */
   range: RangeArea;
+
+  /**
+   * Represents the next cell to focus.
+   */
   next?: Partial<Cell>;
 }
+/**
+ * Represents the event object that is emitted when scrolling occurs.
+ * The `type` property indicates the type of dimension (row or column) being scrolled.
+ * The `coordinate` property represents the current scroll position in that dimension.
+ */
 export type ScrollCoordinateEvent = {
+  /**
+   * Represents the type of dimension being scrolled.
+   * Possible values are 'rgRow' and 'rgCol'.
+   */
   type: DimensionType;
+
+  /**
+   * Represents the current scroll position in the specified dimension.
+   * The value is a number representing the coordinate in pixels.
+   */
   coordinate: number;
 };
