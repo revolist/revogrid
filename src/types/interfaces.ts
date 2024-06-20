@@ -55,7 +55,7 @@ export type ColumnDataSchemaModel = {
   /**
    * Row models based on viewport
    */
-  data: DataSource;
+  data: DataType[];
   /**
    * Current cell data
    */
@@ -409,7 +409,7 @@ export type ColPropertiesFunc = (
 export type DataType = {
   [T in ColumnProp]: DataFormat;
 };
-export type DataSource = DataType[];
+
 export type DataLookup = {
   [rowIndex: number]: DataType;
 };

@@ -19,7 +19,6 @@ import {
   ColumnProp,
   DataLookup,
   DataFormat,
-  DataSource,
 } from '../..';
 import {
   ChangedRange,
@@ -328,7 +327,7 @@ export default class ColumnService {
       prop: ColumnProp;
       rowIndex: number;
       colIndex: number;
-      model: DataSource;
+      model: DataType;
       colType: DimensionCols;
       type: DimensionRows;
     }[] = [];
