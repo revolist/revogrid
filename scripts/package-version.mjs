@@ -1,7 +1,7 @@
 import { execa } from 'execa';
+import fs from 'fs';
 import path from 'path';
 import chalk from 'chalk';
-import minimist from 'minimist';
 import { fileURLToPath } from 'url';
 import { packageDirs } from './package-dirs.mjs';
 
@@ -9,9 +9,10 @@ import { packageDirs } from './package-dirs.mjs';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Parse command-line arguments
-const args = minimist(process.argv.slice(2));
-const newVersion = args.version;
+// Read version from root package.json
+const rootPackageJsonPath = path.resolve(__dirname, '../package.json');
+const rootPackageJson = JSON.parse(fs.readFileSync(rootPackageJsonPath, 'utf-8'));
+const newVersion = rootPackageJson.version;
 
 if (!newVersion) {
   console.error(chalk.red('Error: Please provide a version using --version'));
@@ -19,7 +20,7 @@ if (!newVersion) {
 }
 
 async function updateVersionInPackage(packageDir) {
-  const fullPath = path.resolve(__dirname, packageDir, 'release.mjs');
+  const fullPath = path.resolve(__dirname, '..', packageDir, 'release.mjs');
   try {
     await execa('node', [fullPath, '--version', newVersion], {
       stdio: 'inherit',

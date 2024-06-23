@@ -22,8 +22,20 @@ jobs:
 
       # Build
       - run: npm run build
+      
+      # Determine if this is a pre-release
+      - name: Check if pre-release
+        id: tag
+        run: |
+          if [[ "${{ github.event.release.prerelease }}" == "true" ]]; then
+            echo "::set-output name=TAG::prerelease"
+          else
+            echo "::set-output name=TAG::latest"
+          fi
+
       # Publish to npm
-      - run: npm publish --access public
+      - name: Publish to npm
+        run: npm publish --access public --tag ${{ steps.tag.outputs.TAG }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
@@ -35,14 +47,11 @@ jobs:
           scope: '@revolist'
 
       # Publish to GitHub Packages
-      - run: npm publish
+      - name: Publish to GitHub Packages
+        run: npm publish --access public --tag ${{ steps.tag.outputs.TAG }}
         env:
           NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Get version from package.json
-      - name: Get version from package.json
-        id: version
-        run: echo "::set-output name=VERSION::$(node -p "require('./package.json').version")"
-
         # Update packages with new version
-      - run: npm run package:update  -- --version ${{ steps.version.outputs.VERSION }}
+      - name: Sync packages
+        run: npm run package:update
