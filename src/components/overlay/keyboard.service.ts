@@ -1,15 +1,26 @@
 import { getRange } from '../../store/selection/selection.helpers';
-import SelectionStoreService from '../../store/selection/selection.store.service';
 import { codesLetter } from '../../utils/key.codes';
-import { isAll, isClear, isCopy, isCut, isEnterKey, isLetterKey, isPaste } from '../../utils/key.utils';
+import {
+  isAll,
+  isClear,
+  isCopy,
+  isCut,
+  isEnterKey,
+  isLetterKey,
+  isPaste,
+} from '../../utils/key.utils';
 import { timeout } from '../../utils';
-import { EventData, getCoordinate, isAfterLast, isBeforeFirst } from './selection.utils';
+import {
+  EventData,
+  getCoordinate,
+  isAfterLast,
+  isBeforeFirst,
+} from './selection.utils';
 import { RESIZE_INTERVAL } from '../../utils/consts';
 import { Cell, RangeArea, SelectionStoreState } from '../..';
 import { Observable } from '../..';
 
 type Config = {
-  selectionStoreService: SelectionStoreService;
   selectionStore: Observable<SelectionStoreState>;
 
   // Apply changes from edit.
@@ -34,12 +45,16 @@ const DIRECTION_CODES: string[] = [
   codesLetter.ARROW_RIGHT,
 ];
 export class KeyboardService {
-
   constructor(private sv: Config) {}
 
-  async keyDown(e: KeyboardEvent, canRange: boolean) {
+  async keyDown(
+    e: KeyboardEvent,
+    canRange: boolean,
+    isEditMode: boolean,
+    { range, focus }: Pick<EventData, 'range' | 'focus'>,
+  ) {
     // IF EDIT MODE
-    if (this.sv.selectionStoreService.edited) {
+    if (isEditMode) {
       switch (e.code) {
         case codesLetter.ESCAPE:
           this.sv.cancel();
@@ -51,13 +66,13 @@ export class KeyboardService {
     // IF NOT EDIT MODE
 
     // pressed clear key
-    if (this.sv.selectionStoreService.ranged && isClear(e.code)) {
+    if (range && isClear(e.code)) {
       this.sv.clearCell();
       return;
     }
 
     // below works with focus only
-    if (!this.sv.selectionStoreService.focused) {
+    if (!focus) {
       return;
     }
 
@@ -140,7 +155,7 @@ export class KeyboardService {
     changes: Partial<Cell>,
     range?: RangeArea,
     focus?: Cell,
-    isMulti = false
+    isMulti = false,
   ) {
     if (!range || !focus) {
       return false;
@@ -151,7 +166,7 @@ export class KeyboardService {
     }
     if (isMulti) {
       const eData: EventData = this.sv.getData();
-      if (isAfterLast(data.end, eData) || isBeforeFirst(data.start)) {
+      if (isAfterLast(data.end, eData.lastCell) || isBeforeFirst(data.start)) {
         return false;
       }
       const range = getRange(data.start, data.end);
@@ -161,7 +176,10 @@ export class KeyboardService {
   }
 
   /** Monitor key direction changes */
-  changeDirectionKey(e: KeyboardEvent, canRange: boolean): { changes: Partial<Cell>; isMulti?: boolean } | void {
+  changeDirectionKey(
+    e: KeyboardEvent,
+    canRange: boolean,
+  ): { changes: Partial<Cell>; isMulti?: boolean } | void {
     const isMulti = canRange && e.shiftKey;
     if (DIRECTION_CODES.includes(e.code)) {
       e.preventDefault();

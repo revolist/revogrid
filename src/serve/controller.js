@@ -1,44 +1,84 @@
 import { generateFakeDataObject } from './data.js';
 
+/**
+ * Map of prevented events
+ */
 window.eventsPrevented = {};
+
+/**
+ * Toggle row headers visibility
+ * @param {boolean} isShow - Show row headers if true, hide otherwise
+ */
 window.showRowHeaders = function (isShow) {
   const grid = document.querySelector('revo-grid');
   grid.rowHeaders = isShow;
 };
+
+/**
+ * Toggle column grouping visibility
+ * @param {boolean} isShow - Show column grouping if true, hide otherwise
+ */
 window.showColGrouping = function (isShow) {
   setData({
     groupedHeader: isShow,
   });
 };
+
+/**
+ * Set row size
+ * @param {number} s - Row size
+ */
 window.setRowSize = function (s) {
   const grid = document.querySelector('revo-grid');
   grid.rowSize = s;
 };
+
+/**
+ * Start editing cell
+ * @param {number} rgRow - Row index
+ * @param {string} prop - Column property
+ */
 window.setEdit = function (rgRow, prop) {
   const grid = document.querySelector('revo-grid');
   grid.setCellEdit(rgRow, prop);
 };
+
+/**
+ * Scroll to column
+ * @param {number} [x=30] - Column index
+ */
 window.scrollToCol = function (x = 30) {
   const grid = document.querySelector('revo-grid');
   grid.scrollToColumnProp(x);
 };
+
+/**
+ * Clear grouping
+ */
 window.clearGrouping = function () {
   const grid = document.querySelector('revo-grid');
   grid.grouping = {};
 };
 
-// Row group
-window.setGrouping = function (
-  props = [],
-  expandedAll = false,
-) {
+/**
+ * Set row grouping
+ * @param {Array} props - Array of properties to group by
+ * @param {boolean} expandedAll - Expand all groups if true, collapse otherwise
+ */
+window.setGrouping = function (props = [], expandedAll = false) {
   const grid = document.querySelector('revo-grid');
   grid.grouping = {
     props,
     expandedAll,
-    groupLabelTemplate: (createElement, { name, depth }) => createElement('span', null, ` ${props[depth]}: ${name}`),
+    groupLabelTemplate: (createElement, { name, depth }) =>
+      createElement('span', null, ` ${props[depth]}: ${name}`),
   };
 };
+
+/**
+ * Set trimmed rows
+ * @param {Array} rows - Array of row indexes to trim
+ */
 window.setTrimmed = function (rows = []) {
   const grid = document.querySelector('revo-grid');
   grid.trimmedRows = rows.reduce((r, v) => {
@@ -47,6 +87,10 @@ window.setTrimmed = function (rows = []) {
   }, {});
 };
 
+/**
+ * Export grid
+ * @param {string} [filename='new file'] - File name
+ */
 window.exportGrid = function (filename = 'new file') {
   const grid = document.querySelector('revo-grid');
   grid.getPlugins().then(plugins => {
@@ -66,9 +110,12 @@ let defaultData = {
   bottomPinned: [],
   colPinEnd: [],
   colPinStart: [],
-  // groupedHeader: true,
-  // order: 5
 };
+
+/**
+ * Set data
+ * @param {Object} [config={}] - Data configuration
+ */
 window.setData = function (config = {}) {
   defaultData = { ...defaultData, ...config };
   const $loader = document.querySelector('.loader');
@@ -85,6 +132,12 @@ window.setData = function (config = {}) {
     $loader.style.display = 'none';
   }, 0);
 };
+
+/**
+ * Set pinned rows/columns
+ * @param {string} type - Type of pinned rows/columns
+ * @param {boolean} checked - True if rows/columns are pinned, false otherwise
+ */
 window.setPinned = function (type, checked) {
   const val = [];
   if (checked) {
@@ -108,12 +161,22 @@ window.setPinned = function (type, checked) {
   });
 };
 
-// prevent event debug
+/**
+ * Prevent event debug
+ * @param {string} name - Event name
+ * @param {boolean} checked - True if event should be prevented, false otherwise
+ */
 window.preventEvent = function (name, checked) {
   eventsPrevented[name] = checked;
 };
+
 let keys = 2;
 let attrs = {};
+
+/**
+ * Toggle visibility of grid
+ * @param {boolean} checked - True if grid is visible, false otherwise
+ */
 window.toggleVisibility = function (checked) {
   if (!checked) {
     const grid = document.querySelector('revo-grid');
@@ -141,6 +204,12 @@ window.toggleVisibility = function (checked) {
 };
 
 let timerUpdateInterval;
+
+/**
+ * Toggle timer update
+ * @param {boolean} checked - True if timer should be updated, false otherwise
+ * @param {number} [inteval=3] - Update interval in seconds
+ */
 window.timerUpdate = function (checked, inteval = 3) {
   clearInterval(timerUpdateInterval);
   if (checked) {
@@ -151,6 +220,10 @@ window.timerUpdate = function (checked, inteval = 3) {
   }
 };
 
+/**
+ * Set theme
+ * @param {string} theme - Theme name
+ */
 window.theme = function (theme) {
   const grid = document.querySelector('revo-grid');
   if (theme && theme.indexOf('dark') > -1) {
@@ -163,6 +236,9 @@ window.theme = function (theme) {
 
 window.onload = onLoad;
 
+/**
+ * On load function
+ */
 function onLoad() {
   const grid = document.querySelector('revo-grid');
 
@@ -199,21 +275,13 @@ function onLoad() {
   grid.filter = true;
   grid.exporting = true;
   grid.rowHeaders = true;
-  grid.rowDefinitions = [
-    {
-      type: 'rgRow',
-      index: 1,
-      size: 100,
-    },
-  ];
-  grid.rowClass = 'row-style';
   // grid.stretch = true;
   /* 
   grid.autoSizeColumn = {
     mode: 'autoSizeAll',
   };*/
   // default
-  setData({ rows: 1000, cols: 1000 });
+  setData({ rows: 100, cols: 2 });
 
   // events testing
   // 'beforerange', 'setRange', 'beforefocuslost', 'beforecellfocus', 'afterfocus', 'beforeedit', 'aftercolumnresize'

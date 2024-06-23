@@ -17,7 +17,10 @@ import ColumnDataProvider, {
   ColumnCollection,
 } from '../../services/column.data.provider';
 import { DataProvider } from '../../services/data.provider';
-import { DSourceState, getVisibleSourceItem } from '../../store/dataSource/data.store';
+import {
+  DSourceState,
+  getVisibleSourceItem,
+} from '../../store/dataSource/data.store';
 import DimensionProvider from '../../services/dimension.provider';
 import ViewportProvider from '../../services/viewport.provider';
 import ThemeService from '../../themeManager/theme.service';
@@ -47,7 +50,7 @@ import StretchColumn, {
 } from '../../plugins/column.stretch.plugin';
 import { rowDefinitionByType, rowDefinitionRemoveByType } from './grid.helpers';
 import ColumnPlugin from '../../plugins/moveColumn/column.drag.plugin';
-import { getFromEvent } from '../../utils/events';
+import { getPropertyFromEvent } from '../../utils/events';
 import { isMobileDevice } from '../../utils/mobile';
 import {
   MultiDimensionType,
@@ -90,17 +93,17 @@ import { HeaderProperties, PluginProviders } from '../..';
 
 /**
  * Revogrid - High-performance, customizable grid library for managing large datasets.
- * 
+ *
  * :::tip
  * Read [type definition file](https://github.com/revolist/revogrid/blob/master/src/interfaces.d.ts) for the full interface information.
  * All complex property types such as `ColumnRegular`, `ColumnProp`, `ColumnDataSchemaModel` can be found there.
  * :::
- * 
+ *
  * :::tip
  * For a comprehensive events guide, check the [dependency tree](#Dependencies).
  * All events propagate to the root level of the grid.
  * :::
- * 
+ *
  * @slot data-{column-type}-{row-type}. @example data-rgCol-rgRow - main data slot. Applies extra elements in <revogr-data />.
  * @slot focus-{column-type}-{row-type}. @example focus-rgCol-rgRow - focus layer for main data. Applies extra elements in <revogr-focus />.
  */
@@ -124,7 +127,7 @@ export class RevoGridComponent {
   /**
    * Indicates default rgRow size.
    * By default 0, means theme package size will be applied
-   * 
+   *
    * Alternatively you can use `rowSize` to reset viewport
    */
   @Prop() rowSize = 0;
@@ -555,12 +558,16 @@ export class RevoGridComponent {
    * Useful for performance optimization.
    * No viewport update will be triggered.
    */
-  @Method() async setDataAt(data: {
-    row: number;
-    col: number;
-  } & AllDimensionType) {
+  @Method() async setDataAt(
+    data: {
+      row: number;
+      col: number;
+    } & AllDimensionType,
+  ) {
     const dataElement: HTMLRevogrDataElement | null =
-      this.element.querySelector(`revogr-data[type="${data.rowType}"][col-type="${data.colType}"]`);
+      this.element.querySelector(
+        `revogr-data[type="${data.rowType}"][col-type="${data.colType}"]`,
+      );
     return dataElement?.updateCell({
       row: data.row,
       col: data.col,
@@ -570,9 +577,7 @@ export class RevoGridComponent {
   /**
    * Scrolls viewport to specified row by index.
    */
-  @Method() async scrollToRow(
-    coordinate = 0,
-  ) {
+  @Method() async scrollToRow(coordinate = 0) {
     const y = this.dimensionProvider.getViewPortPos({
       coordinate,
       dimension: 'rgRow',
@@ -583,9 +588,7 @@ export class RevoGridComponent {
   /**
    * Scrolls viewport to specified column by index.
    */
-  @Method() async scrollToColumnIndex(
-    coordinate = 0,
-  ) {
+  @Method() async scrollToColumnIndex(coordinate = 0) {
     const x = this.dimensionProvider.getViewPortPos({
       coordinate,
       dimension: 'rgCol',
@@ -790,19 +793,22 @@ export class RevoGridComponent {
   @Listen('touchstart', { target: 'document' })
   @Listen('mousedown', { target: 'document' })
   mousedownHandle(event: MouseEvent | TouchEvent) {
-    const screenX = getFromEvent(event, 'screenX');
-    const screenY = getFromEvent(event, 'screenY');
+    const screenX = getPropertyFromEvent(event, 'screenX');
+    const screenY = getPropertyFromEvent(event, 'screenY');
     if (screenX === null || screenY === null) {
       return;
     }
 
     this.clickTrackForFocusClear = screenX + screenY;
   }
+  /**
+   * To keep your elements from losing focus use mouseup/touchend e.preventDefault();
+   */
   @Listen('touchend', { target: 'document' })
   @Listen('mouseup', { target: 'document' })
   mouseupHandle(event: MouseEvent | TouchEvent) {
-    const screenX = getFromEvent(event, 'screenX');
-    const screenY = getFromEvent(event, 'screenY');
+    const screenX = getPropertyFromEvent(event, 'screenX');
+    const screenY = getPropertyFromEvent(event, 'screenY');
     if (screenX === null || screenY === null) {
       return;
     }
@@ -892,9 +898,7 @@ export class RevoGridComponent {
     this.afteredit.emit(detail);
   }
 
-  @Listen('selectionchangeinit') onRangeChanged(
-    e: CustomEvent<ChangedRange>,
-  ) {
+  @Listen('selectionchangeinit') onRangeChanged(e: CustomEvent<ChangedRange>) {
     const beforeange = this.beforeange.emit(e.detail);
     if (beforeange.defaultPrevented) {
       e.preventDefault();
@@ -974,7 +978,10 @@ export class RevoGridComponent {
       this.columnTypes,
     );
     this.beforecolumnsset.emit(columnGather);
-    this.dimensionProvider.applyNewColumns(columnGather.columns, this.disableVirtualX);
+    this.dimensionProvider.applyNewColumns(
+      columnGather.columns,
+      this.disableVirtualX,
+    );
     this.beforecolumnapplied.emit(columnGather);
     const columns = this.columnProvider.setColumns(columnGather);
     this.aftercolumnsset.emit({
@@ -999,7 +1006,12 @@ export class RevoGridComponent {
     this.rowDefChanged(this.rowDefinitions, this.rowDefinitions);
   }
 
-  @Watch('theme') themeChanged(t: Theme, _?: Theme, __ = 'theme', init = false) {
+  @Watch('theme') themeChanged(
+    t: Theme,
+    _?: Theme,
+    __ = 'theme',
+    init = false,
+  ) {
     this.themeService.register(t);
     this.dimensionProvider.setSettings(
       { originItemSize: this.themeService.rowSize },
@@ -1011,7 +1023,24 @@ export class RevoGridComponent {
     );
     // if theme change we need to reapply row size and reset viewport
     if (!init) {
-      this.rowSizeChanged(this.themeService.rowSize);
+      // clear existing data
+      this.dimensionProvider.setSettings(
+        { originItemSize: this.themeService.rowSize },
+        'rgRow',
+      );
+      this.rowDefChanged(
+        // for cases when some custom size present and not
+        this.rowDefinitions.length
+          ? this.rowDefinitions
+          : [
+              {
+                type: 'rgRow',
+                size: this.themeService.rowSize,
+                index: 0,
+              },
+            ],
+        this.rowDefinitions,
+      );
     }
   }
 
@@ -1071,7 +1100,10 @@ export class RevoGridComponent {
     this.dataSourceChanged(this.source, this.source, 'source');
   }
 
-  @Watch('rowDefinitions') rowDefChanged(after: any, before?: any) {
+  @Watch('rowDefinitions') rowDefChanged(
+    after: RowDefinition[],
+    before?: RowDefinition[],
+  ) {
     const {
       detail: { vals: newVal, oldVals: oldVal },
     } = this.beforerowdefinition.emit({
@@ -1178,13 +1210,10 @@ export class RevoGridComponent {
     this.themeService = new ThemeService({
       rowSize: this.rowSize,
     });
-    this.dimensionProvider = new DimensionProvider(
-      this.viewportProvider,
-      {
-        realSizeChanged: (k: MultiDimensionType) =>
-          this.contentsizechanged.emit(k),
-      },
-    );
+    this.dimensionProvider = new DimensionProvider(this.viewportProvider, {
+      realSizeChanged: (k: MultiDimensionType) =>
+        this.contentsizechanged.emit(k),
+    });
     this.columnProvider = new ColumnDataProvider();
     this.selectionStoreConnector = new SelectionStoreConnector();
     this.dataProvider = new DataProvider(this.dimensionProvider);
@@ -1308,7 +1337,6 @@ export class RevoGridComponent {
       contentHeight,
     );
 
-
     // #region ViewportSections
     /**
      * The code renders a viewport divided into sections.
@@ -1343,7 +1371,7 @@ export class RevoGridComponent {
         />,
       );
     }
-    
+
     // Viewport section render
     const isMobile = isMobileDevice();
     const viewPortHtml: VNode[] = [];
@@ -1366,7 +1394,7 @@ export class RevoGridComponent {
       ];
 
       // Render viewport data (vertical sections)
-      view.dataPorts.forEach((data) => {
+      view.dataPorts.forEach(data => {
         const key = `${data.type}_${view.type}`;
         const dataView = (
           <revogr-overlay-selection
@@ -1383,12 +1411,11 @@ export class RevoGridComponent {
             slot={data.slot}
             onCanceledit={() => this.selectionStoreConnector.setEdit(false)}
             onSetedit={({ detail }) => {
-                const event = this.beforeeditstart.emit(detail);
-                if (!event.defaultPrevented) {
-                  this.selectionStoreConnector.setEdit(detail.val);
-                }
+              const event = this.beforeeditstart.emit(detail);
+              if (!event.defaultPrevented) {
+                this.selectionStoreConnector.setEdit(detail.val);
               }
-            }
+            }}
           >
             <revogr-data
               {...data}
@@ -1431,18 +1458,26 @@ export class RevoGridComponent {
       viewPortHtml.push(
         <revogr-viewport-scroll
           {...view.prop}
-          ref={el => this.scrollingService.registerElement(el, `${view.prop.key}`)}
-          onScrollviewport={e => this.scrollingService.proxyScroll(e.detail, `${view.prop.key}`)}
-          onScrollviewportsilent={e => this.scrollingService.scrollSilentService(e.detail, `${view.prop.key}`)}
+          ref={el =>
+            this.scrollingService.registerElement(el, `${view.prop.key}`)
+          }
+          onScrollviewport={e =>
+            this.scrollingService.proxyScroll(e.detail, `${view.prop.key}`)
+          }
+          onScrollviewportsilent={e =>
+            this.scrollingService.scrollSilentService(
+              e.detail,
+              `${view.prop.key}`,
+            )
+          }
         >
           {dataViews}
         </revogr-viewport-scroll>,
       );
     }
-    
+
     viewportSections.push(viewPortHtml);
     // #endregion
-
 
     const typeRow: DimensionType = 'rgRow';
     const typeCol: DimensionType = 'rgCol';
@@ -1452,7 +1487,9 @@ export class RevoGridComponent {
 
     return (
       <Host {...{ [`${UUID}`]: this.uuid }}>
-        { this.hideAttribution ? null : <revogr-attribution class="attribution" /> }
+        {this.hideAttribution ? null : (
+          <revogr-attribution class="attribution" />
+        )}
         <div
           class="main-viewport"
           onClick={(e: MouseEvent) => {

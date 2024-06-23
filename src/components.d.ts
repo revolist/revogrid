@@ -495,6 +495,9 @@ export namespace Components {
          */
         "viewportCol": Observable<ViewportState>;
     }
+    /**
+     * Component for handling row order editor.
+     */
     interface RevogrOrderEditor {
         "clearOrder": () => Promise<void>;
         /**
@@ -516,6 +519,9 @@ export namespace Components {
          */
         "parent": HTMLElement;
     }
+    /**
+     * Component for overlaying the grid with the selection.
+     */
     interface RevogrOverlaySelection {
         /**
           * Additional data to pass to renderer.
@@ -554,7 +560,7 @@ export namespace Components {
          */
         "isMobileDevice": boolean;
         /**
-          * Last cell position.
+          * Last real coordinates positions + 1.
          */
         "lastCell": Cell1;
         /**
@@ -996,6 +1002,9 @@ declare global {
     to: number;
   };
     }
+    /**
+     * Component for handling row order editor.
+     */
     interface HTMLRevogrOrderEditorElement extends Components.RevogrOrderEditor, HTMLStencilElement {
         addEventListener<K extends keyof HTMLRevogrOrderEditorElementEventMap>(type: K, listener: (this: HTMLRevogrOrderEditorElement, ev: RevogrOrderEditorCustomEvent<HTMLRevogrOrderEditorElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
         addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
@@ -1035,6 +1044,9 @@ declare global {
         "beforekeyup": KeyboardEvent;
         "beforecellsave": any;
     }
+    /**
+     * Component for overlaying the grid with the selection.
+     */
     interface HTMLRevogrOverlaySelectionElement extends Components.RevogrOverlaySelection, HTMLStencilElement {
         addEventListener<K extends keyof HTMLRevogrOverlaySelectionElementEventMap>(type: K, listener: (this: HTMLRevogrOverlaySelectionElement, ev: RevogrOverlaySelectionCustomEvent<HTMLRevogrOverlaySelectionElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
         addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
@@ -1793,6 +1805,9 @@ declare namespace LocalJSX {
          */
         "viewportCol"?: Observable<ViewportState>;
     }
+    /**
+     * Component for handling row order editor.
+     */
     interface RevogrOrderEditor {
         /**
           * Static stores, not expected to change during component lifetime
@@ -1839,6 +1854,9 @@ declare namespace LocalJSX {
          */
         "parent"?: HTMLElement;
     }
+    /**
+     * Component for overlaying the grid with the selection.
+     */
     interface RevogrOverlaySelection {
         /**
           * Additional data to pass to renderer.
@@ -1877,7 +1895,7 @@ declare namespace LocalJSX {
          */
         "isMobileDevice"?: boolean;
         /**
-          * Last cell position.
+          * Last real coordinates positions + 1.
          */
         "lastCell"?: Cell1;
         /**
@@ -2170,7 +2188,13 @@ declare module "@stencil/core" {
              */
             "revogr-focus": LocalJSX.RevogrFocus & JSXBase.HTMLAttributes<HTMLRevogrFocusElement>;
             "revogr-header": LocalJSX.RevogrHeader & JSXBase.HTMLAttributes<HTMLRevogrHeaderElement>;
+            /**
+             * Component for handling row order editor.
+             */
             "revogr-order-editor": LocalJSX.RevogrOrderEditor & JSXBase.HTMLAttributes<HTMLRevogrOrderEditorElement>;
+            /**
+             * Component for overlaying the grid with the selection.
+             */
             "revogr-overlay-selection": LocalJSX.RevogrOverlaySelection & JSXBase.HTMLAttributes<HTMLRevogrOverlaySelectionElement>;
             /**
              * Row headers component

@@ -1,10 +1,4 @@
-import {
-  Component,
-  Method,
-  Event,
-  EventEmitter,
-  Prop,
-} from '@stencil/core';
+import { Component, Method, Event, EventEmitter, Prop } from '@stencil/core';
 import debounce from 'lodash/debounce';
 
 import { DSourceState, setItems } from '../../store/dataSource/data.store';
@@ -20,6 +14,9 @@ import {
 } from '../../types/interfaces';
 import { Cell } from '../../types/selection';
 
+/**
+ * Component for handling row order editor.
+ */
 @Component({ tag: 'revogr-order-editor' })
 export class OrderEditor {
   // #region Properties
@@ -49,13 +46,16 @@ export class OrderEditor {
   rowDragEnd: EventEmitter;
 
   /** Row move started */
-  @Event({ eventName: 'rowdragmoveinit', cancelable: true }) rowDrag: EventEmitter<PositionItem>;
+  @Event({ eventName: 'rowdragmoveinit', cancelable: true })
+  rowDrag: EventEmitter<PositionItem>;
 
   /** Row mouse move started */
-  @Event({ eventName: 'rowdragmousemove', cancelable: true })rowMouseMove: EventEmitter<Cell>;
+  @Event({ eventName: 'rowdragmousemove', cancelable: true })
+  rowMouseMove: EventEmitter<Cell>;
 
   /** Row dragged, new range ready to be applied */
-  @Event({ eventName: 'rowdropinit', cancelable: true }) rowDropped: EventEmitter<{
+  @Event({ eventName: 'rowdropinit', cancelable: true })
+  rowDropped: EventEmitter<{
     from: number;
     to: number;
   }>;
@@ -63,7 +63,10 @@ export class OrderEditor {
 
   // #region Private
   private rowOrderService: RowOrderService;
-  private events: { name: keyof DocumentEventMap; listener: (e: MouseEvent) => void; }[] = [];
+  private events: {
+    name: keyof DocumentEventMap;
+    listener: (e: MouseEvent) => void;
+  }[] = [];
   private rowMoveFunc = debounce((y: number) => {
     const rgRow = this.rowOrderService.move(y, this.getData());
     if (rgRow !== null) {
@@ -98,16 +101,20 @@ export class OrderEditor {
     const mouseUp = (e: MouseEvent) => this.endOrder(e);
     const mouseLeave = () => this.clearOrder();
 
-    this.events.push({
-      name: 'mousemove',
-      listener: moveMove,
-    }, {
-      name: 'mouseup',
-      listener: mouseUp,
-    }, {
-      name: 'mouseleave',
-      listener: mouseLeave,
-    });
+    this.events.push(
+      {
+        name: 'mousemove',
+        listener: moveMove,
+      },
+      {
+        name: 'mouseup',
+        listener: mouseUp,
+      },
+      {
+        name: 'mouseleave',
+        listener: mouseLeave,
+      },
+    );
     document.addEventListener('mousemove', moveMove);
     // Action finished inside of the document
     document.addEventListener('mouseup', mouseUp);

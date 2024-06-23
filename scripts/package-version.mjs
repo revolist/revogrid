@@ -3,6 +3,7 @@ import path from 'path';
 import chalk from 'chalk';
 import minimist from 'minimist';
 import { fileURLToPath } from 'url';
+import { packageDirs } from './package-dirs.mjs';
 
 // Define __dirname and __filename for ESM
 const __filename = fileURLToPath(import.meta.url);
@@ -17,15 +18,6 @@ if (!newVersion) {
   process.exit(1);
 }
 
-const packageDirs = [
-  '../packages/angular',
-  '../packages/react',
-  '../packages/svelte',
-  '../packages/vue2',
-  '../packages/vue3',
-  '../docs',
-];
-
 async function updateVersionInPackage(packageDir) {
   const fullPath = path.resolve(__dirname, packageDir, 'release.mjs');
   try {
@@ -39,9 +31,28 @@ async function updateVersionInPackage(packageDir) {
   }
 }
 
+async function commitAndPushChanges(packageDir) {
+  try {
+    // Add changes
+    await execa('git', ['add', '.'], { cwd: packageDir, stdio: 'inherit' });
+
+    // Commit changes
+    await execa('git', ['commit', '-m', `chore(release): update versions to ${newVersion}`], { cwd: packageDir, stdio: 'inherit' });
+
+    // Push changes
+    await execa('git', ['push'], { cwd: packageDir, stdio: 'inherit' });
+
+    console.log(chalk.green(`Successfully committed and pushed version updates for ${packageDir} to GitHub`));
+  } catch (error) {
+    console.error(chalk.red(`Failed to commit and push changes for ${packageDir}`));
+    console.error(error);
+  }
+}
+
 (async () => {
   for (const packageDir of packageDirs) {
     await updateVersionInPackage(packageDir);
+    await commitAndPushChanges(packageDir);
   }
   console.log(chalk.blue('All versions updated.'));
 })();

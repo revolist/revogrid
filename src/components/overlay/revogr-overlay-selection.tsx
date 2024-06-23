@@ -11,16 +11,22 @@ import {
   Watch,
 } from '@stencil/core';
 import ColumnService from '../data/column.service';
-import SelectionStoreService from '../../store/selection/selection.store.service';
 import { codesLetter } from '../../utils/key.codes';
 import { MOBILE_CLASS, SELECTION_BORDER_CLASS } from '../../utils/consts';
 import { DSourceState } from '../../store/dataSource/data.store';
-import { getRange, isRangeSingleCell } from '../../store/selection/selection.helpers';
-import { getCurrentCell, getElStyle } from './selection.utils';
+import {
+  getRange,
+  isRangeSingleCell,
+} from '../../store/selection/selection.helpers';
+import {
+  EventData,
+  getElStyle,
+  getFocusCellBasedOnEvent,
+} from './selection.utils';
 import { isEditInput } from '../editors/edit.utils';
 import { KeyboardService } from './keyboard.service';
 import { AutoFillService } from './autofill.service';
-import { getFromEvent, verifyTouchTarget } from '../../utils/events';
+import { verifyTouchTarget } from '../../utils/events';
 import {
   Observable,
   SelectionStoreState,
@@ -37,6 +43,7 @@ import {
   FocusRenderEvent,
   ApplyFocusEvent,
   AllDimensionType,
+  DataFormat,
 } from '../../types/interfaces';
 import {
   Editors,
@@ -49,6 +56,9 @@ import {
   SaveDataDetails,
 } from '../../types/selection';
 
+/**
+ * Component for overlaying the grid with the selection.
+ */
 @Component({
   tag: 'revogr-overlay-selection',
   styleUrl: 'revogr-overlay-style.scss',
@@ -99,7 +109,7 @@ export class OverlaySelection {
    */
   @Prop() colData: Observable<DSourceState<ColumnRegular, DimensionCols>>;
   /**
-   * Last cell position.
+   * Last real coordinates positions + 1.
    */
   @Prop() lastCell: Cell;
   /**
@@ -249,8 +259,6 @@ export class OverlaySelection {
   private clipboard: HTMLRevogrClipboardElement;
 
   protected columnService: ColumnService;
-
-  protected selectionStoreService: SelectionStoreService;
   private keyboardService: KeyboardService | null = null;
   private autoFillService: AutoFillService | null = null;
   private orderEditor: HTMLRevogrOrderEditorElement;
@@ -261,37 +269,66 @@ export class OverlaySelection {
   @Listen('touchmove', { target: 'document' })
   @Listen('mousemove', { target: 'document' })
   onMouseMove(e: MouseEvent | TouchEvent) {
-    if (this.selectionStoreService.focused) {
+    if (this.selectionStore.get('focus')) {
       this.autoFillService.selectionMouseMove(e);
     }
   }
 
-  /** Action finished inside of the document. */
-  /** Pointer left document, clear any active operation. */
+  /**
+   * Action finished inside of the document.
+   * Pointer left document, clear any active operation.
+   */
   @Listen('touchend', { target: 'document' })
   @Listen('mouseup', { target: 'document' })
   @Listen('mouseleave', { target: 'document' })
   onMouseUp() {
-    this.autoFillService.clearAutoFillSelection();
+    // Clear auto fill selection
+    // when pointer left document,
+    // clear any active operation.
+    this.autoFillService.clearAutoFillSelection(
+      this.selectionStore.get('focus'),
+      this.selectionStore.get('range'),
+    );
   }
 
-  /** Row drag started. */
+  /**
+   * Row drag started.
+   * This event is fired when drag action started on cell.
+   */
   @Listen('dragstartcell') onCellDrag(e: CustomEvent<DragStartEvent>) {
+    // Invoke drag start on order editor.
     this.orderEditor?.dragStart(e.detail);
   }
 
-  /** Get keyboard down from element. */
+  /**
+   * Get keyboard down from element.
+   * This event is fired when keyboard key is released.
+   */
   @Listen('keyup', { target: 'document' }) onKeyUp(e: KeyboardEvent) {
+    // Emit before key up event.
     this.beforeKeyUp.emit(e);
   }
 
-  /** Get keyboard down from element. */
+  /**
+   * Get keyboard down from element.
+   * This event is fired when keyboard key is pressed.
+   */
   @Listen('keydown', { target: 'document' }) onKeyDown(e: KeyboardEvent) {
+    // Emit before key down event and check if default prevention is set.
     const proxy = this.beforeKeyDown.emit(e);
     if (e.defaultPrevented || proxy.defaultPrevented) {
       return;
     }
-    this.keyboardService?.keyDown(e, this.range);
+    // Invoke key down on keyboard service.
+    this.keyboardService?.keyDown(
+      e,
+      this.range,
+      !!this.selectionStore.get('edit'),
+      {
+        focus: this.selectionStore.get('focus'),
+        range: this.selectionStore.get('range'),
+      },
+    );
   }
   // #endregion
 
@@ -299,15 +336,9 @@ export class OverlaySelection {
   @Watch('selectionStore') selectionServiceSet(
     s: Observable<SelectionStoreState>,
   ) {
-    this.selectionStoreService = new SelectionStoreService(s, {
-      changeRange: range => this.triggerRangeEvent(range),
-      focus: (focus, end) => this.doFocus(focus, end),
-    });
-
     this.keyboardService = new KeyboardService({
-      selectionStoreService: this.selectionStoreService,
       selectionStore: s,
-      range: r => this.selectionStoreService.changeRange(r),
+      range: r => this.triggerRangeEvent(r),
       focusNext: (f, next) => this.doFocus(f, f, next),
       change: val => {
         if (this.readonly) {
@@ -331,7 +362,6 @@ export class OverlaySelection {
   @Watch('dimensionCol')
   createAutoFillService() {
     this.autoFillService = new AutoFillService({
-      selectionStoreService: this.selectionStoreService,
       dimensionRow: this.dimensionRow,
       dimensionCol: this.dimensionCol,
       columnService: this.columnService,
@@ -465,11 +495,11 @@ export class OverlaySelection {
     if (editCell) {
       nodes.push(editCell);
     } else {
-      const range = this.selectionStoreService.ranged;
-      const selectionFocus = this.selectionStoreService.focused;
+      const range = this.selectionStore.get('range');
+      const focus = this.selectionStore.get('focus');
 
       // Clipboard
-      if ((range || selectionFocus) && this.useClipboard) {
+      if ((range || focus) && this.useClipboard) {
         nodes.push(
           <revogr-clipboard
             readonly={this.readonly}
@@ -486,8 +516,8 @@ export class OverlaySelection {
         nodes.push(...this.renderRange(range));
       }
       // Autofill
-      if (selectionFocus && !this.readonly && this.range) {
-        nodes.push(this.autoFillService.renderAutofill(range, selectionFocus));
+      if (focus && !this.readonly && this.range) {
+        nodes.push(this.autoFillService.renderAutofill(range, focus));
       }
 
       // Order
@@ -507,13 +537,7 @@ export class OverlaySelection {
     return (
       <Host
         class={{ mobile: this.isMobileDevice }}
-        // Open Editor on DblClick
-        onDblClick={(e: MouseEvent) => {
-          // DblClick prevented outside - Editor will not open
-          if (!e.defaultPrevented) {
-            this.doEdit();
-          }
-        }}
+        onDblClick={(e: MouseEvent) => this.onElementDblClick(e)}
         onMouseDown={(e: MouseEvent) => this.onElementMouseDown(e)}
         onTouchStart={(e: TouchEvent) => this.onElementMouseDown(e, true)}
       >
@@ -523,6 +547,9 @@ export class OverlaySelection {
     );
   }
 
+  /**
+   * Executes the focus operation on the specified range of cells.
+   */
   private doFocus(focus: Cell, end: Cell, next?: Partial<Cell>) {
     const { defaultPrevented } = this.beforeFocusCell.emit(
       this.columnService.getSaveData(focus.y, focus.x),
@@ -578,33 +605,55 @@ export class OverlaySelection {
     return !e.defaultPrevented;
   }
 
-  protected onElementMouseDown(e: MouseEvent | TouchEvent, touch = false) {
-    // Ignore focus if clicked input
-    if (isEditInput(e.target as HTMLElement | undefined)) {
-      return;
-    }
+  /**
+   * Open Editor on DblClick
+   */
+  private onElementDblClick(e: MouseEvent) {
+    // DblClick prevented outside - Editor will not open
+    
+    // Get data from the component
     const data = this.getData();
-    if (e.defaultPrevented) {
+    const focusCell = getFocusCellBasedOnEvent(e, data);
+    if (!focusCell) {
       return;
     }
-    const x = getFromEvent(e, 'clientX');
-    const y = getFromEvent(e, 'clientY');
-    // skip touch
-    if (x === null || y === null) {
+    this.doEdit();
+  }
+
+  /**
+   * Handle mouse down event on Host element
+   */
+  private onElementMouseDown(e: MouseEvent | TouchEvent, touch = false) {
+    // Get the target element from the event object
+    const targetElement = e.target as HTMLElement | undefined;
+    // Ignore focus if clicked input
+    if (isEditInput(targetElement)) {
       return;
     }
-    // Regular cell click
-    const focusCell = getCurrentCell({ x, y }, data);
-    this.selectionStoreService.focus(focusCell, this.range && e.shiftKey);
+
+    // Get data from the component
+    const data = this.getData();
+    const focusCell = getFocusCellBasedOnEvent(e, data);
+    if (!focusCell) {
+      return;
+    }
+
+    // Set focus on the current cell
+    this.focus(focusCell, this.range && e.shiftKey);
 
     // Initiate autofill selection
     if (this.range) {
-      this.autoFillService.selectionStart(e.target as HTMLElement, data);
+      this.autoFillService.selectionStart(targetElement, this.getData());
+
+      // Prevent default behavior for mouse events,
+      // but only if target element is not a mobile input
       if (!touch) {
         e.preventDefault();
       } else if (
         verifyTouchTarget((e as TouchEvent).touches[0], MOBILE_CLASS)
       ) {
+        // Prevent default behavior for touch events
+        // if target element is a mobile input
         e.preventDefault();
       }
     }
@@ -615,8 +664,9 @@ export class OverlaySelection {
    */
   protected doEdit(val = '') {
     if (this.canEdit()) {
-      const editCell = this.selectionStore.get('focus');
-      const data = this.columnService.getSaveData(editCell.y, editCell.x);
+      const focus = this.selectionStore.get('focus');
+
+      const data = this.columnService.getSaveData(focus.y, focus.x);
       this.setEdit?.emit({
         ...data,
         val,
@@ -645,8 +695,8 @@ export class OverlaySelection {
   }
 
   private getRegion() {
-    const focus = this.selectionStoreService.focused;
-    let range = this.selectionStoreService.ranged;
+    const focus = this.selectionStore.get('focus');
+    let range = this.selectionStore.get('range');
     if (!range) {
       range = getRange(focus, focus);
     }
@@ -658,7 +708,7 @@ export class OverlaySelection {
     if (canCopyEvent.defaultPrevented) {
       return false;
     }
-    let rangeData: (any[][]) | undefined;
+    let rangeData: DataFormat[][] | undefined;
 
     if (range) {
       const { data, mapping } = this.columnService.copyRangeArray(
@@ -681,8 +731,8 @@ export class OverlaySelection {
   }
 
   private onPaste(data: string[][]) {
-    const focus = this.selectionStoreService.focused;
-    const isEditing = this.selectionStoreService.edited !== null;
+    const focus = this.selectionStore.get('focus');
+    const isEditing = this.selectionStore.get('edit') !== null;
     if (!focus || isEditing) {
       return;
     }
@@ -715,19 +765,16 @@ export class OverlaySelection {
 
   protected clearCell() {
     if (
-      this.selectionStoreService.ranged &&
-      !isRangeSingleCell(this.selectionStoreService.ranged)
+      this.selectionStore.get('range') &&
+      !isRangeSingleCell(this.selectionStore.get('range'))
     ) {
       const data = this.columnService.getRangeStaticData(
-        this.selectionStoreService.ranged,
+        this.selectionStore.get('range'),
         '',
       );
-      this.autoFillService.onRangeApply(
-        data,
-        this.selectionStoreService.ranged,
-      );
+      this.autoFillService.onRangeApply(data, this.selectionStore.get('range'));
     } else if (this.canEdit()) {
-      const focused = this.selectionStoreService.focused;
+      const focused = this.selectionStore.get('focus');
       const cell = this.columnService.getSaveData(focused.y, focused.x);
       this.cellEdit({
         rgRow: focused.y,
@@ -750,8 +797,28 @@ export class OverlaySelection {
     if (this.readonly) {
       return false;
     }
-    const editCell = this.selectionStoreService.focused;
-    return editCell && !this.columnService?.isReadOnly(editCell.y, editCell.x);
+    const focus = this.selectionStore.get('focus');
+    return focus && !this.columnService?.isReadOnly(focus.y, focus.x);
+  }
+
+  get edited() {
+    return this.selectionStore.get('edit');
+  }
+
+  /**
+   * Sets the focus on a cell and optionally edits a range.
+   */
+  focus(cell?: Cell, isRangeEdit = false) {
+    if (!cell) return false;
+
+    const end = cell;
+    const start = this.selectionStore.get('focus');
+
+    if (isRangeEdit && start) {
+      return this.triggerRangeEvent(getRange(start, end));
+    }
+
+    return this.doFocus(cell, end);
   }
 
   get types(): AllDimensionType {
@@ -764,12 +831,14 @@ export class OverlaySelection {
   /**
    * Collect data
    */
-  protected getData() {
+  protected getData(): EventData {
     return {
       el: this.element,
       rows: this.dimensionRow.state,
       cols: this.dimensionCol.state,
       lastCell: this.lastCell,
+      focus: this.selectionStore.get('focus'),
+      range: this.selectionStore.get('range'),
     };
   }
 }

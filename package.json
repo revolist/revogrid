@@ -89,12 +89,11 @@
     "api:update": "./generate_api.sh",
 
     "readme": "./readme/generate_readme.sh",
-    "package:update": "node ./scripts/package-version.mjs --version=4.0.11",
+    "package:update": "node ./scripts/package-version.mjs",
 
     "test": "stencil test",
     "serve": "stencil build --dev --watch --serve",
-    "release": "npm run build && npm publish --public --tag pre-release && npm run package:update",
-    "deploy": "git submodule update && npm run build:demo"
+    "release": "npm run build && npm publish --public --tag pre-release && npm run package:update"
   },
   "devDependencies": {
     "@angular/core": "^18.0.3",

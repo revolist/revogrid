@@ -275,6 +275,7 @@ export default class ViewportService {
       colData: data.colStore,
       viewportCol: data.viewports[data.colType].store,
       viewportRow: data.viewports[type].store,
+      // lastCell is the last real coordinate + 1
       lastCell: getLastCell(data, type),
       slot,
       type,

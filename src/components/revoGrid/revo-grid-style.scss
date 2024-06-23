@@ -93,6 +93,7 @@ revo-grid {
     display: flex;
     flex-direction: row;
     align-items: flex-start;
+    flex-grow: 1;
     max-width: 100%;
   }
 
@@ -105,6 +106,7 @@ revo-grid {
     flex-grow: 1;
     height: 0;
     display: flex;
+    justify-content: space-between;
     flex-direction: row;
   }
 

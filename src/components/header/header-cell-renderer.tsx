@@ -19,7 +19,6 @@ export const HeaderCellRenderer = ({ data, props, additionalData }: Props, child
   if (data?.columnTemplate) {
     colTemplate = data.columnTemplate(h, data, additionalData);
   }
-  console.log('data.columnProperties', data);
   if (data?.columnProperties) {
     const extra = data.columnProperties(data);
     if (extra && typeof extra === 'object') {
