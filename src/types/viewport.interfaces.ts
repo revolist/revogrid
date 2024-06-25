@@ -4,7 +4,7 @@ import type { DimensionCols } from './dimension';
 import type { Cell, SelectionStoreState } from './selection';
 import type { RowDataSources } from '../services/data.provider';
 import type { DimensionStoreCollection } from '../store/dimension/dimension.store';
-import type { ViewportStoreCollection } from '../store/viewport/viewport.store';
+import type { ViewportStoreCollection } from '../store/viewport';
 import type { JSXBase } from '@stencil/core/internal';
 
 export type SlotType = 'content' | 'header' | 'footer';

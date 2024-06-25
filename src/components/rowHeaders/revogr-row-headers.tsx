@@ -2,7 +2,7 @@ import { h, Host, Component, Prop, Event, EventEmitter } from '@stencil/core';
 import { JSXBase } from '@stencil/core/internal';
 
 import DataStore from '../../store/dataSource/data.store';
-import ViewportStore from '../../store/viewport/viewport.store';
+import { ViewportStore } from '../../store/viewport';
 import { ROW_HEADER_TYPE } from '../../utils/consts';
 import { RowHeaderRender } from './row-header-render';
 import { calculateRowHeaderSize } from '../../utils/row-header-utils';

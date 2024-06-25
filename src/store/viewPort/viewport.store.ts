@@ -53,7 +53,7 @@ function initialState(): ViewportState {
 /**
  * Viewport store class
  */
-export default class ViewportStore {
+export class ViewportStore {
   readonly store: Observable<ViewportState>;
   // last coordinate for store position restore
   private lastKnownScroll = 0;
