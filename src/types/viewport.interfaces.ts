@@ -1,11 +1,11 @@
-import { ColumnRegular, Observable, ViewPortScrollEvent, ViewportState } from './interfaces';
-import { DSourceState, JSX } from '..';
-import { DimensionCols } from './dimension';
-import { Cell, SelectionStoreState } from './selection';
-import { RowDataSources } from '../services/data.provider';
-import { DimensionStoreCollection } from '../store/dimension/dimension.store';
-import { ViewportStoreCollection } from '../store/viewport/viewport.store';
-import { JSXBase } from '@stencil/core/internal';
+import type { ColumnRegular, Observable, ViewPortScrollEvent, ViewportState } from './interfaces';
+import type { DSourceState, JSX } from '..';
+import type { DimensionCols } from './dimension';
+import type { Cell, SelectionStoreState } from './selection';
+import type { RowDataSources } from '../services/data.provider';
+import type { DimensionStoreCollection } from '../store/dimension/dimension.store';
+import type { ViewportStoreCollection } from '../store/viewport/viewport.store';
+import type { JSXBase } from '@stencil/core/internal';
 
 export type SlotType = 'content' | 'header' | 'footer';
 

@@ -18,14 +18,14 @@ import {
 } from './viewport.helpers';
 
 import { setStore } from '../../utils/store.utils';
-import {
+import type {
   VirtualPositionItem,
   ViewportStateItems,
   ViewportState,
   Observable,
   ViewSettingSizeProp,
-} from '../..';
-import { MultiDimensionType } from '../..';
+} from '../../types/interfaces';
+import type { MultiDimensionType } from '../../types/dimension';
 
 export type ViewportStoreCollection = {
   [T in MultiDimensionType]: ViewportStore;
