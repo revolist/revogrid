@@ -83,7 +83,7 @@
     "loader/"
   ],
   "scripts": {
-    "docs": "typedoc",
+    "docs": "npx typedoc",
     "build": "npm run api:clear && stencil build --prod && rm -f loader/package.json && npm run api:update && npm run docs",
     "api:clear": "rm -rf docs/guide/api",
     "api:update": "./generate_api.sh",
@@ -124,6 +124,8 @@
     "react-dom": "^18.3.1",
     "rxjs": "^7.8.1",
     "svelte": "^4.2.18",
+    "typedoc": "^0.26.2",
+    "typedoc-plugin-markdown": "^4.1.0",
     "typescript": "^5.4.5",
     "url": "^0.11.3",
     "vue": "^3.4.27"
