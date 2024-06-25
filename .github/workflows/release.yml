@@ -1,0 +1,65 @@
+# Automatically release a new version of the package when a new version is created
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+        version:
+          type: string
+          description: 'Version to release'
+          required: true
+        draft:
+          type: boolean
+          description: 'Draft release'
+          required: false
+        prerelease:
+          type: boolean
+          description: 'Prerelease'
+          required: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+            node-version: '20.x'
+
+      - name: Update package.json version
+        run: |
+          NEW_VERSION=${{ github.event.inputs.version }}
+          jq --arg new_version "$NEW_VERSION" '.version = $new_version' package.json > tmp.$$.json && mv tmp.$$.json package.json
+        shell: bash
+
+      - name: Install changelog
+        run: npm install -g conventional-changelog-cli
+
+      - name: Generate CHANGELOG.md
+        run: |
+          npx conventional-changelog -p angular -i CHANGELOG.md -s
+        shell: bash
+
+      - name: Commit and push changes
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add package.json CHANGELOG.md
+          git commit -m "chore(release): ${NEW_VERSION}"
+          git push
+        shell: bash
+
+      - name: Create GitHub release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ github.event.inputs.version }}
+          release_name: Release ${{ github.event.inputs.version }}
+          body_path: ./CHANGELOG.md
+          draft: ${{ github.event.inputs.draft || false }}
+          prerelease: ${{ github.event.inputs.prerelease || false }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
