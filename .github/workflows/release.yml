@@ -1,0 +1,24 @@
+# Automatically release a new version of the package when a new version is created
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+        version:
+          type: string
+          description: 'Version to release'
+          required: true
+        draft:
+          type: boolean
+          description: 'Draft release'
+          required: false
+        prerelease:
+          type: boolean
+          description: 'Prerelease'
+          required: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
