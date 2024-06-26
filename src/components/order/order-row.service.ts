@@ -1,6 +1,5 @@
-import { getItemByPosition } from '../../store/dimension/dimension.helpers';
-import { DimensionSettingsState, PositionItem } from '../..';
-import { Cell } from '../..';
+import { getItemByPosition } from '@store';
+import { DimensionSettingsState, PositionItem, Cell } from '@type';
 
 type EventData = { el: HTMLElement; rows: DimensionSettingsState; cols: DimensionSettingsState };
 interface Config {

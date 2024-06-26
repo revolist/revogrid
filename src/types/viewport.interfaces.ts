@@ -1,25 +1,36 @@
-import type { ColumnRegular, Observable, ViewPortScrollEvent, ViewportState } from './interfaces';
-import type { DSourceState, JSX } from '..';
-import type { DimensionCols } from './dimension';
-import type { Cell, SelectionStoreState } from './selection';
-import type { RowDataSources } from '../services/data.provider';
-import type { DimensionStoreCollection } from '../store/dimension/dimension.store';
-import type { ViewportStoreCollection } from '../store/viewport';
 import type { JSXBase } from '@stencil/core/internal';
+import type {
+  DimensionCols,
+  ColumnRegular,
+  Observable,
+  ViewPortScrollEvent,
+  ViewportState,
+  Cell,
+  SelectionStoreState,
+} from '@type';
+import type {
+  DimensionStoreCollection,
+  ViewportStoreCollection,
+  DSourceState,
+} from '@store';
+import type { RowDataSources } from '../services/data.provider';
+import type { JSX } from '..';
 
 export type SlotType = 'content' | 'header' | 'footer';
 
-
 export interface ElementScroll {
-  changeScroll?(e: ViewPortScrollEvent, silent?: boolean): Promise<ViewPortScrollEvent>;
+  changeScroll?(
+    e: ViewPortScrollEvent,
+    silent?: boolean,
+  ): Promise<ViewPortScrollEvent>;
   setScroll?(e: ViewPortScrollEvent): Promise<void>;
 }
 export type ElementsScroll = { [key: string]: ElementScroll[] };
 
-
 export type HeaderProperties = JSX.RevogrHeader;
 
-export type ViewportProperties = JSX.RevogrViewportScroll & JSXBase.HTMLAttributes<HTMLRevogrViewportScrollElement>;
+export type ViewportProperties = JSX.RevogrViewportScroll &
+  JSXBase.HTMLAttributes<HTMLRevogrViewportScrollElement>;
 
 export type ViewportColumn = {
   colType: DimensionCols;
@@ -32,7 +43,8 @@ export type ViewportColumn = {
 
   rowStores: RowDataSources;
   colStore: Observable<DSourceState<ColumnRegular, DimensionCols>>;
-} & Partial<JSX.RevogrViewportScroll> & Partial<JSX.RevogrHeader>;
+} & Partial<JSX.RevogrViewportScroll> &
+  Partial<JSX.RevogrHeader>;
 
 export type ViewportData = {
   /** Selection connection */
@@ -48,7 +60,8 @@ export type ViewportData = {
   JSX.RevogrData;
 
 export type ViewportProps = {
-  prop: JSX.RevogrViewportScroll & JSXBase.HTMLAttributes<HTMLRevogrViewportScrollElement>;
+  prop: JSX.RevogrViewportScroll &
+    JSXBase.HTMLAttributes<HTMLRevogrViewportScrollElement>;
   position: Cell;
   type: DimensionCols;
   /** Cols dataset */

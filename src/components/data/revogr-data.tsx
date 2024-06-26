@@ -19,11 +19,11 @@ import {
   ROW_FOCUSED_CLASS,
 } from '../../utils/consts';
 
-import { DSourceState, getSourceItem } from '../../store/dataSource/data.store';
+import { DSourceState, getSourceItem } from '@store';
 import RowRenderer, { PADDING_DEPTH } from './row-renderer';
 import GroupingRowRenderer from '../../plugins/groupingRow/grouping.row.renderer';
 import { isGrouping } from '../../plugins/groupingRow/grouping.service';
-import { DimensionCols, DimensionRows } from '../../types/dimension';
+import { DimensionCols, DimensionRows } from '@type';
 import { RowHighlightPlugin } from './row-highlight.plugin';
 import { convertVNodeToHTML } from '../vnode/vnode.utils';
 import { CellRenderer } from './cell-renderer';
@@ -40,8 +40,8 @@ import {
   DragStartEvent,
   ColumnDataSchemaModel,
   VirtualPositionItem,
-} from '../../types/interfaces';
-import { RangeArea, SelectionStoreState } from '../../types/selection';
+} from '@type';
+import { RangeArea, SelectionStoreState } from '@type';
 
 /**
  * This component is responsible for rendering data

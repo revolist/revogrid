@@ -4,8 +4,8 @@ import { SortingSign } from '../../plugins/sorting/sorting.sign';
 import { ResizeEvent, ResizeProps } from '../../services/resizable.directive';
 import { DATA_COL, FOCUS_CLASS, HEADER_CLASS, HEADER_SORTABLE_CLASS, MIN_COL_SIZE } from '../../utils/consts';
 import { HeaderCellRenderer } from './header-cell-renderer';
-import { VirtualPositionItem, ColumnTemplateProp, InitialHeaderClick, CellProps } from '../../types/interfaces';
-import { RangeArea } from '../../types/selection';
+import { VirtualPositionItem, ColumnTemplateProp, InitialHeaderClick, CellProps } from '@type';
+import { RangeArea } from '@type';
 
 type Props = {
   column: VirtualPositionItem;

@@ -2,19 +2,28 @@ import reduce from 'lodash/reduce';
 import each from 'lodash/each';
 import find from 'lodash/find';
 
-import DataStore, {
+import {
+  columnTypes,
+  DataStore,
   getSourceItem,
   getSourceItemVirtualIndexByProp,
   Groups,
   setSourceByVirtualIndex,
-} from '../store/dataSource/data.store';
-import { columnTypes } from '../store/storeTypes';
+} from '@store';
 import GroupingColumnPlugin, {
   ColumnGroupingCollection,
   isColGrouping,
 } from '../plugins/groupingColumn/grouping.col.plugin';
-import { ColumnData, ColumnDataSchema, ColumnProp, ColumnRegular, ColumnTypes, ViewSettingSizeProp } from '..';
-import { DimensionCols, DimensionColPin } from '..';
+import {
+  ColumnData,
+  ColumnDataSchema,
+  ColumnProp,
+  ColumnRegular,
+  ColumnTypes,
+  ViewSettingSizeProp,
+  DimensionCols,
+  DimensionColPin,
+} from '@type';
 
 export type ColumnCollection = {
   columns: Record<DimensionCols, ColumnRegular[]>;
@@ -60,10 +69,7 @@ export default class ColumnDataProvider {
     ) as ColumnDataSources;
   }
 
-  column(
-    c: number,
-    pin?: DimensionColPin,
-  ): ColumnRegular | undefined {
+  column(c: number, pin?: DimensionColPin): ColumnRegular | undefined {
     return this.getColumn(c, pin || 'rgCol');
   }
 
@@ -93,7 +99,7 @@ export default class ColumnDataProvider {
     );
   }
 
-  getColumns(type: DimensionCols | 'all' = 'all') {
+  getColumns(type: DimensionCols | 'all' = 'all'): ColumnRegular[] {
     if (type !== 'all') {
       return this.dataSources[type].store.get('source');
     }
@@ -103,10 +109,7 @@ export default class ColumnDataProvider {
     }, []);
   }
 
-  getColumnIndexByProp(
-    prop: ColumnProp,
-    type: DimensionCols,
-  ): number {
+  getColumnIndexByProp(prop: ColumnProp, type: DimensionCols): number {
     return getSourceItemVirtualIndexByProp(this.dataSources[type].store, prop);
   }
 
@@ -131,14 +134,12 @@ export default class ColumnDataProvider {
 
         // groups
         groups: data.columnGrouping[k].reduce((res: Groups, g) => {
-            if (!res[g.level]) {
-              res[g.level] = [];
-            }
-            res[g.level].push(g);
-            return res;
-          },
-          {},
-        ),
+          if (!res[g.level]) {
+            res[g.level] = [];
+          }
+          res[g.level].push(g);
+          return res;
+        }, {}),
       });
     });
     this.sorting = data.sort;
@@ -148,18 +149,10 @@ export default class ColumnDataProvider {
   updateColumns(cols: ColumnRegular[]) {
     // collect column by type and propert
     const columnByKey: Partial<
-      Record<
-        DimensionCols,
-        Record<ColumnProp, ColumnRegular>
-      >
+      Record<DimensionCols, Record<ColumnProp, ColumnRegular>>
     > = cols.reduce(
       (
-        res: Partial<
-          Record<
-            DimensionCols,
-            Record<ColumnProp, ColumnRegular>
-          >
-        >,
+        res: Partial<Record<DimensionCols, Record<ColumnProp, ColumnRegular>>>,
         c,
       ) => {
         const type = ColumnDataProvider.getColumnType(c);
@@ -217,10 +210,7 @@ export default class ColumnDataProvider {
   clearSorting() {
     const types = reduce(
       this.sorting,
-      (
-        r: { [key in Partial<DimensionCols>]: boolean },
-        c: ColumnRegular,
-      ) => {
+      (r: { [key in Partial<DimensionCols>]: boolean }, c: ColumnRegular) => {
         const k = ColumnDataProvider.getColumnType(c);
         r[k] = true;
         return r;
@@ -236,16 +226,10 @@ export default class ColumnDataProvider {
     this.sorting = {};
   }
 
-  static getSizes(
-    cols: ColumnRegular[],
-  ): ViewSettingSizeProp {
+  static getSizes(cols: ColumnRegular[]): ViewSettingSizeProp {
     return reduce(
       cols,
-      (
-        res: ViewSettingSizeProp,
-        c: ColumnRegular,
-        i: number,
-      ) => {
+      (res: ViewSettingSizeProp, c: ColumnRegular, i: number) => {
         if (c.size) {
           res[i] = c.size;
         }

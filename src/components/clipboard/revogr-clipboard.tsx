@@ -1,5 +1,5 @@
 import { Component, Listen, Method, Event, EventEmitter, Prop } from '@stencil/core';
-import { DataFormat } from '../../types/interfaces';
+import { DataFormat } from '@type';
 /**
  * This Clipboard provides functionality for handling clipboard events in a web application.
  */

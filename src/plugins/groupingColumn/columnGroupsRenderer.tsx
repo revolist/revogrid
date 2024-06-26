@@ -1,12 +1,10 @@
 import { h, VNode } from '@stencil/core';
 import findIndex from 'lodash/findIndex';
-import { Group } from '../../store/dataSource/data.store';
-import { getItemByIndex } from '../../store/dimension/dimension.helpers';
+import { Group, getItemByIndex } from '@store';
+import { DimensionSettingsState, Providers, DimensionCols } from '@type';
 import { HEADER_ROW_CLASS } from '../../utils/consts';
 import GroupHeaderRenderer from './headerGroupRenderer';
-import { DimensionSettingsState, Providers } from '../../types/interfaces';
-import { ResizeProps } from '../..';
-import { DimensionCols } from '../../components';
+import { ResizeProps } from '../../services/resizable.directive';
 
 type Props<T> = {
   visibleProps: { [prop: string]: number };

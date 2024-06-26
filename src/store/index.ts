@@ -1,4 +1,9 @@
-import { DimensionCols, DimensionRows } from '..';
+import { DimensionCols, DimensionRows } from '@type';
+
+export * from './dataSource';
+export * from './dimension';
+export * from './selection';
+export * from './viewport';
 
 export const rowTypes: DimensionRows[] = ['rowPinStart', 'rgRow', 'rowPinEnd'];
 export const columnTypes: DimensionCols[] = [

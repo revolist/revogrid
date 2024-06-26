@@ -1,15 +1,32 @@
-import { Component, Prop, h, Host, Event, Element, EventEmitter } from '@stencil/core';
+import {
+  Component,
+  Prop,
+  h,
+  Host,
+  Event,
+  Element,
+  EventEmitter,
+} from '@stencil/core';
 import { FOCUS_CLASS } from '../../utils/consts';
 import { getElStyle } from '../overlay/selection.utils';
-import { DSourceState, getSourceItem } from '../../store/dataSource/data.store';
-import { Cell, SelectionStoreState } from '../../types/selection';
-import { ColumnRegular, DataType, DimensionSettingsState, FocusRenderEvent, FocusTemplateFunc, Observable } from '../../types/interfaces';
-import { DimensionCols, DimensionRows } from '../../types/dimension';
+import { DSourceState, getSourceItem } from '@store';
+import {
+  Cell,
+  SelectionStoreState,
+  ColumnRegular,
+  DataType,
+  DimensionSettingsState,
+  FocusRenderEvent,
+  FocusTemplateFunc,
+  Observable,
+  DimensionCols,
+  DimensionRows,
+} from '@type';
 
 /**
  * Focus component. Shows focus layer around the cell that is currently in focus.
  * @slot focus-${view.type}-${data.type}. @example focus-rgCol-rgRow
-*/
+ */
 @Component({
   tag: 'revogr-focus',
   styleUrl: 'revogr-focus-style.scss',
@@ -50,12 +67,14 @@ export class RevogrFocus {
    * Can be prevented by event.preventDefault().
    * If preventDefault used slot will be rendered.
    */
-  @Event({ eventName: 'beforefocusrender' }) beforeFocusRender: EventEmitter<FocusRenderEvent>;
+  @Event({ eventName: 'beforefocusrender' })
+  beforeFocusRender: EventEmitter<FocusRenderEvent>;
   /**
    * Before focus changed verify if it's in view and scroll viewport into this view
    * Can be prevented by event.preventDefault()
    */
-  @Event({ eventName: 'beforescrollintoview' }) beforeScrollIntoView: EventEmitter<{ el: HTMLElement }>;
+  @Event({ eventName: 'beforescrollintoview' })
+  beforeScrollIntoView: EventEmitter<{ el: HTMLElement }>;
   /**
    * Used to setup properties after focus was rendered
    */
@@ -79,13 +98,16 @@ export class RevogrFocus {
     const column = getSourceItem(this.colData, focus.x);
     this.afterFocus.emit({
       model,
-      column
+      column,
     });
   }
 
   componentDidRender() {
     const currentFocus = this.selectionStore.get('focus');
-    if (this.activeFocus?.x === currentFocus?.x && this.activeFocus?.y === currentFocus?.y) {
+    if (
+      this.activeFocus?.x === currentFocus?.x &&
+      this.activeFocus?.y === currentFocus?.y
+    ) {
       return;
     }
     this.activeFocus = currentFocus;
@@ -113,7 +135,7 @@ export class RevogrFocus {
       colType: this.colType,
     });
     if (event.defaultPrevented) {
-      return <slot/>;
+      return <slot />;
     }
     const { detail } = event;
     const style = getElStyle(
@@ -123,11 +145,9 @@ export class RevogrFocus {
     );
     const extra = this.focusTemplate?.(h, detail);
     return (
-      <Host
-        class={FOCUS_CLASS}
-        style={style}>
-          <slot/>
-          { extra }
+      <Host class={FOCUS_CLASS} style={style}>
+        <slot />
+        {extra}
       </Host>
     );
   }

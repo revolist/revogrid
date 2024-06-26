@@ -11,8 +11,8 @@ import {
   filterTypes,
 } from './filter.service';
 import { LogicFunction } from './filter.types';
-import { ColumnProp, ColumnRegular, DataType } from '../../types/interfaces';
-import { PluginProviders } from '../..';
+import { ColumnProp, ColumnRegular, DataType } from '@type';
+import { PluginProviders } from '@type';
 
 type CustomFilter = {
   columnFilterType: string; // property defined in column filter: string/number/abstract/enum...etc

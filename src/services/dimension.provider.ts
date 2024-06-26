@@ -1,25 +1,27 @@
 import reduce from 'lodash/reduce';
 import debounce from 'lodash/debounce';
-import { columnTypes, rowTypes } from '../store/storeTypes';
-import DimensionStore, {
-  DimensionStoreCollection,
-} from '../store/dimension/dimension.store';
+import ColumnDataProvider from '../services/column.data.provider';
 import ViewportProvider from './viewport.provider';
-import { getItemByIndex } from '../store/dimension/dimension.helpers';
 import {
+  getItemByIndex,
+  columnTypes,
+  rowTypes,
+  DimensionStore,
+  DimensionStoreCollection,
   gatherTrimmedItems,
   Trimmed,
-} from '../store/dataSource/trimmed.plugin';
+} from '@store';
 import { RESIZE_INTERVAL } from '../utils/consts';
 import {
+  DimensionCols,
+  DimensionType,
+  MultiDimensionType,
   ColumnRegular,
   DimensionSettingsState,
   ViewPortScrollEvent,
   ViewSettingSizeProp,
   ViewportState,
-} from '..';
-import { DimensionCols, DimensionType, MultiDimensionType } from '..';
-import ColumnDataProvider from '../services/column.data.provider';
+} from '@type';
 export type ColumnItems = Record<DimensionCols, ColumnRegular[]>;
 
 export type DimensionConfig = {
@@ -127,7 +129,10 @@ export default class DimensionProvider {
     this.updateViewport(type);
   }
 
-  applyNewColumns(columns: Record<DimensionCols, ColumnRegular[]>, disableVirtualX: boolean) {
+  applyNewColumns(
+    columns: Record<DimensionCols, ColumnRegular[]>,
+    disableVirtualX: boolean,
+  ) {
     for (let type of columnTypes) {
       // clear existing data
       this.stores[type].drop();
@@ -136,7 +141,7 @@ export default class DimensionProvider {
 
       // for pinned col no need virtual data
       const noVirtual = type !== 'rgCol' || disableVirtualX;
-      
+
       // setItemCount
       this.stores[type].setStore({ count: items.length });
 
@@ -161,7 +166,6 @@ export default class DimensionProvider {
       });
     }
   }
-
 
   getFullSize(): { x: number; y: number } {
     let x = 0;

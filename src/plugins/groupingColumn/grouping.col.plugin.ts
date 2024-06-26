@@ -2,10 +2,10 @@ import isArray from 'lodash/isArray';
 import map from 'lodash/map';
 import { ColumnCollection } from '../../services/column.data.provider';
 import { ColumnItems } from '../../services/dimension.provider';
-import { Group as StoreGroup } from '../../store/dataSource/data.store';
+import { Group as StoreGroup } from '@store';
 import { BasePlugin } from '../base.plugin';
-import { DimensionCols } from '../..';
-import { ColumnGrouping, ColumnRegular } from '../..';
+import { DimensionCols } from '@type';
+import { ColumnGrouping, ColumnRegular } from '@type';
 interface Group extends StoreGroup {
   level: number;
 }

@@ -3,7 +3,7 @@ import { dispatch } from '../../plugins/dispatcher';
 import { doPropMerge } from '../data/column.service';
 import { ResizableElement } from '../../services/resizable.element';
 import { ResizeProps } from '../../services/resizable.directive';
-import { CellProps, ColumnTemplateProp } from '../../types/interfaces';
+import { CellProps, ColumnTemplateProp } from '@type';
 
 type Props = {
   props: CellProps & Partial<ResizeProps>;

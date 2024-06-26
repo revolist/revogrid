@@ -12,9 +12,9 @@ import {
   ColumnRegular,
   InitialHeaderClick,
   DataType,
-} from '../..';
-import { DimensionRows } from '../..';
-import { PluginProviders } from '../../';
+  DimensionRows,
+  PluginProviders,
+} from '@type';
 
 export type SortingOrder = Record<ColumnProp, Order>;
 type SortingOrderFunction = Record<ColumnProp, CellCompareFunc | undefined>;
@@ -40,11 +40,15 @@ export default class SortingPlugin extends BasePlugin {
   private sortingFunc: SortingOrderFunction | null = null;
   private sortingPromise: (() => void) | null = null;
   private postponeSort = debounce(
-    async (order: SortingOrder, comparison: SortingOrderFunction) => this.runSorting(order, comparison),
+    async (order: SortingOrder, comparison: SortingOrderFunction) =>
+      this.runSorting(order, comparison),
     50,
   );
 
-  private async runSorting(order: SortingOrder, comparison: SortingOrderFunction) {
+  private async runSorting(
+    order: SortingOrder,
+    comparison: SortingOrderFunction,
+  ) {
     await this.sort(order, comparison);
     this.sortingPromise?.();
     this.sortingPromise = null;
@@ -57,7 +61,7 @@ export default class SortingPlugin extends BasePlugin {
     super(revogrid, providers);
 
     const beforeanysource = async ({
-      detail: { type, },
+      detail: { type },
     }: CustomEvent<{
       type: DimensionRows;
       source: any[];
@@ -109,9 +113,11 @@ export default class SortingPlugin extends BasePlugin {
 
   private startSorting(order: SortingOrder, sortingFunc: SortingOrderFunction) {
     if (!this.sortingPromise) {
-      this.revogrid.jobsBeforeRender.push(new Promise<void>((resolve) => {
-        this.sortingPromise = resolve;
-      }));
+      this.revogrid.jobsBeforeRender.push(
+        new Promise<void>(resolve => {
+          this.sortingPromise = resolve;
+        }),
+      );
     }
     this.postponeSort(order, sortingFunc);
   }

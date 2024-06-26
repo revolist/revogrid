@@ -4,14 +4,23 @@
  */
 import each from 'lodash/each';
 import reduce from 'lodash/reduce';
+
 import { BasePlugin } from './base.plugin';
-import ColumnDataProvider, { ColumnCollection } from '../services/column.data.provider';
-import { columnTypes } from '../store/storeTypes';
+import ColumnDataProvider, {
+  ColumnCollection,
+} from '../services/column.data.provider';
 import { ColumnItems } from '../services/dimension.provider';
-import { getSourceItem } from '../store/dataSource/data.store';
-import { DimensionCols, DimensionRows } from '..';
-import { ColumnRegular, DataType, InitialHeaderClick, ViewSettingSizeProp } from '..';
-import { BeforeSaveDataDetails, BeforeRangeSaveDataDetails } from '..';
+import { getSourceItem, columnTypes } from '@store';
+import {
+  DimensionCols,
+  DimensionRows,
+  ColumnRegular,
+  DataType,
+  InitialHeaderClick,
+  ViewSettingSizeProp,
+  BeforeSaveDataDetails,
+  BeforeRangeSaveDataDetails,
+} from '@type';
 import { PluginProviders } from '../';
 
 interface Column extends ColumnRegular {
@@ -66,7 +75,11 @@ export default class AutoSizeColumnPlugin extends BasePlugin {
   private dataResolve: Resolve | null = null;
   private dataReject: Reject | null = null;
 
-  constructor(revogrid: HTMLRevoGridElement, protected providers: PluginProviders, private config?: AutoSizeColumnConfig) {
+  constructor(
+    revogrid: HTMLRevoGridElement,
+    protected providers: PluginProviders,
+    private config?: AutoSizeColumnConfig,
+  ) {
     super(revogrid, providers);
     this.letterBlockSize = config?.letterBlockSize || LETTER_BLOCK_SIZE;
 
@@ -76,7 +89,9 @@ export default class AutoSizeColumnPlugin extends BasePlugin {
       revogrid.appendChild(this.precsizeCalculationArea);
     }
 
-    const aftersourceset = ({ detail: { source } }: CustomEvent<SourceSetEvent>) => {
+    const aftersourceset = ({
+      detail: { source },
+    }: CustomEvent<SourceSetEvent>) => {
       this.setSource(source);
     };
     const afteredit = ({ detail }: CustomEvent<EditEvent>) => {
@@ -85,16 +100,22 @@ export default class AutoSizeColumnPlugin extends BasePlugin {
     const afterEditAll = ({ detail }: CustomEvent<EditEvent>) => {
       this.afterEditAll(detail);
     };
-    const beforecolumnsset = ({ detail: { columns } }: CustomEvent<ColumnCollection>) => {
+    const beforecolumnsset = ({
+      detail: { columns },
+    }: CustomEvent<ColumnCollection>) => {
       this.columnSet(columns);
     };
     const headerDblClick = ({ detail }: CustomEvent<InitialHeaderClick>) => {
       const type = ColumnDataProvider.getColumnType(detail.column);
       const size = this.getColumnSize(detail.index, type);
       if (size) {
-        this.providers.dimension.setCustomSizes(type, {
-          [detail.index]: size,
-        }, true);
+        this.providers.dimension.setCustomSizes(
+          type,
+          {
+            [detail.index]: size,
+          },
+          true,
+        );
       }
     };
     this.addEventListener('beforecolumnsset', beforecolumnsset);
@@ -138,7 +159,10 @@ export default class AutoSizeColumnPlugin extends BasePlugin {
       const sizes: ViewSettingSizeProp = {};
       each(autoSize[type], rgCol => {
         // calculate size
-        rgCol.size = sizes[rgCol.index] = source.reduce((prev, rgRow) => Math.max(prev, this.getLength(rgRow[rgCol.prop])), this.getLength(rgCol.name || ''));
+        rgCol.size = sizes[rgCol.index] = source.reduce(
+          (prev, rgRow) => Math.max(prev, this.getLength(rgRow[rgCol.prop])),
+          this.getLength(rgCol.name || ''),
+        );
       });
       this.providers.dimension.setCustomSizes(type, sizes, true);
     });

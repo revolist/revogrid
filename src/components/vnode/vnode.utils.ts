@@ -1,4 +1,4 @@
-import { JSX } from '../..';
+import { JSX } from '../../components';
 
 /**
  * Converts a VNode element into an HTML element and appends it to the specified parentHolder.

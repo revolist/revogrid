@@ -8,14 +8,12 @@ import { DataProvider } from '../../services/data.provider';
 import DimensionProvider from '../../services/dimension.provider';
 import SelectionStoreConnector from '../../services/selection.store.connector';
 import ViewportProvider from '../../services/viewport.provider';
-import { getItemByPosition } from '../../store/dimension/dimension.helpers';
+import { getItemByPosition } from '@store';
 import { BasePlugin } from '../base.plugin';
 import { ColumnOrderHandler } from './order-column.handler';
 import { dispatch } from '../dispatcher';
 import { isColGrouping } from '../groupingColumn/grouping.col.plugin';
-import { ColumnPropProp, ColumnRegular, DimensionSettingsState, PositionItem } from '../..';
-import { DimensionCols, MultiDimensionType } from '../..';
-import { PluginProviders } from '../../';
+import { ColumnPropProp, ColumnRegular, DimensionSettingsState, PositionItem, DimensionCols, MultiDimensionType, PluginProviders } from '@type';
 import { ON_COLUMN_CLICK } from '../../components/header/header-cell-renderer';
 
 const COLUMN_CLICK = ON_COLUMN_CLICK;

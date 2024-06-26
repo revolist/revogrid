@@ -1,6 +1,6 @@
 import { h, VNode } from '@stencil/core';
-import { PositionItem } from '../../types/interfaces';
-import { Cell } from '../../types/selection';
+import { PositionItem } from '@type';
+import { Cell } from '@type';
 
 type Props = { ref: { (e: OrdererService): void } };
 

@@ -1,9 +1,8 @@
 import {
   getItemByIndex,
   getItemByPosition,
-} from '../../store/dimension/dimension.helpers';
-import { DimensionSettingsState } from '../..';
-import { Cell, RangeArea, RangeAreaCss } from '../..';
+} from '@store';
+import { DimensionSettingsState, Cell, RangeArea, RangeAreaCss } from '@type';
 import { getPropertyFromEvent } from '../../utils/events';
 
 export type EventData = {

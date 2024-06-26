@@ -24,8 +24,8 @@ import type {
   ViewportState,
   Observable,
   ViewSettingSizeProp,
-} from '../../types/interfaces';
-import type { MultiDimensionType } from '../../types/dimension';
+} from '@type';
+import type { MultiDimensionType } from '@type';
 
 export type ViewportStoreCollection = {
   [T in MultiDimensionType]: ViewportStore;

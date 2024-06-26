@@ -2,9 +2,9 @@
  * Collects data for pinned columns in the required @ViewportProps format.
  */
 
-import { MultiDimensionType } from '../..';
-import { Cell } from '../..';
-import { ViewportColumn } from '../../types/viewport.interfaces';
+import { MultiDimensionType } from '@type';
+import { Cell } from '@type';
+import { ViewportColumn } from '@type';
 
 /**
  * Represents the slot names for the viewport slots.

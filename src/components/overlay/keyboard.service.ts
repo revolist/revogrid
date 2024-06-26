@@ -1,4 +1,4 @@
-import { getRange } from '../../store/selection/selection.helpers';
+import { getRange } from '@store';
 import { codesLetter } from '../../utils/key.codes';
 import {
   isAll,
@@ -17,8 +17,8 @@ import {
   isBeforeFirst,
 } from './selection.utils';
 import { RESIZE_INTERVAL } from '../../utils/consts';
-import { Cell, RangeArea, SelectionStoreState } from '../..';
-import { Observable } from '../..';
+import { Cell, RangeArea, SelectionStoreState } from '@type';
+import { Observable } from '@type';
 
 type Config = {
   selectionStore: Observable<SelectionStoreState>;

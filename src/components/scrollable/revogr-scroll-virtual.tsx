@@ -10,13 +10,13 @@ import {
 } from '@stencil/core';
 import LocalScrollService, { getContentSize } from '../../services/local.scroll.service';
 import { getScrollbarSize } from '../../utils';
-import { DimensionType } from '../../types/dimension';
+import { DimensionType } from '@type';
 import {
   Observable,
   ViewportState,
   DimensionSettingsState,
   ViewPortScrollEvent,
-} from '../../types/interfaces';
+} from '@type';
 import { AutohideScrollPlugin } from './autohide-scroll.plugin';
 import { LocalScrollTimer } from '../../services/local.scroll.timer';
 

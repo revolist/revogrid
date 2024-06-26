@@ -1,13 +1,11 @@
 import fill from 'lodash/fill';
-import { Group, Groups } from '../../store/dataSource/data.store';
-import { ColSource, CSVFormat, DataInput, Formatter } from './types';
+import { columnTypes, rowTypes, Group, Groups } from '@store';
 
-import { columnTypes, rowTypes } from '../../store/storeTypes';
 import { timeout } from '../../utils';
 import { BasePlugin } from '../base.plugin';
 import ExportCsv from './csv';
-import { DimensionCols } from '../..';
-import { ColumnProp, DataType } from '../..';
+import { ColSource, CSVFormat, DataInput, Formatter } from './types';
+import { DimensionCols, ColumnProp, DataType } from '@type';
 
 enum ExportTypes {
   csv = 'csv',

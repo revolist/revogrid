@@ -1,21 +1,23 @@
 import { h, Host, Component, Prop, Event, EventEmitter } from '@stencil/core';
 import { JSXBase } from '@stencil/core/internal';
 
-import DataStore from '../../store/dataSource/data.store';
-import { ViewportStore } from '../../store/viewport';
+import { ViewportStore, DataStore } from '@store';
+
 import { ROW_HEADER_TYPE } from '../../utils/consts';
 import { RowHeaderRender } from './row-header-render';
 import { calculateRowHeaderSize } from '../../utils/row-header-utils';
 import { HEADER_SLOT } from '../revoGrid/viewport.helpers';
-import { DimensionRows, DimensionCols } from '../../types/dimension';
 import {
   RowHeaders,
   ViewPortScrollEvent,
   DataType,
   ColumnRegular,
-} from '../../types/interfaces';
-import { ViewportData, ElementScroll } from '../../types/viewport.interfaces';
-import { JSX } from '../..';
+  ViewportData,
+  ElementScroll,
+  DimensionRows,
+  DimensionCols,
+} from '@type';
+import { JSX } from '../../components';
 
 /**
  * Row headers component
@@ -102,7 +104,7 @@ export class RevogrRowHeaders {
       dataViews.push(
         <revogr-data
           {...data}
-          colType='rowHeaders'
+          colType="rowHeaders"
           jobsBeforeRender={this.jobsBeforeRender}
           rowClass={this.rowClass}
           dataStore={dataStore.store}

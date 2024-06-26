@@ -2,7 +2,7 @@ import { h } from '@stencil/core';
 import RowRenderer, { RowProps } from '../../components/data/row-renderer';
 import { GROUP_DEPTH, GROUP_EXPANDED, GROUP_EXPAND_BTN, GROUP_EXPAND_EVENT, PSEUDO_GROUP_ITEM } from './grouping.const';
 import { GroupLabelTemplateFunc } from './grouping.row.types';
-import { DataType, PositionItem } from '../../types/interfaces';
+import { DataType, PositionItem } from '@type';
 
 interface GroupRowPros extends RowProps {
   model: DataType;

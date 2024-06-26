@@ -6,7 +6,7 @@ import { Trimmed, trimmedPlugin } from './trimmed.plugin';
 import { setStore } from '../../utils/store.utils';
 import { proxyPlugin } from './data.proxy';
 import { GroupLabelTemplateFunc } from '../../plugins/groupingRow/grouping.row.types';
-import { DimensionRows, DimensionCols } from '../..';
+import { DimensionRows, DimensionCols } from '@type';
 import {
   ColumnProperties,
   ColumnGrouping,
@@ -15,7 +15,7 @@ import {
   DataSourceState,
   Observable,
   ColumnProp,
-} from '../..';
+} from '@type';
 
 export interface Group extends ColumnProperties {
   name: string;
@@ -37,7 +37,7 @@ export type DSourceState<
  * Data store
  * Manage the state of a data source and provide methods for updating, adding, and refreshing the data.
  */
-export default class DataStore<T extends GDataType, ST extends GDimension> {
+export class DataStore<T extends GDataType, ST extends GDimension> {
   private readonly dataStore: Observable<DSourceState<T, ST>>;
   get store(): Observable<DSourceState<T, ST>> {
     return this.dataStore;

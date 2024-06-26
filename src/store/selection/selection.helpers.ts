@@ -1,5 +1,5 @@
 import { EMPTY_INDEX } from '../../services/selection.store.connector';
-import { Cell, RangeArea } from '../..';
+import { Cell, RangeArea } from '@type';
 
 export function isHiddenStore(pos: number) {
   return pos === EMPTY_INDEX;

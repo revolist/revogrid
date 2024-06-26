@@ -20,7 +20,7 @@ import { DataProvider } from '../../services/data.provider';
 import {
   DSourceState,
   getVisibleSourceItem,
-} from '../../store/dataSource/data.store';
+} from '@store';
 import DimensionProvider from '../../services/dimension.provider';
 import ViewportProvider from '../../services/viewport.provider';
 import ThemeService from '../../themeManager/theme.service';
@@ -58,7 +58,7 @@ import {
   DimensionCols,
   DimensionType,
   DimensionTypeCol,
-} from '../../types/dimension';
+} from '@type';
 import {
   RowHeaders,
   ColumnRegular,
@@ -74,7 +74,7 @@ import {
   ColumnDataSchema,
   Observable,
   AllDimensionType,
-} from '../../types/interfaces';
+} from '@type';
 import {
   Editors,
   BeforeSaveDataDetails,
@@ -83,13 +83,13 @@ import {
   ChangedRange,
   RangeArea,
   AfterEditEvent,
-} from '../../types/selection';
-import { Theme } from '../../types/theme';
+} from '@type';
+import { Theme } from '@type';
 import {
   PluginBaseComponent,
   PluginExternalConstructor,
-} from '../../types/plugin';
-import { HeaderProperties, PluginProviders } from '../..';
+} from '@type';
+import { HeaderProperties, PluginProviders } from '@type';
 
 /**
  * Revogrid - High-performance, customizable grid library for managing large datasets.

@@ -5,7 +5,7 @@ import {
   ViewportStateItems,
   VirtualPositionItem,
   Range,
-} from '../..';
+} from '@type';
 import { getItemByPosition } from '../dimension/dimension.helpers';
 
 export type DimensionDataViewport = Pick<

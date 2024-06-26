@@ -5,42 +5,32 @@
  * It contains typing information for all components that exist in this project.
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
-import { AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeRowRenderEvent, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionSettingsState, DragStartEvent, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, Observable, PositionItem, RowDefinition, RowHeaders, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/interfaces";
-import { AfterEditEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeSaveDataDetails, Cell, ChangedRange, EditCell, EditorCtr, Editors, RangeArea, SaveDataDetails, SelectionStoreState, TempRange } from "./types/selection";
-import { PluginBaseComponent, PluginExternalConstructor } from "./types/plugin";
-import { Theme } from "./types/theme";
+import { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, ChangedRange, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, Observable, PluginBaseComponent, PluginExternalConstructor, PositionItem, RangeArea, RowDefinition, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
 import { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
 import { ColumnFilterConfig, FilterCaptions, FilterCollection } from "./plugins/filter/filter.plugin";
 import { GroupingOptions } from "./plugins/groupingRow/grouping.row.types";
 import { VNode } from "@stencil/core";
-import { DimensionCols, DimensionRows, DimensionType, DimensionTypeCol, MultiDimensionType } from "./types/dimension";
 import { FocusedData } from "./components/revoGrid/viewport.service";
 import { ColumnCollection } from "./services/column.data.provider";
 import { DataInput } from "./plugins/export/types";
-import { DSourceState, Groups } from "./store/dataSource/data.store";
+import { DSourceState, Groups } from "./store/index";
 import { MultiFilterItem, ShowData } from "./plugins/filter/filter.pop";
 import { LogicFunction } from "./plugins/filter/filter.types";
 import { ResizeProps } from "./services/resizable.directive";
 import { Cell as Cell1, ColumnRegular as ColumnRegular1, DataType as DataType1, DimensionCols as DimensionCols1, DimensionRows as DimensionRows1, DimensionSettingsState as DimensionSettingsState1, Observable as Observable1, SelectionStoreState as SelectionStoreState1 } from "./components";
-import { ElementScroll, ViewportData } from "./types/viewport.interfaces";
-export { AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeRowRenderEvent, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionSettingsState, DragStartEvent, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, Observable, PositionItem, RowDefinition, RowHeaders, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/interfaces";
-export { AfterEditEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeSaveDataDetails, Cell, ChangedRange, EditCell, EditorCtr, Editors, RangeArea, SaveDataDetails, SelectionStoreState, TempRange } from "./types/selection";
-export { PluginBaseComponent, PluginExternalConstructor } from "./types/plugin";
-export { Theme } from "./types/theme";
+export { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, ChangedRange, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, Observable, PluginBaseComponent, PluginExternalConstructor, PositionItem, RangeArea, RowDefinition, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
 export { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
 export { ColumnFilterConfig, FilterCaptions, FilterCollection } from "./plugins/filter/filter.plugin";
 export { GroupingOptions } from "./plugins/groupingRow/grouping.row.types";
 export { VNode } from "@stencil/core";
-export { DimensionCols, DimensionRows, DimensionType, DimensionTypeCol, MultiDimensionType } from "./types/dimension";
 export { FocusedData } from "./components/revoGrid/viewport.service";
 export { ColumnCollection } from "./services/column.data.provider";
 export { DataInput } from "./plugins/export/types";
-export { DSourceState, Groups } from "./store/dataSource/data.store";
+export { DSourceState, Groups } from "./store/index";
 export { MultiFilterItem, ShowData } from "./plugins/filter/filter.pop";
 export { LogicFunction } from "./plugins/filter/filter.types";
 export { ResizeProps } from "./services/resizable.directive";
 export { Cell as Cell1, ColumnRegular as ColumnRegular1, DataType as DataType1, DimensionCols as DimensionCols1, DimensionRows as DimensionRows1, DimensionSettingsState as DimensionSettingsState1, Observable as Observable1, SelectionStoreState as SelectionStoreState1 } from "./components";
-export { ElementScroll, ViewportData } from "./types/viewport.interfaces";
 export namespace Components {
     /**
      * Revogrid - High-performance, customizable grid library for managing large datasets.

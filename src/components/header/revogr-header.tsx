@@ -10,7 +10,7 @@ import { HTMLStencilElement, VNode } from '@stencil/core/internal';
 import keyBy from 'lodash/keyBy';
 
 import { HEADER_ACTUAL_ROW_CLASS, HEADER_ROW_CLASS } from '../../utils/consts';
-import { Groups } from '../../store/dataSource/data.store';
+import { Groups } from '@store';
 import HeaderRenderer from './header-renderer';
 import ColumnGroupsRenderer from '../../plugins/groupingColumn/columnGroupsRenderer';
 import { ResizeProps } from '../../services/resizable.directive';
@@ -22,9 +22,9 @@ import {
   Providers,
   ViewportState,
   ViewSettingSizeProp,
-} from '../../types/interfaces';
-import { DimensionCols } from '../../types/dimension';
-import { SelectionStoreState } from '../../types/selection';
+} from '@type';
+import { DimensionCols } from '@type';
+import { SelectionStoreState } from '@type';
 
 @Component({
   tag: 'revogr-header',

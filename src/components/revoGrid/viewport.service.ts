@@ -9,8 +9,9 @@ import {
   DSourceState,
   getSourceItem,
   getVisibleSourceItem,
-} from '../../store/dataSource/data.store';
-import { columnTypes, rowTypes } from '../../store/storeTypes';
+  columnTypes,
+  rowTypes,
+} from '@store';
 import { OrdererService } from '../order/order-renderer';
 import GridScrollingService from './viewport.scrolling.service';
 import {
@@ -27,17 +28,17 @@ import {
   Observable,
   ViewPortResizeEvent,
   ViewSettingSizeProp,
-} from '../..';
-import { DimensionCols, DimensionRows } from '../..';
-import {
+  DimensionCols,
+  DimensionRows,
   HeaderProperties,
   SlotType,
   ViewportColumn,
   ViewportData,
   ViewportProperties,
   ViewportProps,
-} from '../../types/viewport.interfaces';
-import { Cell, RangeArea } from '../..';
+  Cell,
+  RangeArea,
+} from '@type';
 
 export type ResizeDetails = { [index: number]: ColumnRegular };
 type Config = {
@@ -67,7 +68,6 @@ export type FocusedData = {
 function gatherColumnData(data: ViewportColumn) {
   const colDimension = data.dimensions[data.colType].store;
   const realWidth = colDimension.get('realSize');
-
 
   const prop: ViewportProperties = {
     contentWidth: realWidth,

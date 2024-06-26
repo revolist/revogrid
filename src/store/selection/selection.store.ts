@@ -4,9 +4,9 @@
 
 import { createStore } from '@stencil/store';
 import { setStore } from '../../utils/store.utils';
-import { getRange } from './selection.helpers';
-import { Observable } from '../..';
-import { SelectionStoreState, Cell, TempRange, RangeArea } from '../..';
+import { getRange } from '@store';
+import { Observable } from '@type';
+import { SelectionStoreState, Cell, TempRange, RangeArea } from '@type';
 
 
 function defaultState(): SelectionStoreState {

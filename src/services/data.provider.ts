@@ -1,18 +1,23 @@
 import reduce from 'lodash/reduce';
 
-import DataStore, {
+import {
+  isRowType,
+  rowTypes,
+  DataStore,
   getSourceItem,
   getVisibleSourceItem,
   Groups,
   setSourceByVirtualIndex,
-} from '../store/dataSource/data.store';
-import { isRowType, rowTypes } from '../store/storeTypes';
+  Trimmed,
+} from '@store';
 import DimensionProvider from './dimension.provider';
-import { Trimmed } from '../store/dataSource/trimmed.plugin';
 import { GroupLabelTemplateFunc } from '../plugins/groupingRow/grouping.row.types';
-import { DataLookup, DimensionRows } from '..';
-import { DataType } from '..';
-import { BeforeSaveDataDetails } from '..';
+import {
+  DataLookup,
+  DimensionRows,
+  DataType,
+  BeforeSaveDataDetails,
+} from '@type';
 
 export type RowDataSources = {
   [T in DimensionRows]: DataStore<DataType, DimensionRows>;
@@ -60,11 +65,18 @@ export class DataProvider {
     return getSourceItem(store, virtualIndex);
   }
 
-  setCellData({ type, rowIndex, prop, val }: BeforeSaveDataDetails, mutate = true) {
+  setCellData(
+    { type, rowIndex, prop, val }: BeforeSaveDataDetails,
+    mutate = true,
+  ) {
     const model = this.getModel(rowIndex, type);
     model[prop] = val;
     // apply data to source
-    setSourceByVirtualIndex(this.stores[type].store, { [rowIndex]: model }, mutate);
+    setSourceByVirtualIndex(
+      this.stores[type].store,
+      { [rowIndex]: model },
+      mutate,
+    );
   }
 
   setRangeData(data: DataLookup, type: DimensionRows) {

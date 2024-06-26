@@ -1,18 +1,18 @@
 import { Component, Method, Event, EventEmitter, Prop } from '@stencil/core';
 import debounce from 'lodash/debounce';
 
-import { DSourceState, setItems } from '../../store/dataSource/data.store';
+import { DSourceState, setItems } from '@store';
 import { DRAGG_TEXT } from '../../utils/consts';
 import RowOrderService from './order-row.service';
-import { DimensionRows } from '../../types/dimension';
+import { DimensionRows } from '@type';
 import {
   DataType,
   DimensionSettingsState,
   DragStartEvent,
   Observable,
   PositionItem,
-} from '../../types/interfaces';
-import { Cell } from '../../types/selection';
+} from '@type';
+import { Cell } from '@type';
 
 /**
  * Component for handling row order editor.

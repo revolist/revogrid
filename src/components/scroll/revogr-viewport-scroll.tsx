@@ -19,8 +19,8 @@ import {
   FOOTER_SLOT,
   HEADER_SLOT,
 } from '../revoGrid/viewport.helpers';
-import { DimensionCols, DimensionType } from '../../types/dimension';
-import { ScrollCoordinateEvent, ViewPortResizeEvent, ViewPortScrollEvent } from '../../types/interfaces';
+import { DimensionCols, DimensionType } from '@type';
+import { ScrollCoordinateEvent, ViewPortResizeEvent, ViewPortScrollEvent } from '@type';
 
 type Delta = 'deltaX' | 'deltaY';
 type LocalScrollEvent = {

@@ -15,8 +15,8 @@ import {
   Observable,
   PluginSubscribe,
   ViewSettingSizeProp,
-} from '../..';
-import { MultiDimensionType } from '../..';
+  MultiDimensionType,
+} from '@type';
 
 export type DimensionStoreCollection = {
   [T in MultiDimensionType]: DimensionStore;
@@ -109,7 +109,7 @@ function initialState(): DimensionSettingsState {
   };
 }
 
-export default class DimensionStore {
+export class DimensionStore {
   readonly store: Observable<DimensionSettingsState>;
   constructor() {
     this.store = createStore(initialState());

@@ -1,4 +1,4 @@
-import { DataType, ColumnProp, ColumnRegular } from '../..';
+import { DataType, ColumnProp, ColumnRegular } from '@type';
 import {
   GROUP_DEPTH,
   GROUP_EXPANDED,

@@ -1,7 +1,10 @@
-import { columnTypes } from '../../store/storeTypes';
-import { DimensionColPin } from '../..';
-import { ViewPortScrollEvent } from '../..';
-import { ElementsScroll, ElementScroll } from '../../types/viewport.interfaces';
+import { columnTypes } from '@store';
+import {
+  DimensionColPin,
+  ViewPortScrollEvent,
+  ElementsScroll,
+  ElementScroll,
+} from '@type';
 
 export default class GridScrollingService {
   private elements: ElementsScroll = {};
@@ -14,7 +17,7 @@ export default class GridScrollingService {
       // skip
       if (e.dimension === 'rgCol' && elKey === 'headerRow') {
         continue;
-      // pinned column only
+        // pinned column only
       } else if (this.isPinnedColumn(key) && e.dimension === 'rgCol') {
         if (elKey === key || !e.delta) {
           continue;
@@ -37,15 +40,22 @@ export default class GridScrollingService {
   }
 
   /**
-   * Silent scroll update for mobile devices when we have negative scroll top 
+   * Silent scroll update for mobile devices when we have negative scroll top
    */
-  async scrollSilentService(e: ViewPortScrollEvent, key?: DimensionColPin | string) {
+  async scrollSilentService(
+    e: ViewPortScrollEvent,
+    key?: DimensionColPin | string,
+  ) {
     for (let elKey in this.elements) {
       // skip same element update
       if (elKey === key) {
         continue;
       }
-      if (columnTypes.includes(key as DimensionColPin) && (elKey === 'headerRow' || columnTypes.includes(elKey  as DimensionColPin))) {
+      if (
+        columnTypes.includes(key as DimensionColPin) &&
+        (elKey === 'headerRow' ||
+          columnTypes.includes(elKey as DimensionColPin))
+      ) {
         for (let el of this.elements[elKey]) {
           await el.changeScroll?.(e, true);
         }
@@ -54,7 +64,9 @@ export default class GridScrollingService {
     }
   }
 
-  private isPinnedColumn(key?: DimensionColPin | string): key is DimensionColPin {
+  private isPinnedColumn(
+    key?: DimensionColPin | string,
+  ): key is DimensionColPin {
     return ['colPinStart', 'colPinEnd'].indexOf(key) > -1;
   }
 

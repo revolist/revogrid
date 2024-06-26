@@ -1,8 +1,8 @@
 import { h as createElement } from '@stencil/core';
 import { isEnterKey, isTab } from '../../utils/key.utils';
 import { timeout } from '../../utils';
-import { ColumnRegular } from '../../types/interfaces';
-import { EditCell, EditorBase, SaveData } from '../../types/selection';
+import { ColumnRegular } from '@type';
+import { EditCell, EditorBase, SaveData } from '@type';
 
 /**
  * Represents a cell editor in a grid.

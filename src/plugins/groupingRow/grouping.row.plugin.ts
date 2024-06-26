@@ -1,9 +1,7 @@
 import { ColumnCollection } from '../../services/column.data.provider';
-import { getPhysical, setItems } from '../../store/dataSource/data.store';
-import { columnTypes } from '../../store/storeTypes';
+import { getPhysical, setItems, columnTypes, TrimmedEntity } from '@store';
 import { BasePlugin } from '../base.plugin';
 import { FILTER_TRIMMED_TYPE } from '../filter/filter.plugin';
-import { TrimmedEntity } from '../../store/dataSource/trimmed.plugin';
 import {
   GROUPING_ROW_TYPE,
   GROUP_EXPANDED,
@@ -28,9 +26,7 @@ import {
   processDoubleConversionTrimmed,
   TRIMMED_GROUPING,
 } from './grouping.trimmed.service';
-import { BeforeSaveDataDetails } from '../..';
-import { ColumnRegular } from '../..';
-import { PluginProviders } from '../../';
+import { BeforeSaveDataDetails, ColumnRegular, PluginProviders } from '@type';
 
 export default class GroupingRowPlugin extends BasePlugin {
   private options: GroupingOptions | undefined;

@@ -9,24 +9,21 @@ import {
   getCurrentCell,
   isAfterLast,
 } from './selection.utils';
-import { getRange } from '../../store/selection/selection.helpers';
+import { DSourceState, getSourceItem, getRange } from '@store';
 import ColumnService from '../data/column.service';
-import { DSourceState, getSourceItem } from '../../store/dataSource/data.store';
 import { getPropertyFromEvent } from '../../utils/events';
 import {
   DataLookup,
   DataType,
   DimensionSettingsState,
   Observable,
-} from '../../types/interfaces';
-import {
   TempRange,
   ChangedRange,
   BeforeRangeSaveDataDetails,
   RangeArea,
   Cell,
-} from '../../types/selection';
-import { DimensionRows } from '../../types/dimension';
+  DimensionRows,
+} from '@type';
 
 type Config = {
   dimensionRow: Observable<DimensionSettingsState>;
@@ -213,10 +210,7 @@ export class AutoFillService {
   /**
    * Clear current range selection on mouse up and mouse leave events
    */
-  clearAutoFillSelection(
-    focus: Cell,
-    oldRange: RangeArea
-  ) {
+  clearAutoFillSelection(focus: Cell, oldRange: RangeArea) {
     // If autofill was active, apply autofill values
     if (this.autoFillInitial) {
       // Fetch latest focus

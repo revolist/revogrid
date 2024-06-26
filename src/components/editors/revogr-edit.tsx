@@ -10,14 +10,14 @@ import {
 } from '@stencil/core';
 import { EDIT_INPUT_WR } from '../../utils/consts';
 import { TextEditor } from './text-editor';
-import { ColumnDataSchemaModel } from '../../types/interfaces';
+import { ColumnDataSchemaModel } from '@type';
 import {
   EditCell,
   EditorCtr,
   SaveDataDetails,
   EditorBase,
   SaveData,
-} from '../../types/selection';
+} from '@type';
 
 import { isEditorCtrConstructible } from './edit.utils';
 

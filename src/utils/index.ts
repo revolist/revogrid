@@ -1,5 +1,3 @@
-export * from '../store/dimension/dimension.helpers';
-
 /* Generate range on size
  */
 export function range(size: number, startAt = 0): number[] {

@@ -13,11 +13,11 @@ import {
 import ColumnService from '../data/column.service';
 import { codesLetter } from '../../utils/key.codes';
 import { MOBILE_CLASS, SELECTION_BORDER_CLASS } from '../../utils/consts';
-import { DSourceState } from '../../store/dataSource/data.store';
+import { DSourceState } from '@store';
 import {
   getRange,
   isRangeSingleCell,
-} from '../../store/selection/selection.helpers';
+} from '@store';
 import {
   EventData,
   getElStyle,
@@ -38,13 +38,13 @@ import {
   Cell,
   DragStartEvent,
 } from '../../components';
-import { MultiDimensionType } from '../../types/dimension';
+import { MultiDimensionType } from '@type';
 import {
   FocusRenderEvent,
   ApplyFocusEvent,
   AllDimensionType,
   DataFormat,
-} from '../../types/interfaces';
+} from '@type';
 import {
   Editors,
   BeforeSaveDataDetails,
@@ -54,7 +54,7 @@ import {
   ChangedRange,
   BeforeRangeSaveDataDetails,
   SaveDataDetails,
-} from '../../types/selection';
+} from '@type';
 
 /**
  * Component for overlaying the grid with the selection.

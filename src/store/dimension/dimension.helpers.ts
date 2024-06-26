@@ -5,7 +5,7 @@ import {
   DimensionSettingsState,
   PositionItem,
   ViewSettingSizeProp,
-} from '../..';
+} from '@type';
 
 export type DimensionPosition = Pick<
   DimensionSettingsState,

@@ -5,7 +5,7 @@ import '../../utils/closest.polifill';
 import { LogicFunction } from './filter.types';
 import { FilterCaptions } from './filter.plugin';
 import debounce from 'lodash/debounce';
-import { ColumnProp } from '../../types/interfaces';
+import { ColumnProp } from '@type';
 
 export type FilterItem = {
   // column id

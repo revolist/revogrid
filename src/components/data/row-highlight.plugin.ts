@@ -1,6 +1,6 @@
 import { VNode } from '@stencil/core';
 import { ROW_FOCUSED_CLASS } from '../../utils/consts';
-import { RangeArea } from '../../types/selection';
+import { RangeArea } from '@type';
 
 /**
  * Class is responsible for highlighting rows in a table.

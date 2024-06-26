@@ -1,7 +1,5 @@
-import { cropCellToMax, isHiddenStore, nextCell } from '../store/selection/selection.helpers';
-import { SelectionStore } from '../store/selection/selection.store';
-import { MultiDimensionType, DimensionCols, DimensionRows } from '..';
-import { Cell, EditCellStore, RangeArea } from '..';
+import { cropCellToMax, isHiddenStore, nextCell, SelectionStore } from '@store';
+import type { MultiDimensionType, DimensionCols, DimensionRows, Cell, EditCellStore, RangeArea } from '@type';
 
 type StoreByDimension = Record<number, SelectionStore>;
 type FocusedStore = {

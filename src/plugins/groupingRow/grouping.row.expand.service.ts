@@ -1,4 +1,4 @@
-import { DataType } from '../..';
+import { DataType } from '@type';
 import { PSEUDO_GROUP_ITEM_ID, PSEUDO_GROUP_ITEM_VALUE, GROUP_EXPANDED, GROUP_DEPTH } from './grouping.const';
 import { isGrouping, getParsedGroup, isSameGroup } from './grouping.service';
 

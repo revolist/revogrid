@@ -2,13 +2,13 @@ import {
   DSourceState,
   getSourceItem,
   getVisibleSourceItem,
-} from '../../store/dataSource/data.store';
+} from '@store';
 import { CELL_CLASS, DISABLED_CLASS } from '../../utils/consts';
-import { getRange } from '../../store/selection/selection.helpers';
+import { getRange } from '@store';
 
 import { isGroupingColumn } from '../../plugins/groupingRow/grouping.service';
 import slice from 'lodash/slice';
-import { DimensionCols, DimensionRows, RowDrag } from '../..';
+import { DimensionCols, DimensionRows, RowDrag } from '@type';
 import {
   ColumnRegular,
   Observable,
@@ -19,7 +19,7 @@ import {
   ColumnProp,
   DataLookup,
   DataFormat,
-} from '../..';
+} from '@type';
 import {
   ChangedRange,
   OldNewRangeMapping,
@@ -28,7 +28,7 @@ import {
   BeforeSaveDataDetails,
   EditorCtr,
   Editors,
-} from '../..';
+} from '@type';
 
 export type ColumnStores = {
   [T in DimensionCols]: Observable<DSourceState<ColumnRegular, DimensionCols>>;

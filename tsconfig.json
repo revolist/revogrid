@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "baseUrl": "./",
     "allowSyntheticDefaultImports": true,
     "allowUnreachableCode": false,
     "declaration": true,
@@ -19,7 +20,8 @@
     "sourceMap": true,
     "skipLibCheck": true,
     "paths": {
-      "@root": ["./*"]
+      "@store": ["src/store"],
+      "@type": ["src/types"]
     }
   },
   "include": ["src", "types/jsx.d.ts"],

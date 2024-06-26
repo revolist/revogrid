@@ -1,5 +1,5 @@
 import reduce from 'lodash/reduce';
-import { RowDefinition, DimensionRows } from '../..';
+import { RowDefinition, DimensionRows } from '@type';
 
 type Result = Partial<{
   [T in DimensionRows]: { sizes?: Record<number, number>; };

@@ -4,7 +4,7 @@ import {
   DragStartEvent,
   ColumnDataSchemaModel,
   CellTemplate,
-} from '../../types/interfaces';
+} from '@type';
 
 import {
   DRAGGABLE_CLASS,

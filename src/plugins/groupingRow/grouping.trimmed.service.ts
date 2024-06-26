@@ -1,4 +1,4 @@
-import { gatherTrimmedItems, Trimmed, TrimmedEntity } from '../../store/dataSource/trimmed.plugin';
+import { gatherTrimmedItems, Trimmed, TrimmedEntity } from '@store';
 
 export const TRIMMED_GROUPING = 'grouping';
 
