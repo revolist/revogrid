@@ -1,4 +1,4 @@
-import { Observable } from '..';
+import type { Observable } from '@type';
 
 /** Set stores data */
 function setStore<T extends { [key: string]: any }>(

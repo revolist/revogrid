@@ -1,7 +1,8 @@
 import each from 'lodash/each';
 import sortedIndex from 'lodash/sortedIndex';
 import reduce from 'lodash/reduce';
-import {
+
+import type {
   DimensionSettingsState,
   PositionItem,
   ViewSettingSizeProp,

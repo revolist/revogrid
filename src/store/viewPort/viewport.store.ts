@@ -24,12 +24,8 @@ import type {
   ViewportState,
   Observable,
   ViewSettingSizeProp,
+  MultiDimensionType,
 } from '@type';
-import type { MultiDimensionType } from '@type';
-
-export type ViewportStoreCollection = {
-  [T in MultiDimensionType]: ViewportStore;
-};
 
 /**
  * Initial state for viewport store
@@ -55,8 +51,10 @@ function initialState(): ViewportState {
  */
 export class ViewportStore {
   readonly store: Observable<ViewportState>;
+
   // last coordinate for store position restore
   private lastKnownScroll = 0;
+
   get lastCoordinate() {
     return this.lastKnownScroll;
   }
@@ -75,10 +73,7 @@ export class ViewportStore {
    * Render viewport based on coordinate
    * It's the main method for draw
    */
-  setViewPortCoordinate(
-    position: number,
-    dimension: DimensionDataViewport,
-  ) {
+  setViewPortCoordinate(position: number, dimension: DimensionDataViewport) {
     const viewportSize = this.store.get('virtualSize');
     // no visible data to calculate
     if (!viewportSize) {

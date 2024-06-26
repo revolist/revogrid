@@ -1,4 +1,4 @@
-import { DimensionCols, DimensionRows } from '@type';
+import type { DimensionCols, DimensionRows } from '@type';
 
 export * from './dataSource';
 export * from './dimension';
