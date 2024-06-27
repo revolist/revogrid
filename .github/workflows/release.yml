@@ -18,55 +18,55 @@ on:
           required: false
 
 jobs:
-  release:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
+  # release:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-            node-version: '22.x'
+  #     - name: Set up Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #           node-version: '22.x'
 
-      - name: Update package.json version
-        run: |
-          NEW_VERSION=${{ github.event.inputs.version }}
-          jq --arg new_version "$NEW_VERSION" '.version = $new_version' package.json > tmp.$$.json && mv tmp.$$.json package.json
-        shell: bash
+  #     - name: Update package.json version
+  #       run: |
+  #         NEW_VERSION=${{ github.event.inputs.version }}
+  #         jq --arg new_version "$NEW_VERSION" '.version = $new_version' package.json > tmp.$$.json && mv tmp.$$.json package.json
+  #       shell: bash
 
-      - name: Install changelog
-        run: npm install -g conventional-changelog-cli
+  #     - name: Install changelog
+  #       run: npm install -g conventional-changelog-cli
 
-      - name: Generate CHANGELOG.md
-        run: |
-          npx conventional-changelog -p angular -i CHANGELOG.md -s
-        shell: bash
+  #     - name: Generate CHANGELOG.md
+  #       run: |
+  #         npx conventional-changelog -p angular -i CHANGELOG.md -s
+  #       shell: bash
 
-      - name: Commit and push changes
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          NEW_VERSION=${{ github.event.inputs.version }}
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add package.json CHANGELOG.md
-          git commit -m "chore(release): ${NEW_VERSION}"
-          git push
-        shell: bash
+  #     - name: Commit and push changes
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #       run: |
+  #         NEW_VERSION=${{ github.event.inputs.version }}
+  #         git config --global user.name "github-actions[bot]"
+  #         git config --global user.email "github-actions[bot]@users.noreply.github.com"
+  #         git add package.json CHANGELOG.md
+  #         git commit -m "chore(release): ${NEW_VERSION}"
+  #         git push
+  #       shell: bash
 
-      - name: Create GitHub release
-        uses: actions/create-release@v1
-        with:
-          tag_name: ${{ github.event.inputs.version }}
-          release_name: Release ${{ github.event.inputs.version }}
-          body_path: ./CHANGELOG.md
-          draft: ${{ github.event.inputs.draft || false }}
-          prerelease: ${{ github.event.inputs.prerelease || false }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  #     - name: Create GitHub release
+  #       uses: actions/create-release@v1
+  #       with:
+  #         tag_name: ${{ github.event.inputs.version }}
+  #         release_name: Release ${{ github.event.inputs.version }}
+  #         body_path: ./CHANGELOG.md
+  #         draft: ${{ github.event.inputs.draft || false }}
+  #         prerelease: ${{ github.event.inputs.prerelease || false }}
+  #       env:
+  #         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   publish:
-    needs: release
+    # needs: release
     runs-on: ubuntu-latest
     steps:
       # Setup to publish to npm Packages
@@ -86,35 +86,35 @@ jobs:
       # Build
       - run: npm run build
       
-      # Determine if this is a pre-release
-      - name: Check if pre-release
-        id: tag
-        run: |
-          if [[ "${{ github.event.inputs.prerelease }}" == "true" ]]; then
-            echo "::set-output name=TAG::prerelease"
-          else
-            echo "::set-output name=TAG::latest"
-          fi
+      # # Determine if this is a pre-release
+      # - name: Check if pre-release
+      #   id: tag
+      #   run: |
+      #     if [[ "${{ github.event.inputs.prerelease }}" == "true" ]]; then
+      #       echo "::set-output name=TAG::prerelease"
+      #     else
+      #       echo "::set-output name=TAG::latest"
+      #     fi
 
-      # Publish to npm
-      - name: Publish to npm
-        run: npm publish --access public --tag ${{ steps.tag.outputs.TAG }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # # Publish to npm
+      # - name: Publish to npm
+      #   run: npm publish --access public --tag ${{ steps.tag.outputs.TAG }}
+      #   env:
+      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      # Setup to publish to GitHub Packages
-      - uses: actions/setup-node@v4
-        with:
-          registry-url: 'https://npm.pkg.github.com'
-          # Defaults to the user or organization that owns the workflow file
-          scope: '@revolist'
+      # # Setup to publish to GitHub Packages
+      # - uses: actions/setup-node@v4
+      #   with:
+      #     registry-url: 'https://npm.pkg.github.com'
+      #     # Defaults to the user or organization that owns the workflow file
+      #     scope: '@revolist'
 
-      # Publish to GitHub Packages
-      - name: Publish to GitHub Packages
-        run: npm publish --access public --tag ${{ steps.tag.outputs.TAG }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # # Publish to GitHub Packages
+      # - name: Publish to GitHub Packages
+      #   run: npm publish --access public --tag ${{ steps.tag.outputs.TAG }}
+      #   env:
+      #     NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-        # Update packages with new version
-      - name: Sync packages
-        run: npm run package:update
+      #   # Update packages with new version
+      # - name: Sync packages
+      #   run: npm run package:update
