@@ -3,7 +3,6 @@ import debounce from 'lodash/debounce';
 import ColumnDataProvider from '../services/column.data.provider';
 import ViewportProvider from './viewport.provider';
 import {
-  getItemByIndex,
   columnTypes,
   rowTypes,
   DimensionStore,
@@ -22,6 +21,7 @@ import {
   ViewSettingSizeProp,
   ViewportState,
 } from '@type';
+import { getItemByIndex } from '../store/dimension/dimension.helpers';
 export type ColumnItems = Record<DimensionCols, ColumnRegular[]>;
 
 export type DimensionConfig = {

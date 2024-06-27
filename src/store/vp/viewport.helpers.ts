@@ -7,7 +7,7 @@ import {
   Range,
 } from '@type';
 
-import { getItemByPosition } from '@store';
+import { getItemByPosition } from '../dimension/dimension.helpers';
 
 export type DimensionDataViewport = Pick<
   DimensionSettingsState,
