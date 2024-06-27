@@ -7,7 +7,7 @@ import { setStore } from '../../utils/store.utils';
 import { proxyPlugin } from './data.proxy';
 import { GroupLabelTemplateFunc } from '../../plugins/groupingRow/grouping.row.types';
 import { DimensionRows, DimensionCols } from '@type';
-import {
+import type {
   ColumnProperties,
   ColumnGrouping,
   ColumnRegular,

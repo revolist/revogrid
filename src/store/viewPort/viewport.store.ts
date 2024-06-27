@@ -1,13 +1,8 @@
-/**
- * Viewport store
- * Used for virtualization (process of rendering only visible part of data)
- * Redraws viewport based on position and dimension
- */
 import { createStore } from '@stencil/store';
 
 import {
-  addMissingItems,
   DimensionDataViewport,
+  addMissingItems,
   getFirstItem,
   getLastItem,
   getUpdatedItemsByPosition,
@@ -28,7 +23,9 @@ import type {
 } from '@type';
 
 /**
- * Initial state for viewport store
+ * Viewport store
+ * Used for virtualization (process of rendering only visible part of data)
+ * Redraws viewport based on position and dimension
  */
 function initialState(): ViewportState {
   return {
@@ -58,7 +55,7 @@ export class ViewportStore {
   get lastCoordinate() {
     return this.lastKnownScroll;
   }
-  private set lastCoordinate(value: number) {
+  set lastCoordinate(value: number) {
     this.lastKnownScroll = value;
   }
   constructor(readonly type: MultiDimensionType) {
