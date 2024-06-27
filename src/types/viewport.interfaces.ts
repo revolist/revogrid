@@ -7,11 +7,12 @@ import type {
   ViewportState,
   Cell,
   SelectionStoreState,
+  MultiDimensionType,
 } from '@type';
 import type {
   DimensionStoreCollection,
-  ViewportStoreCollection,
   DSourceState,
+  ViewportStore,
 } from '@store';
 import type { RowDataSources } from '../services/data.provider';
 import type { JSX } from '..';
@@ -31,6 +32,10 @@ export type HeaderProperties = JSX.RevogrHeader;
 
 export type ViewportProperties = JSX.RevogrViewportScroll &
   JSXBase.HTMLAttributes<HTMLRevogrViewportScrollElement>;
+
+type ViewportStoreCollection = {
+  [T in MultiDimensionType]: ViewportStore;
+};
 
 export type ViewportColumn = {
   colType: DimensionCols;
