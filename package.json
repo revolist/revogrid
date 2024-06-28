@@ -86,7 +86,7 @@
     "docs": "npx typedoc",
     "build": "npm run api:clear && stencil build --prod && rm -f loader/package.json && npm run api:update && npm run docs",
     "api:clear": "rm -rf docs/guide/api",
-    "api:update": "./generate_api.sh",
+    "api:update": "./scripts/generate_api.sh",
     "readme": "./readme/generate_readme.sh",
     "package:update": "node ./scripts/package-version.mjs",
     "test": "stencil test",
