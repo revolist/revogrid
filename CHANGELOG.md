@@ -133,3 +133,12 @@ test
     -   Enhanced plugin support - now with full access to grid providers.
     -   Updated documentation.
     -   Provided full framework support and native render for [Angular](./angular/), [React](./react/), and [Vue](./vue3/), with partial support for Ember and [Svelte](./svelte/).
+## v4.0.17
+
+## What's Changed
+* Enable import injection to support Vite by @novhack in https://github.com/revolist/revogrid/pull/437
+
+## New Contributors
+* @novhack made their first contribution in https://github.com/revolist/revogrid/pull/437
+
+**Full Changelog**: https://github.com/revolist/revogrid/compare/v3.5.2...v4.0.17
