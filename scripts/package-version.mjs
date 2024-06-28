@@ -53,7 +53,7 @@ async function commitAndPushChanges(packageDir) {
 (async () => {
   for (const packageDir of packageDirs) {
     await updateVersionInPackage(packageDir);
-    // await commitAndPushChanges(packageDir);
+    await commitAndPushChanges(packageDir);
   }
   console.log(chalk.blue('All versions updated.'));
 })();
