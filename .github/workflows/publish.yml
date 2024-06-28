@@ -9,14 +9,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
         with:
           repository: revolist/revogrid-actions
           ref: main
           path: ./actions
           token: ${{ secrets.REPO_TOKEN }}
-      - uses: actions/checkout@v4
-        with:
-          path: ../
       - name: Release grid new version
         uses: ./actions/release-grid
         with:
