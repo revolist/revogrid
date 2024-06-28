@@ -16,7 +16,7 @@ jobs:
           token: ${{ secrets.REPO_TOKEN }}
       - uses: actions/checkout@v4
         with:
-          clean: false
+          path: ./
       - name: Release grid new version
         uses: ./actions/release-grid
         with:
