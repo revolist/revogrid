@@ -2,6 +2,8 @@ name: Publish NPM
 on:
   release:
     types: [created]
+permissions:
+  contents: write
 jobs:
   build:
     runs-on: ubuntu-latest
