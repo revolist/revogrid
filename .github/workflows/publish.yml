@@ -33,25 +33,42 @@ jobs:
             echo "::set-output name=TAG::latest"
           fi
 
-      # Publish to npm
-      - name: Publish to npm
-        run: npm publish --access public --tag ${{ steps.tag.outputs.TAG }}
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      # Update CHANGELOG.md with release notes
+      - name: Update CHANGELOG.md
+        run: |
+          RELEASE_NOTES="${{ github.event.release.body }}"
+          TAG_NAME="${{ github.event.release.tag_name }}"
+          echo -e "## $TAG_NAME\n\n$RELEASE_NOTES\n" >> CHANGELOG.md
 
-      # Setup to publish to GitHub Packages
-      - uses: actions/setup-node@v4
-        with:
-          registry-url: 'https://npm.pkg.github.com'
-          # Defaults to the user or organization that owns the workflow file
-          scope: '@revolist'
-
-      # Publish to GitHub Packages
-      - name: Publish to GitHub Packages
-        run: npm publish --access public --tag ${{ steps.tag.outputs.TAG }}
+      - name: Commit CHANGELOG.md
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add CHANGELOG.md
+          git commit -m "Update CHANGELOG.md for release ${{ github.event.release.tag_name }}"
+          git push origin HEAD:main
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # # Publish to npm
+      # - name: Publish to npm
+      #   run: npm publish --access public --tag ${{ steps.tag.outputs.TAG }}
+      #   env:
+      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      # # Setup to publish to GitHub Packages
+      # - uses: actions/setup-node@v4
+      #   with:
+      #     registry-url: 'https://npm.pkg.github.com'
+      #     # Defaults to the user or organization that owns the workflow file
+      #     scope: '@revolist'
+
+      # # Publish to GitHub Packages
+      # - name: Publish to GitHub Packages
+      #   run: npm publish --access public --tag ${{ steps.tag.outputs.TAG }}
+      #   env:
+      #     NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
         # Update packages with new version
-      - name: Sync packages
-        run: npm run package:update
+      # - name: Sync packages
+      #   run: npm run package:update
