@@ -6,69 +6,16 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      # Setup to publish to npm Packages
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20.x'
-          registry-url: 'https://registry.npmjs.org'
-
       - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: revolist/revogrid-actions
+          ref: main
+          path: ./actions
+          token: ${{ secrets.REPO_TOKEN }}
+      - name: Release grid new version
+        uses: ./actions/release-grid
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          npm_token: ${{ secrets.NPM_TOKEN }}
       
-      # Checout submodule
-      - name: Checkout submodules
-        run: git submodule update --init --remote --recursive
-
-      - run: npm ci
-
-      # Build
-      - run: npm run build
-      
-      # Determine if this is a pre-release
-      - name: Check if pre-release
-        id: tag
-        run: |
-          if [[ "${{ github.event.release.prerelease }}" == "true" ]]; then
-            echo "::set-output name=TAG::prerelease"
-          else
-            echo "::set-output name=TAG::latest"
-          fi
-
-      # Update CHANGELOG.md with release notes
-      - name: Update CHANGELOG.md
-        run: |
-          RELEASE_NOTES="${{ github.event.release.body }}"
-          TAG_NAME="${{ github.event.release.tag_name }}"
-          echo -e "## $TAG_NAME\n\n$RELEASE_NOTES\n" >> CHANGELOG.md
-
-      - name: Commit CHANGELOG.md
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add CHANGELOG.md
-          git commit -m "Update CHANGELOG.md for release ${{ github.event.release.tag_name }}"
-          git push origin HEAD:main
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      # # Publish to npm
-      # - name: Publish to npm
-      #   run: npm publish --access public --tag ${{ steps.tag.outputs.TAG }}
-      #   env:
-      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      # # Setup to publish to GitHub Packages
-      # - uses: actions/setup-node@v4
-      #   with:
-      #     registry-url: 'https://npm.pkg.github.com'
-      #     # Defaults to the user or organization that owns the workflow file
-      #     scope: '@revolist'
-
-      # # Publish to GitHub Packages
-      # - name: Publish to GitHub Packages
-      #   run: npm publish --access public --tag ${{ steps.tag.outputs.TAG }}
-      #   env:
-      #     NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-        # Update packages with new version
-      # - name: Sync packages
-      #   run: npm run package:update
