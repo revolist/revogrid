@@ -10,7 +10,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          submodules: true
+          submodules: recursive
+          token: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/checkout@v4
         with:
           repository: revolist/revogrid-actions
