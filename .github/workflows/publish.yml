@@ -18,5 +18,6 @@ jobs:
         uses: ./actions/release-grid
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+          repo_token: ${{ secrets.REPO_TOKEN }}
           npm_token: ${{ secrets.NPM_TOKEN }}
       

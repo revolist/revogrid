@@ -32,7 +32,14 @@ async function updateVersionInPackage(packageDir) {
   }
 }
 
-async function commitAndPushChanges(packageDir, newVersion, githubToken) {
+async function commitAndPushChanges(packageDir, newVersion) {
+  const githubToken = process.env.GITHUB_TOKEN;
+
+  if (!githubToken) {
+    console.error(chalk.red('GitHub token is not set'));
+    process.exit(1);
+  }
+
   try {
     // Configure Git to use the GitHub token
     await execa('git', ['config', '--global', 'credential.helper', 'store'], { cwd: packageDir });
@@ -59,7 +66,7 @@ async function commitAndPushChanges(packageDir, newVersion, githubToken) {
 (async () => {
   for (const packageDir of packageDirs) {
     await updateVersionInPackage(packageDir);
-    await commitAndPushChanges(packageDir);
+    await commitAndPushChanges(packageDir, newVersion);
   }
   console.log(chalk.blue('All versions updated.'));
 })();
