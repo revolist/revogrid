@@ -421,3 +421,6 @@ test
 * @novhack made their first contribution in https://github.com/revolist/revogrid/pull/437
 
 **Full Changelog**: https://github.com/revolist/revogrid/compare/v3.5.2...v4.0.20
+## v4.0.21
+
+Support new vue 3 package automatic build
