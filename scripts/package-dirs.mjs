@@ -4,5 +4,5 @@ export const packageDirs = [
   'packages/svelte',
   'packages/vue2',
   'packages/vue3',
-  // 'docs',
+  'docs',
 ];
