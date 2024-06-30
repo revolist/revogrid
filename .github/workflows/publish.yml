@@ -4,7 +4,7 @@ on:
     types: [created]
 permissions: write-all
 jobs:
-  build_and_publish:
+  publish:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -21,6 +21,7 @@ jobs:
           repo_token: ${{ secrets.REPO_TOKEN }}
           npm_token: ${{ secrets.NPM_TOKEN }}
   update_submodules:
+    needs: publish
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
