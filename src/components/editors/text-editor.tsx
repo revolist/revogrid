@@ -1,4 +1,4 @@
-import { h as createElement } from '@stencil/core';
+import { VNode, h as createElement } from '@stencil/core';
 import { isEnterKey, isTab } from '../../utils/key.utils';
 import { timeout } from '../../utils';
 import { ColumnRegular } from '@type';
@@ -22,7 +22,7 @@ export class TextEditor implements EditorBase {
   private editInput!: HTMLInputElement;
 
   public element: Element | null = null;
-  public editCell: EditCell | null = null;
+  public editCell?: EditCell = undefined;
 
   constructor(
     public column: ColumnRegular,
@@ -79,7 +79,7 @@ export class TextEditor implements EditorBase {
    * @param {Object} _additionalData - additional data from plugin.
    * @returns {VNode} - input element.
    */
-  render(h: typeof createElement, _additionalData: any) {
+  render(h: typeof createElement, _additionalData: any): VNode | VNode[] {
     return h('input', {
       type: 'text',
       // set input value from cell data

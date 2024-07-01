@@ -151,6 +151,5 @@ export class DimensionStore {
       sizes,
     );
     setStore(this.store, dimensionData);
-    return dimensionData;
   }
 }

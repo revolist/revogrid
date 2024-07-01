@@ -38,7 +38,7 @@ import {
   Cell,
   DragStartEvent,
 } from '../../components';
-import { MultiDimensionType } from '@type';
+import { EditCellStore, MultiDimensionType } from '@type';
 import {
   FocusRenderEvent,
   ApplyFocusEvent,
@@ -801,7 +801,7 @@ export class OverlaySelection {
     return focus && !this.columnService?.isReadOnly(focus.y, focus.x);
   }
 
-  get edited() {
+  get edited(): EditCellStore {
     return this.selectionStore.get('edit');
   }
 

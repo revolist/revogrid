@@ -1,5 +1,5 @@
 import { ColumnCollection } from '../../services/column.data.provider';
-import { getPhysical, setItems, columnTypes, TrimmedEntity } from '@store';
+import { getPhysical, setItems, columnTypes, TrimmedEntity, DSourceState } from '@store';
 import { BasePlugin } from '../base.plugin';
 import { FILTER_TRIMMED_TYPE } from '../filter/filter.plugin';
 import {
@@ -26,7 +26,8 @@ import {
   processDoubleConversionTrimmed,
   TRIMMED_GROUPING,
 } from './grouping.trimmed.service';
-import { BeforeSaveDataDetails, ColumnRegular, PluginProviders } from '@type';
+import { BeforeSaveDataDetails, ColumnRegular, DataType, DimensionRows, PluginProviders } from '@type';
+import { Observable } from '../../utils/store.utils';
 
 export default class GroupingRowPlugin extends BasePlugin {
   private options: GroupingOptions | undefined;
@@ -35,7 +36,7 @@ export default class GroupingRowPlugin extends BasePlugin {
     return this.options?.props && this.options?.props?.length;
   }
 
-  get store() {
+  get store(): Observable<DSourceState<DataType, DimensionRows>> {
     return this.providers.data.stores[GROUPING_ROW_TYPE].store;
   }
 
