@@ -1,5 +1,5 @@
 import { DSourceState } from '@store';
-import { Observable, PluginSubscribe } from '@type';
+import { Observable, PluginSubscribe } from '../../utils/store.utils';
 
 type State = DSourceState<any, any>;
 

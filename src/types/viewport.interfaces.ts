@@ -2,7 +2,6 @@ import type { JSXBase } from '@stencil/core/internal';
 import type {
   DimensionCols,
   ColumnRegular,
-  Observable,
   ViewPortScrollEvent,
   ViewportState,
   Cell,
@@ -13,6 +12,7 @@ import type {
   ViewportStoreCollection,
   DSourceState,
 } from '@store';
+import { Observable } from '../utils/store.utils';
 import type { RowDataSources } from '../services/data.provider';
 import type { JSX } from '..';
 

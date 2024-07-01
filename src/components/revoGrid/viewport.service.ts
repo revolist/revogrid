@@ -25,7 +25,6 @@ import ColumnDataProvider from '../../services/column.data.provider';
 import { DataProvider } from '../../services/data.provider';
 import {
   ColumnRegular,
-  Observable,
   ViewPortResizeEvent,
   ViewSettingSizeProp,
   DimensionCols,
@@ -39,6 +38,7 @@ import {
   Cell,
   RangeArea,
 } from '@type';
+import { Observable } from '../../utils/store.utils';
 
 export type ResizeDetails = { [index: number]: ColumnRegular };
 type Config = {

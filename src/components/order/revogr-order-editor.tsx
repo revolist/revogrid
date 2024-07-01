@@ -4,15 +4,15 @@ import debounce from 'lodash/debounce';
 import { DSourceState, setItems } from '@store';
 import { DRAGG_TEXT } from '../../utils/consts';
 import RowOrderService from './order-row.service';
-import { DimensionRows } from '@type';
 import {
+  DimensionRows,
   DataType,
   DimensionSettingsState,
   DragStartEvent,
-  Observable,
   PositionItem,
+  Cell,
 } from '@type';
-import { Cell } from '@type';
+import { Observable } from '../../utils/store.utils';
 
 /**
  * Component for handling row order editor.

@@ -12,13 +12,13 @@ import LocalScrollService, { getContentSize } from '../../services/local.scroll.
 import { getScrollbarSize } from '../../utils';
 import { DimensionType } from '@type';
 import {
-  Observable,
   ViewportState,
   DimensionSettingsState,
   ViewPortScrollEvent,
 } from '@type';
 import { AutohideScrollPlugin } from './autohide-scroll.plugin';
 import { LocalScrollTimer } from '../../services/local.scroll.timer';
+import { Observable } from '../../utils/store.utils';
 
 /**
  * Virtual scroll component

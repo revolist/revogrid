@@ -2,18 +2,15 @@
  * Storing pre-calculated
  * Dimension information and sizes
  */
-
-import { createStore } from '@stencil/store';
 import reduce from 'lodash/reduce';
+import { createStore } from '@stencil/store';
 
-import { setStore } from '../../utils/store.utils';
+import { setStore, Observable, PluginSubscribe } from '../../utils/store.utils';
 import { calculateDimensionData } from './dimension.helpers';
 import each from 'lodash/each';
 import {
   DimensionCalc,
   DimensionSettingsState,
-  Observable,
-  PluginSubscribe,
   ViewSettingSizeProp,
   MultiDimensionType,
 } from '@type';

@@ -22,7 +22,10 @@
     "paths": {
       "@store": ["src/store"],
       "@type": ["src/types"]
-    }
+    },
+    "types": [
+      "@stencil/store"
+    ]
   },
   "include": ["src", "types/jsx.d.ts"],
   "exclude": ["node_modules"]

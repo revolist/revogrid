@@ -13,11 +13,7 @@ import {
 } from '@stencil/core';
 
 import ColumnService from './column.service';
-import {
-  DATA_COL,
-  DATA_ROW,
-  ROW_FOCUSED_CLASS,
-} from '../../utils/consts';
+import { DATA_COL, DATA_ROW, ROW_FOCUSED_CLASS } from '../../utils/consts';
 
 import { DSourceState, getSourceItem } from '@store';
 import RowRenderer, { PADDING_DEPTH } from './row-renderer';
@@ -28,7 +24,6 @@ import { RowHighlightPlugin } from './row-highlight.plugin';
 import { convertVNodeToHTML } from '../vnode/vnode.utils';
 import { CellRenderer } from './cell-renderer';
 import {
-  Observable,
   ViewportState,
   DimensionSettingsState,
   BeforeRowRenderEvent,
@@ -40,8 +35,10 @@ import {
   DragStartEvent,
   ColumnDataSchemaModel,
   VirtualPositionItem,
+  RangeArea,
+  SelectionStoreState,
 } from '@type';
-import { RangeArea, SelectionStoreState } from '@type';
+import { Observable } from '../../utils/store.utils';
 
 /**
  * This component is responsible for rendering data
@@ -157,7 +154,6 @@ export class RevogrData {
   private renderedRows = new Map<number, VNode>();
   private rangeUnsubscribe: (() => void) | undefined;
 
-
   @Watch('dataStore') onDataStoreChange() {
     this.onStoreChange();
   }
@@ -178,8 +174,10 @@ export class RevogrData {
     };
 
     this.rangeUnsubscribe?.();
-    this.rangeUnsubscribe = this.rowSelectionStore.onChange('range', (e: RangeArea) =>
-      this.rowHighlightPlugin.selectionChange(e, this.renderedRows),
+    this.rangeUnsubscribe = this.rowSelectionStore.onChange(
+      'range',
+      (e: RangeArea) =>
+        this.rowHighlightPlugin.selectionChange(e, this.renderedRows),
     );
   }
 

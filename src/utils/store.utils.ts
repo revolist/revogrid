@@ -1,7 +1,11 @@
-import type { Observable } from '@type';
+
+import { ObservableMap, Subscription } from './store.types';
+
+export type Observable<T> = ObservableMap<T>;
+export type PluginSubscribe<T> = Subscription<T>;
 
 /** Set stores data */
-function setStore<T extends { [key: string]: any }>(
+export function setStore<T extends { [key: string]: any }>(
   store: Observable<T>,
   data: Partial<T>,
 ) {
@@ -10,4 +14,3 @@ function setStore<T extends { [key: string]: any }>(
   }
 }
 
-export { setStore };

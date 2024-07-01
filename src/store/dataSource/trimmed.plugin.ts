@@ -1,4 +1,4 @@
-import { Observable, PluginSubscribe } from '@type';
+import { Observable, PluginSubscribe } from '../../utils/store.utils';
 import { DSourceState } from './data.store';
 
 export type TrimmedEntity = Record<number, boolean>;

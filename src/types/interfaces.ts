@@ -1,9 +1,4 @@
-/* eslint-disable */
-/* tslint:disable */
-// @ts-ignore
-import { VNode } from '@stencil/core';
-// @ts-ignore
-import { ObservableMap, Subscription } from '@stencil/store';
+import type { VNode } from '@stencil/core';
 
 import {
   DimensionCols,
@@ -19,9 +14,8 @@ import {
   RangeArea,
   SelectionStoreState,
 } from './selection';
+import type { Observable } from '../utils/store.utils';
 
-export type Observable<T> = ObservableMap<T>;
-export type PluginSubscribe<T> = Subscription<T>;
 
 export type ColumnDataSchemaModel = {
   /**

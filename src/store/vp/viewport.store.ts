@@ -1,5 +1,3 @@
-import { createStore } from '@stencil/store';
-
 import {
   DimensionDataViewport,
   addMissingItems,
@@ -11,13 +9,12 @@ import {
   updateMissingAndRange,
   isActiveRangeOutsideLastItem,
 } from './viewport.helpers';
-
-import { setStore } from '../../utils/store.utils';
+import { createStore } from '@stencil/store';
+import { type Observable, setStore } from '../../utils/store.utils';
 import type {
   VirtualPositionItem,
   ViewportStateItems,
   ViewportState,
-  Observable,
   ViewSettingSizeProp,
   MultiDimensionType,
 } from '@type';

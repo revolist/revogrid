@@ -18,10 +18,10 @@ import {
   DimensionSettingsState,
   FocusRenderEvent,
   FocusTemplateFunc,
-  Observable,
   DimensionCols,
   DimensionRows,
 } from '@type';
+import { Observable } from '../../utils/store.utils';
 
 /**
  * Focus component. Shows focus layer around the cell that is currently in focus.

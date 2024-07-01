@@ -16,7 +16,6 @@ import {
   DataLookup,
   DataType,
   DimensionSettingsState,
-  Observable,
   TempRange,
   ChangedRange,
   BeforeRangeSaveDataDetails,
@@ -24,6 +23,7 @@ import {
   Cell,
   DimensionRows,
 } from '@type';
+import { Observable } from '../../utils/store.utils';
 
 type Config = {
   dimensionRow: Observable<DimensionSettingsState>;

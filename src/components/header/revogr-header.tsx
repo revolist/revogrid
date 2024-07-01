@@ -18,13 +18,13 @@ import {
   ColumnRegular,
   DimensionSettingsState,
   InitialHeaderClick,
-  Observable,
   Providers,
   ViewportState,
   ViewSettingSizeProp,
+  DimensionCols,
+  SelectionStoreState,
 } from '@type';
-import { DimensionCols } from '@type';
-import { SelectionStoreState } from '@type';
+import { Observable } from '../../utils/store.utils';
 
 @Component({
   tag: 'revogr-header',
@@ -89,7 +89,7 @@ export class RevogrHeaderComponent {
 
   /**
    * On initial header click
-  */
+   */
   @Event({
     eventName: 'beforeheaderclick',
   })
@@ -97,7 +97,7 @@ export class RevogrHeaderComponent {
 
   /**
    * On header resize
-  */
+   */
   @Event({
     eventName: 'headerresize',
   })
@@ -105,7 +105,7 @@ export class RevogrHeaderComponent {
 
   /**
    * On before header resize
-  */
+   */
   @Event({ eventName: 'beforeheaderresize', cancelable: true })
   beforeResize: EventEmitter<ColumnRegular[]>;
 
