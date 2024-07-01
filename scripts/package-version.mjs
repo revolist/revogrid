@@ -32,41 +32,10 @@ async function updateVersionInPackage(packageDir) {
   }
 }
 
-async function commitAndPushChanges(packageDir, newVersion) {
-  const githubToken = process.env.GITHUB_TOKEN;
-
-  if (!githubToken) {
-    console.error(chalk.red('GitHub token is not set'));
-    process.exit(1);
-  }
-
-  try {
-    // Configure Git to use the GitHub token
-    await execa('git', ['config', '--global', 'credential.helper', 'store'], { cwd: packageDir });
-    await execa('git', ['config', '--global', 'user.name', '"github-actions[bot]"'], { cwd: packageDir });
-    await execa('git', ['config', '--global', 'user.email', '"github-actions[bot]@users.noreply.github.com"'], { cwd: packageDir });
-    await execa('git', ['config', '--global', `url.https://${githubToken}:x-oauth-basic@github.com/.insteadOf`, 'https://github.com/'], { cwd: packageDir });
-
-    // Add changes
-    await execa('git', ['add', '.'], { cwd: packageDir, stdio: 'inherit' });
-
-    // Commit changes
-    await execa('git', ['commit', '-m', `chore(release): update versions to ${newVersion}`], { cwd: packageDir, stdio: 'inherit' });
-
-    // Push changes
-    await execa('git', ['push'], { cwd: packageDir, stdio: 'inherit' });
-
-    console.log(chalk.green(`Successfully committed and pushed version updates for ${packageDir} to GitHub`));
-  } catch (error) {
-    console.error(chalk.red(`Failed to commit and push changes for ${packageDir}`));
-    console.error(error);
-  }
-}
 
 (async () => {
   for (const packageDir of packageDirs) {
     await updateVersionInPackage(packageDir);
-    await commitAndPushChanges(packageDir, newVersion);
   }
   console.log(chalk.blue('All versions updated.'));
 })();

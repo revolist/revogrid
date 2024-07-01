@@ -61,7 +61,7 @@ function main() {
         break;
     }
 
-    files.push('version.md', 'contribute.md', 'LICENSE.md');
+    files.push('version.md', 'sponsors.md', 'contribute.md', 'LICENSE.md');
     generateReadme(files, output);
   });
 }
