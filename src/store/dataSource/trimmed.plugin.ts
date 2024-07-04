@@ -1,5 +1,5 @@
 import { Observable, PluginSubscribe } from '../../utils/store.utils';
-import { DSourceState } from './data.store';
+import { DSourceState, GDataType } from './data.store';
 
 export type TrimmedEntity = Record<number, boolean>;
 export type Trimmed = Record<string, TrimmedEntity>;
@@ -8,7 +8,7 @@ export type Trimmed = Record<string, TrimmedEntity>;
  * Hide items from main collection
  * But keep them in store
  */
-export const trimmedPlugin = <T>(store: Observable<DSourceState<T, any>>): PluginSubscribe<DSourceState<T, any>> => ({
+export const trimmedPlugin = <T extends GDataType>(store: Observable<DSourceState<T, any>>): PluginSubscribe<DSourceState<T, any>> => ({
   set(k, newVal) {
     switch (k) {
       case 'trimmed':

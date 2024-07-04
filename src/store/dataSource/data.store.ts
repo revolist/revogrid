@@ -158,7 +158,7 @@ export const getSourceItem = (
  * @param modelByIndex - collection of rows/values with virtual indexes to setup/replace in store/data source
  * @param mutate - if true, store will be mutated and whole viewport will be re-rendered
  */
-export function setSourceByVirtualIndex<T>(
+export function setSourceByVirtualIndex<T extends GDataType>(
   store: Observable<DSourceState<T, any>>,
   modelByIndex: Record<number, T>,
   mutate = true,
@@ -181,7 +181,7 @@ export function setSourceByVirtualIndex<T>(
  * @param modelByIndex - collection of rows with physical indexes to setup
  * @param mutate - if true, store will be mutated and whole viewport will be re-rendered
  */
-export function setSourceByPhysicalIndex<T>(
+export function setSourceByPhysicalIndex<T extends GDataType>(
   store: Observable<DSourceState<T, any>>,
   modelByIndex: Record<number, T>,
   mutate = true,
@@ -195,7 +195,7 @@ export function setSourceByPhysicalIndex<T>(
   }
 }
 
-export function setItems<T>(
+export function setItems<T extends GDataType>(
   store: Observable<DSourceState<T, any>>,
   items: number[],
 ) {

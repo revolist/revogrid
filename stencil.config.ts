@@ -30,6 +30,8 @@ const directivesProxyFile = (name: string, filepath = entry) =>
 const angularPath = (name: string, filepath = entry) =>
   `${parent}/angular/projects/${name}/src/lib/${filepath}`;
 
+const customElementsDir = 'standalone';
+
 export const config: Config = {
   // https://github.com/ionic-team/stencil/blob/master/src/declarations/stencil-public-compiler.ts
   enableCache: true,
@@ -89,6 +91,14 @@ export const config: Config = {
       directivesArrayFile: angularPath('angular-datagrid', entry),
       excludeComponents,
     }),
+    angularOutputTarget({
+      componentCorePackage,
+      outputType: 'standalone',
+      customElementsDir: customElementsDir,
+      directivesProxyFile: angularPath('angular-datagrid', `standalone.ts`),
+      directivesArrayFile: angularPath('angular-datagrid', entry),
+      excludeComponents,
+    }),
     // #endregion
 
     // #region React
@@ -114,7 +124,7 @@ export const config: Config = {
       type: 'dist-custom-elements',
       customElementsExportBehavior: 'single-export-module',
       minify: true,
-      dir: './standalone',
+      dir: customElementsDir,
       generateTypeDeclarations: true,
       empty: true,
     },
