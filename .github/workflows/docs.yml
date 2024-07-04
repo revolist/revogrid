@@ -23,12 +23,17 @@ jobs:
       # Install
       - name: Package update
         working-directory: ./demo
-        run: npm install
+        run: npm ci
 
+      - name: Verify Node.js version
+        run: |
+          node -v
+          npm -v
+          
       # Build
       - name: Package build
         working-directory: ./demo
-        run: sudo npm run build
+        run: npm run build
 
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4
