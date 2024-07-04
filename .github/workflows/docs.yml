@@ -11,14 +11,14 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      # Checout submodule
-      - name: Checkout submodules
-        run: git submodule update --init --remote --recursive
-
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '16.13.0'
+          node-version: 16.x
+
+      # Checout submodule
+      - name: Checkout submodules
+        run: git submodule update --init --remote --recursive
 
       # Install
       - name: Package update
