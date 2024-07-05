@@ -946,6 +946,7 @@ export class RevoGridComponent {
   viewportProvider: ViewportProvider;
   private themeService: ThemeService;
   private viewport: ViewportService | null = null;
+  private isInited = false;
 
   private orderService: OrdererService;
   private selectionStoreConnector: SelectionStoreConnector;
@@ -1188,35 +1189,11 @@ export class RevoGridComponent {
   }
   // #endregion
 
-  componentWillRender() {
-    const event = this.beforegridrender.emit();
-    if (event.defaultPrevented) {
-      return false;
-    }
-    return Promise.all(this.jobsBeforeRender);
-  }
+  // #region Plugins
+  private setPlugins() {
+    // remove old plugins if any
+    this.removePlugins();
 
-  connectedCallback() {
-    // #region Setup Providers
-    this.viewportProvider = new ViewportProvider();
-    this.themeService = new ThemeService({
-      rowSize: this.rowSize,
-    });
-    this.dimensionProvider = new DimensionProvider(this.viewportProvider, {
-      realSizeChanged: (k: MultiDimensionType) =>
-        this.contentsizechanged.emit(k),
-    });
-    this.columnProvider = new ColumnDataProvider();
-    this.selectionStoreConnector = new SelectionStoreConnector();
-    this.dataProvider = new DataProvider(this.dimensionProvider);
-    // #endregion
-
-    // generate uuid for this grid
-    this.uuid = `${new Date().getTime()}-rvgrid`;
-
-    this.registerOutsideVNodes(this.registerVNode);
-
-    // #region Plugins
     // pass data provider to plugins
     const pluginData: PluginProviders = {
       data: this.dataProvider,
@@ -1266,12 +1243,51 @@ export class RevoGridComponent {
     }
 
     // register user plugins
-    if (this.plugins) {
-      this.plugins.forEach(p => {
-        this.internalPlugins.push(new p(this.element, pluginData));
-      });
+    this.plugins?.forEach(p => this.internalPlugins.push(new p(this.element, pluginData)));
+  }
+
+  private removePlugins() {
+    this.internalPlugins.forEach(p => p.destroy());
+    this.internalPlugins = [];
+  }
+  // #endregion
+
+
+  // if reconnect to dom we need to set up plugins
+  connectedCallback() {
+    if (this.isInited) {
+      this.setPlugins();
     }
+  }
+
+  /**
+   * Called once just after the component is first connected to the DOM.
+   * Since this method is only called once, it's a good place to load data asynchronously and to setup the state
+   * without triggering extra re-renders.
+   * A promise can be returned, that can be used to wait for the first render().
+   */
+  componentWillLoad() {
+    // #region Setup Providers
+    this.viewportProvider = new ViewportProvider();
+    this.themeService = new ThemeService({
+      rowSize: this.rowSize,
+    });
+    this.dimensionProvider = new DimensionProvider(this.viewportProvider, {
+      realSizeChanged: (k: MultiDimensionType) =>
+        this.contentsizechanged.emit(k),
+    });
+    this.columnProvider = new ColumnDataProvider();
+    this.selectionStoreConnector = new SelectionStoreConnector();
+    this.dataProvider = new DataProvider(this.dimensionProvider);
     // #endregion
+
+    // generate uuid for this grid
+    this.uuid = `rv--${Math.random().toString(36).slice(2, 6)}-${Date.now()}`;
+
+    this.registerOutsideVNodes(this.registerVNode);
+
+    // init plugins
+    this.setPlugins();
 
     // set data
     this.applyStretch(this.stretch);
@@ -1300,12 +1316,16 @@ export class RevoGridComponent {
     );
 
     this.aftergridinit.emit();
+    // set inited flag for connectedCallback
+    this.isInited = true;
   }
 
-  disconnectedCallback() {
-    // destroy plugins on element disconnect
-    this.internalPlugins.forEach(p => p.destroy());
-    this.internalPlugins = [];
+  componentWillRender() {
+    const event = this.beforegridrender.emit();
+    if (event.defaultPrevented) {
+      return false;
+    }
+    return Promise.all(this.jobsBeforeRender);
   }
 
   render() {
@@ -1515,5 +1535,10 @@ export class RevoGridComponent {
         {this.extraElements}
       </Host>
     );
+  }
+
+  disconnectedCallback() {
+    // Remove all plugins, to avoid memory leaks and unexpected behaviour when the component is removed
+    this.removePlugins();
   }
 }

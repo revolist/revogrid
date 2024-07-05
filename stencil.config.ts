@@ -86,16 +86,9 @@ export const config: Config = {
     // #region Angular
     angularOutputTarget({
       componentCorePackage,
-      outputType: 'component',
-      directivesProxyFile: angularPath('angular-datagrid', `components.ts`),
-      directivesArrayFile: angularPath('angular-datagrid', entry),
-      excludeComponents,
-    }),
-    angularOutputTarget({
-      componentCorePackage,
       outputType: 'standalone',
       customElementsDir: customElementsDir,
-      directivesProxyFile: angularPath('angular-datagrid', `standalone.ts`),
+      directivesProxyFile: angularPath('angular-datagrid', `components.ts`),
       directivesArrayFile: angularPath('angular-datagrid', entry),
       excludeComponents,
     }),

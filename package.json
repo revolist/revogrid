@@ -70,6 +70,10 @@
       "import": "./standalone/revo-grid.js",
       "types": "./standalone/revo-grid.d.ts"
     },
+    "./standalone/revo-grid.js": {
+      "import": "./standalone/revo-grid.js",
+      "types": "./standalone/revo-grid.d.ts"
+    },
     "./loader": {
       "import": "./loader/index.js",
       "require": "./loader/index.cjs",
