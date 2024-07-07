@@ -16,7 +16,10 @@ import {
 } from './selection';
 import type { Observable } from '../utils/store.utils';
 
-
+/**
+ * Advanced column data schema model.
+ * Used for transpassing data to cell renderer and editor.
+ */
 export type ColumnDataSchemaModel = {
   /**
    * Column prop used for mapping value to cell from data source model/row
@@ -86,9 +89,9 @@ export type RowDrag =
  */
 export type ColumnGrouping = {
   /**
-   * An array of `ColumnDataSchema` objects that represent the children of the grouping.
+   * An array of objects that represent the children of the grouping.
    */
-  children: ColumnDataSchema[];
+  children: (ColumnGrouping | ColumnRegular)[];
   /**
    * A `DataFormat` object that represents the name of the grouping.
    */
@@ -119,6 +122,10 @@ export type ColumnTypes = {
    */
   [name: string]: ColumnType;
 };
+
+/**
+ * Interface for custom cell renderer.
+ */
 export interface CellTemplate {
   // TODO: Add Promise support for template and all custom function so user will be able to use async render on the light speed
   (
@@ -227,9 +234,7 @@ export interface ColumnRegular extends ColumnType {
   [key: string]: any;
 }
 
-export type ColumnDataSchema = ColumnGrouping | ColumnRegular;
-
-export type ColumnData = ColumnDataSchema[];
+export type ColumnData = (ColumnGrouping | ColumnRegular)[];
 /**
  * Column template property.
  * Contains extended properties for column.

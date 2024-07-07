@@ -66,7 +66,6 @@ import {
   ColumnProp,
   ViewPortScrollEvent,
   InitialHeaderClick,
-  ColumnDataSchema,
   AllDimensionType,
   Editors,
   BeforeSaveDataDetails,
@@ -964,7 +963,7 @@ export class RevoGridComponent {
     // Column format change will trigger column structure update
     this.columnChanged(this.columns);
   }
-  @Watch('columns') columnChanged(newVal: ColumnDataSchema[] = []) {
+  @Watch('columns') columnChanged(newVal: (ColumnGrouping | ColumnRegular)[] = []) {
     const columnGather = ColumnDataProvider.getColumns(
       newVal,
       0,

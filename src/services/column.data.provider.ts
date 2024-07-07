@@ -16,13 +16,13 @@ import GroupingColumnPlugin, {
 } from '../plugins/groupingColumn/grouping.col.plugin';
 import {
   ColumnData,
-  ColumnDataSchema,
   ColumnProp,
   ColumnRegular,
   ColumnTypes,
   ViewSettingSizeProp,
   DimensionCols,
   DimensionColPin,
+  ColumnGrouping,
 } from '@type';
 
 export type ColumnCollection = {
@@ -280,7 +280,7 @@ export default class ColumnDataProvider {
 
     return reduce(
       columns,
-      (res: ColumnCollection, colData: ColumnDataSchema) => {
+      (res: ColumnCollection, colData: ColumnGrouping | ColumnRegular) => {
         // Grouped column
         if (isColGrouping(colData)) {
           return GroupingColumnPlugin.gatherGroup(

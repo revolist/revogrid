@@ -47,6 +47,10 @@ export type ChangedRange = {
     [key: number]: DataType;
   };
 };
+
+/**
+ * Cell coordinates
+ */
 export interface Cell {
   x: ColIndex;
   y: RowIndex;
@@ -93,23 +97,43 @@ export type BeforeRangeSaveDataDetails = {
 
 export type AfterEditEvent = BeforeRangeSaveDataDetails | BeforeSaveDataDetails;
 
+/**
+ * Edit cell info for store
+ */
 export interface EditCellStore extends Cell {
   val?: SaveData;
 }
+/**
+ * Edit cell info for editor
+ */
 export type EditCell = EditCellStore & BeforeSaveDataDetails;
+
+/**
+ * Available editors in grid
+ */
 export type Editors = {
   [name: string]: EditorCtr;
 };
+
+/**
+ * Editor component
+ */
 export type EditorCtr = EditorCtrCallable | EditorCtrConstructible;
 
-export interface EditorCtrCallable {
+
+/**
+ * Editor component callable function
+ */
+export type EditorCtrCallable = {
   (
     column: ColumnDataSchemaModel,
     save: (value: SaveData, preventFocus?: boolean) => void,
     close: (focusNext?: boolean) => void,
   ): EditorBase;
 }
-
+/**
+ * Editor component constructible class
+ */
 export interface EditorCtrConstructible {
   new (
     column: ColumnDataSchemaModel,
@@ -118,6 +142,9 @@ export interface EditorCtrConstructible {
   ): EditorBase;
 }
 
+/**
+ * Editor interface
+ */
 export interface EditorBase {
   element?: Element | null;
   editCell?: EditCell;
