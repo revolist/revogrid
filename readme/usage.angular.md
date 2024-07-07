@@ -55,7 +55,7 @@ export class AppComponent {
   columns: ColumnRegular[] = [];
   editors: Editors = {};
 
-  constructor(private ref: Injector) {
+  constructor() {
     const MY_EDITOR = 'custom-editor';
     this.source = [
       {
@@ -72,7 +72,7 @@ export class AppComponent {
         prop: 'name',
         name: 'First',
         editor: MY_EDITOR,
-        cellTemplate: Template(CellComponent, ref),
+        cellTemplate: Template(CellComponent),
       },
       {
         prop: 'details',
@@ -81,7 +81,7 @@ export class AppComponent {
     ];
 
 
-    this.editors = { [MY_EDITOR]: Editor(EditorComponent, ref) };
+    this.editors = { [MY_EDITOR]: Editor(EditorComponent) };
   }
 }
 ```
