@@ -147,7 +147,49 @@ export default class SelectionStoreConnector {
     this.setEdit('');
   }
 
-  focus(store: SelectionStore, { focus, end }: { focus: Cell; end: Cell }) {
+  beforeNextFocusCell(focus: Selection.Cell) {
+    if (!this.focusedStore) {
+      return;
+    }
+    const nextStore = this.checkNextStore(focus, this.focusedStore.position, this.focusedStore.entity.store.get('lastCell') );
+    nextStore.store.nextFocus({ ...focus, ...nextStore.item });
+  }
+
+  checkNextStore(focus: Selection.Cell, currentStorePointer: Selection.Cell, lastCell: Selection.Cell) {
+     // item in new store
+     const nextItem: Partial<Cell> | null = nextCell(focus, lastCell);
+
+     let nextStore: SelectionStore | null = null;
+     if (nextItem) {
+       for (let i in nextItem) {
+         let type: keyof Cell = i as keyof Cell;
+         let stores;
+         switch (type) {
+           case 'x':
+             stores = this.getXStores(currentStorePointer.y);
+             break;
+           case 'y':
+             stores = this.getYStores(currentStorePointer.x);
+             break;
+         }
+         if (nextItem[type] >= 0) {
+           nextStore = stores[++currentStorePointer[type]];
+         } else {
+           nextStore = stores[--currentStorePointer[type]];
+           const nextLastCell = nextStore?.store.get('lastCell');
+           if (nextLastCell) {
+             nextItem[type] = nextLastCell[type] + nextItem[type];
+           }
+         }
+       }
+     }
+     return {
+      store: nextStore,
+      item: nextItem,
+     };
+  }
+
+  getCurrentStorePointer(store: SelectionStore) {
     let currentStorePointer: Selection.Cell;
     // clear all stores focus leave only active one
     for (let y in this.stores) {
@@ -161,44 +203,23 @@ export default class SelectionStoreConnector {
         }
       }
     }
+    return currentStorePointer;
+  }
+
+  focus(store: SelectionStore, { focus, end }: { focus: Cell; end: Cell }) {
+    const currentStorePointer = this.getCurrentStorePointer(store);
     if (!currentStorePointer) {
       return;
     }
 
     // check is focus in next store
     const lastCell = store.store.get('lastCell');
-    // item in new store
-    const nextItem: Partial<Cell> | null = nextCell(focus, lastCell);
-
-    let nextStore;
-    if (nextItem) {
-      for (let i in nextItem) {
-        let type: keyof Cell = i as keyof Cell;
-        let stores;
-        switch (type) {
-          case 'x':
-            stores = this.getXStores(currentStorePointer.y);
-            break;
-          case 'y':
-            stores = this.getYStores(currentStorePointer.x);
-            break;
-        }
-        if (nextItem[type] >= 0) {
-          nextStore = stores[++currentStorePointer[type]];
-        } else {
-          nextStore = stores[--currentStorePointer[type]];
-          const nextLastCell = nextStore?.store.get('lastCell');
-          if (nextLastCell) {
-            nextItem[type] = nextLastCell[type] + nextItem[type];
-          }
-        }
-      }
-    }
+    const next = this.checkNextStore(focus, currentStorePointer, lastCell);
 
     // if next store present - update
-    if (nextStore) {
-      let item = { ...focus, ...nextItem };
-      this.focus(nextStore, { focus: item, end: item });
+    if (next?.store) {
+      let item = { ...focus, ...next.item };
+      this.focus(next.store, { focus: item, end: item });
       return;
     }
 

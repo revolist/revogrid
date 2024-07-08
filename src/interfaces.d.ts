@@ -291,6 +291,7 @@ export declare namespace Selection {
     tempRange: RangeArea | null;
     tempRangeType: string | null;
     focus: Cell | null;
+    nextFocus: Cell | null; // next focus store
 
     edit: Edition.EditCellStore | null;
     lastCell: Cell | null;
