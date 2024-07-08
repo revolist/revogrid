@@ -113,7 +113,7 @@ export class KeyboardService {
       const range = getRange(data.start, data.end);
       return this.sv.selectionStoreService.changeRange(range);
     }
-    return this.sv.selectionStoreService.focus(data.start);
+    return this.sv.selectionStoreService.focus(data.start, false, isAfterLast(data.start, eData) ? 1: isBeforeFirst(data.start) ? -1 : 0);
   }
 
   keyUp(e: KeyboardEvent): void {

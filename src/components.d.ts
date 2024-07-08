@@ -855,6 +855,7 @@ declare namespace LocalJSX {
         "onInternalCellEdit"?: (event: RevogrOverlaySelectionCustomEvent<Edition.BeforeSaveDataDetails>) => void;
         "onInternalCopy"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
         "onInternalFocusCell"?: (event: RevogrOverlaySelectionCustomEvent<Edition.BeforeSaveDataDetails>) => void;
+        "onInternalNextStoreFocus"?: (event: RevogrOverlaySelectionCustomEvent<Selection.Cell>) => void;
         "onInternalPaste"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
         /**
           * Range data apply

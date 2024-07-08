@@ -64,6 +64,7 @@ export class OverlaySelection {
 
   @Event({ cancelable: true }) internalCellEdit: EventEmitter<Edition.BeforeSaveDataDetails>;
   @Event({ cancelable: true }) internalFocusCell: EventEmitter<Edition.BeforeSaveDataDetails>;
+  @Event({ cancelable: true }) internalNextStoreFocus: EventEmitter<Selection.Cell>;
 
   @Event({ bubbles: false }) setEdit: EventEmitter<Edition.BeforeEdit>;
   /**
@@ -120,17 +121,33 @@ export class OverlaySelection {
     this.keyboardService?.keyDown(e, this.range);
   }
 
+  private focusCurrent(cell: Selection.Cell, end: Selection.Cell) {
+    const currentFocusEvent = this.internalFocusCell.emit(this.columnService.getSaveData(cell.y, cell.x));
+    if (currentFocusEvent.defaultPrevented) {
+      return false;
+    }
+    const focused = { focus: cell, end };
+    return !this.focusCell.emit(focused)?.defaultPrevented;
+  }
+
   /** Create selection store */
+  private unsubscribeSelectionStore: { (): void }[] = [];
   @Watch('selectionStore') selectionServiceSet(s: Observable<Selection.SelectionStoreState>) {
+    this.unsubscribeSelectionStore.forEach(v => v());
+    this.unsubscribeSelectionStore = [];
+
+    this.unsubscribeSelectionStore.push(s.onChange('nextFocus', (v) => {
+      this.focusCurrent(v, v);
+    }));
     this.selectionStoreService = new SelectionStoreService(s, {
       changeRange: range => !this.setRange.emit(range)?.defaultPrevented,
-      focus: (focus, end) => {
-        const focused = { focus, end };
-        const { defaultPrevented } = this.internalFocusCell.emit(this.columnService.getSaveData(focus.y, focus.x));
-        if (defaultPrevented) {
+      focus: (focus, end, focusNextStore) => {
+        if (!focusNextStore) {
+         return this.focusCurrent(focus, end);
+        } else {
+          this.internalNextStoreFocus.emit(focus);
           return false;
         }
-        return !this.focusCell.emit(focused)?.defaultPrevented;
       },
     });
 
@@ -191,6 +208,8 @@ export class OverlaySelection {
 
   disconnectedCallback() {
     this.columnService?.destroy();
+    this.unsubscribeSelectionStore.forEach(v => v());
+    this.unsubscribeSelectionStore = [];
   }
 
   private renderRange(range: Selection.RangeArea) {

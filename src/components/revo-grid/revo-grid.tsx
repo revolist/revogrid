@@ -617,6 +617,10 @@ export class RevoGridComponent {
     }
   }
 
+  @Listen('internalNextStoreFocus') onCellStoreFocus(e: CustomEvent<Selection.Cell>) {
+    this.selectionStoreConnector.beforeNextFocusCell(e.detail);
+  }
+
   // --------------------------------------------------------------------------
   //
   //  Private Properties
