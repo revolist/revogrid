@@ -36,6 +36,7 @@ export class RevogrData {
   @Prop() dataStore: RowSource;
 
   @Event() dragStartCell: EventEmitter<MouseEvent>;
+  @Event() beforerowrender: EventEmitter<{ row: VNode; rowIndex: number; model: any }>;
 
   @Watch('dataStore')
   @Watch('colData')
@@ -80,11 +81,11 @@ export class RevogrData {
       for (let rgCol of cols) {
         cells.push(this.getCellRenderer(rgRow, rgCol, this.canDrag, /** grouping apply*/ this.columnService.hasGrouping ? depth : 0));
       }
-      rowsEls.push(
-        <RowRenderer rowClass={rowClass} size={rgRow.size} start={rgRow.start}>
-          {cells}
-        </RowRenderer>,
-      );
+      const row = <RowRenderer rowClass={rowClass} size={rgRow.size} start={rgRow.start}>
+        {cells}
+      </RowRenderer>;
+      this.beforerowrender.emit({ row, model: dataRow, rowIndex: rgRow.itemIndex });
+      rowsEls.push(row);
     }
     return rowsEls;
   }
