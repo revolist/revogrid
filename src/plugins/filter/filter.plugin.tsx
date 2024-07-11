@@ -319,7 +319,7 @@ export class FilterPlugin extends BasePlugin {
 
     // applies the hasFilter to the columns to show filter icon
     await this.revogrid.updateColumns(columnsToUpdate);
-    this.emit('afterFilterApply');
+    this.emit('afterfilterapply');
   }
 
   async clearFiltering() {
