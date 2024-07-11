@@ -1,7 +1,7 @@
 ## Installation
 
 The library published as a [scoped NPM package](https://docs.npmjs.com/misc/scope) in the [NPMJS Revolist account](https://www.npmjs.com/org/revolist).
-[Check for more info on our demo side](https://revolist.github.io/revogrid/guide/installing.html).
+[Check for more info on our demo side](https://rv-grid.com/guide/installation).
 
 With NPM:
 
@@ -24,11 +24,10 @@ yarn add @revolist/revogrid;
 
 ## Framework
 
-In `<revo-grid />` we have developed a sophisticated Continuous Delivery (CD) system powered by GitHub Actions. This advanced system automatically builds and delivers grid versions across multiple frameworks, including React, Angular, Svelte, Vue 2, and Vue 3, with full type support. This ensures continuous version delivery, providing the latest grid enhancements and upgrades across all supported frameworks ✨
+In `<revo-grid />` we have developed a sophisticated Continuous Delivery (CD) system powered by GitHub Actions. This advanced system automatically builds and delivers grid versions across multiple frameworks, including React, Angular, Svelte, Vue 2, and Vue 3, with full type support. This ensures continuous version delivery, providing the latest grid enhancements and upgrades across all supported frameworks ✨. In the future (version 5), we are planning to switch to monorepo based development.
 
-- [JavaScript](https://revolist.github.io/revogrid/guide);
-- [VueJs](https://revolist.github.io/revogrid/guide/framework.vue.overview.html);
-- [Svelte](https://revolist.github.io/revogrid/guide/framework.svelte.overview.html);
-- [React](https://revolist.github.io/revogrid/guide/framework.react.overview.html);
-- [Angular](https://revolist.github.io/revogrid/guide/framework.angular.overview.html);
-- [Ember](docs/ember.md).
+- [JavaScript](https://rv-grid.com/guide/);
+- [VueJs](https://rv-grid.com/guide/vue3/);
+- [Svelte](https://rv-grid.com/guide/svelte/);
+- [React](https://rv-grid.com/guide/react/);
+- [Angular](https://rv-grid.com/guide/angular/).

@@ -41,7 +41,7 @@
   - Cell editor (use predefined or apply your own custom editors and cell types).
   - Cell properties (define custom properties for rendered cells).
 
-- **Column Types**: [More details](https://revolist.github.io/revogrid/guide/column.types.html)
+- **Column Types**: [More details](https://rv-grid.com/guide/column/#Column-Formats)
   - Text/String (default).
   - Number.
   - Select.
@@ -64,7 +64,7 @@
 
 - **Plugin System**: Create custom plugins or extend existing ones easily.
 
-- **Additional Customizations and Improvements**: Explore hundreds of other small customizations and improvements in [RevoGrid](https://revolist.github.io/revogrid).
+- **Additional Customizations and Improvements**: Explore hundreds of other small customizations and improvements in [RevoGrid](https://rv-grid.com/).
 
 <br>
 

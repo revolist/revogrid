@@ -16,7 +16,7 @@ export class Attribution {
     return (
       <Host>
         <a
-          href="https://revolist.github.io/revogrid"
+          href="https://rv-grid.com/guide/attribution"
           title="Made with ❤️ by Revolist OU Team"
           class="value"
         >

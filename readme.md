@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://revolist.github.io/revogrid">
+  <a href="https://rv-grid.com">
     <img src="./assets/logo.svg" alt="RevoGrid" height="150" />
   </a>
 </p>
@@ -20,7 +20,7 @@ Support Millions of cells and thousands of columns easy and efficiently for fast
 </p>
 
 <p align="center">
-  <a href="https://revolist.github.io/revogrid">Demo and API</a> •
+  <a href="https://rv-grid.com">Demo and API</a> •
   <a href="#key-features">Key Features</a> •
   <a href="#basic-usage">How To Use</a> •
   <a href="#installation">Installation</a> •
@@ -75,7 +75,7 @@ Support Millions of cells and thousands of columns easy and efficiently for fast
   - Cell editor (use predefined or apply your own custom editors and cell types).
   - Cell properties (define custom properties for rendered cells).
 
-- **Column Types**: [More details](https://revolist.github.io/revogrid/guide/column.types.html)
+- **Column Types**: [More details](https://rv-grid.com/guide/column/#Column-Formats)
   - Text/String (default).
   - Number.
   - Select.
@@ -98,7 +98,7 @@ Support Millions of cells and thousands of columns easy and efficiently for fast
 
 - **Plugin System**: Create custom plugins or extend existing ones easily.
 
-- **Additional Customizations and Improvements**: Explore hundreds of other small customizations and improvements in [RevoGrid](https://revolist.github.io/revogrid).
+- **Additional Customizations and Improvements**: Explore hundreds of other small customizations and improvements in [RevoGrid](https://rv-grid.com/).
 
 <br>
 
@@ -121,7 +121,7 @@ Support Millions of cells and thousands of columns easy and efficiently for fast
 ## Installation
 
 The library published as a [scoped NPM package](https://docs.npmjs.com/misc/scope) in the [NPMJS Revolist account](https://www.npmjs.com/org/revolist).
-[Check for more info on our demo side](https://revolist.github.io/revogrid/guide/installing.html).
+[Check for more info on our demo side](https://rv-grid.com/guide/installation).
 
 With NPM:
 
@@ -144,14 +144,13 @@ yarn add @revolist/revogrid;
 
 ## Framework
 
-In `<revo-grid />` we have developed a sophisticated Continuous Delivery (CD) system powered by GitHub Actions. This advanced system automatically builds and delivers grid versions across multiple frameworks, including React, Angular, Svelte, Vue 2, and Vue 3, with full type support. This ensures continuous version delivery, providing the latest grid enhancements and upgrades across all supported frameworks ✨
+In `<revo-grid />` we have developed a sophisticated Continuous Delivery (CD) system powered by GitHub Actions. This advanced system automatically builds and delivers grid versions across multiple frameworks, including React, Angular, Svelte, Vue 2, and Vue 3, with full type support. This ensures continuous version delivery, providing the latest grid enhancements and upgrades across all supported frameworks ✨. In the future (version 5), we are planning to switch to monorepo based development.
 
-- [JavaScript](https://revolist.github.io/revogrid/guide);
-- [VueJs](https://revolist.github.io/revogrid/guide/framework.vue.overview.html);
-- [Svelte](https://revolist.github.io/revogrid/guide/framework.svelte.overview.html);
-- [React](https://revolist.github.io/revogrid/guide/framework.react.overview.html);
-- [Angular](https://revolist.github.io/revogrid/guide/framework.angular.overview.html);
-- [Ember](docs/ember.md).
+- [JavaScript](https://rv-grid.com/guide/);
+- [VueJs](https://rv-grid.com/guide/vue3/);
+- [Svelte](https://rv-grid.com/guide/svelte/);
+- [React](https://rv-grid.com/guide/react/);
+- [Angular](https://rv-grid.com/guide/angular/).
 
 
 ## Basic Usage

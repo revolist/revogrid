@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://revolist.github.io/revogrid">
+  <a href="https://rv-grid.com">
     <img src="./assets/logo.svg" alt="RevoGrid" height="150" />
   </a>
 </p>
@@ -20,7 +20,7 @@ Support Millions of cells and thousands of columns easy and efficiently for fast
 </p>
 
 <p align="center">
-  <a href="https://revolist.github.io/revogrid">Demo and API</a> •
+  <a href="https://rv-grid.com">Demo and API</a> •
   <a href="#key-features">Key Features</a> •
   <a href="#basic-usage">How To Use</a> •
   <a href="#installation">Installation</a> •
