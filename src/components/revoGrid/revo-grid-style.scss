@@ -20,6 +20,9 @@ revo-grid {
   @include noSelect;
 
   .attribution {
+    $size: 4px;
+    $color: rgba(#266ae8, 0.6);
+
     position: absolute;
     top: 0;
     left: 0;
@@ -27,10 +30,10 @@ revo-grid {
     z-index: 100;
     width: 0;
     height: 0;
-    border-left: 6px solid #0049cf;
-    border-top: 6px solid #0049cf;
-    border-bottom: 6px solid transparent;
-    border-right: 6px solid transparent;
+    border-left: $size solid $color;
+    border-top: $size solid $color;
+    border-bottom: $size solid transparent;
+    border-right: $size solid transparent;
     cursor: pointer;
 
     .value {
@@ -47,7 +50,7 @@ revo-grid {
       letter-spacing: 0.3px;
       font-size: 11px;
       opacity: 0;
-      width: 6px;
+      width: $size;
       overflow: hidden;
       transition: opacity 0.5s ease-in-out, width 0.3s ease-in-out;
     }
