@@ -31,3 +31,6 @@ const items = [{ name: 'New Item', details: 'Item Description' }];
 grid.columns = columns;
 grid.source = items;
 ```
+
+
+[Example and guide](https://rv-grid.com/guide/)

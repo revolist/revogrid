@@ -1,4 +1,4 @@
-### Usage Angular [Example](https://codesandbox.io/s/data-vue-test-3wkzi?file=/src/App.vue)
+### Usage Angular
 
 With NPM:
 
@@ -12,62 +12,54 @@ With Yarn:
 yarn add @revolist/angular-datagrid;
 ```
 
+[Example and guide](https://rv-grid.com/guide/angular/)
+
+
+#### Standalone Components
+
+From Angular CLI v17+, the default behavior is to generate a new project with standalone components.
+
 ```ts
-// app.module.ts
-import { NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
-import { RevogridModule } from '@revolist/angular-datagrid';
+import "@angular/compiler";
+import { bootstrapApplication } from "@angular/platform-browser";
+import { AppComponent } from "./app/app.component";
 
-import { AppComponent } from './app.component';
-import { CellComponent } from './cell.component';
-import { EditorComponent } from './editor.component';
-
-@NgModule({
-  declarations: [
-    AppComponent,
-    CellComponent,
-    EditorComponent,
-  ],
-  imports: [
-    RevogridModule,
-    BrowserModule,
-  ],
+bootstrapApplication(AppComponent, {
   providers: [],
-  bootstrap: [AppComponent]
-})
-export class AppModule {}
+}).catch((err) =>
+  console.error(err)
+);
 ```
 
 ```ts
 // app.component.ts
-import { Component, Injector } from '@angular/core';
-import { ColumnRegular, Editors } from '@revolist/revogrid';
-import { Template, Editor } from '@revolist/angular-datagrid';
+
+import { Component } from "@angular/core";
+import { RevoGrid, Template, Editor, Editors, ColumnRegular } from "@revolist/angular-datagrid";
 import { CellComponent } from './cell.component';
 import { EditorComponent } from './editor.component';
 
+
+const MY_EDITOR = 'custom-editor';
+
 @Component({
   selector: 'app-root',
+  standalone: true,
+  imports: [RevoGrid, CellComponent, EditorComponent],
   template: `<revo-grid [source]="source" [columns]="columns" [editors]="editors"/>`,
 })
 export class AppComponent {
-  source: any[] = [];
-  columns: ColumnRegular[] = [];
-  editors: Editors = {};
-
-  constructor() {
-    const MY_EDITOR = 'custom-editor';
-    this.source = [
-      {
-        name: '1',
-        details: 'Item 1',
-      },
-      {
-        name: '2',
-        details: 'Item 2',
-      },
-    ];
-    this.columns = [
+    source = [
+    {
+      name: "1",
+      details: "Item 1",
+    },
+    {
+      name: "2",
+      details: "Item 2",
+    },
+  ];
+  columns: ColumnRegular[] = [
       {
         prop: 'name',
         name: 'First',
@@ -78,11 +70,8 @@ export class AppComponent {
         prop: 'details',
         name: 'Second',
       },
-    ];
-
-
-    this.editors = { [MY_EDITOR]: Editor(EditorComponent) };
-  }
+  ];
+  editors: Editors = { [MY_EDITOR]: Editor(EditorComponent) };
 }
 ```
 
@@ -94,6 +83,7 @@ import { ColumnDataSchemaModel } from '@revolist/revogrid';
 
 @Component({
   selector: 'app-cell',
+  standalone: true,
   template: '<span> {{value}} works!</span>',
 })
 export class CellComponent {
@@ -112,6 +102,7 @@ import { type EditorType } from '@revolist/angular-datagrid';
 
 @Component({
   selector: 'app-editor',
+  standalone: true,
   template: '<button (click)="testClick()">{{ props.val }} close!</button>',
 })
 export class EditorComponent {

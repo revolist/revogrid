@@ -157,11 +157,7 @@ In `<revo-grid />` we have developed a sophisticated Continuous Delivery (CD) sy
 
 RevoGrid functions as a web component. Simply place the component on your page and access its properties as you would with any other HTML element. It also offers multiple ways to integrate our grid into your project:
 
-- [Import the grid into your index.html file](./docs/indexhtml.md)
-- [Import as a module with lazy loading](./docs/indexmodule.md)
-- [Import using builders like Webpack with lazy loading](./docs/webpack.md)
-- [Import as an ESM module without lazy loading](./docs/custom.element.md)
-
+- [Import the grid into your project](https://rv-grid.com/guide/installation)
 
 ### Vanilla JS Grid Usage
 
@@ -197,27 +193,58 @@ grid.columns = columns;
 grid.source = items;
 ```
 
+
+[Example and guide](https://rv-grid.com/guide/)
+
+
 ## Versions
 
 - **2.0+**: Introduced the plugin system, grouping, sorting, and filtering.
-- **3.0+**: Breaking changes introduced. See the [migration guide](./docs/guide/migration.md).
-This version features new component loading, ESM modules, Bootstrap support, and much [more](./docs/guide/migration.md).
-- **4.0+**: Breaking changes introduced. See the [migration guide](./docs/guide/migration.md). In this version, we rethought our framework approach, updated typings, fixed major issues, updated core and significantly improved overall performance. The grid is now much faster, with better plugin support and full framework support for Angular, React, and Vue, along with partial support for Ember and Svelte. Redesigned the documentation, and added more examples.
+- **3.0+**: Breaking changes introduced:
+    -   Removed the redundant viewport component.
+    -   Renamed classes to support Bootstrap and other libraries:
+        -   `row` -> `rgRow`
+        -   `col` -> `rgCol`
+        -   `data-cell` -> `rgCell`
+        -   `data-header-cell` -> `rgHeaderCell`
+    -   Migrated all method names to lowercase to align with modern event naming conventions. For example, `afterEdit` is now `afteredit`. Check the API for details.
+    -   Added support for pure ESM modules to enable the use of the grid in all modern frontend tooling like Vite, Parcel, etc. You can now import custom elements without lazy loading. Note that you are responsible for polyfills.
 
 
+- **4.0+**: Breaking changes introduced. See the [migration guide](https://rv-grid.com/guide/migration). 
 
-## Sponsors
+-   Redesigned type support:
+        - Removed deprecated namespaces:
+            - **Before**: `RevoGrid.ColumnDataSchemaRegular`
+            - **Now**: `ColumnDataSchemaRegular`;
+        - Improved type import:
+            - **Before**: `import { RevoGrid } from '@revolist/revogrid/dist/types/interfaces'`
+            - **Now**: `import { ColumnDataSchemaRegular } from '@revolist/revogrid'`.
+        - Changed viewport type names everywhere. For example, before: `rowDefinitions: [{ type: "row", index: 0, size: 145 }]`, after: `rowDefinitions: [{ type: "rgRow", index: 0, size: 145 }]`.
+    -   Updated [event](https://rv-grid.com/guide/api/revoGrid.html#Events) naming convention. Review your [event](https://rv-grid.com/guide/api/revoGrid.html#Events) usage. [Event names](https://rv-grid.com/guide/api/revoGrid.html#Events) are all lowercase now and are aligned with modern event naming conventions. For example, `afterEdit` -> `afteredit`.
 
-We would like to extend our heartfelt gratitude to our sponsor for their generous support. Their contributions help us maintain and develop RevoGrid, ensuring continuous improvements and updates. If you are using RevoGrid in your project and would like to support its development, consider becoming a sponsor.
+-   **Major improvements**:
+    -   Rethought the entire framework approach. Introduced Pro version with advance support and pro features.
+    -   Introduced slot support.
+    -   Updated scrolling system for better mobile support.
+    -   Advance template support. Introduced `additionalData` for templates and editors. `Prop` gives access to parent/root app context.
+    -   Redesigned the documentation.
+    -   Fixed major issues and significantly improved overall performance, making the grid multiple time faster.
+    -   Enhanced plugin support - now with full access to grid providers.
+    -   Updated documentation.
+    -   Provided full framework support and native render for  Angular, React, Svelte and Vue.
 
-### Our Sponsors
+
+## Our Sponsors
+
+We would like to extend our heartfelt gratitude to our sponsors for their generous support. Their contributions help us maintain and develop RevoGrid, ensuring continuous improvements and updates.
 
 [![Altruistiq](https://cdn.prod.website-files.com/62cd69e08130a1a33f5ef900/6310b4d500e971695db5e9c3_615b5db69ce8931a276e5ed2_Social_Icons_AQ_3_32x32.png)](https://altruistiq.com)
 
 
 ### Become a Sponsor
 
-If you or your company would like to support the ongoing development of RevoGrid, please consider becoming a sponsor. Your support will help us continue to improve the project and provide the best possible tool for the community.
+If you or your company would like to support the ongoing development of RevoGrid, please consider becoming a sponsor or use or [Pro version](https://rv-grid.com/pro/). Your support will help us continue to improve the project and provide the best possible tool for the community.
 
 [![Sponsor Us](https://img.shields.io/badge/Sponsor%20Us-%F0%9F%92%96-brightgreen)](https://opencollective.com/revogrid)
 

@@ -1,4 +1,4 @@
-### Usage React [Example](https://codesandbox.io/s/data-vue-test-3wkzi?file=/src/App.vue)
+### Usage React
 
 With NPM:
 
@@ -14,21 +14,13 @@ yarn add @revolist/react-datagrid;
 
 ```tsx
 // App.tsx
-import { RevoGrid, Template, Editor, type EditorType } from '@revolist/react-datagrid';
-import { ColumnDataSchemaModel, Editors } from '@revolist/revogrid';
-import { createContext, useContext } from 'react';
-
-/**
- * Showcase
- */
-export const LevelContext = createContext('My custom context to pass to cell');
+import { RevoGrid, Template, Editor, type EditorType, type ColumnDataSchemaModel, type Editors } from '@revolist/react-datagrid';
 
 /**
  * Custom cell component
  */
-const Cell = ({ model, prop }: ColumnDataSchemaModel) => {
-  const level = useContext(LevelContext);
-  return <div><strong title={level}>{model[prop]}</strong></div>;
+const Cell = ({ model, prop, value }: ColumnDataSchemaModel) => {
+  return <div><strong>{value}</strong></div>;
 };
 
 /**
@@ -73,3 +65,6 @@ function App() {
 export default App
 
 ```
+
+[Example and guide](https://rv-grid.com/guide/react/)
+

@@ -1,4 +1,4 @@
-### Usage Vue 3 [Example](https://codesandbox.io/s/data-vue-test-3wkzi?file=/src/App.vue)
+### Usage Vue 3
 
 With NPM:
 
@@ -33,18 +33,19 @@ import { provide, readonly, ref } from 'vue';
 /**
  * Import Revogrid, Renderer and Editor for Vue
  */
-import Grid, { VGridVueEditor, VGridVueTemplate } from '@revolist/vue3-datagrid';
+import Grid, { VGridVueEditor, VGridVueTemplate, Editors } from '@revolist/vue3-datagrid';
 
 import Editor from './Editor.vue';
 import Cell from './Cell.vue';
-import { Editors } from '@revolist/revogrid';
 
 const count = ref(0)
 provide('read-only-count', readonly(count));
 
 const MY_EDITOR = 'custom-editor';
+
 // Vue column editor register
 const gridEditors: Editors = { [MY_EDITOR]: VGridVueEditor(Editor) };
+
 // Define columns
 const columns = [
   {
@@ -91,7 +92,7 @@ function testAction(e: CustomEvent) {
 
 <script lang="ts" setup>
 import { defineProps, ref, inject } from 'vue';
-import type { ColumnDataSchemaModel } from '@revolist/revogrid';
+import type { ColumnDataSchemaModel } from '@revolist/vue3-datagrid';
 
 const props = defineProps<ColumnDataSchemaModel>();
 const cell = ref<HTMLElement>();
@@ -136,3 +137,6 @@ export default defineComponent({
 </script>
 
 ```
+
+
+[Example and guide](https://rv-grid.com/guide/vue3/)

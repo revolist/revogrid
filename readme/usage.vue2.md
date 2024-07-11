@@ -1,4 +1,4 @@
-### Usage Vue 2 [Example](https://codesandbox.io/s/data-vue-test-3wkzi?file=/src/App.vue)
+### Usage Vue 2
 
 With NPM:
 
@@ -53,3 +53,6 @@ export default {
 };
 </script>
 ```
+
+
+[Example and guide](https://rv-grid.com/guide/vue2/)

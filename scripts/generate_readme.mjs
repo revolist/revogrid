@@ -37,23 +37,23 @@ function main() {
     let output = 'README.md';
     switch (pkg) {
       case 'angular':
-        files.push('usage.angular.md');
+        files.push('usage.angular.md', 'usage.deprecated.md');
         output = `packages/${pkg}/${output}`;
         break;
       case 'react':
-        files.push('usage.react.md');
+        files.push('usage.react.md', 'usage.deprecated.md');
         output = `packages/${pkg}/${output}`;
         break;
       case 'svelte':
-        files.push('usage.svelte.md');
+        files.push('usage.svelte.md', 'usage.deprecated.md');
         output = `packages/${pkg}/${output}`;
         break;
       case 'vue2':
-        files.push('usage.vue2.md');
+        files.push('usage.vue2.md', 'usage.deprecated.md');
         output = `packages/${pkg}/${output}`;
         break;
       case 'vue3':
-        files.push('usage.vue3.md');
+        files.push('usage.vue3.md', 'usage.deprecated.md');
         output = `packages/${pkg}/${output}`;
         break;
       default:
