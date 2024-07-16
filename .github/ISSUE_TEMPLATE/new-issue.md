@@ -16,4 +16,4 @@ Search the repo and ensure your issue doesn't already exist. If so, it may:
 A clear and concise description of what the issue is.
 
 **To Reproduce**
-Create a minimal reproduction to illustrate the issue. Here's a [template](https://codesandbox.io/s/revo-grid-vanilla-js-7cq7c) to start you off.
+Create a minimal reproduction to illustrate the issue. Here's a [template](https://codesandbox.io/p/sandbox/rg-start-standalone-dq2mjk) to start you off.
