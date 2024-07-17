@@ -158,6 +158,14 @@ export class OverlaySelection {
   @Event({ eventName: 'beforecellfocusinit', cancelable: true })
   beforeFocusCell: EventEmitter<BeforeSaveDataDetails>;
 
+
+  /**
+   * Fired when change of viewport happens.
+   * Usually when we switch between pinned regions.
+   */
+  @Event({ eventName: 'beforenextvpfocus', cancelable: true })
+  beforeNextViewportFocus: EventEmitter<Cell>;
+
   /**
    * Set edit cell.
    */
@@ -263,6 +271,7 @@ export class OverlaySelection {
   private autoFillService: AutoFillService | null = null;
   private orderEditor: HTMLRevogrOrderEditorElement;
   private revogrEdit: HTMLRevogrEditElement | null = null;
+  private unsubscribeSelectionStore: { (): void }[] = [];
   // #endregion
 
   // #region Listeners
@@ -332,14 +341,28 @@ export class OverlaySelection {
   }
   // #endregion
 
-  /** Selection & Keyboard */
+  /**
+   * Selection & Keyboard
+   */
   @Watch('selectionStore') selectionServiceSet(
     s: Observable<SelectionStoreState>,
   ) {
+    // clear subscriptions
+    this.unsubscribeSelectionStore.forEach(v => v());
+    this.unsubscribeSelectionStore.length = 0;
+    this.unsubscribeSelectionStore.push(s.onChange('nextFocus', (v) => this.doFocus(v, v)));
+
     this.keyboardService = new KeyboardService({
       selectionStore: s,
       range: r => this.triggerRangeEvent(r),
-      focusNext: (f, next) => this.doFocus(f, f, next),
+      focus: (f, changes, focusNextViewport) => {
+        if (focusNextViewport) {
+          this.beforeNextViewportFocus.emit(f);
+          return false;
+        } else {
+          return this.doFocus(f, f, changes);
+        }
+      },
       change: val => {
         if (this.readonly) {
           return;
@@ -398,6 +421,9 @@ export class OverlaySelection {
   }
 
   disconnectedCallback() {
+    // clear subscriptions
+    this.unsubscribeSelectionStore.forEach(v => v());
+    this.unsubscribeSelectionStore.length = 0;
     this.columnService?.destroy();
   }
 
@@ -550,20 +576,20 @@ export class OverlaySelection {
   /**
    * Executes the focus operation on the specified range of cells.
    */
-  private doFocus(focus: Cell, end: Cell, next?: Partial<Cell>) {
+  private doFocus(focus: Cell, end: Cell, changes?: Partial<Cell>) {
     const { defaultPrevented } = this.beforeFocusCell.emit(
       this.columnService.getSaveData(focus.y, focus.x),
     );
     if (defaultPrevented) {
       return false;
     }
-    const evData = {
+    const evData: FocusRenderEvent = {
       range: {
         ...focus,
         x1: end.x,
         y1: end.y,
       },
-      next,
+      next: changes,
       ...this.types,
     };
     const applyEvent = this.applyFocus.emit(evData);

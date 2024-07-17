@@ -29,7 +29,7 @@ type Config = {
   cancel(): void;
 
   clearCell(): void;
-  focusNext(focus: Cell, next: Partial<Cell>): boolean;
+  focus(focus: Cell, changes: Partial<Cell>, focusNextViewport?: number): boolean;
 
   getData(): any;
   internalPaste(): void;
@@ -164,15 +164,23 @@ export class KeyboardService {
     if (!data) {
       return false;
     }
+    const eData: EventData = this.sv.getData();
     if (isMulti) {
-      const eData: EventData = this.sv.getData();
       if (isAfterLast(data.end, eData.lastCell) || isBeforeFirst(data.start)) {
         return false;
       }
       const range = getRange(data.start, data.end);
       return this.sv.range(range);
     }
-    return this.sv.focusNext(data.start, changes);
+    return this.sv.focus(
+      data.start,
+      changes,
+      isAfterLast(data.start, eData.lastCell)
+        ? 1
+        : isBeforeFirst(data.start)
+          ? -1
+          : 0,
+    );
   }
 
   /** Monitor key direction changes */

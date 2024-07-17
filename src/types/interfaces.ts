@@ -749,7 +749,7 @@ export interface FocusRenderEvent extends AllDimensionType {
   range: RangeArea;
 
   /**
-   * Represents the next cell to focus.
+   * Changes for the next cell to focus. @example { y: -1 }
    */
   next?: Partial<Cell>;
 }

@@ -15,6 +15,7 @@ function defaultState(): SelectionStoreState {
     focus: null,
     edit: null,
     lastCell: null,
+    nextFocus: null,
   };
 }
 
@@ -49,6 +50,10 @@ export class SelectionStore {
         tempRange: null,
       });
     }
+  }
+
+  setNextFocus(focus: Cell) {
+    setStore(this.store, { nextFocus: focus });
   }
 
   setTempArea(range: TempRange | null) {

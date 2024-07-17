@@ -10,13 +10,38 @@ import {
 
 export type RowIndex = number;
 export type ColIndex = number;
+
+/**
+ * Represents the state of the selection store.
+ * It contains information about the selection range, temporary range,
+ * focused cell, editing cell, last focused cell, and next cell to focus.
+ */
 export type SelectionStoreState = {
   range: RangeArea | null;
+  /**
+   * Temporary range selection area
+   */
   tempRange: RangeArea | null;
+  /**
+   * Type of the temporary range selection
+   */
   tempRangeType: string | null;
+  /**
+   * Focused cell coordinate
+   */
   focus: Cell | null;
+  /**
+   * Editing cell store
+   */
   edit: EditCellStore | null;
+  /**
+   * Last cell which was focused
+   */
   lastCell: Cell | null;
+  /**
+   * Next cell to focus
+   */
+  nextFocus: Cell | null;
 };
 export type RangeArea = {
   x: ColIndex;

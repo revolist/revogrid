@@ -1016,6 +1016,7 @@ declare global {
         "beforepasteregion": any;
         "celleditapply": BeforeSaveDataDetails;
         "beforecellfocusinit": BeforeSaveDataDetails;
+        "beforenextvpfocus": Cell1;
         "setedit": BeforeEdit;
         "beforeapplyrange": FocusRenderEvent;
         "beforesetrange": any;
@@ -1922,6 +1923,10 @@ declare namespace LocalJSX {
           * Before key down event proxy, used to prevent key down trigger. If you have some custom behaviour event, use this event to check if it wasn't processed by internal logic. Call preventDefault().
          */
         "onBeforekeyup"?: (event: RevogrOverlaySelectionCustomEvent<KeyboardEvent>) => void;
+        /**
+          * Fired when change of viewport happens. Usually when we switch between pinned regions.
+         */
+        "onBeforenextvpfocus"?: (event: RevogrOverlaySelectionCustomEvent<Cell1>) => void;
         /**
           * Before region paste happened.
          */

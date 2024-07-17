@@ -1420,6 +1420,7 @@ export class RevoGridComponent {
             applyChangesOnClose={this.applyOnClose}
             additionalData={this.additionalData}
             slot={data.slot}
+            onBeforenextvpfocus={(e) => this.selectionStoreConnector.beforeNextFocusCell(e.detail)}
             onCanceledit={() => this.selectionStoreConnector.setEdit(false)}
             onSetedit={({ detail }) => {
               const event = this.beforeeditstart.emit(detail);
