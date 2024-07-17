@@ -192,6 +192,14 @@ export class KeyboardService {
     if (DIRECTION_CODES.includes(e.code)) {
       e.preventDefault();
     }
+
+    if (e.shiftKey) {
+      switch (e.code) {
+        case codesLetter.TAB:
+          return { changes: { x: -1 }, isMulti: false };
+      }
+    }
+  
     switch (e.code) {
       case codesLetter.ARROW_UP:
         return { changes: { y: -1 }, isMulti };
