@@ -72,18 +72,18 @@ export const FILTER_TRIMMED_TYPE = 'filter';
 export const FILTER_CONFIG_CHANGED_EVENT = 'filterconfigchanged';
 
 export class FilterPlugin extends BasePlugin {
-  private pop: HTMLRevogrFilterPanelElement;
-  private filterCollection: FilterCollection = {};
-  private multiFilterItems: MultiFilterItem = {};
-  private possibleFilters: Record<string, string[]> = { ...filterTypes };
-  private possibleFilterNames: Record<string, string> = { ...filterNames };
-  private possibleFilterEntities: Record<string, LogicFunction> = {
+  pop: HTMLRevogrFilterPanelElement;
+  filterCollection: FilterCollection = {};
+  multiFilterItems: MultiFilterItem = {};
+  possibleFilters: Record<string, string[]> = { ...filterTypes };
+  possibleFilterNames: Record<string, string> = { ...filterNames };
+  possibleFilterEntities: Record<string, LogicFunction> = {
     ...filterEntities,
   };
-  private filterProp = FILTER_PROP;
+  filterProp = FILTER_PROP;
 
   constructor(
-    protected revogrid: HTMLRevoGridElement,
+    public revogrid: HTMLRevoGridElement,
     providers: PluginProviders,
     uiid: string,
     config?: ColumnFilterConfig,
@@ -149,7 +149,7 @@ export class FilterPlugin extends BasePlugin {
     ];
   }
 
-  private initConfig(config: ColumnFilterConfig) {
+  initConfig(config: ColumnFilterConfig) {
     if (config.multiFilterItems) {
       this.multiFilterItems = { ...config.multiFilterItems };
     }
@@ -216,7 +216,7 @@ export class FilterPlugin extends BasePlugin {
     }
   }
 
-  private async headerclick(e: HeaderEvent) {
+  async headerclick(e: HeaderEvent) {
     const el = e.detail.originalEvent?.target as HTMLElement;
     if (!isFilterBtn(el)) {
       return;
@@ -248,7 +248,7 @@ export class FilterPlugin extends BasePlugin {
     });
   }
 
-  private getColumnFilter(
+  getColumnFilter(
     type?: boolean | string | string[],
   ): Record<string, string[]> {
     let filterType = 'string';
@@ -272,12 +272,12 @@ export class FilterPlugin extends BasePlugin {
     return { [filterType]: this.possibleFilters[filterType] };
   }
 
-  private isValidType(type: any): type is string {
+  isValidType(type: any): type is string {
     return !!(typeof type === 'string' && this.possibleFilters[type]);
   }
 
   // called on internal component change
-  private async onFilterChange(filterItems: MultiFilterItem) {
+  async onFilterChange(filterItems: MultiFilterItem) {
     this.multiFilterItems = filterItems;
     this.runFiltering();
   }
@@ -336,7 +336,7 @@ export class FilterPlugin extends BasePlugin {
     await this.runFiltering();
   }
 
-  private async runFiltering() {
+  async runFiltering() {
     const collection: FilterCollection = {};
 
     // handle old filterCollection to return the first filter only (if any) from multiFilterItems
@@ -374,14 +374,14 @@ export class FilterPlugin extends BasePlugin {
     );
   }
 
-  private async getData() {
+  async getData() {
     return {
       source: await this.revogrid.getSource(),
       columns: await this.revogrid.getColumns(),
     };
   }
 
-  private getRowFilter(rows: DataType[], filterItems: MultiFilterItem) {
+  getRowFilter(rows: DataType[], filterItems: MultiFilterItem) {
     const propKeys = Object.keys(filterItems);
 
     const trimmed: Record<number, boolean> = {};

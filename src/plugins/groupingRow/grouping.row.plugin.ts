@@ -50,8 +50,8 @@ export default class GroupingRowPlugin extends BasePlugin {
   }
 
   constructor(
-    protected revogrid: HTMLRevoGridElement,
-    protected providers: PluginProviders,
+    public revogrid: HTMLRevoGridElement,
+    public providers: PluginProviders,
   ) {
     super(revogrid, providers);
   }

@@ -63,7 +63,7 @@ export default class ColumnPlugin extends BasePlugin {
   private dragData: EventData | null = null;
   private readonly orderUi: ColumnOrderHandler;
   protected readonly localSubscriptions: LocalSubscriptions = {};
-  constructor(protected revogrid: HTMLRevoGridElement, protected providers: PluginProviders) {
+  constructor(public revogrid: HTMLRevoGridElement, public providers: PluginProviders) {
     super(revogrid, providers);
     this.orderUi = new ColumnOrderHandler();
     revogrid.appendChild(this.orderUi.render());
@@ -208,7 +208,7 @@ export default class ColumnPlugin extends BasePlugin {
   /**
    * Clearing subscription
    */
-  protected clearSubscriptions() {
+  clearSubscriptions() {
     super.clearSubscriptions();
     this.clearLocalSubscriptions();
   }

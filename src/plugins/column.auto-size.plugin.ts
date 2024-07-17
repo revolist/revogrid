@@ -65,20 +65,20 @@ enum ColumnAutoSizeMode {
 }
 
 export default class AutoSizeColumnPlugin extends BasePlugin {
-  private autoSizeColumns: Partial<AutoSizeColumns> | null = null;
-  private readonly letterBlockSize: number;
+  autoSizeColumns: Partial<AutoSizeColumns> | null = null;
+  readonly letterBlockSize: number;
 
   /** for config option when @preciseSize enabled */
-  private readonly precsizeCalculationArea: HTMLElement;
+  readonly precsizeCalculationArea: HTMLElement;
 
   /** for edge case when no columns defined before data */
-  private dataResolve: Resolve | null = null;
-  private dataReject: Reject | null = null;
+  dataResolve: Resolve | null = null;
+  dataReject: Reject | null = null;
 
   constructor(
     revogrid: HTMLRevoGridElement,
-    protected providers: PluginProviders,
-    private config?: AutoSizeColumnConfig,
+    public providers: PluginProviders,
+    public config?: AutoSizeColumnConfig,
   ) {
     super(revogrid, providers);
     this.letterBlockSize = config?.letterBlockSize || LETTER_BLOCK_SIZE;
@@ -134,7 +134,7 @@ export default class AutoSizeColumnPlugin extends BasePlugin {
     }
   }
 
-  private async setSource(source: DataType[]): Promise<void> {
+  async setSource(source: DataType[]): Promise<void> {
     let autoSize = this.autoSizeColumns;
     if (this.dataReject) {
       this.dataReject();
@@ -168,7 +168,7 @@ export default class AutoSizeColumnPlugin extends BasePlugin {
     });
   }
 
-  private getLength(len?: any): number {
+  getLength(len?: any): number {
     const padding = 15;
     if (!len) {
       return 0;
@@ -187,7 +187,7 @@ export default class AutoSizeColumnPlugin extends BasePlugin {
     }
   }
 
-  private afteredit(e: EditEvent) {
+  afteredit(e: EditEvent) {
     let data: Record<string, DataType>;
     if (this.isRangeEdit(e)) {
       data = e.data;
@@ -219,7 +219,7 @@ export default class AutoSizeColumnPlugin extends BasePlugin {
     });
   }
 
-  private afterEditAll(e: EditEvent) {
+  afterEditAll(e: EditEvent) {
     const props: Record<any, true> = {};
     if (this.isRangeEdit(e)) {
       each(e.data, r => each(r, (_v, p) => (props[p] = true)));
@@ -241,7 +241,7 @@ export default class AutoSizeColumnPlugin extends BasePlugin {
     });
   }
 
-  private getColumnSize(index: number, type: DimensionCols): number {
+  getColumnSize(index: number, type: DimensionCols): number {
     const rgCol = this.autoSizeColumns[type][index];
     if (!rgCol) {
       return 0;
@@ -263,7 +263,7 @@ export default class AutoSizeColumnPlugin extends BasePlugin {
     );
   }
 
-  private columnSet(columns: ColumnItems) {
+  columnSet(columns: ColumnItems) {
     for (let t of columnTypes) {
       const type = t as DimensionCols;
       const cols = columns[type];
@@ -290,16 +290,16 @@ export default class AutoSizeColumnPlugin extends BasePlugin {
     }
   }
 
-  private clearPromise() {
+  clearPromise() {
     this.dataResolve = null;
     this.dataReject = null;
   }
 
-  private isRangeEdit(e: EditEvent): e is BeforeRangeSaveDataDetails {
+  isRangeEdit(e: EditEvent): e is BeforeRangeSaveDataDetails {
     return !!(e as BeforeRangeSaveDataDetails).data;
   }
 
-  private initiatePresizeElement(): HTMLElement {
+  initiatePresizeElement(): HTMLElement {
     const styleForFontTest: Partial<CSSStyleDeclaration> = {
       position: 'absolute',
       fontSize: '14px',

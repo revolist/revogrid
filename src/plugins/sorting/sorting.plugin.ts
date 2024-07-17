@@ -34,18 +34,18 @@ type ColumnSetEvent = {
 
 export default class SortingPlugin extends BasePlugin {
   // sorting order per column
-  private sorting: SortingOrder | null = null;
+  sorting: SortingOrder | null = null;
 
   // sorting function per column, multiple columns sorting supported
-  private sortingFunc: SortingOrderFunction | null = null;
-  private sortingPromise: (() => void) | null = null;
-  private postponeSort = debounce(
+  sortingFunc: SortingOrderFunction | null = null;
+  sortingPromise: (() => void) | null = null;
+  postponeSort = debounce(
     async (order: SortingOrder, comparison: SortingOrderFunction) =>
       this.runSorting(order, comparison),
     50,
   );
 
-  private async runSorting(
+  async runSorting(
     order: SortingOrder,
     comparison: SortingOrderFunction,
   ) {
@@ -55,7 +55,7 @@ export default class SortingPlugin extends BasePlugin {
   }
 
   constructor(
-    protected revogrid: HTMLRevoGridElement,
+    public revogrid: HTMLRevoGridElement,
     providers: PluginProviders,
   ) {
     super(revogrid, providers);
@@ -111,7 +111,7 @@ export default class SortingPlugin extends BasePlugin {
     this.addEventListener('beforeheaderclick', headerclick);
   }
 
-  private startSorting(order: SortingOrder, sortingFunc: SortingOrderFunction) {
+  startSorting(order: SortingOrder, sortingFunc: SortingOrderFunction) {
     if (!this.sortingPromise) {
       this.revogrid.jobsBeforeRender.push(
         new Promise<void>(resolve => {
@@ -122,7 +122,7 @@ export default class SortingPlugin extends BasePlugin {
     this.postponeSort(order, sortingFunc);
   }
 
-  private getComparer(column: ColumnRegular, order: Order): CellCompareFunc {
+  getComparer(column: ColumnRegular, order: Order): CellCompareFunc {
     const cellCmp: CellCompareFunc =
       column?.cellCompare?.bind({ order }) || this.defaultCellCompare;
     if (order == 'asc') {

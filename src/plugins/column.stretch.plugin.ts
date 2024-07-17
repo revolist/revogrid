@@ -28,7 +28,7 @@ export default class StretchColumn extends BasePlugin {
   private readonly scrollSize;
   constructor(
     revogrid: HTMLRevoGridElement,
-    protected providers: PluginProviders,
+    public providers: PluginProviders,
   ) {
     super(revogrid, providers);
 

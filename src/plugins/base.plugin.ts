@@ -8,14 +8,14 @@ type WatchConfig = { immediate: boolean };
  * Extend this class to create plugin
  */
 export class BasePlugin implements PluginBaseComponent {
-  protected readonly subscriptions: Record<string, (...args: any[]) => void> = {};
-  constructor(protected revogrid: HTMLRevoGridElement, protected providers: PluginProviders) {}
+  readonly subscriptions: Record<string, (...args: any[]) => void> = {};
+  constructor(public revogrid: HTMLRevoGridElement, public providers: PluginProviders) {}
   /**
    *
    * @param eventName - event name to subscribe to in revo-grid component (e.g. 'beforeheaderclick')
    * @param callback - callback function for event
    */
-  protected addEventListener(
+  addEventListener(
     eventName: string,
     callback: (e: CustomEvent) => void,
   ) {
@@ -31,7 +31,7 @@ export class BasePlugin implements PluginBaseComponent {
    * @param callback - callback function
    * @param immediate - trigger callback immediately with current value
    */
-  protected watch<T extends any>(
+  watch<T extends any>(
     prop: string,
     callback: (arg: T) => boolean | void,
     { immediate }: Partial<WatchConfig> = { immediate: false },
@@ -64,7 +64,7 @@ export class BasePlugin implements PluginBaseComponent {
    * Remove event listener
    * @param eventName
    */
-  protected removeEventListener(eventName: string) {
+  removeEventListener(eventName: string) {
     this.revogrid.removeEventListener(eventName, this.subscriptions[eventName]);
     delete this.subscriptions[eventName];
   }
@@ -73,7 +73,7 @@ export class BasePlugin implements PluginBaseComponent {
    * Emit event from revo-grid component
    * Event can be cancelled by calling event.preventDefault() in callback
    */
-  protected emit(eventName: string, detail?: any) {
+  emit(eventName: string, detail?: any) {
     const event = new CustomEvent(eventName, { detail, cancelable: true });
     this.revogrid.dispatchEvent(event);
     return event;
@@ -82,7 +82,7 @@ export class BasePlugin implements PluginBaseComponent {
   /**
    * Clear all subscriptions
    */
-  protected clearSubscriptions() {
+  clearSubscriptions() {
     for (let type in this.subscriptions) {
       this.removeEventListener(type);
     }
