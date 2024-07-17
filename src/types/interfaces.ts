@@ -693,7 +693,7 @@ export interface BeforeRowRenderEvent<T = any> extends AllDimensionType {
   /**
    * Represents the data item being rendered.
    */
-  dataItem: T;
+  model: T;
 
   /**
    * Represents the item being rendered.

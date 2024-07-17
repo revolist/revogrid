@@ -109,6 +109,7 @@ export class RevogrData {
    * Before each row render
    */
   @Event() beforerowrender: EventEmitter<BeforeRowRenderEvent>;
+  
   /**
    * When data render finished for the designated type
    */
@@ -316,7 +317,7 @@ export class RevogrData {
       this.beforerowrender.emit({
         node: row,
         item: rgRow,
-        dataItem,
+        model: dataItem,
         colType: this.columnService.type,
         rowType: this.type,
       });
