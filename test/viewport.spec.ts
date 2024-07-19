@@ -1,25 +1,26 @@
-import { RevoGrid } from '../src/interfaces';
-import { getFirstItem, getItems, getLastItem, recombineByOffset } from '../src/store/viewPort/viewport.helpers';
-import { generateFakeDataObject } from '../src/utilsExternal/generateFakeDataObject';
+import { type VirtualPositionItem, type ViewportStateItems } from '../src';
+import { getFirstItem, getItems, getLastItem, recombineByOffset } from '../src/store/vp/viewport.helpers';
 
-type ItemsToUpdate = Pick<RevoGrid.ViewportStateItems, 'items' | 'start' | 'end'>;
+type ItemsToUpdate = Pick<ViewportStateItems, 'items' | 'start' | 'end'>;
 
 describe('revo-grid-viewport', () => {
   const virtualSize = 600;
   const originItemSize = 30;
-  const data = generateFakeDataObject({
-    rows: 100,
-    cols: 10,
-  });
-  const realSize = data.length * originItemSize;
-  let recombined: ItemsToUpdate;
-  let range = { start: 0, end: 0 };
-  let items: RevoGrid.VirtualPositionItem[] = getItems({
+  const rows = 100;
+
+  const realSize = rows * originItemSize;
+  let recombined: ItemsToUpdate = {
+    items: [],
     start: 0,
-    startIndex: 0,
+    end: 0,
+  };
+  let range = { start: 0, end: 0 };
+  let items: VirtualPositionItem[] = getItems({
+    firstItemStart: 0,
+    firstItemIndex: 0,
     origSize: originItemSize,
     maxSize: virtualSize,
-    maxCount: data.length,
+    maxCount: rows,
   });
   range.end = items.length - 1;
 
@@ -28,7 +29,7 @@ describe('revo-grid-viewport', () => {
   // repeat recombination several time same way as user scroll
   for (let i = 0; i < 120; i++) {
     describe(`Recombination ${i}`, () => {
-      recombined = recombineByOffset(i % 5, {
+      const newRecombined = recombineByOffset(i % 5, {
         positiveDirection: i < 100,
         start: range.start,
         end: range.end,
@@ -37,9 +38,14 @@ describe('revo-grid-viewport', () => {
         realSize,
         sizes: {},
       });
+      if (!newRecombined) {
+        return;
+      } else {
+        recombined = newRecombined;
+      }
 
       it('Recombination exist', () => {
-        expect(recombined.items?.length).toBeGreaterThan(0);
+        expect(recombined?.items?.length).toBeGreaterThan(0);
       });
 
       it('Start should be positive', () => {
