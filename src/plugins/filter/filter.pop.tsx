@@ -30,6 +30,10 @@ export type MultiFilterItem = {
 export type ShowData = {
   x: number;
   y: number;
+  /**
+   * Auto correct position if it is out of document bounds
+   */
+  autoCorrect?: boolean;
 } & FilterItem;
 
 const defaultType: FilterType = 'none';
@@ -190,6 +194,15 @@ export class FilterPanel {
       </div>
     );
   }
+
+  private autoCorrect(el: HTMLElement) {
+    const pos = el.getBoundingClientRect();
+    const maxLeft = window.innerWidth - pos.width;
+
+    if (pos.left > maxLeft && el.offsetLeft) {
+      el.style.left = `${maxLeft - el.parentElement.getBoundingClientRect().left}px`;
+    }
+  }
   
   render() {
     if (!this.changes) {
@@ -204,7 +217,7 @@ export class FilterPanel {
     const capts = Object.assign(this.filterCaptionsInternal, this.filterCaptions);
 
     return (
-      <Host style={style}>
+      <Host style={style} ref={(el) => { this.changes.autoCorrect && this.autoCorrect(el) }}>
         <label>{capts.title}</label>
         <div class="filter-holder">{this.getFilterItemsList()}</div>
 
