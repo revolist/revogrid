@@ -1,8 +1,8 @@
 export const packageDirs = [
+  'packages/vue3',
   'packages/angular',
   'packages/react',
   'packages/svelte',
   'packages/vue2',
-  'packages/vue3',
   'docs',
 ];
