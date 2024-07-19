@@ -59,6 +59,9 @@ export class KeyboardService {
         case codesLetter.ESCAPE:
           this.sv.cancel();
           break;
+        case codesLetter.TAB:
+          await this.keyChangeSelection(e, canRange);
+          break;
       }
       return;
     }
