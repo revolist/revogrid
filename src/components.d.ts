@@ -740,7 +740,7 @@ declare global {
         "beforerangeedit": BeforeRangeSaveDataDetails;
         "afteredit": AfterEditEvent;
         "beforeautofill": ChangedRange;
-        "beforeange": ChangedRange;
+        "beforerange": ChangedRange;
         "afterfocus": {
     model: any;
     column: ColumnRegular;
@@ -1300,10 +1300,6 @@ declare namespace LocalJSX {
          */
         "onAftertrimmed"?: (event: RevoGridCustomEvent<any>) => void;
         /**
-          * Triggered before range applied. Use e.preventDefault() to prevent range.
-         */
-        "onBeforeange"?: (event: RevoGridCustomEvent<ChangedRange>) => void;
-        /**
           * Before data apply on any source type. Can be source from pinned and main viewport. You can override data source here
          */
         "onBeforeanysource"?: (event: RevoGridCustomEvent<{
@@ -1358,6 +1354,10 @@ declare namespace LocalJSX {
           * Emmited before the grid is rendered.
          */
         "onBeforegridrender"?: (event: RevoGridCustomEvent<any>) => void;
+        /**
+          * Triggered before range applied. Use e.preventDefault() to prevent range.
+         */
+        "onBeforerange"?: (event: RevoGridCustomEvent<ChangedRange>) => void;
         /**
           * This event is triggered before applying range data, specifically when a range selection occurs. To customize the data and prevent the default edit data from being set, you can call `e.preventDefault()`.
          */
