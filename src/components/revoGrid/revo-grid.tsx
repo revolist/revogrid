@@ -325,7 +325,7 @@ export class RevoGridComponent {
    * Triggered before range applied.
    * Use e.preventDefault() to prevent range.
    */
-  @Event() beforeange: EventEmitter<ChangedRange>;
+  @Event() beforerange: EventEmitter<ChangedRange>;
 
   /**
    * Triggered after focus render finished.
@@ -890,7 +890,7 @@ export class RevoGridComponent {
   }
 
   @Listen('selectionchangeinit') onRangeChanged(e: CustomEvent<ChangedRange>) {
-    const beforeange = this.beforeange.emit(e.detail);
+    const beforeange = this.beforerange.emit(e.detail);
     if (beforeange.defaultPrevented) {
       e.preventDefault();
     }
