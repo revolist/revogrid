@@ -24,7 +24,7 @@ Support Millions of cells and thousands of columns easy and efficiently for fast
   <a href="#key-features">Key Features</a> •
   <a href="#basic-usage">How To Use</a> •
   <a href="#installation">Installation</a> •
-  <a href="https://github.com/revolist/revogrid/blob/master/src/components/revo-grid/readme.md">Docs</a> •
+  <a href="https://rv-grid.com/guide/">Docs</a> •
   <a href="#license">License</a>
 </p>
 
@@ -222,6 +222,7 @@ grid.source = items;
             - **Now**: `import { ColumnDataSchemaRegular } from '@revolist/revogrid'`.
         - Changed viewport type names everywhere. For example, before: `rowDefinitions: [{ type: "row", index: 0, size: 145 }]`, after: `rowDefinitions: [{ type: "rgRow", index: 0, size: 145 }]`.
     -   Updated [event](https://rv-grid.com/guide/api/revoGrid.html#Events) naming convention. Review your [event](https://rv-grid.com/guide/api/revoGrid.html#Events) usage. [Event names](https://rv-grid.com/guide/api/revoGrid.html#Events) are all lowercase now and are aligned with modern event naming conventions. For example, `afterEdit` -> `afteredit`.
+    - Multiple event breaking changes introduced: beforerowrender now returns `BeforeRowRenderEvent`. Check all events for details.
 
 -   **Major improvements**:
     -   Rethought the entire framework approach. Introduced Pro version with advance support and pro features.

@@ -1,4 +1,4 @@
-### Usage Svelte [Example](https://codesandbox.io/s/data-vue-test-3wkzi?file=/src/App.vue)
+### Usage Svelte
 
 With NPM:
 

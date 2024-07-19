@@ -24,7 +24,7 @@ Support Millions of cells and thousands of columns easy and efficiently for fast
   <a href="#key-features">Key Features</a> •
   <a href="#basic-usage">How To Use</a> •
   <a href="#installation">Installation</a> •
-  <a href="https://github.com/revolist/revogrid/blob/master/src/components/revo-grid/readme.md">Docs</a> •
+  <a href="https://rv-grid.com/guide/">Docs</a> •
   <a href="#license">License</a>
 </p>
 
