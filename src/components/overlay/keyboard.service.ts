@@ -60,7 +60,7 @@ export class KeyboardService {
           this.sv.cancel();
           break;
         case codesLetter.TAB:
-          await this.keyChangeSelection(e, canRange);
+          this.keyChangeSelection(e, canRange);
           break;
       }
       return;
@@ -81,7 +81,7 @@ export class KeyboardService {
 
     // tab key means same as arrow right
     if (codesLetter.TAB === e.code) {
-      await this.keyChangeSelection(e, canRange);
+      this.keyChangeSelection(e, canRange);
       return;
     }
 
