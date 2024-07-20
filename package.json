@@ -62,8 +62,8 @@
   "types": "dist/types/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/revo-grid/revo-grid.esm.js",
-      "require": "./dist/revo-grid/revo-grid.cjs.js",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs.js",
       "types": "./dist/types/index.d.ts"
     },
     "./standalone": {
