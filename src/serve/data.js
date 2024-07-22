@@ -85,13 +85,13 @@ export function generateFakeDataObject(config = {}) {
         // custom filter
         // filter: 'myFilterType',
 
-        cellTemplate: (h, v) => {
-          // delay
-          // for(let i = 0; i < 10000000; i++) {
-          //   // do nothing, this is just to slow down to test performance
-          // }
-          return v.model[v.prop];
-        }
+        // cellTemplate: (h, v) => {
+        //   // delay
+        //   // for(let i = 0; i < 10000000; i++) {
+        //   //   // do nothing, this is just to slow down to test performance
+        //   // }
+        //   return v.model[v.prop];
+        // }
       };
 
       // apply config

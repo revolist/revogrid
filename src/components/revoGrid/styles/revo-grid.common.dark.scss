@@ -54,20 +54,6 @@
         background-color: $focused-header;
       }
     }
-
-    .revo-draggable {
-      > .revo-drag-icon {
-        $drag-icon-color: rgba($font-color, 0.5);
-        background-color: $drag-icon-color;
-      }
-
-      &:hover {
-        > .revo-drag-icon {
-          $drag-icon-color: rgba($font-color, 0.7);
-          background-color: $drag-icon-color;
-        }
-      }
-    }
   }
 
   revogr-viewport-scroll {

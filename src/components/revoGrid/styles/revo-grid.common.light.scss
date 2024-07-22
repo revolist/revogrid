@@ -66,18 +66,5 @@
         background-color: $cell-disabled-bg;
       }
     }
-
-    .revo-draggable {
-      > .revo-drag-icon {
-        $drag-icon-color: #d4d4d4;
-        background-color: $drag-icon-color;
-      }
-
-      &:hover {
-        > .revo-drag-icon {
-          background-color: black;
-        }
-      }
-    }
   }
 }

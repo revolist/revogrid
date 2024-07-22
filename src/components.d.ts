@@ -807,6 +807,8 @@ declare global {
         "rowheaderschanged": any;
         "beforegridrender": any;
         "aftergridinit": any;
+        "additionaldatachanged": any;
+        "afterthemechanged": Theme;
     }
     /**
      * Revogrid - High-performance, customizable grid library for managing large datasets.
@@ -1254,6 +1256,10 @@ declare namespace LocalJSX {
          */
         "jobsBeforeRender"?: Promise<any>[];
         /**
+          * Emmited after the additional data is changed
+         */
+        "onAdditionaldatachanged"?: (event: RevoGridCustomEvent<any>) => void;
+        /**
           * Emitted after each source update, whether from the pinned or main viewport. Useful for tracking all changes originating from sources in both the pinned and main viewports.
          */
         "onAfteranysource"?: (event: RevoGridCustomEvent<{
@@ -1295,6 +1301,10 @@ declare namespace LocalJSX {
     type: DimensionRows;
     source: DataType[];
   }>) => void;
+        /**
+          * Emmited after the theme is changed
+         */
+        "onAfterthemechanged"?: (event: RevoGridCustomEvent<Theme>) => void;
         /**
           * Emitted after trimmed values have been applied. Useful for notifying when trimming of values has taken place.
          */

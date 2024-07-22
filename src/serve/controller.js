@@ -106,6 +106,7 @@ window.exportGrid = function (filename = 'new file') {
 let defaultData = {
   rows: 0,
   cols: 0,
+  rowDrag: 0,
   topPinned: [],
   bottomPinned: [],
   colPinEnd: [],

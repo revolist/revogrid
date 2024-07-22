@@ -98,7 +98,7 @@
     "api:update": "./scripts/generate_api.sh",
     "readme": "node ./scripts/generate_readme.mjs",
     "test": "stencil test --spec",
-    "serve": "stencil build --dev --watch --serve",
+    "dev": "stencil build --dev --watch --serve",
     "release": "npm run build && npm publish --public --tag pre-release && npm run package:update"
   },
   "devDependencies": {
