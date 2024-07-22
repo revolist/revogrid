@@ -534,6 +534,11 @@ export class RevoGridComponent {
   @Event() aftergridinit: EventEmitter;
 
   /**
+   * Emmited after the additional data is changed
+   */
+  @Event() additionaldatachanged: EventEmitter<any>;
+
+  /**
    * Emmited after the theme is changed
    */
   @Event() afterthemechanged: EventEmitter<Theme>
@@ -1191,6 +1196,10 @@ export class RevoGridComponent {
    */
   @Watch('registerVNode') registerOutsideVNodes(elements: VNode[] = []) {
     this.extraElements = [...this.extraElements, ...elements];
+  }
+
+  @Watch('additionalData') additionalDataChanged(data: any) {
+    this.additionaldatachanged.emit(data);
   }
   // #endregion
 
