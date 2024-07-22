@@ -533,6 +533,11 @@ export class RevoGridComponent {
    */
   @Event() aftergridinit: EventEmitter;
 
+  /**
+   * Emmited after the theme is changed
+   */
+  @Event() afterthemechanged: EventEmitter<Theme>
+
   // #endregion
 
   // #region Methods
@@ -1034,6 +1039,7 @@ export class RevoGridComponent {
         this.rowDefinitions,
       );
     }
+    this.afterthemechanged.emit(t);
   }
 
   @Watch('source')

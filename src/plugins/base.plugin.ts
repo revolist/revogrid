@@ -73,8 +73,8 @@ export class BasePlugin implements PluginBaseComponent {
    * Emit event from revo-grid component
    * Event can be cancelled by calling event.preventDefault() in callback
    */
-  emit(eventName: string, detail?: any) {
-    const event = new CustomEvent(eventName, { detail, cancelable: true });
+  emit<T = any>(eventName: string, detail?: T) {
+    const event = new CustomEvent<T>(eventName, { detail, cancelable: true });
     this.revogrid.dispatchEvent(event);
     return event;
   }
