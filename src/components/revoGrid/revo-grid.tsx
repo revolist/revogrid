@@ -76,11 +76,11 @@ import {
   AfterEditEvent,
   Theme,
   PluginBaseComponent,
-  PluginExternalConstructor,
   HeaderProperties,
   PluginProviders,
 } from '@type';
 import { Observable } from '../../utils/store.utils';
+import { BasePlugin } from '../../plugins/base.plugin';
 
 /**
  * Revogrid - High-performance, customizable grid library for managing large datasets.
@@ -177,7 +177,7 @@ export class RevoGridComponent {
    * Has to be predefined during first grid init.
    * Every plugin should be inherited from BasePlugin.
    */
-  @Prop() plugins: PluginExternalConstructor[];
+  @Prop() plugins: (typeof BasePlugin)[] = [];
 
   /**
    * Column Types Format.
