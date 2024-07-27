@@ -1,17 +1,8 @@
-export type Target = HTMLElement | Element | null;
-
-export type DispatchDetail = any;
-type Event = {
-  target: HTMLElement | null;
-  preventDefault(): void;
-};
-
-
 /**
  * Dispatch custom event to element
  */
-export function dispatch(
-  target: Target,
+export function dispatch<DispatchDetail = any>(
+  target: MouseEvent['target'],
   eventName: string,
   detail?: DispatchDetail,
 ): CustomEvent {
@@ -23,22 +14,15 @@ export function dispatch(
   target?.dispatchEvent(event);
   return event;
 }
-export function dispatchByEvent(
-  e: Event,
+
+/**
+ * Dispatch custom event by event object and prevent default
+ */
+export function dispatchByEvent<DispatchDetail = any>(
+  e: Pick<MouseEvent, 'target' | 'preventDefault'>,
   eventName: string,
-  detail: DispatchDetail,
+  detail?: DispatchDetail,
 ): CustomEvent {
   e.preventDefault();
-  return dispatch(e.target as Target, eventName, detail);
-}
-/**
- * Dispatch event by other event target
- */
-export function dispatchOnEvent(
-    e: MouseEvent | CustomEvent,
-    eventName: string,
-    detail?: any
-  ): CustomEvent {
-    e.preventDefault();
-    return dispatch(e.target as Target, eventName, detail);
+  return dispatch(e.target, eventName, detail);
 }
