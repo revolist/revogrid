@@ -1,3 +1,4 @@
+import { h } from '@stencil/core';
 import { PluginProviders, PluginBaseComponent } from '..';
 
 type WatchConfig = { immediate: boolean };
@@ -8,6 +9,7 @@ type WatchConfig = { immediate: boolean };
  * Extend this class to create plugin
  */
 export class BasePlugin implements PluginBaseComponent {
+  readonly h = h;
   readonly subscriptions: Record<string, (...args: any[]) => void> = {};
   constructor(public revogrid: HTMLRevoGridElement, public providers: PluginProviders) {}
   /**
