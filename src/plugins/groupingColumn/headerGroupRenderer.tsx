@@ -1,7 +1,7 @@
 import { h, VNode } from '@stencil/core';
 import { Group } from '@store';
 import { CellProps, Providers } from '@type';
-import { ResizeEvent, ResizeProps } from '../../services/resizable.directive';
+import { ResizeEvent, ResizeProps } from '../../components/header/resizable.directive';
 import { HEADER_CLASS, MIN_COL_SIZE } from '../../utils/consts';
 import { HeaderCellRenderer } from '../../components/header/header-cell-renderer';
 import { DimensionCols } from '../../components';

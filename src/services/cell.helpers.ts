@@ -1,4 +1,4 @@
-import { Cell } from '..';
+import type { Cell } from '@type';
 import { DATA_COL, DATA_ROW } from '../utils/consts';
 
 export function getCell(cell: HTMLElement): Cell {

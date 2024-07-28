@@ -2,6 +2,11 @@ import reduce from 'lodash/reduce';
 import each from 'lodash/each';
 import find from 'lodash/find';
 
+import GroupingColumnPlugin, {
+  ColumnGroupingCollection,
+  isColGrouping,
+} from '../plugins/groupingColumn/grouping.col.plugin';
+
 import {
   columnTypes,
   DataStore,
@@ -10,11 +15,7 @@ import {
   Groups,
   setSourceByVirtualIndex,
 } from '@store';
-import GroupingColumnPlugin, {
-  ColumnGroupingCollection,
-  isColGrouping,
-} from '../plugins/groupingColumn/grouping.col.plugin';
-import {
+import type {
   ColumnData,
   ColumnProp,
   ColumnRegular,

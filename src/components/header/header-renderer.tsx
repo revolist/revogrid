@@ -1,7 +1,7 @@
 import { h, VNode } from '@stencil/core';
 import { FilterButton } from '../../plugins/filter/filter.button';
 import { SortingSign } from '../../plugins/sorting/sorting.sign';
-import { ResizeEvent, ResizeProps } from '../../services/resizable.directive';
+import { ResizeEvent, ResizeProps } from './resizable.directive';
 import { DATA_COL, FOCUS_CLASS, HEADER_CLASS, HEADER_SORTABLE_CLASS, MIN_COL_SIZE } from '../../utils/consts';
 import { HeaderCellRenderer } from './header-cell-renderer';
 import { VirtualPositionItem, ColumnTemplateProp, InitialHeaderClick, CellProps } from '@type';

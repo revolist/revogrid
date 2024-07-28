@@ -13,7 +13,7 @@ import { HEADER_ACTUAL_ROW_CLASS, HEADER_ROW_CLASS } from '../../utils/consts';
 import { Groups } from '@store';
 import HeaderRenderer from './header-renderer';
 import ColumnGroupsRenderer from '../../plugins/groupingColumn/columnGroupsRenderer';
-import { ResizeProps } from '../../services/resizable.directive';
+import { ResizeProps } from './resizable.directive';
 import {
   ColumnRegular,
   DimensionSettingsState,

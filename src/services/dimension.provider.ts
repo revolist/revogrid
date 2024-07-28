@@ -1,16 +1,18 @@
 import reduce from 'lodash/reduce';
 import debounce from 'lodash/debounce';
-import ColumnDataProvider from '../services/column.data.provider';
+import ColumnDataProvider from './column.data.provider';
 import ViewportProvider from './viewport.provider';
+import { RESIZE_INTERVAL } from '../utils/consts';
+
 import {
   columnTypes,
   rowTypes,
+  getItemByIndex,
   DimensionStore,
   DimensionStoreCollection,
   gatherTrimmedItems,
   Trimmed,
 } from '@store';
-import { RESIZE_INTERVAL } from '../utils/consts';
 import {
   DimensionCols,
   DimensionType,
@@ -21,7 +23,7 @@ import {
   ViewSettingSizeProp,
   ViewportState,
 } from '@type';
-import { getItemByIndex } from '../store/dimension/dimension.helpers';
+
 export type ColumnItems = Record<DimensionCols, ColumnRegular[]>;
 
 export type DimensionConfig = {

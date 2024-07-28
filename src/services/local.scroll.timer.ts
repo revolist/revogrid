@@ -1,4 +1,4 @@
-import { DimensionType } from '..';
+import type { DimensionType } from '@type';
 /**
  * Apply changes only if mousewheel event happened some time ago (scrollThrottling)
  */

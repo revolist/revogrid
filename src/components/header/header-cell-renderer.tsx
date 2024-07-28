@@ -1,8 +1,8 @@
 import { h, VNode } from '@stencil/core';
 import { dispatch } from '../../plugins/dispatcher';
 import { doPropMerge } from '../data/column.service';
-import { ResizableElement } from '../../services/resizable.element';
-import { ResizeProps } from '../../services/resizable.directive';
+import { ResizableElement } from './resizable.element';
+import { ResizeProps } from './resizable.directive';
 import { CellProps, ColumnTemplateProp } from '@type';
 
 type Props = {

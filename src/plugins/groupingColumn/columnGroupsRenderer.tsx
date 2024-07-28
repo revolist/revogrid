@@ -4,7 +4,7 @@ import { Group, getItemByIndex } from '@store';
 import { DimensionSettingsState, Providers, DimensionCols } from '@type';
 import { HEADER_ROW_CLASS } from '../../utils/consts';
 import GroupHeaderRenderer from './headerGroupRenderer';
-import { ResizeProps } from '../../services/resizable.directive';
+import { ResizeProps } from '../../components/header/resizable.directive';
 
 type Props<T> = {
   visibleProps: { [prop: string]: number };

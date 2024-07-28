@@ -1,6 +1,6 @@
 import { h, VNode } from '@stencil/core';
 import { ResizeProps, ResizeDirective, ResizeEvents } from './resizable.directive';
-import { CellProps } from '../types/interfaces';
+import type { CellProps } from '@type';
 
 export const ResizableElement = (props: Partial<ResizeProps> & CellProps, children: VNode[]) => {
   const resizeEls: VNode[] = [];

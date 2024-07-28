@@ -1,5 +1,4 @@
-import { DimensionType } from '..';
-import { ViewPortScrollEvent } from '..';
+import type { DimensionType, ViewPortScrollEvent } from '@type';
 import { scaleValue } from '../utils';
 
 interface Config {

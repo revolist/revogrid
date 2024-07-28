@@ -17,7 +17,7 @@ import { Observable } from "./utils/store.utils";
 import { DSourceState, Groups } from "./store/index";
 import { MultiFilterItem, ShowData } from "./plugins/filter/filter.pop";
 import { LogicFunction } from "./plugins/filter/filter.types";
-import { ResizeProps } from "./services/resizable.directive";
+import { ResizeProps } from "./components/header/resizable.directive";
 import { Cell as Cell1, ColumnRegular as ColumnRegular1, DataType as DataType1, DimensionCols as DimensionCols1, DimensionRows as DimensionRows1, DimensionSettingsState as DimensionSettingsState1, Observable as Observable1, SelectionStoreState as SelectionStoreState1 } from "./components";
 export { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, ChangedRange, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, PluginBaseComponent, PositionItem, RangeArea, RowDefinition, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
 export { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
@@ -31,7 +31,7 @@ export { Observable } from "./utils/store.utils";
 export { DSourceState, Groups } from "./store/index";
 export { MultiFilterItem, ShowData } from "./plugins/filter/filter.pop";
 export { LogicFunction } from "./plugins/filter/filter.types";
-export { ResizeProps } from "./services/resizable.directive";
+export { ResizeProps } from "./components/header/resizable.directive";
 export { Cell as Cell1, ColumnRegular as ColumnRegular1, DataType as DataType1, DimensionCols as DimensionCols1, DimensionRows as DimensionRows1, DimensionSettingsState as DimensionSettingsState1, Observable as Observable1, SelectionStoreState as SelectionStoreState1 } from "./components";
 export namespace Components {
     /**

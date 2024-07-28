@@ -1,7 +1,6 @@
 import reduce from 'lodash/reduce';
 import { columnTypes, rowTypes, type ViewportStoreCollection, ViewportStore } from '@store';
-import type { MultiDimensionType } from '@type';
-import type { ViewportState } from '@type';
+import type { MultiDimensionType, ViewportState } from '@type';
 
 
 export default class ViewportProvider {

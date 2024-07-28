@@ -11,8 +11,8 @@ import {
   Trimmed,
 } from '@store';
 import DimensionProvider from './dimension.provider';
-import { GroupLabelTemplateFunc } from '../plugins/groupingRow/grouping.row.types';
-import {
+import type { GroupLabelTemplateFunc } from '../plugins/groupingRow/grouping.row.types';
+import type {
   DataLookup,
   DimensionRows,
   DataType,
