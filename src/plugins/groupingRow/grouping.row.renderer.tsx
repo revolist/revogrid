@@ -7,7 +7,7 @@ import { DataType, PositionItem } from '@type';
 interface GroupRowPros extends RowProps {
   model: DataType;
   hasExpand: boolean;
-  groupingCustomRenderer?: GroupLabelTemplateFunc;
+  groupingCustomRenderer?: GroupLabelTemplateFunc | null;
 }
 type Props = GroupRowPros & PositionItem;
 
@@ -20,7 +20,7 @@ function expandEvent(e: MouseEvent, model: DataType, virtualIndex: number) {
     cancelable: true,
     bubbles: true,
   });
-  e.target.dispatchEvent(event);
+  e.target?.dispatchEvent(event);
 }
 
 const GroupingRowRenderer = (props: Props) => {

@@ -82,9 +82,9 @@ export class Clipboard {
       return;
     }
     const clipboardData = this.getData(e);
-    const isHTML = clipboardData.types.indexOf('text/html') > -1;
-    const data = isHTML ? clipboardData.getData('text/html') : clipboardData.getData('text');
-    const dataText = clipboardData.getData('text');
+    const isHTML = (clipboardData?.types.indexOf('text/html') || -1) > -1;
+    const data = isHTML ? clipboardData?.getData('text/html') : clipboardData?.getData('text');
+    const dataText = clipboardData?.getData('text');
 
     const beforePaste = this.beforePaste.emit({
       raw: data,
@@ -102,7 +102,7 @@ export class Clipboard {
     if (beforePaste.detail.isHTML) {
       const table = this.htmlParse(beforePaste.detail.raw);
       // fallback to text if not possible to parse as html
-      parsedData = table || this.textParse(dataText);
+      parsedData = table || this.textParse(dataText || '');
     } else {
       parsedData = this.textParse(beforePaste.detail.raw);
     }
@@ -139,7 +139,7 @@ export class Clipboard {
       return;
     }
     const data = this.getData(beforeCopy.detail.event);
-    this.copyRegion.emit(data);
+    this.copyRegion.emit(data || undefined);
     e.preventDefault();
   }
 
@@ -161,7 +161,7 @@ export class Clipboard {
       return;
     }
 
-    this.clearRegion.emit(data);
+    this.clearRegion.emit(data || undefined);
     e.preventDefault();
   }
 

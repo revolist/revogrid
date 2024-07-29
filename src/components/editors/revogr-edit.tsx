@@ -89,10 +89,10 @@ export class RevoEdit {
 
   onAutoSave() {
     this.preventSaveOnClose = true;
-    const val = this.currentEditor.getValue?.();
+    const val = this.currentEditor?.getValue?.();
     // For Editor plugin internal usage.
     // When you want to prevent save and use custom save of your own.
-    if (this.currentEditor.beforeAutoSave) {
+    if (this.currentEditor?.beforeAutoSave) {
       const canSave = this.currentEditor.beforeAutoSave(val);
       if (canSave === false) {
         return;

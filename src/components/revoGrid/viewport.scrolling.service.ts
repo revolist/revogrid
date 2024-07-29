@@ -11,7 +11,7 @@ export default class GridScrollingService {
   constructor(private setViewport: (e: ViewPortScrollEvent) => void) {}
 
   async proxyScroll(e: ViewPortScrollEvent, key?: DimensionColPin | string) {
-    let newEvent: Promise<ViewPortScrollEvent>;
+    let newEvent: Promise<ViewPortScrollEvent> | undefined;
     let event = e;
     for (let elKey in this.elements) {
       // skip
@@ -67,7 +67,7 @@ export default class GridScrollingService {
   private isPinnedColumn(
     key?: DimensionColPin | string,
   ): key is DimensionColPin {
-    return ['colPinStart', 'colPinEnd'].indexOf(key) > -1;
+    return !!key && ['colPinStart', 'colPinEnd'].indexOf(key) > -1;
   }
 
   registerElements(els: ElementsScroll) {
@@ -93,7 +93,6 @@ export default class GridScrollingService {
   }
 
   unregister() {
-    delete this.elements;
     this.elements = {};
   }
 }

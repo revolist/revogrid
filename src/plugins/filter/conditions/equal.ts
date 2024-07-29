@@ -8,8 +8,8 @@ const eq: LogicFunction = (value: LogicFunctionParam, extra?: LogicFunctionExtra
     value = JSON.stringify(value);
   }
 
-  const filterVal = extra.toString().toLocaleLowerCase();
-  if (filterVal.length === 0) {
+  const filterVal = extra?.toString().toLocaleLowerCase();
+  if (filterVal?.length === 0) {
     return true;
   }
   

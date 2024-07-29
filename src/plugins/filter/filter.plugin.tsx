@@ -72,7 +72,7 @@ export const FILTER_TRIMMED_TYPE = 'filter';
 export const FILTER_CONFIG_CHANGED_EVENT = 'filterconfigchanged';
 
 export class FilterPlugin extends BasePlugin {
-  pop: HTMLRevogrFilterPanelElement;
+  pop?: HTMLRevogrFilterPanelElement;
   filterCollection: FilterCollection = {};
   multiFilterItems: MultiFilterItem = {};
   possibleFilters: Record<string, string[]> = { ...filterTypes };
@@ -173,13 +173,14 @@ export class FilterPlugin extends BasePlugin {
      * which filters has to be included/excluded
      * convinient way to exclude system filters
      */
-    if (config.include) {
+    const cfgInlcude = config.include;
+    if (cfgInlcude) {
       const filters: Record<string, string[]> = {};
 
       for (let t in this.possibleFilters) {
         // validate filters, if appropriate function present
         const newTypes = this.possibleFilters[t].filter(
-          f => config.include.indexOf(f) > -1,
+          f => cfgInlcude.indexOf(f) > -1,
         );
         if (newTypes.length) {
           filters[t] = newTypes;
@@ -224,9 +225,13 @@ export class FilterPlugin extends BasePlugin {
     e.preventDefault();
 
     // close if same
-    const changes = await this.pop.getChanges();
+    const changes = await this.pop?.getChanges();
     if (changes && changes?.prop === e.detail.prop) {
-      this.pop.show();
+      this.pop?.show();
+      return;
+    }
+
+    if (!this.pop) {
       return;
     }
 

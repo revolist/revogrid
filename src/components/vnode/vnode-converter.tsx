@@ -20,7 +20,7 @@ import {
   tag: 'vnode-html',
 })
 export class VNodeToHtml {
-  @Prop() redraw: (() => VNode[]) | null = null;
+  @Prop() redraw: (() => VNode[]) | null | undefined = null;
   @Event() html: EventEmitter<{ html: string; vnodes: VNode[] }>;
   @Element() el: HTMLElement;
 

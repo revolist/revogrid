@@ -360,7 +360,7 @@ export default class ViewportService {
     );
   }
 
-  getSelectedRange(): RangeArea | null {
+  getSelectedRange(): RangeArea | null | undefined {
     return this.config.selectionStoreConnector.selectedRange;
   }
 

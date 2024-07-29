@@ -210,7 +210,7 @@ export default class AutoSizeColumnPlugin extends BasePlugin {
           undefined,
         );
 
-        if (size && rgCol.size < size) {
+        if (size && (rgCol.size ?? 0) < size) {
           rgCol.size = sizes[rgCol.index] = size;
         }
       });
@@ -242,7 +242,7 @@ export default class AutoSizeColumnPlugin extends BasePlugin {
   }
 
   getColumnSize(index: number, type: DimensionCols): number {
-    const rgCol = this.autoSizeColumns[type][index];
+    const rgCol = this.autoSizeColumns?.[type]?.[index];
     if (!rgCol) {
       return 0;
     }
@@ -285,7 +285,7 @@ export default class AutoSizeColumnPlugin extends BasePlugin {
     }
 
     if (this.dataResolve) {
-      this.dataResolve(this.autoSizeColumns);
+      this.dataResolve(this.autoSizeColumns || {});
       this.clearPromise();
     }
   }
@@ -312,7 +312,7 @@ export default class AutoSizeColumnPlugin extends BasePlugin {
 
     const el = document.createElement('div');
     for (let s in styleForFontTest) {
-      el.style[s] = styleForFontTest[s];
+      el.style[s] = styleForFontTest[s] ?? '';
     }
     el.classList.add('revo-test-container');
     return el;

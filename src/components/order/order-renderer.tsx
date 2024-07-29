@@ -9,10 +9,10 @@ type Props = { ref: { (e: OrdererService): void } };
  */
 export class OrdererService {
   private parentY = 0;
-  el!: HTMLElement;
-  rgRow!: HTMLElement;
-  text!: HTMLElement;
-  draggable!: HTMLElement;
+  el?: HTMLElement;
+  rgRow?: HTMLElement;
+  text?: HTMLElement;
+  draggable?: HTMLElement;
 
   start(parent: HTMLElement, { pos, text, event }: { pos: PositionItem; text: string; event: MouseEvent }) {
     const { top } = parent.getBoundingClientRect();

@@ -3,7 +3,7 @@ import { LogicFunction, LogicFunctionExtraParam, LogicFunctionParam } from '../.
 const gtThan: LogicFunction = function (value: LogicFunctionParam, extra?: LogicFunctionExtraParam) {
   let conditionValue: number;
 
-  if (typeof value === 'number') {
+  if (typeof value === 'number' && typeof extra !== 'undefined' && extra !== null) {
     conditionValue = parseFloat(extra?.toString());
     return value > conditionValue;
   }

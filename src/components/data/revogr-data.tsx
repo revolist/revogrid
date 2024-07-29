@@ -268,7 +268,7 @@ export class RevogrData {
         /**
          * For grouping, can be removed in the future and replaced with event
          */
-        if (groupDepth && !columnProps.itemIndex) {
+        if (groupDepth && !columnProps.itemIndex && defaultProps.style) {
           defaultProps.style.paddingLeft = `${PADDING_DEPTH * groupDepth}px`;
         }
 

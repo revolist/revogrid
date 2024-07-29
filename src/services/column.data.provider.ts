@@ -39,7 +39,7 @@ export type ColumnDataSources = Record<
   DataStore<ColumnRegular, DimensionCols>
 >;
 type Sorting = Record<ColumnProp, ColumnRegular>;
-type SortingOrder = Record<ColumnProp, 'asc' | 'desc'>;
+type SortingOrder = Record<ColumnProp, 'asc' | 'desc' | undefined>;
 
 export default class ColumnDataProvider {
   readonly dataSources: ColumnDataSources;
@@ -174,7 +174,7 @@ export default class ColumnDataProvider {
       const items = this.dataSources[type].store.get('source');
       colByIndex[type] = items.reduce(
         (result: Record<number, ColumnRegular>, rgCol, index) => {
-          const colToUpdateIfExists = colsToUpdate[rgCol.prop];
+          const colToUpdateIfExists = colsToUpdate?.[rgCol.prop];
           if (colToUpdateIfExists) {
             result[index] = colToUpdateIfExists;
           }
@@ -184,7 +184,7 @@ export default class ColumnDataProvider {
       );
     });
     each(colByIndex, (colsToUpdate, type: DimensionCols) =>
-      setSourceByVirtualIndex(this.dataSources[type].store, colsToUpdate),
+      setSourceByVirtualIndex(this.dataSources[type].store, colsToUpdate || {}),
     );
   }
 
@@ -203,6 +203,9 @@ export default class ColumnDataProvider {
       this.clearSorting();
     }
     column.order = sorting;
+    if (!this.sorting) {
+      this.sorting = {};
+    }
     this.sorting[column.prop] = column;
     this.updateColumn(column, index);
     return column;

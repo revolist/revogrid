@@ -678,7 +678,7 @@ export namespace Components {
         "setScroll": (e: ViewPortScrollEvent) => Promise<void>;
     }
     interface VnodeHtml {
-        "redraw": (() => VNode[]) | null;
+        "redraw": (() => VNode[]) | null | undefined;
     }
 }
 export interface RevoGridCustomEvent<T> extends CustomEvent<T> {
@@ -2134,7 +2134,7 @@ declare namespace LocalJSX {
     }
     interface VnodeHtml {
         "onHtml"?: (event: VnodeHtmlCustomEvent<{ html: string; vnodes: VNode[] }>) => void;
-        "redraw"?: (() => VNode[]) | null;
+        "redraw"?: (() => VNode[]) | null | undefined;
     }
     interface IntrinsicElements {
         "revo-grid": RevoGrid;

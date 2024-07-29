@@ -195,12 +195,15 @@ export class FilterPanel {
     );
   }
 
-  private autoCorrect(el: HTMLElement) {
+  private autoCorrect(el?: HTMLElement | null) {
+    if (!el) {
+      return;
+    }
     const pos = el.getBoundingClientRect();
     const maxLeft = window.innerWidth - pos.width;
 
     if (pos.left > maxLeft && el.offsetLeft) {
-      el.style.left = `${maxLeft - el.parentElement.getBoundingClientRect().left}px`;
+      el.style.left = `${maxLeft - (el.parentElement?.getBoundingClientRect().left ?? 0)}px`;
     }
   }
   
@@ -217,7 +220,7 @@ export class FilterPanel {
     const capts = Object.assign(this.filterCaptionsInternal, this.filterCaptions);
 
     return (
-      <Host style={style} ref={(el) => { this.changes.autoCorrect && this.autoCorrect(el) }}>
+      <Host style={style} ref={(el) => { this.changes?.autoCorrect && this.autoCorrect(el) }}>
         <label>{capts.title}</label>
         <div class="filter-holder">{this.getFilterItemsList()}</div>
 
@@ -338,7 +341,7 @@ export class FilterPanel {
   private onReset() {
     this.assertChanges();
 
-    delete this.filterItems[this.changes.prop];
+    delete this.filterItems[this.changes?.prop ?? ''];
 
     // this updates the DOM which is used by getFilterItemsList() key
     this.filterId++;
@@ -352,9 +355,9 @@ export class FilterPanel {
     // this is for reactivity issues for getFilterItemsList()
     this.filterId++;
 
-    const prop = this.changes.prop;
+    const prop = this.changes?.prop;
 
-    const items = this.filterItems[prop];
+    const items = this.filterItems[prop ?? ''];
     if (!items) return;
 
     const index = items.findIndex(d => d.id === id);
@@ -362,7 +365,7 @@ export class FilterPanel {
     items.splice(index, 1);
 
     // let's remove the prop if no more filters so the filter icon will be removed
-    if (items.length === 0) delete this.filterItems[prop];
+    if (items.length === 0) delete this.filterItems[prop ?? ''];
 
     if (!this.disableDynamicFiltering) this.debouncedApplyFilter();
   }
@@ -373,9 +376,9 @@ export class FilterPanel {
     // this is for reactivity issues for getFilterItemsList()
     this.filterId++;
 
-    const prop = this.changes.prop;
+    const prop = this.changes?.prop;
 
-    const items = this.filterItems[prop];
+    const items = this.filterItems[prop ?? ''];
     if (!items) return;
 
     const index = items.findIndex(d => d.id === id);
@@ -396,9 +399,11 @@ export class FilterPanel {
     if (select) select.value = defaultType;
 
     this.currentFilterType = defaultType;
-    this.changes.type = defaultType;
+    if (this.changes) {
+      this.changes.type = defaultType;
+    }
     this.currentFilterId = -1;
-    if (e.classList.contains(`[uuid="${this.uuid}"]`)) {
+    if (e?.classList.contains(`[uuid="${this.uuid}"]`)) {
       return false;
     }
     return !e?.closest(`[uuid="${this.uuid}"]`);
