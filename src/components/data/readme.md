@@ -21,9 +21,10 @@
 
 ## Events
 
-| Event           | Description | Type                      |
-| --------------- | ----------- | ------------------------- |
-| `dragStartCell` |             | `CustomEvent<MouseEvent>` |
+| Event             | Description | Type                                                         |
+| ----------------- | ----------- | ------------------------------------------------------------ |
+| `beforerowrender` |             | `CustomEvent<{ row: VNode; rowIndex: number; model: any; }>` |
+| `dragStartCell`   |             | `CustomEvent<MouseEvent>`                                    |
 
 
 ## Dependencies

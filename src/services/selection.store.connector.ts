@@ -152,7 +152,7 @@ export default class SelectionStoreConnector {
       return;
     }
     const nextStore = this.checkNextStore(focus, this.focusedStore.position, this.focusedStore.entity.store.get('lastCell') );
-    nextStore.store.nextFocus({ ...focus, ...nextStore.item });
+    nextStore.store?.nextFocus({ ...focus, ...nextStore.item });
   }
 
   checkNextStore(focus: Selection.Cell, currentStorePointer: Selection.Cell, lastCell: Selection.Cell) {
