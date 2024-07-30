@@ -56,8 +56,8 @@ export type ViewportData = {
   /** Current grid uniq Id */
   uuid: string;
   style?: { [key: string]: string };
-} & JSX.RevogrOverlaySelection &
-  JSX.RevogrData;
+} & JSX.RevogrOverlaySelection
+  & JSX.RevogrData;
 
 export type ViewportProps = {
   prop: JSX.RevogrViewportScroll &

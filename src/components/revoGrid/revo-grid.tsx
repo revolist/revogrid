@@ -442,7 +442,7 @@ export class RevoGridComponent {
   /**  Column updated */
   @Event() aftercolumnsset: EventEmitter<{
     columns: ColumnCollection;
-    order: Record<ColumnProp, 'asc' | 'desc'>;
+    order: Record<ColumnProp, 'asc' | 'desc' | undefined>;
   }>;
 
   /**
@@ -722,7 +722,7 @@ export class RevoGridComponent {
   @Method() async updateColumnSorting(
     column: ColumnRegular,
     index: number,
-    order: 'asc' | 'desc',
+    order: 'asc' | 'desc' | undefined,
     additive: boolean,
   ) {
     return this.columnProvider.updateColumnSorting(
@@ -769,7 +769,7 @@ export class RevoGridComponent {
   /**
    * Get the currently focused cell.
    */
-  @Method() async getFocused(): Promise<FocusedData | null> {
+  @Method() async getFocused(): Promise<FocusedData | null | undefined> {
     return this.viewport?.getFocused();
   }
 
@@ -783,14 +783,14 @@ export class RevoGridComponent {
   /**
    * Get the currently selected Range.
    */
-  @Method() async getSelectedRange(): Promise<RangeArea | null> {
+  @Method() async getSelectedRange(): Promise<RangeArea | null | undefined> {
     return this.viewport?.getSelectedRange();
   }
 
   // #endregion
 
   // #region Listeners outside scope
-  private clickTrackForFocusClear: number | null = null;
+  private clickTrackForFocusClear?: number;
   @Listen('touchstart', { target: 'document' })
   @Listen('mousedown', { target: 'document' })
   mousedownHandle(event: MouseEvent | TouchEvent) {
@@ -820,7 +820,7 @@ export class RevoGridComponent {
     const target = event.target as HTMLElement | null;
     const pos = screenX + screenY;
     // detect if mousemove then do nothing
-    if (Math.abs(this.clickTrackForFocusClear - pos) > 10) {
+    if (Math.abs((this.clickTrackForFocusClear ?? 0) - pos) > 10) {
       return;
     }
 
@@ -948,7 +948,7 @@ export class RevoGridComponent {
   private extraElements: VNode[] = [];
 
   // UUID required to support multiple grids in one page and avoid collision
-  uuid: string | null = null;
+  uuid?: string;
   columnProvider: ColumnDataProvider;
   dataProvider: DataProvider;
   dimensionProvider: DimensionProvider;
@@ -1130,7 +1130,7 @@ export class RevoGridComponent {
       return;
     }
     each(newRows, (r, k: DimensionRows) =>
-      this.dimensionProvider.setCustomSizes(k, r.sizes || {}),
+      this.dimensionProvider.setCustomSizes(k, r?.sizes || {}),
     );
   }
 
@@ -1146,7 +1146,7 @@ export class RevoGridComponent {
     let grPlugin: GroupingRowPlugin | undefined;
     for (let p of this.internalPlugins) {
       const isGrouping = p as unknown as GroupingRowPlugin;
-      if (isGrouping.setGrouping) {
+      if (!!isGrouping.setGrouping) {
         grPlugin = isGrouping;
         break;
       }
@@ -1236,7 +1236,7 @@ export class RevoGridComponent {
         new FilterPlugin(
           this.element,
           pluginData,
-          this.uuid,
+          this.uuid || '',
           typeof this.filter === 'object' ? this.filter : undefined,
         ),
       );
@@ -1261,7 +1261,7 @@ export class RevoGridComponent {
   }
 
   private removePlugins() {
-    this.internalPlugins.forEach(p => p.destroy());
+    this.internalPlugins.forEach(p => p.destroy?.());
     this.internalPlugins = [];
   }
   // #endregion
@@ -1521,7 +1521,7 @@ export class RevoGridComponent {
           class="main-viewport"
           onClick={(e: MouseEvent) => {
             if (e.currentTarget === e.target) {
-              this.viewport.clearEdit();
+              this.viewport?.clearEdit();
             }
           }}
         >

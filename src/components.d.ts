@@ -136,7 +136,7 @@ export namespace Components {
         /**
           * Get the currently focused cell.
          */
-        "getFocused": () => Promise<FocusedData | null>;
+        "getFocused": () => Promise<FocusedData | null | undefined>;
         /**
           * Get all active plugins instances
          */
@@ -144,7 +144,7 @@ export namespace Components {
         /**
           * Get the currently selected Range.
          */
-        "getSelectedRange": () => Promise<RangeArea | null>;
+        "getSelectedRange": () => Promise<RangeArea | null | undefined>;
         /**
           * Get data from source
          */
@@ -269,7 +269,7 @@ export namespace Components {
           * @param index - virtual column index
           * @param order - order to apply
          */
-        "updateColumnSorting": (column: ColumnRegular, index: number, order: 'asc' | 'desc', additive: boolean) => Promise<ColumnRegular>;
+        "updateColumnSorting": (column: ColumnRegular, index: number, order: 'asc' | 'desc' | undefined, additive: boolean) => Promise<ColumnRegular>;
         /**
           * Update columns
          */
@@ -783,7 +783,7 @@ declare global {
         "beforecolumnapplied": ColumnCollection;
         "aftercolumnsset": {
     columns: ColumnCollection;
-    order: Record<ColumnProp, 'asc' | 'desc'>;
+    order: Record<ColumnProp, 'asc' | 'desc' | undefined>;
   };
         "beforefilterapply": { collection: FilterCollection };
         "beforefiltertrimmed": {
@@ -1277,7 +1277,7 @@ declare namespace LocalJSX {
          */
         "onAftercolumnsset"?: (event: RevoGridCustomEvent<{
     columns: ColumnCollection;
-    order: Record<ColumnProp, 'asc' | 'desc'>;
+    order: Record<ColumnProp, 'asc' | 'desc' | undefined>;
   }>) => void;
         /**
           * Triggered after data applied or range changed.

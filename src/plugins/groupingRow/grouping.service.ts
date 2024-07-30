@@ -151,7 +151,7 @@ export function getParsedGroup(id: string): any[] {
   const parseGroup = JSON.parse(id);
   // extra precaution and type safe guard
   if (!Array.isArray(parseGroup)) {
-    return null;
+    return [];
   }
   return parseGroup;
 }

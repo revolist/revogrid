@@ -16,10 +16,10 @@ import { EditCell, EditorBase, SaveData } from '@type';
  * Closes editor when called
  * @param preventFocus - if true editor will not be closed and next cell will not be focused
  */
-export type SaveCallback = (value: SaveData, preventFocus: boolean) => void;
+export type SaveCallback = (value: SaveData | undefined, preventFocus: boolean) => void;
 
 export class TextEditor implements EditorBase {
-  private editInput!: HTMLInputElement;
+  private editInput: HTMLInputElement | null = null;
 
   public element: Element | null = null;
   public editCell?: EditCell = undefined;
@@ -60,7 +60,7 @@ export class TextEditor implements EditorBase {
    * IMPORTANT: Prevent scroll glitches when editor is closed and focus is on current input element.
    */
   beforeDisconnect() {
-    this.editInput.blur();
+    this.editInput?.blur();
   }
 
   /**

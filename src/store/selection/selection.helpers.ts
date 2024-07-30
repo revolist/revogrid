@@ -44,7 +44,7 @@ export function cropCellToMax(cell: Cell, lastCell: Cell): Cell {
   return newCell;
 }
 
-export function getRange(start?: Cell, end?: Cell): RangeArea | null {
+export function getRange(start?: Cell | null, end?: Cell | null): RangeArea | null {
   return start && end
     ? {
         x: Math.min(start.x, end.x),

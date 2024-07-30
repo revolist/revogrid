@@ -24,7 +24,7 @@ export class VNodeToHtml {
   @Event() html: EventEmitter<{ html: string; vnodes: VNode[] }>;
   @Element() el: HTMLElement;
 
-  private vnodes: VNode[] | null = [];
+  private vnodes: VNode[] = [];
 
   componentDidRender() {
     this.html.emit({
@@ -34,7 +34,7 @@ export class VNodeToHtml {
   }
 
   render() {
-    this.vnodes = this.redraw?.();
+    this.vnodes = this.redraw?.() || [];
     return (
       <Host
         style={{ visibility: 'hidden', position: 'absolute' }}

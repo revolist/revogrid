@@ -104,7 +104,7 @@ export default class DimensionProvider {
    * @param trimmed - trimmed items
    * @param type
    */
-  setTrimmed(trimmed: Partial<Trimmed>, type: MultiDimensionType) {
+  setTrimmed(trimmed: Trimmed, type: MultiDimensionType) {
     const allTrimmed = gatherTrimmedItems(trimmed);
     const dimStoreType = this.stores[type];
     dimStoreType.setStore({ trimmed: allTrimmed });

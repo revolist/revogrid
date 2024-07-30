@@ -33,7 +33,7 @@ type Config = {
 
   getData(): any;
   internalPaste(): void;
-  range(range: RangeArea): boolean;
+  range(range: RangeArea | null): boolean;
   selectAll(): void;
 };
 
@@ -51,7 +51,7 @@ export class KeyboardService {
     e: KeyboardEvent,
     canRange: boolean,
     isEditMode: boolean,
-    { range, focus }: Pick<EventData, 'range' | 'focus'>,
+    { range, focus }: Partial<Pick<EventData, 'range' | 'focus'>>,
   ) {
     // IF EDIT MODE
     if (isEditMode) {
@@ -151,7 +151,7 @@ export class KeyboardService {
 
     const range = this.sv.selectionStore.get('range');
     const focus = this.sv.selectionStore.get('focus');
-    return this.keyPositionChange(data.changes, range, focus, data.isMulti);
+    return this.keyPositionChange(data.changes, range || undefined, focus || undefined, data.isMulti);
   }
 
   keyPositionChange(

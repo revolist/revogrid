@@ -149,8 +149,8 @@ export default class ViewportService {
       const columnSelectionStore = this.registerCol(colData.position.x, val);
 
       // render per each column data collections vertically
-      const dataPorts = this.dataViewPort(column).reduce<ViewportData[]>(
-        (r, rgRow) => {
+      const dataPorts = this.dataViewPort(column).reduce(
+        (r: ViewportData[], rgRow) => {
           // register selection store for Segment
           const segmentSelection = this.registerSegment(rgRow.position);
           segmentSelection.setLastCell(rgRow.lastCell);

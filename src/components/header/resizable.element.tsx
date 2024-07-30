@@ -47,7 +47,7 @@ export const ResizableElement = (props: Partial<ResizeProps> & CellProps, childr
     }
   }
   return (
-    <div {...props} ref={(e: HTMLElement) => directive?.set(e)}>
+    <div {...props} ref={(e) => e && directive?.set(e)}>
       {children}
       {resizeEls}
     </div>

@@ -92,7 +92,7 @@ export function getCoordinate(
     const start = { x: range.x, y: range.y };
     const end = isMulti ? { x: range.x1, y: range.y1 } : start;
     const point = end[c] > focus[c] ? end : start;
-    point[c] += changes[c];
+    point[c] += changes[c] ?? 0;
     return { start, end };
   };
 

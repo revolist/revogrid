@@ -9,14 +9,15 @@ type RemoveResult = Partial<{
 }>;
 export const rowDefinitionByType = (newVal: RowDefinition[] = []) => {
   return reduce(newVal, (r: Result, v) => {
-      if (!r[v.type]) {
-        r[v.type] = {};
+      let type = r[v.type];
+      if (!type) {
+        type = r[v.type] = {};
       }
       if (v.size) {
-        if (!r[v.type].sizes) {
-          r[v.type].sizes = {};
+        if (!type.sizes) {
+          type.sizes = {};
         }
-        r[v.type].sizes[v.index] = v.size;
+        type.sizes[v.index] = v.size;
       }
       return r;
     },
@@ -30,7 +31,7 @@ export const rowDefinitionRemoveByType = (oldVal: RowDefinition[] = []) => {
         r[v.type] = [];
       }
       if (v.size) {
-        r[v.type].push(v.index);
+        r[v.type]?.push(v.index);
       }
       return r;
     },

@@ -40,7 +40,7 @@ export function getContentSize(
 }
 
 export default class LocalScrollService {
-  private preventArtificialScroll: Record<DimensionType, () => void | null> = {
+  private preventArtificialScroll: Record<DimensionType, (() => void) | null> = {
     rgRow: null,
     rgCol: null,
   };
@@ -149,7 +149,7 @@ export default class LocalScrollService {
       return NO_COORDINATE;
     }
 
-    if (c > param.maxSize) {
+    if (param.maxSize && c > param.maxSize) {
       return param.maxSize;
     }
     return c;
@@ -164,7 +164,7 @@ export default class LocalScrollService {
   /* convert virtual to real and back, scale range */
   private convert(pos: number, param: Params, toReal = true): number {
     const minRange = param.clientSize;
-    const from: [number, number] = [0, param.virtualContentSize - minRange];
+    const from: [number, number] = [0, (param.virtualContentSize ?? minRange) - minRange];
     const to: [number, number] = [0, param.contentSize - param.virtualSize];
     if (toReal) {
       return scaleValue(pos, from, to);

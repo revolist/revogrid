@@ -4,8 +4,6 @@ import type {
   DimensionCols,
   DimensionRows,
   Cell,
-  EditCellStore,
-  RangeArea,
 } from '@type';
 
 type StoreByDimension = Record<number, SelectionStore>;
@@ -14,7 +12,6 @@ type FocusedStore = {
   cell: Cell;
   position: Cell;
 };
-
 type StoresMapping<T> = { [xOrY: number]: Partial<T> };
 
 export const EMPTY_INDEX = -1;
@@ -53,15 +50,15 @@ export default class SelectionStoreConnector {
     return null;
   }
 
-  get edit(): EditCellStore | undefined {
+  get edit() {
     return this.focusedStore?.entity.store.get('edit');
   }
 
-  get focused(): Cell | undefined {
+  get focused() {
     return this.focusedStore?.entity.store.get('focus');
   }
 
-  get selectedRange(): RangeArea | undefined {
+  get selectedRange() {
     return this.focusedStore?.entity.store.get('range');
   }
 
@@ -191,10 +188,11 @@ export default class SelectionStoreConnector {
     }
 
     // Get the next store based on the current focus and the last cell.
-    const next = this.getNextStore(focus, this.focusedStore.position, this.focusedStore.entity.store.get('lastCell') );
+    const lastCell = this.focusedStore.entity.store.get('lastCell');
+    const next = lastCell && this.getNextStore(focus, this.focusedStore.position, lastCell);
 
     // Set the next focus cell in the store.
-    next.store?.setNextFocus({ ...focus, ...next.item });
+    next?.store?.setNextFocus({ ...focus, ...next.item });
   }
 
   focusByCell<T extends Cell>(storePos: T, start: T, end: T) {
@@ -210,7 +208,7 @@ export default class SelectionStoreConnector {
 
     // check for the focus in nearby store/viewport
     const lastCell = store.store.get('lastCell');
-    const next = this.getNextStore(focus, currentStorePointer, lastCell);
+    const next = lastCell && this.getNextStore(focus, currentStorePointer, lastCell);
 
     // if next store present - update
     if (next?.store) {
@@ -219,9 +217,10 @@ export default class SelectionStoreConnector {
       return null;
     }
 
-    focus = cropCellToMax(focus, lastCell);
-    end = cropCellToMax(end, lastCell);
-
+    if (lastCell) {
+      focus = cropCellToMax(focus, lastCell);
+      end = cropCellToMax(end, lastCell);  
+    }
     store.setFocus(focus, end);
     return focus;
   }
@@ -230,8 +229,8 @@ export default class SelectionStoreConnector {
    * Retrieves the current store pointer based on the active store.
    * Clears focus from all stores except the active one.
    */
-  getCurrentStorePointer(store: SelectionStore): Cell {
-    let currentStorePointer: Cell;
+  getCurrentStorePointer(store: SelectionStore) {
+    let currentStorePointer: Cell | undefined;
 
     // Iterate through all stores
     for (let y in this.stores) {
@@ -283,6 +282,8 @@ export default class SelectionStoreConnector {
             stores = this.getYStores(currentStorePointer.x);
             break;
         }
+
+        // Get the next store based on the item in the new store
         if (nextItem[type] >= 0) {
           nextStore = stores[++currentStorePointer[type]];
         } else {
@@ -308,7 +309,7 @@ export default class SelectionStoreConnector {
     }
   }
 
-  setEdit(val: string | boolean) {
+  setEdit(val?: string | boolean) {
     if (!this.focusedStore) {
       return;
     }
@@ -325,7 +326,7 @@ export default class SelectionStoreConnector {
         if (!store) {
           continue;
         }
-        const lastCell = store.store.get('lastCell');
+        const lastCell = store.store.get('lastCell') || { x: 0, y: 0 };
         store.setRange(
           { x: 0, y: 0 },
           { x: lastCell.x - 1, y: lastCell.y - 1 },
