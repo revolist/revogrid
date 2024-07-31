@@ -84,7 +84,7 @@ export class TextEditor implements EditorBase {
       type: 'text',
       enterKeyHint: 'enter',
       // set input value from cell data
-      value: this.editCell?.val || '',
+      value: this.editCell?.val ?? '',
       // save input element as ref for further usage
       ref: (el: HTMLInputElement | null) => {
         this.editInput = el;
