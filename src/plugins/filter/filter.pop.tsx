@@ -231,14 +231,14 @@ export class FilterPanel {
         </div>
         <div class="filter-actions">
           {this.disableDynamicFiltering &&
-            <button class="revo-button green save"  onClick={() => this.onSave()}>
+            <button id="revo-button-save" aria-label="save" class="revo-button green"  onClick={() => this.onSave()}>
               {capts.save}
             </button>
           }
-          <button class="revo-button light reset" onClick={() => this.onReset()}>
+          <button id="revo-button-reset" aria-label="reset" class="revo-button light" onClick={() => this.onReset()}>
             {capts.reset}
           </button>
-          <button class="revo-button light cancel" onClick={() => this.onCancel()}>
+          <button id="revo-button-cancel" aria-label="cancel" class="revo-button light" onClick={() => this.onCancel()}>
             {capts.cancel}
           </button>
         </div>
