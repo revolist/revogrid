@@ -276,6 +276,11 @@ function onLoad() {
   grid.filter = true;
   grid.exporting = true;
   grid.rowHeaders = true;
+  grid.rowDefinitions = [{
+    size: 200,
+    type: 'rgRow',
+    index: 2,
+  }];
   // grid.stretch = true;
   /* 
   grid.autoSizeColumn = {

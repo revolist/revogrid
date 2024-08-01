@@ -1031,16 +1031,10 @@ export class RevoGridComponent {
       );
       this.rowDefChanged(
         // for cases when some custom size present and not
-        this.rowDefinitions.length
-          ? this.rowDefinitions
-          : [
-              {
-                type: 'rgRow',
-                size: this.themeService.rowSize,
-                index: 0,
-              },
-            ],
         this.rowDefinitions,
+        this.rowDefinitions,
+        'theme',
+        true,
       );
     }
     this.afterthemechanged.emit(t);
@@ -1322,7 +1316,9 @@ export class RevoGridComponent {
       undefined,
       'pinnedBottomSource',
     );
-    this.trimmedRowsChanged(this.trimmedRows);
+    if (Object.keys(this.trimmedRows ?? {}).length > 0) {
+      this.trimmedRowsChanged(this.trimmedRows);
+    }
     this.rowDefChanged(this.rowDefinitions);
     this.groupingChanged(this.grouping);
 

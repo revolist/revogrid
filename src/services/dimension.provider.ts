@@ -88,10 +88,7 @@ export default class DimensionProvider {
       };
     }
     this.stores[type].setDimensionSize(newSizes);
-    this.viewports.stores[type].setViewPortDimensionSizes(
-      newSizes,
-      !keepOld ? this.stores[type].store.get('originItemSize') : undefined,
-    );
+    this.updateViewport(type, true);
   }
 
   setItemCount(realCount: number, type: MultiDimensionType) {
@@ -108,9 +105,7 @@ export default class DimensionProvider {
     const allTrimmed = gatherTrimmedItems(trimmed);
     const dimStoreType = this.stores[type];
     dimStoreType.setStore({ trimmed: allTrimmed });
-    this.viewports.stores[type].setViewPortDimensionSizes(
-      dimStoreType.store.get('sizes'),
-    );
+    this.updateViewport(type, true);
   }
 
   /**
@@ -181,22 +176,25 @@ export default class DimensionProvider {
     return { y, x };
   }
 
-  updateViewport(type: MultiDimensionType) {
+  updateViewport(type: MultiDimensionType, force = false) {
     this.setViewPortCoordinate({
       coordinate: this.viewports.stores[type].lastCoordinate,
       type,
+      force,
     });
   }
 
   setViewPortCoordinate({
     coordinate,
     type,
+    force = false,
   }: {
     coordinate: number;
     type: MultiDimensionType;
+    force?: boolean;
   }) {
     const dimension = this.stores[type].getCurrentState();
-    this.viewports.stores[type].setViewPortCoordinate(coordinate, dimension);
+    this.viewports.stores[type].setViewPortCoordinate(coordinate, dimension, force);
   }
 
   getViewPortPos(e: ViewPortScrollEvent): number {
