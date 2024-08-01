@@ -11,7 +11,6 @@ import {
   VNode,
   Host,
 } from '@stencil/core';
-import each from 'lodash/each';
 
 import ColumnDataProvider, {
   ColumnCollection,
@@ -1005,7 +1004,7 @@ export class RevoGridComponent {
   @Watch('rowSize') rowSizeChanged(s: number) {
     // clear existing data
     this.dimensionProvider.setSettings({ originItemSize: s }, 'rgRow');
-    this.rowDefChanged(this.rowDefinitions, this.rowDefinitions);
+    this.rowDefChanged(this.rowDefinitions, this.rowDefinitions, 'rowSize', true);
   }
 
   @Watch('theme') themeChanged(
@@ -1106,6 +1105,8 @@ export class RevoGridComponent {
   @Watch('rowDefinitions') rowDefChanged(
     after: RowDefinition[],
     before?: RowDefinition[],
+    _watchName?: string,
+    forceUpdate = true,
   ) {
     const {
       detail: { vals: newVal, oldVals: oldVal },
@@ -1119,19 +1120,26 @@ export class RevoGridComponent {
     if (oldVal) {
       const remove = rowDefinitionRemoveByType(oldVal);
       // clear all old data and drop sizes
-      each(remove, (_, t: DimensionRows) => {
-        this.dimensionProvider.clearSize(
-          t,
-          this.dataProvider.stores[t].store.get('source').length,
-        );
-      });
+      for (const t in remove) {
+        if (remove.hasOwnProperty(t)) {
+          const type = t as DimensionRows;
+          const store = this.dataProvider.stores[type];
+          const sourceLength = store.store.get('source').length;
+          this.dimensionProvider.clearSize(type, sourceLength);
+        }
+      }
     }
     if (!newVal.length) {
-      return;
+      if (forceUpdate) {
+        this.dimensionProvider.setCustomSizes('rgRow', {});
+      } else {
+        return;
+      }
     }
-    each(newRows, (r, k: DimensionRows) =>
-      this.dimensionProvider.setCustomSizes(k, r.sizes || {}),
-    );
+    Object.entries(newRows).forEach(([k, r]) => {
+      const type = k as DimensionRows;
+      this.dimensionProvider.setCustomSizes(type, r.sizes || {});
+    });
   }
 
   @Watch('trimmedRows') trimmedRowsChanged(
