@@ -202,9 +202,13 @@ export class AutoFillService {
       oldRange,
       newProps: slice(columns, newRange.x, newRange.x1 + 1).map(v => v.prop),
       oldProps: slice(columns, oldRange.x, oldRange.x1 + 1).map(v => v.prop),
+      mapping: {},
     };
 
-    rangeData.newData = this.sv.columnService.getRangeData(rangeData);
+    const changesOnRange = this.sv.columnService.getRangeData(rangeData);
+    rangeData.newData = changesOnRange.changed;
+    rangeData.mapping = changesOnRange.mapping;
+    
     const selectionEndEvent = this.sv.internalSelectionChanged(rangeData);
     if (selectionEndEvent.defaultPrevented) {
       this.sv.setTempRange(null);

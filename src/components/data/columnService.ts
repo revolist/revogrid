@@ -155,7 +155,7 @@ export default class ColumnService implements ColumnServiceI {
     };
   }
 
-  getRangeData(d: Selection.ChangedRange): RevoGrid.DataLookup {
+  getRangeData(d: Selection.ChangedRange) {
     const changed: RevoGrid.DataLookup = {};
 
     // get original length sizes
@@ -163,10 +163,13 @@ export default class ColumnService implements ColumnServiceI {
     const copyFrom = this.copyRangeArray(d.oldRange, d.oldProps, this.dataStore);
     const copyRowLength = copyFrom.length;
 
+    const mapping: Selection.OldNewRangeMapping = {};
+
     // rows
     for (let rowIndex = d.newRange.y, i = 0; rowIndex < d.newRange.y1 + 1; rowIndex++, i++) {
       // copy original data link
       const copyRow = copyFrom[i % copyRowLength];
+      const oldRowIndex = d.oldRange.y + (i % copyRowLength);
 
       // columns
       for (let colIndex = d.newRange.x, j = 0; colIndex < d.newRange.x1 + 1; colIndex++, j++) {
@@ -176,6 +179,8 @@ export default class ColumnService implements ColumnServiceI {
         }
 
         const p = this.columns[colIndex].prop;
+        const copyColIndex = d.oldRange.x + (j % copyColLength);
+        const copyColumnProp = this.columns[copyColIndex].prop;
         const currentCol = j % copyColLength;
 
         /** if can write */
@@ -185,10 +190,22 @@ export default class ColumnService implements ColumnServiceI {
             changed[rowIndex] = {};
           }
           changed[rowIndex][p] = copyRow[currentCol];
+          /** Generate mapping object */
+          if (!mapping[rowIndex]) {
+            mapping[rowIndex] = {};
+          }
+          mapping[rowIndex][p] = {
+            colIndex: copyColIndex,
+            colProp: copyColumnProp,
+            rowIndex: oldRowIndex,
+          };
         }
       }
     }
-    return changed;
+    return {
+      changed,
+      mapping,
+    };
   }
 
   getTransformedDataToApply(
