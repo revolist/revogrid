@@ -19,7 +19,7 @@ export type DimensionDataViewport = Pick<
   | 'realSize'
 >;
 
-type ItemsToUpdate = Pick<ViewportStateItems, 'items' | 'start' | 'end'>;
+export type ItemsToUpdate = Pick<ViewportStateItems, 'items' | 'start' | 'end'>;
 /**
  * Update items based on new scroll position
  * If viewport wasn't changed fully simple recombination of positions

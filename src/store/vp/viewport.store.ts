@@ -8,14 +8,13 @@ import {
   setItemSizes,
   updateMissingAndRange,
   isActiveRangeOutsideLastItem,
+  ItemsToUpdate,
 } from './viewport.helpers';
 import { createStore } from '@stencil/store';
 import { type Observable, setStore } from '../../utils/store.utils';
 import type {
   VirtualPositionItem,
-  ViewportStateItems,
   ViewportState,
-  ViewSettingSizeProp,
   MultiDimensionType,
 } from '@type';
 
@@ -66,8 +65,9 @@ export class ViewportStore {
   /**
    * Render viewport based on coordinate
    * It's the main method for draw
+   * Use force if you want to re-render viewport
    */
-  setViewPortCoordinate(position: number, dimension: DimensionDataViewport) {
+  setViewPortCoordinate(position: number, dimension: DimensionDataViewport, force = false) {
     const viewportSize = this.store.get('virtualSize');
     // no visible data to calculate
     if (!viewportSize) {
@@ -104,8 +104,17 @@ export class ViewportStore {
     pos -= singleOffsetInPx;
     pos = pos < 0 ? 0 : pos < maxCoordinate ? pos : maxCoordinate;
 
-    const allItems = this.getItems();
-    const items = [...allItems.items];
+    let allItems: ItemsToUpdate;
+    // if force clear all items and start from 0
+    if (force) {
+      allItems = {
+        items: [],
+        start: 0,
+        end: 0,
+      };
+    } else {
+      allItems = this.getItems()
+    }
 
     const firstItem: VirtualPositionItem | undefined = getFirstItem(allItems);
     const lastItem: VirtualPositionItem | undefined = getLastItem(allItems);
@@ -130,6 +139,7 @@ export class ViewportStore {
     } else if (
       isActiveRangeOutsideLastItem(pos, virtualSize, firstItem, lastItem)
     ) {
+      const items = [...allItems.items];
       // check is any item missing for full fill content
       const missing = addMissingItems(
         firstItem,
@@ -160,66 +170,6 @@ export class ViewportStore {
   }
 
   /**
-   * Update viewport sizes for existing items
-   * This method is generating new item positions based on custom sizes and original sizes
-   * @param sizes - custom sizes for each item
-   * @param dropToOriginalSize - drop to original size if requested
-   */
-  setViewPortDimensionSizes(
-    sizes: ViewSettingSizeProp,
-    dropToOriginalSize?: number,
-  ) {
-    let items = [...this.store.get('items')];
-    const count = items.length;
-    // viewport not inited
-    if (!count) {
-      return;
-    }
-
-    let changedCoordinate = 0;
-    let i = 0;
-    let start = this.store.get('start');
-
-    // drop to original size if requested
-    if (dropToOriginalSize) {
-      const allItems = this.getItems();
-      const firstItem: VirtualPositionItem | undefined = getFirstItem(allItems);
-      items = setItemSizes(items, start, dropToOriginalSize, firstItem.start);
-    }
-
-    // loop through array from initial item after recombination
-    // if size change present, change position for all items after
-    while (i < count) {
-      const item = items[start];
-      // change pos if size change present before
-      if (changedCoordinate) {
-        item.start += changedCoordinate;
-        item.end += changedCoordinate;
-      }
-      // check if size change present
-      const size: number | undefined = sizes[item.itemIndex];
-      // size found
-      if (size) {
-        const changedSize = size - item.size;
-        changedCoordinate += changedSize;
-        item.size = size;
-        item.end = item.start + size;
-        // size lost
-      }
-
-      // loop by start index
-      start++;
-      i++;
-      // if start index out of array, reset it
-      if (start === count) {
-        start = 0;
-      }
-    }
-
-    this.setViewport({ items: [...items] });
-  }
-
-  /**
    * Set sizes for existing items
    */
   setOriginalSizes(size: number) {
@@ -240,7 +190,7 @@ export class ViewportStore {
     });
   }
 
-  getItems(): Pick<ViewportStateItems, 'items' | 'start' | 'end'> {
+  getItems(): ItemsToUpdate {
     return {
       items: this.store.get('items'),
       start: this.store.get('start'),
