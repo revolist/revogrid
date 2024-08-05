@@ -38,7 +38,6 @@ import { GroupingOptions } from '../../plugins/groupingRow/grouping.row.types';
 import ViewportService, { FocusedData } from './viewport.service';
 import { DATA_SLOT, HEADER_SLOT } from './viewport.helpers';
 import GridScrollingService from './viewport.scrolling.service';
-import { UUID } from '../../utils/consts';
 import SelectionStoreConnector from '../../services/selection.store.connector';
 import OrderRenderer, { OrdererService } from '../order/order-renderer';
 import StretchColumn, {
@@ -817,20 +816,21 @@ export class RevoGridComponent {
     if (event.defaultPrevented) {
       return;
     }
-    const target = event.target as HTMLElement | null;
     const pos = screenX + screenY;
     // detect if mousemove then do nothing
     if (Math.abs(this.clickTrackForFocusClear - pos) > 10) {
       return;
     }
 
-    // check if action finished inside of the document
-    // clear data which is outside of grid
+    // Check if action finished inside of the document
     // if event prevented or it is current table don't clear focus
-    if (target?.closest(`[${UUID}="${this.uuid}"]`)) {
-      return;
+    const path = event.composedPath();
+    if (!path.includes(this.element) &&
+        !path.includes(this.element.shadowRoot)
+      ) {
+      // Perform actions if the click is outside the component
+      this.clearFocus();
     }
-    this.clearFocus();
   }
   // #endregion
 
@@ -947,8 +947,6 @@ export class RevoGridComponent {
   @Element() element: HTMLRevoGridElement;
   private extraElements: VNode[] = [];
 
-  // UUID required to support multiple grids in one page and avoid collision
-  uuid: string | null = null;
   columnProvider: ColumnDataProvider;
   dataProvider: DataProvider;
   dimensionProvider: DimensionProvider;
@@ -1239,7 +1237,6 @@ export class RevoGridComponent {
         new FilterPlugin(
           this.element,
           pluginData,
-          this.uuid,
           typeof this.filter === 'object' ? this.filter : undefined,
         ),
       );
@@ -1297,9 +1294,6 @@ export class RevoGridComponent {
     this.selectionStoreConnector = new SelectionStoreConnector();
     this.dataProvider = new DataProvider(this.dimensionProvider);
     // #endregion
-
-    // generate uuid for this grid
-    this.uuid = `rv--${Math.random().toString(36).slice(2, 6)}-${Date.now()}`;
 
     this.registerOutsideVNodes(this.registerVNode);
 
@@ -1518,7 +1512,7 @@ export class RevoGridComponent {
     const dimensions = this.dimensionProvider.stores;
 
     return (
-      <Host {...{ [`${UUID}`]: this.uuid }}>
+      <Host>
         {this.hideAttribution ? null : (
           <revogr-attribution class="attribution" />
         )}
