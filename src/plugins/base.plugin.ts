@@ -97,3 +97,5 @@ export class BasePlugin implements PluginBaseComponent {
     this.clearSubscriptions();
   }
 }
+
+export type GridPlugin = (typeof BasePlugin);
