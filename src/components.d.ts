@@ -16,7 +16,7 @@ import { ColumnCollection } from "./services/column.data.provider";
 import { DataInput } from "./plugins/export/types";
 import { Observable } from "./utils/store.utils";
 import { DSourceState, Groups } from "./store/index";
-import { MultiFilterItem, ShowData } from "./plugins/filter/filter.pop";
+import { MultiFilterItem, ShowData } from "./plugins/filter/filter.panel";
 import { LogicFunction } from "./plugins/filter/filter.types";
 import { ResizeProps } from "./components/header/resizable.directive";
 import { Cell as Cell1, ColumnRegular as ColumnRegular1, DataType as DataType1, DimensionCols as DimensionCols1, DimensionRows as DimensionRows1, DimensionSettingsState as DimensionSettingsState1, Observable as Observable1, SelectionStoreState as SelectionStoreState1 } from "./components";
@@ -31,7 +31,7 @@ export { ColumnCollection } from "./services/column.data.provider";
 export { DataInput } from "./plugins/export/types";
 export { Observable } from "./utils/store.utils";
 export { DSourceState, Groups } from "./store/index";
-export { MultiFilterItem, ShowData } from "./plugins/filter/filter.pop";
+export { MultiFilterItem, ShowData } from "./plugins/filter/filter.panel";
 export { LogicFunction } from "./plugins/filter/filter.types";
 export { ResizeProps } from "./components/header/resizable.directive";
 export { Cell as Cell1, ColumnRegular as ColumnRegular1, DataType as DataType1, DimensionCols as DimensionCols1, DimensionRows as DimensionRows1, DimensionSettingsState as DimensionSettingsState1, Observable as Observable1, SelectionStoreState as SelectionStoreState1 } from "./components";
@@ -399,7 +399,6 @@ export namespace Components {
         "filterTypes": Record<string, string[]>;
         "getChanges": () => Promise<ShowData>;
         "show": (newEntity?: ShowData) => Promise<void>;
-        "uuid": string;
     }
     /**
      * Focus component. Shows focus layer around the cell that is currently in focus.
@@ -1689,7 +1688,6 @@ declare namespace LocalJSX {
         "filterNames"?: Record<string, string>;
         "filterTypes"?: Record<string, string[]>;
         "onFilterChange"?: (event: RevogrFilterPanelCustomEvent<MultiFilterItem>) => void;
-        "uuid"?: string;
     }
     /**
      * Focus component. Shows focus layer around the cell that is currently in focus.

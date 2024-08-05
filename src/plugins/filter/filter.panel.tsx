@@ -1,4 +1,4 @@
-import { Component, Event, EventEmitter, h, Host, Listen, Method, Prop, State, VNode } from '@stencil/core';
+import { Component, Event, EventEmitter, h, Host, Listen, Method, Prop, State, VNode, Element } from '@stencil/core';
 import { FilterType } from './filter.service';
 import { AndOrButton, isFilterBtn, TrashButton } from './filter.button';
 import '../../utils/closest.polifill';
@@ -56,19 +56,20 @@ export class FilterPanel {
     title: 'Filter by',
     save: 'Save',
     // drops the filter
-    reset: 'Cancel',
+    reset: 'Clear changes',
     cancel: 'Close',
     add: 'Add more condition...',
     placeholder: 'Enter value...',
     and: 'and',
     or: 'or',
   };
+
+  @Element() element!: HTMLElement;
   @State() isFilterIdSet = false;
   @State() filterId = 0;
   @State() currentFilterId = -1;
   @State() currentFilterType: FilterType = defaultType;
   @State() changes: ShowData | undefined;
-  @Prop({ mutable: true, reflect: true }) uuid: string;
   @Prop() filterItems: MultiFilterItem = {};
   @Prop() filterTypes: Record<string, string[]> = {};
   @Prop() filterNames: Record<string, string> = {};
@@ -79,11 +80,26 @@ export class FilterPanel {
   @Listen('mousedown', { target: 'document' }) onMouseDown(e: MouseEvent) {
     if (this.changes && !e.defaultPrevented) {
       const el = e.target as HTMLElement;
-      if (this.isOutside(el) && !isFilterBtn(el)) {
+
+      const select = document.getElementById('add-filter') as HTMLSelectElement;
+      if (select) {
+        select.value = defaultType;
+      }
+      this.currentFilterType = defaultType;
+      if (this.changes) {
+        this.changes.type = defaultType;
+      }
+      this.currentFilterId = -1;
+
+      const path = e.composedPath();
+      const isOutside = !path.includes(this.element);
+
+      if (isOutside && !isFilterBtn(el)) {
         this.changes = undefined;
       }
     }
   }
+
   @Method() async show(newEntity?: ShowData) {
     this.changes = newEntity;
     if (this.changes) {
@@ -392,20 +408,5 @@ export class FilterPanel {
     if (!this.changes) {
       throw new Error('Changes required per edit');
     }
-  }
-
-  private isOutside(e: HTMLElement | null) {
-    const select = document.getElementById('add-filter') as HTMLSelectElement;
-    if (select) select.value = defaultType;
-
-    this.currentFilterType = defaultType;
-    if (this.changes) {
-      this.changes.type = defaultType;
-    }
-    this.currentFilterId = -1;
-    if (e?.classList.contains(`[uuid="${this.uuid}"]`)) {
-      return false;
-    }
-    return !e?.closest(`[uuid="${this.uuid}"]`);
   }
 }
