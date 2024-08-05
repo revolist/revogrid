@@ -7,7 +7,6 @@ import { createStore } from '@stencil/store';
 
 import { setStore, Observable, PluginSubscribe } from '../../utils/store.utils';
 import { calculateDimensionData } from './dimension.helpers';
-import each from 'lodash/each';
 import {
   DimensionCalc,
   DimensionSettingsState,
@@ -30,14 +29,15 @@ const trimmedPlugin = (
     sizes: DimensionSettingsState['sizes'],
     trimmed: DimensionSettingsState['trimmed'],
   ) => {
-    const newSize = { ...sizes };
+    const newSize: DimensionSettingsState['sizes'] = { ...sizes };
     trimmedSize = {};
-    each(trimmed, (v, index) => {
-      if (v && newSize[index]) {
-        trimmedSize[index] = newSize[index];
-        delete newSize[index];
+    for (const [index, v] of Object.entries(trimmed)) {
+      const i = index as keyof DimensionSettingsState['sizes'];
+      if (v && newSize[i]) {
+        trimmedSize[i] = newSize[i];
+        delete newSize[i];
       }
-    });
+    }
     store.setDimensionSize(newSize);
   };
   return {

@@ -9,7 +9,6 @@ import {
   Host,
   Listen,
 } from '@stencil/core';
-import each from 'lodash/each';
 
 import GridResizeService from '../revoGrid/viewport.resize.service';
 import LocalScrollService from '../../services/local.scroll.service';
@@ -225,15 +224,16 @@ export class RevogrViewportScroll {
             noScroll: this.colType !== 'rgCol' ? true : false,
           },
         };
-        each(els, (item, dimension: DimensionType) => {
+        for (const [dim, item] of Object.entries(els)) {
+          const dimension = dim as DimensionType;
           this.resizeViewport.emit({ dimension, size: item.size, rowHeader: this.rowHeader });
           if (item.noScroll) {
-            return;
+            continue;
           }
           this.localScrollService?.scroll(item.scroll, dimension, true);
           // track scroll visibility on outer element change
           this.setScrollVisibility(dimension, item.size, item.contentSize);
-        });
+        }
       },
     });
   }
