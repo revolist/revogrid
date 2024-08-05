@@ -78,8 +78,9 @@ import {
   HeaderProperties,
   PluginProviders,
 } from '@type';
-import { Observable } from '../../utils/store.utils';
-import { BasePlugin } from '../../plugins/base.plugin';
+import type { Observable } from '../../utils/store.utils';
+import type { GridPlugin } from '../../plugins/base.plugin';
+
 
 /**
  * Revogrid - High-performance, customizable grid library for managing large datasets.
@@ -176,7 +177,7 @@ export class RevoGridComponent {
    * Has to be predefined during first grid init.
    * Every plugin should be inherited from BasePlugin.
    */
-  @Prop() plugins: (typeof BasePlugin)[] = [];
+  @Prop() plugins: GridPlugin[] = [];
 
   /**
    * Column Types Format.

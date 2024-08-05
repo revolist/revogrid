@@ -6,6 +6,7 @@
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 import { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, ChangedRange, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, PluginBaseComponent, PositionItem, RangeArea, RowDefinition, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
+import { GridPlugin } from "./plugins/base.plugin";
 import { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
 import { ColumnFilterConfig, FilterCaptions, FilterCollection } from "./plugins/filter/filter.plugin";
 import { GroupingOptions } from "./plugins/groupingRow/grouping.row.types";
@@ -20,6 +21,7 @@ import { LogicFunction } from "./plugins/filter/filter.types";
 import { ResizeProps } from "./components/header/resizable.directive";
 import { Cell as Cell1, ColumnRegular as ColumnRegular1, DataType as DataType1, DimensionCols as DimensionCols1, DimensionRows as DimensionRows1, DimensionSettingsState as DimensionSettingsState1, Observable as Observable1, SelectionStoreState as SelectionStoreState1 } from "./components";
 export { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, ChangedRange, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, PluginBaseComponent, PositionItem, RangeArea, RowDefinition, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
+export { GridPlugin } from "./plugins/base.plugin";
 export { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
 export { ColumnFilterConfig, FilterCaptions, FilterCollection } from "./plugins/filter/filter.plugin";
 export { GroupingOptions } from "./plugins/groupingRow/grouping.row.types";
@@ -182,7 +184,7 @@ export namespace Components {
         /**
           * Custom grid plugins. Has to be predefined during first grid init. Every plugin should be inherited from BasePlugin.
          */
-        "plugins": (typeof BasePlugin)[];
+        "plugins": GridPlugin[];
         /**
           * When true, user can range selection.
          */
@@ -194,7 +196,7 @@ export namespace Components {
         /**
           * Refreshes data viewport. Can be specific part as rgRow or pinned rgRow or 'all' by default.
          */
-        "refresh": (type?: DimensionRows | 'all') => Promise<void>;
+        "refresh": (type?: DimensionRows | "all") => Promise<void>;
         /**
           * Register new virtual node inside of grid. Used for additional items creation such as plugin elements. Should be set before grid render inside of plugins.
          */
@@ -269,7 +271,7 @@ export namespace Components {
           * @param index - virtual column index
           * @param order - order to apply
          */
-        "updateColumnSorting": (column: ColumnRegular, index: number, order: 'asc' | 'desc', additive: boolean) => Promise<ColumnRegular>;
+        "updateColumnSorting": (column: ColumnRegular, index: number, order: "asc" | "desc", additive: boolean) => Promise<ColumnRegular>;
         /**
           * Update columns
          */
@@ -1449,7 +1451,7 @@ declare namespace LocalJSX {
         /**
           * Custom grid plugins. Has to be predefined during first grid init. Every plugin should be inherited from BasePlugin.
          */
-        "plugins"?: (typeof BasePlugin)[];
+        "plugins"?: GridPlugin[];
         /**
           * When true, user can range selection.
          */
