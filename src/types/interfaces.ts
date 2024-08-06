@@ -484,6 +484,7 @@ export type InitialHeaderClick = {
    * The column that was clicked.
    */
   column: ColumnRegular;
+  providers: Providers<DimensionCols | 'rowHeaders'>;
 };
 
 /**
