@@ -1,9 +1,12 @@
 import {
+  DSourceState,
   getItemByIndex,
   getItemByPosition,
+  getSourceItem,
 } from '@store';
-import { DimensionSettingsState, Cell, RangeArea, RangeAreaCss } from '@type';
+import { DimensionSettingsState, Cell, RangeArea, RangeAreaCss, DataLookup, DimensionRows, DataType } from '@type';
 import { getPropertyFromEvent } from '../../utils/events';
+import { Observable } from '../../utils/store.utils';
 
 export type EventData = {
   el: HTMLElement;
@@ -13,6 +16,19 @@ export type EventData = {
   focus: Cell;
   range: RangeArea;
 };
+
+export function collectModelsOfRange(data: DataLookup, store: Observable<DSourceState<DataType, DimensionRows>>) {
+  const models: DataLookup = {};
+  for (let i in data) {
+    const rowIndex = parseInt(i, 10);
+    models[rowIndex] = getSourceItem(
+      store,
+      rowIndex,
+    );
+  }
+
+  return models;
+}
 
 export function getFocusCellBasedOnEvent(
   e: MouseEvent | TouchEvent,

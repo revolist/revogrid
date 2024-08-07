@@ -19,6 +19,7 @@ import {
   isRangeSingleCell,
 } from '@store';
 import {
+  collectModelsOfRange,
   EventData,
   getElStyle,
   getFocusCellBasedOnEvent,
@@ -245,7 +246,7 @@ export class OverlaySelection {
   rangeClipboardCopy: EventEmitter<RangeClipboardCopyEventProps>;
 
   /**
-   * Range paste.
+   * Range paste event.
    */
   @Event({ eventName: 'clipboardrangepaste', cancelable: true })
   rangeClipboardPaste: EventEmitter<RangeClipboardPasteEvent>;
@@ -778,6 +779,7 @@ export class OverlaySelection {
     );
     const { defaultPrevented: canPaste } = this.rangeClipboardPaste.emit({
       data: changed,
+      models: collectModelsOfRange(changed, this.dataStore),
       range,
       ...this.types,
     });

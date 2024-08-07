@@ -4,6 +4,7 @@ import { DebouncedFunc } from 'lodash';
 import { h } from '@stencil/core';
 import { CELL_HANDLER_CLASS, MOBILE_CLASS } from '../../utils/consts';
 import {
+  collectModelsOfRange,
   EventData,
   getCell,
   getCurrentCell,
@@ -257,18 +258,13 @@ export class AutoFillService {
     this.autoFillStart = null;
   }
 
-  /** Trigger range apply events and handle responses */
+  /**
+   * Trigger range apply events and handle responses
+   */
   onRangeApply(data: DataLookup, range: RangeArea) {
-    const models: DataLookup = {};
-    for (let rowIndex in data) {
-      models[rowIndex] = getSourceItem(
-        this.sv.dataStore,
-        parseInt(rowIndex, 10),
-      );
-    }
     this.sv.rangeDataApply({
       data,
-      models,
+      models: collectModelsOfRange(data, this.sv.dataStore),
       type: this.sv.dataStore.get('type'),
     });
 

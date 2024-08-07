@@ -778,6 +778,9 @@ export type ScrollCoordinateEvent = {
 /** Range paste. */
 export type RangeClipboardPasteEvent = {
   data: DataLookup;
+  models: {
+    [rowIndex: number]: DataType;
+  };
   range: RangeArea;
 } & AllDimensionType;
 
