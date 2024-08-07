@@ -38,7 +38,7 @@ import {
   Cell,
   DragStartEvent,
 } from '../../components';
-import { EditCellStore, MultiDimensionType } from '@type';
+import { EditCellStore, MultiDimensionType, RangeClipboardCopyEventProps, RangeClipboardPasteEvent } from '@type';
 import {
   FocusRenderEvent,
   ApplyFocusEvent,
@@ -236,9 +236,19 @@ export class OverlaySelection {
   rangeEditApply: EventEmitter<BeforeRangeSaveDataDetails>;
   /** Range copy. */
   @Event({ eventName: 'clipboardrangecopy', cancelable: true })
-  rangeClipboardCopy: EventEmitter;
+  /**
+   * Range copy event.
+   * This event is triggered when data is ready to be copied to the clipboard.
+   * If you want to prevent the default behavior of copying data, you can call `e.preventDefault()`.
+   * If you want to modify the data that will be copied to the clipboard, modify the `data` property of the event object.
+   */
+  rangeClipboardCopy: EventEmitter<RangeClipboardCopyEventProps>;
+
+  /**
+   * Range paste.
+   */
   @Event({ eventName: 'clipboardrangepaste', cancelable: true })
-  rangeClipboardPaste: EventEmitter;
+  rangeClipboardPaste: EventEmitter<RangeClipboardPasteEvent>;
 
   /**
    * Before key up event proxy, used to prevent key up trigger.

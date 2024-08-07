@@ -11,6 +11,7 @@ import {
   Cell,
   EditorCtr,
   FocusedCells,
+  OldNewRangeMapping,
   RangeArea,
   SelectionStoreState,
 } from './selection';
@@ -772,3 +773,17 @@ export type ScrollCoordinateEvent = {
    */
   coordinate: number;
 };
+
+
+/** Range paste. */
+export type RangeClipboardPasteEvent = {
+  data: DataLookup;
+  range: RangeArea;
+} & AllDimensionType;
+
+/** Range copy. */
+export type RangeClipboardCopyEventProps = {
+  data: DataFormat[][];
+  range: RangeArea;
+  mapping: OldNewRangeMapping;
+} & AllDimensionType;
