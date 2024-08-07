@@ -5,7 +5,7 @@
  * It contains typing information for all components that exist in this project.
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
-import { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, ChangedRange, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, PluginBaseComponent, PositionItem, RangeArea, RowDefinition, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
+import { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, ChangedRange, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, PluginBaseComponent, PositionItem, RangeArea, RangeClipboardCopyEventProps, RangeClipboardPasteEvent, RowDefinition, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
 import { GridPlugin } from "./plugins/base.plugin";
 import { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
 import { ColumnFilterConfig, FilterCaptions, FilterCollection } from "./plugins/filter/filter.plugin";
@@ -20,7 +20,7 @@ import { MultiFilterItem, ShowData } from "./plugins/filter/filter.panel";
 import { LogicFunction } from "./plugins/filter/filter.types";
 import { ResizeProps } from "./components/header/resizable.directive";
 import { Cell as Cell1, ColumnRegular as ColumnRegular1, DataType as DataType1, DimensionCols as DimensionCols1, DimensionRows as DimensionRows1, DimensionSettingsState as DimensionSettingsState1, Observable as Observable1, SelectionStoreState as SelectionStoreState1 } from "./components";
-export { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, ChangedRange, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, PluginBaseComponent, PositionItem, RangeArea, RowDefinition, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
+export { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, ChangedRange, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, PluginBaseComponent, PositionItem, RangeArea, RangeClipboardCopyEventProps, RangeClipboardPasteEvent, RowDefinition, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
 export { GridPlugin } from "./plugins/base.plugin";
 export { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
 export { ColumnFilterConfig, FilterCaptions, FilterCollection } from "./plugins/filter/filter.plugin";
@@ -845,14 +845,34 @@ declare global {
         new (): HTMLRevogrAttributionElement;
     };
     interface HTMLRevogrClipboardElementEventMap {
-        "beforepaste": any;
-        "beforepasteapply": any;
+        "beforepaste": {
+    raw: string;
+    isHTML: boolean;
+    event: ClipboardEvent;
+    dataText: string;
+  };
+        "beforepasteapply": {
+    raw: string;
+    parsed: string[][];
+    event: ClipboardEvent;
+  };
         "pasteregion": string[][];
-        "afterpasteapply": any;
-        "beforecut": any;
+        "afterpasteapply": {
+    raw: string;
+    parsed: string[][];
+    event: ClipboardEvent;
+  };
+        "beforecut": {
+    event: ClipboardEvent;
+  };
         "clearregion": DataTransfer;
-        "beforecopy": any;
-        "beforecopyapply": any;
+        "beforecopy": {
+    event: ClipboardEvent;
+  };
+        "beforecopyapply": {
+    event: DataTransfer;
+    data?: string[][];
+  };
         "copyregion": DataTransfer;
     }
     /**
@@ -1034,8 +1054,8 @@ declare global {
         "selectionchangeinit": ChangedRange;
         "beforerangecopyapply": ChangedRange;
         "rangeeditapply": BeforeRangeSaveDataDetails;
-        "clipboardrangecopy": any;
-        "clipboardrangepaste": any;
+        "clipboardrangecopy": RangeClipboardCopyEventProps;
+        "clipboardrangepaste": RangeClipboardPasteEvent;
         "beforekeydown": KeyboardEvent;
         "beforekeyup": KeyboardEvent;
         "beforecellsave": any;
@@ -1511,53 +1531,55 @@ declare namespace LocalJSX {
      */
     interface RevogrClipboard {
         /**
-          * Paste 4. Fired after paste applied to the grid
-          * @property {string} raw - raw data from clipboard
-          * @property {string[][]} parsed - parsed data
-          * @property {ClipboardEvent} event - original event
-          * @property {boolean} defaultPrevented - if true, paste will be canceled
+          * Paste 4. Fired after paste applied to the grid defaultPrevented - if true, paste will be canceled
          */
-        "onAfterpasteapply"?: (event: RevogrClipboardCustomEvent<any>) => void;
+        "onAfterpasteapply"?: (event: RevogrClipboardCustomEvent<{
+    raw: string;
+    parsed: string[][];
+    event: ClipboardEvent;
+  }>) => void;
         /**
-          * Copy 1. Fired before copy triggered
-          * @property {ClipboardEvent} event - original event
-          * @property {boolean} defaultPrevented - if true, copy will be canceled
+          * Copy 1. Fired before copy triggered defaultPrevented - if true, copy will be canceled
          */
-        "onBeforecopy"?: (event: RevogrClipboardCustomEvent<any>) => void;
+        "onBeforecopy"?: (event: RevogrClipboardCustomEvent<{
+    event: ClipboardEvent;
+  }>) => void;
         /**
-          * Copy Method 1. Fired before copy applied to the clipboard from outside.
-          * @property {DataTransfer} event - original event
-          * @property {string} data - data to copy
-          * @property {boolean} defaultPrevented - if true, copy will be canceled
+          * Copy Method 1. Fired before copy applied to the clipboard from outside. defaultPrevented - if true, copy will be canceled
          */
-        "onBeforecopyapply"?: (event: RevogrClipboardCustomEvent<any>) => void;
+        "onBeforecopyapply"?: (event: RevogrClipboardCustomEvent<{
+    event: DataTransfer;
+    data?: string[][];
+  }>) => void;
         /**
-          * Cut 1. Fired before cut triggered
-          * @property {ClipboardEvent} event - original event
-          * @property {boolean} defaultPrevented - if true, cut will be canceled
+          * Cut 1. Fired before cut triggered defaultPrevented - if true, cut will be canceled
          */
-        "onBeforecut"?: (event: RevogrClipboardCustomEvent<any>) => void;
+        "onBeforecut"?: (event: RevogrClipboardCustomEvent<{
+    event: ClipboardEvent;
+  }>) => void;
         /**
-          * Paste 1. Fired before paste applied to the grid
-          * @property {string} raw - raw data from clipboard
-          * @property {ClipboardEvent} event - original event
-          * @property {boolean} defaultPrevented - if true, paste will be canceled
+          * Paste 1. Fired before paste applied to the grid defaultPrevented - if true, paste will be canceled
          */
-        "onBeforepaste"?: (event: RevogrClipboardCustomEvent<any>) => void;
+        "onBeforepaste"?: (event: RevogrClipboardCustomEvent<{
+    raw: string;
+    isHTML: boolean;
+    event: ClipboardEvent;
+    dataText: string;
+  }>) => void;
         /**
           * Paste 2. Fired before paste applied to the grid and after data parsed
-          * @property {string} raw - raw data from clipboard
-          * @property {string[][]} parsed - parsed data
          */
-        "onBeforepasteapply"?: (event: RevogrClipboardCustomEvent<any>) => void;
+        "onBeforepasteapply"?: (event: RevogrClipboardCustomEvent<{
+    raw: string;
+    parsed: string[][];
+    event: ClipboardEvent;
+  }>) => void;
         /**
           * Cut 2. Clears region when cut is done
          */
         "onClearregion"?: (event: RevogrClipboardCustomEvent<DataTransfer>) => void;
         /**
-          * Copy 2. Fired when region copied
-          * @property {DataTransfer} data - data to copy
-          * @property {boolean} defaultPrevented - if true, copy will be canceled
+          * Copy 2. Fired when region copied defaultPrevented - if true, copy will be canceled
          */
         "onCopyregion"?: (event: RevogrClipboardCustomEvent<DataTransfer>) => void;
         /**
@@ -1964,8 +1986,11 @@ declare namespace LocalJSX {
         /**
           * Range copy.
          */
-        "onClipboardrangecopy"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
-        "onClipboardrangepaste"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
+        "onClipboardrangecopy"?: (event: RevogrOverlaySelectionCustomEvent<RangeClipboardCopyEventProps>) => void;
+        /**
+          * Range paste event.
+         */
+        "onClipboardrangepaste"?: (event: RevogrOverlaySelectionCustomEvent<RangeClipboardPasteEvent>) => void;
         /**
           * Cell get focused. To prevent the default behavior of applying the edit data, you can call `e.preventDefault()`.
          */

@@ -10,7 +10,7 @@ import {
   getCurrentCell,
   isAfterLast,
 } from './selection.utils';
-import { DSourceState, getSourceItem, getRange } from '@store';
+import { DSourceState, getRange } from '@store';
 import ColumnService from '../data/column.service';
 import { getPropertyFromEvent } from '../../utils/events';
 import {
