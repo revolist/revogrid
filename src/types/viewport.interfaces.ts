@@ -52,9 +52,6 @@ export type ViewportData = {
 
   /** Slot to put data */
   slot: SlotType;
-
-  /** Current grid uniq Id */
-  uuid: string;
   style?: { [key: string]: string };
 } & JSX.RevogrOverlaySelection
   & JSX.RevogrData;

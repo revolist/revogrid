@@ -1,6 +1,5 @@
 import KeyCodesEnum, { codesLetter, keyValues } from './key.codes';
 import OsPlatform from './platform';
-import includes from 'lodash/includes';
 
 export function isLetterKey(code: number): boolean {
   return (
@@ -52,29 +51,23 @@ export function isMetaKey(code: number): boolean {
 // navigator.platform
 export function isCtrlKey(code: number, platform: string): boolean {
   if (platform.includes(OsPlatform.mac)) {
-    return includes(
-      [
-        KeyCodesEnum.COMMAND_LEFT,
-        KeyCodesEnum.COMMAND_RIGHT,
-        KeyCodesEnum.COMMAND_FIREFOX,
-      ],
-      code,
-    );
-  }
-
-  return KeyCodesEnum.CONTROL === code;
-}
-
-export function isCtrlMetaKey(code: KeyCodesEnum): boolean {
-  return includes(
-    [
-      KeyCodesEnum.CONTROL,
+    return [
       KeyCodesEnum.COMMAND_LEFT,
       KeyCodesEnum.COMMAND_RIGHT,
       KeyCodesEnum.COMMAND_FIREFOX,
-    ],
-    code,
-  );
+    ].includes(code);
+  }
+
+  return code === KeyCodesEnum.CONTROL;
+}
+
+export function isCtrlMetaKey(code: KeyCodesEnum): boolean {
+  return [
+    KeyCodesEnum.CONTROL,
+    KeyCodesEnum.COMMAND_LEFT,
+    KeyCodesEnum.COMMAND_RIGHT,
+    KeyCodesEnum.COMMAND_FIREFOX,
+  ].includes(code);
 }
 
 export function isClear(code: string): boolean {

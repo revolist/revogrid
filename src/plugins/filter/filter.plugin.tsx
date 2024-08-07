@@ -3,7 +3,7 @@ import reduce from 'lodash/reduce';
 
 import { BasePlugin } from '../base.plugin';
 import { FILTER_PROP, isFilterBtn } from './filter.button';
-import { MultiFilterItem } from './filter.pop';
+import { MultiFilterItem } from './filter.panel';
 import {
   filterEntities,
   filterNames,
@@ -85,7 +85,6 @@ export class FilterPlugin extends BasePlugin {
   constructor(
     public revogrid: HTMLRevoGridElement,
     providers: PluginProviders,
-    uiid: string,
     config?: ColumnFilterConfig,
   ) {
     super(revogrid, providers);
@@ -137,7 +136,6 @@ export class FilterPlugin extends BasePlugin {
     this.revogrid.registerVNode = [
       ...existingNodes,
       <revogr-filter-panel
-        uuid={`filter-${uiid}`}
         filterItems={this.multiFilterItems}
         filterNames={this.possibleFilterNames}
         filterEntities={this.possibleFilterEntities}

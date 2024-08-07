@@ -11,6 +11,7 @@ import {
   Cell,
   EditorCtr,
   FocusedCells,
+  OldNewRangeMapping,
   RangeArea,
   SelectionStoreState,
 } from './selection';
@@ -484,6 +485,7 @@ export type InitialHeaderClick = {
    * The column that was clicked.
    */
   column: ColumnRegular;
+  providers: Providers<DimensionCols | 'rowHeaders'>;
 };
 
 /**
@@ -771,3 +773,20 @@ export type ScrollCoordinateEvent = {
    */
   coordinate: number;
 };
+
+
+/** Range paste. */
+export type RangeClipboardPasteEvent = {
+  data: DataLookup;
+  models: {
+    [rowIndex: number]: DataType;
+  };
+  range: RangeArea;
+} & AllDimensionType;
+
+/** Range copy. */
+export type RangeClipboardCopyEventProps = {
+  data: DataFormat[][];
+  range: RangeArea;
+  mapping: OldNewRangeMapping;
+} & AllDimensionType;

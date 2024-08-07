@@ -11,7 +11,6 @@ import {
   VNode,
   Host,
 } from '@stencil/core';
-import each from 'lodash/each';
 
 import ColumnDataProvider, {
   ColumnCollection,
@@ -39,7 +38,6 @@ import { GroupingOptions } from '../../plugins/groupingRow/grouping.row.types';
 import ViewportService, { FocusedData } from './viewport.service';
 import { DATA_SLOT, HEADER_SLOT } from './viewport.helpers';
 import GridScrollingService from './viewport.scrolling.service';
-import { UUID } from '../../utils/consts';
 import SelectionStoreConnector from '../../services/selection.store.connector';
 import OrderRenderer, { OrdererService } from '../order/order-renderer';
 import StretchColumn, {
@@ -79,8 +77,9 @@ import {
   HeaderProperties,
   PluginProviders,
 } from '@type';
-import { Observable } from '../../utils/store.utils';
-import { BasePlugin } from '../../plugins/base.plugin';
+import type { Observable } from '../../utils/store.utils';
+import type { GridPlugin } from '../../plugins/base.plugin';
+
 
 /**
  * Revogrid - High-performance, customizable grid library for managing large datasets.
@@ -177,7 +176,7 @@ export class RevoGridComponent {
    * Has to be predefined during first grid init.
    * Every plugin should be inherited from BasePlugin.
    */
-  @Prop() plugins: (typeof BasePlugin)[] = [];
+  @Prop() plugins: GridPlugin[] = [];
 
   /**
    * Column Types Format.
@@ -817,20 +816,21 @@ export class RevoGridComponent {
     if (event.defaultPrevented) {
       return;
     }
-    const target = event.target as HTMLElement | null;
     const pos = screenX + screenY;
     // detect if mousemove then do nothing
     if (Math.abs((this.clickTrackForFocusClear ?? 0) - pos) > 10) {
       return;
     }
 
-    // check if action finished inside of the document
-    // clear data which is outside of grid
+    // Check if action finished inside of the document
     // if event prevented or it is current table don't clear focus
-    if (target?.closest(`[${UUID}="${this.uuid}"]`)) {
-      return;
+    const path = event.composedPath();
+    if (!path.includes(this.element) &&
+        !path.includes(this.element.shadowRoot)
+      ) {
+      // Perform actions if the click is outside the component
+      this.clearFocus();
     }
-    this.clearFocus();
   }
   // #endregion
 
@@ -947,8 +947,6 @@ export class RevoGridComponent {
   @Element() element: HTMLRevoGridElement;
   private extraElements: VNode[] = [];
 
-  // UUID required to support multiple grids in one page and avoid collision
-  uuid?: string;
   columnProvider: ColumnDataProvider;
   dataProvider: DataProvider;
   dimensionProvider: DimensionProvider;
@@ -1005,7 +1003,7 @@ export class RevoGridComponent {
   @Watch('rowSize') rowSizeChanged(s: number) {
     // clear existing data
     this.dimensionProvider.setSettings({ originItemSize: s }, 'rgRow');
-    this.rowDefChanged(this.rowDefinitions, this.rowDefinitions);
+    this.rowDefChanged(this.rowDefinitions, this.rowDefinitions, 'rowSize', true);
   }
 
   @Watch('theme') themeChanged(
@@ -1032,16 +1030,10 @@ export class RevoGridComponent {
       );
       this.rowDefChanged(
         // for cases when some custom size present and not
-        this.rowDefinitions.length
-          ? this.rowDefinitions
-          : [
-              {
-                type: 'rgRow',
-                size: this.themeService.rowSize,
-                index: 0,
-              },
-            ],
         this.rowDefinitions,
+        this.rowDefinitions,
+        'theme',
+        true,
       );
     }
     this.afterthemechanged.emit(t);
@@ -1106,6 +1098,8 @@ export class RevoGridComponent {
   @Watch('rowDefinitions') rowDefChanged(
     after: RowDefinition[],
     before?: RowDefinition[],
+    _watchName?: string,
+    forceUpdate = true,
   ) {
     const {
       detail: { vals: newVal, oldVals: oldVal },
@@ -1119,19 +1113,26 @@ export class RevoGridComponent {
     if (oldVal) {
       const remove = rowDefinitionRemoveByType(oldVal);
       // clear all old data and drop sizes
-      each(remove, (_, t: DimensionRows) => {
-        this.dimensionProvider.clearSize(
-          t,
-          this.dataProvider.stores[t].store.get('source').length,
-        );
-      });
+      for (const t in remove) {
+        if (remove.hasOwnProperty(t)) {
+          const type = t as DimensionRows;
+          const store = this.dataProvider.stores[type];
+          const sourceLength = store.store.get('source').length;
+          this.dimensionProvider.clearSize(type, sourceLength);
+        }
+      }
     }
     if (!newVal.length) {
-      return;
+      if (forceUpdate) {
+        this.dimensionProvider.setCustomSizes('rgRow', {});
+      } else {
+        return;
+      }
     }
-    each(newRows, (r, k: DimensionRows) =>
-      this.dimensionProvider.setCustomSizes(k, r?.sizes || {}),
-    );
+    Object.entries(newRows).forEach(([k, r]) => {
+      const type = k as DimensionRows;
+      this.dimensionProvider.setCustomSizes(type, r.sizes || {});
+    });
   }
 
   @Watch('trimmedRows') trimmedRowsChanged(
@@ -1236,7 +1237,6 @@ export class RevoGridComponent {
         new FilterPlugin(
           this.element,
           pluginData,
-          this.uuid || '',
           typeof this.filter === 'object' ? this.filter : undefined,
         ),
       );
@@ -1295,9 +1295,6 @@ export class RevoGridComponent {
     this.dataProvider = new DataProvider(this.dimensionProvider);
     // #endregion
 
-    // generate uuid for this grid
-    this.uuid = `rv--${Math.random().toString(36).slice(2, 6)}-${Date.now()}`;
-
     this.registerOutsideVNodes(this.registerVNode);
 
     // init plugins
@@ -1314,7 +1311,9 @@ export class RevoGridComponent {
       undefined,
       'pinnedBottomSource',
     );
-    this.trimmedRowsChanged(this.trimmedRows);
+    if (Object.keys(this.trimmedRows ?? {}).length > 0) {
+      this.trimmedRowsChanged(this.trimmedRows);
+    }
     this.rowDefChanged(this.rowDefinitions);
     this.groupingChanged(this.grouping);
 
@@ -1513,7 +1512,7 @@ export class RevoGridComponent {
     const dimensions = this.dimensionProvider.stores;
 
     return (
-      <Host {...{ [`${UUID}`]: this.uuid }}>
+      <Host>
         {this.hideAttribution ? null : (
           <revogr-attribution class="attribution" />
         )}

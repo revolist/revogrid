@@ -1,4 +1,3 @@
-import reduce from 'lodash/reduce';
 import { RowDefinition, DimensionRows } from '@type';
 
 type Result = Partial<{
@@ -8,33 +7,31 @@ type RemoveResult = Partial<{
   [T in DimensionRows]: number[];
 }>;
 export const rowDefinitionByType = (newVal: RowDefinition[] = []) => {
-  return reduce(newVal, (r: Result, v) => {
-      let type = r[v.type];
-      if (!type) {
-        type = r[v.type] = {};
+  const result: Result = {};
+  for (const v of newVal) {
+    if (!result[v.type]) {
+      result[v.type] = {};
+    }
+    if (v.size) {
+      if (!result[v.type].sizes) {
+        result[v.type].sizes = {};
       }
-      if (v.size) {
-        if (!type.sizes) {
-          type.sizes = {};
-        }
-        type.sizes[v.index] = v.size;
-      }
-      return r;
-    },
-    {},
-  );
+      result[v.type].sizes[v.index] = v.size;
+    }
+  }
+  return result;
 };
 
 export const rowDefinitionRemoveByType = (oldVal: RowDefinition[] = []) => {
-  return reduce(oldVal, (r: RemoveResult, v) => {
-      if (!r[v.type]) {
-        r[v.type] = [];
-      }
-      if (v.size) {
-        r[v.type]?.push(v.index);
-      }
-      return r;
-    },
-    {},
-  );
+  const result: RemoveResult = {};
+  for (const v of oldVal) {
+    if (!result[v.type]) {
+      result[v.type] = [];
+    }
+    if (v.size) {
+      result[v.type].push(v.index);
+    }
+  }
+  return result;
 };
+

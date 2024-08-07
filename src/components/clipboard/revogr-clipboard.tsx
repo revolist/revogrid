@@ -1,4 +1,11 @@
-import { Component, Listen, Method, Event, EventEmitter, Prop } from '@stencil/core';
+import {
+  Component,
+  Listen,
+  Method,
+  Event,
+  EventEmitter,
+  Prop,
+} from '@stencil/core';
 import { DataFormat } from '@type';
 /**
  * This Clipboard provides functionality for handling clipboard events in a web application.
@@ -12,42 +19,50 @@ export class Clipboard {
 
   /**
    * Paste 1. Fired before paste applied to the grid
-   * @property {string} raw - raw data from clipboard
-   * @property {ClipboardEvent} event - original event
-   * @property {boolean} defaultPrevented - if true, paste will be canceled
+   * defaultPrevented - if true, paste will be canceled
    */
-  @Event({ eventName: 'beforepaste' }) beforePaste: EventEmitter;
+  @Event({ eventName: 'beforepaste' }) beforePaste: EventEmitter<{
+    raw: string;
+    isHTML: boolean;
+    event: ClipboardEvent;
+    dataText: string;
+  }>;
 
   /**
    * Paste 2. Fired before paste applied to the grid and after data parsed
-   * @property {string} raw - raw data from clipboard
-   * @property {string[][]} parsed - parsed data
    */
-  @Event({ eventName: 'beforepasteapply' }) beforePasteApply: EventEmitter;
+  @Event({ eventName: 'beforepasteapply' })
+  beforePasteApply: EventEmitter<{
+    raw: string;
+    parsed: string[][];
+    event: ClipboardEvent;
+  }>;
 
   /**
    * Paste 3. Internal method. When data region is ready pass it to the top.
    * @property {string[][]} data - data to paste
    * @property {boolean} defaultPrevented - if true, paste will be canceled
    */
-  @Event({ eventName: 'pasteregion', bubbles: false }) pasteRegion: EventEmitter<string[][]>;
-
+  @Event({ eventName: 'pasteregion', bubbles: false })
+  pasteRegion: EventEmitter<string[][]>;
 
   /**
    * Paste 4. Fired after paste applied to the grid
-   * @property {string} raw - raw data from clipboard
-   * @property {string[][]} parsed - parsed data
-   * @property {ClipboardEvent} event - original event
-   * @property {boolean} defaultPrevented - if true, paste will be canceled
+   * defaultPrevented - if true, paste will be canceled
    */
-  @Event({ eventName: 'afterpasteapply' }) afterPasteApply: EventEmitter;
+  @Event({ eventName: 'afterpasteapply' }) afterPasteApply: EventEmitter<{
+    raw: string;
+    parsed: string[][];
+    event: ClipboardEvent;
+  }>;
 
   /**
    * Cut 1. Fired before cut triggered
-   * @property {ClipboardEvent} event - original event
-   * @property {boolean} defaultPrevented - if true, cut will be canceled
+   * defaultPrevented - if true, cut will be canceled
    */
-  @Event({ eventName: 'beforecut' }) beforeCut: EventEmitter;
+  @Event({ eventName: 'beforecut' }) beforeCut: EventEmitter<{
+    event: ClipboardEvent;
+  }>;
 
   /**
    * Cut 2. Clears region when cut is done
@@ -56,25 +71,27 @@ export class Clipboard {
 
   /**
    * Copy 1. Fired before copy triggered
-   * @property {ClipboardEvent} event - original event
-   * @property {boolean} defaultPrevented - if true, copy will be canceled
+   * defaultPrevented - if true, copy will be canceled
    */
-  @Event({ eventName: 'beforecopy' }) beforeCopy: EventEmitter;
+  @Event({ eventName: 'beforecopy' }) beforeCopy: EventEmitter<{
+    event: ClipboardEvent;
+  }>;
 
   /**
    * Copy Method 1. Fired before copy applied to the clipboard from outside.
-   * @property {DataTransfer} event - original event
-   * @property {string} data - data to copy
-   * @property {boolean} defaultPrevented - if true, copy will be canceled
+   * defaultPrevented - if true, copy will be canceled
    */
-  @Event({ eventName: 'beforecopyapply' }) beforeCopyApply: EventEmitter;
+  @Event({ eventName: 'beforecopyapply' }) beforeCopyApply: EventEmitter<{
+    event: DataTransfer;
+    data?: string[][];
+  }>;
 
   /**
    * Copy 2. Fired when region copied
-   * @property {DataTransfer} data - data to copy
-   * @property {boolean} defaultPrevented - if true, copy will be canceled
+   * defaultPrevented - if true, copy will be canceled
    */
-  @Event({ eventName: 'copyregion', bubbles: false }) copyRegion: EventEmitter<DataTransfer>;
+  @Event({ eventName: 'copyregion', bubbles: false })
+  copyRegion: EventEmitter<DataTransfer>;
 
   @Listen('paste', { target: 'document' }) onPaste(e: ClipboardEvent) {
     // if readonly do nothing
@@ -83,7 +100,9 @@ export class Clipboard {
     }
     const clipboardData = this.getData(e);
     const isHTML = (clipboardData?.types.indexOf('text/html') || -1) > -1;
-    const data = isHTML ? clipboardData?.getData('text/html') : clipboardData?.getData('text');
+    const data = isHTML
+      ? clipboardData?.getData('text/html')
+      : clipboardData?.getData('text');
     const dataText = clipboardData?.getData('text');
 
     const beforePaste = this.beforePaste.emit({
@@ -204,6 +223,10 @@ export class Clipboard {
   }
 
   private getData(e: ClipboardEvent) {
-    return e.clipboardData || (window as unknown as { clipboardData: DataTransfer | null })?.clipboardData;
+    return (
+      e.clipboardData ||
+      (window as unknown as { clipboardData: DataTransfer | null })
+        ?.clipboardData
+    );
   }
 }

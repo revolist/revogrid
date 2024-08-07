@@ -4,8 +4,6 @@ export const RESIZE_INTERVAL = 40;
 export const DATA_COL = 'data-rgCol';
 export const DATA_ROW = 'data-rgRow';
 
-export const UUID = 'grid-uuid';
-
 export const DISABLED_CLASS = 'disabled';
 export const CELL_CLASS = 'rgCell';
 export const ROW_HEADER_TYPE = 'rowHeaders';

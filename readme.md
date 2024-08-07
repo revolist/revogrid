@@ -235,6 +235,8 @@ grid.source = items;
     -   Enhanced plugin support - now with full access to grid providers.
     -   Updated documentation.
     -   Provided full framework support and native render for  Angular, React, Svelte and Vue.
+-   **What next?**
+    -   Check our [Roadmap](https://github.com/users/revolist/projects/3)
 
 
 ## Our Sponsors

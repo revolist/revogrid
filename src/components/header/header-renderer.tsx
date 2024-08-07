@@ -2,9 +2,20 @@ import { h, VNode } from '@stencil/core';
 import { FilterButton } from '../../plugins/filter/filter.button';
 import { SortingSign } from '../../plugins/sorting/sorting.sign';
 import { ResizeEvent, ResizeProps } from './resizable.directive';
-import { DATA_COL, FOCUS_CLASS, HEADER_CLASS, HEADER_SORTABLE_CLASS, MIN_COL_SIZE } from '../../utils/consts';
+import {
+  DATA_COL,
+  FOCUS_CLASS,
+  HEADER_CLASS,
+  HEADER_SORTABLE_CLASS,
+  MIN_COL_SIZE,
+} from '../../utils/consts';
 import { HeaderCellRenderer } from './header-cell-renderer';
-import { VirtualPositionItem, ColumnTemplateProp, InitialHeaderClick, CellProps } from '@type';
+import {
+  VirtualPositionItem,
+  ColumnTemplateProp,
+  InitialHeaderClick,
+  CellProps,
+} from '@type';
 import { RangeArea } from '@type';
 
 type Props = {
@@ -34,16 +45,29 @@ const HeaderRenderer = (p: Props): VNode => {
     maxWidth: p.data?.maxSize,
     active: p.active || ['r'],
     class: cellClass,
-    style: { width: `${p.column.size}px`, transform: `translateX(${p.column.start}px)` },
+    style: {
+      width: `${p.column.size}px`,
+      transform: `translateX(${p.column.start}px)`,
+    },
     onResize: p.onResize,
     onDoubleClick(originalEvent: MouseEvent) {
-      p.onDoubleClick?.({ column: p.data, index: p.column.itemIndex, originalEvent });
+      p.onDoubleClick?.({
+        column: p.data,
+        index: p.column.itemIndex,
+        originalEvent,
+        providers: p.data.providers,
+      });
     },
     onClick(originalEvent: MouseEvent) {
       if (originalEvent.defaultPrevented || !p.onClick) {
         return;
       }
-      p.onClick({ column: p.data, index: p.column.itemIndex, originalEvent });
+      p.onClick({
+        column: p.data,
+        index: p.column.itemIndex,
+        originalEvent,
+        providers: p.data.providers,
+      });
     },
   };
   if (p.range) {
@@ -54,9 +78,17 @@ const HeaderRenderer = (p: Props): VNode => {
     }
   }
   return (
-    <HeaderCellRenderer data={p.data} props={dataProps} additionalData={p.additionalData}>
+    <HeaderCellRenderer
+      data={p.data}
+      props={dataProps}
+      additionalData={p.additionalData}
+    >
       {<SortingSign column={p.data} />}
-      {p.canFilter && p.data?.filter !== false ? <FilterButton column={p.data} /> : ''}
+      {p.canFilter && p.data?.filter !== false ? (
+        <FilterButton column={p.data} />
+      ) : (
+        ''
+      )}
     </HeaderCellRenderer>
   );
 };
