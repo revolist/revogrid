@@ -232,7 +232,7 @@ export class AutoFillService {
           });
 
           // If data apply was not prevented, apply new range
-          if (!stopApply) {
+          if (!stopApply && oldRange) {
             this.applyRangeWithData(newRange, oldRange);
           } else {
             // If data apply was prevented, clear temporary range
@@ -273,14 +273,14 @@ export class AutoFillService {
   }
 
   /** Apply range and copy data during range application */
-  private applyRangeWithData(newRange: RangeArea, oldRange: RangeArea | null) {
+  private applyRangeWithData(newRange: RangeArea, rangeToCopy: RangeArea) {
     const rangeData: ChangedRange = {
       type: this.sv.dataStore.get('type'),
       colType: this.sv.columnService.type,
       newData: {},
       mapping: {},
       newRange,
-      oldRange,
+      oldRange: rangeToCopy,
     };
     const { mapping, changed } = this.sv.columnService.getRangeData(
       rangeData,

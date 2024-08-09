@@ -18,7 +18,7 @@ import {
   FOOTER_SLOT,
   HEADER_SLOT,
 } from '../revoGrid/viewport.helpers';
-import { DimensionCols, DimensionType } from '@type';
+import { DimensionCols, DimensionType, ElementScroll } from '@type';
 import { ScrollCoordinateEvent, ViewPortResizeEvent, ViewPortScrollEvent } from '@type';
 
 type Delta = 'deltaX' | 'deltaY';
@@ -36,7 +36,7 @@ type LocalScrollEvent = {
   tag: 'revogr-viewport-scroll',
   styleUrl: 'revogr-viewport-scroll-style.scss',
 })
-export class RevogrViewportScroll {
+export class RevogrViewportScroll implements ElementScroll {
   /**
    * Enable row header
   */

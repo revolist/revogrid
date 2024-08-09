@@ -189,7 +189,7 @@ type RecombineOffsetData = {
 export function recombineByOffset(
   offset: number,
   data: RecombineOffsetData,
-): ItemsToUpdate | null {
+): ItemsToUpdate | undefined {
   const newItems = [...data.items];
   const itemsCount = newItems.length;
   let newRange = {
@@ -199,7 +199,7 @@ export function recombineByOffset(
 
   // if offset out of revo-viewport, makes sense whole redraw
   if (offset > itemsCount) {
-    return null;
+    return undefined;
   }
 
   // is direction of scroll positive

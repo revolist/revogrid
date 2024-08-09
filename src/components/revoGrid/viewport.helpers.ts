@@ -2,9 +2,7 @@
  * Collects data for pinned columns in the required @ViewportProps format.
  */
 
-import { MultiDimensionType } from '@type';
-import { Cell } from '@type';
-import { ViewportColumn } from '@type';
+import { DimensionRows, MultiDimensionType, SlotType, Cell, ViewportColumn } from '@type';
 
 /**
  * Represents the slot names for the viewport slots.
@@ -36,3 +34,30 @@ export function getLastCell(
   };
 }
 
+
+export function viewportDataPartition(
+  data: ViewportColumn,
+  type: DimensionRows,
+  slot: SlotType,
+  fixed?: boolean,
+) {
+  return {
+    colData: data.colStore,
+    viewportCol: data.viewports[data.colType].store,
+    viewportRow: data.viewports[type].store,
+    // lastCell is the last real coordinate + 1
+    lastCell: getLastCell(data, type),
+    slot,
+    type,
+    canDrag: !fixed,
+    position: data.position,
+    dataStore: data.rowStores[type].store,
+    dimensionCol: data.dimensions[data.colType].store,
+    dimensionRow: data.dimensions[type].store,
+    style: fixed
+      ? { height: `${data.dimensions[type].store.get('realSize')}px` }
+      : undefined,
+  };
+}
+
+export type VPPartition = ReturnType<typeof viewportDataPartition>;

@@ -1606,7 +1606,7 @@ declare namespace LocalJSX {
         /**
           * Column source
          */
-        "colData"?: Observable<DSourceState<ColumnRegular, DimensionCols>>;
+        "colData": Observable<DSourceState<ColumnRegular, DimensionCols>>;
         /**
           * Column data type
          */
@@ -1907,7 +1907,7 @@ declare namespace LocalJSX {
         /**
           * Dimension settings X.
          */
-        "dimensionCol"?: Observable1<DimensionSettingsState1>;
+        "dimensionCol": Observable1<DimensionSettingsState1>;
         /**
           * Dimension settings Y.
          */

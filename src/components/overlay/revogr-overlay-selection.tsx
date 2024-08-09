@@ -97,7 +97,7 @@ export class OverlaySelection {
   /** Dimension settings Y. */
   @Prop() dimensionRow: Observable<DimensionSettingsState>;
   /** Dimension settings X. */
-  @Prop() dimensionCol: Observable<DimensionSettingsState>;
+  @Prop() dimensionCol!: Observable<DimensionSettingsState>;
 
   // --------------------------------------------------------------------------
   //

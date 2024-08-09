@@ -65,8 +65,8 @@ export type OldNewRangeMapping = {
 export type ChangedRange = {
   type: DimensionRows;
   colType: DimensionCols;
-  newRange: RangeArea;
-  oldRange: RangeArea | null;
+  newRange: RangeArea; // new range to apply
+  oldRange: RangeArea; // range to copy from
   mapping: OldNewRangeMapping;
   newData: {
     [key: number]: DataType;
