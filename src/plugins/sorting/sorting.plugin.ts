@@ -275,7 +275,7 @@ export default class SortingPlugin extends BasePlugin {
   ): number[] {
     // if no sorting - return unsorted indexes
     if (Object.entries(sortingFunc).length === 0) {
-      // Unsort indexes
+      // Unsorted indexes
       return [...Array(indexes.length).keys()];
     }
     //

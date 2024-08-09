@@ -12,6 +12,7 @@ type FocusedStore = {
   cell: Cell;
   position: Cell;
 };
+
 type StoresMapping<T> = { [xOrY: number]: Partial<T> };
 
 export const EMPTY_INDEX = -1;
@@ -97,7 +98,7 @@ export default class SelectionStoreConnector {
       return this.columnStores[x];
     }
     this.columnStores[x] = new SelectionStore();
-    // build cross linking type to position
+    // build cross-linking type to position
     this.storesByType[type] = x;
     this.storesXToType[x] = type;
     return this.columnStores[x];
@@ -150,13 +151,13 @@ export default class SelectionStoreConnector {
 
     delete this.rowStores[y];
     delete this.columnStores[x];
-    // clear x cross link
+    // clear x cross-link
     if (this.storesXToType[x]) {
       const type = this.storesXToType[x];
       delete this.storesXToType[x];
       delete this.storesByType[type];
     }
-    // clear y cross link
+    // clear y cross-link
     if (this.storesYToType[y]) {
       const type = this.storesYToType[y];
       delete this.storesYToType[y];
@@ -266,10 +267,9 @@ export default class SelectionStoreConnector {
     // item in new store
     const nextItem: Partial<Cell> | null = nextCell(focus, lastCell);
 
-    let nextStore: SelectionStore | null = null;
+    let nextStore: SelectionStore | undefined;
     if (nextItem) {
-      for (let i in nextItem) {
-        let type: keyof Cell = i as keyof Cell;
+      Object.entries(nextItem).forEach(([type, nextItemCoord]: [keyof Cell, number]) => {
         let stores;
         switch (type) {
           case 'x':
@@ -279,22 +279,21 @@ export default class SelectionStoreConnector {
           case 'y':
             // Get the Y stores for the current X coordinate of the current store pointer
             stores = this.getYStores(currentStorePointer.x);
-            stores = this.getYStores(currentStorePointer.x);
             break;
         }
 
         // Get the next store based on the item in the new store
-        if (nextItem[type] >= 0) {
+        if (nextItemCoord >= 0) {
           nextStore = stores[++currentStorePointer[type]];
         } else {
           nextStore = stores[--currentStorePointer[type]];
           const nextLastCell = nextStore?.store.get('lastCell');
           if (nextLastCell) {
-            nextItem[type] = nextLastCell[type] + nextItem[type];
+            nextItem[type] = nextLastCell[type] + nextItemCoord;
           }
         }
-      }
-    }
+    });
+  }
     return {
       store: nextStore,
       item: nextItem,
@@ -326,11 +325,13 @@ export default class SelectionStoreConnector {
         if (!store) {
           continue;
         }
-        const lastCell = store.store.get('lastCell') || { x: 0, y: 0 };
-        store.setRange(
-          { x: 0, y: 0 },
-          { x: lastCell.x - 1, y: lastCell.y - 1 },
-        );
+        const lastCell = store.store.get('lastCell');
+        if (lastCell) {
+          store.setRange(
+            { x: 0, y: 0 },
+            { x: lastCell.x - 1, y: lastCell.y - 1 },
+          );
+        }
       }
     }
   }

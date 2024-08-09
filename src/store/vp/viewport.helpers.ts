@@ -6,6 +6,7 @@ import {
   VirtualPositionItem,
   Range,
 } from '@type';
+
 import { getItemByPosition } from '../dimension/dimension.helpers';
 
 export type DimensionDataViewport = Pick<
@@ -188,7 +189,7 @@ type RecombineOffsetData = {
 export function recombineByOffset(
   offset: number,
   data: RecombineOffsetData,
-): ItemsToUpdate | undefined {
+): ItemsToUpdate | null {
   const newItems = [...data.items];
   const itemsCount = newItems.length;
   let newRange = {
@@ -198,7 +199,7 @@ export function recombineByOffset(
 
   // if offset out of revo-viewport, makes sense whole redraw
   if (offset > itemsCount) {
-    return undefined;
+    return null;
   }
 
   // is direction of scroll positive
@@ -261,7 +262,8 @@ export function recombineByOffset(
 
       // item should always present, we do not create new item, we recombine them
       if (!newItems[newStart]) {
-        throw new Error('incorrect index');
+        console.error('incorrect index');
+        break;
       }
 
       // do recombination
@@ -337,7 +339,7 @@ export function isActiveRangeOutsideLastItem(
 
 export function getFirstItem(
   s: ItemsToUpdate,
-): VirtualPositionItem | undefined {
+) {
   return s.items[s.start];
 }
 

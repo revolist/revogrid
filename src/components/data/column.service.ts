@@ -240,7 +240,7 @@ export default class ColumnService {
     data: DataFormat[][],
   ): {
     changed: DataLookup;
-    range: RangeArea;
+    range: RangeArea | null;
   } {
     const changed: DataLookup = {};
     const copyRowLength = data.length;

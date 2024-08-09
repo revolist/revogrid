@@ -17,6 +17,10 @@ import {
 } from './selection';
 import type { Observable } from '../utils/store.utils';
 
+export type Nullable<T> = {
+  [P in keyof T]: T[P] | null;
+};
+
 /**
  * Advanced column data schema model.
  * Used for transpassing data to cell renderer and editor.
@@ -781,7 +785,7 @@ export type RangeClipboardPasteEvent = {
   models: {
     [rowIndex: number]: DataType;
   };
-  range: RangeArea;
+  range: RangeArea | null;
 } & AllDimensionType;
 
 /** Range copy. */

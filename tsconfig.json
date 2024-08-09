@@ -19,7 +19,7 @@
     "noImplicitReturns": true,
     "sourceMap": true,
     "skipLibCheck": true,
-    // "strictNullChecks": true,
+    "strictNullChecks": true,
     "paths": {
       "@store": ["src/store"],
       "@type": ["src/types"]

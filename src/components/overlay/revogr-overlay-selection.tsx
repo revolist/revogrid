@@ -41,6 +41,7 @@ import {
 } from '../../components';
 import {
   MultiDimensionType,
+  Nullable,
   RangeClipboardCopyEventProps,
   RangeClipboardPasteEvent
 } from '@type';
@@ -210,7 +211,7 @@ export class OverlaySelection {
    * Set temp range area during autofill.
    */
   @Event({ eventName: 'settemprange' })
-  setTempRange: EventEmitter<TempRange | null>;
+  setTempRange: EventEmitter<Nullable<TempRange> | null>;
 
   /**
    * Before cell get focused.
@@ -285,7 +286,7 @@ export class OverlaySelection {
   private keyboardService: KeyboardService | null = null;
   private autoFillService: AutoFillService | null = null;
   private orderEditor?: HTMLRevogrOrderEditorElement;
-  private revogrEdit?: HTMLRevogrEditElement | null = null;
+  private revogrEdit?: HTMLRevogrEditElement;
   private unsubscribeSelectionStore: { (): void }[] = [];
   // #endregion
 
@@ -299,14 +300,14 @@ export class OverlaySelection {
   }
 
   /**
-   * Action finished inside of the document.
+   * Action finished inside the document.
    * Pointer left document, clear any active operation.
    */
   @Listen('touchend', { target: 'document' })
   @Listen('mouseup', { target: 'document' })
   @Listen('mouseleave', { target: 'document' })
   onMouseUp() {
-    // Clear auto fill selection
+    // Clear autofill selection
     // when pointer left document,
     // clear any active operation.
     this.autoFillService?.clearAutoFillSelection(
@@ -349,8 +350,8 @@ export class OverlaySelection {
       this.range,
       !!this.selectionStore.get('edit'),
       {
-        focus: this.selectionStore.get('focus') || undefined,
-        range: this.selectionStore.get('range') || undefined,
+        focus: this.selectionStore.get('focus'),
+        range: this.selectionStore.get('range'),
       },
     );
   }
@@ -719,12 +720,12 @@ export class OverlaySelection {
 
   /**
    * Close editor event triggered
-   * @param details - if requires focus next
+   * @param details - if it requires focus next
    */
-  private closeEdit(e?: CustomEvent<boolean | undefined>) {
+  private async closeEdit(e?: CustomEvent<boolean | undefined>) {
     this.cancelEdit.emit();
     if (e?.detail) {
-      this.focusNext();
+      await this.focusNext();
     }
   }
 
@@ -864,7 +865,9 @@ export class OverlaySelection {
 
     if (isRangeEdit && start) {
       const range = getRange(start, end);
-      return range && this.triggerRangeEvent(range);
+      if (range) {
+        return this.triggerRangeEvent(range);
+      }
     }
 
     return this.doFocus(cell, end);

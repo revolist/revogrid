@@ -121,7 +121,7 @@ export class RevoEdit {
   }
 
   componentWillRender() {
-    // Active editor present
+    // Active editor present and not yet closed.
     if (this.currentEditor || !this.column) {
       return;
     }

@@ -149,7 +149,7 @@ export default class LocalScrollService {
       return NO_COORDINATE;
     }
 
-    if (param.maxSize && c > param.maxSize) {
+    if (typeof param.maxSize === 'number' && c > param.maxSize) {
       return param.maxSize;
     }
     return c;

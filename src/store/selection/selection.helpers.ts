@@ -27,21 +27,18 @@ export function nextCell(cell: Cell, lastCell: Cell): Partial<Cell> | null {
 }
 
 export function cropCellToMax(cell: Cell, lastCell: Cell): Cell {
-  const newCell: Cell = { ...cell };
-  let types: (keyof Cell)[] = ['x', 'y'];
-  // previous item check
-  for (let t of types) {
-    if (cell[t] < 0) {
-      newCell[t] = 0;
+  const croppedCell: Cell = { ...cell };
+  const cellCoordinates: (keyof Cell)[] = ['x', 'y'];
+
+  for (const coordinate of cellCoordinates) {
+    if (cell[coordinate] < 0) {
+      croppedCell[coordinate] = 0;
+    } else if (cell[coordinate] >= lastCell[coordinate]) {
+      croppedCell[coordinate] = lastCell[coordinate] - 1;
     }
   }
-  // next item check
-  for (let t of types) {
-    if (cell[t] >= lastCell[t]) {
-      newCell[t] = lastCell[t] - 1;
-    }
-  }
-  return newCell;
+
+  return croppedCell;
 }
 
 export function getRange(start?: Cell | null, end?: Cell | null): RangeArea | null {

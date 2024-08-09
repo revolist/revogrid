@@ -22,7 +22,7 @@ import {
   BeforeRangeSaveDataDetails,
   RangeArea,
   Cell,
-  DimensionRows,
+  DimensionRows, Nullable,
 } from '@type';
 import { Observable } from '../../utils/store.utils';
 
@@ -32,7 +32,7 @@ type Config = {
   columnService: ColumnService;
   dataStore: Observable<DSourceState<DataType, DimensionRows>>;
 
-  setTempRange(e: TempRange | null): Event;
+  setTempRange(e: Nullable<TempRange> | null): Event;
   selectionChanged(e: ChangedRange): Event;
   rangeCopy(e: ChangedRange): Event;
   rangeDataApply(e: BeforeRangeSaveDataDetails): CustomEvent;
@@ -183,8 +183,9 @@ export class AutoFillService {
     if (isSame) {
       this.sv.setTempRange(null);
     } else {
+      const area = getRange(this.autoFillInitial, this.autoFillLast);
       this.sv.setTempRange({
-        area: getRange(this.autoFillInitial, this.autoFillLast),
+        area,
         type: this.autoFillType,
       });
     }
@@ -261,7 +262,7 @@ export class AutoFillService {
   /**
    * Trigger range apply events and handle responses
    */
-  onRangeApply(data: DataLookup, range: RangeArea) {
+  onRangeApply(data: DataLookup, range: RangeArea | null) {
     this.sv.rangeDataApply({
       data,
       models: collectModelsOfRange(data, this.sv.dataStore),
@@ -272,7 +273,7 @@ export class AutoFillService {
   }
 
   /** Apply range and copy data during range application */
-  private applyRangeWithData(newRange: RangeArea, oldRange: RangeArea) {
+  private applyRangeWithData(newRange: RangeArea, oldRange: RangeArea | null) {
     const rangeData: ChangedRange = {
       type: this.sv.dataStore.get('type'),
       colType: this.sv.columnService.type,

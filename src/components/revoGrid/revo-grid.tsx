@@ -717,6 +717,7 @@ export class RevoGridComponent {
    * @param column - full column details to update
    * @param index - virtual column index
    * @param order - order to apply
+   * @param additive - if false will replace current order
    */
   @Method() async updateColumnSorting(
     column: ColumnRegular,
@@ -768,8 +769,8 @@ export class RevoGridComponent {
   /**
    * Get the currently focused cell.
    */
-  @Method() async getFocused(): Promise<FocusedData | null | undefined> {
-    return this.viewport?.getFocused();
+  @Method() async getFocused(): Promise<FocusedData | null> {
+    return this.viewport?.getFocused() ?? null;
   }
 
   /**
@@ -782,8 +783,8 @@ export class RevoGridComponent {
   /**
    * Get the currently selected Range.
    */
-  @Method() async getSelectedRange(): Promise<RangeArea | null | undefined> {
-    return this.viewport?.getSelectedRange();
+  @Method() async getSelectedRange(): Promise<RangeArea | null> {
+    return this.viewport?.getSelectedRange() ?? null;
   }
 
   // #endregion
@@ -806,7 +807,7 @@ export class RevoGridComponent {
    */
   @Listen('touchend', { target: 'document' })
   @Listen('mouseup', { target: 'document' })
-  mouseupHandle(event: MouseEvent | TouchEvent) {
+  async mouseupHandle(event: MouseEvent | TouchEvent) {
     const screenX = getPropertyFromEvent(event, 'screenX');
     const screenY = getPropertyFromEvent(event, 'screenY');
     if (screenX === null || screenY === null) {
@@ -822,14 +823,14 @@ export class RevoGridComponent {
       return;
     }
 
-    // Check if action finished inside of the document
-    // if event prevented or it is current table don't clear focus
+    // Check if action finished inside the document
+    // if event prevented, or it is current table don't clear focus
     const path = event.composedPath();
     if (!path.includes(this.element) &&
-        !path.includes(this.element.shadowRoot)
+        !(this.element.shadowRoot && path.includes(this.element.shadowRoot))
       ) {
       // Perform actions if the click is outside the component
-      this.clearFocus();
+      await this.clearFocus();
     }
   }
   // #endregion
@@ -1152,10 +1153,7 @@ export class RevoGridComponent {
         break;
       }
     }
-    if (!grPlugin) {
-      return;
-    }
-    grPlugin.setGrouping(newVal || {});
+    grPlugin?.setGrouping(newVal || {});
   }
   /**
    * Stretch Plugin Apply

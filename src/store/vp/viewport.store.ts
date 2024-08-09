@@ -140,7 +140,7 @@ export class ViewportStore {
       isActiveRangeOutsideLastItem(pos, virtualSize, firstItem, lastItem)
     ) {
       const items = [...allItems.items];
-      // check is any item missing for full fill content
+      // check is any item missing for fulfill content
       const missing = addMissingItems(
         firstItem,
         this.store.get('realCount'),

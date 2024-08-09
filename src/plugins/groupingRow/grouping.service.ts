@@ -147,11 +147,11 @@ export function measureEqualDepth<T>(groupA: T[], groupB: T[]) {
   return i;
 }
 
-export function getParsedGroup(id: string): any[] {
+export function getParsedGroup(id: string){
   const parseGroup = JSON.parse(id);
-  // extra precaution and type safe guard
+  // extra precaution and type safeguard
   if (!Array.isArray(parseGroup)) {
-    return [];
+    return null;
   }
   return parseGroup;
 }

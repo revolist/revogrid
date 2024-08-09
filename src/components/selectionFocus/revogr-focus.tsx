@@ -84,7 +84,7 @@ export class RevogrFocus {
   }>;
 
   @Element() el: HTMLElement;
-  private activeFocus?: Cell;
+  private activeFocus: Cell | null = null;
 
   private changed(e: HTMLElement, focus: Cell) {
     const beforeScrollIn = this.beforeScrollIntoView.emit({ el: e });
@@ -110,7 +110,7 @@ export class RevogrFocus {
     ) {
       return;
     }
-    this.activeFocus = currentFocus || undefined;
+    this.activeFocus = currentFocus;
     if (currentFocus && this.el) {
       this.changed(this.el, currentFocus);
     }

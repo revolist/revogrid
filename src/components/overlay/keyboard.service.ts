@@ -17,7 +17,7 @@ import {
   isBeforeFirst,
 } from './selection.utils';
 import { RESIZE_INTERVAL } from '../../utils/consts';
-import { Cell, RangeArea, SelectionStoreState } from '@type';
+import { Cell, Nullable, RangeArea, SelectionStoreState } from '@type';
 import { Observable } from '../../utils/store.utils';
 
 type Config = {
@@ -51,7 +51,7 @@ export class KeyboardService {
     e: KeyboardEvent,
     canRange: boolean,
     isEditMode: boolean,
-    { range, focus }: Partial<Pick<EventData, 'range' | 'focus'>>,
+    { range, focus }: Nullable<Pick<EventData, 'range' | 'focus'>>,
   ) {
     // IF EDIT MODE
     if (isEditMode) {
@@ -151,13 +151,13 @@ export class KeyboardService {
 
     const range = this.sv.selectionStore.get('range');
     const focus = this.sv.selectionStore.get('focus');
-    return this.keyPositionChange(data.changes, range || undefined, focus || undefined, data.isMulti);
+    return this.keyPositionChange(data.changes, range, focus, data.isMulti);
   }
 
   keyPositionChange(
     changes: Partial<Cell>,
-    range?: RangeArea,
-    focus?: Cell,
+    range: RangeArea | null,
+    focus: Cell | null,
     isMulti = false,
   ) {
     if (!range || !focus) {

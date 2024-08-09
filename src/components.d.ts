@@ -5,7 +5,7 @@
  * It contains typing information for all components that exist in this project.
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
-import { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, ChangedRange, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, PluginBaseComponent, PositionItem, RangeArea, RangeClipboardCopyEventProps, RangeClipboardPasteEvent, RowDefinition, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
+import { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, ChangedRange, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, Nullable, PluginBaseComponent, PositionItem, RangeArea, RangeClipboardCopyEventProps, RangeClipboardPasteEvent, RowDefinition, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
 import { GridPlugin } from "./plugins/base.plugin";
 import { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
 import { ColumnFilterConfig, FilterCaptions, FilterCollection } from "./plugins/filter/filter.plugin";
@@ -20,7 +20,7 @@ import { MultiFilterItem, ShowData } from "./plugins/filter/filter.panel";
 import { LogicFunction } from "./plugins/filter/filter.types";
 import { ResizeProps } from "./components/header/resizable.directive";
 import { Cell as Cell1, ColumnRegular as ColumnRegular1, DataType as DataType1, DimensionCols as DimensionCols1, DimensionRows as DimensionRows1, DimensionSettingsState as DimensionSettingsState1, Observable as Observable1, SelectionStoreState as SelectionStoreState1 } from "./components";
-export { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, ChangedRange, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, PluginBaseComponent, PositionItem, RangeArea, RangeClipboardCopyEventProps, RangeClipboardPasteEvent, RowDefinition, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
+export { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, ChangedRange, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, Nullable, PluginBaseComponent, PositionItem, RangeArea, RangeClipboardCopyEventProps, RangeClipboardPasteEvent, RowDefinition, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
 export { GridPlugin } from "./plugins/base.plugin";
 export { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
 export { ColumnFilterConfig, FilterCaptions, FilterCollection } from "./plugins/filter/filter.plugin";
@@ -138,7 +138,7 @@ export namespace Components {
         /**
           * Get the currently focused cell.
          */
-        "getFocused": () => Promise<FocusedData | null | undefined>;
+        "getFocused": () => Promise<FocusedData | null>;
         /**
           * Get all active plugins instances
          */
@@ -146,7 +146,7 @@ export namespace Components {
         /**
           * Get the currently selected Range.
          */
-        "getSelectedRange": () => Promise<RangeArea | null | undefined>;
+        "getSelectedRange": () => Promise<RangeArea | null>;
         /**
           * Get data from source
          */
@@ -248,7 +248,7 @@ export namespace Components {
         /**
           * Sets data at specified cell. Useful for performance optimization. No viewport update will be triggered.
          */
-        "setDataAt": (data: { row: number; col: number; } & AllDimensionType) => Promise<void>;
+        "setDataAt": (data: { row: number; col: number; } & AllDimensionType) => Promise<void | undefined>;
         /**
           * Source - defines main data source. Can be an Object or 2 dimensional array([][]); Keys/indexes referenced from columns Prop.
          */
@@ -270,6 +270,7 @@ export namespace Components {
           * @param column - full column details to update
           * @param index - virtual column index
           * @param order - order to apply
+          * @param additive - if false will replace current order
          */
         "updateColumnSorting": (column: ColumnRegular, index: number, order: "asc" | "desc" | undefined, additive: boolean) => Promise<ColumnRegular>;
         /**
@@ -397,7 +398,7 @@ export namespace Components {
         "filterItems": MultiFilterItem;
         "filterNames": Record<string, string>;
         "filterTypes": Record<string, string[]>;
-        "getChanges": () => Promise<ShowData>;
+        "getChanges": () => Promise<ShowData | undefined>;
         "show": (newEntity?: ShowData) => Promise<void>;
     }
     /**
@@ -662,7 +663,7 @@ export namespace Components {
           * update on delta in case we don't know existing position or external change
           * @param e
          */
-        "changeScroll": (e: ViewPortScrollEvent, silent?: boolean) => Promise<ViewPortScrollEvent>;
+        "changeScroll": (e: ViewPortScrollEvent, silent?: boolean) => Promise<ViewPortScrollEvent | undefined>;
         "colType": DimensionCols | 'rowHeaders';
         /**
           * Height of inner content
@@ -1047,7 +1048,7 @@ declare global {
         "setrange": RangeArea & { type: MultiDimensionType };
         "selectall": any;
         "canceledit": any;
-        "settemprange": TempRange | null;
+        "settemprange": Nullable<TempRange> | null;
         "applyfocus": FocusRenderEvent;
         "focuscell": ApplyFocusEvent;
         "beforerangedataapply": FocusRenderEvent;
@@ -1155,7 +1156,7 @@ declare global {
         new (): HTMLRevogrViewportScrollElement;
     };
     interface HTMLVnodeHtmlElementEventMap {
-        "html": { html: string; vnodes: VNode[] };
+        "html": { html: string; vnodes: (VNode[]) | null };
     }
     interface HTMLVnodeHtmlElement extends Components.VnodeHtml, HTMLStencilElement {
         addEventListener<K extends keyof HTMLVnodeHtmlElementEventMap>(type: K, listener: (this: HTMLVnodeHtmlElement, ev: VnodeHtmlCustomEvent<HTMLVnodeHtmlElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -2018,7 +2019,7 @@ declare namespace LocalJSX {
         /**
           * Set temp range area during autofill.
          */
-        "onSettemprange"?: (event: RevogrOverlaySelectionCustomEvent<TempRange | null>) => void;
+        "onSettemprange"?: (event: RevogrOverlaySelectionCustomEvent<Nullable<TempRange> | null>) => void;
         /**
           * Range selection allowed.
          */
@@ -2158,7 +2159,7 @@ declare namespace LocalJSX {
         "rowHeader"?: boolean;
     }
     interface VnodeHtml {
-        "onHtml"?: (event: VnodeHtmlCustomEvent<{ html: string; vnodes: VNode[] }>) => void;
+        "onHtml"?: (event: VnodeHtmlCustomEvent<{ html: string; vnodes: (VNode[]) | null }>) => void;
         "redraw"?: (() => VNode[]) | null | undefined;
     }
     interface IntrinsicElements {

@@ -110,8 +110,9 @@ export default class DimensionProvider {
 
   /**
    * Sets dimension data and view port coordinate
-   * @param items - data/column items
+   * @param itemCount
    * @param type - dimension type
+   * @param noVirtual - disable virtual data
    */
   setData(itemCount: number, type: MultiDimensionType, noVirtual = false) {
     this.setItemCount(itemCount, type);

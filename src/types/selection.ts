@@ -66,7 +66,7 @@ export type ChangedRange = {
   type: DimensionRows;
   colType: DimensionCols;
   newRange: RangeArea;
-  oldRange: RangeArea;
+  oldRange: RangeArea | null;
   mapping: OldNewRangeMapping;
   newData: {
     [key: number]: DataType;

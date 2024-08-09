@@ -74,7 +74,7 @@ export class ResizeDirective {
 
   private parent: { width: number; height: number };
   private resizeState: number;
-  private activeResizer?: HTMLElement | null;
+  private activeResizer?: HTMLElement;
   private disableCalcMap = 0b1111;
 
   private mouseMoveFunc: () => void;
@@ -291,7 +291,7 @@ export class ResizeDirective {
       this.activeResizer.removeAttribute('style');
     }
     this.$el.classList.remove('active');
-    this.activeResizer = null;
+    this.activeResizer = undefined;
   }
 
   private bindMove() {

@@ -1,42 +1,29 @@
 import reduce from 'lodash/reduce';
 
 import DimensionProvider from '../../services/dimension.provider';
-import SelectionStoreConnector, {
-  EMPTY_INDEX,
-} from '../../services/selection.store.connector';
+import SelectionStoreConnector, { EMPTY_INDEX } from '../../services/selection.store.connector';
 import ViewportProvider from '../../services/viewport.provider';
-import {
-  DSourceState,
-  getSourceItem,
-  getVisibleSourceItem,
-  columnTypes,
-  rowTypes,
-} from '@store';
+import { columnTypes, DSourceState, getSourceItem, getVisibleSourceItem, rowTypes } from '@store';
 import { OrdererService } from '../order/order-renderer';
 import GridScrollingService from './viewport.scrolling.service';
-import {
-  CONTENT_SLOT,
-  FOOTER_SLOT,
-  getLastCell,
-  HEADER_SLOT,
-} from './viewport.helpers';
+import { CONTENT_SLOT, FOOTER_SLOT, getLastCell, HEADER_SLOT } from './viewport.helpers';
 
 import ColumnDataProvider from '../../services/column.data.provider';
 import { DataProvider } from '../../services/data.provider';
 import {
+  Cell,
   ColumnRegular,
-  ViewPortResizeEvent,
-  ViewSettingSizeProp,
   DimensionCols,
   DimensionRows,
   HeaderProperties,
+  RangeArea,
   SlotType,
   ViewportColumn,
   ViewportData,
   ViewportProperties,
   ViewportProps,
-  Cell,
-  RangeArea,
+  ViewPortResizeEvent,
+  ViewSettingSizeProp,
 } from '@type';
 import { Observable } from '../../utils/store.utils';
 
@@ -149,8 +136,8 @@ export default class ViewportService {
       const columnSelectionStore = this.registerCol(colData.position.x, val);
 
       // render per each column data collections vertically
-      const dataPorts = this.dataViewPort(column).reduce(
-        (r: ViewportData[], rgRow) => {
+      const dataPorts = this.dataViewPort(column).reduce<ViewportData[]>(
+        (r, rgRow) => {
           // register selection store for Segment
           const segmentSelection = this.registerSegment(rgRow.position);
           segmentSelection.setLastCell(rgRow.lastCell);
@@ -169,9 +156,7 @@ export default class ViewportService {
             onSetrange: e => {
               segmentSelection.setRangeArea(e.detail);
             },
-            onSettemprange: e => {
-              segmentSelection.setTempArea(e.detail);
-            },
+            onSettemprange: e => segmentSelection.setTempArea(e.detail),
             onFocuscell: e => {
               // todo: multi focus
               segmentSelection.clearFocus();
@@ -340,24 +325,26 @@ export default class ViewportService {
     };
   }
 
-  getStoreCoordinateByType(colType: DimensionCols, rowType: DimensionRows) {
+  getStoreCoordinateByType(colType: DimensionCols, rowType: DimensionRows): Cell | undefined {
     const stores = this.config.selectionStoreConnector.storesByType;
-    const storeCoordinate = {
+    if (typeof stores[colType] === 'undefined' || typeof stores[rowType] === 'undefined') {
+      return;
+    }
+    return {
       x: stores[colType],
       y: stores[rowType],
     };
-    return storeCoordinate;
   }
 
   setFocus(colType: string, rowType: string, start: Cell, end: Cell) {
-    this.config.selectionStoreConnector?.focusByCell(
-      this.getStoreCoordinateByType(
-        colType as DimensionCols,
-        rowType as DimensionRows,
-      ),
-      start,
-      end,
-    );
+    const coordinate = this.getStoreCoordinateByType(colType as DimensionCols, rowType as DimensionRows);
+    if (coordinate) {
+      this.config.selectionStoreConnector?.focusByCell(
+        coordinate,
+        start,
+        end,
+      );
+    }
   }
 
   getSelectedRange(): RangeArea | null | undefined {
@@ -370,9 +357,12 @@ export default class ViewportService {
     colType: DimensionCols,
     rowType: DimensionRows,
   ) {
-    this.config.selectionStoreConnector?.setEditByCell(
-      this.getStoreCoordinateByType(colType, rowType),
-      { x: colIndex, y: rowIndex },
-    );
+    const coordinate = this.getStoreCoordinateByType(colType as DimensionCols, rowType as DimensionRows);
+    if (coordinate) {
+      this.config.selectionStoreConnector?.setEditByCell(
+        coordinate,
+        { x: colIndex, y: rowIndex },
+      );
+    }
   }
 }

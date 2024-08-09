@@ -333,13 +333,13 @@ export default class GroupingRowPlugin extends BasePlugin {
       undefined,
       true,
     );
-    this.updateTrimmed(undefined, undefined, oldNewIndexes ?? {});
+    this.updateTrimmed(undefined, undefined, oldNewIndexes);
   }
 
   private updateTrimmed(
     trimmedGroup: TrimmedEntity = {},
     _childrenByGroup: Record<number, number[]> = {},
-    firstLevelMap: Record<number, number>,
+    firstLevelMap: Record<number, number> = {},
     secondLevelMap?: Record<number, number>,
   ) {
     // map previously trimmed data
