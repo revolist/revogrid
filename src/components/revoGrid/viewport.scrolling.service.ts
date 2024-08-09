@@ -11,7 +11,7 @@ export default class GridScrollingService {
   constructor(private setViewport: (e: ViewPortScrollEvent) => void) {}
 
   async proxyScroll(e: ViewPortScrollEvent, key?: DimensionColPin | string) {
-    let newEvent: Promise<ViewPortScrollEvent> | undefined;
+    let newEventPromise: Promise<ViewPortScrollEvent | undefined> | undefined;
     let event = e;
     for (let elKey in this.elements) {
       // skip
@@ -24,7 +24,7 @@ export default class GridScrollingService {
         }
         for (let el of this.elements[elKey]) {
           if (el.changeScroll) {
-            newEvent = el.changeScroll(e);
+            newEventPromise = el.changeScroll(e);
           }
         }
       } else {
@@ -33,8 +33,9 @@ export default class GridScrollingService {
         }
       }
     }
+    const newEvent = await newEventPromise;
     if (newEvent) {
-      event = await newEvent;
+      event = newEvent;
     }
     this.setViewport(event);
   }
@@ -79,7 +80,7 @@ export default class GridScrollingService {
    * @param el - can be null if holder removed
    * @param key - element key
    */
-  registerElement(el: ElementScroll | null, key: string) {
+  registerElement(el: ElementScroll | null | undefined, key: string) {
     if (!this.elements[key]) {
       this.elements[key] = [];
     }

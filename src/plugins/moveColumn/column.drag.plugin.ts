@@ -167,7 +167,7 @@ export default class ColumnPlugin extends BasePlugin {
   }
   onMouseUp(e: MouseEvent) {
     // apply new positions
-    if (this.dragData) {
+    if (this.dragData && this.staticDragData) {
       let relativePos = getLeftRelative(e.x, this.dragData.gridRect.left, this.dragData.scrollOffset);
       if (relativePos < 0) {
         relativePos = 0;

@@ -113,7 +113,7 @@ export class DataProvider {
     this.stores[type].setData({ groupingDepth: depth });
   }
 
-  setTrimmed(trimmed: Partial<Trimmed>, type: DimensionRows = 'rgRow') {
+  setTrimmed(trimmed: Trimmed, type: DimensionRows = 'rgRow') {
     const store = this.stores[type];
     store.addTrimmed(trimmed);
     this.dimensionProvider.setTrimmed(trimmed, type);

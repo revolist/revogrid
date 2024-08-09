@@ -44,7 +44,7 @@ const ColumnGroupsRenderer = ({
               group={group}
               active={active}
               canResize={canResize}
-              onResize={e => onResize(e.changedX, groupStartIndex, groupEndIndex)}
+              onResize={e => onResize(e.changedX ?? 0, groupStartIndex, groupEndIndex)}
               additionalData={additionalData}
             />,
           );

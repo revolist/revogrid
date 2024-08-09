@@ -46,7 +46,7 @@ export class AutohideScrollPlugin {
     clearTimeout(timeout);
     return Number(
       setTimeout(() => {
-        element.removeAttribute('visible');
+        element?.removeAttribute('visible');
       }, 1000),
     );
   }

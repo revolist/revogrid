@@ -10,7 +10,6 @@ import {
   RowDrag,
   ColumnRegular,
   DataType,
-  ReadOnlyFormat,
   CellProps,
   ColumnDataSchemaModel,
   ColumnProp,
@@ -63,13 +62,13 @@ export default class ColumnService {
     }
   }
 
-  isReadOnly(r: number, c: number): boolean {
-    const readOnly: ReadOnlyFormat = this.columns[c]?.readonly;
+  isReadOnly(r: number, c: number) {
+    const readOnly = this.columns[c]?.readonly;
     if (typeof readOnly === 'function') {
       const data = this.rowDataModel(r, c);
       return readOnly(data);
     }
-    return readOnly;
+    return !!readOnly;
   }
 
   mergeProperties(
@@ -241,7 +240,7 @@ export default class ColumnService {
     data: DataFormat[][],
   ): {
     changed: DataLookup;
-    range: RangeArea;
+    range: RangeArea | null;
   } {
     const changed: DataLookup = {};
     const copyRowLength = data.length;

@@ -74,7 +74,7 @@ export class ResizeDirective {
 
   private parent: { width: number; height: number };
   private resizeState: number;
-  private activeResizer: HTMLElement | null;
+  private activeResizer?: HTMLElement;
   private disableCalcMap = 0b1111;
 
   private mouseMoveFunc: () => void;
@@ -90,8 +90,8 @@ export class ResizeDirective {
 
     this.minW = this.props.minWidth;
     this.minH = this.props.minHeight;
-    this.maxW = this.props.maxWidth;
-    this.maxH = this.props.maxHeight;
+    this.maxW = this.props.maxWidth ?? 0;
+    this.maxH = this.props.maxHeight ?? 0;
     this.parent = { width: 0, height: 0 };
     this.resizeState = 0;
   }
@@ -253,7 +253,7 @@ export class ResizeDirective {
     if (this.disableCalcMap & DISABLE_MASK.w) {
       this.mouseX = clientX;
       this.width = this.$el.clientWidth;
-      this.parent.width = this.$el.parentElement.clientWidth;
+      this.parent.width = this.$el.parentElement?.clientWidth ?? 0;
 
       // min width
       const minPaddingX =
@@ -270,7 +270,7 @@ export class ResizeDirective {
     if (this.disableCalcMap & DISABLE_MASK.h) {
       this.mouseY = clientY;
       this.height = this.$el.clientHeight;
-      this.parent.height = this.$el.parentElement.clientHeight;
+      this.parent.height = this.$el.parentElement?.clientHeight ?? 0;
 
       // min height
       const minPaddingY =
@@ -291,7 +291,7 @@ export class ResizeDirective {
       this.activeResizer.removeAttribute('style');
     }
     this.$el.classList.remove('active');
-    this.activeResizer = null;
+    this.activeResizer = undefined;
   }
 
   private bindMove() {

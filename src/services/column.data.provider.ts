@@ -196,7 +196,7 @@ export default class ColumnDataProvider {
   updateColumnSorting(
     column: ColumnRegular,
     index: number,
-    sorting: 'asc' | 'desc',
+    sorting: 'asc' | 'desc' | undefined,
     additive: boolean,
   ): ColumnRegular {
     if (!additive) {

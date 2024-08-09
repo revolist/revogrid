@@ -441,7 +441,7 @@ export class RevoGridComponent {
   /**  Column updated */
   @Event() aftercolumnsset: EventEmitter<{
     columns: ColumnCollection;
-    order: Record<ColumnProp, 'asc' | 'desc'>;
+    order: Record<ColumnProp, 'asc' | 'desc' | undefined>;
   }>;
 
   /**
@@ -717,11 +717,12 @@ export class RevoGridComponent {
    * @param column - full column details to update
    * @param index - virtual column index
    * @param order - order to apply
+   * @param additive - if false will replace current order
    */
   @Method() async updateColumnSorting(
     column: ColumnRegular,
     index: number,
-    order: 'asc' | 'desc',
+    order: 'asc' | 'desc' | undefined,
     additive: boolean,
   ) {
     return this.columnProvider.updateColumnSorting(
@@ -769,7 +770,7 @@ export class RevoGridComponent {
    * Get the currently focused cell.
    */
   @Method() async getFocused(): Promise<FocusedData | null> {
-    return this.viewport?.getFocused();
+    return this.viewport?.getFocused() ?? null;
   }
 
   /**
@@ -783,13 +784,13 @@ export class RevoGridComponent {
    * Get the currently selected Range.
    */
   @Method() async getSelectedRange(): Promise<RangeArea | null> {
-    return this.viewport?.getSelectedRange();
+    return this.viewport?.getSelectedRange() ?? null;
   }
 
   // #endregion
 
   // #region Listeners outside scope
-  private clickTrackForFocusClear: number | null = null;
+  private clickTrackForFocusClear?: number;
   @Listen('touchstart', { target: 'document' })
   @Listen('mousedown', { target: 'document' })
   mousedownHandle(event: MouseEvent | TouchEvent) {
@@ -806,7 +807,7 @@ export class RevoGridComponent {
    */
   @Listen('touchend', { target: 'document' })
   @Listen('mouseup', { target: 'document' })
-  mouseupHandle(event: MouseEvent | TouchEvent) {
+  async mouseupHandle(event: MouseEvent | TouchEvent) {
     const screenX = getPropertyFromEvent(event, 'screenX');
     const screenY = getPropertyFromEvent(event, 'screenY');
     if (screenX === null || screenY === null) {
@@ -818,18 +819,18 @@ export class RevoGridComponent {
     }
     const pos = screenX + screenY;
     // detect if mousemove then do nothing
-    if (Math.abs(this.clickTrackForFocusClear - pos) > 10) {
+    if (Math.abs((this.clickTrackForFocusClear ?? 0) - pos) > 10) {
       return;
     }
 
-    // Check if action finished inside of the document
-    // if event prevented or it is current table don't clear focus
+    // Check if action finished inside the document
+    // if event prevented, or it is current table don't clear focus
     const path = event.composedPath();
     if (!path.includes(this.element) &&
-        !path.includes(this.element.shadowRoot)
+        !(this.element.shadowRoot && path.includes(this.element.shadowRoot))
       ) {
       // Perform actions if the click is outside the component
-      this.clearFocus();
+      await this.clearFocus();
     }
   }
   // #endregion
@@ -1147,15 +1148,12 @@ export class RevoGridComponent {
     let grPlugin: GroupingRowPlugin | undefined;
     for (let p of this.internalPlugins) {
       const isGrouping = p as unknown as GroupingRowPlugin;
-      if (isGrouping.setGrouping) {
+      if (!!isGrouping.setGrouping) {
         grPlugin = isGrouping;
         break;
       }
     }
-    if (!grPlugin) {
-      return;
-    }
-    grPlugin.setGrouping(newVal || {});
+    grPlugin?.setGrouping(newVal || {});
   }
   /**
    * Stretch Plugin Apply
@@ -1261,7 +1259,7 @@ export class RevoGridComponent {
   }
 
   private removePlugins() {
-    this.internalPlugins.forEach(p => p.destroy());
+    this.internalPlugins.forEach(p => p.destroy?.());
     this.internalPlugins = [];
   }
   // #endregion
@@ -1520,7 +1518,7 @@ export class RevoGridComponent {
           class="main-viewport"
           onClick={(e: MouseEvent) => {
             if (e.currentTarget === e.target) {
-              this.viewport.clearEdit();
+              this.viewport?.clearEdit();
             }
           }}
         >

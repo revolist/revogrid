@@ -52,7 +52,7 @@ function renderCell(v: RenderProps) {
         <span
           class={DRAGGABLE_CLASS}
           onMouseDown={originalEvent =>
-            v.dragStartCell.emit({
+            v.dragStartCell?.emit({
               originalEvent,
               model: v.model,
             })

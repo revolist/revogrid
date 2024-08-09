@@ -18,7 +18,7 @@ import {
   FOOTER_SLOT,
   HEADER_SLOT,
 } from '../revoGrid/viewport.helpers';
-import { DimensionCols, DimensionType } from '@type';
+import { DimensionCols, DimensionType, ElementScroll } from '@type';
 import { ScrollCoordinateEvent, ViewPortResizeEvent, ViewPortScrollEvent } from '@type';
 
 type Delta = 'deltaX' | 'deltaY';
@@ -36,7 +36,7 @@ type LocalScrollEvent = {
   tag: 'revogr-viewport-scroll',
   styleUrl: 'revogr-viewport-scroll-style.scss',
 })
-export class RevogrViewportScroll {
+export class RevogrViewportScroll implements ElementScroll {
   /**
    * Enable row header
   */
@@ -81,9 +81,9 @@ export class RevogrViewportScroll {
   private oldValY = this.contentHeight;
   private oldValX = this.contentWidth;
 
-  private verticalScroll: HTMLElement;
-  private header: HTMLElement;
-  private footer: HTMLElement;
+  private verticalScroll?: HTMLElement;
+  private header?: HTMLElement;
+  private footer?: HTMLElement;
 
   /**
    * Static functions to bind wheel change
@@ -110,7 +110,7 @@ export class RevogrViewportScroll {
     silent = false,
   ) {
     if (silent) {
-      if (e.coordinate) {
+      if (e.coordinate && this.verticalScroll) {
         switch (e.dimension) {
           // for mobile devices to skip negative scroll loop. only on vertical scroll
           case 'rgRow':
@@ -118,7 +118,7 @@ export class RevogrViewportScroll {
             break;
         }
       }
-      return null;
+      return;
     }
     if (e.delta) {
       switch (e.dimension) {
@@ -126,7 +126,7 @@ export class RevogrViewportScroll {
           e.coordinate = this.horizontalScroll.scrollLeft + e.delta;
           break;
         case 'rgRow':
-          e.coordinate = this.verticalScroll.scrollTop + e.delta;
+          e.coordinate = (this.verticalScroll?.scrollTop ?? 0) + e.delta;
           break;
       }
       this.setScroll(e);
@@ -190,11 +190,13 @@ export class RevogrViewportScroll {
             this.horizontalScroll.scrollLeft = e.coordinate;
             break;
           case 'rgRow':
-            // this will trigger on scroll event
-            this.verticalScroll.scrollTop = e.coordinate;
-            // for mobile devices to skip negative scroll loop. only on vertical scroll
-            if (this.verticalScroll.style.transform) {
-              this.verticalScroll.style.transform = '';
+            if (this.verticalScroll) {
+              // this will trigger on scroll event
+              this.verticalScroll.scrollTop = e.coordinate;
+              // for mobile devices to skip negative scroll loop. only on vertical scroll
+              if (this.verticalScroll.style.transform) {
+                this.verticalScroll.style.transform = '';
+              }
             }
             break;
         }
@@ -208,20 +210,20 @@ export class RevogrViewportScroll {
       resize: entries => {
         let height = entries[0]?.contentRect.height || 0;
         if (height) {
-          height -= this.header.clientHeight + this.footer.clientHeight;
+          height -= (this.header?.clientHeight ?? 0) + (this.footer?.clientHeight ?? 0);
         }
         const els = {
           rgRow: {
             size: height,
             contentSize: this.contentHeight,
-            scroll: this.verticalScroll.scrollTop,
+            scroll: this.verticalScroll?.scrollTop,
             noScroll: false,
           },
           rgCol: {
             size: entries[0]?.contentRect.width || 0,
             contentSize: this.contentWidth,
             scroll: this.horizontalScroll.scrollLeft,
-            noScroll: this.colType !== 'rgCol' ? true : false,
+            noScroll: this.colType !== 'rgCol',
           },
         };
         for (const [dim, item] of Object.entries(els)) {
@@ -230,7 +232,7 @@ export class RevogrViewportScroll {
           if (item.noScroll) {
             continue;
           }
-          this.localScrollService?.scroll(item.scroll, dimension, true);
+          this.localScrollService?.scroll(item.scroll ?? 0, dimension, true);
           // track scroll visibility on outer element change
           this.setScrollVisibility(dimension, item.size, item.contentSize);
         }
@@ -253,7 +255,7 @@ export class RevogrViewportScroll {
   ) {
     // test if scroll present
     const hasScroll = size < innerContentSize;
-    let el: HTMLElement;
+    let el: HTMLElement | undefined;
     // event reference for binding
     switch (type) {
       case 'rgCol':
@@ -265,9 +267,9 @@ export class RevogrViewportScroll {
     }
     // based on scroll visibility assign or remove class and event
     if (hasScroll) {
-      el.classList.add(`scroll-${type}`);
+      el?.classList.add(`scroll-${type}`);
     } else {
-      el.classList.remove(`scroll-${type}`);
+      el?.classList.remove(`scroll-${type}`);
     }
     this.scrollchange.emit({ type, hasScroll });
   }
@@ -292,7 +294,7 @@ export class RevogrViewportScroll {
     this.localScrollService.setParams(
       {
         contentSize: this.contentHeight,
-        clientSize: this.verticalScroll.clientHeight,
+        clientSize: this.verticalScroll?.clientHeight ?? 0,
         virtualSize: 0,
       },
       'rgRow',
@@ -308,7 +310,7 @@ export class RevogrViewportScroll {
     );
     this.setScrollVisibility(
       'rgRow',
-      this.verticalScroll.clientHeight,
+      this.verticalScroll?.clientHeight ?? 0,
       this.contentHeight,
     );
     this.setScrollVisibility(
@@ -409,7 +411,8 @@ export class RevogrViewportScroll {
     e: LocalScrollEvent,
   ) {
     e.preventDefault?.();
-    const pos = this.verticalScroll.scrollTop + e[delta];
+    const scrollTop = this.verticalScroll?.scrollTop ?? 0;
+    const pos = scrollTop + e[delta];
     this.localScrollService?.scroll(pos, type, undefined, e[delta]);
     this.localScrollTimer.latestScrollUpdate(type);
   }

@@ -34,20 +34,20 @@ type ColumnSetEvent = {
 
 export default class SortingPlugin extends BasePlugin {
   // sorting order per column
-  sorting: SortingOrder | null = null;
+  sorting?: SortingOrder;
 
   // sorting function per column, multiple columns sorting supported
-  sortingFunc: SortingOrderFunction | null = null;
+  sortingFunc?: SortingOrderFunction;
   sortingPromise: (() => void) | null = null;
   postponeSort = debounce(
-    async (order: SortingOrder, comparison: SortingOrderFunction) =>
+    async (order?: SortingOrder, comparison?: SortingOrderFunction) =>
       this.runSorting(order, comparison),
     50,
   );
 
   async runSorting(
-    order: SortingOrder,
-    comparison: SortingOrderFunction,
+    order?: SortingOrder,
+    comparison?: SortingOrderFunction,
   ) {
     await this.sort(order, comparison);
     this.sortingPromise?.();
@@ -78,7 +78,7 @@ export default class SortingPlugin extends BasePlugin {
     const aftercolumnsset = async ({
       detail: { order },
     }: CustomEvent<ColumnSetEvent>) => {
-      const columns = await this.revogrid.getColumns();
+      const columns = (await this.revogrid.getColumns());
       const sortingFunc: SortingOrderFunction = {};
 
       for (let prop in order) {
@@ -111,7 +111,7 @@ export default class SortingPlugin extends BasePlugin {
     this.addEventListener('beforeheaderclick', headerclick);
   }
 
-  startSorting(order: SortingOrder, sortingFunc: SortingOrderFunction) {
+  startSorting(order?: SortingOrder, sortingFunc?: SortingOrderFunction) {
     if (!this.sortingPromise) {
       this.revogrid.jobsBeforeRender.push(
         new Promise<void>(resolve => {
@@ -122,7 +122,7 @@ export default class SortingPlugin extends BasePlugin {
     this.postponeSort(order, sortingFunc);
   }
 
-  getComparer(column: ColumnRegular, order: Order): CellCompareFunc {
+  getComparer(column: ColumnRegular | undefined, order: Order): CellCompareFunc | undefined {
     const cellCmp: CellCompareFunc =
       column?.cellCompare?.bind({ order }) || this.defaultCellCompare;
     if (order == 'asc') {
@@ -191,8 +191,8 @@ export default class SortingPlugin extends BasePlugin {
         this.sorting = { [column.prop]: order };
         this.sortingFunc = { [column.prop]: cmp };
       } else {
-        delete this.sorting[column.prop];
-        delete this.sortingFunc[column.prop];
+        delete this.sorting?.[column.prop];
+        delete this.sortingFunc?.[column.prop];
       }
     }
 
@@ -208,14 +208,14 @@ export default class SortingPlugin extends BasePlugin {
    * @param data - this.stores['rgRow'].store.get('source')
    */
   async sort(
-    sorting: SortingOrder,
-    sortingFunc: SortingOrderFunction,
+    sorting?: SortingOrder,
+    sortingFunc?: SortingOrderFunction,
     types: DimensionRows[] = ['rgRow', 'rowPinStart', 'rowPinEnd'],
   ) {
     // if no sorting - reset
     if (!size(sorting)) {
-      this.sorting = null;
-      this.sortingFunc = null;
+      this.sorting = undefined;
+      this.sortingFunc = undefined;
 
       for (let type of types) {
         const store = await this.revogrid.getSourceStore(type);
@@ -271,11 +271,11 @@ export default class SortingPlugin extends BasePlugin {
   sortIndexByItems(
     indexes: number[],
     source: DataType[],
-    sortingFunc: SortingOrderFunction,
+    sortingFunc: SortingOrderFunction = {},
   ): number[] {
     // if no sorting - return unsorted indexes
     if (Object.entries(sortingFunc).length === 0) {
-      // Unsort indexes
+      // Unsorted indexes
       return [...Array(indexes.length).keys()];
     }
     //
@@ -292,7 +292,7 @@ export default class SortingPlugin extends BasePlugin {
          * If the comparison function returns a non-zero value (sorted), it means that the items should be sorted based on the given property. In such a case, the function immediately returns the sorted value, indicating the order in which the items should be arranged.
          * If none of the comparison functions result in a non-zero value, indicating that the items are equal or should remain in the same order, the function eventually returns 0.
          */
-        const sorted = cmp(prop, itemA, itemB);
+        const sorted = cmp?.(prop, itemA, itemB);
         if (sorted) {
           return sorted;
         }

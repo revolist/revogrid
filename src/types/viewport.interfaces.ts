@@ -22,7 +22,7 @@ export interface ElementScroll {
   changeScroll?(
     e: ViewPortScrollEvent,
     silent?: boolean,
-  ): Promise<ViewPortScrollEvent>;
+  ): Promise<ViewPortScrollEvent | undefined>;
   setScroll?(e: ViewPortScrollEvent): Promise<void>;
 }
 export type ElementsScroll = { [key: string]: ElementScroll[] };
@@ -54,6 +54,8 @@ export type ViewportData = {
   slot: SlotType;
   style?: { [key: string]: string };
 } & JSX.RevogrOverlaySelection &
+  (Pick<JSXBase.HTMLAttributes<HTMLRevogrOverlaySelectionElement>, 'ref'> &
+    Pick<JSXBase.HTMLAttributes<HTMLRevogrDataElement>, 'ref'>) &
   JSX.RevogrData;
 
 export type ViewportProps = {

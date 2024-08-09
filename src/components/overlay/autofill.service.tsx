@@ -22,7 +22,7 @@ import {
   BeforeRangeSaveDataDetails,
   RangeArea,
   Cell,
-  DimensionRows,
+  DimensionRows, Nullable,
 } from '@type';
 import { Observable } from '../../utils/store.utils';
 
@@ -32,11 +32,11 @@ type Config = {
   columnService: ColumnService;
   dataStore: Observable<DSourceState<DataType, DimensionRows>>;
 
-  setTempRange(e: TempRange | null): Event;
+  setTempRange(e: Nullable<TempRange> | null): Event;
   selectionChanged(e: ChangedRange): Event;
   rangeCopy(e: ChangedRange): Event;
   rangeDataApply(e: BeforeRangeSaveDataDetails): CustomEvent;
-  setRange(e: RangeArea): boolean;
+  setRange(e: RangeArea | null): boolean;
   clearRangeDataApply(e: { range: RangeArea }): CustomEvent<{
     range: RangeArea;
   }>;
@@ -66,7 +66,7 @@ export class AutoFillService {
    * @param range
    * @param selectionFocus
    */
-  renderAutofill(range: RangeArea, selectionFocus: Cell) {
+  renderAutofill(range: RangeArea | null, selectionFocus: Cell) {
     let handlerStyle;
     if (range) {
       handlerStyle = getCell(
@@ -137,7 +137,7 @@ export class AutoFillService {
     }
   }
 
-  private getFocus(focus: Cell, range: RangeArea) {
+  private getFocus(focus: Cell | null, range: RangeArea | null) {
     // there was an issue that it was taking last cell from range but focus was out
     if (!focus && range) {
       focus = { x: range.x, y: range.y };
@@ -183,8 +183,9 @@ export class AutoFillService {
     if (isSame) {
       this.sv.setTempRange(null);
     } else {
+      const area = getRange(this.autoFillInitial, this.autoFillLast);
       this.sv.setTempRange({
-        area: getRange(this.autoFillInitial, this.autoFillLast),
+        area,
         type: this.autoFillType,
       });
     }
@@ -211,7 +212,7 @@ export class AutoFillService {
   /**
    * Clear current range selection on mouse up and mouse leave events
    */
-  clearAutoFillSelection(focus: Cell, oldRange: RangeArea) {
+  clearAutoFillSelection(focus: Cell | null, oldRange: RangeArea | null) {
     // If autofill was active, apply autofill values
     if (this.autoFillInitial) {
       // Fetch latest focus
@@ -231,7 +232,7 @@ export class AutoFillService {
           });
 
           // If data apply was not prevented, apply new range
-          if (!stopApply) {
+          if (!stopApply && oldRange) {
             this.applyRangeWithData(newRange, oldRange);
           } else {
             // If data apply was prevented, clear temporary range
@@ -261,7 +262,7 @@ export class AutoFillService {
   /**
    * Trigger range apply events and handle responses
    */
-  onRangeApply(data: DataLookup, range: RangeArea) {
+  onRangeApply(data: DataLookup, range: RangeArea | null) {
     this.sv.rangeDataApply({
       data,
       models: collectModelsOfRange(data, this.sv.dataStore),
@@ -272,14 +273,14 @@ export class AutoFillService {
   }
 
   /** Apply range and copy data during range application */
-  private applyRangeWithData(newRange: RangeArea, oldRange: RangeArea) {
+  private applyRangeWithData(newRange: RangeArea, rangeToCopy: RangeArea) {
     const rangeData: ChangedRange = {
       type: this.sv.dataStore.get('type'),
       colType: this.sv.columnService.type,
       newData: {},
       mapping: {},
       newRange,
-      oldRange,
+      oldRange: rangeToCopy,
     };
     const { mapping, changed } = this.sv.columnService.getRangeData(
       rangeData,
@@ -307,7 +308,7 @@ export class AutoFillService {
    * Update range selection only,
    * no data change (mouse selection)
    */
-  private applyRangeOnly(start?: Cell, end?: Cell) {
+  private applyRangeOnly(start?: Cell | null, end?: Cell | null) {
     // no changes to apply
     if (!start || !end) {
       return;

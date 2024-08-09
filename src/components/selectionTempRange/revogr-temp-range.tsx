@@ -32,7 +32,7 @@ export class RevogrFocus {
    */
   @Prop() dimensionCol: Observable<DimensionSettingsState>;
 
-  el: HTMLElement;
+  el?: HTMLElement;
   private readonly onChange = throttle((e: HTMLElement) => this.doChange(e), 300);
 
   private doChange(e: HTMLElement) {
@@ -77,7 +77,7 @@ export class RevogrFocus {
         style={style}
         hidden={false}
       >
-        <div class={directionClass} ref={(e: HTMLElement) => (this.el = e)} />
+        <div class={directionClass} ref={(e) => (this.el = e)} />
       </Host>
     );
   }

@@ -137,7 +137,7 @@ export class RevogrRowHeaders {
       contentWidth: 0,
       style: { minWidth: `${colSize}px` },
       colType: 'rowHeaders',
-      ref: (el: ElementScroll) => this.elementToScroll.emit(el),
+      ref: (el) => this.elementToScroll.emit(el),
       onScrollviewport: (e: CustomEvent) => this.scrollViewport.emit(e.detail),
     };
     const viewportHeader: JSX.RevogrHeader & { slot: string } = {

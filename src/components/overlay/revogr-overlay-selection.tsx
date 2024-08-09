@@ -39,7 +39,12 @@ import {
   Cell,
   DragStartEvent,
 } from '../../components';
-import { EditCellStore, MultiDimensionType, RangeClipboardCopyEventProps, RangeClipboardPasteEvent } from '@type';
+import {
+  MultiDimensionType,
+  Nullable,
+  RangeClipboardCopyEventProps,
+  RangeClipboardPasteEvent
+} from '@type';
 import {
   FocusRenderEvent,
   ApplyFocusEvent,
@@ -92,7 +97,7 @@ export class OverlaySelection {
   /** Dimension settings Y. */
   @Prop() dimensionRow: Observable<DimensionSettingsState>;
   /** Dimension settings X. */
-  @Prop() dimensionCol: Observable<DimensionSettingsState>;
+  @Prop() dimensionCol!: Observable<DimensionSettingsState>;
 
   // --------------------------------------------------------------------------
   //
@@ -206,7 +211,7 @@ export class OverlaySelection {
    * Set temp range area during autofill.
    */
   @Event({ eventName: 'settemprange' })
-  setTempRange: EventEmitter<TempRange | null>;
+  setTempRange: EventEmitter<Nullable<TempRange> | null>;
 
   /**
    * Before cell get focused.
@@ -275,13 +280,13 @@ export class OverlaySelection {
 
   // #region Private Properties
   @Element() element: HTMLElement;
-  private clipboard: HTMLRevogrClipboardElement;
+  private clipboard?: HTMLRevogrClipboardElement;
 
   protected columnService: ColumnService;
   private keyboardService: KeyboardService | null = null;
   private autoFillService: AutoFillService | null = null;
-  private orderEditor: HTMLRevogrOrderEditorElement;
-  private revogrEdit: HTMLRevogrEditElement | null = null;
+  private orderEditor?: HTMLRevogrOrderEditorElement;
+  private revogrEdit?: HTMLRevogrEditElement;
   private unsubscribeSelectionStore: { (): void }[] = [];
   // #endregion
 
@@ -290,22 +295,22 @@ export class OverlaySelection {
   @Listen('mousemove', { target: 'document' })
   onMouseMove(e: MouseEvent | TouchEvent) {
     if (this.selectionStore.get('focus')) {
-      this.autoFillService.selectionMouseMove(e);
+      this.autoFillService?.selectionMouseMove(e);
     }
   }
 
   /**
-   * Action finished inside of the document.
+   * Action finished inside the document.
    * Pointer left document, clear any active operation.
    */
   @Listen('touchend', { target: 'document' })
   @Listen('mouseup', { target: 'document' })
   @Listen('mouseleave', { target: 'document' })
   onMouseUp() {
-    // Clear auto fill selection
+    // Clear autofill selection
     // when pointer left document,
     // clear any active operation.
-    this.autoFillService.clearAutoFillSelection(
+    this.autoFillService?.clearAutoFillSelection(
       this.selectionStore.get('focus'),
       this.selectionStore.get('range'),
     );
@@ -361,11 +366,11 @@ export class OverlaySelection {
     // clear subscriptions
     this.unsubscribeSelectionStore.forEach(v => v());
     this.unsubscribeSelectionStore.length = 0;
-    this.unsubscribeSelectionStore.push(s.onChange('nextFocus', (v) => this.doFocus(v, v)));
+    this.unsubscribeSelectionStore.push(s.onChange('nextFocus', (v) => v && this.doFocus(v, v)));
 
     this.keyboardService = new KeyboardService({
       selectionStore: s,
-      range: r => this.triggerRangeEvent(r),
+      range: r => !!r && this.triggerRangeEvent(r),
       focus: (f, changes, focusNextViewport) => {
         if (focusNextViewport) {
           this.beforeNextViewportFocus.emit(f);
@@ -381,7 +386,7 @@ export class OverlaySelection {
         this.doEdit(val);
       },
       cancel: async () => {
-        await this.revogrEdit.cancelChanges();
+        await this.revogrEdit?.cancelChanges();
         this.closeEdit();
       },
       clearCell: () => !this.readonly && this.clearCell(),
@@ -412,7 +417,7 @@ export class OverlaySelection {
       rangeCopy: e => this.beforeRangeCopyApply.emit(e),
       rangeDataApply: e => this.rangeEditApply.emit(e),
 
-      setRange: e => this.triggerRangeEvent(e),
+      setRange: e => !!e && this.triggerRangeEvent(e),
       getData: () => this.getData(),
     });
   }
@@ -554,7 +559,7 @@ export class OverlaySelection {
       }
       // Autofill
       if (focus && !this.readonly && this.range) {
-        nodes.push(this.autoFillService.renderAutofill(range, focus));
+        nodes.push(this.autoFillService?.renderAutofill(range, focus));
       }
 
       // Order
@@ -680,7 +685,7 @@ export class OverlaySelection {
 
     // Initiate autofill selection
     if (this.range) {
-      this.autoFillService.selectionStart(targetElement, this.getData());
+      targetElement && this.autoFillService?.selectionStart(targetElement, this.getData());
 
       // Prevent default behavior for mouse events,
       // but only if target element is not a mobile input
@@ -702,7 +707,9 @@ export class OverlaySelection {
   protected doEdit(val = '') {
     if (this.canEdit()) {
       const focus = this.selectionStore.get('focus');
-
+      if (!focus) {
+        return;
+      }
       const data = this.columnService.getSaveData(focus.y, focus.x);
       this.setEdit?.emit({
         ...data,
@@ -713,12 +720,12 @@ export class OverlaySelection {
 
   /**
    * Close editor event triggered
-   * @param details - if requires focus next
+   * @param details - if it requires focus next
    */
-  private closeEdit(e?: CustomEvent<boolean>) {
+  private async closeEdit(e?: CustomEvent<boolean | undefined>) {
     this.cancelEdit.emit();
     if (e?.detail) {
-      this.focusNext();
+      await this.focusNext();
     }
   }
 
@@ -763,7 +770,7 @@ export class OverlaySelection {
       }
     }
 
-    this.clipboard.doCopy(e, rangeData);
+    this.clipboard?.doCopy(e, rangeData);
     return true;
   }
 
@@ -786,11 +793,11 @@ export class OverlaySelection {
     if (canPaste) {
       return;
     }
-    this.autoFillService.onRangeApply(changed, range);
+    this.autoFillService?.onRangeApply(changed, range);
   }
 
   private async focusNext() {
-    const canFocus = await this.keyboardService.keyChangeSelection(
+    const canFocus = await this.keyboardService?.keyChangeSelection(
       new KeyboardEvent('keydown', {
         code: codesLetter.ARROW_DOWN,
       }),
@@ -802,17 +809,21 @@ export class OverlaySelection {
   }
 
   protected clearCell() {
+    const range = this.selectionStore.get('range');
     if (
-      this.selectionStore.get('range') &&
-      !isRangeSingleCell(this.selectionStore.get('range'))
+      range &&
+      !isRangeSingleCell(range)
     ) {
       const data = this.columnService.getRangeStaticData(
-        this.selectionStore.get('range'),
+        range,
         '',
       );
-      this.autoFillService.onRangeApply(data, this.selectionStore.get('range'));
+      this.autoFillService?.onRangeApply(data, range);
     } else if (this.canEdit()) {
       const focused = this.selectionStore.get('focus');
+      if (!focused) {
+        return;
+      }
       const cell = this.columnService.getSaveData(focused.y, focused.x);
       this.cellEdit({
         rgRow: focused.y,
@@ -839,7 +850,7 @@ export class OverlaySelection {
     return focus && !this.columnService?.isReadOnly(focus.y, focus.x);
   }
 
-  get edited(): EditCellStore {
+  get edited() {
     return this.selectionStore.get('edit');
   }
 
@@ -853,7 +864,10 @@ export class OverlaySelection {
     const start = this.selectionStore.get('focus');
 
     if (isRangeEdit && start) {
-      return this.triggerRangeEvent(getRange(start, end));
+      const range = getRange(start, end);
+      if (range) {
+        return this.triggerRangeEvent(range);
+      }
     }
 
     return this.doFocus(cell, end);

@@ -21,8 +21,8 @@ import { RangeArea } from '@type';
 type Props = {
   column: VirtualPositionItem;
   additionalData: any;
-  data?: ColumnTemplateProp;
-  range?: RangeArea;
+  data: ColumnTemplateProp;
+  range?: RangeArea | null;
   canResize?: boolean;
   canFilter?: boolean;
   onResize?(e: ResizeEvent): void;
@@ -51,7 +51,7 @@ const HeaderRenderer = (p: Props): VNode => {
     },
     onResize: p.onResize,
     onDoubleClick(originalEvent: MouseEvent) {
-      p.onDoubleClick({
+      p.onDoubleClick?.({
         column: p.data,
         index: p.column.itemIndex,
         originalEvent,

@@ -13,8 +13,8 @@ export type EventData = {
   rows: DimensionSettingsState;
   cols: DimensionSettingsState;
   lastCell: Cell;
-  focus: Cell;
-  range: RangeArea;
+  focus: Cell | null;
+  range: RangeArea | null;
 };
 
 export function collectModelsOfRange(data: DataLookup, store: Observable<DSourceState<DataType, DimensionRows>>) {
@@ -104,19 +104,19 @@ export function getCoordinate(
   changes: Partial<Cell>,
   isMulti = false,
 ) {
-  const updateCoordinate = (c: keyof Cell) => {
+  const updateCoordinate = (c: keyof Cell, pos = 0) => {
     const start = { x: range.x, y: range.y };
     const end = isMulti ? { x: range.x1, y: range.y1 } : start;
     const point = end[c] > focus[c] ? end : start;
-    point[c] += changes[c];
+    point[c] += pos;
     return { start, end };
   };
 
   if (changes.x) {
-    return updateCoordinate('x');
+    return updateCoordinate('x', changes['x']);
   }
   if (changes.y) {
-    return updateCoordinate('y');
+    return updateCoordinate('y', changes['y']);
   }
   return null;
 }

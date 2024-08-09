@@ -106,7 +106,7 @@ export class RevoEdit {
    * Closes editor when called.
    * @param preventFocus - if true, editor will not be closed & next cell will not be focused.
    */
-  onSave(val: SaveData, preventFocus?: boolean) {
+  onSave(val?: SaveData, preventFocus?: boolean) {
     this.preventSaveOnClose = true;
     if (this.editCell) {
       this.cellEdit.emit({
@@ -121,8 +121,8 @@ export class RevoEdit {
   }
 
   componentWillRender() {
-    // Active editor present
-    if (this.currentEditor) {
+    // Active editor present and not yet closed.
+    if (this.currentEditor || !this.column) {
       return;
     }
     this.preventSaveOnClose = false;

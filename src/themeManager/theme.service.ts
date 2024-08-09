@@ -50,8 +50,8 @@ export default class ThemeService {
     }
   }
 
-  static getTheme(theme: string): Theme {
-    if (allowedThemes.indexOf(theme as Theme) > -1) {
+  static getTheme(theme?: string | null): Theme {
+    if (theme && allowedThemes.indexOf(theme as Theme) > -1) {
       return theme as Theme;
     }
     return DEFAULT_THEME;

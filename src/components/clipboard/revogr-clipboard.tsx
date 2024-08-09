@@ -100,10 +100,10 @@ export class Clipboard {
     }
     const clipboardData = this.getData(e);
     const isHTML = (clipboardData?.types.indexOf('text/html') || -1) > -1;
-    const data = isHTML
+    const data = (isHTML
       ? clipboardData?.getData('text/html')
-      : clipboardData?.getData('text');
-    const dataText = clipboardData?.getData('text');
+      : clipboardData?.getData('text')) || '';
+    const dataText = clipboardData?.getData('text') || '';
 
     const beforePaste = this.beforePaste.emit({
       raw: data,

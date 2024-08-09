@@ -94,7 +94,7 @@ export default class GroupingRowPlugin extends BasePlugin {
     let index = 0;
     // order important here, expected parent is first, then others
     return items.reduce(
-      (result: SourceGather, i) => {
+      (result: Required<SourceGather>, i) => {
         const model = source[i];
         if (!withoutGrouping) {
           result.source.push(model);
@@ -252,7 +252,7 @@ export default class GroupingRowPlugin extends BasePlugin {
       { depth, customRenderer: options?.groupLabelTemplate },
       true,
     );
-    this.updateTrimmed(trimmed, childrenByGroup, oldNewIndexes, oldNewIndexMap);
+    this.updateTrimmed(trimmed, childrenByGroup, oldNewIndexes ?? {}, oldNewIndexMap);
   }
 
   /**
@@ -339,7 +339,7 @@ export default class GroupingRowPlugin extends BasePlugin {
   private updateTrimmed(
     trimmedGroup: TrimmedEntity = {},
     _childrenByGroup: Record<number, number[]> = {},
-    firstLevelMap: Record<number, number>,
+    firstLevelMap: Record<number, number> = {},
     secondLevelMap?: Record<number, number>,
   ) {
     // map previously trimmed data

@@ -6,7 +6,7 @@
 
   if (!Element.prototype.closest) {
     Element.prototype.closest = function (s: string) {
-      let el: HTMLElement | Element | (Node & ParentNode) = this;
+      let el: HTMLElement | Element | (Node & ParentNode) | null = this;
 
       do {
         if (Element.prototype.matches.call(el, s)) {

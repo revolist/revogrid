@@ -82,7 +82,7 @@ export class RevogrData {
   /**
    * Column source
    */
-  @Prop() colData: Observable<DSourceState<ColumnRegular, DimensionCols>>;
+  @Prop() colData!: Observable<DSourceState<ColumnRegular, DimensionCols>>;
   /**
    * Data rows source
    */

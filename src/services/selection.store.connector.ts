@@ -4,8 +4,6 @@ import type {
   DimensionCols,
   DimensionRows,
   Cell,
-  EditCellStore,
-  RangeArea,
 } from '@type';
 
 type StoreByDimension = Record<number, SelectionStore>;
@@ -53,15 +51,15 @@ export default class SelectionStoreConnector {
     return null;
   }
 
-  get edit(): EditCellStore | undefined {
+  get edit() {
     return this.focusedStore?.entity.store.get('edit');
   }
 
-  get focused(): Cell | undefined {
+  get focused() {
     return this.focusedStore?.entity.store.get('focus');
   }
 
-  get selectedRange(): RangeArea | undefined {
+  get selectedRange() {
     return this.focusedStore?.entity.store.get('range');
   }
 
@@ -100,7 +98,7 @@ export default class SelectionStoreConnector {
       return this.columnStores[x];
     }
     this.columnStores[x] = new SelectionStore();
-    // build cross linking type to position
+    // build cross-linking type to position
     this.storesByType[type] = x;
     this.storesXToType[x] = type;
     return this.columnStores[x];
@@ -153,13 +151,13 @@ export default class SelectionStoreConnector {
 
     delete this.rowStores[y];
     delete this.columnStores[x];
-    // clear x cross link
+    // clear x cross-link
     if (this.storesXToType[x]) {
       const type = this.storesXToType[x];
       delete this.storesXToType[x];
       delete this.storesByType[type];
     }
-    // clear y cross link
+    // clear y cross-link
     if (this.storesYToType[y]) {
       const type = this.storesYToType[y];
       delete this.storesYToType[y];
@@ -191,10 +189,11 @@ export default class SelectionStoreConnector {
     }
 
     // Get the next store based on the current focus and the last cell.
-    const next = this.getNextStore(focus, this.focusedStore.position, this.focusedStore.entity.store.get('lastCell') );
+    const lastCell = this.focusedStore.entity.store.get('lastCell');
+    const next = lastCell && this.getNextStore(focus, this.focusedStore.position, lastCell);
 
     // Set the next focus cell in the store.
-    next.store?.setNextFocus({ ...focus, ...next.item });
+    next?.store?.setNextFocus({ ...focus, ...next.item });
   }
 
   focusByCell<T extends Cell>(storePos: T, start: T, end: T) {
@@ -210,7 +209,7 @@ export default class SelectionStoreConnector {
 
     // check for the focus in nearby store/viewport
     const lastCell = store.store.get('lastCell');
-    const next = this.getNextStore(focus, currentStorePointer, lastCell);
+    const next = lastCell && this.getNextStore(focus, currentStorePointer, lastCell);
 
     // if next store present - update
     if (next?.store) {
@@ -219,9 +218,10 @@ export default class SelectionStoreConnector {
       return null;
     }
 
-    focus = cropCellToMax(focus, lastCell);
-    end = cropCellToMax(end, lastCell);
-
+    if (lastCell) {
+      focus = cropCellToMax(focus, lastCell);
+      end = cropCellToMax(end, lastCell);  
+    }
     store.setFocus(focus, end);
     return focus;
   }
@@ -230,8 +230,8 @@ export default class SelectionStoreConnector {
    * Retrieves the current store pointer based on the active store.
    * Clears focus from all stores except the active one.
    */
-  getCurrentStorePointer(store: SelectionStore): Cell {
-    let currentStorePointer: Cell;
+  getCurrentStorePointer(store: SelectionStore) {
+    let currentStorePointer: Cell | undefined;
 
     // Iterate through all stores
     for (let y in this.stores) {
@@ -267,10 +267,9 @@ export default class SelectionStoreConnector {
     // item in new store
     const nextItem: Partial<Cell> | null = nextCell(focus, lastCell);
 
-    let nextStore: SelectionStore | null = null;
+    let nextStore: SelectionStore | undefined;
     if (nextItem) {
-      for (let i in nextItem) {
-        let type: keyof Cell = i as keyof Cell;
+      Object.entries(nextItem).forEach(([type, nextItemCoord]: [keyof Cell, number]) => {
         let stores;
         switch (type) {
           case 'x':
@@ -280,20 +279,21 @@ export default class SelectionStoreConnector {
           case 'y':
             // Get the Y stores for the current X coordinate of the current store pointer
             stores = this.getYStores(currentStorePointer.x);
-            stores = this.getYStores(currentStorePointer.x);
             break;
         }
-        if (nextItem[type] >= 0) {
+
+        // Get the next store based on the item in the new store
+        if (nextItemCoord >= 0) {
           nextStore = stores[++currentStorePointer[type]];
         } else {
           nextStore = stores[--currentStorePointer[type]];
           const nextLastCell = nextStore?.store.get('lastCell');
           if (nextLastCell) {
-            nextItem[type] = nextLastCell[type] + nextItem[type];
+            nextItem[type] = nextLastCell[type] + nextItemCoord;
           }
         }
-      }
-    }
+    });
+  }
     return {
       store: nextStore,
       item: nextItem,
@@ -308,7 +308,7 @@ export default class SelectionStoreConnector {
     }
   }
 
-  setEdit(val: string | boolean) {
+  setEdit(val?: string | boolean) {
     if (!this.focusedStore) {
       return;
     }
@@ -326,10 +326,12 @@ export default class SelectionStoreConnector {
           continue;
         }
         const lastCell = store.store.get('lastCell');
-        store.setRange(
-          { x: 0, y: 0 },
-          { x: lastCell.x - 1, y: lastCell.y - 1 },
-        );
+        if (lastCell) {
+          store.setRange(
+            { x: 0, y: 0 },
+            { x: lastCell.x - 1, y: lastCell.y - 1 },
+          );
+        }
       }
     }
   }

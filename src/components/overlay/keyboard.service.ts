@@ -17,7 +17,7 @@ import {
   isBeforeFirst,
 } from './selection.utils';
 import { RESIZE_INTERVAL } from '../../utils/consts';
-import { Cell, RangeArea, SelectionStoreState } from '@type';
+import { Cell, Nullable, RangeArea, SelectionStoreState } from '@type';
 import { Observable } from '../../utils/store.utils';
 
 type Config = {
@@ -33,7 +33,7 @@ type Config = {
 
   getData(): any;
   internalPaste(): void;
-  range(range: RangeArea): boolean;
+  range(range: RangeArea | null): boolean;
   selectAll(): void;
 };
 
@@ -51,7 +51,7 @@ export class KeyboardService {
     e: KeyboardEvent,
     canRange: boolean,
     isEditMode: boolean,
-    { range, focus }: Pick<EventData, 'range' | 'focus'>,
+    { range, focus }: Nullable<Pick<EventData, 'range' | 'focus'>>,
   ) {
     // IF EDIT MODE
     if (isEditMode) {
@@ -156,8 +156,8 @@ export class KeyboardService {
 
   keyPositionChange(
     changes: Partial<Cell>,
-    range?: RangeArea,
-    focus?: Cell,
+    range: RangeArea | null,
+    focus: Cell | null,
     isMulti = false,
   ) {
     if (!range || !focus) {

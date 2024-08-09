@@ -33,8 +33,8 @@ export function getUpdatedItemsByPosition<T extends ItemsToUpdate>(
   dimension: DimensionDataViewport,
 ): ItemsToUpdate {
   const activeItem: PositionItem = getItemByPosition(dimension, pos);
-  const firstItem: PositionItem = getFirstItem(items);
-  let toUpdate: ItemsToUpdate;
+  const firstItem = getFirstItem(items);
+  let toUpdate: ItemsToUpdate | undefined;
   // do simple position recombination if items already present in viewport
   if (firstItem) {
     let changedOffsetStart = activeItem.itemIndex - (firstItem.itemIndex || 0);
@@ -189,7 +189,7 @@ type RecombineOffsetData = {
 export function recombineByOffset(
   offset: number,
   data: RecombineOffsetData,
-): ItemsToUpdate | null {
+): ItemsToUpdate | undefined {
   const newItems = [...data.items];
   const itemsCount = newItems.length;
   let newRange = {
@@ -199,7 +199,7 @@ export function recombineByOffset(
 
   // if offset out of revo-viewport, makes sense whole redraw
   if (offset > itemsCount) {
-    return null;
+    return undefined;
   }
 
   // is direction of scroll positive
@@ -245,11 +245,11 @@ export function recombineByOffset(
     // direction is negative
   } else {
     // push item to the start
-    let firstItem: VirtualPositionItem = getFirstItem(data);
+    let firstItem = getFirstItem(data);
 
     const end = newRange.end;
     for (let i = 0; i < offset; i++) {
-      const newIndex = firstItem.itemIndex - 1;
+      const newIndex = (firstItem?.itemIndex ?? 0) - 1;
       const size = getItemSize(
         newIndex,
         data.sizes,
@@ -262,13 +262,15 @@ export function recombineByOffset(
 
       // item should always present, we do not create new item, we recombine them
       if (!newItems[newStart]) {
-        throw new Error('incorrect index');
+        console.error('incorrect index');
+        break;
       }
 
       // do recombination
+      const firstItemStart = firstItem?.start ?? 0;
       newItems[newStart] = firstItem = {
-        start: firstItem.start - size,
-        end: firstItem.start,
+        start: firstItemStart - size,
+        end: firstItemStart,
         itemIndex: newIndex,
         size: size,
       };
@@ -332,12 +334,12 @@ export function isActiveRangeOutsideLastItem(
   if (!firstItem) {
     return false;
   }
-  return virtualSize + pos > lastItem?.end;
+  return virtualSize + pos > (lastItem?.end ?? 0);
 }
 
 export function getFirstItem(
   s: ItemsToUpdate,
-): VirtualPositionItem | undefined {
+) {
   return s.items[s.start];
 }
 

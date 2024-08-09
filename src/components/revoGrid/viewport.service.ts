@@ -1,42 +1,29 @@
 import reduce from 'lodash/reduce';
 
 import DimensionProvider from '../../services/dimension.provider';
-import SelectionStoreConnector, {
-  EMPTY_INDEX,
-} from '../../services/selection.store.connector';
+import SelectionStoreConnector, { EMPTY_INDEX } from '../../services/selection.store.connector';
 import ViewportProvider from '../../services/viewport.provider';
-import {
-  DSourceState,
-  getSourceItem,
-  getVisibleSourceItem,
-  columnTypes,
-  rowTypes,
-} from '@store';
+import { columnTypes, DSourceState, getSourceItem, getVisibleSourceItem, rowTypes } from '@store';
 import { OrdererService } from '../order/order-renderer';
 import GridScrollingService from './viewport.scrolling.service';
-import {
-  CONTENT_SLOT,
-  FOOTER_SLOT,
-  getLastCell,
-  HEADER_SLOT,
-} from './viewport.helpers';
+import { CONTENT_SLOT, FOOTER_SLOT, HEADER_SLOT, viewportDataPartition, VPPartition } from './viewport.helpers';
 
 import ColumnDataProvider from '../../services/column.data.provider';
 import { DataProvider } from '../../services/data.provider';
 import {
+  Cell,
   ColumnRegular,
-  ViewPortResizeEvent,
-  ViewSettingSizeProp,
   DimensionCols,
   DimensionRows,
   HeaderProperties,
+  RangeArea,
   SlotType,
   ViewportColumn,
   ViewportData,
   ViewportProperties,
   ViewportProps,
-  Cell,
-  RangeArea,
+  ViewPortResizeEvent,
+  ViewSettingSizeProp,
 } from '@type';
 import { Observable } from '../../utils/store.utils';
 
@@ -161,17 +148,16 @@ export default class ViewportService {
             rgRow.type,
           );
           const rowDef: ViewportData = {
+            colType: val,
             ...rgRow,
             rowSelectionStore,
             segmentSelectionStore: segmentSelection.store,
-            ref: (e: Element) =>
+            ref: (e) =>
               config.selectionStoreConnector.registerSection(e),
             onSetrange: e => {
               segmentSelection.setRangeArea(e.detail);
             },
-            onSettemprange: e => {
-              segmentSelection.setTempArea(e.detail);
-            },
+            onSettemprange: e => segmentSelection.setTempArea(e.detail),
             onFocuscell: e => {
               // todo: multi focus
               segmentSelection.clearFocus();
@@ -242,7 +228,7 @@ export default class ViewportService {
 
     // y position for selection
     let y = 0;
-    return rowTypes.reduce((r, type) => {
+    return rowTypes.reduce((result: VPPartition[], type) => {
       // filter out empty sources, we still need to return source to keep slot working
       const isPresent =
         data.viewports[type].store.get('realCount') || type === 'rgRow';
@@ -250,53 +236,29 @@ export default class ViewportService {
         ...data,
         position: { ...data.position, y: isPresent ? y : EMPTY_INDEX },
       };
-      r.push(
-        this.dataPartition(
-          rgCol,
-          type,
-          slots[type],
-          type !== 'rgRow', // is fixed
-        ),
+      const partition = viewportDataPartition(
+        rgCol,
+        type,
+        slots[type],
+        type !== 'rgRow', // is fixed row
       );
+      result.push(partition);
       if (isPresent) {
         y++;
       }
-      return r;
+      return result;
     }, []);
-  }
-
-  private dataPartition(
-    data: ViewportColumn,
-    type: DimensionRows,
-    slot: SlotType,
-    fixed?: boolean,
-  ) {
-    return {
-      colData: data.colStore,
-      viewportCol: data.viewports[data.colType].store,
-      viewportRow: data.viewports[type].store,
-      // lastCell is the last real coordinate + 1
-      lastCell: getLastCell(data, type),
-      slot,
-      type,
-      canDrag: !fixed,
-      position: data.position,
-      dataStore: data.rowStores[type].store,
-      dimensionCol: data.dimensions[data.colType].store,
-      dimensionRow: data.dimensions[type].store,
-      style: fixed
-        ? { height: `${data.dimensions[type].store.get('realSize')}px` }
-        : undefined,
-    };
   }
 
   scrollToCell(cell: Partial<Cell>) {
     for (let key in cell) {
       const coordinate = cell[key as keyof Cell];
-      this.config.scrollingService.proxyScroll({
-        dimension: key === 'x' ? 'rgCol' : 'rgRow',
-        coordinate,
-      });
+      if (typeof coordinate === 'number') {
+        this.config.scrollingService.proxyScroll({
+          dimension: key === 'x' ? 'rgCol' : 'rgRow',
+          coordinate,
+        });
+      }
     }
   }
 
@@ -340,24 +302,26 @@ export default class ViewportService {
     };
   }
 
-  getStoreCoordinateByType(colType: DimensionCols, rowType: DimensionRows) {
+  getStoreCoordinateByType(colType: DimensionCols, rowType: DimensionRows): Cell | undefined {
     const stores = this.config.selectionStoreConnector.storesByType;
-    const storeCoordinate = {
+    if (typeof stores[colType] === 'undefined' || typeof stores[rowType] === 'undefined') {
+      return;
+    }
+    return {
       x: stores[colType],
       y: stores[rowType],
     };
-    return storeCoordinate;
   }
 
   setFocus(colType: string, rowType: string, start: Cell, end: Cell) {
-    this.config.selectionStoreConnector?.focusByCell(
-      this.getStoreCoordinateByType(
-        colType as DimensionCols,
-        rowType as DimensionRows,
-      ),
-      start,
-      end,
-    );
+    const coordinate = this.getStoreCoordinateByType(colType as DimensionCols, rowType as DimensionRows);
+    if (coordinate) {
+      this.config.selectionStoreConnector?.focusByCell(
+        coordinate,
+        start,
+        end,
+      );
+    }
   }
 
   getSelectedRange(): RangeArea | null | undefined {
@@ -370,9 +334,12 @@ export default class ViewportService {
     colType: DimensionCols,
     rowType: DimensionRows,
   ) {
-    this.config.selectionStoreConnector?.setEditByCell(
-      this.getStoreCoordinateByType(colType, rowType),
-      { x: colIndex, y: rowIndex },
-    );
+    const coordinate = this.getStoreCoordinateByType(colType as DimensionCols, rowType as DimensionRows);
+    if (coordinate) {
+      this.config.selectionStoreConnector?.setEditByCell(
+        coordinate,
+        { x: colIndex, y: rowIndex },
+      );
+    }
   }
 }

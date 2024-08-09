@@ -21,7 +21,7 @@ import {
 })
 export class VNodeToHtml {
   @Prop() redraw: (() => VNode[]) | null | undefined = null;
-  @Event() html: EventEmitter<{ html: string; vnodes: VNode[] }>;
+  @Event() html: EventEmitter<{ html: string; vnodes: (VNode[]) | null }>;
   @Element() el: HTMLElement;
 
   private vnodes: VNode[] | null = [];
@@ -34,7 +34,7 @@ export class VNodeToHtml {
   }
 
   render() {
-    this.vnodes = this.redraw?.();
+    this.vnodes = this.redraw?.() ?? null;
     return (
       <Host
         style={{ visibility: 'hidden', position: 'absolute' }}

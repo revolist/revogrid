@@ -31,7 +31,6 @@ export default class ExportFilePlugin extends BasePlugin {
   /** Export file */
   async exportFile(options: ExportFormat = {}, t: ExportTypes = ExportTypes.csv) {
     const formatter = this.formatter(t, options);
-    const blob = await this.getBlob(formatter);
 
     // url
     const URL = window.URL || window.webkitURL;
@@ -39,7 +38,9 @@ export default class ExportFilePlugin extends BasePlugin {
     const a = document.createElement('a');
     const { filename, fileKind } = formatter.options;
     const name = `${filename}.${fileKind}`;
-    const url = URL.createObjectURL(blob);
+
+    const blob = await this.getBlob(formatter);
+    const url = blob ? URL.createObjectURL(blob) : '';
 
     a.style.display = 'none';
     a.setAttribute('href', url);

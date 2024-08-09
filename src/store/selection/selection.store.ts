@@ -4,7 +4,7 @@
 
 import { setStore, Observable } from '../../utils/store.utils';
 import { getRange } from '@store';
-import { SelectionStoreState, Cell, TempRange, RangeArea } from '@type';
+import { SelectionStoreState, Cell, TempRange, RangeArea, Nullable } from '@type';
 import { createStore } from '@stencil/store';
 
 function defaultState(): SelectionStoreState {
@@ -56,7 +56,7 @@ export class SelectionStore {
     setStore(this.store, { nextFocus: focus });
   }
 
-  setTempArea(range: TempRange | null) {
+  setTempArea(range: Nullable<TempRange> | null) {
     setStore(this.store, { tempRange: range?.area, tempRangeType: range?.type, edit: null });
   }
 
@@ -65,18 +65,19 @@ export class SelectionStore {
   }
 
   /** Can be applied from selection change or from simple keyboard change clicks */
-  setRangeArea(range: RangeArea) {
+  setRangeArea(range: RangeArea | null) {
     setStore(this.store, { range, edit: null, tempRange: null });
   }
   setRange(start: Cell, end: Cell) {
-    this.setRangeArea(getRange(start, end));
+    const range = getRange(start, end);
+    this.setRangeArea(range);
   }
 
   setLastCell(lastCell: Cell) {
     setStore(this.store, { lastCell });
   }
 
-  setEdit(val: string | boolean) {
+  setEdit(val?: string | boolean) {
     const focus = this.store.get('focus');
     if (focus && typeof val === 'string') {
       setStore(this.store, {
