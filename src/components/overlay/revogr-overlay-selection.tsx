@@ -262,13 +262,13 @@ export class OverlaySelection {
    * Call preventDefault().
    */
   @Event({ eventName: 'beforekeydown' })
-  beforeKeyDown: EventEmitter<KeyboardEvent>;
+  beforeKeyDown: EventEmitter<KeyboardEvent & EventData>;
   /**
    * Before key down event proxy, used to prevent key down trigger.
    * If you have some custom behaviour event, use this event to check if it wasn't processed by internal logic.
    * Call preventDefault().
    */
-  @Event({ eventName: 'beforekeyup' }) beforeKeyUp: EventEmitter<KeyboardEvent>;
+  @Event({ eventName: 'beforekeyup' }) beforeKeyUp: EventEmitter<KeyboardEvent & EventData>;
   /**
    * Runs before cell save.
    * Can be used to override or cancel original save.
@@ -331,7 +331,7 @@ export class OverlaySelection {
    */
   @Listen('keyup', { target: 'document' }) onKeyUp(e: KeyboardEvent) {
     // Emit before key up event.
-    this.beforeKeyUp.emit(e);
+    this.beforeKeyUp.emit({ ...e, this.getData() });
   }
 
   /**
@@ -340,7 +340,7 @@ export class OverlaySelection {
    */
   @Listen('keydown', { target: 'document' }) onKeyDown(e: KeyboardEvent) {
     // Emit before key down event and check if default prevention is set.
-    const proxy = this.beforeKeyDown.emit(e);
+    const proxy = this.beforeKeyDown.emit({ ...e, this.getData() });
     if (e.defaultPrevented || proxy.defaultPrevented) {
       return;
     }
