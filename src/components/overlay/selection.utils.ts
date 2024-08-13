@@ -4,7 +4,7 @@ import {
   getItemByPosition,
   getSourceItem,
 } from '@store';
-import { DimensionSettingsState, Cell, RangeArea, RangeAreaCss, DataLookup, DimensionRows, DataType } from '@type';
+import { DimensionSettingsState, Cell, RangeArea, RangeAreaCss, DataLookup, DimensionRows, DataType, EditCellStore } from '@type';
 import { getPropertyFromEvent } from '../../utils/events';
 import { Observable } from '../../utils/store.utils';
 
@@ -15,6 +15,7 @@ export type EventData = {
   lastCell: Cell;
   focus: Cell | null;
   range: RangeArea | null;
+  edit: EditCellStore | null;
 };
 
 export function collectModelsOfRange(data: DataLookup, store: Observable<DSourceState<DataType, DimensionRows>>) {
