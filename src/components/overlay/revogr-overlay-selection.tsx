@@ -80,7 +80,13 @@ export class OverlaySelection {
 
   /** Range data apply */
   @Event({ cancelable: true }) internalRangeDataApply: EventEmitter<Edition.BeforeRangeSaveDataDetails>;
-
+  /**
+   * Before key up event proxy, used to prevent key up trigger.
+   * If you have some custom behaviour event, use this event to check if it wasn't processed by internal logic.
+   * Call preventDefault().
+   */
+  @Event({ eventName: 'beforekeydown' })
+  beforeKeyDown: EventEmitter;
   // --------------------------------------------------------------------------
   //
   //  Listeners
@@ -115,7 +121,9 @@ export class OverlaySelection {
 
   /** Recived keyboard down from element */
   @Listen('keydown', { target: 'document' }) onKeyDown(e: KeyboardEvent) {
-    if (e.defaultPrevented) {
+    // Emit before key down event and check if default prevention is set.
+    const proxy = this.beforeKeyDown.emit({ ...e, ...this.getData()});
+    if (e.defaultPrevented || proxy.defaultPrevented) {
       return;
     }
     this.keyboardService?.keyDown(e, this.range);
@@ -375,6 +383,9 @@ export class OverlaySelection {
       rows: this.dimensionRow.state,
       cols: this.dimensionCol.state,
       lastCell: this.lastCell,
+      focus: this.selectionStore.get('focus'),
+      range: this.selectionStore.get('range'),
+      edit: this.selectionStore.get('edit'),
     };
   }
 }
