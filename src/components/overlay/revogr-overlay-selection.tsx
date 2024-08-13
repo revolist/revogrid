@@ -891,6 +891,7 @@ export class OverlaySelection {
       lastCell: this.lastCell,
       focus: this.selectionStore.get('focus'),
       range: this.selectionStore.get('range'),
+      edit: this.selectionStore.get('edit'),
     };
   }
 }
