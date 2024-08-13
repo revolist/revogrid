@@ -848,6 +848,10 @@ declare namespace LocalJSX {
          */
         "lastCell"?: Selection.Cell;
         /**
+          * Before key up event proxy, used to prevent key up trigger. If you have some custom behaviour event, use this event to check if it wasn't processed by internal logic. Call preventDefault().
+         */
+        "onBeforekeydown"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
+        /**
           * Used for editors support when close requested
          */
         "onCancelEdit"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
