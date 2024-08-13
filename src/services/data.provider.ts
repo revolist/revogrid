@@ -12,8 +12,8 @@ import DataType = RevoGrid.DataType;
 export type RowDataSources = { [T in DimensionRows]: DataStore<DataType, DimensionRows> };
 
 export class DataProvider {
-  public readonly stores: RowDataSources;
-  constructor(private dimensionProvider: DimensionProvider) {
+  readonly stores: RowDataSources;
+  constructor(public dimensionProvider: DimensionProvider) {
     this.stores = reduce(
       rowTypes,
       (sources: Partial<RowDataSources>, k: DimensionRows) => {

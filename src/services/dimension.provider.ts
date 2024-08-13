@@ -9,8 +9,8 @@ export type ColumnItems = Record<RevoGrid.DimensionCols, RevoGrid.ColumnRegular[
 
 export type DimensionStores = { [T in RevoGrid.MultiDimensionType]: DimensionStore };
 export default class DimensionProvider {
-  public readonly stores: DimensionStores;
-  constructor(private viewports: ViewportProvider) {
+  readonly stores: DimensionStores;
+  constructor(public viewports: ViewportProvider) {
     this.stores = reduce(
       [...rowTypes, ...columnTypes],
       (sources: Partial<DimensionStores>, k: RevoGrid.MultiDimensionType) => {

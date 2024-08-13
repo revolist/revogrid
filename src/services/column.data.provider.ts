@@ -23,7 +23,7 @@ type Sorting = Record<ColumnProp, ColumnRegular>;
 type SortingOrder = Record<ColumnProp, 'asc' | 'desc'>;
 
 export default class ColumnDataProvider {
-  private readonly dataSources: ColumnDataSources;
+  readonly dataSources: ColumnDataSources;
   sorting: Sorting | null = null;
 
   get order() {

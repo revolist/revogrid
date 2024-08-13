@@ -18,7 +18,7 @@ export const EMPTY_INDEX = -1;
 export default class SelectionStoreConnector {
   // dirty flag required to cleanup whole store in case visibility of panels changed
   private dirty = false;
-  private readonly stores: StoresMatrix = {};
+  readonly stores: StoresMatrix = {};
 
   readonly columnStores: StoreByDimension = {};
   readonly rowStores: { [y: number]: SelectionStore } = {};
@@ -54,7 +54,7 @@ export default class SelectionStoreConnector {
     return this.focusedStore?.entity.store.get('range');
   }
 
-  private readonly sections: Element[] = [];
+  readonly sections: Element[] = [];
   registerSection(e?: Element) {
     if (!e) {
       this.sections.length = 0;
@@ -244,11 +244,11 @@ export default class SelectionStoreConnector {
     this.focusedStore.entity.setEdit(val);
   }
 
-  private getXStores(y: number) {
+  getXStores(y: number) {
     return this.stores[y];
   }
 
-  private getYStores(x: number) {
+  getYStores(x: number) {
     const stores: { [p: number]: SelectionStore } = {};
     for (let i in this.stores) {
       stores[i] = this.stores[i][x];
