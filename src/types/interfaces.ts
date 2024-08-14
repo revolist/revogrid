@@ -92,15 +92,15 @@ export type RowDrag =
 /**
  * `ColumnGrouping` type is used to define a grouping in a column.
  */
-export type ColumnGrouping = {
+export type ColumnGrouping<T = any> = {
   /**
    * An array of objects that represent the children of the grouping.
    */
-  children: (ColumnGrouping | ColumnRegular)[];
+  children: (ColumnGrouping<T> | ColumnRegular)[];
   /**
    * A `DataFormat` object that represents the name of the grouping.
    */
-  name: DataFormat;
+  name: DataFormat<T>;
 };
 /**
  * Configuration for header inner template properties
@@ -204,7 +204,7 @@ export interface ColumnRegular extends ColumnType {
   /**
    * Column header text.
    */
-  name?: DataFormat;
+  name?: any;
   /**
    * Column size would be changed based on space left.
    */
@@ -259,7 +259,7 @@ export type ColumnPropProp = ColumnGrouping | ColumnTemplateProp;
 // Column prop used for mapping value to cell from data source model/row, used for indexing.
 export type ColumnProp = string | number;
 
-export type DataFormat = any;
+export type DataFormat<T = any> = T;
 
 export type CellProp = string | number | object | boolean | undefined;
 
@@ -410,12 +410,12 @@ export type PropertiesFunc = (
 export type ColPropertiesFunc = (
   props: ColumnPropProp,
 ) => CellProps | void | undefined;
-export type DataType = {
-  [T in ColumnProp]: DataFormat;
+export type DataType<D = any> = {
+  [T in ColumnProp]: DataFormat<D>;
 };
 
-export type DataLookup = {
-  [rowIndex: number]: DataType;
+export type DataLookup<T = any> = {
+  [rowIndex: number]: DataType<T>;
 };
 /**
  * `RowDefinition` is a type that represents a row definition in the
@@ -789,8 +789,8 @@ export type RangeClipboardPasteEvent = {
 } & AllDimensionType;
 
 /** Range copy. */
-export type RangeClipboardCopyEventProps = {
-  data: DataFormat[][];
+export type RangeClipboardCopyEventProps<T = any> = {
+  data: DataFormat<T>[][];
   range: RangeArea;
   mapping: OldNewRangeMapping;
 } & AllDimensionType;
