@@ -331,7 +331,7 @@ export class OverlaySelection {
    */
   @Listen('keyup', { target: 'document' }) onKeyUp(e: KeyboardEvent) {
     // Emit before key up event.
-    this.beforeKeyUp.emit({ ...e, this.getData() });
+    this.beforeKeyUp.emit({ ...e, ...this.getData() });
   }
 
   /**
@@ -340,7 +340,7 @@ export class OverlaySelection {
    */
   @Listen('keydown', { target: 'document' }) onKeyDown(e: KeyboardEvent) {
     // Emit before key down event and check if default prevention is set.
-    const proxy = this.beforeKeyDown.emit({ ...e, this.getData() });
+    const proxy = this.beforeKeyDown.emit({ ...e, ...this.getData() });
     if (e.defaultPrevented || proxy.defaultPrevented) {
       return;
     }

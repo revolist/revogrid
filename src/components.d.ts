@@ -20,6 +20,7 @@ import { MultiFilterItem, ShowData } from "./plugins/filter/filter.panel";
 import { LogicFunction } from "./plugins/filter/filter.types";
 import { ResizeProps } from "./components/header/resizable.directive";
 import { Cell as Cell1, ColumnRegular as ColumnRegular1, DataType as DataType1, DimensionCols as DimensionCols1, DimensionRows as DimensionRows1, DimensionSettingsState as DimensionSettingsState1, Observable as Observable1, SelectionStoreState as SelectionStoreState1 } from "./components";
+import { EventData } from "./components/overlay/selection.utils";
 export { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, ChangedRange, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, Nullable, PluginBaseComponent, PositionItem, RangeArea, RangeClipboardCopyEventProps, RangeClipboardPasteEvent, RowDefinition, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
 export { GridPlugin } from "./plugins/base.plugin";
 export { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
@@ -35,6 +36,7 @@ export { MultiFilterItem, ShowData } from "./plugins/filter/filter.panel";
 export { LogicFunction } from "./plugins/filter/filter.types";
 export { ResizeProps } from "./components/header/resizable.directive";
 export { Cell as Cell1, ColumnRegular as ColumnRegular1, DataType as DataType1, DimensionCols as DimensionCols1, DimensionRows as DimensionRows1, DimensionSettingsState as DimensionSettingsState1, Observable as Observable1, SelectionStoreState as SelectionStoreState1 } from "./components";
+export { EventData } from "./components/overlay/selection.utils";
 export namespace Components {
     /**
      * Revogrid - High-performance, customizable grid library for managing large datasets.
@@ -1057,8 +1059,8 @@ declare global {
         "rangeeditapply": BeforeRangeSaveDataDetails;
         "clipboardrangecopy": RangeClipboardCopyEventProps;
         "clipboardrangepaste": RangeClipboardPasteEvent;
-        "beforekeydown": KeyboardEvent;
-        "beforekeyup": KeyboardEvent;
+        "beforekeydown": KeyboardEvent & EventData;
+        "beforekeyup": KeyboardEvent & EventData;
         "beforecellsave": any;
     }
     /**
@@ -1951,11 +1953,11 @@ declare namespace LocalJSX {
         /**
           * Before key up event proxy, used to prevent key up trigger. If you have some custom behaviour event, use this event to check if it wasn't processed by internal logic. Call preventDefault().
          */
-        "onBeforekeydown"?: (event: RevogrOverlaySelectionCustomEvent<KeyboardEvent>) => void;
+        "onBeforekeydown"?: (event: RevogrOverlaySelectionCustomEvent<KeyboardEvent & EventData>) => void;
         /**
           * Before key down event proxy, used to prevent key down trigger. If you have some custom behaviour event, use this event to check if it wasn't processed by internal logic. Call preventDefault().
          */
-        "onBeforekeyup"?: (event: RevogrOverlaySelectionCustomEvent<KeyboardEvent>) => void;
+        "onBeforekeyup"?: (event: RevogrOverlaySelectionCustomEvent<KeyboardEvent & EventData>) => void;
         /**
           * Fired when change of viewport happens. Usually when we switch between pinned regions.
          */
