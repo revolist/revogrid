@@ -122,7 +122,7 @@ export class OverlaySelection {
   /** Recived keyboard down from element */
   @Listen('keydown', { target: 'document' }) onKeyDown(e: KeyboardEvent) {
     // Emit before key down event and check if default prevention is set.
-    const proxy = this.beforeKeyDown.emit({ ...e, ...this.getData()});
+    const proxy = this.beforeKeyDown.emit({ original: e, ...this.getData()});
     if (e.defaultPrevented || proxy.defaultPrevented) {
       return;
     }
