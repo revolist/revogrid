@@ -17,9 +17,9 @@ export class BasePlugin implements PluginBaseComponent {
    * @param eventName - event name to subscribe to in revo-grid component (e.g. 'beforeheaderclick')
    * @param callback - callback function for event
    */
-  addEventListener(
+  addEventListener<T = any>(
     eventName: string,
-    callback: (e: CustomEvent) => void,
+    callback: (e: CustomEvent<T>) => void,
   ) {
     this.revogrid.addEventListener(eventName, callback);
     this.subscriptions[eventName] = callback;
