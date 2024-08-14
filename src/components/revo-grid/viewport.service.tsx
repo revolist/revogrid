@@ -281,7 +281,26 @@ export default class ViewportService {
   getSelectedRange(): Selection.RangeArea | null {
     return this.sv.selectionStoreConnector.selectedRange;
   }
-
+  setFocus(colType: string, rowType: string, start: Selection.Cell, end: Selection.Cell) {
+    const coordinate = this.getStoreCoordinateByType(colType as RevoGrid.DimensionCols, rowType as RevoGrid.DimensionRows);
+    if (coordinate) {
+      this.sv.selectionStoreConnector?.focusByCell(
+        coordinate,
+        start,
+        end,
+      );
+    }
+  }
+  getStoreCoordinateByType(colType: RevoGrid.DimensionCols, rowType: RevoGrid.DimensionRows): Selection.Cell | undefined {
+    const stores = this.storesByType;
+    if (typeof stores[colType] === 'undefined' || typeof stores[rowType] === 'undefined') {
+      return undefined;
+    }
+    return {
+      x: stores[colType],
+      y: stores[rowType],
+    };
+  }
   setEdit(rowIndex: number, colIndex: number, colType: RevoGrid.DimensionCols, rowType: RevoGrid.DimensionRows) {
     const stores = this.storesByType;
     const storeCoordinate = {

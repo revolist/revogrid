@@ -512,6 +512,15 @@ export class RevoGridComponent {
     return this.viewport?.getSelectedRange();
   }
 
+  /**  Set focus range. */
+  @Method() async setCellsFocus(
+    cellStart: Selection.Cell = { x: 0, y: 0 },
+    cellEnd: Selection.Cell = { x: 0, y: 0 },
+    colType = 'rgCol',
+    rowType = 'rgRow',
+  ) {
+    this.viewport?.setFocus(colType, rowType, cellStart, cellEnd);
+  }
 
   // --------------------------------------------------------------------------
   //

@@ -255,6 +255,16 @@ Type: `Promise<void>`
 
 
 
+### `setCellsFocus(cellStart?: Selection.Cell, cellEnd?: Selection.Cell, colType?: string, rowType?: string) => Promise<void>`
+
+Set focus range.
+
+#### Returns
+
+Type: `Promise<void>`
+
+
+
 ### `updateColumnSorting(column: RevoGrid.ColumnRegular, index: number, order: 'asc' | 'desc', additive: boolean) => Promise<RevoGrid.ColumnRegular>`
 
 Update column sorting

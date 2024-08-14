@@ -206,6 +206,11 @@ export default class SelectionStoreConnector {
     return currentStorePointer;
   }
 
+  focusByCell<T extends Cell>(storePos: T, start: T, end: T) {
+    const store = this.stores[storePos.y][storePos.x];
+    this.focus(store, { focus: start, end });
+  }
+
   focus(store: SelectionStore, { focus, end }: { focus: Cell; end: Cell }) {
     const currentStorePointer = this.getCurrentStorePointer(store);
     if (!currentStorePointer) {
