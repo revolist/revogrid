@@ -1,11 +1,11 @@
 {
   "name": "@revolist/revogrid",
-  "version": "4.9.3",
+  "version": "4.9.6",
   "type": "module",
   "description": "Virtual reactive data grid spreadsheet component - RevoGrid.",
   "license": "MIT",
   "author": "revolist",
-  "homepage": "https://github.com/revolist/revogrid#readme",
+  "homepage": "https://rv-grid.com",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/revolist/revogrid.git"

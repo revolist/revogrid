@@ -1,4 +1,3 @@
-import { ColumnCollection } from '../../services/column.data.provider';
 import { getPhysical, setItems, columnTypes, TrimmedEntity, DSourceState } from '@store';
 import { BasePlugin } from '../base.plugin';
 import { FILTER_TRIMMED_TYPE } from '../filter/filter.plugin';
@@ -28,6 +27,7 @@ import {
 } from './grouping.trimmed.service';
 import { BeforeSaveDataDetails, ColumnRegular, DataType, DimensionRows, PluginProviders } from '@type';
 import { Observable } from '../../utils/store.utils';
+import { ColumnCollection } from '../../utils/column.utils';
 
 export default class GroupingRowPlugin extends BasePlugin {
   private options: GroupingOptions | undefined;

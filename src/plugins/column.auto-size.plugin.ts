@@ -6,10 +6,6 @@ import each from 'lodash/each';
 import reduce from 'lodash/reduce';
 
 import { BasePlugin } from './base.plugin';
-import ColumnDataProvider, {
-  ColumnCollection,
-} from '../services/column.data.provider';
-import { ColumnItems } from '../services/dimension.provider';
 import { getSourceItem, columnTypes } from '@store';
 import {
   DimensionCols,
@@ -20,8 +16,9 @@ import {
   ViewSettingSizeProp,
   BeforeSaveDataDetails,
   BeforeRangeSaveDataDetails,
+  PluginProviders,
 } from '@type';
-import { PluginProviders } from '../';
+import { ColumnCollection, getColumnType } from '../utils/column.utils';
 
 interface Column extends ColumnRegular {
   index: number;
@@ -106,7 +103,7 @@ export default class AutoSizeColumnPlugin extends BasePlugin {
       this.columnSet(columns);
     };
     const headerDblClick = ({ detail }: CustomEvent<InitialHeaderClick>) => {
-      const type = ColumnDataProvider.getColumnType(detail.column);
+      const type = getColumnType(detail.column);
       const size = this.getColumnSize(detail.index, type);
       if (size) {
         this.providers.dimension.setCustomSizes(
@@ -263,7 +260,7 @@ export default class AutoSizeColumnPlugin extends BasePlugin {
     );
   }
 
-  columnSet(columns: ColumnItems) {
+  columnSet(columns: Record<DimensionCols, ColumnRegular[]>) {
     for (let t of columnTypes) {
       const type = t as DimensionCols;
       const cols = columns[type];
