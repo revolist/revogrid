@@ -898,7 +898,7 @@ declare global {
     interface HTMLRevogrDataElementEventMap {
         "beforerowrender": BeforeRowRenderEvent;
         "afterrender": { type: DimensionRows };
-        "beforecellrender": BeforeCellRenderEvent;
+        "beforecellrender": BeforeCellRenderEvent<ColumnDataSchemaModel>;
         "dragstartcell": DragStartEvent;
     }
     /**
@@ -1632,7 +1632,7 @@ declare namespace LocalJSX {
         /**
           * Before each cell render function. Allows to override cell properties
          */
-        "onBeforecellrender"?: (event: RevogrDataCustomEvent<BeforeCellRenderEvent>) => void;
+        "onBeforecellrender"?: (event: RevogrDataCustomEvent<BeforeCellRenderEvent<ColumnDataSchemaModel>>) => void;
         /**
           * Before each row render
          */
