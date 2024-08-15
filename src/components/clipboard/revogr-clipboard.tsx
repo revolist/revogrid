@@ -43,7 +43,7 @@ export class Clipboard {
    * @property {string[][]} data - data to paste
    * @property {boolean} defaultPrevented - if true, paste will be canceled
    */
-  @Event({ eventName: 'pasteregion', bubbles: false })
+  @Event({ eventName: 'pasteregion' })
   pasteRegion: EventEmitter<string[][]>;
 
   /**
@@ -90,7 +90,7 @@ export class Clipboard {
    * Copy 2. Fired when region copied
    * defaultPrevented - if true, copy will be canceled
    */
-  @Event({ eventName: 'copyregion', bubbles: false })
+  @Event({ eventName: 'copyregion' })
   copyRegion: EventEmitter<DataTransfer>;
 
   @Listen('paste', { target: 'document' }) onPaste(e: ClipboardEvent) {

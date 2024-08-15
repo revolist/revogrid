@@ -3,7 +3,6 @@ import debounce from 'lodash/debounce';
 import range from 'lodash/range';
 
 import { setStore } from '../../utils/store.utils';
-import ColumnDataProvider from '../../services/column.data.provider';
 import { BasePlugin } from '../base.plugin';
 import {
   ColumnProp,
@@ -15,6 +14,7 @@ import {
   DimensionRows,
   PluginProviders,
 } from '@type';
+import { getColumnByProp } from '../../utils/column.utils';
 
 export type SortingOrder = Record<ColumnProp, Order>;
 type SortingOrderFunction = Record<ColumnProp, CellCompareFunc | undefined>;
@@ -83,7 +83,7 @@ export default class SortingPlugin extends BasePlugin {
 
       for (let prop in order) {
         const cmp = this.getComparer(
-          ColumnDataProvider.getColumnByProp(columns, prop),
+          getColumnByProp(columns, prop),
           order[prop],
         );
         sortingFunc[prop] = cmp;

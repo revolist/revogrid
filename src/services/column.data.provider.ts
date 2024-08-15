@@ -2,11 +2,6 @@ import reduce from 'lodash/reduce';
 import each from 'lodash/each';
 import find from 'lodash/find';
 
-import GroupingColumnPlugin, {
-  ColumnGroupingCollection,
-  isColGrouping,
-} from '../plugins/groupingColumn/grouping.col.plugin';
-
 import {
   columnTypes,
   DataStore,
@@ -16,23 +11,13 @@ import {
   setSourceByVirtualIndex,
 } from '@store';
 import type {
-  ColumnData,
   ColumnProp,
   ColumnRegular,
-  ColumnTypes,
-  ViewSettingSizeProp,
   DimensionCols,
   DimensionColPin,
-  ColumnGrouping,
 } from '@type';
+import { ColumnCollection, getColumnType } from '../utils/column.utils';
 
-export type ColumnCollection = {
-  columns: Record<DimensionCols, ColumnRegular[]>;
-  columnByProp: Record<ColumnProp, ColumnRegular[]>;
-  columnGrouping: ColumnGroupingCollection;
-  maxLevel: number;
-  sort: Record<ColumnProp, ColumnRegular>;
-};
 
 export type ColumnDataSources = Record<
   DimensionCols,
@@ -46,28 +31,24 @@ export default class ColumnDataProvider {
   sorting: Sorting | null = null;
 
   get order() {
-    return reduce(
-      this.sorting,
-      (r: SortingOrder, c, prop) => {
-        r[prop] = c.order;
-        return r;
-      },
-      {},
-    );
+    const order: SortingOrder = {};
+    const sorting = this.sorting;
+    if (sorting) {
+      Object.keys(sorting).forEach((prop) => {
+        order[prop] = sorting[prop].order;
+      });
+    }
+    return order;
   }
 
   get stores() {
     return this.dataSources;
   }
   constructor() {
-    this.dataSources = reduce(
-      columnTypes,
-      (sources: Partial<ColumnDataSources>, k: DimensionCols) => {
-        sources[k] = new DataStore(k);
-        return sources;
-      },
-      {},
-    ) as ColumnDataSources;
+    this.dataSources = columnTypes.reduce((sources: ColumnDataSources, k: DimensionCols) => {
+      sources[k] = new DataStore(k);
+      return sources;
+    }, {} as ColumnDataSources);
   }
 
   column(c: number, pin?: DimensionColPin): ColumnRegular | undefined {
@@ -156,7 +137,7 @@ export default class ColumnDataProvider {
         res: Partial<Record<DimensionCols, Record<ColumnProp, ColumnRegular>>>,
         c,
       ) => {
-        const type = ColumnDataProvider.getColumnType(c);
+        const type = getColumnType(c);
         if (!res[type]) {
           res[type] = {};
         }
@@ -170,26 +151,36 @@ export default class ColumnDataProvider {
     const colByIndex: Partial<
       Record<DimensionCols, Record<number, ColumnRegular>>
     > = {};
-    each(columnByKey, (colsToUpdate, type: DimensionCols) => {
+    for (const t in columnByKey) {
+      if (!columnByKey.hasOwnProperty(t)) {
+        continue;
+      }
+      const type = t as DimensionCols;
+      const colsToUpdate = columnByKey[type];
       const items = this.dataSources[type].store.get('source');
-      colByIndex[type] = items.reduce(
-        (result: Record<number, ColumnRegular>, rgCol, index) => {
-          const colToUpdateIfExists = colsToUpdate?.[rgCol.prop];
-          if (colToUpdateIfExists) {
-            result[index] = colToUpdateIfExists;
-          }
-          return result;
-        },
-        {},
+      colByIndex[type] = {};
+      for (let i = 0; i < items.length; i++) {
+        const rgCol = items[i];
+        const colToUpdateIfExists = colsToUpdate?.[rgCol.prop];
+        if (colToUpdateIfExists) {
+          colByIndex[type][i] = colToUpdateIfExists;
+        }
+      }
+    }
+    for (const t in colByIndex) {
+      if (!colByIndex.hasOwnProperty(t)) {
+        continue;
+      }
+      const type = t as DimensionCols;
+      setSourceByVirtualIndex(
+        this.dataSources[type].store,
+        colByIndex[type] || {},
       );
-    });
-    each(colByIndex, (colsToUpdate, type: DimensionCols) =>
-      setSourceByVirtualIndex(this.dataSources[type].store, colsToUpdate || {}),
-    );
+    }
   }
 
   updateColumn(column: ColumnRegular, index: number) {
-    const type = ColumnDataProvider.getColumnType(column);
+    const type = getColumnType(column);
     setSourceByVirtualIndex(this.dataSources[type].store, { [index]: column });
   }
 
@@ -215,7 +206,7 @@ export default class ColumnDataProvider {
     const types = reduce(
       this.sorting,
       (r: { [key in Partial<DimensionCols>]: boolean }, c: ColumnRegular) => {
-        const k = ColumnDataProvider.getColumnType(c);
+        const k = getColumnType(c);
         r[k] = true;
         return r;
       },
@@ -228,105 +219,5 @@ export default class ColumnDataProvider {
     });
 
     this.sorting = {};
-  }
-
-  static getSizes(cols: ColumnRegular[]): ViewSettingSizeProp {
-    return reduce(
-      cols,
-      (res: ViewSettingSizeProp, c: ColumnRegular, i: number) => {
-        if (c.size) {
-          res[i] = c.size;
-        }
-        return res;
-      },
-      {},
-    );
-  }
-
-  static getColumnByProp(
-    columns: ColumnData,
-    prop: ColumnProp,
-  ): ColumnRegular | undefined {
-    return find(columns, c => {
-      if (isColGrouping(c)) {
-        return ColumnDataProvider.getColumnByProp(c.children, prop);
-      }
-      return c.prop === prop;
-    }) as ColumnRegular | undefined;
-  }
-
-  // columns processing
-  static getColumns(
-    columns: ColumnData,
-    level = 0,
-    types?: ColumnTypes,
-  ): ColumnCollection {
-    const collection: ColumnCollection = {
-      // columns as they are in stores per type
-      columns: {
-        rgCol: [],
-        colPinStart: [],
-        colPinEnd: [],
-      },
-      // columns grouped by prop for quick access
-      columnByProp: {},
-      // column grouping
-      columnGrouping: {
-        rgCol: [],
-        colPinStart: [],
-        colPinEnd: [],
-      },
-      // max depth level for column grouping
-      maxLevel: level,
-      // sorting
-      sort: {},
-    };
-
-    return reduce(
-      columns,
-      (res: ColumnCollection, colData: ColumnGrouping | ColumnRegular) => {
-        // Grouped column
-        if (isColGrouping(colData)) {
-          return GroupingColumnPlugin.gatherGroup(
-            res,
-            colData,
-            ColumnDataProvider.getColumns(colData.children, level + 1, types),
-            level,
-          );
-        }
-        // Regular column
-        const regularColumn = {
-          ...(colData.columnType && types && types[colData.columnType]),
-          ...colData,
-        };
-        // Regular column, no Pin
-        if (!regularColumn.pin) {
-          res.columns.rgCol.push(regularColumn);
-          // Pin
-        } else {
-          res.columns[regularColumn.pin].push(regularColumn);
-        }
-        if (regularColumn.order) {
-          res.sort[regularColumn.prop] = regularColumn;
-        }
-        // technically it's possible that some columns have same prop, but better to avoid it
-        if (!res.columnByProp[regularColumn.prop]) {
-          res.columnByProp[regularColumn.prop] = [];
-        }
-        res.columnByProp[regularColumn.prop].push(regularColumn);
-
-        // trigger setup hook if present
-        regularColumn.beforeSetup && regularColumn.beforeSetup(regularColumn);
-        return res;
-      },
-      collection,
-    );
-  }
-
-  static getColumnType(rgCol: ColumnRegular): DimensionCols {
-    if (rgCol.pin) {
-      return rgCol.pin;
-    }
-    return 'rgCol';
   }
 }

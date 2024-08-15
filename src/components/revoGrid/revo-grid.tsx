@@ -12,9 +12,7 @@ import {
   Host,
 } from '@stencil/core';
 
-import ColumnDataProvider, {
-  ColumnCollection,
-} from '../../services/column.data.provider';
+import ColumnDataProvider from '../../services/column.data.provider';
 import { DataProvider } from '../../services/data.provider';
 import { DSourceState, getVisibleSourceItem } from '@store';
 import DimensionProvider from '../../services/dimension.provider';
@@ -79,6 +77,7 @@ import {
 } from '@type';
 import type { Observable } from '../../utils/store.utils';
 import type { GridPlugin } from '../../plugins/base.plugin';
+import { ColumnCollection, getColumnByProp, getColumns } from '../../utils/column.utils';
 
 
 /**
@@ -653,7 +652,7 @@ export class RevoGridComponent {
     prop: ColumnProp,
     rowSource: DimensionRows = 'rgRow',
   ) {
-    const rgCol = ColumnDataProvider.getColumnByProp(this.columns, prop);
+    const rgCol = getColumnByProp(this.columns, prop);
     if (!rgCol) {
       return;
     }
@@ -973,7 +972,7 @@ export class RevoGridComponent {
     this.columnChanged(this.columns);
   }
   @Watch('columns') columnChanged(newVal: (ColumnGrouping | ColumnRegular)[] = []) {
-    const columnGather = ColumnDataProvider.getColumns(
+    const columnGather = getColumns(
       newVal,
       0,
       this.columnTypes,

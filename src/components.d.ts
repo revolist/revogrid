@@ -12,7 +12,7 @@ import { ColumnFilterConfig, FilterCaptions, FilterCollection } from "./plugins/
 import { GroupingOptions } from "./plugins/groupingRow/grouping.row.types";
 import { VNode } from "@stencil/core";
 import { FocusedData } from "./components/revoGrid/viewport.service";
-import { ColumnCollection } from "./services/column.data.provider";
+import { ColumnCollection } from "./utils/column.utils";
 import { DataInput } from "./plugins/export/types";
 import { Observable } from "./utils/store.utils";
 import { DSourceState, Groups } from "./store/index";
@@ -28,7 +28,7 @@ export { ColumnFilterConfig, FilterCaptions, FilterCollection } from "./plugins/
 export { GroupingOptions } from "./plugins/groupingRow/grouping.row.types";
 export { VNode } from "@stencil/core";
 export { FocusedData } from "./components/revoGrid/viewport.service";
-export { ColumnCollection } from "./services/column.data.provider";
+export { ColumnCollection } from "./utils/column.utils";
 export { DataInput } from "./plugins/export/types";
 export { Observable } from "./utils/store.utils";
 export { DSourceState, Groups } from "./store/index";
@@ -1059,8 +1059,8 @@ declare global {
         "rangeeditapply": BeforeRangeSaveDataDetails;
         "clipboardrangecopy": RangeClipboardCopyEventProps;
         "clipboardrangepaste": RangeClipboardPasteEvent;
-        "beforekeydown": KeyboardEvent & EventData;
-        "beforekeyup": KeyboardEvent & EventData;
+        "beforekeydown": { original: KeyboardEvent } & EventData;
+        "beforekeyup": { original: KeyboardEvent } & EventData;
         "beforecellsave": any;
     }
     /**
@@ -1953,11 +1953,11 @@ declare namespace LocalJSX {
         /**
           * Before key up event proxy, used to prevent key up trigger. If you have some custom behaviour event, use this event to check if it wasn't processed by internal logic. Call preventDefault().
          */
-        "onBeforekeydown"?: (event: RevogrOverlaySelectionCustomEvent<KeyboardEvent & EventData>) => void;
+        "onBeforekeydown"?: (event: RevogrOverlaySelectionCustomEvent<{ original: KeyboardEvent } & EventData>) => void;
         /**
           * Before key down event proxy, used to prevent key down trigger. If you have some custom behaviour event, use this event to check if it wasn't processed by internal logic. Call preventDefault().
          */
-        "onBeforekeyup"?: (event: RevogrOverlaySelectionCustomEvent<KeyboardEvent & EventData>) => void;
+        "onBeforekeyup"?: (event: RevogrOverlaySelectionCustomEvent<{ original: KeyboardEvent } & EventData>) => void;
         /**
           * Fired when change of viewport happens. Usually when we switch between pinned regions.
          */
