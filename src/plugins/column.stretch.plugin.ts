@@ -1,12 +1,9 @@
 import each from 'lodash/each';
 import { calculateRowHeaderSize } from '../utils/row-header-utils';
-import { ColumnCollection } from '../services/column.data.provider';
-import { ColumnItems } from '../services/dimension.provider';
 import { getScrollbarSize } from '../utils';
 import { BasePlugin } from './base.plugin';
-import { DimensionCols, DimensionType } from '..';
-import { PluginBaseComponent } from '../';
-import { PluginProviders } from '../';
+import { DimensionCols, DimensionType, PluginBaseComponent, PluginProviders, ColumnRegular } from '@type';
+import { ColumnCollection } from '../utils/column.utils';
 
 /**
  * This plugin serves to recalculate columns initially
@@ -86,7 +83,7 @@ export default class StretchColumn extends BasePlugin {
   /**
    * Apply stretch changes
    */
-  applyStretch(columns: ColumnItems) {
+  applyStretch(columns: Record<DimensionCols, ColumnRegular[]>) {
     // unsubscribe from all events
     this.dropChanges();
     // calculate grid size

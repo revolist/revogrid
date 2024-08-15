@@ -1,6 +1,5 @@
 import reduce from 'lodash/reduce';
 import debounce from 'lodash/debounce';
-import ColumnDataProvider from './column.data.provider';
 import ViewportProvider from './viewport.provider';
 import { RESIZE_INTERVAL } from '../utils/consts';
 
@@ -23,8 +22,7 @@ import {
   ViewSettingSizeProp,
   ViewportState,
 } from '@type';
-
-export type ColumnItems = Record<DimensionCols, ColumnRegular[]>;
+import { getColumnSizes } from '../utils/column.utils';
 
 export type DimensionConfig = {
   realSizeChanged(k: MultiDimensionType): void;
@@ -144,7 +142,7 @@ export default class DimensionProvider {
       this.stores[type].setStore({ count: items.length });
 
       // setCustomSizes
-      const newSizes = ColumnDataProvider.getSizes(items);
+      const newSizes = getColumnSizes(items);
       this.stores[type].setDimensionSize(newSizes);
 
       const vpUpdate: Partial<ViewportState> = {
