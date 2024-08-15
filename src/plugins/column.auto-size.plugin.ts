@@ -16,8 +16,9 @@ import {
   ViewSettingSizeProp,
   BeforeSaveDataDetails,
   BeforeRangeSaveDataDetails,
+  PluginProviders,
 } from '@type';
-import { ColumnCollection, getColumnType, PluginProviders } from '../';
+import { ColumnCollection, getColumnType } from '../utils/column.utils';
 
 interface Column extends ColumnRegular {
   index: number;
