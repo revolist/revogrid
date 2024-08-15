@@ -118,7 +118,7 @@ export class RevogrData {
    * Before each cell render function. Allows to override cell properties
    */
   @Event({ eventName: 'beforecellrender' })
-  beforeCellRender: EventEmitter<BeforeCellRenderEvent>;
+  beforeCellRender: EventEmitter<BeforeCellRenderEvent<ColumnDataSchemaModel>>;
 
   /**
    * Event emitted on cell drag start
@@ -253,7 +253,7 @@ export class RevogrData {
         }
 
         const {
-          detail: { column: columnProps, row: rowProps },
+          detail: { column: columnProps, row: rowProps, model: newModel },
         } = cellEvent;
 
         const defaultProps: CellProps = {
@@ -276,7 +276,7 @@ export class RevogrData {
           rowProps.itemIndex,
           columnProps.itemIndex,
           defaultProps,
-          model,
+          newModel,
           columnsData[columnProps.itemIndex]?.cellProperties,
         );
 
@@ -285,7 +285,7 @@ export class RevogrData {
         cells.push(
           <CellRenderer
             renderProps={{
-              model,
+              model: newModel,
               providers: this.providers,
               template: columnsData[columnProps.itemIndex]?.cellTemplate,
               additionalData: this.additionalData,
@@ -338,12 +338,13 @@ export class RevogrData {
     row: VirtualPositionItem,
     column: VirtualPositionItem,
   ) {
-    return this.beforeCellRender.emit({
+    const detail: BeforeCellRenderEvent<ColumnDataSchemaModel> = {
       column: { ...column },
       row: { ...row },
       model,
       rowType: model.type,
       colType: model.colType,
-    });
+    };
+    return this.beforeCellRender.emit(detail);
   }
 }
