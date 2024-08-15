@@ -5,7 +5,7 @@
   "description": "Virtual reactive data grid spreadsheet component - RevoGrid.",
   "license": "MIT",
   "author": "revolist",
-  "homepage": "https://github.com/revolist/revogrid#readme",
+  "homepage": "https://rv-grid.com",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/revolist/revogrid.git"
