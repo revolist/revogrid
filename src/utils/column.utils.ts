@@ -18,11 +18,31 @@ export interface ColumnGroup extends StoreGroup {
 }
 export type ColumnGroupingCollection = Record<DimensionCols, ColumnGroup[]>;
 
+/**
+ * Column collection definition.
+ * Used to access indexed data for columns.
+ * Can be accessed via different events.
+ */
 export type ColumnCollection = {
+  /**
+   * Columns as they are in stores
+   */
   columns: Record<DimensionCols, ColumnRegular[]>;
+  /**
+   * Columns indexed by prop for quick access, it's possible to have multiple columns with same prop but not recommended
+   */
   columnByProp: Record<ColumnProp, ColumnRegular[]>;
+  /**
+   * Grouped columns
+   */
   columnGrouping: ColumnGroupingCollection;
+  /**
+   * Max level of grouping
+   */
   maxLevel: number;
+  /**
+   * Sorting
+   */
   sort: Record<ColumnProp, ColumnRegular>;
 };
 
