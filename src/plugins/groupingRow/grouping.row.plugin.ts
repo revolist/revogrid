@@ -102,14 +102,14 @@ export default class GroupingRowPlugin extends BasePlugin {
         }
 
         // grouping filter
-        if (!isGrouping(model)) {
-          result.source.push(model);
-          result.oldNewIndexes[i] = index;
-          index++;
-        } else {
+        if (isGrouping(model)) {
           if (model[GROUP_EXPANDED]) {
             result.prevExpanded[model[PSEUDO_GROUP_ITEM_VALUE]] = true;
           }
+        } else {
+          result.source.push(model);
+          result.oldNewIndexes[i] = index;
+          index++;
         }
         return result;
       },

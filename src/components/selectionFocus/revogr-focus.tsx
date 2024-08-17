@@ -20,6 +20,7 @@ import {
   FocusTemplateFunc,
   DimensionCols,
   DimensionRows,
+  FocusAfterRenderEvent,
 } from '@type';
 import { Observable } from '../../utils/store.utils';
 
@@ -78,29 +79,11 @@ export class RevogrFocus {
   /**
    * Used to setup properties after focus was rendered
    */
-  @Event({ eventName: 'afterfocus' }) afterFocus: EventEmitter<{
-    model: any;
-    column: ColumnRegular;
-  }>;
+  @Event({ eventName: 'afterfocus' }) afterFocus: EventEmitter<FocusAfterRenderEvent>;
 
   @Element() el: HTMLElement;
   private activeFocus: Cell | null = null;
 
-  private changed(e: HTMLElement, focus: Cell) {
-    const beforeScrollIn = this.beforeScrollIntoView.emit({ el: e });
-    if (!beforeScrollIn.defaultPrevented) {
-      e.scrollIntoView({
-        block: 'nearest',
-        inline: 'nearest',
-      });
-    }
-    const model = getSourceItem(this.dataStore, focus.y);
-    const column = getSourceItem(this.colData, focus.x);
-    this.afterFocus.emit({
-      model,
-      column,
-    });
-  }
 
   componentDidRender() {
     const currentFocus = this.selectionStore.get('focus');
@@ -112,7 +95,23 @@ export class RevogrFocus {
     }
     this.activeFocus = currentFocus;
     if (currentFocus && this.el) {
-      this.changed(this.el, currentFocus);
+      const beforeScrollIn = this.beforeScrollIntoView.emit({ el: this.el });
+      if (!beforeScrollIn.defaultPrevented) {
+        this.el.scrollIntoView({
+          block: 'nearest',
+          inline: 'nearest',
+        });
+      }
+      const model = getSourceItem(this.dataStore, currentFocus.y);
+      const column = getSourceItem(this.colData, currentFocus.x);
+      this.afterFocus.emit({
+        model,
+        column,
+        rowType: this.rowType,
+        colType: this.colType,
+        rowIndex: currentFocus.y,
+        colIndex: currentFocus.x,
+      });
     }
   }
 

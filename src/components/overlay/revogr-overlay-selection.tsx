@@ -790,6 +790,7 @@ export class OverlaySelection {
       range,
       ...this.types,
     });
+  
     if (canPaste) {
       return;
     }

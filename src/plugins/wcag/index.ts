@@ -30,7 +30,8 @@ export class WCAGPlugin extends BasePlugin {
     revogrid.setAttribute('dir', 'ltr');
     revogrid.setAttribute('role', 'treegrid');
     revogrid.setAttribute('aria-keyshortcuts', 'Enter');
-    revogrid.setAttribute('aria-keyshortcuts', 'Esc');
+    revogrid.setAttribute('aria-multiselectable', 'true');
+    revogrid.setAttribute('tabindex', '0');
 
     /**
      * Before Columns Set Event
@@ -62,10 +63,11 @@ export class WCAGPlugin extends BasePlugin {
             const columnProps = cellProperties?.(...args) || {};
 
             return {
-              ...columnProps,
               role: 'gridcell',
               ['aria-colindex']: index,
               ['aria-rowindex']: args[0].rowIndex,
+              ['tabindex']: -1,
+              ...columnProps,
             };
           };
         });
@@ -93,6 +95,24 @@ export class WCAGPlugin extends BasePlugin {
           role: 'row',
           ['aria-rowindex']: detail.item.itemIndex,
         };
+      },
+    );
+
+    // focuscell
+    this.addEventListener(
+      'afterfocus',
+      async (
+        e: CustomEvent<HTMLRevogrFocusElementEventMap['afterfocus']>,
+      ) => {
+        if (e.defaultPrevented) {
+          return;
+        }
+        const el = this.revogrid.querySelector(
+          `revogr-data[type="${e.detail.rowType}"][col-type="${e.detail.colType}"] [data-rgrow="${e.detail.rowIndex}"][data-rgcol="${e.detail.colIndex}"]`,
+        );
+        if (el instanceof HTMLElement) {
+          el.focus();
+        }
       },
     );
   }

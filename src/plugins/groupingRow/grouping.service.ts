@@ -24,7 +24,6 @@ function getGroupValueDefault(item: DataType, prop: string | number) {
   return item[prop] || null;
 }
 
-
 /**
  * Gather data for grouping
  * @param array - flat data array
@@ -34,11 +33,17 @@ function getGroupValueDefault(item: DataType, prop: string | number) {
 export function gatherGrouping(
   array: DataType[],
   groupIds: ColumnProp[],
-  { prevExpanded, expandedAll, getGroupValue = getGroupValueDefault }: ExpandedOptions,
+  {
+    prevExpanded,
+    expandedAll,
+    getGroupValue = getGroupValueDefault,
+  }: ExpandedOptions,
 ) {
   const groupedItems: GroupedData = new Map();
   array.forEach((item, originalIndex) => {
-    const groupLevelValues = groupIds.map(groupId => getGroupValue(item, groupId));
+    const groupLevelValues = groupIds.map(groupId =>
+      getGroupValue(item, groupId),
+    );
     const lastLevelValue = groupLevelValues.pop();
     let currentGroupLevel = groupedItems;
     groupLevelValues.forEach(value => {
@@ -50,9 +55,7 @@ export function gatherGrouping(
     if (!currentGroupLevel.has(lastLevelValue)) {
       currentGroupLevel.set(lastLevelValue, []);
     }
-    const lastLevelItems = currentGroupLevel.get(
-      lastLevelValue,
-    ) as DataType[];
+    const lastLevelItems = currentGroupLevel.get(lastLevelValue) as DataType[];
     lastLevelItems.push({
       ...item,
       [GROUP_ORIGINAL_INDEX]: originalIndex,
@@ -128,8 +131,15 @@ export function getGroupingName(rgRow?: DataType) {
   return rgRow && rgRow[PSEUDO_GROUP_ITEM];
 }
 
-export function isGrouping(rgRow?: DataType) {
-  return rgRow && typeof rgRow[PSEUDO_GROUP_ITEM] !== 'undefined';
+type GroupingItem = {
+  [PSEUDO_GROUP_ITEM]: string;
+  [GROUP_EXPANDED]: boolean;
+  [PSEUDO_GROUP_ITEM_VALUE]: string;
+  [GROUP_DEPTH]: number;
+};
+
+export function isGrouping(rgRow?: DataType): rgRow is GroupingItem {
+  return typeof rgRow?.[PSEUDO_GROUP_ITEM] !== 'undefined';
 }
 
 export function isGroupingColumn(column?: ColumnRegular) {
@@ -147,7 +157,7 @@ export function measureEqualDepth<T>(groupA: T[], groupB: T[]) {
   return i;
 }
 
-export function getParsedGroup(id: string){
+export function getParsedGroup(id: string) {
   const parseGroup = JSON.parse(id);
   // extra precaution and type safeguard
   if (!Array.isArray(parseGroup)) {

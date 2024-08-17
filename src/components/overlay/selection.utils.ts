@@ -19,7 +19,7 @@ export type EventData = {
 };
 
 export function collectModelsOfRange(data: DataLookup, store: Observable<DSourceState<DataType, DimensionRows>>) {
-  const models: DataLookup = {};
+  const models: Partial<DataLookup> = {};
   for (let i in data) {
     const rowIndex = parseInt(i, 10);
     models[rowIndex] = getSourceItem(

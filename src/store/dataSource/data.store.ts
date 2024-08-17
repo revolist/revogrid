@@ -143,10 +143,10 @@ export function getVisibleSourceItem(
  * @param store - store to process
  * @param virtualIndex - virtual index to process
  */
-export const getSourceItem = (
-  store: Observable<DSourceState<any, any>>,
+export const getSourceItem = <T1 extends GDataType, T2 extends GDimension>(
+  store: Observable<DSourceState<T1, T2>>,
   virtualIndex: number,
-): any | undefined => {
+) => {
   const items = store.get('items');
   const source = store.get('source');
   return source[items[virtualIndex]];
@@ -160,7 +160,7 @@ export const getSourceItem = (
  */
 export function setSourceByVirtualIndex<T extends GDataType>(
   store: Observable<DSourceState<T, any>>,
-  modelByIndex: Record<number, T>,
+  modelByIndex: Record<number, T | undefined>,
   mutate = true,
 ) {
   const items = store.get('items');
@@ -168,7 +168,12 @@ export function setSourceByVirtualIndex<T extends GDataType>(
 
   for (let virtualIndex in modelByIndex) {
     const realIndex = items[virtualIndex];
-    source[realIndex] = modelByIndex[virtualIndex];
+    const item = modelByIndex[virtualIndex];
+    if (!item) {
+      delete source[realIndex];
+    } else {
+      source[realIndex] = item;
+    }
   }
   if (mutate) {
     store.set('source', [...source]);

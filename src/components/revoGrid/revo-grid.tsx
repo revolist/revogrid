@@ -336,7 +336,8 @@ export class RevoGridComponent {
 
   /**
    * Triggered after focus render finished.
-   * Can be used to access a focus element through `event.target`
+   * Can be used to access a focus element through `event.target`.
+   * This is just a duplicate of `afterfocus` from `revogr-focus.tsx`.
    */
   @Event() afterfocus: EventEmitter<{
     model: any;

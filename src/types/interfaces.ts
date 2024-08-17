@@ -186,7 +186,7 @@ export type Order = 'asc' | 'desc' | undefined;
 /**
  * Interface for regular column definition.
  * Regular column can be any column that is not a grouping column.
- * 
+ *
  */
 /**
  * ColumnRegular interface represents regular column definition.
@@ -253,7 +253,7 @@ export interface ColumnTemplateProp extends ColumnRegular {
    * Index of the column, used for mapping value to cell from data source model/row.
    */
   index: number;
-};
+}
 
 export type ColumnPropProp = ColumnGrouping | ColumnTemplateProp;
 // Column prop used for mapping value to cell from data source model/row, used for indexing.
@@ -384,7 +384,6 @@ export type FocusTemplateFunc = (
   createElement: HyperFunc<VNode>,
   detail: FocusRenderEvent,
 ) => any;
-
 
 /**
  * `CellCompareFunc` is a function that takes the column property to compare,
@@ -759,6 +758,19 @@ export interface FocusRenderEvent extends AllDimensionType {
    */
   next?: Partial<Cell>;
 }
+
+export interface FocusAfterRenderEvent extends AllDimensionType {
+  model?: any;
+  column?: ColumnRegular;
+  /**
+   * Index of the row in the viewport
+   */
+  rowIndex: number;
+  /**
+   * Index of the column in the viewport
+   */
+  colIndex: number;
+}
 /**
  * Represents the event object that is emitted when scrolling occurs.
  * The `type` property indicates the type of dimension (row or column) being scrolled.
@@ -778,13 +790,10 @@ export type ScrollCoordinateEvent = {
   coordinate: number;
 };
 
-
 /** Range paste. */
 export type RangeClipboardPasteEvent = {
   data: DataLookup;
-  models: {
-    [rowIndex: number]: DataType;
-  };
+  models: Partial<DataLookup>;
   range: RangeArea | null;
 } & AllDimensionType;
 

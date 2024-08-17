@@ -250,7 +250,7 @@ export default class AutoSizeColumnPlugin extends BasePlugin {
           s.store.get('items'),
           (prev, _row, i) => {
             const item = getSourceItem(s.store, i);
-            return Math.max(prev || 0, this.getLength(item[rgCol.prop]));
+            return Math.max(prev || 0, this.getLength(item?.[rgCol.prop]));
           },
           0,
         );
