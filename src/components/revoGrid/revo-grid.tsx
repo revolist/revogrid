@@ -41,6 +41,7 @@ import type {
   PluginBaseComponent,
   HeaderProperties,
   PluginProviders,
+  FocusAfterRenderEvent,
 } from '@type';
 
 import ColumnDataProvider from '../../services/column.data.provider';
@@ -339,10 +340,7 @@ export class RevoGridComponent {
    * Can be used to access a focus element through `event.target`.
    * This is just a duplicate of `afterfocus` from `revogr-focus.tsx`.
    */
-  @Event() afterfocus: EventEmitter<{
-    model: any;
-    column: ColumnRegular;
-  }>;
+  @Event() afterfocus: EventEmitter<FocusAfterRenderEvent>;
 
   /**
    * This event is triggered before the order of `rgRow` is applied.
