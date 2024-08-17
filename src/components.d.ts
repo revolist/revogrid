@@ -5,7 +5,7 @@
  * It contains typing information for all components that exist in this project.
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
-import { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, ChangedRange, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, Nullable, PluginBaseComponent, PositionItem, RangeArea, RangeClipboardCopyEventProps, RangeClipboardPasteEvent, RowDefinition, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
+import { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, ChangedRange, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, FocusAfterRenderEvent, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, Nullable, PluginBaseComponent, PositionItem, RangeArea, RangeClipboardCopyEventProps, RangeClipboardPasteEvent, RowDefinition, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
 import { GridPlugin } from "./plugins/base.plugin";
 import { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
 import { ColumnFilterConfig, FilterCaptions, FilterCollection } from "./plugins/filter/filter.plugin";
@@ -21,7 +21,7 @@ import { LogicFunction } from "./plugins/filter/filter.types";
 import { ResizeProps } from "./components/header/resizable.directive";
 import { Cell as Cell1, ColumnRegular as ColumnRegular1, DataType as DataType1, DimensionCols as DimensionCols1, DimensionRows as DimensionRows1, DimensionSettingsState as DimensionSettingsState1, Observable as Observable1, SelectionStoreState as SelectionStoreState1 } from "./components";
 import { EventData } from "./components/overlay/selection.utils";
-export { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, ChangedRange, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, Nullable, PluginBaseComponent, PositionItem, RangeArea, RangeClipboardCopyEventProps, RangeClipboardPasteEvent, RowDefinition, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
+export { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, ChangedRange, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, FocusAfterRenderEvent, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, Nullable, PluginBaseComponent, PositionItem, RangeArea, RangeClipboardCopyEventProps, RangeClipboardPasteEvent, RowDefinition, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
 export { GridPlugin } from "./plugins/base.plugin";
 export { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
 export { ColumnFilterConfig, FilterCaptions, FilterCollection } from "./plugins/filter/filter.plugin";
@@ -52,6 +52,11 @@ export namespace Components {
      * @example focus-rgCol-rgRow - focus layer for main data. Applies extra elements in <revogr-focus />.
      */
     interface RevoGrid {
+        /**
+          * Enable accessibility. If disabled, the grid will not be accessible.
+          * @default true
+         */
+        "accessible": boolean;
         /**
           * Add trimmed by type
          */
@@ -962,10 +967,7 @@ declare global {
     interface HTMLRevogrFocusElementEventMap {
         "beforefocusrender": FocusRenderEvent;
         "beforescrollintoview": { el: HTMLElement };
-        "afterfocus": {
-    model: any;
-    column: ColumnRegular;
-  };
+        "afterfocus": FocusAfterRenderEvent;
     }
     /**
      * Focus component. Shows focus layer around the cell that is currently in focus.
@@ -1208,6 +1210,11 @@ declare namespace LocalJSX {
      */
     interface RevoGrid {
         /**
+          * Enable accessibility. If disabled, the grid will not be accessible.
+          * @default true
+         */
+        "accessible"?: boolean;
+        /**
           * Additional data to be passed to plugins, renders or editors. For example if you need to pass Vue component instance.
          */
         "additionalData"?: any;
@@ -1308,7 +1315,7 @@ declare namespace LocalJSX {
          */
         "onAfteredit"?: (event: RevoGridCustomEvent<AfterEditEvent>) => void;
         /**
-          * Triggered after focus render finished. Can be used to access a focus element through `event.target`
+          * Triggered after focus render finished. Can be used to access a focus element through `event.target`. This is just a duplicate of `afterfocus` from `revogr-focus.tsx`.
          */
         "onAfterfocus"?: (event: RevoGridCustomEvent<{
     model: any;
@@ -1746,10 +1753,7 @@ declare namespace LocalJSX {
         /**
           * Used to setup properties after focus was rendered
          */
-        "onAfterfocus"?: (event: RevogrFocusCustomEvent<{
-    model: any;
-    column: ColumnRegular;
-  }>) => void;
+        "onAfterfocus"?: (event: RevogrFocusCustomEvent<FocusAfterRenderEvent>) => void;
         /**
           * Before focus render event. Can be prevented by event.preventDefault(). If preventDefault used slot will be rendered.
          */

@@ -114,9 +114,7 @@ export type BeforeSaveDataDetails = {
 };
 export type BeforeRangeSaveDataDetails = {
   data: DataLookup;
-  models: {
-    [rowIndex: number]: DataType;
-  };
+  models: Partial<DataLookup>;
   type: DimensionRows;
 };
 

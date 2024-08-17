@@ -322,7 +322,7 @@ export default class ColumnService {
       prop: ColumnProp;
       rowIndex: number;
       colIndex: number;
-      model: DataType;
+      model?: DataType;
       colType: DimensionCols;
       type: DimensionRows;
     }[] = [];

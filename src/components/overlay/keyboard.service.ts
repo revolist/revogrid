@@ -8,6 +8,7 @@ import {
   isEnterKeyValue,
   isLetterKey,
   isPaste,
+  isTab,
 } from '../../utils/key.utils';
 import { timeout } from '../../utils';
 import {
@@ -80,7 +81,7 @@ export class KeyboardService {
     }
 
     // tab key means same as arrow right
-    if (codesLetter.TAB === e.code) {
+    if (isTab(e.code)) {
       this.keyChangeSelection(e, canRange);
       return;
     }

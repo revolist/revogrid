@@ -70,6 +70,7 @@ revogr-data {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    outline: none;
 
     &.align-center {
       text-align: center;
