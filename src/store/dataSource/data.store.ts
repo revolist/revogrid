@@ -169,11 +169,7 @@ export function setSourceByVirtualIndex<T extends GDataType>(
   for (let virtualIndex in modelByIndex) {
     const realIndex = items[virtualIndex];
     const item = modelByIndex[virtualIndex];
-    if (!item) {
-      delete source[realIndex];
-    } else {
-      source[realIndex] = item;
-    }
+    source[realIndex] = item as T;
   }
   if (mutate) {
     store.set('source', [...source]);
