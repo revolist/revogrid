@@ -12,6 +12,37 @@ import {
   Host,
 } from '@stencil/core';
 
+import type {
+  MultiDimensionType,
+  DimensionRows,
+  DimensionCols,
+  DimensionType,
+  DimensionTypeCol,
+  RowHeaders,
+  ColumnRegular,
+  ColumnGrouping,
+  DataType,
+  RowDefinition,
+  ColumnType,
+  FocusTemplateFunc,
+  PositionItem,
+  ColumnProp,
+  ViewPortScrollEvent,
+  InitialHeaderClick,
+  AllDimensionType,
+  Editors,
+  BeforeSaveDataDetails,
+  BeforeRangeSaveDataDetails,
+  Cell,
+  ChangedRange,
+  RangeArea,
+  AfterEditEvent,
+  Theme,
+  PluginBaseComponent,
+  HeaderProperties,
+  PluginProviders,
+} from '@type';
+
 import ColumnDataProvider from '../../services/column.data.provider';
 import { DataProvider } from '../../services/data.provider';
 import { DSourceState, getVisibleSourceItem } from '@store';
@@ -45,39 +76,10 @@ import { rowDefinitionByType, rowDefinitionRemoveByType } from './grid.helpers';
 import ColumnPlugin from '../../plugins/moveColumn/column.drag.plugin';
 import { getPropertyFromEvent } from '../../utils/events';
 import { isMobileDevice } from '../../utils/mobile';
-import {
-  MultiDimensionType,
-  DimensionRows,
-  DimensionCols,
-  DimensionType,
-  DimensionTypeCol,
-  RowHeaders,
-  ColumnRegular,
-  ColumnGrouping,
-  DataType,
-  RowDefinition,
-  ColumnType,
-  FocusTemplateFunc,
-  PositionItem,
-  ColumnProp,
-  ViewPortScrollEvent,
-  InitialHeaderClick,
-  AllDimensionType,
-  Editors,
-  BeforeSaveDataDetails,
-  BeforeRangeSaveDataDetails,
-  Cell,
-  ChangedRange,
-  RangeArea,
-  AfterEditEvent,
-  Theme,
-  PluginBaseComponent,
-  HeaderProperties,
-  PluginProviders,
-} from '@type';
 import type { Observable } from '../../utils/store.utils';
 import type { GridPlugin } from '../../plugins/base.plugin';
 import { ColumnCollection, getColumnByProp, getColumns } from '../../utils/column.utils';
+import { WCAGPlugin } from '../../plugins/wcag';
 
 
 /**
@@ -284,6 +286,13 @@ export class RevoGridComponent {
    * Should be set before grid render inside of plugins.
    */
   @Prop() registerVNode: VNode[] = [];
+
+
+  /**
+   * Enable accessibility. If disabled, the grid will not be accessible.
+   * @default true
+   */
+  @Prop() accessible = true;
 
   // #endregion
 
@@ -1214,6 +1223,10 @@ export class RevoGridComponent {
       viewport: this.viewportProvider,
       selection: this.selectionStoreConnector,
     };
+
+    if (this.accessible) {
+      this.internalPlugins.push(new WCAGPlugin(this.element, pluginData));
+    }
 
     // register auto size plugin
     if (this.autoSizeColumn) {
