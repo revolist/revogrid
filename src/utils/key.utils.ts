@@ -1,17 +1,6 @@
 import KeyCodesEnum, { codesLetter, keyValues } from './key.codes';
 import OsPlatform from './platform';
 
-export function isLetterKey(code: number): boolean {
-  return (
-    code === 32 || // space
-    (code >= 48 && code <= 57) ||
-    (code >= 96 && code <= 111) ||
-    (code >= 186 && code <= 192) ||
-    (code >= 219 && code <= 222) ||
-    code >= 226 ||
-    (code >= 65 && code <= 90)
-  ); // a-z
-}
 
 export function isMetaKey(code: number): boolean {
   const keys: KeyCodesEnum[] = [

@@ -750,10 +750,7 @@ declare global {
         "afteredit": AfterEditEvent;
         "beforeautofill": ChangedRange;
         "beforerange": ChangedRange;
-        "afterfocus": {
-    model: any;
-    column: ColumnRegular;
-  };
+        "afterfocus": FocusAfterRenderEvent;
         "roworderchanged": { from: number; to: number };
         "beforesortingapply": {
     column: ColumnRegular;
@@ -1317,10 +1314,7 @@ declare namespace LocalJSX {
         /**
           * Triggered after focus render finished. Can be used to access a focus element through `event.target`. This is just a duplicate of `afterfocus` from `revogr-focus.tsx`.
          */
-        "onAfterfocus"?: (event: RevoGridCustomEvent<{
-    model: any;
-    column: ColumnRegular;
-  }>) => void;
+        "onAfterfocus"?: (event: RevoGridCustomEvent<FocusAfterRenderEvent>) => void;
         /**
           * Emmited after the grid is initialized. Connected to the DOM.
          */

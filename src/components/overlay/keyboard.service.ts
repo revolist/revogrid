@@ -6,7 +6,6 @@ import {
   isCopy,
   isCut,
   isEnterKeyValue,
-  isLetterKey,
   isPaste,
   isTab,
 } from '../../utils/key.utils';
@@ -117,7 +116,7 @@ export class KeyboardService {
     }
 
     // pressed letter key
-    if (isLetterKey(e.keyCode)) {
+    if (e.key.length === 1) {
       this.sv.change(e.key);
       return;
     }
