@@ -3,11 +3,6 @@
  */
 import debounce from 'lodash/debounce';
 import each from 'lodash/each';
-import ColumnDataProvider from '../../services/column.data.provider';
-import { DataProvider } from '../../services/data.provider';
-import DimensionProvider from '../../services/dimension.provider';
-import SelectionStoreConnector from '../../services/selection.store.connector';
-import ViewportProvider from '../../services/viewport.provider';
 import { getItemByPosition } from '@store';
 import { BasePlugin } from '../base.plugin';
 import { ColumnOrderHandler } from './order-column.handler';
@@ -29,13 +24,6 @@ export type DragStartEventDetails = {
   data: ColumnPropProp;
 };
 
-export type Providers = {
-  data: DataProvider;
-  dimension: DimensionProvider;
-  selection: SelectionStoreConnector;
-  column: ColumnDataProvider;
-  viewport: ViewportProvider;
-};
 type StaticData = {
   startPos: number;
   startItem: PositionItem;
@@ -51,7 +39,7 @@ type LocalSubscription = {
   target: Element | Document;
   callback(...params: any[]): void;
 };
-export type EventData = {
+export type ColumnDragEventData = {
   elRect: DOMRect;
   gridRect: DOMRect;
   scrollOffset: number;
@@ -60,7 +48,7 @@ export type EventData = {
 export default class ColumnPlugin extends BasePlugin {
   private moveFunc = debounce((e: MouseEvent) => this.doMove(e), 5);
   private staticDragData: StaticData | null = null;
-  private dragData: EventData | null = null;
+  private dragData: ColumnDragEventData | null = null;
   private readonly orderUi: ColumnOrderHandler;
   protected readonly localSubscriptions: LocalSubscriptions = {};
   constructor(public revogrid: HTMLRevoGridElement, public providers: PluginProviders) {
@@ -217,7 +205,7 @@ export default class ColumnPlugin extends BasePlugin {
     gridEl,
     dataEl,
     data,
-  }: StaticData): EventData {
+  }: StaticData): ColumnDragEventData {
     const gridRect = gridEl.getBoundingClientRect();
     const elRect = dataEl.getBoundingClientRect();
     const scrollOffset = elRect.left - gridRect.left;
