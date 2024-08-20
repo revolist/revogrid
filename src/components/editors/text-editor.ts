@@ -19,10 +19,10 @@ import { EditCell, EditorBase, SaveData } from '@type';
 export type SaveCallback = (value: SaveData | undefined, preventFocus: boolean) => void;
 
 export class TextEditor implements EditorBase {
-  private editInput: HTMLInputElement | null = null;
+  editInput: HTMLInputElement | null = null;
 
-  public element: Element | null = null;
-  public editCell?: EditCell = undefined;
+  element: Element | null = null;
+  editCell?: EditCell = undefined;
 
   constructor(
     public column: ColumnRegular,
@@ -39,7 +39,7 @@ export class TextEditor implements EditorBase {
     }
   }
 
-  private onKeyDown(e: KeyboardEvent) {
+  onKeyDown(e: KeyboardEvent) {
     const isEnter = isEnterKeyValue(e.key);
     const isKeyTab = isTab(e.key);
 

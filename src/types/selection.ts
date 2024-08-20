@@ -189,7 +189,7 @@ export interface EditorBase {
   componentDidRender?(): void;
   disconnectedCallback?(): void;
   render(
-    createElement?: HyperFunc<VNode>,
+    createElement: HyperFunc<VNode>,
     additionalData?: any,
   ): VNode | VNode[] | string | void;
 }

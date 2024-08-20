@@ -5,14 +5,19 @@
   $cell-border-color: #404040;
   $cell-shadow-cell: 0 -1px 0 0 $cell-border-color inset;
   $focused-header: rgba(#7394a0, 0.15);
+  $el-color: #28272b;
 
   .rowHeaders {
-    $el-color: #28272b;
     background-color: rgba($el-color, 0.8);
     revogr-data .rgCell {
       color: rgba($font-color, 0.8);
     }
   }
+
+  revogr-edit {
+    background-color: $el-color;
+  }
+
   revogr-header {
     .header-rgRow {
       &.group {
