@@ -40,6 +40,7 @@ const defaultType: FilterType = 'none';
 
 const FILTER_LIST_CLASS = 'multi-filter-list';
 const FILTER_LIST_CLASS_ACTION = 'multi-filter-list-action';
+const FILTER_ID = 'add-filter';
 
 /**
  * Filter panel for editing filters
@@ -78,25 +79,29 @@ export class FilterPanel {
   @Prop() disableDynamicFiltering = false;
   @Event() filterChange: EventEmitter<MultiFilterItem>;
   @Listen('mousedown', { target: 'document' }) onMouseDown(e: MouseEvent) {
-    if (this.changes && !e.defaultPrevented) {
-      const el = e.target as HTMLElement;
-
-      const select = document.getElementById('add-filter') as HTMLSelectElement;
-      if (select) {
-        select.value = defaultType;
+    // click on anything then select drops values to default
+    if (!this.changes || e.defaultPrevented) {
+      return;
+    }
+    const path = e.composedPath();
+    const select = document.getElementById(FILTER_ID);
+    if (select instanceof HTMLSelectElement) {
+      // click on select should be skipped
+      if (path.includes(select)) {
+        return;
       }
-      this.currentFilterType = defaultType;
-      if (this.changes) {
-        this.changes.type = defaultType;
-      }
-      this.currentFilterId = -1;
+      select.value = defaultType;
+    }
+    this.currentFilterType = defaultType;
+    if (this.changes) {
+      this.changes.type = defaultType;
+    }
+    this.currentFilterId = -1;
 
-      const path = e.composedPath();
-      const isOutside = !path.includes(this.element);
+    const isOutside = !path.includes(this.element);
 
-      if (isOutside && !isFilterBtn(el)) {
-        this.changes = undefined;
-      }
+    if (e.target instanceof HTMLElement && isOutside && !isFilterBtn(e.target)) {
+      this.changes = undefined;
     }
   }
 
@@ -241,7 +246,7 @@ export class FilterPanel {
         <div class="filter-holder">{this.getFilterItemsList()}</div>
 
         <div class="add-filter">
-          <select id="add-filter" class="select-css" onChange={e => this.onAddNewFilter(e)}>
+          <select id={FILTER_ID} class="select-css" onChange={e => this.onAddNewFilter(e)}>
             {this.renderSelectOptions(this.currentFilterType)}
           </select>
         </div>
@@ -263,16 +268,20 @@ export class FilterPanel {
   }
 
   private onFilterTypeChange(e: Event, prop: ColumnProp, index: number) {
-    const el = e.target as HTMLSelectElement;
-    this.filterItems[prop][index].type = el.value as FilterType;
+    if (!(e.target instanceof HTMLSelectElement)) {
+      return;
+    }
+    this.filterItems[prop][index].type = e.target.value as FilterType;
 
     // this re-renders the input to know if we need extra input
     this.filterId++;
 
     // adding setTimeout will wait for the next tick DOM update then focus on input
     setTimeout(() => {
-      const input = document.getElementById('filter-input-' + this.filterItems[prop][index].id) as HTMLInputElement;
-      if (input) input.focus();
+      const input = document.getElementById('filter-input-' + this.filterItems[prop][index].id);
+      if (input instanceof HTMLInputElement) {
+        input.focus();
+      }
     }, 0);
 
     if (!this.disableDynamicFiltering) this.debouncedApplyFilter();
