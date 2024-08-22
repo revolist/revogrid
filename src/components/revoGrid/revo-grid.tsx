@@ -557,6 +557,9 @@ export class RevoGridComponent {
    * Can be specific part as rgRow or pinned rgRow or 'all' by default.
    */
   @Method() async refresh(type: DimensionRows | 'all' = 'all') {
+    if (!this.dataProvider) {
+      throw new Error('Not connected');
+    }
     this.dataProvider.refresh(type);
   }
 
@@ -585,6 +588,9 @@ export class RevoGridComponent {
    * Scrolls viewport to specified row by index.
    */
   @Method() async scrollToRow(coordinate = 0) {
+    if (!this.dimensionProvider) {
+      throw new Error('Not connected');
+    }
     const y = this.dimensionProvider.getViewPortPos({
       coordinate,
       dimension: 'rgRow',
@@ -596,6 +602,9 @@ export class RevoGridComponent {
    * Scrolls viewport to specified column by index.
    */
   @Method() async scrollToColumnIndex(coordinate = 0) {
+    if (!this.dimensionProvider) {
+      throw new Error('Not connected');
+    }
     const x = this.dimensionProvider.getViewPortPos({
       coordinate,
       dimension: 'rgCol',
@@ -610,6 +619,10 @@ export class RevoGridComponent {
     prop: ColumnProp,
     dimension: DimensionTypeCol = 'rgCol',
   ) {
+    if (!this.dimensionProvider) {
+      throw new Error('Not connected');
+    }
+
     const coordinate = this.columnProvider.getColumnIndexByProp(
       prop,
       dimension,
@@ -636,6 +649,9 @@ export class RevoGridComponent {
     trimmedType = 'external',
     type: DimensionRows = 'rgRow',
   ) {
+    if (!this.dataProvider) {
+      throw new Error('Not connected');
+    }
     const event = this.beforetrimmed.emit({
       trimmed,
       trimmedType,
@@ -686,6 +702,9 @@ export class RevoGridComponent {
 
   /**  Get data from source */
   @Method() async getSource(type: DimensionRows = 'rgRow') {
+    if (!this.dataProvider) {
+      throw new Error('Not connected');
+    }
     return this.dataProvider.stores[type].store.get('source');
   }
 
@@ -695,6 +714,9 @@ export class RevoGridComponent {
    * @param type - type of source
    */
   @Method() async getVisibleSource(type: DimensionRows = 'rgRow') {
+    if (!this.dataProvider) {
+      throw new Error('Not connected');
+    }
     return getVisibleSourceItem(this.dataProvider.stores[type].store);
   }
 
@@ -706,6 +728,9 @@ export class RevoGridComponent {
   @Method() async getSourceStore(
     type: DimensionRows = 'rgRow',
   ): Promise<Observable<DSourceState<DataType, DimensionRows>>> {
+    if (!this.dataProvider) {
+      throw new Error('Not connected');
+    }
     return this.dataProvider.stores[type].store;
   }
   /**
@@ -785,6 +810,9 @@ export class RevoGridComponent {
    * Including all pinned data
    */
   @Method() async getContentSize(): Promise<Cell> {
+    if (!this.dimensionProvider) {
+      throw new Error('Not connected');
+    }
     return this.dimensionProvider?.getFullSize();
   }
   /**
@@ -881,7 +909,7 @@ export class RevoGridComponent {
     await timeout();
     // apply data
     if (!defaultPrevented) {
-      this.dataProvider.setCellData(detail);
+      this.dataProvider?.setCellData(detail);
 
       // @feature: incrimental update for cells
       // this.dataProvider.setCellData(detail, false);
@@ -898,6 +926,9 @@ export class RevoGridComponent {
   @Listen('rangeeditapply') onRangeEdit(
     e: CustomEvent<BeforeRangeSaveDataDetails>,
   ) {
+    if (!this.dataProvider) {
+      throw new Error('Not connected');
+    }
     const { defaultPrevented, detail } = this.beforerangeedit.emit(e.detail);
     if (defaultPrevented) {
       e.preventDefault();
@@ -956,8 +987,8 @@ export class RevoGridComponent {
   private extraElements: VNode[] = [];
 
   columnProvider: ColumnDataProvider;
-  dataProvider: DataProvider;
-  dimensionProvider: DimensionProvider;
+  dataProvider?: DataProvider;
+  dimensionProvider?: DimensionProvider;
   viewportProvider: ViewportProvider;
   private themeService: ThemeService;
   private viewport: ViewportService | null = null;
@@ -980,6 +1011,9 @@ export class RevoGridComponent {
     this.columnChanged(this.columns);
   }
   @Watch('columns') columnChanged(newVal: (ColumnGrouping | ColumnRegular)[] = []) {
+    if (!this.dimensionProvider) {
+      return;
+    }
     const columnGather = getColumns(
       newVal,
       0,
@@ -1009,6 +1043,9 @@ export class RevoGridComponent {
   }
 
   @Watch('rowSize') rowSizeChanged(s: number) {
+    if (!this.dimensionProvider) {
+      return;
+    }
     // clear existing data
     this.dimensionProvider.setSettings({ originItemSize: s }, 'rgRow');
     this.rowDefChanged(this.rowDefinitions, this.rowDefinitions, 'rowSize', true);
@@ -1020,6 +1057,9 @@ export class RevoGridComponent {
     __ = 'theme',
     init = false,
   ) {
+    if (!this.dimensionProvider) {
+      return;
+    }
     this.themeService.register(t);
     this.dimensionProvider.setSettings(
       { originItemSize: this.themeService.rowSize },
@@ -1055,6 +1095,9 @@ export class RevoGridComponent {
     _: T[] | undefined,
     watchName: string,
   ) {
+    if (!this.dataProvider) {
+      return;
+    }
     let type: DimensionRows = 'rgRow';
     switch (watchName) {
       case 'pinnedBottomSource':
@@ -1109,6 +1152,10 @@ export class RevoGridComponent {
     _watchName?: string,
     forceUpdate = true,
   ) {
+    // in firefox it's triggered before init
+    if (!this.dimensionProvider || !this.dataProvider) {
+      return;
+    }
     const {
       detail: { vals: newVal, oldVals: oldVal },
     } = this.beforerowdefinition.emit({
@@ -1139,7 +1186,7 @@ export class RevoGridComponent {
     }
     Object.entries(newRows).forEach(([k, r]) => {
       const type = k as DimensionRows;
-      this.dimensionProvider.setCustomSizes(type, r.sizes || {});
+      this.dimensionProvider?.setCustomSizes(type, r.sizes || {});
     });
   }
 
@@ -1166,6 +1213,9 @@ export class RevoGridComponent {
    * Stretch Plugin Apply
    */
   @Watch('stretch') applyStretch(isStretch: boolean | string) {
+    if (!this.dimensionProvider || !this.dataProvider) {
+      return;
+    }
     if (isStretch === 'false') {
       isStretch = false;
     }
@@ -1211,6 +1261,10 @@ export class RevoGridComponent {
 
   // #region Plugins
   private setPlugins() {
+    if (!this.dimensionProvider || !this.dataProvider) {
+      return;
+    }
+
     // remove old plugins if any
     this.removePlugins();
 
@@ -1329,7 +1383,7 @@ export class RevoGridComponent {
     // init scrolling service
     this.scrollingService = new GridScrollingService(
       (e: ViewPortScrollEvent) => {
-        this.dimensionProvider.setViewPortCoordinate({
+        this.dimensionProvider?.setViewPortCoordinate({
           coordinate: e.coordinate,
           type: e.dimension,
         });
@@ -1351,6 +1405,9 @@ export class RevoGridComponent {
   }
 
   render() {
+    if (!this.dimensionProvider || !this.dataProvider) {
+      return;
+    }
     const contentHeight =
       this.dimensionProvider.stores['rgRow'].store.get('realSize');
 
