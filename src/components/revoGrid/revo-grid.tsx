@@ -57,8 +57,6 @@ import AutoSize, {
 
 import {
   FilterPlugin,
-  ColumnFilterConfig,
-  FilterCollection,
 } from '../../plugins/filter/filter.plugin';
 import SortingPlugin from '../../plugins/sorting/sorting.plugin';
 import ExportFilePlugin from '../../plugins/export/export.plugin';
@@ -81,6 +79,7 @@ import type { Observable } from '../../utils/store.utils';
 import type { GridPlugin } from '../../plugins/base.plugin';
 import { ColumnCollection, getColumnByProp, getColumns } from '../../utils/column.utils';
 import { WCAGPlugin } from '../../plugins/wcag';
+import { ColumnFilterConfig, FilterCollection } from '../../plugins/filter/filter.types';
 
 
 /**

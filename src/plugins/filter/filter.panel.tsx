@@ -1,40 +1,24 @@
-import { Component, Event, EventEmitter, h, Host, Listen, Method, Prop, State, VNode, Element } from '@stencil/core';
-import { FilterType } from './filter.service';
+import {
+  h,
+  Component,
+  Event,
+  EventEmitter,
+  Host,
+  Listen,
+  Method,
+  Prop,
+  State,
+  VNode,
+  Element,
+} from '@stencil/core';
+import debounce from 'lodash/debounce';
+
 import { AndOrButton, isFilterBtn, TrashButton } from './filter.button';
 import '../../utils/closest.polifill';
-import { LogicFunction } from './filter.types';
-import { FilterCaptions } from './filter.plugin';
-import debounce from 'lodash/debounce';
+import { FilterCaptions, LogicFunction, MultiFilterItem, ShowData } from './filter.types';
 import { ColumnProp } from '@type';
+import { FilterType } from './filter.indexed';
 
-export type FilterItem = {
-  // column id
-  prop?: ColumnProp;
-  // filter type definition
-  type?: FilterType;
-  // value for additional filtering, text value or some id
-  value?: any;
-};
-
-export type FilterData = {
-  id: number;
-  type: FilterType;
-  value?: any;
-  relation: 'and' | 'or';
-};
-
-export type MultiFilterItem = {
-  [prop: string]: FilterData[];
-};
-
-export type ShowData = {
-  x: number;
-  y: number;
-  /**
-   * Auto correct position if it is out of document bounds
-   */
-  autoCorrect?: boolean;
-} & FilterItem;
 
 const defaultType: FilterType = 'none';
 
@@ -72,7 +56,6 @@ export class FilterPanel {
   @State() currentFilterType: FilterType = defaultType;
   @State() changes: ShowData | undefined;
   @Prop() filterItems: MultiFilterItem = {};
-  @Prop() filterTypes: Record<string, string[]> = {};
   @Prop() filterNames: Record<string, string> = {};
   @Prop() filterEntities: Record<string, LogicFunction> = {};
   @Prop() filterCaptions: FilterCaptions | undefined;
@@ -100,7 +83,11 @@ export class FilterPanel {
 
     const isOutside = !path.includes(this.element);
 
-    if (e.target instanceof HTMLElement && isOutside && !isFilterBtn(e.target)) {
+    if (
+      e.target instanceof HTMLElement &&
+      isOutside &&
+      !isFilterBtn(e.target)
+    ) {
       this.changes = undefined;
     }
   }
@@ -128,22 +115,33 @@ export class FilterPanel {
   }
 
   renderSelectOptions(type: FilterType, isDefaultTypeRemoved = false) {
+    if (!this.changes) {
+      return;
+    }
     const options: VNode[] = [];
-    const prop = this.changes?.prop;
+    const prop = this.changes.prop;
 
     if (!isDefaultTypeRemoved) {
-      const capts = Object.assign(this.filterCaptionsInternal, this.filterCaptions);
+      const capts = Object.assign(
+        this.filterCaptionsInternal,
+        this.filterCaptions,
+      );
 
       options.push(
-        <option selected={this.currentFilterType === defaultType} value={defaultType}>
-          {prop && this.filterItems[prop] && this.filterItems[prop].length > 0 ? capts.add : this.filterNames[defaultType]}
+        <option
+          selected={this.currentFilterType === defaultType}
+          value={defaultType}
+        >
+          {prop && this.filterItems[prop] && this.filterItems[prop].length > 0
+            ? capts.add
+            : this.filterNames[defaultType]}
         </option>,
       );
     }
 
-    for (let gIndex in this.filterTypes) {
+    for (let gIndex in this.changes.filterTypes) {
       options.push(
-        ...this.filterTypes[gIndex].map(k => (
+        ...this.changes.filterTypes[gIndex].map(k => (
           <option value={k} selected={type === k}>
             {this.filterNames[k]}
           </option>
@@ -159,9 +157,13 @@ export class FilterPanel {
 
     if (!currentFilter) return '';
 
-    if (this.filterEntities[currentFilter[index].type].extra !== 'input') return '';
+    if (this.filterEntities[currentFilter[index].type].extra !== 'input')
+      return '';
 
-    const capts = Object.assign(this.filterCaptionsInternal, this.filterCaptions);
+    const capts = Object.assign(
+      this.filterCaptionsInternal,
+      this.filterCaptions,
+    );
 
     return (
       <input
@@ -180,7 +182,10 @@ export class FilterPanel {
     if (!(prop || prop === 0)) return '';
 
     const propFilters = this.filterItems[prop] || [];
-    const capts = Object.assign(this.filterCaptionsInternal, this.filterCaptions);
+    const capts = Object.assign(
+      this.filterCaptionsInternal,
+      this.filterCaptions,
+    );
     return (
       <div key={this.filterId}>
         {propFilters.map((d, index) => {
@@ -190,7 +195,9 @@ export class FilterPanel {
           if (index !== this.filterItems[prop].length - 1) {
             andOrButton = (
               <div onClick={() => this.toggleFilterAndOr(d.id)}>
-                <AndOrButton text={d.relation === 'and' ? capts.and : capts.or} />
+                <AndOrButton
+                  text={d.relation === 'and' ? capts.and : capts.or}
+                />
               </div>
             );
           }
@@ -198,8 +205,14 @@ export class FilterPanel {
           return (
             <div key={d.id} class={FILTER_LIST_CLASS}>
               <div class={{ 'select-input': true }}>
-                <select class="select-css select-filter" onChange={e => this.onFilterTypeChange(e, prop, index)}>
-                  {this.renderSelectOptions(this.filterItems[prop][index].type, true)}
+                <select
+                  class="select-css select-filter"
+                  onChange={e => this.onFilterTypeChange(e, prop, index)}
+                >
+                  {this.renderSelectOptions(
+                    this.filterItems[prop][index].type,
+                    true,
+                  )}
                 </select>
                 <div class={FILTER_LIST_CLASS_ACTION}>{andOrButton}</div>
                 <div onClick={() => this.onRemoveFilter(d.id)}>
@@ -211,7 +224,7 @@ export class FilterPanel {
           );
         })}
 
-        {propFilters.length > 0 ? <div class="add-filter-divider"/> : ''}
+        {propFilters.length > 0 ? <div class="add-filter-divider" /> : ''}
       </div>
     );
   }
@@ -227,7 +240,7 @@ export class FilterPanel {
       el.style.left = `${maxLeft - (el.parentElement?.getBoundingClientRect().left ?? 0)}px`;
     }
   }
-  
+
   render() {
     if (!this.changes) {
       return <Host style={{ display: 'none' }}></Host>;
@@ -238,28 +251,55 @@ export class FilterPanel {
       top: `${this.changes.y}px`,
     };
 
-    const capts = Object.assign(this.filterCaptionsInternal, this.filterCaptions);
+    const capts = Object.assign(
+      this.filterCaptionsInternal,
+      this.filterCaptions,
+    );
 
     return (
-      <Host style={style} ref={(el) => { this.changes?.autoCorrect && this.autoCorrect(el) }}>
+      <Host
+        style={style}
+        ref={el => {
+          this.changes?.autoCorrect && this.autoCorrect(el);
+        }}
+      >
         <label>{capts.title}</label>
         <div class="filter-holder">{this.getFilterItemsList()}</div>
 
         <div class="add-filter">
-          <select id={FILTER_ID} class="select-css" onChange={e => this.onAddNewFilter(e)}>
+          <select
+            id={FILTER_ID}
+            class="select-css"
+            onChange={e => this.onAddNewFilter(e)}
+          >
             {this.renderSelectOptions(this.currentFilterType)}
           </select>
         </div>
         <div class="filter-actions">
-          {this.disableDynamicFiltering &&
-            <button id="revo-button-save" aria-label="save" class="revo-button green"  onClick={() => this.onSave()}>
+          {this.disableDynamicFiltering && (
+            <button
+              id="revo-button-save"
+              aria-label="save"
+              class="revo-button green"
+              onClick={() => this.onSave()}
+            >
               {capts.save}
             </button>
-          }
-          <button id="revo-button-reset" aria-label="reset" class="revo-button light" onClick={() => this.onReset()}>
+          )}
+          <button
+            id="revo-button-reset"
+            aria-label="reset"
+            class="revo-button light"
+            onClick={() => this.onReset()}
+          >
             {capts.reset}
           </button>
-          <button id="revo-button-cancel" aria-label="cancel" class="revo-button light" onClick={() => this.onCancel()}>
+          <button
+            id="revo-button-cancel"
+            aria-label="cancel"
+            class="revo-button light"
+            onClick={() => this.onCancel()}
+          >
             {capts.cancel}
           </button>
         </div>
@@ -278,7 +318,9 @@ export class FilterPanel {
 
     // adding setTimeout will wait for the next tick DOM update then focus on input
     setTimeout(() => {
-      const input = document.getElementById('filter-input-' + this.filterItems[prop][index].id);
+      const input = document.getElementById(
+        'filter-input-' + this.filterItems[prop][index].id,
+      );
       if (input instanceof HTMLInputElement) {
         input.focus();
       }
@@ -328,14 +370,18 @@ export class FilterPanel {
 
     // adding setTimeout will wait for the next tick DOM update then focus on input
     setTimeout(() => {
-      const input = document.getElementById('filter-input-' + this.currentFilterId) as HTMLInputElement;
+      const input = document.getElementById(
+        'filter-input-' + this.currentFilterId,
+      ) as HTMLInputElement;
       if (input) input.focus();
     }, 0);
   }
 
   private onUserInput(index: number, prop: ColumnProp, event: Event) {
     // update the value of the filter item
-    this.filterItems[prop][index].value = (event.target as HTMLInputElement).value;
+    this.filterItems[prop][index].value = (
+      event.target as HTMLInputElement
+    ).value;
 
     if (!this.disableDynamicFiltering) this.debouncedApplyFilter();
   }

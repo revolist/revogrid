@@ -181,6 +181,12 @@ export interface ColumnType extends ColumnProperties {
    * Represents the cell compare function for custom sorting.
    */
   cellCompare?: CellCompareFunc;
+
+  /**
+   * Represents the cell value parse function for custom parsing.
+   * Currently only used for filtering.
+   */
+  cellParser?: (model: DataType, column: ColumnRegular) => any;
 }
 export type Order = 'asc' | 'desc' | undefined;
 /**

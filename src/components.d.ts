@@ -8,7 +8,7 @@ import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 import { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, ChangedRange, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, FocusAfterRenderEvent, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, Nullable, PluginBaseComponent, PositionItem, RangeArea, RangeClipboardCopyEventProps, RangeClipboardPasteEvent, RowDefinition, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
 import { GridPlugin } from "./plugins/base.plugin";
 import { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
-import { ColumnFilterConfig, FilterCaptions, FilterCollection } from "./plugins/filter/filter.plugin";
+import { ColumnFilterConfig, FilterCaptions, FilterCollection, LogicFunction, MultiFilterItem, ShowData } from "./plugins/filter/filter.types";
 import { GroupingOptions } from "./plugins/groupingRow/grouping.row.types";
 import { VNode } from "@stencil/core";
 import { FocusedData } from "./components/revoGrid/viewport.service";
@@ -16,15 +16,13 @@ import { ColumnCollection } from "./utils/column.utils";
 import { DataInput } from "./plugins/export/types";
 import { Observable } from "./utils/store.utils";
 import { DSourceState, Groups } from "./store/index";
-import { MultiFilterItem, ShowData } from "./plugins/filter/filter.panel";
-import { LogicFunction } from "./plugins/filter/filter.types";
 import { ResizeProps } from "./components/header/resizable.directive";
 import { Cell as Cell1, ColumnRegular as ColumnRegular1, DataType as DataType1, DimensionCols as DimensionCols1, DimensionRows as DimensionRows1, DimensionSettingsState as DimensionSettingsState1, Observable as Observable1, SelectionStoreState as SelectionStoreState1 } from "./components";
 import { EventData } from "./components/overlay/selection.utils";
 export { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, ChangedRange, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, FocusAfterRenderEvent, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, Nullable, PluginBaseComponent, PositionItem, RangeArea, RangeClipboardCopyEventProps, RangeClipboardPasteEvent, RowDefinition, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
 export { GridPlugin } from "./plugins/base.plugin";
 export { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
-export { ColumnFilterConfig, FilterCaptions, FilterCollection } from "./plugins/filter/filter.plugin";
+export { ColumnFilterConfig, FilterCaptions, FilterCollection, LogicFunction, MultiFilterItem, ShowData } from "./plugins/filter/filter.types";
 export { GroupingOptions } from "./plugins/groupingRow/grouping.row.types";
 export { VNode } from "@stencil/core";
 export { FocusedData } from "./components/revoGrid/viewport.service";
@@ -32,8 +30,6 @@ export { ColumnCollection } from "./utils/column.utils";
 export { DataInput } from "./plugins/export/types";
 export { Observable } from "./utils/store.utils";
 export { DSourceState, Groups } from "./store/index";
-export { MultiFilterItem, ShowData } from "./plugins/filter/filter.panel";
-export { LogicFunction } from "./plugins/filter/filter.types";
 export { ResizeProps } from "./components/header/resizable.directive";
 export { Cell as Cell1, ColumnRegular as ColumnRegular1, DataType as DataType1, DimensionCols as DimensionCols1, DimensionRows as DimensionRows1, DimensionSettingsState as DimensionSettingsState1, Observable as Observable1, SelectionStoreState as SelectionStoreState1 } from "./components";
 export { EventData } from "./components/overlay/selection.utils";
@@ -404,7 +400,6 @@ export namespace Components {
         "filterEntities": Record<string, LogicFunction>;
         "filterItems": MultiFilterItem;
         "filterNames": Record<string, string>;
-        "filterTypes": Record<string, string[]>;
         "getChanges": () => Promise<ShowData | undefined>;
         "show": (newEntity?: ShowData) => Promise<void>;
     }
@@ -1712,7 +1707,6 @@ declare namespace LocalJSX {
         "filterEntities"?: Record<string, LogicFunction>;
         "filterItems"?: MultiFilterItem;
         "filterNames"?: Record<string, string>;
-        "filterTypes"?: Record<string, string[]>;
         "onFilterChange"?: (event: RevogrFilterPanelCustomEvent<MultiFilterItem>) => void;
     }
     /**
