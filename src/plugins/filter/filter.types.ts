@@ -23,13 +23,12 @@ export type LogicFunctionExtraParam =
   | 'input'
   | 'multi'
   | 'datepicker'
-  | undefined
-  | string
   | number
   | Date
   | DateEnum
   | null
   | undefined
+  | string
   | string[]
   | number[];
 export type LogicFunction = {
