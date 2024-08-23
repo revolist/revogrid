@@ -3,38 +3,20 @@ import reduce from 'lodash/reduce';
 
 import { BasePlugin } from '../base.plugin';
 import { FILTER_PROP, isFilterBtn } from './filter.button';
-import { MultiFilterItem } from './filter.panel';
 import {
-  filterEntities,
+  filterCoreFunctionsIndexedByType,
   filterNames,
   FilterType,
   filterTypes,
-} from './filter.service';
-import { LogicFunction } from './filter.types';
-import { ColumnProp, ColumnRegular, DataType } from '@type';
-import { PluginProviders } from '@type';
-
-type CustomFilter = {
-  columnFilterType: string; // property defined in column filter: string/number/abstract/enum...etc
-  name: string;
-  func: LogicFunction;
-};
-
-export type FilterCaptions = {
-  title: string;
-  save: string;
-  reset: string;
-  cancel: string;
-  add: string,
-  placeholder: string,
-  and: string,
-  or: string,
-};
-
-export type FilterLocalization = {
-  captions: FilterCaptions;
-  filterNames: Record<FilterType, string>;
-};
+} from './filter.indexed';
+import {
+  ColumnFilterConfig,
+  FilterCollection,
+  LogicFunction,
+  MultiFilterItem,
+} from './filter.types';
+import { ColumnRegular, DataType, PluginProviders } from '@type';
+import { getCellDataParsed } from 'src/utils';
 
 /**
  * @typedef ColumnFilterConfig
@@ -50,23 +32,6 @@ export type FilterLocalization = {
 /**
  * @internal
  */
-export type ColumnFilterConfig = {
-  collection?: FilterCollection;
-  include?: string[];
-  customFilters?: Record<string, CustomFilter>;
-  filterProp?: string;
-  localization?: FilterLocalization;
-  multiFilterItems?: MultiFilterItem;
-  disableDynamicFiltering?: boolean;
-};
-type HeaderEvent = CustomEvent<ColumnRegular>;
-type FilterCollectionItem = {
-  filter: LogicFunction;
-  type: FilterType;
-  value?: any;
-};
-
-export type FilterCollection = Record<ColumnProp, FilterCollectionItem>;
 
 export const FILTER_TRIMMED_TYPE = 'filter';
 export const FILTER_CONFIG_CHANGED_EVENT = 'filterconfigchanged';
@@ -75,11 +40,16 @@ export class FilterPlugin extends BasePlugin {
   pop?: HTMLRevogrFilterPanelElement;
   filterCollection: FilterCollection = {};
   multiFilterItems: MultiFilterItem = {};
-  possibleFilters: Record<string, string[]> = { ...filterTypes };
-  possibleFilterNames: Record<string, string> = { ...filterNames };
-  possibleFilterEntities: Record<string, LogicFunction> = {
-    ...filterEntities,
+
+  filterByType: Record<string, string[]> =
+    { ...filterTypes };
+  filterNameIndexByType: Record<string, string> = {
+    ...filterNames,
   };
+  filterFunctionsIndexedByType: Record<string, LogicFunction> = {
+    ...filterCoreFunctionsIndexedByType,
+  };
+
   filterProp = FILTER_PROP;
 
   constructor(
@@ -91,8 +61,6 @@ export class FilterPlugin extends BasePlugin {
     if (config) {
       this.initConfig(config);
     }
-
-    const headerclick = (e: HeaderEvent) => this.headerclick(e);
 
     const aftersourceset = async () => {
       const filterCollectionProps = Object.keys(this.filterCollection);
@@ -113,7 +81,11 @@ export class FilterPlugin extends BasePlugin {
       }
       await this.runFiltering();
     };
-    this.addEventListener('headerclick', headerclick);
+    this.addEventListener(
+      'headerclick',
+      (e: CustomEvent<HTMLRevoGridElementEventMap['headerclick']>) =>
+        this.headerclick(e),
+    );
     this.addEventListener(
       FILTER_CONFIG_CHANGED_EVENT,
       ({ detail }: CustomEvent<ColumnFilterConfig | boolean>) => {
@@ -132,13 +104,15 @@ export class FilterPlugin extends BasePlugin {
       this.onFilterChange(detail),
     );
 
-    const existingNodes = this.revogrid.registerVNode.filter((n) => n.$tag$ !== 'revogr-filter-panel');
+    const existingNodes = this.revogrid.registerVNode.filter(
+      n => n.$tag$ !== 'revogr-filter-panel',
+    );
     this.revogrid.registerVNode = [
       ...existingNodes,
       <revogr-filter-panel
         filterItems={this.multiFilterItems}
-        filterNames={this.possibleFilterNames}
-        filterEntities={this.possibleFilterEntities}
+        filterNames={this.filterNameIndexByType}
+        filterEntities={this.filterFunctionsIndexedByType}
         filterCaptions={config?.localization?.captions}
         onFilterChange={e => this.onFilterChange(e.detail)}
         disableDynamicFiltering={config?.disableDynamicFiltering}
@@ -151,18 +125,20 @@ export class FilterPlugin extends BasePlugin {
     if (config.multiFilterItems) {
       this.multiFilterItems = { ...config.multiFilterItems };
     }
+    // Add custom filters
     if (config.customFilters) {
-      for (let cType in config.customFilters) {
-        const cFilter = config.customFilters[cType];
-        if (!this.possibleFilters[cFilter.columnFilterType]) {
-          this.possibleFilters[cFilter.columnFilterType] = [];
+      for (let customFilterType in config.customFilters) {
+        const cFilter = config.customFilters[customFilterType];
+        if (!this.filterByType[cFilter.columnFilterType]) {
+          this.filterByType[cFilter.columnFilterType] = [];
         }
-        this.possibleFilters[cFilter.columnFilterType].push(cType);
-        this.possibleFilterEntities[cType] = cFilter.func;
-        this.possibleFilterNames[cType] = cFilter.name;
+        this.filterByType[cFilter.columnFilterType].push(customFilterType);
+        this.filterFunctionsIndexedByType[customFilterType] = cFilter.func;
+        this.filterNameIndexByType[customFilterType] = cFilter.name;
       }
     }
 
+    // Add filterProp if provided in config
     if (config.filterProp) {
       this.filterProp = config.filterProp;
     }
@@ -175,9 +151,9 @@ export class FilterPlugin extends BasePlugin {
     if (cfgInlcude) {
       const filters: Record<string, string[]> = {};
 
-      for (let t in this.possibleFilters) {
+      for (let t in this.filterByType) {
         // validate filters, if appropriate function present
-        const newTypes = this.possibleFilters[t].filter(
+        const newTypes = this.filterByType[t].filter(
           f => cfgInlcude.indexOf(f) > -1,
         );
         if (newTypes.length) {
@@ -186,14 +162,15 @@ export class FilterPlugin extends BasePlugin {
       }
       // if any valid filters provided show them
       if (Object.keys(filters).length > 0) {
-        this.possibleFilters = filters;
+        this.filterByType = filters;
       }
     }
+
     if (config.collection) {
       this.filterCollection = reduce(
         config.collection,
         (result: FilterCollection, item, prop) => {
-          if (this.possibleFilterEntities[item.type]) {
+          if (this.filterFunctionsIndexedByType[item.type]) {
             result[prop] = item;
           } else {
             console.warn(`${item.type} type is not found.`);
@@ -207,15 +184,15 @@ export class FilterPlugin extends BasePlugin {
     if (config.localization) {
       if (config.localization.filterNames) {
         Object.entries(config.localization.filterNames).forEach(([k, v]) => {
-          if (this.possibleFilterNames[k] != void 0) {
-            this.possibleFilterNames[k] = v;
+          if (this.filterNameIndexByType[k] != void 0) {
+            this.filterNameIndexByType[k] = v;
           }
         });
       }
     }
   }
 
-  async headerclick(e: HeaderEvent) {
+  async headerclick(e: CustomEvent<ColumnRegular>) {
     const el = e.detail.originalEvent?.target as HTMLElement;
     if (!isFilterBtn(el)) {
       return;
@@ -237,13 +214,14 @@ export class FilterPlugin extends BasePlugin {
     const gridPos = this.revogrid.getBoundingClientRect();
     const buttonPos = el.getBoundingClientRect();
     const prop = e.detail.prop;
-    this.pop.filterTypes = this.getColumnFilter(e.detail.filter);
+
     this.pop.show({
       ...this.filterCollection[prop],
       x: buttonPos.x - gridPos.x,
       y: buttonPos.y - gridPos.y + buttonPos.height,
       autoCorrect: true,
       prop,
+      filterTypes: this.getColumnFilter(e.detail.filter),
     });
   }
 
@@ -252,7 +230,7 @@ export class FilterPlugin extends BasePlugin {
   ): Record<string, string[]> {
     let filterType = 'string';
     if (!type) {
-      return { [filterType]: this.possibleFilters[filterType] };
+      return { [filterType]: this.filterByType[filterType] };
     }
 
     // if custom column filter
@@ -263,21 +241,26 @@ export class FilterPlugin extends BasePlugin {
     } else if (typeof type === 'object' && type.length) {
       return type.reduce((r: Record<string, string[]>, multiType) => {
         if (this.isValidType(multiType)) {
-          r[multiType] = this.possibleFilters[multiType];
+          r[multiType] = this.filterByType[multiType];
         }
         return r;
       }, {});
     }
-    return { [filterType]: this.possibleFilters[filterType] };
+    return { [filterType]: this.filterByType[filterType] };
   }
 
   isValidType(type: any): type is string {
-    return !!(typeof type === 'string' && this.possibleFilters[type]);
+    return !!(typeof type === 'string' && this.filterByType[type]);
   }
 
-  // called on internal component change
+  /**
+   * Called on internal component change
+   */
   async onFilterChange(filterItems: MultiFilterItem) {
+    // store the filter items
     this.multiFilterItems = filterItems;
+
+    // run the filtering when the items change
     this.runFiltering();
   }
 
@@ -286,30 +269,44 @@ export class FilterPlugin extends BasePlugin {
    */
   async doFiltering(
     collection: FilterCollection,
-    items: DataType[],
+    source: DataType[],
     columns: ColumnRegular[],
     filterItems: MultiFilterItem,
   ) {
     const columnsToUpdate: ColumnRegular[] = [];
 
+    /**
+     * Loop through the columns and update the columns that need to be updated with the `hasFilter` property.
+     */
+    const columnByProp: Record<string, ColumnRegular> = {};
     columns.forEach(rgCol => {
       const column = { ...rgCol };
       const hasFilter = filterItems[column.prop];
+      columnByProp[column.prop] = column;
+
+      /**
+       * If the column has a filter and it's not already marked as filtered, update the column.
+       */
       if (column[this.filterProp] && !hasFilter) {
         delete column[this.filterProp];
         columnsToUpdate.push(column);
       }
+
+      /**
+       * If the column does not have a filter and it's marked as filtered, update the column.
+       */
+
       if (!column[this.filterProp] && hasFilter) {
         columnsToUpdate.push(column);
         column[this.filterProp] = true;
       }
     });
-    const itemsToFilter = this.getRowFilter(items, filterItems);
+    const itemsToTrim = this.getRowFilter(source, filterItems, columnByProp);
     // check is filter event prevented
     const { defaultPrevented, detail } = this.emit('beforefiltertrimmed', {
       collection,
-      itemsToFilter,
-      source: items,
+      itemsToFilter: itemsToTrim,
+      source,
       filterItems,
     });
     if (defaultPrevented) {
@@ -326,7 +323,7 @@ export class FilterPlugin extends BasePlugin {
     }
 
     // applies the hasFilter to the columns to show filter icon
-    await this.revogrid.updateColumns(columnsToUpdate);
+    this.providers.column.updateColumns(columnsToUpdate);
     this.emit('afterfilterapply');
   }
 
@@ -346,7 +343,7 @@ export class FilterPlugin extends BasePlugin {
       if (this.multiFilterItems[prop].length > 0) {
         const firstFilterItem = this.multiFilterItems[prop][0];
         collection[prop] = {
-          filter: filterEntities[firstFilterItem.type],
+          filter: this.filterFunctionsIndexedByType[firstFilterItem.type],
           type: firstFilterItem.type,
           value: firstFilterItem.value,
         };
@@ -380,7 +377,14 @@ export class FilterPlugin extends BasePlugin {
     };
   }
 
-  getRowFilter(rows: DataType[], filterItems: MultiFilterItem) {
+  /**
+   * Get trimmed rows based on filter
+   */
+  getRowFilter(
+    rows: DataType[],
+    filterItems: MultiFilterItem,
+    columnByProp: Record<string, ColumnRegular>
+  ): Record<number, boolean> {
     const propKeys = Object.keys(filterItems);
 
     const trimmed: Record<number, boolean> = {};
@@ -389,29 +393,40 @@ export class FilterPlugin extends BasePlugin {
 
     // each rows
     rows.forEach((model, rowIndex) => {
-      // working on all props
+      // check filter by column properties
       for (const prop of propKeys) {
         const propFilters = filterItems[prop];
 
+        // reset the count of satisfied filters
         propFilterSatisfiedCount = 0;
+        // reset the array of last filter results
         lastFilterResults = [];
 
         // testing each filter for a prop
         for (const [filterIndex, filterData] of propFilters.entries()) {
           // the filter LogicFunction based on the type
-          const filter = this.possibleFilterEntities[filterData.type];
+          const filterFunc = this.filterFunctionsIndexedByType[filterData.type];
 
           // THE MAGIC OF FILTERING IS HERE
+          const column = columnByProp[prop];
+          // If there is no column but user wants to filter by a property
+          const value = column ? getCellDataParsed(model, columnByProp[prop]) : model[prop];
+          // OR relation
           if (filterData.relation === 'or') {
+            // reset the array of last filter results
             lastFilterResults = [];
-            if (filter(model[prop], filterData.value)) {
+            // if the filter is satisfied, continue to the next filter
+            if (filterFunc(value, filterData.value)) {
               continue;
             }
+            // if the filter is not satisfied, count it
             propFilterSatisfiedCount++;
+
+          // AND relation
           } else {
             // 'and' relation will need to know the next filter
             // so we save this current filter to include it in the next filter
-            lastFilterResults.push(!filter(model[prop], filterData.value));
+            lastFilterResults.push(!filterFunc(value, filterData.value));
 
             // check first if we have a filter on the next index to pair it with this current filter
             const nextFilterData = propFilters[filterIndex + 1];
@@ -419,20 +434,23 @@ export class FilterPlugin extends BasePlugin {
             if (!nextFilterData || nextFilterData.relation !== 'and') {
               // let's just continue since for sure propFilterSatisfiedCount cannot be satisfied
               if (lastFilterResults.indexOf(true) === -1) {
+                // reset the array of last filter results
                 lastFilterResults = [];
                 continue;
               }
 
               // we need to add all of the lastFilterResults since we need to satisfy all
               propFilterSatisfiedCount += lastFilterResults.length;
+              // reset the array of last filter results
               lastFilterResults = [];
             }
           }
         } // end of propFilters forEach
 
         // add to the list of removed/trimmed rows of filter condition is satisfied
-        if (propFilterSatisfiedCount === propFilters.length)
+        if (propFilterSatisfiedCount === propFilters.length) {
           trimmed[rowIndex] = true;
+        }
       } // end of for-of propKeys
     });
     return trimmed;

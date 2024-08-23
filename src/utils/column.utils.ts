@@ -7,6 +7,7 @@ import {
   ColumnProp,
   ColumnRegular,
   ColumnTypes,
+  DataType,
   DimensionCols,
   ViewSettingSizeProp,
 } from '@type';
@@ -17,6 +18,18 @@ export interface ColumnGroup extends StoreGroup {
   level: number;
 }
 export type ColumnGroupingCollection = Record<DimensionCols, ColumnGroup[]>;
+
+export function getCellData(val?: any) {
+  if (typeof val === 'undefined' || val === null) {
+    return '';
+  }
+  return val;
+}
+
+export function getCellDataParsed(model: DataType, column: ColumnRegular) {
+  const val = column.cellParser ? column.cellParser(model, column) : model[column.prop];
+  return getCellData(val);
+}
 
 /**
  * Column collection definition.

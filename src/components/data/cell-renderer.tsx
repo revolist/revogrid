@@ -7,11 +7,12 @@ import {
 } from '@type';
 
 import {
+  getCellData,
   DRAGGABLE_CLASS,
   DRAG_ICON_CLASS,
-} from '../../utils/consts';
+} from '../../utils';
 
-import { getCellData, isRowDragService } from './column.service';
+import { isRowDragService } from './column.service';
 
 interface RenderProps {
   model: ColumnDataSchemaModel;

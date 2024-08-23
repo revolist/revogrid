@@ -1,5 +1,5 @@
 import { DSourceState, getSourceItem, getVisibleSourceItem } from '@store';
-import { CELL_CLASS, DISABLED_CLASS } from '../../utils/consts';
+import { getCellData, Observable, CELL_CLASS, DISABLED_CLASS } from '../../utils';
 import { getRange } from '@store';
 
 import { isGroupingColumn } from '../../plugins/groupingRow/grouping.service';
@@ -23,7 +23,6 @@ import {
   EditorCtr,
   Editors,
 } from '@type';
-import { Observable } from '../../utils/store.utils';
 
 export type ColumnStores = {
   [T in DimensionCols]: Observable<DSourceState<ColumnRegular, DimensionCols>>;
@@ -108,10 +107,10 @@ export default class ColumnService {
     colIndex: number,
     val?: string,
   ): BeforeSaveDataDetails {
-    if (typeof val === 'undefined') {
-      val = this.getCellData(rowIndex, colIndex);
-    }
     const data = this.rowDataModel(rowIndex, colIndex);
+    if (typeof val === 'undefined') {
+      val = getCellData(data.model[data.prop as number]);
+    }
     return {
       prop: data.prop,
       rowIndex,
@@ -384,13 +383,6 @@ export default class ColumnService {
   destroy() {
     this.unsubscribe.forEach(f => f());
   }
-}
-
-export function getCellData(val?: any) {
-  if (typeof val === 'undefined' || val === null) {
-    return '';
-  }
-  return val;
 }
 
 /**
