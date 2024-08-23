@@ -41,9 +41,9 @@ export class FilterPlugin extends BasePlugin {
   filterCollection: FilterCollection = {};
   multiFilterItems: MultiFilterItem = {};
 
-  filterByType: Record<'string' | 'number' | string, (FilterType | string)[]> =
+  filterByType: Record<string, string[]> =
     { ...filterTypes };
-  filterNameIndexByType: Record<FilterType | string, string> = {
+  filterNameIndexByType: Record<string, string> = {
     ...filterNames,
   };
   filterFunctionsIndexedByType: Record<string, LogicFunction> = {
