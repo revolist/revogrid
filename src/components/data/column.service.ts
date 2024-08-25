@@ -77,14 +77,15 @@ export default class ColumnService {
     model: ColumnDataSchemaModel,
     extraPropsFunc: ColumnRegular['cellProperties'],
   ): CellProps {
-    const cellClass: { [key: string]: boolean } = {
+    const props: CellProps = {
+      ...defaultProps,
+    };
+    props.class = {
+      ...(typeof props.class === 'string' ? { [props.class]: true } : props.class),
       [CELL_CLASS]: true,
       [DISABLED_CLASS]: this.isReadOnly(r, c),
     };
-    let props: CellProps = {
-      ...defaultProps,
-      class: cellClass,
-    };
+
     const extra = extraPropsFunc?.(model);
     if (!extra) {
       return props;

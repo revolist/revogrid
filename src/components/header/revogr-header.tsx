@@ -173,7 +173,7 @@ export class RevogrHeaderComponent {
           canResize={this.canResize}
           active={this.resizeHandler}
           onResize={e => this.onResize(e, rgCol.itemIndex)}
-          onDoubleClick={e => this.headerdblClick.emit(e)}
+          onDblClick={e => this.headerdblClick.emit(e)}
           onClick={e => this.initialHeaderClick.emit(e)}
           additionalData={this.additionalData}
         />,

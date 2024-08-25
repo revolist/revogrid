@@ -14,9 +14,9 @@ import {
   VirtualPositionItem,
   ColumnTemplateProp,
   InitialHeaderClick,
-  CellProps,
+  RangeArea
 } from '@type';
-import { RangeArea } from '@type';
+import { ResizableElementHTMLAttributes } from './resizable.element';
 
 type Props = {
   column: VirtualPositionItem;
@@ -27,7 +27,7 @@ type Props = {
   canFilter?: boolean;
   onResize?(e: ResizeEvent): void;
   onClick?(data: InitialHeaderClick): void;
-  onDoubleClick?(data: InitialHeaderClick): void;
+  onDblClick?(data: InitialHeaderClick): void;
 } & Partial<Pick<ResizeProps, 'active'>>;
 
 const HeaderRenderer = (p: Props): VNode => {
@@ -38,7 +38,7 @@ const HeaderRenderer = (p: Props): VNode => {
   if (p.data?.order) {
     cellClass[p.data.order] = true;
   }
-  const dataProps: CellProps & Partial<ResizeProps> = {
+  const dataProps: ResizableElementHTMLAttributes = {
     [DATA_COL]: p.column.itemIndex,
     canResize: p.canResize,
     minWidth: p.data?.minSize || MIN_COL_SIZE,
@@ -50,8 +50,8 @@ const HeaderRenderer = (p: Props): VNode => {
       transform: `translateX(${p.column.start}px)`,
     },
     onResize: p.onResize,
-    onDoubleClick(originalEvent: MouseEvent) {
-      p.onDoubleClick?.({
+    onDblClick(originalEvent: MouseEvent) {
+      p.onDblClick?.({
         column: p.data,
         index: p.column.itemIndex,
         originalEvent,
