@@ -253,7 +253,7 @@ export class RevogrData {
         }
 
         const {
-          detail: { column: columnProps, row: rowProps, model: newModel },
+          detail: { column: columnProps, row: rowProps, model: schemaModel },
         } = cellEvent;
 
         const defaultProps: CellProps = {
@@ -276,24 +276,23 @@ export class RevogrData {
           rowProps.itemIndex,
           columnProps.itemIndex,
           defaultProps,
-          newModel,
-          columnsData[columnProps.itemIndex]?.cellProperties,
+          schemaModel,
+          schemaModel.column?.cellProperties,
         );
 
         // Never use webcomponent for cell render
         // It's very slow because of webcomponent initialization takes time
-        cells.push(
-          <CellRenderer
-            renderProps={{
-              model: newModel,
-              providers: this.providers,
-              template: columnsData[columnProps.itemIndex]?.cellTemplate,
-              additionalData: this.additionalData,
-              dragStartCell: this.dragStartCell,
-            }}
-            cellProps={props}
-          />,
-        );
+        const cellNode = <CellRenderer
+          renderProps={{
+            model: schemaModel,
+            providers: this.providers,
+            template: schemaModel.column?.cellTemplate,
+            additionalData: this.additionalData,
+            dragStartCell: this.dragStartCell,
+          }}
+          cellProps={props}
+        />;
+        cells.push(cellNode);
       }
       // #endregion
 

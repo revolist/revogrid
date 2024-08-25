@@ -81,6 +81,14 @@ export function generateFakeDataObject(config = {}) {
         size: 100,
         // custom sorting
         cellCompare: rgCol % 2 == 0 ? naturalSort : undefined,
+        cellProperties: ({ colIndex }) => ({
+          className: {
+            'first-column': colIndex === 0,
+          },
+          class: {
+            'first-column-class': colIndex === 0,
+          }
+        })
 
         // custom filter
         // filter: 'myFilterType',
