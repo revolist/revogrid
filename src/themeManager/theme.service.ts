@@ -1,7 +1,7 @@
-import { Theme, ThemeConfig, ThemePackage } from '../types/theme';
-import ThemeCompact from './theme.compact';
-import ThemeDefault from './theme.default';
-import ThemeMaterial from './theme.material';
+import type { Theme, ThemeConfig, ThemePackage } from '../types/theme';
+import { ThemeCompact } from './theme.compact';
+import { ThemeDefault } from './theme.default';
+import { ThemeMaterial } from './theme.material';
 
 export const DEFAULT_THEME = 'default';
 
@@ -20,7 +20,7 @@ export default class ThemeService {
     return this.currentTheme;
   }
 
-  get rowSize(): number {
+  get rowSize() {
     return this.customRowSize || this.currentTheme.defaultRowSize;
   }
 
@@ -34,7 +34,7 @@ export default class ThemeService {
   }
 
   register(theme: Theme) {
-    const parsedTheme = ThemeService.getTheme(theme);
+    const parsedTheme = getTheme(theme);
     switch (parsedTheme) {
       case 'material':
       case 'darkMaterial':
@@ -49,11 +49,12 @@ export default class ThemeService {
         break;
     }
   }
+}
 
-  static getTheme(theme?: string | null): Theme {
-    if (theme && allowedThemes.indexOf(theme as Theme) > -1) {
-      return theme as Theme;
-    }
-    return DEFAULT_THEME;
+
+export function getTheme(theme?: string | null): Theme {
+  if (theme && allowedThemes.indexOf(theme as Theme) > -1) {
+    return theme as Theme;
   }
+  return DEFAULT_THEME;
 }

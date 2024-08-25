@@ -16,6 +16,7 @@ import {
   SelectionStoreState,
 } from './selection';
 import type { Observable } from '../utils/store.utils';
+import { JSXBase } from '@stencil/core/internal';
 
 export type Nullable<T> = {
   [P in keyof T]: T[P] | null;
@@ -261,29 +262,15 @@ export type ColumnProp = string | number;
 
 export type DataFormat<T = any> = T;
 
-export type CellProp = string | number | object | boolean | undefined;
-
 /**
  * Additional properties applied to the cell.
- * Contains style object where key is CSS property and value is CSS property value.
- * Contains class object where key is CSS class and value is boolean flag indicating if class should be applied.
- * Contains additional properties for custom cell rendering.
+ * Contains HTMLAttributes<HTMLDivElement> properties for custom cell rendering.
  */
-export type CellProps = {
-  // CSS styles applied to the cell
-  style?: {
-    [key: string]: string | undefined;
-  };
-  // CSS classes applied to the cell
-  class?:
-    | {
-        // CSS class name
-        [key: string]: boolean;
-      }
-    | string;
+export type CellProps = JSXBase.HTMLAttributes<HTMLDivElement> & {
   // Additional properties for custom cell rendering
-  [attr: string]: CellProp;
+  [attr: string]: string | number | object | boolean | undefined;
 };
+
 
 /**
  * Providers for grid which are going to be injected into each cell template

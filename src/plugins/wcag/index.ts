@@ -1,4 +1,4 @@
-import { PluginProviders } from '@type';
+import { CellProps, PluginProviders } from '@type';
 import { BasePlugin } from '../base.plugin';
 import { ColumnCollection } from 'src/utils';
 
@@ -60,13 +60,16 @@ export class WCAGPlugin extends BasePlugin {
           };
 
           column.cellProperties = (...args) => {
-            const columnProps = cellProperties?.(...args) || {};
-
-            return {
-              role: 'gridcell',
+            const wcagProps: CellProps = {
+              ['role']: 'gridcell',
               ['aria-colindex']: index,
               ['aria-rowindex']: args[0].rowIndex,
               ['tabindex']: -1,
+            };
+            const columnProps: CellProps = cellProperties?.(...args) || {};
+
+            return {
+              ...wcagProps,
               ...columnProps,
             };
           };

@@ -9,7 +9,6 @@ export type ResizeProps = {
   maxHeight?: number;
 
   onResize?(e: ResizeEvent): void;
-  onDoubleClick?(originalEvent: MouseEvent): void;
 };
 
 export type ResizeEvent = {
