@@ -1,5 +1,10 @@
 import { DSourceState, getSourceItem, getVisibleSourceItem } from '@store';
-import { getCellData, Observable, CELL_CLASS, DISABLED_CLASS } from '../../utils';
+import {
+  getCellData,
+  Observable,
+  CELL_CLASS,
+  DISABLED_CLASS,
+} from '../../utils';
 import { getRange } from '@store';
 
 import { isGroupingColumn } from '../../plugins/groupingRow/grouping.service';
@@ -23,6 +28,7 @@ import {
   EditorCtr,
   Editors,
 } from '@type';
+import { JSXBase } from '@stencil/core/internal';
 
 export type ColumnStores = {
   [T in DimensionCols]: Observable<DSourceState<ColumnRegular, DimensionCols>>;
@@ -81,7 +87,9 @@ export default class ColumnService {
       ...defaultProps,
     };
     props.class = {
-      ...(typeof props.class === 'string' ? { [props.class]: true } : props.class),
+      ...(typeof props.class === 'string'
+        ? { [props.class]: true }
+        : props.class),
       [CELL_CLASS]: true,
       [DISABLED_CLASS]: this.isReadOnly(r, c),
     };
@@ -398,20 +406,30 @@ export function isRowDragService(
   }
   return !!rowDrag;
 }
+
+function mergeClasses(
+  class1: JSXBase.HTMLAttributes<HTMLElement>['class'] = {},
+  class2: JSXBase.HTMLAttributes<HTMLElement>['class'] = {},
+) {
+  if (typeof class1 === 'string') {
+    class1 = { [class1]: true };
+  }
+  if (typeof class2 === 'string') {
+    class2 = { [class2]: true };
+  }
+  return { ...class1, ...class2 };
+}
+
 export function doPropMerge(existing: CellProps, extra: CellProps) {
+  // if className is provided - remove it from props it messing with stencil
+  if (extra.className) {
+    extra.class = mergeClasses(extra.class, extra.className);
+    delete extra.className;
+  }
   let props: CellProps = { ...extra, ...existing };
   // extend existing props
   if (extra.class) {
-    if (typeof extra.class === 'object' && typeof props.class === 'object') {
-      props.class = { ...extra.class, ...props.class };
-    } else if (
-      typeof extra.class === 'string' &&
-      typeof props.class === 'object'
-    ) {
-      props.class[extra.class] = true;
-    } else if (typeof props.class === 'string') {
-      props.class += ' ' + extra.class;
-    }
+    props.class = mergeClasses(props.class, extra.class);
   }
   if (extra.style) {
     props.style = { ...extra.style, ...props.style };

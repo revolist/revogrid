@@ -273,6 +273,7 @@ export type DataFormat<T = any> = T;
  * Contains HTMLAttributes<HTMLDivElement> properties for custom cell rendering.
  */
 export type CellProps = JSXBase.HTMLAttributes<HTMLDivElement> & {
+  className?: JSXBase.HTMLAttributes<HTMLDivElement>['class'];
   // Additional properties for custom cell rendering
   [attr: string]: string | number | object | boolean | undefined;
 };
