@@ -1256,25 +1256,34 @@ export class RevoGridComponent {
   @Watch('additionalData') additionalDataChanged(data: any) {
     this.additionaldatachanged.emit(data);
   }
+
+  @Watch('plugins') pluginsChanged(plugins: GridPlugin[] = []) {
+    // pass data provider to plugins
+    const pluginData = this.getPluginData();
+    if (!pluginData) {
+      return;
+    }
+    // register user plugins
+    plugins?.forEach(userPlugin => {
+      const existingPlugin = this.internalPlugins.find(createdPlugin => createdPlugin instanceof userPlugin);
+      if (existingPlugin) {
+        return;
+      }
+      this.internalPlugins.push(new userPlugin(this.element, pluginData));
+    });
+  }
   // #endregion
 
   // #region Plugins
   private setPlugins() {
-    if (!this.dimensionProvider || !this.dataProvider) {
-      return;
-    }
-
     // remove old plugins if any
     this.removePlugins();
 
     // pass data provider to plugins
-    const pluginData: PluginProviders = {
-      data: this.dataProvider,
-      column: this.columnProvider,
-      dimension: this.dimensionProvider,
-      viewport: this.viewportProvider,
-      selection: this.selectionStoreConnector,
-    };
+    const pluginData = this.getPluginData();
+    if (!pluginData) {
+      return;
+    }
 
     if (this.accessible) {
       this.internalPlugins.push(new WCAGPlugin(this.element, pluginData));
@@ -1319,7 +1328,24 @@ export class RevoGridComponent {
     }
 
     // register user plugins
-    this.plugins?.forEach(p => this.internalPlugins.push(new p(this.element, pluginData)));
+    this.pluginsChanged(this.plugins);
+  }
+
+  private getPluginData(): PluginProviders | undefined {
+    if (!this.dimensionProvider || !this.dataProvider) {
+      return;
+    }
+
+    // pass data provider to plugins
+    const pluginData: PluginProviders = {
+      data: this.dataProvider,
+      column: this.columnProvider,
+      dimension: this.dimensionProvider,
+      viewport: this.viewportProvider,
+      selection: this.selectionStoreConnector,
+    };
+
+    return pluginData;
   }
 
   private removePlugins() {
