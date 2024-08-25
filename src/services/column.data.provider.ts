@@ -1,6 +1,5 @@
 import reduce from 'lodash/reduce';
 import each from 'lodash/each';
-import find from 'lodash/find';
 
 import {
   columnTypes,
@@ -18,7 +17,6 @@ import type {
 } from '@type';
 import { ColumnCollection, getColumnType } from '../utils/column.utils';
 
-
 export type ColumnDataSources = Record<
   DimensionCols,
   DataStore<ColumnRegular, DimensionCols>
@@ -35,7 +33,7 @@ export default class ColumnDataProvider {
     const order: SortingOrder = {};
     const sorting = this.sorting;
     if (sorting) {
-      Object.keys(sorting).forEach((prop) => {
+      Object.keys(sorting).forEach(prop => {
         order[prop] = sorting[prop].order;
       });
     }
@@ -46,10 +44,13 @@ export default class ColumnDataProvider {
     return this.dataSources;
   }
   constructor() {
-    this.dataSources = columnTypes.reduce((sources: ColumnDataSources, k: DimensionCols) => {
-      sources[k] = new DataStore(k);
-      return sources;
-    }, {} as ColumnDataSources);
+    this.dataSources = columnTypes.reduce(
+      (sources: ColumnDataSources, k: DimensionCols) => {
+        sources[k] = new DataStore(k);
+        return sources;
+      },
+      {} as ColumnDataSources,
+    );
   }
 
   column(c: number, pin?: DimensionColPin): ColumnRegular | undefined {
@@ -96,12 +97,8 @@ export default class ColumnDataProvider {
     return getSourceItemVirtualIndexByProp(this.dataSources[type].store, prop);
   }
 
-  getColumnByProp(
-    prop: ColumnProp,
-    type: DimensionCols,
-  ): ColumnRegular | undefined {
-    const items = this.dataSources[type].store.get('source');
-    return find(items, { prop });
+  getColumnByProp(prop: ColumnProp) {
+    return this.collection?.columnByProp[prop];
   }
 
   refreshByType(type: DimensionCols) {
