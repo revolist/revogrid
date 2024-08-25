@@ -6,7 +6,6 @@ import { FILTER_PROP, isFilterBtn } from './filter.button';
 import {
   filterCoreFunctionsIndexedByType,
   filterNames,
-  FilterType,
   filterTypes,
 } from './filter.indexed';
 import {
