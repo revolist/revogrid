@@ -17,7 +17,7 @@ export const ResizableElement: FunctionalComponent = (
     (props.canResize &&
       new ResizeDirective(props, e => {
         if (e.eventName === ResizeEvents.end) {
-          props.onResize && props.onResize(e);
+          props.onResize?.(e);
         }
       })) ||
     null;
