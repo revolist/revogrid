@@ -29,6 +29,7 @@ type SortingOrder = Record<ColumnProp, 'asc' | 'desc' | undefined>;
 export default class ColumnDataProvider {
   readonly dataSources: ColumnDataSources;
   sorting: Sorting | null = null;
+  collection: ColumnCollection | null = null;
 
   get order() {
     const order: SortingOrder = {};
@@ -125,6 +126,7 @@ export default class ColumnDataProvider {
       });
     });
     this.sorting = data.sort;
+    this.collection = data;
     return data;
   }
 
