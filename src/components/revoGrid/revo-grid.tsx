@@ -1257,12 +1257,13 @@ export class RevoGridComponent {
     this.additionaldatachanged.emit(data);
   }
 
-  @Watch('plugins') pluginsChanged(plugins: GridPlugin[] = []) {
+  @Watch('plugins') pluginsChanged(plugins: GridPlugin[] = [], _prevPlugins?: GridPlugin[]) {
     // pass data provider to plugins
     const pluginData = this.getPluginData();
     if (!pluginData) {
       return;
     }
+    // todo: remove old plugins if any was removed based on _prevPlugins
     // register user plugins
     plugins?.forEach(userPlugin => {
       const existingPlugin = this.internalPlugins.find(createdPlugin => createdPlugin instanceof userPlugin);
