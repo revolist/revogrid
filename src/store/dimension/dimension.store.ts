@@ -54,22 +54,34 @@ const trimmedPlugin = (
   };
 };
 
-const realSizePlugin = (
-  store: DimensionStore,
+/**
+ * Plugin which recalculates realSize on changes of sizes, originItemSize and count
+ */
+const recalculateRealSizePlugin = (
+  storeService: DimensionStore,
 ): PluginSubscribe<DimensionSettingsState> => {
+  /**
+   * Recalculates realSize if size, origin size or count changes
+   */
   return {
+    /**
+     * Reacts on changes of count, sizes and originItemSize
+     */
     set(k) {
       switch (k) {
         case 'count':
         case 'sizes':
         case 'originItemSize':
+          // recalculate realSize
           let realSize = 0;
-          const count = store.store.get('count');
+          const count = storeService.store.get('count');
           for (let i = 0; i < count; i++) {
             realSize +=
-              store.store.get('sizes')[i] || store.store.get('originItemSize');
+              storeService.store.get('sizes')[i] ||
+              storeService.store.get('originItemSize');
           }
-          store.setStore({ realSize });
+          storeService.setStore({ realSize });
+          break;
       }
     },
   };
@@ -108,10 +120,10 @@ function initialState(): DimensionSettingsState {
 
 export class DimensionStore {
   readonly store: Observable<DimensionSettingsState>;
-  constructor() {
+  constructor(public readonly type: MultiDimensionType) {
     this.store = createStore(initialState());
     this.store.use(trimmedPlugin(this));
-    this.store.use(realSizePlugin(this));
+    this.store.use(recalculateRealSizePlugin(this));
   }
 
   getCurrentState(): DimensionSettingsState {
