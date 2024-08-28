@@ -56,10 +56,6 @@ export class ViewportStore {
   }
   constructor(readonly type: MultiDimensionType) {
     this.store = createStore(initialState());
-    // drop items on real size change, require a new item set
-    this.store.onChange('realCount', () => this.clearItems());
-    // drop items on virtual size change, require a new item set
-    this.store.onChange('virtualSize', () => this.clearItems());
   }
 
   /**
@@ -67,7 +63,11 @@ export class ViewportStore {
    * It's the main method for draw
    * Use force if you want to re-render viewport
    */
-  setViewPortCoordinate(position: number, dimension: DimensionDataViewport, force = false) {
+  setViewPortCoordinate(
+    position: number,
+    dimension: DimensionDataViewport,
+    force = false,
+  ) {
     const viewportSize = this.store.get('virtualSize');
     // no visible data to calculate
     if (!viewportSize) {
@@ -113,7 +113,7 @@ export class ViewportStore {
         end: 0,
       };
     } else {
-      allItems = this.getItems()
+      allItems = this.getItems();
     }
 
     const firstItem: VirtualPositionItem | undefined = getFirstItem(allItems);
@@ -199,10 +199,11 @@ export class ViewportStore {
   }
 
   setViewport(data: Partial<ViewportState>) {
+    // drop items on virtual size change, require a new item set
+    // drop items on real size change, require a new item set
+    if (typeof data.realCount === 'number' || typeof data.virtualSize === 'number') {
+      data = { ...data, items: data.items || [] };
+    }
     setStore(this.store, data);
-  }
-
-  clearItems() {
-    this.store.set('items', []);
   }
 }

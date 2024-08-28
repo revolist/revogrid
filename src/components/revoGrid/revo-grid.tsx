@@ -46,7 +46,7 @@ import type {
 
 import ColumnDataProvider from '../../services/column.data.provider';
 import { DataProvider } from '../../services/data.provider';
-import { DSourceState, getVisibleSourceItem } from '@store';
+import { DSourceState, getVisibleSourceItem, rowTypes } from '@store';
 import DimensionProvider from '../../services/dimension.provider';
 import ViewportProvider from '../../services/viewport.provider';
 import ThemeService from '../../themeManager/theme.service';
@@ -1161,7 +1161,7 @@ export class RevoGridComponent {
       vals: after,
       oldVals: before,
     });
-    // apply new vals
+    // apply new values
     const newRows = rowDefinitionByType(newVal);
     // clear current defs
     if (oldVal) {
@@ -1176,16 +1176,13 @@ export class RevoGridComponent {
         }
       }
     }
-    if (!newVal.length) {
-      if (forceUpdate) {
-        this.dimensionProvider.setCustomSizes('rgRow', {});
-      } else {
-        return;
+    // set new sizes
+    rowTypes.forEach((t) => {
+      const newSizes = newRows[t];
+      // apply new sizes or force update
+      if (newSizes || forceUpdate) {
+        this.dimensionProvider?.setCustomSizes(t, newSizes?.sizes || {});
       }
-    }
-    Object.entries(newRows).forEach(([k, r]) => {
-      const type = k as DimensionRows;
-      this.dimensionProvider?.setCustomSizes(type, r.sizes || {});
     });
   }
 

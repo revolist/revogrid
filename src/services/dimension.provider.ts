@@ -43,9 +43,9 @@ export default class DimensionProvider {
     );
     this.stores = reduce(
       [...rowTypes, ...columnTypes],
-      (sources: Partial<DimensionStoreCollection>, k: MultiDimensionType) => {
-        sources[k] = new DimensionStore();
-        sources[k].store.onChange('realSize', () => sizeChanged(k));
+      (sources: Partial<DimensionStoreCollection>, t: MultiDimensionType) => {
+        sources[t] = new DimensionStore(t);
+        sources[t].store.onChange('realSize', () => sizeChanged(t));
         return sources;
       },
       {},
@@ -155,6 +155,7 @@ export default class DimensionProvider {
         vpUpdate.virtualSize = this.stores[type].getCurrentState().realSize;
       }
 
+      // if virtualSize present this would trigger viewport clear
       this.viewports.stores[type].setViewport(vpUpdate);
       this.setViewPortCoordinate({
         coordinate: this.viewports.stores[type].lastCoordinate,
