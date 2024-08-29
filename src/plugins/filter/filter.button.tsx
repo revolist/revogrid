@@ -3,6 +3,7 @@ import { ColumnRegular } from '@type';
 
 export const FILTER_BUTTON_CLASS = 'rv-filter';
 export const FILTER_BUTTON_ACTIVE = 'active';
+
 export const FILTER_PROP = 'hasFilter';
 export const AND_OR_BUTTON = 'and-or-button';
 export const TRASH_BUTTON = 'trash-button';

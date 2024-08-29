@@ -1,6 +1,7 @@
 import { h } from '@stencil/core';
 import reduce from 'lodash/reduce';
 
+import type { ColumnRegular, DataType, PluginProviders } from '@type';
 import { BasePlugin } from '../base.plugin';
 import { FILTER_PROP, isFilterBtn } from './filter.button';
 import {
@@ -8,14 +9,22 @@ import {
   filterNames,
   filterTypes,
 } from './filter.indexed';
-import {
+
+import type {
   ColumnFilterConfig,
   FilterCollection,
   LogicFunction,
   MultiFilterItem,
 } from './filter.types';
-import { ColumnRegular, DataType, PluginProviders } from '@type';
-import { getCellDataParsed } from 'src/utils';
+
+import { getCellDataParsed } from '../../utils';
+
+export * from './filter.types';
+export * from './filter.indexed';
+export * from './filter.button';
+
+export const FILTER_TRIMMED_TYPE = 'filter';
+export const FILTER_CONFIG_CHANGED_EVENT = 'filterconfigchanged';
 
 /**
  * @typedef ColumnFilterConfig
@@ -31,9 +40,6 @@ import { getCellDataParsed } from 'src/utils';
 /**
  * @internal
  */
-
-export const FILTER_TRIMMED_TYPE = 'filter';
-export const FILTER_CONFIG_CHANGED_EVENT = 'filterconfigchanged';
 
 export class FilterPlugin extends BasePlugin {
   pop?: HTMLRevogrFilterPanelElement;
@@ -116,8 +122,12 @@ export class FilterPlugin extends BasePlugin {
         onFilterChange={e => this.onFilterChange(e.detail)}
         disableDynamicFiltering={config?.disableDynamicFiltering}
         ref={e => (this.pop = e)}
-      />,
+      > { this.extraContent() }</revogr-filter-panel>,
     ];
+  }
+
+  extraContent() {
+    return null;
   }
 
   initConfig(config: ColumnFilterConfig) {

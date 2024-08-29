@@ -114,69 +114,6 @@ export class FilterPanel {
     }
   }
 
-  renderSelectOptions(type: FilterType, isDefaultTypeRemoved = false) {
-    if (!this.changes) {
-      return;
-    }
-    const options: VNode[] = [];
-    const prop = this.changes.prop;
-
-    if (!isDefaultTypeRemoved) {
-      const capts = Object.assign(
-        this.filterCaptionsInternal,
-        this.filterCaptions,
-      );
-
-      options.push(
-        <option
-          selected={this.currentFilterType === defaultType}
-          value={defaultType}
-        >
-          {prop && this.filterItems[prop] && this.filterItems[prop].length > 0
-            ? capts.add
-            : this.filterNames[defaultType]}
-        </option>,
-      );
-    }
-
-    for (let gIndex in this.changes.filterTypes) {
-      options.push(
-        ...this.changes.filterTypes[gIndex].map(k => (
-          <option value={k} selected={type === k}>
-            {this.filterNames[k]}
-          </option>
-        )),
-      );
-      options.push(<option disabled></option>);
-    }
-    return options;
-  }
-
-  renderExtra(prop: ColumnProp, index: number) {
-    const currentFilter = this.filterItems[prop];
-
-    if (!currentFilter) return '';
-
-    if (this.filterEntities[currentFilter[index].type].extra !== 'input')
-      return '';
-
-    const capts = Object.assign(
-      this.filterCaptionsInternal,
-      this.filterCaptions,
-    );
-
-    return (
-      <input
-        id={`filter-input-${currentFilter[index].id}`}
-        placeholder={capts.placeholder}
-        type="text"
-        value={currentFilter[index].value}
-        onInput={this.onUserInput.bind(this, index, prop)}
-        onKeyDown={e => this.onKeyDown(e)}
-      />
-    );
-  }
-
   getFilterItemsList() {
     const prop = this.changes?.prop;
     if (!(prop || prop === 0)) return '';
@@ -239,72 +176,6 @@ export class FilterPanel {
     if (pos.left > maxLeft && el.offsetLeft) {
       el.style.left = `${maxLeft - (el.parentElement?.getBoundingClientRect().left ?? 0)}px`;
     }
-  }
-
-  render() {
-    if (!this.changes) {
-      return <Host style={{ display: 'none' }}></Host>;
-    }
-    const style = {
-      display: 'block',
-      left: `${this.changes.x}px`,
-      top: `${this.changes.y}px`,
-    };
-
-    const capts = Object.assign(
-      this.filterCaptionsInternal,
-      this.filterCaptions,
-    );
-
-    return (
-      <Host
-        style={style}
-        ref={el => {
-          this.changes?.autoCorrect && this.autoCorrect(el);
-        }}
-      >
-        <label>{capts.title}</label>
-        <div class="filter-holder">{this.getFilterItemsList()}</div>
-
-        <div class="add-filter">
-          <select
-            id={FILTER_ID}
-            class="select-css"
-            onChange={e => this.onAddNewFilter(e)}
-          >
-            {this.renderSelectOptions(this.currentFilterType)}
-          </select>
-        </div>
-        <div class="filter-actions">
-          {this.disableDynamicFiltering && (
-            <button
-              id="revo-button-save"
-              aria-label="save"
-              class="revo-button green"
-              onClick={() => this.onSave()}
-            >
-              {capts.save}
-            </button>
-          )}
-          <button
-            id="revo-button-reset"
-            aria-label="reset"
-            class="revo-button light"
-            onClick={() => this.onReset()}
-          >
-            {capts.reset}
-          </button>
-          <button
-            id="revo-button-cancel"
-            aria-label="cancel"
-            class="revo-button light"
-            onClick={() => this.onCancel()}
-          >
-            {capts.cancel}
-          </button>
-        </div>
-      </Host>
-    );
   }
 
   private onFilterTypeChange(e: Event, prop: ColumnProp, index: number) {
@@ -463,5 +334,138 @@ export class FilterPanel {
     if (!this.changes) {
       throw new Error('Changes required per edit');
     }
+  }
+
+
+  renderSelectOptions(type: FilterType, isDefaultTypeRemoved = false) {
+    if (!this.changes) {
+      return;
+    }
+    const options: VNode[] = [];
+    const prop = this.changes.prop;
+
+    if (!isDefaultTypeRemoved) {
+      const capts = Object.assign(
+        this.filterCaptionsInternal,
+        this.filterCaptions,
+      );
+
+      options.push(
+        <option
+          selected={this.currentFilterType === defaultType}
+          value={defaultType}
+        >
+          {prop && this.filterItems[prop] && this.filterItems[prop].length > 0
+            ? capts.add
+            : this.filterNames[defaultType]}
+        </option>,
+      );
+    }
+
+    for (let gIndex in this.changes.filterTypes) {
+      options.push(
+        ...this.changes.filterTypes[gIndex].map(k => (
+          <option value={k} selected={type === k}>
+            {this.filterNames[k]}
+          </option>
+        )),
+      );
+      options.push(<option disabled></option>);
+    }
+    return options;
+  }
+
+  renderExtra(prop: ColumnProp, index: number) {
+    const currentFilter = this.filterItems[prop];
+
+    if (!currentFilter) return '';
+
+    if (this.filterEntities[currentFilter[index].type].extra !== 'input')
+      return '';
+
+    const capts = Object.assign(
+      this.filterCaptionsInternal,
+      this.filterCaptions,
+    );
+
+    return (
+      <input
+        id={`filter-input-${currentFilter[index].id}`}
+        placeholder={capts.placeholder}
+        type="text"
+        value={currentFilter[index].value}
+        onInput={this.onUserInput.bind(this, index, prop)}
+        onKeyDown={e => this.onKeyDown(e)}
+      />
+    );
+  }
+
+  render() {
+    if (!this.changes) {
+      return <Host style={{ display: 'none' }}></Host>;
+    }
+    const style = {
+      display: 'block',
+      left: `${this.changes.x}px`,
+      top: `${this.changes.y}px`,
+    };
+
+    const capts = Object.assign(
+      this.filterCaptionsInternal,
+      this.filterCaptions,
+    );
+
+    return (
+      <Host
+        style={style}
+        ref={el => {
+          this.changes?.autoCorrect && this.autoCorrect(el);
+        }}
+      >
+        <slot slot="header" />
+        <label>{capts.title}</label>
+        <div class="filter-holder">{this.getFilterItemsList()}</div>
+
+        <div class="add-filter">
+          <select
+            id={FILTER_ID}
+            class="select-css"
+            onChange={e => this.onAddNewFilter(e)}
+          >
+            {this.renderSelectOptions(this.currentFilterType)}
+          </select>
+        </div>
+        <slot />
+        <div class="filter-actions">
+          {this.disableDynamicFiltering && (
+            <button
+              id="revo-button-save"
+              aria-label="save"
+              class="revo-button green"
+              onClick={() => this.onSave()}
+            >
+              {capts.save}
+            </button>
+          )}
+          <button
+            id="revo-button-reset"
+            aria-label="reset"
+            class="revo-button light"
+            onClick={() => this.onReset()}
+          >
+            {capts.reset}
+          </button>
+          <button
+            id="revo-button-cancel"
+            aria-label="cancel"
+            class="revo-button light"
+            onClick={() => this.onCancel()}
+          >
+            {capts.cancel}
+          </button>
+        </div>
+        <slot slot="footer" />
+      </Host>
+    );
   }
 }
