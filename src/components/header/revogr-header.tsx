@@ -11,7 +11,7 @@ import keyBy from 'lodash/keyBy';
 
 import { HEADER_ACTUAL_ROW_CLASS, HEADER_ROW_CLASS } from '../../utils/consts';
 import { Groups } from '@store';
-import HeaderRenderer from './header-renderer';
+import HeaderRenderer, { HeaderRenderProps } from './header-renderer';
 import ColumnGroupsRenderer from '../../plugins/groupingColumn/columnGroupsRenderer';
 import { ResizeProps } from './resizable.directive';
 import {
@@ -116,6 +116,13 @@ export class RevogrHeaderComponent {
     eventName: 'headerdblclick',
   })
   headerdblClick: EventEmitter<InitialHeaderClick>;
+
+  /**
+ * Before each header cell render function. Allows to override cell properties
+ */
+  @Event({ eventName: 'beforeheaderrender' })
+  beforeHeaderRender: EventEmitter<HeaderRenderProps>;
+  
   // #endregion
 
   @Element() element!: HTMLStencilElement;
@@ -160,24 +167,27 @@ export class RevogrHeaderComponent {
     // render header columns
     for (let rgCol of cols) {
       const colData = this.colData[rgCol.itemIndex];
-      cells.push(
-        <HeaderRenderer
-          range={range}
-          column={rgCol}
-          data={{
-            ...colData,
-            index: rgCol.itemIndex,
-            providers: this.providers,
-          }}
-          canFilter={!!this.columnFilter}
-          canResize={this.canResize}
-          active={this.resizeHandler}
-          onResize={e => this.onResize(e, rgCol.itemIndex)}
-          onDblClick={e => this.headerdblClick.emit(e)}
-          onClick={e => this.initialHeaderClick.emit(e)}
-          additionalData={this.additionalData}
-        />,
-      );
+      const props: HeaderRenderProps = {
+        range: range,
+        column: rgCol,
+        data: {
+          ...colData,
+          index: rgCol.itemIndex,
+          providers: this.providers,
+        },
+        canFilter: !!this.columnFilter,
+        canResize: this.canResize,
+        active: this.resizeHandler,
+        onResize: e => this.onResize(e, rgCol.itemIndex),
+        onDblClick: e => this.headerdblClick.emit(e),
+        onClick: e => this.initialHeaderClick.emit(e),
+        additionalData: this.additionalData,
+      };
+      const event = this.beforeHeaderRender.emit(props);
+      if (event.defaultPrevented) {
+        continue;
+      }
+      cells.push(<HeaderRenderer {...event.detail} />);
       visibleProps[colData?.prop] = rgCol.itemIndex;
     }
 

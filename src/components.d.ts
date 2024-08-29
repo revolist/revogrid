@@ -17,6 +17,7 @@ import { DataInput } from "./plugins/export/types";
 import { Observable } from "./utils/store.utils";
 import { DSourceState, Groups } from "./store/index";
 import { ResizeProps } from "./components/header/resizable.directive";
+import { HeaderRenderProps } from "./components/header/header-renderer";
 import { Cell as Cell1, ColumnRegular as ColumnRegular1, DataType as DataType1, DimensionCols as DimensionCols1, DimensionRows as DimensionRows1, DimensionSettingsState as DimensionSettingsState1, Observable as Observable1, SelectionStoreState as SelectionStoreState1 } from "./components";
 import { EventData } from "./components/overlay/selection.utils";
 export { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, ChangedRange, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, FocusAfterRenderEvent, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, Nullable, PluginBaseComponent, PositionItem, RangeArea, RangeClipboardCopyEventProps, RangeClipboardPasteEvent, RowDefinition, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
@@ -31,6 +32,7 @@ export { DataInput } from "./plugins/export/types";
 export { Observable } from "./utils/store.utils";
 export { DSourceState, Groups } from "./store/index";
 export { ResizeProps } from "./components/header/resizable.directive";
+export { HeaderRenderProps } from "./components/header/header-renderer";
 export { Cell as Cell1, ColumnRegular as ColumnRegular1, DataType as DataType1, DimensionCols as DimensionCols1, DimensionRows as DimensionRows1, DimensionSettingsState as DimensionSettingsState1, Observable as Observable1, SelectionStoreState as SelectionStoreState1 } from "./components";
 export { EventData } from "./components/overlay/selection.utils";
 export namespace Components {
@@ -984,6 +986,7 @@ declare global {
         "headerresize": ViewSettingSizeProp;
         "beforeheaderresize": ColumnRegular[];
         "headerdblclick": InitialHeaderClick;
+        "beforeheaderrender": HeaderRenderProps;
     }
     interface HTMLRevogrHeaderElement extends Components.RevogrHeader, HTMLStencilElement {
         addEventListener<K extends keyof HTMLRevogrHeaderElementEventMap>(type: K, listener: (this: HTMLRevogrHeaderElement, ev: RevogrHeaderCustomEvent<HTMLRevogrHeaderElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -1792,6 +1795,10 @@ declare namespace LocalJSX {
           * On initial header click
          */
         "onBeforeheaderclick"?: (event: RevogrHeaderCustomEvent<InitialHeaderClick>) => void;
+        /**
+          * Before each header cell render function. Allows to override cell properties
+         */
+        "onBeforeheaderrender"?: (event: RevogrHeaderCustomEvent<HeaderRenderProps>) => void;
         /**
           * On before header resize
          */

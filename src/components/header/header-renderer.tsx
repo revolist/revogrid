@@ -1,4 +1,11 @@
 import { h, VNode } from '@stencil/core';
+import type {
+  VirtualPositionItem,
+  ColumnTemplateProp,
+  InitialHeaderClick,
+  RangeArea
+} from '@type';
+
 import { FilterButton } from '../../plugins/filter/filter.button';
 import { SortingSign } from '../../plugins/sorting/sorting.sign';
 import { ResizeEvent, ResizeProps } from './resizable.directive';
@@ -10,15 +17,9 @@ import {
   MIN_COL_SIZE,
 } from '../../utils/consts';
 import { HeaderCellRenderer } from './header-cell-renderer';
-import {
-  VirtualPositionItem,
-  ColumnTemplateProp,
-  InitialHeaderClick,
-  RangeArea
-} from '@type';
 import { ResizableElementHTMLAttributes } from './resizable.element';
 
-type Props = {
+export type HeaderRenderProps = {
   column: VirtualPositionItem;
   additionalData: any;
   data: ColumnTemplateProp;
@@ -30,7 +31,7 @@ type Props = {
   onDblClick?(data: InitialHeaderClick): void;
 } & Partial<Pick<ResizeProps, 'active'>>;
 
-const HeaderRenderer = (p: Props): VNode => {
+const HeaderRenderer = (p: HeaderRenderProps): VNode => {
   const cellClass: { [key: string]: boolean } = {
     [HEADER_CLASS]: true,
     [HEADER_SORTABLE_CLASS]: !!p.data?.sortable,
