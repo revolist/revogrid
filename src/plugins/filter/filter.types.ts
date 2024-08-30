@@ -31,8 +31,8 @@ export type LogicFunctionExtraParam =
   | string
   | string[]
   | number[];
-export type LogicFunction = {
-  (value: LogicFunctionParam, extra?: LogicFunctionExtraParam): boolean;
+export type LogicFunction<T1 = LogicFunctionParam, T2 = LogicFunctionExtraParam> = {
+  (value: T1, extra?: T2): boolean;
   extra?: ExtraField;
 };
 
