@@ -127,9 +127,11 @@ export function getColumns(
           level,
         );
       }
+      // Column type
+      const columnDefinitionFromType = colData.columnType && types?.[colData.columnType];
       // Regular column
       const regularColumn = {
-        ...(colData.columnType && types && types[colData.columnType]),
+        ...columnDefinitionFromType,
         ...colData,
       };
       // Regular column, no Pin

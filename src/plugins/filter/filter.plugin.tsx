@@ -84,7 +84,7 @@ export class FilterPlugin extends BasePlugin {
           }
         });
       }
-      await this.runFiltering();
+      await this.runFiltering(this.multiFilterItems);
     };
     this.addEventListener(
       'headerclick',
@@ -126,7 +126,7 @@ export class FilterPlugin extends BasePlugin {
     ];
   }
 
-  extraContent() {
+  extraContent(): any {
     return null;
   }
 
@@ -270,7 +270,7 @@ export class FilterPlugin extends BasePlugin {
     this.multiFilterItems = filterItems;
 
     // run the filtering when the items change
-    this.runFiltering();
+    this.runFiltering(this.multiFilterItems);
   }
 
   /**
@@ -338,19 +338,19 @@ export class FilterPlugin extends BasePlugin {
 
   async clearFiltering() {
     this.multiFilterItems = {};
-    await this.runFiltering();
+    await this.runFiltering(this.multiFilterItems);
   }
 
-  async runFiltering() {
+  async runFiltering(multiFilterItems: MultiFilterItem) {
     const collection: FilterCollection = {};
 
     // handle old filterCollection to return the first filter only (if any) from multiFilterItems
-    const filterProps = Object.keys(this.multiFilterItems);
+    const filterProps = Object.keys(multiFilterItems);
 
     for (const prop of filterProps) {
       // check if we have any filter for a column
-      if (this.multiFilterItems[prop].length > 0) {
-        const firstFilterItem = this.multiFilterItems[prop][0];
+      if (multiFilterItems[prop].length > 0) {
+        const firstFilterItem = multiFilterItems[prop][0];
         collection[prop] = {
           filter: this.filterFunctionsIndexedByType[firstFilterItem.type],
           type: firstFilterItem.type,
