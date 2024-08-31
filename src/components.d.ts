@@ -943,6 +943,7 @@ declare global {
     };
     interface HTMLRevogrFilterPanelElementEventMap {
         "filterChange": MultiFilterItem;
+        "resetChange": ColumnProp;
     }
     interface HTMLRevogrFilterPanelElement extends Components.RevogrFilterPanel, HTMLStencilElement {
         addEventListener<K extends keyof HTMLRevogrFilterPanelElementEventMap>(type: K, listener: (this: HTMLRevogrFilterPanelElement, ev: RevogrFilterPanelCustomEvent<HTMLRevogrFilterPanelElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -1711,6 +1712,7 @@ declare namespace LocalJSX {
         "filterItems"?: MultiFilterItem;
         "filterNames"?: Record<string, string>;
         "onFilterChange"?: (event: RevogrFilterPanelCustomEvent<MultiFilterItem>) => void;
+        "onResetChange"?: (event: RevogrFilterPanelCustomEvent<ColumnProp>) => void;
     }
     /**
      * Focus component. Shows focus layer around the cell that is currently in focus.

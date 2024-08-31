@@ -1,7 +1,7 @@
 import { h } from '@stencil/core';
 import reduce from 'lodash/reduce';
 
-import type { ColumnRegular, DataType, PluginProviders } from '@type';
+import type { ColumnProp, ColumnRegular, DataType, PluginProviders } from '@type';
 import { BasePlugin } from '../base.plugin';
 import { FILTER_PROP, isFilterBtn } from './filter.button';
 import {
@@ -120,6 +120,7 @@ export class FilterPlugin extends BasePlugin {
         filterEntities={this.filterFunctionsIndexedByType}
         filterCaptions={config?.localization?.captions}
         onFilterChange={e => this.onFilterChange(e.detail)}
+        onResetChange={e => this.onFilterReset(e.detail)}
         disableDynamicFiltering={config?.disableDynamicFiltering}
         ref={e => (this.pop = e)}
       > { this.extraContent() }</revogr-filter-panel>,
@@ -271,6 +272,11 @@ export class FilterPlugin extends BasePlugin {
 
     // run the filtering when the items change
     this.runFiltering(this.multiFilterItems);
+  }
+
+  onFilterReset(prop?: ColumnProp) {
+    delete this.multiFilterItems[prop ?? ''];
+    this.onFilterChange(this.multiFilterItems);
   }
 
   /**

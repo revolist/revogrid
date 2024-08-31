@@ -60,7 +60,10 @@ export class FilterPanel {
   @Prop() filterEntities: Record<string, LogicFunction> = {};
   @Prop() filterCaptions: FilterCaptions | undefined;
   @Prop() disableDynamicFiltering = false;
+
   @Event() filterChange: EventEmitter<MultiFilterItem>;
+  @Event() resetChange: EventEmitter<ColumnProp>;
+
   @Listen('mousedown', { target: 'document' }) onMouseDown(e: MouseEvent) {
     // click on anything then select drops values to default
     if (!this.changes || e.defaultPrevented) {
@@ -283,12 +286,10 @@ export class FilterPanel {
   private onReset() {
     this.assertChanges();
 
-    delete this.filterItems[this.changes?.prop ?? ''];
+    this.resetChange.emit(this.changes?.prop);
 
     // this updates the DOM which is used by getFilterItemsList() key
     this.filterId++;
-
-    this.filterChange.emit(this.filterItems);
   }
 
   private onRemoveFilter(id: number) {
