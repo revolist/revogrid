@@ -110,6 +110,10 @@ export function generateFakeDataObject(config = {}) {
       if (colPinEnd.indexOf(j) > -1) {
         columns[rgCol].pin = 'colPinEnd';
       }
+      if (!rgCol) {
+        columns[rgCol].order = 'desc';
+        columns[rgCol].sortable = true;
+      }
     }
     result[rgRow][rgCol] = `${rgRow}:${rgCol}`; // rgRow % 5 ? rgCol : rgRow % 3 ? (rgCol % 3 ? 2 : 3) : rgRow; // rgRow + ':' + rgCol;
 

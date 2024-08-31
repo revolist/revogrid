@@ -125,37 +125,45 @@ export default class DimensionProvider {
     this.updateViewport(type);
   }
 
+  /**
+   * Applies new columns to the dimension provider
+   * @param columns - new columns data
+   * @param disableVirtualX - disable virtual data for X axis
+   */
   applyNewColumns(
     columns: Record<DimensionCols, ColumnRegular[]>,
     disableVirtualX: boolean,
   ) {
+    // Apply new columns to dimension provider
     for (let type of columnTypes) {
-      // clear existing data
+      // Clear existing data in the dimension provider
       this.stores[type].drop();
 
+      // Get the new columns for the current type
       const items = columns[type];
 
-      // for pinned col no need virtual data
+      // Determine if virtual data should be disabled for the current type
       const noVirtual = type !== 'rgCol' || disableVirtualX;
 
-      // setItemCount
+      // Set the items count in the dimension provider
       this.stores[type].setStore({ count: items.length });
 
-      // setCustomSizes
+      // Set the custom sizes for the columns
       const newSizes = getColumnSizes(items);
       this.stores[type].setDimensionSize(newSizes);
 
+      // Update the viewport with new data
       const vpUpdate: Partial<ViewportState> = {
-        // this triggers drop on realCount change
+        // This triggers drop on realCount change
         realCount: items.length,
       };
 
-      // Virtualization will get disabled
+      // If virtual data is disabled, set the virtual size to the real size
       if (noVirtual) {
         vpUpdate.virtualSize = this.stores[type].getCurrentState().realSize;
       }
 
-      // if virtualSize present this would trigger viewport clear
+      // Update the viewport
       this.viewports.stores[type].setViewport(vpUpdate);
       this.setViewPortCoordinate({
         coordinate: this.viewports.stores[type].lastCoordinate,

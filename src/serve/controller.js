@@ -291,7 +291,7 @@ function onLoad() {
 
   // events testing
   // 'beforerange', 'setRange', 'beforefocuslost', 'beforecellfocus', 'afterfocus', 'beforeedit', 'aftercolumnresize'
-  const events = ['headerdblclick'];
+  const events = ['aftercolumnresize'];
   events.forEach(e => {
     grid.addEventListener(e, $e => {
       if (window.eventsPrevented[e]) {

@@ -36,10 +36,10 @@ export type LogicFunction<T1 = LogicFunctionParam, T2 = LogicFunctionExtraParam>
   extra?: ExtraField;
 };
 
-type CustomFilter = {
+type CustomFilter<T1 = LogicFunctionParam, T2 = LogicFunctionExtraParam> = {
   columnFilterType: string; // property defined in column filter: string/number/abstract/enum...etc
   name: string;
-  func: LogicFunction;
+  func: LogicFunction<T1, T2>;
 };
 
 export type FilterCaptions = {

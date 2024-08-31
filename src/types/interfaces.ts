@@ -270,7 +270,7 @@ export type DataFormat<T = any> = T;
 
 /**
  * Additional properties applied to the cell.
- * Contains HTMLAttributes<HTMLDivElement> properties for custom cell rendering.
+ * Contains properties for custom cell rendering.
  */
 export type CellProps = JSXBase.HTMLAttributes<HTMLDivElement> & {
   className?: JSXBase.HTMLAttributes<HTMLDivElement>['class'];

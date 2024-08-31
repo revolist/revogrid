@@ -1009,6 +1009,7 @@ export class RevoGridComponent {
     // Column format change will trigger column structure update
     this.columnChanged(this.columns);
   }
+
   @Watch('columns') columnChanged(newVal: (ColumnGrouping | ColumnRegular)[] = []) {
     if (!this.dimensionProvider) {
       return;
@@ -1018,13 +1019,19 @@ export class RevoGridComponent {
       0,
       this.columnTypes,
     );
-    this.beforecolumnsset.emit(columnGather);
+    const beforeSetEvent = this.beforecolumnsset.emit(columnGather);
+    if (beforeSetEvent.defaultPrevented) {
+      return;
+    }
     this.dimensionProvider.applyNewColumns(
-      columnGather.columns,
+      beforeSetEvent.detail.columns,
       this.disableVirtualX,
     );
-    this.beforecolumnapplied.emit(columnGather);
-    const columns = this.columnProvider.setColumns(columnGather);
+    const beforeApplyEvent = this.beforecolumnapplied.emit(columnGather);
+    if (beforeApplyEvent.defaultPrevented) {
+      return;
+    }
+    const columns = this.columnProvider.setColumns(beforeApplyEvent.detail);
     this.aftercolumnsset.emit({
       columns,
       order: this.columnProvider.order,
