@@ -64,7 +64,7 @@ export default class ColumnDataProvider {
     return getSourceItem(this.dataSources[type].store, virtualIndex);
   }
 
-  getRawColumns() {
+  getRawColumns(): Record<DimensionCols, ColumnRegular[]> {
     return reduce(
       this.dataSources,
       (
@@ -84,11 +84,12 @@ export default class ColumnDataProvider {
   }
 
   getColumns(type: DimensionCols | 'all' = 'all'): ColumnRegular[] {
+    const columnsByType = this.getRawColumns();
     if (type !== 'all') {
-      return this.dataSources[type].store.get('source');
+      return columnsByType[type];
     }
     return columnTypes.reduce((r: ColumnRegular[], t) => {
-      r.push(...this.dataSources[t].store.get('source'));
+      r.push(...columnsByType[t]);
       return r;
     }, []);
   }

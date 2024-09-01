@@ -1,5 +1,3 @@
-import reduce from 'lodash/reduce';
-
 import DimensionProvider from '../../services/dimension.provider';
 import SelectionStoreConnector, { EMPTY_INDEX } from '../../services/selection.store.connector';
 import ViewportProvider from '../../services/viewport.provider';
@@ -187,19 +185,18 @@ export default class ViewportService {
     { detail }: CustomEvent<ViewSettingSizeProp>,
     store: Observable<DSourceState<ColumnRegular, DimensionCols>>,
   ) {
+    // apply to dimension provider
     this.config.dimensionProvider?.setCustomSizes(type, detail, true);
-    const changedItems = reduce(
-      detail || {},
-      (r: ResizeDetails, size, i) => {
-        const index = parseInt(i, 10);
-        const item = getSourceItem(store, index);
-        if (item) {
-          r[index] = { ...item, size };
-        }
-        return r;
-      },
-      {},
-    );
+
+    // set resize event
+    const changedItems: ResizeDetails = {};
+    for (const [i, size] of Object.entries(detail || {})) {
+      const virtualIndex = parseInt(i, 10);
+      const item = getSourceItem(store, virtualIndex);
+      if (item) {
+        changedItems[virtualIndex] = { ...item, size };
+      }
+    }
     this.config.resize(changedItems);
   }
 
