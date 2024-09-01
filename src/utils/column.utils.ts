@@ -59,6 +59,9 @@ export type ColumnCollection = {
   sort: Record<ColumnProp, ColumnRegular>;
 };
 
+/**
+ * Get column type from column data
+ */
 export function getColumnType(rgCol: ColumnRegular): DimensionCols {
   if (rgCol.pin) {
     return rgCol.pin;
