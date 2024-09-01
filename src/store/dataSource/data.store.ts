@@ -160,7 +160,7 @@ export const getSourcePhysicalIndex = <T1 extends GDataType, T2 extends GDimensi
 };
 
 /**
- * Apple item/model/row value to data source
+ * Apply silently item/model/row value to data source
  * @param store  - data source with changes
  * @param modelByIndex - collection of rows/values with virtual indexes to setup/replace in store/data source
  * @param mutate - if true, store will be mutated and whole viewport will be re-rendered

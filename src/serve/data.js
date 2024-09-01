@@ -117,7 +117,7 @@ export function generateFakeDataObject(config = {}) {
     }
     result[rgRow][rgCol] = `${rgRow}:${rgCol}`; // rgRow % 5 ? rgCol : rgRow % 3 ? (rgCol % 3 ? 2 : 3) : rgRow; // rgRow + ':' + rgCol;
 
-    if (rgCol === 1) {
+    if (rgCol === 0) {
       result[rgRow][rgCol] = 'A';
     }
     // apply config

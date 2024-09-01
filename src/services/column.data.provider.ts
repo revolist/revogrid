@@ -7,6 +7,7 @@ import {
   getSourceItem,
   getSourceItemVirtualIndexByProp,
   Groups,
+  setSourceByPhysicalIndex,
   setSourceByVirtualIndex,
 } from '@store';
 import type {
@@ -88,10 +89,7 @@ export default class ColumnDataProvider {
     if (type !== 'all') {
       return columnsByType[type];
     }
-    return columnTypes.reduce((r: ColumnRegular[], t) => {
-      r.push(...columnsByType[t]);
-      return r;
-    }, []);
+    return columnTypes.reduce((r: ColumnRegular[], t) => [...r, ...columnsByType[t]], []);
   }
 
   getColumnIndexByProp(prop: ColumnProp, type: DimensionCols): number {
@@ -128,11 +126,13 @@ export default class ColumnDataProvider {
     return data;
   }
 
-  updateColumns(cols: ColumnRegular[]) {
+  /**
+   * Used in plugins
+   * Modify columns in store
+   */
+  updateColumns(updatedColumns: ColumnRegular[]) {
     // collect column by type and propert
-    const columnByKey: Partial<
-      Record<DimensionCols, Record<ColumnProp, ColumnRegular>>
-    > = cols.reduce(
+    const columnByKey = updatedColumns.reduce(
       (
         res: Partial<Record<DimensionCols, Record<ColumnProp, ColumnRegular>>>,
         c,
@@ -157,11 +157,13 @@ export default class ColumnDataProvider {
       }
       const type = t as DimensionCols;
       const colsToUpdate = columnByKey[type];
-      const items = this.dataSources[type].store.get('source');
+      const sourceItems = this.dataSources[type].store.get('source');
       colByIndex[type] = {};
-      for (let i = 0; i < items.length; i++) {
-        const rgCol = items[i];
-        const colToUpdateIfExists = colsToUpdate?.[rgCol.prop];
+      for (let i = 0; i < sourceItems.length; i++) {
+        const column = sourceItems[i];
+        const colToUpdateIfExists = colsToUpdate?.[column.prop];
+
+        // update column if exists in source
         if (colToUpdateIfExists) {
           colByIndex[type][i] = colToUpdateIfExists;
         }
@@ -172,7 +174,7 @@ export default class ColumnDataProvider {
         continue;
       }
       const type = t as DimensionCols;
-      setSourceByVirtualIndex(
+      setSourceByPhysicalIndex(
         this.dataSources[type].store,
         colByIndex[type] || {},
       );

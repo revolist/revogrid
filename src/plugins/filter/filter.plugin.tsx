@@ -18,6 +18,7 @@ import type {
 } from './filter.types';
 
 import { getCellDataParsed } from '../../utils';
+import { rowTypes } from '@store';
 
 export * from './filter.types';
 export * from './filter.indexed';
@@ -366,8 +367,11 @@ export class FilterPlugin extends BasePlugin {
     }
 
     this.filterCollection = collection;
+    const columns = this.providers.column.getColumns();
+    const source = rowTypes.reduce((result, t) => {
+      return [...result, ...this.providers.data.stores[t].store.get('source')];
+    }, [])
 
-    const { source, columns } = await this.getData();
     const { defaultPrevented, detail } = this.emit('beforefilterapply', {
       collection: this.filterCollection,
       source,
@@ -383,13 +387,6 @@ export class FilterPlugin extends BasePlugin {
       detail.columns,
       detail.filterItems,
     );
-  }
-
-  async getData() {
-    return {
-      source: await this.revogrid.getSource(),
-      columns: await this.revogrid.getColumns(),
-    };
   }
 
   /**
