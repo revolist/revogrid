@@ -247,7 +247,7 @@ export class RevoGridComponent {
    * Stretch strategy for columns by `StretchColumn` plugin.
    * For example if there are more space on the right last column size would be increased.
    */
-  @Prop() stretch: boolean | string = true;
+  @Prop() stretch: boolean | string = false;
 
   /**
    * Additional data to be passed to plugins, renders or editors.
