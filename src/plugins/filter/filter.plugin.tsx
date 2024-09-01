@@ -368,9 +368,8 @@ export class FilterPlugin extends BasePlugin {
 
     this.filterCollection = collection;
     const columns = this.providers.column.getColumns();
-    const source = rowTypes.reduce((result, t) => {
-      return [...result, ...this.providers.data.stores[t].store.get('source')];
-    }, [])
+    // run the filtering on the main source only
+    const source = this.providers.data.stores['rgRow'].store.get('source');
 
     const { defaultPrevented, detail } = this.emit('beforefilterapply', {
       collection: this.filterCollection,
