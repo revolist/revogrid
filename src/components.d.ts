@@ -1972,7 +1972,7 @@ declare namespace LocalJSX {
          */
         "onApplyfocus"?: (event: RevogrOverlaySelectionCustomEvent<FocusRenderEvent>) => void;
         /**
-          * Before range applied.
+          * Before range applied. First step in triggerRangeEvent.
          */
         "onBeforeapplyrange"?: (event: RevogrOverlaySelectionCustomEvent<FocusRenderEvent>) => void;
         /**
@@ -2016,7 +2016,7 @@ declare namespace LocalJSX {
          */
         "onBeforerangedataapply"?: (event: RevogrOverlaySelectionCustomEvent<FocusRenderEvent>) => void;
         /**
-          * Before range selection applied.
+          * Before range selection applied. Second step in triggerRangeEvent.
          */
         "onBeforesetrange"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
         /**

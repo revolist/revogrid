@@ -150,7 +150,9 @@ export const getSourceItem = <T1 extends GDataType, T2 extends GDimension>(
   const source = store.get('source');
   return source[getSourcePhysicalIndex(store, virtualIndex)];
 };
-
+/**
+ * Get physical index from virtual index
+ */
 export const getSourcePhysicalIndex = <T1 extends GDataType, T2 extends GDimension>(
   store: Observable<DSourceState<T1, T2>>,
   virtualIndex: number,
