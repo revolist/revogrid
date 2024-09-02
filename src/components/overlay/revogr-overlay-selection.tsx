@@ -14,15 +14,13 @@ import ColumnService from '../data/column.service';
 import { codesLetter } from '../../utils/key.codes';
 import { MOBILE_CLASS, SELECTION_BORDER_CLASS } from '../../utils/consts';
 import { DSourceState } from '@store';
-import {
-  getRange,
-  isRangeSingleCell,
-} from '@store';
+import { getRange, isRangeSingleCell } from '@store';
 import {
   collectModelsOfRange,
   EventData,
-  getElStyle,
+  getCell,
   getFocusCellBasedOnEvent,
+  styleByCellProps,
 } from './selection.utils';
 import { isEditInput } from '../editors/edit.utils';
 import { KeyboardService } from './keyboard.service';
@@ -43,7 +41,7 @@ import {
   MultiDimensionType,
   Nullable,
   RangeClipboardCopyEventProps,
-  RangeClipboardPasteEvent
+  RangeClipboardPasteEvent,
 } from '@type';
 import {
   FocusRenderEvent,
@@ -164,7 +162,6 @@ export class OverlaySelection {
   @Event({ eventName: 'beforecellfocusinit', cancelable: true })
   beforeFocusCell: EventEmitter<BeforeSaveDataDetails>;
 
-
   /**
    * Fired when change of viewport happens.
    * Usually when we switch between pinned regions.
@@ -178,12 +175,12 @@ export class OverlaySelection {
   @Event({ eventName: 'setedit' }) setEdit: EventEmitter<BeforeEdit>;
 
   /**
-   * Before range applied.
+   * Before range applied. First step in triggerRangeEvent.
    */
   @Event({ eventName: 'beforeapplyrange' })
   beforeApplyRange: EventEmitter<FocusRenderEvent>;
   /**
-   * Before range selection applied.
+   * Before range selection applied. Second step in triggerRangeEvent.
    */
   @Event({ eventName: 'beforesetrange' }) beforeSetRange: EventEmitter;
 
@@ -212,6 +209,14 @@ export class OverlaySelection {
    */
   @Event({ eventName: 'settemprange' })
   setTempRange: EventEmitter<Nullable<TempRange> | null>;
+
+  /**
+   * Before set temp range area during autofill.
+   */
+  @Event({ eventName: 'beforesettemprange' })
+  beforeSetTempRange: EventEmitter<
+    { tempRange: Nullable<TempRange> | null } & EventData & AllDimensionType
+  >;
 
   /**
    * Before cell get focused.
@@ -268,7 +273,9 @@ export class OverlaySelection {
    * If you have some custom behaviour event, use this event to check if it wasn't processed by internal logic.
    * Call preventDefault().
    */
-  @Event({ eventName: 'beforekeyup' }) beforeKeyUp: EventEmitter<{ original: KeyboardEvent } & EventData>;
+  @Event({ eventName: 'beforekeyup' }) beforeKeyUp: EventEmitter<
+    { original: KeyboardEvent } & EventData
+  >;
   /**
    * Runs before cell save.
    * Can be used to override or cancel original save.
@@ -366,7 +373,9 @@ export class OverlaySelection {
     // clear subscriptions
     this.unsubscribeSelectionStore.forEach(v => v());
     this.unsubscribeSelectionStore.length = 0;
-    this.unsubscribeSelectionStore.push(s.onChange('nextFocus', (v) => v && this.doFocus(v, v)));
+    this.unsubscribeSelectionStore.push(
+      s.onChange('nextFocus', v => v && this.doFocus(v, v)),
+    );
 
     this.keyboardService = new KeyboardService({
       selectionStore: s,
@@ -410,8 +419,20 @@ export class OverlaySelection {
         this.beforeRangeDataApply.emit({
           ...e,
           ...this.types,
+          rowDimension: { ...this.dimensionRow.state },
+          colDimension: { ...this.dimensionCol.state },
         }),
-      setTempRange: e => this.setTempRange.emit(e),
+      setTempRange: e => {
+        const tempRangeEvent = this.beforeSetTempRange.emit({
+          tempRange: e,
+          ...this.getData(),
+          ...this.types,
+        });
+        if (tempRangeEvent.defaultPrevented) {
+          return null;
+        }
+        return this.setTempRange.emit(tempRangeEvent.detail.tempRange);
+      },
       selectionChanged: e => this.selectionChange.emit(e),
 
       rangeCopy: e => this.beforeRangeCopyApply.emit(e),
@@ -451,13 +472,14 @@ export class OverlaySelection {
   }
 
   private renderRange(range: RangeArea) {
-    const style = getElStyle(
+    const cell = getCell(
       range,
       this.dimensionRow.state,
       this.dimensionCol.state,
     );
+    const styles = styleByCellProps(cell);
     return [
-      <div class={SELECTION_BORDER_CLASS} style={style}>
+      <div class={SELECTION_BORDER_CLASS} style={styles}>
         {this.isMobileDevice && (
           <div class="range-handlers">
             <span class={MOBILE_CLASS}></span>
@@ -488,6 +510,8 @@ export class OverlaySelection {
         y1: editCell.y,
       },
       ...this.types,
+      rowDimension: { ...this.dimensionRow.state },
+      colDimension: { ...this.dimensionCol.state },
     });
 
     // Render prevented
@@ -495,14 +519,15 @@ export class OverlaySelection {
       return null;
     }
 
-    const style = getElStyle(
+    const cell = getCell(
       renderEvent.detail.range,
-      this.dimensionRow.state,
-      this.dimensionCol.state,
+      renderEvent.detail.rowDimension,
+      renderEvent.detail.colDimension,
     );
+    const styles = styleByCellProps(cell);
     return (
       <revogr-edit
-        style={style}
+        style={styles}
         ref={el => (this.revogrEdit = el)}
         additionalData={this.additionalData}
         editCell={editable}
@@ -607,6 +632,8 @@ export class OverlaySelection {
       },
       next: changes,
       ...this.types,
+      rowDimension: { ...this.dimensionRow.state },
+      colDimension: { ...this.dimensionCol.state },
     };
     const applyEvent = this.applyFocus.emit(evData);
     if (applyEvent.defaultPrevented) {
@@ -631,6 +658,8 @@ export class OverlaySelection {
     const applyEvent = this.beforeApplyRange.emit({
       range: { ...range },
       ...this.types,
+      rowDimension: { ...this.dimensionRow.state },
+      colDimension: { ...this.dimensionCol.state },
     });
     if (applyEvent.defaultPrevented) {
       return false;
@@ -652,7 +681,10 @@ export class OverlaySelection {
    */
   private onElementDblClick(e: MouseEvent) {
     // DblClick prevented outside - Editor will not open
-    
+    if (e.defaultPrevented) {
+      return;
+    }
+
     // Get data from the component
     const data = this.getData();
     const focusCell = getFocusCellBasedOnEvent(e, data);
@@ -669,7 +701,7 @@ export class OverlaySelection {
     // Get the target element from the event object
     const targetElement = e.target as HTMLElement | undefined;
     // Ignore focus if clicked input
-    if (isEditInput(targetElement)) {
+    if (isEditInput(targetElement) || e.defaultPrevented) {
       return;
     }
 
@@ -685,7 +717,8 @@ export class OverlaySelection {
 
     // Initiate autofill selection
     if (this.range) {
-      targetElement && this.autoFillService?.selectionStart(targetElement, this.getData());
+      targetElement &&
+        this.autoFillService?.selectionStart(targetElement, this.getData());
 
       // Prevent default behavior for mouse events,
       // but only if target element is not a mobile input
@@ -790,7 +823,7 @@ export class OverlaySelection {
       range,
       ...this.types,
     });
-  
+
     if (canPaste) {
       return;
     }
@@ -811,14 +844,8 @@ export class OverlaySelection {
 
   protected clearCell() {
     const range = this.selectionStore.get('range');
-    if (
-      range &&
-      !isRangeSingleCell(range)
-    ) {
-      const data = this.columnService.getRangeStaticData(
-        range,
-        '',
-      );
+    if (range && !isRangeSingleCell(range)) {
+      const data = this.columnService.getRangeStaticData(range, '');
       this.autoFillService?.onRangeApply(data, range);
     } else if (this.canEdit()) {
       const focused = this.selectionStore.get('focus');

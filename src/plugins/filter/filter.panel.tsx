@@ -15,10 +15,14 @@ import debounce from 'lodash/debounce';
 
 import { AndOrButton, isFilterBtn, TrashButton } from './filter.button';
 import '../../utils/closest.polifill';
-import { FilterCaptions, LogicFunction, MultiFilterItem, ShowData } from './filter.types';
+import {
+  FilterCaptions,
+  LogicFunction,
+  MultiFilterItem,
+  ShowData,
+} from './filter.types';
 import { ColumnProp } from '@type';
 import { FilterType } from './filter.indexed';
-
 
 const defaultType: FilterType = 'none';
 
@@ -39,10 +43,11 @@ const FILTER_ID = 'add-filter';
 export class FilterPanel {
   private filterCaptionsInternal: FilterCaptions = {
     title: 'Filter by',
+    ok: 'Ok',
     save: 'Save',
     // drops the filter
-    reset: 'Clear changes',
-    cancel: 'Close',
+    reset: 'Reset',
+    cancel: 'Cancel',
     add: 'Add more condition...',
     placeholder: 'Enter value...',
     and: 'and',
@@ -59,6 +64,9 @@ export class FilterPanel {
   @Prop() filterNames: Record<string, string> = {};
   @Prop() filterEntities: Record<string, LogicFunction> = {};
   @Prop() filterCaptions: FilterCaptions | undefined;
+  /**
+   * Disables dynamic filtering. A way to apply filters on Save only
+   */
   @Prop() disableDynamicFiltering = false;
 
   @Event() filterChange: EventEmitter<MultiFilterItem>;
@@ -200,7 +208,9 @@ export class FilterPanel {
       }
     }, 0);
 
-    if (!this.disableDynamicFiltering) this.debouncedApplyFilter();
+    if (!this.disableDynamicFiltering) {
+      this.debouncedApplyFilter();
+    }
   }
 
   private debouncedApplyFilter = debounce(() => {
@@ -219,7 +229,9 @@ export class FilterPanel {
       this.currentFilterType = defaultType;
     }
 
-    if (!this.disableDynamicFiltering) this.debouncedApplyFilter();
+    if (!this.disableDynamicFiltering) {
+      this.debouncedApplyFilter();
+    }
   }
 
   private addNewFilterToProp() {
@@ -257,7 +269,9 @@ export class FilterPanel {
       event.target as HTMLInputElement
     ).value;
 
-    if (!this.disableDynamicFiltering) this.debouncedApplyFilter();
+    if (!this.disableDynamicFiltering) {
+      this.debouncedApplyFilter();
+    }
   }
 
   private onKeyDown(e: KeyboardEvent) {
@@ -310,7 +324,9 @@ export class FilterPanel {
     // let's remove the prop if no more filters so the filter icon will be removed
     if (items.length === 0) delete this.filterItems[prop ?? ''];
 
-    if (!this.disableDynamicFiltering) this.debouncedApplyFilter();
+    if (!this.disableDynamicFiltering) {
+      this.debouncedApplyFilter();
+    }
   }
 
   private toggleFilterAndOr(id: number) {
@@ -328,7 +344,9 @@ export class FilterPanel {
     if (index === -1) return;
 
     items[index].relation = items[index].relation === 'and' ? 'or' : 'and';
-    if (!this.disableDynamicFiltering) this.debouncedApplyFilter();
+    if (!this.disableDynamicFiltering) {
+      this.debouncedApplyFilter();
+    }
   }
 
   private assertChanges() {
@@ -336,7 +354,6 @@ export class FilterPanel {
       throw new Error('Changes required per edit');
     }
   }
-
 
   renderSelectOptions(type: FilterType, isDefaultTypeRemoved = false) {
     if (!this.changes) {
@@ -438,7 +455,7 @@ export class FilterPanel {
         </div>
         <slot />
         <div class="filter-actions">
-          {this.disableDynamicFiltering && (
+          {this.disableDynamicFiltering && [
             <button
               id="revo-button-save"
               aria-label="save"
@@ -446,24 +463,35 @@ export class FilterPanel {
               onClick={() => this.onSave()}
             >
               {capts.save}
-            </button>
-          )}
-          <button
-            id="revo-button-reset"
-            aria-label="reset"
-            class="revo-button light"
-            onClick={() => this.onReset()}
-          >
-            {capts.reset}
-          </button>
-          <button
-            id="revo-button-cancel"
-            aria-label="cancel"
-            class="revo-button light"
-            onClick={() => this.onCancel()}
-          >
-            {capts.cancel}
-          </button>
+            </button>,
+            <button
+              id="revo-button-ok"
+              aria-label="ok"
+              class="revo-button green"
+              onClick={() => this.onCancel()}
+            >
+              {capts.cancel}
+            </button>,
+          ]}
+          {!this.disableDynamicFiltering && [
+            <button
+              id="revo-button-ok"
+              aria-label="ok"
+              class="revo-button green"
+              onClick={() => this.onCancel()}
+            >
+              {capts.ok}
+            </button>,
+
+            <button
+              id="revo-button-reset"
+              aria-label="reset"
+              class="revo-button light"
+              onClick={() => this.onReset()}
+            >
+              {capts.reset}
+            </button>,
+          ]}
         </div>
         <slot slot="footer" />
       </Host>
