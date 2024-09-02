@@ -747,6 +747,10 @@ export interface FocusRenderEvent extends AllDimensionType {
    */
   range: RangeArea;
 
+  rowDimension: DimensionSettingsState;
+
+  colDimension: DimensionSettingsState;
+
   /**
    * Changes for the next cell to focus. @example { y: -1 }
    */

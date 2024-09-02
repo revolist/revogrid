@@ -32,7 +32,7 @@ type Config = {
   columnService: ColumnService;
   dataStore: Observable<DSourceState<DataType, DimensionRows>>;
 
-  setTempRange(e: Nullable<TempRange> | null): Event;
+  setTempRange(e: Nullable<TempRange> | null): Event | null;
   selectionChanged(e: ChangedRange): Event;
   rangeCopy(e: ChangedRange): Event;
   rangeDataApply(e: BeforeRangeSaveDataDetails): CustomEvent;

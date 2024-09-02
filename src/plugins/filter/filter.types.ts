@@ -46,6 +46,7 @@ export type FilterCaptions = {
   title: string;
   save: string;
   reset: string;
+  ok: string;
   cancel: string;
   add: string;
   placeholder: string;

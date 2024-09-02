@@ -118,11 +118,17 @@ export class RevogrHeaderComponent {
   headerdblClick: EventEmitter<InitialHeaderClick>;
 
   /**
- * Before each header cell render function. Allows to override cell properties
- */
+   * Before each header cell render function. Allows to override cell properties
+   */
   @Event({ eventName: 'beforeheaderrender' })
   beforeHeaderRender: EventEmitter<HeaderRenderProps>;
-  
+
+  /**
+   * After all header cells rendered. Finalizes cell rendering.
+   */
+  @Event({ eventName: 'afterheaderrender' })
+  afterHeaderRender: EventEmitter<Providers<DimensionCols | 'rowHeaders'>>;
+
   // #endregion
 
   @Element() element!: HTMLStencilElement;
@@ -156,6 +162,10 @@ export class RevogrHeaderComponent {
       }
     }
     this.headerresize.emit(sizes);
+  }
+
+  componentDidRender() {
+    this.afterHeaderRender.emit(this.providers);
   }
 
   render() {

@@ -1,6 +1,4 @@
-import each from 'lodash/each';
 import sortedIndex from 'lodash/sortedIndex';
-import reduce from 'lodash/reduce';
 
 import type {
   DimensionSettingsState,
@@ -41,14 +39,9 @@ export function calculateDimensionData(
   // combine all new sizes
   const sizes = { ...newSizes };
   // prepare order sorted new sizes and calculate changed real size
-  let newIndexes: number[] = [];
-  each(newSizes, (_, i) => {
-    const index = parseInt(i, 10);
-    newIndexes[sortedIndex(newIndexes, index)] = index;
-  });
+  const newIndexes = Object.keys(sizes).map(Number).sort((a, b) => a - b);
   // fill new coordinates based on what is changed
-  reduce(
-    newIndexes,
+  newIndexes.reduce(
     (previous: PositionItem | undefined, itemIndex: number, i: number) => {
       const newItem: PositionItem = {
         itemIndex,
@@ -117,9 +110,15 @@ export const getItemByPosition = (
   item.start = positionItem.end + relativeIndex * originItemSize;
   item.end = item.start + originItemSize;
   return item;
-}
+};
 
-export function getItemByIndex(dimension: DimensionIndexInput, index: number) {
+export function getItemByIndex(
+  dimension: Pick<
+    DimensionIndexInput,
+    'indexToItem' | 'indexes' | 'originItemSize'
+  >,
+  index: number,
+) {
   let item: PositionItem = {
     itemIndex: index,
     start: 0,
@@ -140,7 +139,6 @@ export function getItemByIndex(dimension: DimensionIndexInput, index: number) {
     return item;
   }
   // special size item was present before
-
   const positionItem =
     dimension.indexToItem[dimension.indexes[currentPlace - 1]];
   item.start =

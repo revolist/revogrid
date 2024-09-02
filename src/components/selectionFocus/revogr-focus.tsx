@@ -8,7 +8,7 @@ import {
   EventEmitter,
 } from '@stencil/core';
 import { FOCUS_CLASS } from '../../utils/consts';
-import { getElStyle } from '../overlay/selection.utils';
+import { getCell, styleByCellProps } from '../overlay/selection.utils';
 import { DSourceState, getSourceItem } from '@store';
 import {
   Cell,
@@ -70,6 +70,7 @@ export class RevogrFocus {
    */
   @Event({ eventName: 'beforefocusrender' })
   beforeFocusRender: EventEmitter<FocusRenderEvent>;
+
   /**
    * Before focus changed verify if it's in view and scroll viewport into this view
    * Can be prevented by event.preventDefault()
@@ -79,11 +80,11 @@ export class RevogrFocus {
   /**
    * Used to setup properties after focus was rendered
    */
-  @Event({ eventName: 'afterfocus' }) afterFocus: EventEmitter<FocusAfterRenderEvent>;
+  @Event({ eventName: 'afterfocus' })
+  afterFocus: EventEmitter<FocusAfterRenderEvent>;
 
   @Element() el: HTMLElement;
   private activeFocus: Cell | null = null;
-
 
   componentDidRender() {
     const currentFocus = this.selectionStore.get('focus');
@@ -132,19 +133,27 @@ export class RevogrFocus {
       },
       rowType: this.rowType,
       colType: this.colType,
+      rowDimension: { ...this.dimensionRow.state },
+      colDimension: { ...this.dimensionCol.state },
     });
     if (event.defaultPrevented) {
       return <slot />;
     }
     const { detail } = event;
-    const style = getElStyle(
+
+    const cell = getCell(
       detail.range,
-      this.dimensionRow.state,
-      this.dimensionCol.state,
+      event.detail.rowDimension,
+      event.detail.colDimension,
     );
+    const styles = styleByCellProps(cell);
     const extra = this.focusTemplate?.(h, detail);
+    const props = {
+      class: { [FOCUS_CLASS]: true },
+      style: styles,
+    };
     return (
-      <Host class={FOCUS_CLASS} style={style}>
+      <Host {...props}>
         <slot />
         {extra}
       </Host>
