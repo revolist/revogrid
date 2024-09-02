@@ -4,6 +4,9 @@ revogr-filter-panel {
   top: 0;
   left: 0;
   z-index: 100;
+  max-height: calc(100% - 80px);
+  min-width: 250px;
+  overflow: auto;
 
   opacity: 1;
   transform: none;

@@ -18,7 +18,6 @@ import type {
 } from './filter.types';
 
 import { getCellDataParsed } from '../../utils';
-import { rowTypes } from '@store';
 
 export * from './filter.types';
 export * from './filter.indexed';
@@ -26,6 +25,7 @@ export * from './filter.button';
 
 export const FILTER_TRIMMED_TYPE = 'filter';
 export const FILTER_CONFIG_CHANGED_EVENT = 'filterconfigchanged';
+export const FILTE_PANEL = 'revogr-filter-panel';
 
 /**
  * @typedef ColumnFilterConfig
@@ -35,7 +35,7 @@ export const FILTER_CONFIG_CHANGED_EVENT = 'filterconfigchanged';
  * @property {Record<string, CustomFilter>|undefined} customFilters - hash map of {FilterType:CustomFilter}.
  * @property {FilterLocalization|undefined} localization - translation for filter popup captions.
  * @property {MultiFilterItem|undefined} multiFilterItems - data for multi filtering.
- * @property {boolean|undefined} disableDynamicFiltering - disables dynamic filtering.
+ * @property {boolean|undefined} disableDynamicFiltering - disables dynamic filtering. A way to apply filters on Save only.
  * A way to define your own filter types per column
  */
 /**
@@ -67,6 +67,23 @@ export class FilterPlugin extends BasePlugin {
     if (config) {
       this.initConfig(config);
     }
+
+    const existingNodes = this.revogrid.registerVNode.filter(
+      n => typeof n === 'object' && n.$tag$ !== FILTE_PANEL,
+    );
+    this.revogrid.registerVNode = [
+      ...existingNodes,
+      <revogr-filter-panel
+        filterItems={this.multiFilterItems}
+        filterNames={this.filterNameIndexByType}
+        filterEntities={this.filterFunctionsIndexedByType}
+        filterCaptions={config?.localization?.captions}
+        onFilterChange={e => this.onFilterChange(e.detail)}
+        onResetChange={e => this.onFilterReset(e.detail)}
+        disableDynamicFiltering={config?.disableDynamicFiltering}
+        ref={e => (this.pop = e)}
+      > { this.extraContent() }</revogr-filter-panel>,
+    ];
 
     const aftersourceset = async () => {
       const filterCollectionProps = Object.keys(this.filterCollection);
@@ -109,23 +126,6 @@ export class FilterPlugin extends BasePlugin {
     this.addEventListener('filter', ({ detail }: CustomEvent) =>
       this.onFilterChange(detail),
     );
-
-    const existingNodes = this.revogrid.registerVNode.filter(
-      n => n.$tag$ !== 'revogr-filter-panel',
-    );
-    this.revogrid.registerVNode = [
-      ...existingNodes,
-      <revogr-filter-panel
-        filterItems={this.multiFilterItems}
-        filterNames={this.filterNameIndexByType}
-        filterEntities={this.filterFunctionsIndexedByType}
-        filterCaptions={config?.localization?.captions}
-        onFilterChange={e => this.onFilterChange(e.detail)}
-        onResetChange={e => this.onFilterReset(e.detail)}
-        disableDynamicFiltering={config?.disableDynamicFiltering}
-        ref={e => (this.pop = e)}
-      > { this.extraContent() }</revogr-filter-panel>,
-    ];
   }
 
   extraContent(): any {

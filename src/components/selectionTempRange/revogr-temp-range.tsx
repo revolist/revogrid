@@ -1,7 +1,7 @@
 import { Component, Prop, h, Host } from '@stencil/core';
 import throttle from 'lodash/throttle';
 import { TMP_SELECTION_BG_CLASS } from '../../utils/consts';
-import { getElStyle } from '../overlay/selection.utils';
+import { getCell, styleByCellProps } from '../overlay/selection.utils';
 import { DimensionSettingsState } from '@type';
 import { SelectionStoreState, RangeArea } from '@type';
 import { Observable } from '../../utils/store.utils';
@@ -67,16 +67,21 @@ export class RevogrFocus {
       derectionX = 'left';
     }
     const directionClass = `${derectionX} ${directionY}`;
-    const style = getElStyle(data, this.dimensionRow.state, this.dimensionCol.state);
+    const cell = getCell(data,
+      this.dimensionRow.state,
+      this.dimensionCol.state
+    );
+    const styles = styleByCellProps(cell);
+    const props = {
+      class: {
+        [TMP_SELECTION_BG_CLASS]: true,
+        [type || '']: true,
+      },
+      style: styles,
+      hidden: false
+    };
     return (
-      <Host
-        class={{
-          [TMP_SELECTION_BG_CLASS]: true,
-          [type || '']: true,
-        }}
-        style={style}
-        hidden={false}
-      >
+      <Host {...props}>
         <div class={directionClass} ref={(e) => (this.el = e)} />
       </Host>
     );

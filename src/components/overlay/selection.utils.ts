@@ -1,10 +1,20 @@
 import {
+  DimensionIndexInput,
   DSourceState,
   getItemByIndex,
   getItemByPosition,
   getSourceItem,
 } from '@store';
-import { DimensionSettingsState, Cell, RangeArea, RangeAreaCss, DataLookup, DimensionRows, DataType, EditCellStore } from '@type';
+import type {
+  DimensionSettingsState,
+  Cell,
+  RangeArea,
+  RangeAreaCss,
+  DataLookup,
+  DimensionRows,
+  DataType,
+  EditCellStore,
+} from '@type';
 import { getPropertyFromEvent } from '../../utils/events';
 import { Observable } from '../../utils/store.utils';
 
@@ -18,14 +28,14 @@ export type EventData = {
   edit: EditCellStore | null;
 };
 
-export function collectModelsOfRange(data: DataLookup, store: Observable<DSourceState<DataType, DimensionRows>>) {
+export function collectModelsOfRange(
+  data: DataLookup,
+  store: Observable<DSourceState<DataType, DimensionRows>>,
+) {
   const models: Partial<DataLookup> = {};
   for (let i in data) {
     const rowIndex = parseInt(i, 10);
-    models[rowIndex] = getSourceItem(
-      store,
-      rowIndex,
-    );
+    models[rowIndex] = getSourceItem(store, rowIndex);
   }
 
   return models;
@@ -161,7 +171,7 @@ export function isBeforeFirst({ x, y }: Cell) {
 //   return null;
 // }
 
-function styleByCellProps(styles: { [key: string]: number }): RangeAreaCss {
+export function styleByCellProps(styles: { [key: string]: number }): RangeAreaCss {
   return {
     left: `${styles.left}px`,
     top: `${styles.top}px`,
@@ -172,8 +182,14 @@ function styleByCellProps(styles: { [key: string]: number }): RangeAreaCss {
 
 export function getCell(
   { x, y, x1, y1 }: RangeArea,
-  dimensionRow: DimensionSettingsState,
-  dimensionCol: DimensionSettingsState,
+  dimensionRow: Pick<
+    DimensionIndexInput,
+    'indexToItem' | 'indexes' | 'originItemSize'
+  >,
+  dimensionCol: Pick<
+    DimensionIndexInput,
+    'indexToItem' | 'indexes' | 'originItemSize'
+  >,
 ) {
   const top = getItemByIndex(dimensionRow, y).start;
   const left = getItemByIndex(dimensionCol, x).start;
@@ -188,13 +204,4 @@ export function getCell(
     width: right - left,
     height: bottom - top,
   };
-}
-
-export function getElStyle(
-  range: RangeArea,
-  dimensionRow: DimensionSettingsState,
-  dimensionCol: DimensionSettingsState,
-): RangeAreaCss {
-  const styles = getCell(range, dimensionRow, dimensionCol);
-  return styleByCellProps(styles);
 }

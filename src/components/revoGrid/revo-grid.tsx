@@ -285,7 +285,7 @@ export class RevoGridComponent {
    * Used for additional items creation such as plugin elements.
    * Should be set before grid render inside of plugins.
    */
-  @Prop() registerVNode: VNode[] = [];
+  @Prop() registerVNode: (VNode | (() => VNode))[] = [];
 
 
   /**
@@ -532,6 +532,12 @@ export class RevoGridComponent {
    * Emmited before the grid is rendered.
    */
   @Event() beforegridrender: EventEmitter;
+
+
+  /**
+   * Emmited after the grid is rendered.
+   */
+  @Event() aftergridrender: EventEmitter;
 
   /**
    * Emmited after the grid is initialized. Connected to the DOM.
@@ -998,7 +1004,7 @@ export class RevoGridComponent {
 
   // #region Private Properties
   @Element() element: HTMLRevoGridElement;
-  extraElements: VNode[] = [];
+  extraElements: (VNode | (() => VNode))[] = [];
 
   columnProvider?: ColumnDataProvider;
   dataProvider?: DataProvider;
@@ -1268,7 +1274,7 @@ export class RevoGridComponent {
   /**
    * Register external VNodes
    */
-  @Watch('registerVNode') registerOutsideVNodes(elements: VNode[] = []) {
+  @Watch('registerVNode') registerOutsideVNodes(elements: (VNode | (() => VNode))[] = []) {
     this.extraElements = [...this.extraElements, ...elements];
   }
 
@@ -1447,6 +1453,10 @@ export class RevoGridComponent {
       return false;
     }
     return Promise.all(this.jobsBeforeRender);
+  }
+
+  componentDidRender() {
+    this.aftergridrender.emit();
   }
 
   render() {
@@ -1657,7 +1667,8 @@ export class RevoGridComponent {
           ref={el => this.scrollingService.registerElement(el, 'colScroll')}
           onScrollvirtual={e => this.scrollingService.proxyScroll(e.detail)}
         />
-        {this.extraElements}
+        <revogr-extra nodes={this.extraElements}>
+        </revogr-extra>
       </Host>
     );
   }

@@ -5,7 +5,7 @@
  * It contains typing information for all components that exist in this project.
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
-import { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, ChangedRange, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, FocusAfterRenderEvent, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, Nullable, PluginBaseComponent, PositionItem, RangeArea, RangeClipboardCopyEventProps, RangeClipboardPasteEvent, RowDefinition, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
+import { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, ChangedRange, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, FocusAfterRenderEvent, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, Nullable, PluginBaseComponent, PositionItem, Providers, RangeArea, RangeClipboardCopyEventProps, RangeClipboardPasteEvent, RowDefinition, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
 import { GridPlugin } from "./plugins/base.plugin";
 import { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
 import { ColumnFilterConfig, FilterCaptions, FilterCollection, LogicFunction, MultiFilterItem, ShowData } from "./plugins/filter/filter.types";
@@ -20,7 +20,7 @@ import { ResizeProps } from "./components/header/resizable.directive";
 import { HeaderRenderProps } from "./components/header/header-renderer";
 import { Cell as Cell1, ColumnRegular as ColumnRegular1, DataType as DataType1, DimensionCols as DimensionCols1, DimensionRows as DimensionRows1, DimensionSettingsState as DimensionSettingsState1, Observable as Observable1, SelectionStoreState as SelectionStoreState1 } from "./components";
 import { EventData } from "./components/overlay/selection.utils";
-export { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, ChangedRange, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, FocusAfterRenderEvent, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, Nullable, PluginBaseComponent, PositionItem, RangeArea, RangeClipboardCopyEventProps, RangeClipboardPasteEvent, RowDefinition, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
+export { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, ChangedRange, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, FocusAfterRenderEvent, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, Nullable, PluginBaseComponent, PositionItem, Providers, RangeArea, RangeClipboardCopyEventProps, RangeClipboardPasteEvent, RowDefinition, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
 export { GridPlugin } from "./plugins/base.plugin";
 export { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
 export { ColumnFilterConfig, FilterCaptions, FilterCollection, LogicFunction, MultiFilterItem, ShowData } from "./plugins/filter/filter.types";
@@ -205,7 +205,7 @@ export namespace Components {
         /**
           * Register new virtual node inside of grid. Used for additional items creation such as plugin elements. Should be set before grid render inside of plugins.
          */
-        "registerVNode": VNode[];
+        "registerVNode": (VNode | (() => VNode))[];
         /**
           * When true, columns are resizable.
          */
@@ -396,7 +396,20 @@ export namespace Components {
          */
         "saveOnClose": boolean;
     }
+    interface RevogrExtra {
+        /**
+          * Nodes to render
+         */
+        "nodes": ((VNode) |  (() => VNode))[] | null;
+        /**
+          * Refreshes the extra component. Useful if you want to manually force the component to re-render.
+         */
+        "refresh": () => Promise<void>;
+    }
     interface RevogrFilterPanel {
+        /**
+          * Disables dynamic filtering. A way to apply filters on Save only
+         */
         "disableDynamicFiltering": boolean;
         "filterCaptions": FilterCaptions | undefined;
         "filterEntities": Record<string, LogicFunction>;
@@ -809,6 +822,7 @@ declare global {
         "filterconfigchanged": any;
         "rowheaderschanged": any;
         "beforegridrender": any;
+        "aftergridrender": any;
         "aftergridinit": any;
         "additionaldatachanged": any;
         "afterthemechanged": Theme;
@@ -941,6 +955,12 @@ declare global {
         prototype: HTMLRevogrEditElement;
         new (): HTMLRevogrEditElement;
     };
+    interface HTMLRevogrExtraElement extends Components.RevogrExtra, HTMLStencilElement {
+    }
+    var HTMLRevogrExtraElement: {
+        prototype: HTMLRevogrExtraElement;
+        new (): HTMLRevogrExtraElement;
+    };
     interface HTMLRevogrFilterPanelElementEventMap {
         "filterChange": MultiFilterItem;
         "resetChange": ColumnProp;
@@ -988,6 +1008,7 @@ declare global {
         "beforeheaderresize": ColumnRegular[];
         "headerdblclick": InitialHeaderClick;
         "beforeheaderrender": HeaderRenderProps;
+        "afterheaderrender": Providers<DimensionCols | 'rowHeaders'>;
     }
     interface HTMLRevogrHeaderElement extends Components.RevogrHeader, HTMLStencilElement {
         addEventListener<K extends keyof HTMLRevogrHeaderElementEventMap>(type: K, listener: (this: HTMLRevogrHeaderElement, ev: RevogrHeaderCustomEvent<HTMLRevogrHeaderElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
@@ -1049,6 +1070,7 @@ declare global {
         "selectall": any;
         "canceledit": any;
         "settemprange": Nullable<TempRange> | null;
+        "beforesettemprange": { tempRange: Nullable<TempRange> | null } & EventData & AllDimensionType;
         "applyfocus": FocusRenderEvent;
         "focuscell": ApplyFocusEvent;
         "beforerangedataapply": FocusRenderEvent;
@@ -1178,6 +1200,7 @@ declare global {
         "revogr-clipboard": HTMLRevogrClipboardElement;
         "revogr-data": HTMLRevogrDataElement;
         "revogr-edit": HTMLRevogrEditElement;
+        "revogr-extra": HTMLRevogrExtraElement;
         "revogr-filter-panel": HTMLRevogrFilterPanelElement;
         "revogr-focus": HTMLRevogrFocusElement;
         "revogr-header": HTMLRevogrHeaderElement;
@@ -1318,6 +1341,10 @@ declare namespace LocalJSX {
           * Emmited after the grid is initialized. Connected to the DOM.
          */
         "onAftergridinit"?: (event: RevoGridCustomEvent<any>) => void;
+        /**
+          * Emmited after the grid is rendered.
+         */
+        "onAftergridrender"?: (event: RevoGridCustomEvent<any>) => void;
         /**
           * After main source/rows updated
          */
@@ -1485,7 +1512,7 @@ declare namespace LocalJSX {
         /**
           * Register new virtual node inside of grid. Used for additional items creation such as plugin elements. Should be set before grid render inside of plugins.
          */
-        "registerVNode"?: VNode[];
+        "registerVNode"?: (VNode | (() => VNode))[];
         /**
           * When true, columns are resizable.
          */
@@ -1705,7 +1732,16 @@ declare namespace LocalJSX {
          */
         "saveOnClose"?: boolean;
     }
+    interface RevogrExtra {
+        /**
+          * Nodes to render
+         */
+        "nodes"?: ((VNode) |  (() => VNode))[] | null;
+    }
     interface RevogrFilterPanel {
+        /**
+          * Disables dynamic filtering. A way to apply filters on Save only
+         */
         "disableDynamicFiltering"?: boolean;
         "filterCaptions"?: FilterCaptions | undefined;
         "filterEntities"?: Record<string, LogicFunction>;
@@ -1793,6 +1829,10 @@ declare namespace LocalJSX {
           * Column groups
          */
         "groups"?: Groups;
+        /**
+          * After all header cells rendered. Finalizes cell rendering.
+         */
+        "onAfterheaderrender"?: (event: RevogrHeaderCustomEvent<Providers<DimensionCols | 'rowHeaders'>>) => void;
         /**
           * On initial header click
          */
@@ -1979,6 +2019,10 @@ declare namespace LocalJSX {
           * Before range selection applied.
          */
         "onBeforesetrange"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
+        /**
+          * Before set temp range area during autofill.
+         */
+        "onBeforesettemprange"?: (event: RevogrOverlaySelectionCustomEvent<{ tempRange: Nullable<TempRange> | null } & EventData & AllDimensionType>) => void;
         /**
           * Used for editors support when editor close requested.
          */
@@ -2171,6 +2215,7 @@ declare namespace LocalJSX {
         "revogr-clipboard": RevogrClipboard;
         "revogr-data": RevogrData;
         "revogr-edit": RevogrEdit;
+        "revogr-extra": RevogrExtra;
         "revogr-filter-panel": RevogrFilterPanel;
         "revogr-focus": RevogrFocus;
         "revogr-header": RevogrHeader;
@@ -2217,6 +2262,7 @@ declare module "@stencil/core" {
              * and managing the lifecycle of the editor instance.
              */
             "revogr-edit": LocalJSX.RevogrEdit & JSXBase.HTMLAttributes<HTMLRevogrEditElement>;
+            "revogr-extra": LocalJSX.RevogrExtra & JSXBase.HTMLAttributes<HTMLRevogrExtraElement>;
             "revogr-filter-panel": LocalJSX.RevogrFilterPanel & JSXBase.HTMLAttributes<HTMLRevogrFilterPanelElement>;
             /**
              * Focus component. Shows focus layer around the cell that is currently in focus.
