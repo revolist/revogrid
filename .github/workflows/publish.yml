@@ -17,7 +17,7 @@ jobs:
       - name: Release grid new version
         uses: ./actions/release-grid
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.REPO_TOKEN }}
           npm_token: ${{ secrets.NPM_TOKEN }}
   update_submodules:
     needs: publish
@@ -33,6 +33,6 @@ jobs:
       - name: Update submodules
         uses: ./actions/update-submodules
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.REPO_TOKEN }}
           repo_token: ${{ secrets.REPO_TOKEN }}
       
