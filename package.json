@@ -136,12 +136,10 @@
     "typedoc-plugin-markdown": "^4.2.3",
     "typescript": "^5.5.4",
     "url": "^0.11.3",
-    "vue": "^3.4.34"
+    "vue": "^3.4.34",
+    "json2md": "^2.0.1"
   },
   "publishConfig": {
     "access": "public"
-  },
-  "dependencies": {
-    "json2md": "^2.0.1"
   }
 }
