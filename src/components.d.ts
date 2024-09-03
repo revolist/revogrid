@@ -529,6 +529,7 @@ export namespace Components {
           * Parent element
          */
         "parent": HTMLElement;
+        "rowType": DimensionRows;
     }
     /**
      * Component for overlaying the grid with the selection.
@@ -1030,13 +1031,20 @@ declare global {
     text: string;
     pos: PositionItem;
     event: MouseEvent;
+    rowType: DimensionRows;
   };
-        "rowdragendinit": any;
-        "rowdragmoveinit": PositionItem;
-        "rowdragmousemove": Cell;
+        "rowdragendinit": { rowType: DimensionRows };
+        "rowdragmoveinit": PositionItem & { rowType: DimensionRows };
+        "rowdragmousemove": Cell & { rowType: DimensionRows };
         "rowdropinit": {
     from: number;
     to: number;
+    rowType: DimensionRows;
+  };
+        "roworderchange": {
+    from: number;
+    to: number;
+    rowType: DimensionRows;
   };
     }
     /**
@@ -1892,15 +1900,15 @@ declare namespace LocalJSX {
         /**
           * Row drag ended started
          */
-        "onRowdragendinit"?: (event: RevogrOrderEditorCustomEvent<any>) => void;
+        "onRowdragendinit"?: (event: RevogrOrderEditorCustomEvent<{ rowType: DimensionRows }>) => void;
         /**
           * Row mouse move started
          */
-        "onRowdragmousemove"?: (event: RevogrOrderEditorCustomEvent<Cell>) => void;
+        "onRowdragmousemove"?: (event: RevogrOrderEditorCustomEvent<Cell & { rowType: DimensionRows }>) => void;
         /**
           * Row move started
          */
-        "onRowdragmoveinit"?: (event: RevogrOrderEditorCustomEvent<PositionItem>) => void;
+        "onRowdragmoveinit"?: (event: RevogrOrderEditorCustomEvent<PositionItem & { rowType: DimensionRows }>) => void;
         /**
           * Row drag started
          */
@@ -1909,6 +1917,7 @@ declare namespace LocalJSX {
     text: string;
     pos: PositionItem;
     event: MouseEvent;
+    rowType: DimensionRows;
   }>) => void;
         /**
           * Row dragged, new range ready to be applied
@@ -1916,11 +1925,21 @@ declare namespace LocalJSX {
         "onRowdropinit"?: (event: RevogrOrderEditorCustomEvent<{
     from: number;
     to: number;
+    rowType: DimensionRows;
+  }>) => void;
+        /**
+          * Row drag ended finished. Time to apply data
+         */
+        "onRoworderchange"?: (event: RevogrOrderEditorCustomEvent<{
+    from: number;
+    to: number;
+    rowType: DimensionRows;
   }>) => void;
         /**
           * Parent element
          */
         "parent"?: HTMLElement;
+        "rowType"?: DimensionRows;
     }
     /**
      * Component for overlaying the grid with the selection.

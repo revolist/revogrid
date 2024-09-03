@@ -229,4 +229,30 @@ export default class DimensionProvider {
       this.stores[s].setStore(data);
     }
   }
+
+  updateSizesPositionByNewDataIndexes(type: MultiDimensionType, newItemsOrder: number[], prevItemsOrder: number[] = []) {
+    // Move custom sizes to new order
+    const dimService = this.stores[type];
+    const customSizes = {...dimService.store.get('sizes')};
+    if (Object.keys(customSizes).length) {
+      const originalIndices = new Map();
+      prevItemsOrder.forEach((value, index) => {
+          originalIndices.set(value, index);
+      });
+      const newSizes: Record<number, number> = {};
+      newItemsOrder.forEach((value, newIndex) => {
+        const originalIndex = originalIndices.get(value);
+        if (originalIndex !== newIndex && customSizes[originalIndex]) {
+          newSizes[newIndex] = customSizes[originalIndex];
+          delete customSizes[originalIndex];
+        }
+      });
+      if (Object.keys(newSizes).length) {
+        this.setCustomSizes(type, {
+          ...customSizes,
+          ...newSizes,
+        });
+      }
+    }
+ }
 }

@@ -102,6 +102,10 @@ export class DataStore<T extends GDataType, ST extends GDimension> {
     setStore(this.store, { trimmed });
   }
 
+  setSourceData(items: Record<number, any>, mutate = true) {
+    setSourceByVirtualIndex(this.store, items, mutate);
+  }
+
   // local data update
   setData(input: Partial<DSourceState<T, ST>>) {
     const data: Partial<DSourceState<T, ST>> = {

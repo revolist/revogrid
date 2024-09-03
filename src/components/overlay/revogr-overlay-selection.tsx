@@ -13,8 +13,7 @@ import {
 import ColumnService from '../data/column.service';
 import { codesLetter } from '../../utils/key.codes';
 import { MOBILE_CLASS, SELECTION_BORDER_CLASS } from '../../utils/consts';
-import { DSourceState } from '@store';
-import { getRange, isRangeSingleCell } from '@store';
+import { type DSourceState, getRange, isRangeSingleCell } from '@store';
 import {
   collectModelsOfRange,
   EventData,
@@ -37,19 +36,15 @@ import {
   Cell,
   DragStartEvent,
 } from '../../components';
-import {
+import type {
   MultiDimensionType,
   Nullable,
   RangeClipboardCopyEventProps,
   RangeClipboardPasteEvent,
-} from '@type';
-import {
   FocusRenderEvent,
   ApplyFocusEvent,
   AllDimensionType,
   DataFormat,
-} from '@type';
-import {
   Editors,
   BeforeSaveDataDetails,
   BeforeEdit,
@@ -596,6 +591,7 @@ export class OverlaySelection {
             dimensionRow={this.dimensionRow}
             dimensionCol={this.dimensionCol}
             parent={this.element}
+            rowType={this.types.rowType}
             onRowdragstartinit={e => this.rowDragStart(e)}
           />,
         );

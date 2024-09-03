@@ -7,7 +7,6 @@ import {
   getSourceItem,
   getVisibleSourceItem,
   Groups,
-  setSourceByVirtualIndex,
   Trimmed,
 } from '@store';
 import DimensionProvider from './dimension.provider';
@@ -65,18 +64,24 @@ export class DataProvider {
     return getSourceItem(store, virtualIndex);
   }
 
+  changeOrder({ rowType = 'rgRow', from, to }: { rowType: DimensionRows, from: number; to: number }) {
+    const service = this.stores[rowType];
+    const items = [...service.store.get('items')];
+    const prevItems = [...items];
+
+    const toMove = items.splice(from, 1);
+    items.splice(to, 0, ...toMove);
+    this.dimensionProvider.updateSizesPositionByNewDataIndexes(rowType, items, prevItems);
+    service.setData({ items });
+  }
+
   setCellData(
     { type, rowIndex, prop, val }: BeforeSaveDataDetails,
     mutate = true,
   ) {
     const model = this.getModel(rowIndex, type);
     model[prop] = val;
-    // apply data to source
-    setSourceByVirtualIndex(
-      this.stores[type].store,
-      { [rowIndex]: model },
-      mutate,
-    );
+    this.stores[type].setSourceData({ [rowIndex]: model }, mutate);
   }
 
   setRangeData(data: DataLookup, type: DimensionRows) {
@@ -93,8 +98,7 @@ export class DataProvider {
         oldModel[prop] = data[rowIndex][prop];
       }
     }
-    // apply data to source
-    setSourceByVirtualIndex(this.stores[type].store, items);
+    this.stores[type].setSourceData(items);
   }
 
   refresh(type: DimensionRows | 'all' = 'all') {
