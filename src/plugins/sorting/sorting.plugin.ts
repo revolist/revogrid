@@ -257,8 +257,8 @@ export default class SortingPlugin extends BasePlugin {
   }
 
   defaultCellCompare(prop: ColumnProp, a: DataType, b: DataType) {
-    const av = a[prop]?.toString().toLowerCase();
-    const bv = b[prop]?.toString().toLowerCase();
+    const av = a?.[prop]?.toString().toLowerCase();
+    const bv = b?.[prop]?.toString().toLowerCase();
 
     return av == bv ? 0 : av > bv ? 1 : -1;
   }
