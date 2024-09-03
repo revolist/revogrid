@@ -23,19 +23,7 @@ jobs:
     needs: publish
     runs-on: ubuntu-latest
     steps:
-      - name: Set up SSH for private submodules
-        run: |
-          mkdir -p ~/.ssh
-          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          echo "$KNOWN_HOSTS" > ~/.ssh/known_hosts
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          KNOWN_HOSTS: ${{ secrets.KNOWN_HOSTS }}
-
       - uses: actions/checkout@v4
-        with:
-          token: ${{ secrets.REPO_TOKEN }}
       - uses: actions/checkout@v4
         with:
           repository: revolist/revogrid-actions
