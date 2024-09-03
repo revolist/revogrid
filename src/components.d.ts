@@ -1396,8 +1396,7 @@ declare namespace LocalJSX {
          */
         "onBeforeexport"?: (event: RevoGridCustomEvent<DataInput>) => void;
         /**
-          * Emitted before applying a filter to the data source. Use e.preventDefault() to prevent cell focus change. Modify the
-          * @collection if you need to change filters.
+          * Emitted before applying a filter to the data source. Use e.preventDefault() to prevent cell focus change. Modify if you need to change filters.
          */
         "onBeforefilterapply"?: (event: RevoGridCustomEvent<{ collection: FilterCollection }>) => void;
         /**

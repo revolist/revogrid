@@ -5,6 +5,7 @@ import { reactOutputTarget } from '@stencil/react-output-target';
 import { vueOutputTarget } from '@stencil/vue-output-target';
 import { svelteOutputTarget } from '@stencil/svelte-output-target';
 import { vueOutputTarget as vue2OutputTarget } from '@revolist/stencil-vue2-output-target';
+import { eventListOutputTarget } from './scripts/event-list.plugin';
 
 const componentCorePackage = '@revolist/revogrid';
 const parent = './packages';
@@ -132,6 +133,10 @@ export const config: Config = {
       dir: './docs/guide/api',
       footer: '*Built with ❤️ by Revolist OU*',
     },
+    eventListOutputTarget({
+      mdPath: './docs/guide/types/Events.md',
+      tsPath: './src/types/events.ts',
+    }),
     {
       type: 'docs-vscode',
       file: 'vscode-data.json',
