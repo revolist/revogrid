@@ -914,6 +914,10 @@ export class RevoGridComponent {
     this.orderService?.end();
   }
 
+  @Listen('roworderchange') onRowOrderChange(e: CustomEvent<HTMLRevogrOrderEditorElementEventMap['roworderchange']>) {
+    this.dataProvider?.changeOrder(e.detail);
+  }
+
   @Listen('rowdragmoveinit') onRowDrag({ detail }: CustomEvent<PositionItem>) {
     this.orderService?.move(detail);
   }

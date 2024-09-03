@@ -1,7 +1,7 @@
 import { Component, Method, Event, EventEmitter, Prop } from '@stencil/core';
 import debounce from 'lodash/debounce';
 
-import { DSourceState, setItems } from '@store';
+import { DSourceState } from '@store';
 import { DRAGG_TEXT } from '../../utils/consts';
 import RowOrderService from './order-row.service';
 import {
@@ -29,6 +29,8 @@ export class OrderEditor {
 
   /** Static stores, not expected to change during component lifetime */
   @Prop() dataStore: Observable<DSourceState<DataType, DimensionRows>>;
+
+  @Prop() rowType: DimensionRows;
   // #endregion
 
   // #region Events
@@ -39,26 +41,37 @@ export class OrderEditor {
     text: string;
     pos: PositionItem;
     event: MouseEvent;
+    rowType: DimensionRows;
   }>;
 
   /** Row drag ended started */
   @Event({ eventName: 'rowdragendinit' })
-  rowDragEnd: EventEmitter;
+  rowDragEnd: EventEmitter<{ rowType: DimensionRows }>;
 
   /** Row move started */
   @Event({ eventName: 'rowdragmoveinit', cancelable: true })
-  rowDrag: EventEmitter<PositionItem>;
+  rowDrag: EventEmitter<PositionItem & { rowType: DimensionRows }>;
 
   /** Row mouse move started */
   @Event({ eventName: 'rowdragmousemove', cancelable: true })
-  rowMouseMove: EventEmitter<Cell>;
+  rowMouseMove: EventEmitter<Cell & { rowType: DimensionRows }>;
 
   /** Row dragged, new range ready to be applied */
   @Event({ eventName: 'rowdropinit', cancelable: true })
   rowDropped: EventEmitter<{
     from: number;
     to: number;
+    rowType: DimensionRows;
   }>;
+
+  /** Row drag ended finished. Time to apply data */
+  @Event({ eventName: 'roworderchange' })
+  rowOrderChange: EventEmitter<{
+    from: number;
+    to: number;
+    rowType: DimensionRows;
+  }>;
+
   // #endregion
 
   // #region Private
@@ -70,7 +83,10 @@ export class OrderEditor {
   private rowMoveFunc = debounce((y: number) => {
     const rgRow = this.rowOrderService.move(y, this.getData());
     if (rgRow !== null) {
-      this.rowDrag.emit(rgRow);
+      this.rowDrag.emit({
+        ...rgRow,
+        rowType: this.rowType,
+      });
     }
   }, 5);
   // #endregion
@@ -92,6 +108,7 @@ export class OrderEditor {
       text: DRAGG_TEXT,
       pos,
       event: e.originalEvent,
+      rowType: this.rowType,
     });
     if (dragStartEvent.defaultPrevented) {
       return;
@@ -130,30 +147,29 @@ export class OrderEditor {
     this.rowOrderService.clear();
     this.events.forEach(v => document.removeEventListener(v.name, v.listener));
     this.events.length = 0;
-    this.rowDragEnd.emit();
+    this.rowDragEnd.emit({ rowType: this.rowType });
   }
   // #endregion
 
   move({ x, y }: { x: number; y: number }) {
-    this.rowMouseMove.emit({ x, y });
+    this.rowMouseMove.emit({ x, y, rowType: this.rowType });
     this.rowMoveFunc(y);
   }
 
   connectedCallback() {
     this.rowOrderService = new RowOrderService({
-      positionChanged: (f, t) => this.onPositionChanged(f, t),
+      positionChanged: (from: number, to: number) => {
+        const dropEvent = this.rowDropped.emit({
+          from,
+          to,
+          rowType: this.rowType,
+        });
+        if (dropEvent.defaultPrevented) {
+          return;
+        }
+        this.rowOrderChange.emit(dropEvent.detail);
+      },
     });
-  }
-
-  private onPositionChanged(from: number, to: number) {
-    const dropEvent = this.rowDropped.emit({ from, to });
-    if (dropEvent.defaultPrevented) {
-      return;
-    }
-    const items = [...this.dataStore.get('items')];
-    const toMove = items.splice(from, 1);
-    items.splice(to, 0, ...toMove);
-    setItems(this.dataStore, items);
   }
 
   private getData() {
