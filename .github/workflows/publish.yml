@@ -34,6 +34,8 @@ jobs:
           KNOWN_HOSTS: ${{ secrets.KNOWN_HOSTS }}
 
       - uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.REPO_TOKEN }}
       - uses: actions/checkout@v4
         with:
           repository: revolist/revogrid-actions
