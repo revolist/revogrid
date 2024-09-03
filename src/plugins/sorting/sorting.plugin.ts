@@ -1,6 +1,5 @@
 import size from 'lodash/size';
 import debounce from 'lodash/debounce';
-import range from 'lodash/range';
 
 import { BasePlugin } from '../base.plugin';
 import {
