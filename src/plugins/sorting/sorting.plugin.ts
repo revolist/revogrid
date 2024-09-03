@@ -224,7 +224,7 @@ export default class SortingPlugin extends BasePlugin {
         // row indexes
         const proxyItems = storeService.store.get('proxyItems');
         // row indexes
-        const newItemsOrder = range(0, source.length);
+        const newItemsOrder = storeService.store.get('items'); // recover indexes range(0, source.length)
         this.providers.dimension.updateSizesPositionByNewDataIndexes(type, newItemsOrder, proxyItems);
         storeService.setData({ proxyItems: newItemsOrder, source: [...source] });
       }
