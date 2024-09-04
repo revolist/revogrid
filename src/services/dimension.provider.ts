@@ -234,25 +234,39 @@ export default class DimensionProvider {
     // Move custom sizes to new order
     const dimService = this.stores[type];
     const customSizes = {...dimService.store.get('sizes')};
-    if (Object.keys(customSizes).length) {
-      const originalIndices = new Map();
-      prevItemsOrder.forEach((value, index) => {
-          originalIndices.set(value, index);
-      });
-      const newSizes: Record<number, number> = {};
-      newItemsOrder.forEach((value, newIndex) => {
-        const originalIndex = originalIndices.get(value);
-        if (originalIndex !== newIndex && customSizes[originalIndex]) {
-          newSizes[newIndex] = customSizes[originalIndex];
+    if (!Object.keys(customSizes).length) {
+      return;
+    }
+    // Step 1: Create a map of original indices, but allow duplicates by storing arrays of indices
+    const originalIndices: Record<number, number[]> = {};
+    prevItemsOrder.forEach((physIndex, virtIndex) => {
+      if (!originalIndices[physIndex]) {
+        originalIndices[physIndex] = [];
+      }
+      originalIndices[physIndex].push(virtIndex); // Store all indices for each value
+    });
+
+    // Step 2: Create new sizes based on new item order
+    const newSizes: Record<number, number> = {};
+
+    newItemsOrder.forEach((physIndex, virtIndex) => {
+      const indices = originalIndices[physIndex]; // Get all original indices for this value
+      
+      if (indices && indices.length > 0) {
+        const originalIndex = indices.shift(); // Get the first available original index
+
+        if (originalIndex !== undefined && originalIndex !== virtIndex && customSizes[originalIndex]) {
+          newSizes[virtIndex] = customSizes[originalIndex];
           delete customSizes[originalIndex];
         }
-      });
-      if (Object.keys(newSizes).length) {
-        this.setCustomSizes(type, {
-          ...customSizes,
-          ...newSizes,
-        });
       }
+    });
+    // Step 3: Set new sizes if there are changes
+    if (Object.keys(newSizes).length) {
+      this.setCustomSizes(type, {
+        ...customSizes,
+        ...newSizes,
+      });
     }
- }
+  }
 }
