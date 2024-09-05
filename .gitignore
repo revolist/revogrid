@@ -16,7 +16,7 @@ fw/
 log.txt
 *.sublime-project
 *.sublime-workspace
-
+.history/
 .stencil/
 .idea/
 .vscode/
