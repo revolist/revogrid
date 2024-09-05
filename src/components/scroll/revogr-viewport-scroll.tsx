@@ -91,7 +91,7 @@ export class RevogrViewportScroll implements ElementScroll {
   private horizontalMouseWheel: (e: Partial<LocalScrollEvent>) => void;
   private verticalMouseWheel: (e: Partial<LocalScrollEvent>) => void;
 
-  private resizeService: GridResizeService;
+  private resizeService?: GridResizeService;
   private localScrollService: LocalScrollService;
   private localScrollTimer: LocalScrollTimer;
 
@@ -275,7 +275,7 @@ export class RevogrViewportScroll implements ElementScroll {
   }
 
   disconnectedCallback() {
-    this.resizeService.destroy();
+    this.resizeService?.destroy();
   }
 
   async componentDidRender() {
@@ -410,6 +410,7 @@ export class RevogrViewportScroll implements ElementScroll {
     delta: Delta,
     e: LocalScrollEvent,
   ) {
+    // todo: when you reach the grid end don't prevent default it should work as native
     e.preventDefault?.();
     const scrollTop = this.verticalScroll?.scrollTop ?? 0;
     const pos = scrollTop + e[delta];
@@ -428,6 +429,7 @@ export class RevogrViewportScroll implements ElementScroll {
     delta: Delta,
     e: LocalScrollEvent,
   ) {
+    // todo: when you reach the grid end don't prevent default it should work as native
     e.preventDefault?.();
     const pos = this.horizontalScroll.scrollLeft + e[delta];
     this.localScrollService?.scroll(pos, type, undefined, e[delta]);

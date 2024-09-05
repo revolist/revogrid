@@ -243,13 +243,16 @@ export default class SortingPlugin extends BasePlugin {
           source,
           sortingFunc,
         );
-
-        this.providers.dimension.updateSizesPositionByNewDataIndexes(type, newItemsOrder, proxyItems);
        
+        // take row indexes before trim applied and proxy items
+        const prevItems = storeService.store.get('items');
         storeService.setData({
           proxyItems: newItemsOrder,
           source: [...source],
         });
+        // take currently visible row indexes
+        const newItems = storeService.store.get('items');
+        this.providers.dimension.updateSizesPositionByNewDataIndexes(type, newItems, prevItems);
       }
     }
     this.emit('aftersortingapply');

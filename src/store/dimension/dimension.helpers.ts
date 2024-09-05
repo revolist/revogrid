@@ -36,10 +36,8 @@ export function calculateDimensionData(
   const positionIndexToItem: { [position: number]: PositionItem } = {};
   const indexToItem: { [index: number]: PositionItem } = {};
 
-  // combine all new sizes
-  const sizes = { ...newSizes };
   // prepare order sorted new sizes and calculate changed real size
-  const newIndexes = Object.keys(sizes).map(Number).sort((a, b) => a - b);
+  const newIndexes = Object.keys(newSizes).map(Number).sort((a, b) => a - b);
   // fill new coordinates based on what is changed
   newIndexes.reduce(
     (previous: PositionItem | undefined, itemIndex: number, i: number) => {
@@ -56,7 +54,7 @@ export function calculateDimensionData(
       } else {
         newItem.start = itemIndex * originItemSize;
       }
-      newItem.end = newItem.start + sizes[itemIndex];
+      newItem.end = newItem.start + newSizes[itemIndex];
       positionIndexes.push(newItem.start);
       indexToItem[itemIndex] = positionIndexToItem[i] = newItem;
       return newItem;
@@ -69,7 +67,6 @@ export function calculateDimensionData(
     positionIndexes: [...positionIndexes],
     positionIndexToItem: { ...positionIndexToItem },
     indexToItem,
-    sizes,
   };
 }
 

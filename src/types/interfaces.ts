@@ -610,10 +610,13 @@ export interface DimensionCalc {
    * Object containing information about trimmed data.
    * Used for hiding entities from visible data source.
    */
-  trimmed: Record<any, any>;
+  trimmed: { [index: number]: number} | null;
 
   /**
    * Object containing size for each visible item.
+     * provider stores only changed sizes, not all of them
+     * same as indexes but for sizes and positions
+     * virtual item index to size
    */
   sizes: ViewSettingSizeProp;
 }

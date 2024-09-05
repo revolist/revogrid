@@ -133,11 +133,14 @@ export default class DimensionProvider {
   applyNewColumns(
     columns: Record<DimensionCols, ColumnRegular[]>,
     disableVirtualX: boolean,
+    keepOld = false,
   ) {
     // Apply new columns to dimension provider
     for (let type of columnTypes) {
-      // Clear existing data in the dimension provider
-      this.stores[type].drop();
+      if (!keepOld) {
+        // Clear existing data in the dimension provider
+        this.stores[type].drop();
+      }
 
       // Get the new columns for the current type
       const items = columns[type];
@@ -202,7 +205,11 @@ export default class DimensionProvider {
     force?: boolean;
   }) {
     const dimension = this.stores[type].getCurrentState();
-    this.viewports.stores[type].setViewPortCoordinate(coordinate, dimension, force);
+    this.viewports.stores[type].setViewPortCoordinate(
+      coordinate,
+      dimension,
+      force,
+    );
   }
 
   getViewPortPos(e: ViewPortScrollEvent): number {
@@ -230,43 +237,16 @@ export default class DimensionProvider {
     }
   }
 
-  updateSizesPositionByNewDataIndexes(type: MultiDimensionType, newItemsOrder: number[], prevItemsOrder: number[] = []) {
+  updateSizesPositionByNewDataIndexes(
+    type: MultiDimensionType,
+    newItemsOrder: number[],
+    prevItemsOrder: number[] = [],
+  ) {
     // Move custom sizes to new order
-    const dimService = this.stores[type];
-    const customSizes = {...dimService.store.get('sizes')};
-    if (!Object.keys(customSizes).length) {
-      return;
-    }
-    // Step 1: Create a map of original indices, but allow duplicates by storing arrays of indices
-    const originalIndices: Record<number, number[]> = {};
-    prevItemsOrder.forEach((physIndex, virtIndex) => {
-      if (!originalIndices[physIndex]) {
-        originalIndices[physIndex] = [];
-      }
-      originalIndices[physIndex].push(virtIndex); // Store all indices for each value
-    });
-
-    // Step 2: Create new sizes based on new item order
-    const newSizes: Record<number, number> = {};
-
-    newItemsOrder.forEach((physIndex, virtIndex) => {
-      const indices = originalIndices[physIndex]; // Get all original indices for this value
-      
-      if (indices && indices.length > 0) {
-        const originalIndex = indices.shift(); // Get the first available original index
-
-        if (originalIndex !== undefined && originalIndex !== virtIndex && customSizes[originalIndex]) {
-          newSizes[virtIndex] = customSizes[originalIndex];
-          delete customSizes[originalIndex];
-        }
-      }
-    });
-    // Step 3: Set new sizes if there are changes
-    if (Object.keys(newSizes).length) {
-      this.setCustomSizes(type, {
-        ...customSizes,
-        ...newSizes,
-      });
-    }
+    this.stores[type].updateSizesPositionByIndexes(
+      newItemsOrder,
+      prevItemsOrder,
+    );
+    this.updateViewport(type, true);
   }
 }

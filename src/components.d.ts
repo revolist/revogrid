@@ -327,7 +327,7 @@ export namespace Components {
         /**
           * Prevent rendering until job is done. Can be used for initial rendering performance improvement. When several plugins require initial rendering this will prevent double initial rendering.
          */
-        "jobsBeforeRender": Promise<any>[];
+        "jobsBeforeRender": (Promise<any> | (() => Promise<any>))[];
         /**
           * Range allowed
          */
@@ -913,6 +913,7 @@ declare global {
         "beforerowrender": BeforeRowRenderEvent;
         "afterrender": { type: DimensionRows };
         "beforecellrender": BeforeCellRenderEvent<ColumnDataSchemaModel>;
+        "beforedatarender": AllDimensionType;
         "dragstartcell": DragStartEvent;
     }
     /**
@@ -1658,7 +1659,7 @@ declare namespace LocalJSX {
         /**
           * Prevent rendering until job is done. Can be used for initial rendering performance improvement. When several plugins require initial rendering this will prevent double initial rendering.
          */
-        "jobsBeforeRender"?: Promise<any>[];
+        "jobsBeforeRender"?: (Promise<any> | (() => Promise<any>))[];
         /**
           * When data render finished for the designated type
          */
@@ -1667,6 +1668,10 @@ declare namespace LocalJSX {
           * Before each cell render function. Allows to override cell properties
          */
         "onBeforecellrender"?: (event: RevogrDataCustomEvent<BeforeCellRenderEvent<ColumnDataSchemaModel>>) => void;
+        /**
+          * Before data render
+         */
+        "onBeforedatarender"?: (event: RevogrDataCustomEvent<AllDimensionType>) => void;
         /**
           * Before each row render
          */
