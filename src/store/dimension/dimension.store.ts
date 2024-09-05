@@ -5,7 +5,7 @@
 import reduce from 'lodash/reduce';
 import { createStore } from '@stencil/store';
 
-import { setStore, Observable, PluginSubscribe } from '../../utils/store.utils';
+import { setStore, Observable } from '../../utils/store.utils';
 import { calculateDimensionData } from './dimension.helpers';
 import {
   DimensionCalc,
@@ -13,6 +13,8 @@ import {
   ViewSettingSizeProp,
   MultiDimensionType,
 } from '@type';
+import { recalculateRealSizePlugin } from './dimension.recalculate.plugin';
+import { trimmedPlugin } from './dimension.trim.plugin';
 
 export type DimensionStoreCollection = {
   [T in MultiDimensionType]: DimensionStore;
@@ -20,84 +22,15 @@ export type DimensionStoreCollection = {
 
 type Item = keyof DimensionSettingsState;
 
-const trimmedPlugin = (
-  store: DimensionStore,
-): PluginSubscribe<DimensionSettingsState> => {
-  let trimmedSize: DimensionSettingsState['sizes'] = {};
-
-  const setTrimmed = (
-    sizes: DimensionSettingsState['sizes'],
-    trimmed: DimensionSettingsState['trimmed'],
-  ) => {
-    const newSize: DimensionSettingsState['sizes'] = { ...sizes };
-    trimmedSize = {};
-    for (const [index, v] of Object.entries(trimmed)) {
-      const i = index as keyof DimensionSettingsState['sizes'];
-      if (v && newSize[i]) {
-        trimmedSize[i] = newSize[i];
-        delete newSize[i];
-      }
-    }
-    store.setDimensionSize(newSize);
-  };
-  return {
-    set(key, val) {
-      switch (key) {
-        case 'trimmed':
-          const trim = val as DimensionSettingsState['trimmed'];
-          const sizes = store.store.get('sizes');
-          // recover trimmed, apply new trim
-          setTrimmed({ ...sizes, ...trimmedSize }, trim);
-          break;
-      }
-    },
-  };
-};
-
-/**
- * Plugin which recalculates realSize on changes of sizes, originItemSize and count
- */
-const recalculateRealSizePlugin = (
-  storeService: DimensionStore,
-): PluginSubscribe<DimensionSettingsState> => {
-  /**
-   * Recalculates realSize if size, origin size or count changes
-   */
-  return {
-    /**
-     * Reacts on changes of count, sizes and originItemSize
-     */
-    set(k) {
-      switch (k) {
-        case 'count':
-        case 'sizes':
-        case 'originItemSize':
-          // recalculate realSize
-          let realSize = 0;
-          const count = storeService.store.get('count');
-          for (let i = 0; i < count; i++) {
-            realSize +=
-              storeService.store.get('sizes')[i] ||
-              storeService.store.get('originItemSize');
-          }
-          storeService.setStore({ realSize });
-          break;
-      }
-    },
-  };
-};
-
 function initialBase(): DimensionCalc {
   return {
     indexes: [],
     count: 0,
 
-    // plugin support
-    trimmed: {},
+    // hidden items
+    trimmed: null,
 
-    // size operations, this provider stores only changed sizes, not all of them
-    // same as indexes but for sizes and positions
-    // item index to size
+    // virtual item index to size
     sizes: {},
     // order in indexes[] to coordinate
     positionIndexToItem: {},
@@ -122,8 +55,14 @@ export class DimensionStore {
   readonly store: Observable<DimensionSettingsState>;
   constructor(public readonly type: MultiDimensionType) {
     this.store = createStore(initialState());
-    this.store.use(trimmedPlugin(this));
-    this.store.use(recalculateRealSizePlugin(this));
+    this.store.use(trimmedPlugin({
+      store: this.store,
+      setSizes: this.setDimensionSize.bind(this),
+    }));
+    this.store.use(recalculateRealSizePlugin({
+      store: this.store,
+      setStore: this.setStore.bind(this),
+    }));
   }
 
   getCurrentState(): DimensionSettingsState {
@@ -157,11 +96,54 @@ export class DimensionStore {
    * Generates new indexes based on sizes
    * @param sizes - sizes to set
    */
-  setDimensionSize(sizes: ViewSettingSizeProp) {
+  setDimensionSize(sizes: ViewSettingSizeProp = {}) {
     const dimensionData = calculateDimensionData(
       this.store.get('originItemSize'),
       sizes,
     );
-    setStore(this.store, dimensionData);
+    setStore(this.store, {
+      ...dimensionData,
+      sizes,
+    });
+  }
+
+  updateSizesPositionByIndexes(newItemsOrder: number[], prevItemsOrder: number[] = []) {
+    // Move custom sizes to new order
+    const customSizes = {...this.store.get('sizes')};
+    if (!Object.keys(customSizes).length) {
+      return;
+    }
+    // Step 1: Create a map of original indices, but allow duplicates by storing arrays of indices
+    const originalIndices: Record<number, number[]> = {};
+    prevItemsOrder.forEach((physIndex, virtIndex) => {
+      if (!originalIndices[physIndex]) {
+        originalIndices[physIndex] = [];
+      }
+      originalIndices[physIndex].push(virtIndex); // Store all indices for each value
+    });
+
+    // Step 2: Create new sizes based on new item order
+    const newSizes: Record<number, number> = {};
+
+    newItemsOrder.forEach((physIndex, virtIndex) => {
+      const indices = originalIndices[physIndex]; // Get all original indices for this value
+      
+      if (indices && indices.length > 0) {
+        const originalIndex = indices.shift(); // Get the first available original index
+
+        if (originalIndex !== undefined && originalIndex !== virtIndex && customSizes[originalIndex]) {
+          newSizes[virtIndex] = customSizes[originalIndex];
+          delete customSizes[originalIndex];
+        }
+      }
+    });
+
+    // Step 3: Set new sizes if there are changes
+    if (Object.keys(newSizes).length) {
+      this.setDimensionSize({
+        ...customSizes,
+        ...newSizes,
+      });
+    }
   }
 }

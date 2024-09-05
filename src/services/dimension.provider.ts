@@ -133,11 +133,14 @@ export default class DimensionProvider {
   applyNewColumns(
     columns: Record<DimensionCols, ColumnRegular[]>,
     disableVirtualX: boolean,
+    keepOld = false,
   ) {
     // Apply new columns to dimension provider
     for (let type of columnTypes) {
-      // Clear existing data in the dimension provider
-      this.stores[type].drop();
+      if (!keepOld) {
+        // Clear existing data in the dimension provider
+        this.stores[type].drop();
+      }
 
       // Get the new columns for the current type
       const items = columns[type];
@@ -202,7 +205,11 @@ export default class DimensionProvider {
     force?: boolean;
   }) {
     const dimension = this.stores[type].getCurrentState();
-    this.viewports.stores[type].setViewPortCoordinate(coordinate, dimension, force);
+    this.viewports.stores[type].setViewPortCoordinate(
+      coordinate,
+      dimension,
+      force,
+    );
   }
 
   getViewPortPos(e: ViewPortScrollEvent): number {
@@ -230,29 +237,16 @@ export default class DimensionProvider {
     }
   }
 
-  updateSizesPositionByNewDataIndexes(type: MultiDimensionType, newItemsOrder: number[], prevItemsOrder: number[] = []) {
+  updateSizesPositionByNewDataIndexes(
+    type: MultiDimensionType,
+    newItemsOrder: number[],
+    prevItemsOrder: number[] = [],
+  ) {
     // Move custom sizes to new order
-    const dimService = this.stores[type];
-    const customSizes = {...dimService.store.get('sizes')};
-    if (Object.keys(customSizes).length) {
-      const originalIndices = new Map();
-      prevItemsOrder.forEach((value, index) => {
-          originalIndices.set(value, index);
-      });
-      const newSizes: Record<number, number> = {};
-      newItemsOrder.forEach((value, newIndex) => {
-        const originalIndex = originalIndices.get(value);
-        if (originalIndex !== newIndex && customSizes[originalIndex]) {
-          newSizes[newIndex] = customSizes[originalIndex];
-          delete customSizes[originalIndex];
-        }
-      });
-      if (Object.keys(newSizes).length) {
-        this.setCustomSizes(type, {
-          ...customSizes,
-          ...newSizes,
-        });
-      }
-    }
- }
+    this.stores[type].updateSizesPositionByIndexes(
+      newItemsOrder,
+      prevItemsOrder,
+    );
+    this.updateViewport(type, true);
+  }
 }

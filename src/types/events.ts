@@ -48,6 +48,7 @@ export type RevogridEvents = 'contentsizechanged'|
   'beforerowrender'|
   'afterrender'|
   'beforecellrender'|
+  'beforedatarender'|
   'dragstartcell'|
   'celledit'|
   'closeedit'|
@@ -151,6 +152,7 @@ export const REVOGRID_EVENTS = new Map<RevogridEvents, RevogridEvents>([
   ['beforerowrender', 'beforerowrender'],
   ['afterrender', 'afterrender'],
   ['beforecellrender', 'beforecellrender'],
+  ['beforedatarender', 'beforedatarender'],
   ['dragstartcell', 'dragstartcell'],
   ['celledit', 'celledit'],
   ['closeedit', 'closeedit'],

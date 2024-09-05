@@ -1035,7 +1035,12 @@ export class RevoGridComponent {
     this.columnChanged(this.columns);
   }
 
-  @Watch('columns') columnChanged(newVal: (ColumnGrouping | ColumnRegular)[] = []) {
+  @Watch('columns') columnChanged(
+    newVal: (ColumnGrouping | ColumnRegular)[] = [],
+    _prevVal: (ColumnGrouping | ColumnRegular)[] | undefined = undefined,
+    __watchName: string = 'columns',
+    init = false,
+  ) {
     if (!this.dimensionProvider || !this.columnProvider) {
       return;
     }
@@ -1051,6 +1056,7 @@ export class RevoGridComponent {
     this.dimensionProvider.applyNewColumns(
       beforeSetEvent.detail.columns,
       this.disableVirtualX,
+      init,
     );
     const beforeApplyEvent = this.beforecolumnapplied.emit(columnGather);
     if (beforeApplyEvent.defaultPrevented) {
@@ -1421,7 +1427,7 @@ export class RevoGridComponent {
     // set data
     this.applyStretch(this.stretch);
     this.themeChanged(this.theme, undefined, undefined, true);
-    this.columnChanged(this.columns);
+    this.columnChanged(this.columns, undefined, undefined, true);
     this.dataSourceChanged(this.source, undefined, 'source');
     this.dataSourceChanged(this.pinnedTopSource, undefined, 'pinnedTopSource');
     this.dataSourceChanged(
@@ -1433,7 +1439,11 @@ export class RevoGridComponent {
       this.trimmedRowsChanged(this.trimmedRows);
     }
     this.rowDefChanged(this.rowDefinitions);
-    this.groupingChanged(this.grouping);
+
+    // init grouping
+    if (this.grouping && Object.keys(this.grouping).length > 0) {
+      this.groupingChanged(this.grouping);
+    }
 
     // init scrolling service
     this.scrollingService = new GridScrollingService(

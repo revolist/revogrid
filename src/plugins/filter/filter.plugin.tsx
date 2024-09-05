@@ -102,6 +102,9 @@ export class FilterPlugin extends BasePlugin {
           }
         });
       }
+      if (Object.keys(this.multiFilterItems).length === 0) {
+        return;
+      }
       await this.runFiltering(this.multiFilterItems);
     };
     this.addEventListener(

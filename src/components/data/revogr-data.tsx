@@ -19,7 +19,7 @@ import { DSourceState, getSourceItem } from '@store';
 import RowRenderer, { PADDING_DEPTH } from './row-renderer';
 import GroupingRowRenderer from '../../plugins/groupingRow/grouping.row.renderer';
 import { isGrouping } from '../../plugins/groupingRow/grouping.service';
-import { DimensionCols, DimensionRows } from '@type';
+import { AllDimensionType, DimensionCols, DimensionRows } from '@type';
 import { RowHighlightPlugin } from './row-highlight.plugin';
 import { convertVNodeToHTML } from '../vnode/vnode.utils';
 import { CellRenderer } from './cell-renderer';
@@ -102,7 +102,7 @@ export class RevogrData {
    * Can be used for initial rendering performance improvement.
    * When several plugins require initial rendering this will prevent double initial rendering.
    */
-  @Prop() jobsBeforeRender: Promise<any>[] = [];
+  @Prop() jobsBeforeRender: (Promise<any> | (() => Promise<any>))[] = [];
   // #endregion
 
   /**
@@ -120,6 +120,11 @@ export class RevogrData {
   @Event({ eventName: 'beforecellrender' })
   beforeCellRender: EventEmitter<BeforeCellRenderEvent<ColumnDataSchemaModel>>;
 
+  /**
+   * Before data render
+   */
+  @Event({ eventName: 'beforedatarender' })
+  beforeDataRender: EventEmitter<AllDimensionType>;
   /**
    * Event emitted on cell drag start
    */
@@ -193,7 +198,11 @@ export class RevogrData {
   }
 
   async componentWillRender() {
-    return Promise.all(this.jobsBeforeRender);
+    this.beforeDataRender.emit({
+      rowType: this.type,
+      colType: this.colType as DimensionCols,
+    });
+    return Promise.all(this.jobsBeforeRender.map(p => typeof p === 'function' ? p() : p));
   }
 
   componentDidRender() {

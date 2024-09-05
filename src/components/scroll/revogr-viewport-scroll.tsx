@@ -91,7 +91,7 @@ export class RevogrViewportScroll implements ElementScroll {
   private horizontalMouseWheel: (e: Partial<LocalScrollEvent>) => void;
   private verticalMouseWheel: (e: Partial<LocalScrollEvent>) => void;
 
-  private resizeService: GridResizeService;
+  private resizeService?: GridResizeService;
   private localScrollService: LocalScrollService;
   private localScrollTimer: LocalScrollTimer;
 
@@ -275,7 +275,7 @@ export class RevogrViewportScroll implements ElementScroll {
   }
 
   disconnectedCallback() {
-    this.resizeService.destroy();
+    this.resizeService?.destroy();
   }
 
   async componentDidRender() {
@@ -410,8 +410,16 @@ export class RevogrViewportScroll implements ElementScroll {
     delta: Delta,
     e: LocalScrollEvent,
   ) {
-    e.preventDefault?.();
     const scrollTop = this.verticalScroll?.scrollTop ?? 0;
+    const clientHeight = this.verticalScroll?.clientHeight ?? 0;
+    const scrollHeight = this.verticalScroll?.scrollHeight ?? 0;
+
+    // Detect if the user has reached the bottom
+    const atBottom = (scrollTop + clientHeight >= scrollHeight) && e.deltaY > 0;
+    const atTop = scrollTop === 0 && e.deltaY < 0;
+    if (!atBottom && !atTop) {
+      e.preventDefault?.();
+    }
     const pos = scrollTop + e[delta];
     this.localScrollService?.scroll(pos, type, undefined, e[delta]);
     this.localScrollTimer.latestScrollUpdate(type);
@@ -428,8 +436,20 @@ export class RevogrViewportScroll implements ElementScroll {
     delta: Delta,
     e: LocalScrollEvent,
   ) {
-    e.preventDefault?.();
-    const pos = this.horizontalScroll.scrollLeft + e[delta];
+    if (!e.deltaX) {
+      return;
+    }
+    const { scrollLeft, scrollWidth, clientWidth } = this.horizontalScroll;
+
+    // Detect if the user has reached the right end
+    const atRight = (scrollLeft + clientWidth >= scrollWidth) && e.deltaX > 0;
+
+    // Detect if the user has reached the left end
+    const atLeft = scrollLeft === 0 && e.deltaX < 0;
+    if (!atRight && !atLeft) {
+      e.preventDefault?.();
+    }
+    const pos = scrollLeft + e[delta];
     this.localScrollService?.scroll(pos, type, undefined, e[delta]);
     this.localScrollTimer.latestScrollUpdate(type);
   }
