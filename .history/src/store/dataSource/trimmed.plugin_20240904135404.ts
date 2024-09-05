@@ -8,19 +8,16 @@ export type Trimmed = Record<string, TrimmedEntity>;
  * Hide items from main collection
  * But keep them in store
  */
-export const trimmedPlugin = <T extends GDataType>(
-  store: Observable<DSourceState<T, any>>,
-): PluginSubscribe<DSourceState<T, any>> => ({
+export const trimmedPlugin = <T extends GDataType>(store: Observable<DSourceState<T, any>>): PluginSubscribe<DSourceState<T, any>> => ({
   set(k, newVal) {
     switch (k) {
-      case 'trimmed': {
+      case 'trimmed':
         const proxy = store.get('proxyItems');
         const trimmed = gatherTrimmedItems(newVal as Trimmed);
         const newItems = proxy.filter(v => !trimmed[v]);
 
         store.set('items', newItems);
         break;
-      }
     }
   },
 });

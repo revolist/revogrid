@@ -19,7 +19,7 @@ export const recalculateRealSizePlugin = (storeService: {
       switch (k) {
         case 'count':
         case 'sizes':
-        case 'originItemSize': {
+        case 'originItemSize':
           // recalculate realSize
           let realSize = 0;
           const count = storeService.store.get('count');
@@ -30,7 +30,6 @@ export const recalculateRealSizePlugin = (storeService: {
           }
           storeService.setStore({ realSize });
           break;
-        }
       }
     },
   };

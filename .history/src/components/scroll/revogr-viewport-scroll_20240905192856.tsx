@@ -436,9 +436,6 @@ export class RevogrViewportScroll implements ElementScroll {
     delta: Delta,
     e: LocalScrollEvent,
   ) {
-    if (!e.deltaX) {
-      return;
-    }
     const { scrollLeft, scrollWidth, clientWidth } = this.horizontalScroll;
 
     // Detect if the user has reached the right end
@@ -446,6 +443,7 @@ export class RevogrViewportScroll implements ElementScroll {
 
     // Detect if the user has reached the left end
     const atLeft = scrollLeft === 0 && e.deltaX < 0;
+
     if (!atRight && !atLeft) {
       e.preventDefault?.();
     }

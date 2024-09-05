@@ -415,9 +415,8 @@ export class RevogrViewportScroll implements ElementScroll {
     const scrollHeight = this.verticalScroll?.scrollHeight ?? 0;
 
     // Detect if the user has reached the bottom
-    const atBottom = (scrollTop + clientHeight >= scrollHeight) && e.deltaY > 0;
-    const atTop = scrollTop === 0 && e.deltaY < 0;
-    if (!atBottom && !atTop) {
+    const atBottom = scrollTop + clientHeight >= scrollHeight;
+    if (!atBottom) {
       e.preventDefault?.();
     }
     const pos = scrollTop + e[delta];
@@ -436,20 +435,9 @@ export class RevogrViewportScroll implements ElementScroll {
     delta: Delta,
     e: LocalScrollEvent,
   ) {
-    if (!e.deltaX) {
-      return;
-    }
-    const { scrollLeft, scrollWidth, clientWidth } = this.horizontalScroll;
-
-    // Detect if the user has reached the right end
-    const atRight = (scrollLeft + clientWidth >= scrollWidth) && e.deltaX > 0;
-
-    // Detect if the user has reached the left end
-    const atLeft = scrollLeft === 0 && e.deltaX < 0;
-    if (!atRight && !atLeft) {
-      e.preventDefault?.();
-    }
-    const pos = scrollLeft + e[delta];
+    // todo: when you reach the grid end don't prevent default it should work as native
+    e.preventDefault?.();
+    const pos = this.horizontalScroll.scrollLeft + e[delta];
     this.localScrollService?.scroll(pos, type, undefined, e[delta]);
     this.localScrollTimer.latestScrollUpdate(type);
   }
