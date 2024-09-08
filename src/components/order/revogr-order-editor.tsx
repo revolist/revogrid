@@ -1,7 +1,7 @@
 import { Component, Method, Event, EventEmitter, Prop } from '@stencil/core';
 import debounce from 'lodash/debounce';
 
-import { DSourceState } from '@store';
+import { DSourceState, getSourceItem } from '@store';
 import { DRAGG_TEXT } from '../../utils/consts';
 import RowOrderService from './order-row.service';
 import {
@@ -42,6 +42,7 @@ export class OrderEditor {
     pos: PositionItem;
     event: MouseEvent;
     rowType: DimensionRows;
+    model: any;
   }>;
 
   /** Row drag ended started */
@@ -109,6 +110,7 @@ export class OrderEditor {
       pos,
       event: e.originalEvent,
       rowType: this.rowType,
+      model: getSourceItem(this.dataStore, pos.itemIndex),
     });
     if (dragStartEvent.defaultPrevented) {
       return;

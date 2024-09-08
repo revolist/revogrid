@@ -893,11 +893,7 @@ export class RevoGridComponent {
   // #region Listeners
   /** Drag events */
   @Listen('rowdragstartinit') onRowDragStarted(
-    e: CustomEvent<{
-      pos: PositionItem;
-      text: string;
-      event: MouseEvent;
-    }>,
+    e: CustomEvent<HTMLRevogrOrderEditorElementEventMap['rowdragstartinit']>,
   ) {
     const dragStart = this.rowdragstart.emit(e.detail);
     if (dragStart.defaultPrevented) {
