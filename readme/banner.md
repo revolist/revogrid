@@ -11,9 +11,6 @@
   <img src="https://badgen.net/bundlephobia/tree-shaking/@revolist/revogrid@latest" alt="Tree shaking"/>
   <img src="https://sonarcloud.io/api/project_badges/measure?project=revolist_revogrid&metric=alert_status" alt="Sonar Quality Gate"/>
   <img src="https://sonarcloud.io/api/project_badges/measure?project=revolist_revogrid&metric=alert_status" alt="Sonar Quality Gate"/>
-  <a href="https://www.jsdelivr.com/package/npm/@revolist/revogrid">
-    <img src="https://data.jsdelivr.com/v1/package/npm/@revolist/revogrid/badge" alt="Downloads"/>
-  </a>
 </p>
 
 #
