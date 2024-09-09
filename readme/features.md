@@ -17,6 +17,8 @@
 
 - **Formula Support**: Evaluate formulas in cell data.
 
+- **Master Detail/Subtables/Forms**: Expand rows to reveal child data.
+
 - **Drag and Drop**: Drag and drop in rows and columns.
 
 - **Sorting**: Multiple options, customizable per column, with advanced event handling.
