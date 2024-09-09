@@ -34,7 +34,10 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Build
-        run: cd ./demo && npm i && npm run build
+        run: |
+          cd ./demo
+          npm install
+          npm run build
         shell: bash
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
