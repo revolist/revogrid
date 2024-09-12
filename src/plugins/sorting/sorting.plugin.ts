@@ -12,7 +12,7 @@ import {
   DimensionRows,
   PluginProviders,
 } from '@type';
-import { getColumnByProp } from '../../utils/column.utils';
+import { getCellRaw, getColumnByProp } from '../../utils/column.utils';
 import { rowTypes } from '@store';
 
 export type SortingOrder = Record<ColumnProp, Order>;
@@ -123,7 +123,7 @@ export default class SortingPlugin extends BasePlugin {
 
   getComparer(column: ColumnRegular | undefined, order: Order): CellCompareFunc | undefined {
     const cellCmp: CellCompareFunc =
-      column?.cellCompare?.bind({ order }) || this.defaultCellCompare;
+      column?.cellCompare?.bind({ order }) || this.defaultCellCompare?.bind({ column });
     if (order == 'asc') {
       return cellCmp;
     }
@@ -258,9 +258,11 @@ export default class SortingPlugin extends BasePlugin {
     this.emit('aftersortingapply');
   }
 
-  defaultCellCompare(prop: ColumnProp, a: DataType, b: DataType) {
-    const av = a?.[prop]?.toString().toLowerCase();
-    const bv = b?.[prop]?.toString().toLowerCase();
+  defaultCellCompare(this: { column?: ColumnRegular }, prop: ColumnProp, a: DataType, b: DataType) {
+    const aRaw = this.column ? getCellRaw(a, this.column) : a?.[prop];
+    const bRaw = this.column ? getCellRaw(b, this.column) : b?.[prop];
+    const av = aRaw?.toString().toLowerCase();
+    const bv = bRaw?.toString().toLowerCase();
 
     return av == bv ? 0 : av > bv ? 1 : -1;
   }

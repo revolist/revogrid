@@ -26,9 +26,15 @@ export function getCellData(val?: any) {
   return val;
 }
 
+export function getCellRaw(model: DataType, column: ColumnRegular) {
+  if (column.cellParser) {
+    return column.cellParser(model, column);
+  }
+  return model[column.prop];
+}
+
 export function getCellDataParsed(model: DataType, column: ColumnRegular) {
-  const val = column.cellParser ? column.cellParser(model, column) : model[column.prop];
-  return getCellData(val);
+  return getCellData(getCellRaw(model, column));
 }
 
 /**
