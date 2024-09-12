@@ -4,6 +4,7 @@ import {
   Observable,
   CELL_CLASS,
   DISABLED_CLASS,
+  getCellRaw,
 } from '../../utils';
 import { getRange } from '@store';
 
@@ -155,7 +156,6 @@ export default class ColumnService {
     const column = this.columns[colIndex];
     const prop: ColumnProp | undefined = column?.prop;
     const model = getSourceItem(this.dataStore, rowIndex) || {};
-    const value = model[prop];
     const type = this.dataStore.get('type');
     return {
       prop,
@@ -166,7 +166,7 @@ export default class ColumnService {
       colIndex,
       colType: this.type,
       type,
-      value,
+      value: getCellRaw(model, column),
     };
   }
 
