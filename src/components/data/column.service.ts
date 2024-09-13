@@ -114,7 +114,7 @@ export default class ColumnService {
   ): BeforeSaveDataDetails {
     const data = this.rowDataModel(rowIndex, colIndex);
     if (typeof val === 'undefined') {
-      getCellData(val = data.value);
+      val = getCellData(data.value);
     }
     return {
       prop: data.prop,
