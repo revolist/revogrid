@@ -4,6 +4,7 @@ import {
   CELL_CLASS,
   DISABLED_CLASS,
   getCellRaw,
+  getCellData,
 } from '../../utils';
 import { getRange } from '@store';
 
@@ -113,7 +114,7 @@ export default class ColumnService {
   ): BeforeSaveDataDetails {
     const data = this.rowDataModel(rowIndex, colIndex);
     if (typeof val === 'undefined') {
-      val = data.value;
+      getCellData(val = data.value);
     }
     return {
       prop: data.prop,
