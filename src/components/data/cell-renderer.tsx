@@ -1,23 +1,19 @@
 import { h, VNode, Build, EventEmitter } from '@stencil/core';
 import {
-  Providers,
   DragStartEvent,
-  ColumnDataSchemaModel,
-  CellTemplate,
+  CellTemplateProp,
 } from '@type';
 
 import {
-  getCellData,
   DRAGGABLE_CLASS,
   DRAG_ICON_CLASS,
+  getCellDataParsed,
 } from '../../utils';
 
 import { isRowDragService } from './column.service';
 
 interface RenderProps {
-  model: ColumnDataSchemaModel;
-  providers: Providers;
-  template?: CellTemplate;
+  schemaModel: CellTemplateProp;
   additionalData?: any;
   dragStartCell?: EventEmitter<DragStartEvent>;
 }
@@ -27,27 +23,26 @@ function renderCell(v: RenderProps) {
   const els: (VNode | string)[] = [];
 
   // #region Custom cell
-  if (v.template) {
-    els.push(
-      v.template(h, { ...v.model, providers: v.providers }, v.additionalData),
-    );
+  const template = v.schemaModel.column?.cellTemplate;
+  if (template) {
+    els.push(template(h, v.schemaModel, v.additionalData));
   }
   // #endregion
 
   // #region Regular cell
   else {
-    if (!v.model.column) {
+    if (!v.schemaModel.column) {
       // something is wrong with data
       if (Build.isDev) {
-        console.error('Investigate column problem.', v.model);
+        console.error('Investigate column problem.', v.schemaModel);
       }
       return '';
     }
 
     // Row drag
     if (
-      v.model.column.rowDrag &&
-      isRowDragService(v.model.column.rowDrag, v.model)
+      v.schemaModel.column.rowDrag &&
+      isRowDragService(v.schemaModel.column.rowDrag, v.schemaModel)
     ) {
       els.push(
         <span
@@ -55,7 +50,7 @@ function renderCell(v: RenderProps) {
           onMouseDown={originalEvent =>
             v.dragStartCell?.emit({
               originalEvent,
-              model: v.model,
+              model: v.schemaModel,
             })
           }
         >
@@ -63,8 +58,10 @@ function renderCell(v: RenderProps) {
         </span>,
       );
     }
-
-    els.push(`${getCellData(v.model.model[v.model.prop])}`);
+    
+    els.push(`${
+      getCellDataParsed(v.schemaModel.model, v.schemaModel.column)
+    }`);
   }
   return els;
 }

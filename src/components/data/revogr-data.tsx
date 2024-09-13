@@ -19,7 +19,7 @@ import { DSourceState, getSourceItem } from '@store';
 import RowRenderer, { PADDING_DEPTH } from './row-renderer';
 import GroupingRowRenderer from '../../plugins/groupingRow/grouping.row.renderer';
 import { isGrouping } from '../../plugins/groupingRow/grouping.service';
-import { AllDimensionType, DimensionCols, DimensionRows } from '@type';
+import { AllDimensionType, CellTemplateProp, DimensionCols, DimensionRows } from '@type';
 import { RowHighlightPlugin } from './row-highlight.plugin';
 import { convertVNodeToHTML } from '../vnode/vnode.utils';
 import { CellRenderer } from './cell-renderer';
@@ -33,7 +33,6 @@ import {
   CellProps,
   BeforeCellRenderEvent,
   DragStartEvent,
-  ColumnDataSchemaModel,
   VirtualPositionItem,
   RangeArea,
   SelectionStoreState,
@@ -118,7 +117,7 @@ export class RevogrData {
    * Before each cell render function. Allows to override cell properties
    */
   @Event({ eventName: 'beforecellrender' })
-  beforeCellRender: EventEmitter<BeforeCellRenderEvent<ColumnDataSchemaModel>>;
+  beforeCellRender: EventEmitter<BeforeCellRenderEvent<CellTemplateProp>>;
 
   /**
    * Before data render
@@ -248,13 +247,16 @@ export class RevogrData {
 
       // #region Cells
       for (let rgCol of cols) {
-        const model = this.columnService.rowDataModel(
-          rgRow.itemIndex,
-          rgCol.itemIndex,
-        );
+        const smodel: CellTemplateProp = {
+          ...this.columnService.rowDataModel(
+            rgRow.itemIndex,
+            rgCol.itemIndex,
+          ),
+          providers: this.providers,
+        };
 
         // call before cell render
-        const cellEvent = this.triggerBeforeCellRender(model, rgRow, rgCol);
+        const cellEvent = this.triggerBeforeCellRender(smodel, rgRow, rgCol);
 
         // if event was prevented
         if (cellEvent.defaultPrevented) {
@@ -286,16 +288,13 @@ export class RevogrData {
           columnProps.itemIndex,
           defaultProps,
           schemaModel,
-          schemaModel.column?.cellProperties,
         );
 
         // Never use webcomponent for cell render
         // It's very slow because of webcomponent initialization takes time
         const cellNode = <CellRenderer
           renderProps={{
-            model: schemaModel,
-            providers: this.providers,
-            template: schemaModel.column?.cellTemplate,
+            schemaModel,
             additionalData: this.additionalData,
             dragStartCell: this.dragStartCell,
           }}
@@ -342,13 +341,13 @@ export class RevogrData {
   }
 
   triggerBeforeCellRender(
-    model: ColumnDataSchemaModel,
+    model: CellTemplateProp,
     row: VirtualPositionItem,
     column: VirtualPositionItem,
   ) {
-    const detail: BeforeCellRenderEvent<ColumnDataSchemaModel> = {
-      column: { ...column },
-      row: { ...row },
+    const detail: BeforeCellRenderEvent<CellTemplateProp> = {
+      column,
+      row,
       model,
       rowType: model.type,
       colType: model.colType,

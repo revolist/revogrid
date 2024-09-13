@@ -28,6 +28,7 @@ import {
   BeforeSaveDataDetails,
   EditorCtr,
   Editors,
+  CellTemplateProp,
 } from '@type';
 import { JSXBase } from '@stencil/core/internal';
 
@@ -81,8 +82,7 @@ export default class ColumnService {
     r: number,
     c: number,
     defaultProps: CellProps,
-    model: ColumnDataSchemaModel,
-    extraPropsFunc: ColumnRegular['cellProperties'],
+    schemaModel: CellTemplateProp,
   ): CellProps {
     const props: CellProps = {
       ...defaultProps,
@@ -95,7 +95,7 @@ export default class ColumnService {
       [DISABLED_CLASS]: this.isReadOnly(r, c),
     };
 
-    const extra = extraPropsFunc?.(model);
+    const extra = schemaModel.column?.cellProperties?.(schemaModel);
     if (!extra) {
       return props;
     }
