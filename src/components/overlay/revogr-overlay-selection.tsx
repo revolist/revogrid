@@ -25,6 +25,7 @@ import { isEditInput } from '../editors/edit.utils';
 import { KeyboardService } from './keyboard.service';
 import { AutoFillService } from './autofill.service';
 import { verifyTouchTarget } from '../../utils/events';
+import { getCellData } from '../../utils';
 import {
   Observable,
   SelectionStoreState,
@@ -492,11 +493,18 @@ export class OverlaySelection {
     if (this.readonly || !editCell) {
       return null;
     }
-    const val =
-      editCell.val || this.columnService.getCellData(editCell.y, editCell.x);
+    const enteredOrModelValue =
+      editCell.val ||
+        getCellData(
+          this.columnService.rowDataModel(editCell.y, editCell.x).value
+        );
     const editable = {
       ...editCell,
-      ...this.columnService.getSaveData(editCell.y, editCell.x, val),
+      ...this.columnService.getSaveData(
+        editCell.y,
+        editCell.x,
+        enteredOrModelValue,
+      ),
     };
     const renderEvent = this.beforeEditRender.emit({
       range: {
@@ -860,7 +868,9 @@ export class OverlaySelection {
   }
 
   private rowDragStart({ detail }: CustomEvent<{ cell: Cell; text: string }>) {
-    detail.text = this.columnService.getCellData(detail.cell.y, detail.cell.x);
+    detail.text = getCellData(
+      this.columnService.rowDataModel(detail.cell.y, detail.cell.x).value
+    );
   }
 
   /**

@@ -79,8 +79,8 @@ export function generateFakeDataObject(config = {}) {
         prop: rgCol,
         sortable: true,
         size: 100,
-        // custom sorting
-        cellCompare: rgCol % 2 == 0 ? naturalSort : undefined,
+        // custom sorting except of 0 row
+        cellCompare: !!rgCol && rgCol % 2 == 0 ? naturalSort : undefined,
         cellProperties: ({ colIndex }) => ({
           className: {
             'first-column': colIndex === 0,
@@ -115,6 +115,7 @@ export function generateFakeDataObject(config = {}) {
           'custom-row-index': rowIndex
         };
       }
+      columns[rgCol].cellParser = () => 'a';
       columns[rgCol].cellTemplate = (h, { value }) => {
       //   // delay
       //   // for(let i = 0; i < 10000000; i++) {
