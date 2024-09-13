@@ -398,7 +398,7 @@ export type ColumnTemplateFunc = (
   additionalData?: any,
 ) => any;
 export type PropertiesFunc = (
-  props: ColumnDataSchemaModel,
+  props: CellTemplateProp,
 ) => CellProps | void | undefined;
 export type ColPropertiesFunc = (
   props: ColumnPropProp,

@@ -92,14 +92,6 @@ export function generateFakeDataObject(config = {}) {
 
         // custom filter
         // filter: 'myFilterType',
-
-        // cellTemplate: (h, v) => {
-        //   // delay
-        //   // for(let i = 0; i < 10000000; i++) {
-        //   //   // do nothing, this is just to slow down to test performance
-        //   // }
-        //   return v.model[v.prop];
-        // }
       };
 
       // apply config
@@ -118,7 +110,18 @@ export function generateFakeDataObject(config = {}) {
     result[rgRow][rgCol] = `${rgRow}:${rgCol}`; // rgRow % 5 ? rgCol : rgRow % 3 ? (rgCol % 3 ? 2 : 3) : rgRow; // rgRow + ':' + rgCol;
 
     if (rgCol === 0) {
-      result[rgRow][rgCol] = 'A';
+      columns[rgCol].cellProperties = ({ rowIndex }) => {
+        return {
+          'custom-row-index': rowIndex
+        };
+      }
+      columns[rgCol].cellTemplate = (h, { value }) => {
+      //   // delay
+      //   // for(let i = 0; i < 10000000; i++) {
+      //   //   // do nothing, this is just to slow down to test performance
+      //   // }
+        return value;
+      }
     }
     // apply config
     if (rgCol === rowDrag) {
