@@ -166,7 +166,7 @@ export interface ColumnType extends ColumnProperties {
    */
   maxSize?: number;
   /**
-   * Represents a custom editor defined in @editors property.
+   * Represents a custom editor defined in editors property.
    * Can be a string or an editor constructor function.
    */
   editor?: string | EditorCtr;
@@ -217,11 +217,11 @@ export interface ColumnRegular extends ColumnType {
    */
   autoSize?: boolean;
   /**
-   * Filter. Require filter plugin to be installed and activated through grid config @filter.
+   * Filter. Require filter plugin to be installed and activated through grid config filter.
    */
   filter?: boolean | string | string[];
   /**
-   * Is column can be sorted, check @cellCompare function for custom sorting.
+   * Is column can be sorted, check cellCompare function for custom sorting.
    */
   sortable?: boolean;
   /**
@@ -233,7 +233,7 @@ export interface ColumnRegular extends ColumnType {
    */
   rowDrag?: RowDrag;
   /**
-   * Represents type defined in @columnTypes property through grid config.
+   * Represents type defined in columnTypes property through grid config.
    */
   columnType?: string;
   /**

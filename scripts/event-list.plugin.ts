@@ -4,16 +4,21 @@ import json2md from 'json2md';
 export const eventListOutputTarget = (outputTarget: {
     mdPath: string;
     tsPath: string;
+    footer?: string;
 }): OutputTargetCustom => ({
   type: 'custom',
   name: 'event-list-generator',
   async generator(_, compilerCtx, buildCtx) {
     const timespan = buildCtx.createTimeSpan(`generate event-list`, true);
 
-    const md = json2md(
+    const md = `---
+aside: false
+---
+
+${json2md(
       [
         {
-          h1: 'Events',
+          h1: 'Revogrid Events',
         },
         {
           table: {
@@ -31,8 +36,9 @@ export const eventListOutputTarget = (outputTarget: {
       ],
       '',
       '',
-    );
-    // mdContent = md;
+    )}
+
+${outputTarget.footer || ''}`;
 
     // Collecting and filtering unique event names
     const eventNames = buildCtx.components.flatMap(c =>

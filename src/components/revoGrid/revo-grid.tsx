@@ -90,9 +90,9 @@ import { ColumnFilterConfig, FilterCollection } from '../../plugins/filter/filte
  * All complex property types such as `ColumnRegular`, `ColumnProp`, `ColumnDataSchemaModel` can be found there.
  * :::
  *
- * :::tip
- * For a comprehensive events guide, check the [dependency tree](#Dependencies).
- * All events propagate to the root level of the grid.
+ * :::info
+ * For a comprehensive events guide, check the [Events](./events.md).
+ * All events propagate to the root level of the grid. [Dependency tree](#Dependencies).
  * :::
  *
  * @slot data-{column-type}-{row-type}. @example data-rgCol-rgRow - main data slot. Applies extra elements in <revogr-data />.

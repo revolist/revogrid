@@ -134,8 +134,9 @@ export const config: Config = {
       footer: '*Built with ❤️ by Revolist OU*',
     },
     eventListOutputTarget({
-      mdPath: './docs/guide/types/Events.md',
+      mdPath: './docs/guide/api/events.md',
       tsPath: './src/types/events.ts',
+      footer: '*Built with ❤️ by Revolist OU*',
     }),
     {
       type: 'docs-vscode',

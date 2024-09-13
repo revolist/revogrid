@@ -42,9 +42,9 @@ export namespace Components {
      * Read [type definition file](https://github.com/revolist/revogrid/blob/master/src/interfaces.d.ts) for the full interface information.
      * All complex property types such as `ColumnRegular`, `ColumnProp`, `ColumnDataSchemaModel` can be found there.
      * :::
-     * :::tip
-     * For a comprehensive events guide, check the [dependency tree](#Dependencies).
-     * All events propagate to the root level of the grid.
+     * :::info
+     * For a comprehensive events guide, check the [Events](./events.md).
+     * All events propagate to the root level of the grid. [Dependency tree](#Dependencies).
      * :::
      * @example data-rgCol-rgRow - main data slot. Applies extra elements in <revogr-data />.
      * @example focus-rgCol-rgRow - focus layer for main data. Applies extra elements in <revogr-focus />.
@@ -834,9 +834,9 @@ declare global {
      * Read [type definition file](https://github.com/revolist/revogrid/blob/master/src/interfaces.d.ts) for the full interface information.
      * All complex property types such as `ColumnRegular`, `ColumnProp`, `ColumnDataSchemaModel` can be found there.
      * :::
-     * :::tip
-     * For a comprehensive events guide, check the [dependency tree](#Dependencies).
-     * All events propagate to the root level of the grid.
+     * :::info
+     * For a comprehensive events guide, check the [Events](./events.md).
+     * All events propagate to the root level of the grid. [Dependency tree](#Dependencies).
      * :::
      * @example data-rgCol-rgRow - main data slot. Applies extra elements in <revogr-data />.
      * @example focus-rgCol-rgRow - focus layer for main data. Applies extra elements in <revogr-focus />.
@@ -1230,9 +1230,9 @@ declare namespace LocalJSX {
      * Read [type definition file](https://github.com/revolist/revogrid/blob/master/src/interfaces.d.ts) for the full interface information.
      * All complex property types such as `ColumnRegular`, `ColumnProp`, `ColumnDataSchemaModel` can be found there.
      * :::
-     * :::tip
-     * For a comprehensive events guide, check the [dependency tree](#Dependencies).
-     * All events propagate to the root level of the grid.
+     * :::info
+     * For a comprehensive events guide, check the [Events](./events.md).
+     * All events propagate to the root level of the grid. [Dependency tree](#Dependencies).
      * :::
      * @example data-rgCol-rgRow - main data slot. Applies extra elements in <revogr-data />.
      * @example focus-rgCol-rgRow - focus layer for main data. Applies extra elements in <revogr-focus />.
@@ -2263,9 +2263,9 @@ declare module "@stencil/core" {
              * Read [type definition file](https://github.com/revolist/revogrid/blob/master/src/interfaces.d.ts) for the full interface information.
              * All complex property types such as `ColumnRegular`, `ColumnProp`, `ColumnDataSchemaModel` can be found there.
              * :::
-             * :::tip
-             * For a comprehensive events guide, check the [dependency tree](#Dependencies).
-             * All events propagate to the root level of the grid.
+             * :::info
+             * For a comprehensive events guide, check the [Events](./events.md).
+             * All events propagate to the root level of the grid. [Dependency tree](#Dependencies).
              * :::
              * @example data-rgCol-rgRow - main data slot. Applies extra elements in <revogr-data />.
              * @example focus-rgCol-rgRow - focus layer for main data. Applies extra elements in <revogr-focus />.
