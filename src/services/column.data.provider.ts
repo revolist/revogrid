@@ -104,6 +104,9 @@ export default class ColumnDataProvider {
     this.dataSources[type].refresh();
   }
 
+  /**
+   * Main method to set columns
+   */
   setColumns(data: ColumnCollection): ColumnCollection {
     columnTypes.forEach(k => {
       // set columns data
