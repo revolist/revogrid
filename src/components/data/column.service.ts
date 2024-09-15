@@ -154,7 +154,7 @@ export default class ColumnService {
    */
   rowDataModel(rowIndex: number, colIndex: number): ColumnDataSchemaModel {
     const column = this.columns[colIndex];
-    const prop: ColumnProp | undefined = column?.prop;
+    const prop = column?.prop;
     const model = getSourceItem(this.dataStore, rowIndex) || {};
     const type = this.dataStore.get('type');
     return {
