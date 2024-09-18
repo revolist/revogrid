@@ -16,11 +16,11 @@
 
 -   Redesigned type support:
         - Removed deprecated namespaces:
-            - **Before**: `RevoGrid.ColumnDataSchemaRegular`
-            - **Now**: `ColumnDataSchemaRegular`;
+            - **Before**: `RevoGrid.ColumnRegular`
+            - **Now**: `ColumnRegular`;
         - Improved type import:
             - **Before**: `import { RevoGrid } from '@revolist/revogrid/dist/types/interfaces'`
-            - **Now**: `import { ColumnDataSchemaRegular } from '@revolist/revogrid'`.
+            - **Now**: `import { ColumnRegular } from '@revolist/revogrid'`.
         - Changed viewport type names everywhere. For example, before: `rowDefinitions: [{ type: "row", index: 0, size: 145 }]`, after: `rowDefinitions: [{ type: "rgRow", index: 0, size: 145 }]`.
     -   Updated [event](https://rv-grid.com/guide/api/revoGrid.html#Events) naming convention. Review your [event](https://rv-grid.com/guide/api/revoGrid.html#Events) usage. [Event names](https://rv-grid.com/guide/api/revoGrid.html#Events) are all lowercase now and are aligned with modern event naming conventions. For example, `afterEdit` -> `afteredit`.
     - Multiple event breaking changes introduced: beforerowrender now returns `BeforeRowRenderEvent`. Check all events for details.
