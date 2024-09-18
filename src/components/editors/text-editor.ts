@@ -1,7 +1,7 @@
 import { VNode, h as createElement } from '@stencil/core';
 import { isEnterKeyValue, isTab } from '../../utils/key.utils';
 import { timeout } from '../../utils';
-import { ColumnDataSchemaModel, ColumnRegular } from '@type';
+import { ColumnDataSchemaModel } from '@type';
 import { EditCell, EditorBase, SaveData } from '@type';
 
 /**
