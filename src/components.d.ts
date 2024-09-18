@@ -203,6 +203,10 @@ export namespace Components {
          */
         "refresh": (type?: DimensionRows | "all") => Promise<void>;
         /**
+          * Refresh extra elements. Triggers re-rendering of extra elements and functions. Part of extraElements and registerVNode methods. Useful for plugins.
+         */
+        "refreshExtraElements": () => Promise<void>;
+        /**
           * Register new virtual node inside of grid. Used for additional items creation such as plugin elements. Should be set before grid render inside of plugins.
          */
         "registerVNode": (VNode | (() => VNode))[];
