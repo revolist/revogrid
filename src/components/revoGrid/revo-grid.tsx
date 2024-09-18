@@ -97,7 +97,8 @@ import { ColumnFilterConfig, FilterCollection } from '../../plugins/filter/filte
  *
  * @slot data-{column-type}-{row-type}. @example data-rgCol-rgRow - main data slot. Applies extra elements in <revogr-data />.
  * @slot focus-{column-type}-{row-type}. @example focus-rgCol-rgRow - focus layer for main data. Applies extra elements in <revogr-focus />.
- */
+ * @slot viewport - Viewport slot.
+*/
 @Component({
   tag: 'revo-grid',
   styleUrl: 'revo-grid-style.scss',
@@ -842,6 +843,15 @@ export class RevoGridComponent {
     return this.viewport?.getSelectedRange() ?? null;
   }
 
+  /**
+   * Refresh extra elements. Triggers re-rendering of extra elements and functions.
+   * Part of extraElements and registerVNode methods.
+   * Useful for plugins.
+   */
+  @Method() async refreshExtraElements() {
+    this.extraService?.refresh();
+  }
+
   // #endregion
 
   // #region Listeners outside scope
@@ -1005,6 +1015,11 @@ export class RevoGridComponent {
   // #region Private Properties
   @Element() element: HTMLRevoGridElement;
   extraElements: (VNode | (() => VNode))[] = [];
+  /** 
+   * Service for rendering extra elements as virtual nodes
+   * Part of extraElements and registerVNode methods
+   */
+  extraService?: HTMLRevogrExtraElement;
 
   columnProvider?: ColumnDataProvider;
   dataProvider?: DataProvider;
@@ -1281,7 +1296,7 @@ export class RevoGridComponent {
    * Register external VNodes
    */
   @Watch('registerVNode') registerOutsideVNodes(elements: (VNode | (() => VNode))[] = []) {
-    this.extraElements = [...this.extraElements, ...elements];
+    this.extraElements = elements;
   }
 
   @Watch('additionalData') additionalDataChanged(data: any) {
@@ -1677,8 +1692,7 @@ export class RevoGridComponent {
           ref={el => this.scrollingService.registerElement(el, 'colScroll')}
           onScrollvirtual={e => this.scrollingService.proxyScroll(e.detail)}
         />
-        <revogr-extra nodes={this.extraElements}>
-        </revogr-extra>
+        <revogr-extra ref={el => (this.extraService = el)} nodes={this.extraElements} />
       </Host>
     );
   }

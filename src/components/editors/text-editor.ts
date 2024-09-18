@@ -1,7 +1,7 @@
 import { VNode, h as createElement } from '@stencil/core';
 import { isEnterKeyValue, isTab } from '../../utils/key.utils';
 import { timeout } from '../../utils';
-import { ColumnRegular } from '@type';
+import { ColumnDataSchemaModel, ColumnRegular } from '@type';
 import { EditCell, EditorBase, SaveData } from '@type';
 
 /**
@@ -25,7 +25,7 @@ export class TextEditor implements EditorBase {
   editCell?: EditCell = undefined;
 
   constructor(
-    public column: ColumnRegular,
+    public data: ColumnDataSchemaModel,
     private saveCallback?: SaveCallback,
   ) {}
 
