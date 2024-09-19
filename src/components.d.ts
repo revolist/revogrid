@@ -187,7 +187,7 @@ export namespace Components {
          */
         "pinnedTopSource": DataType[];
         /**
-          * Custom grid plugins. Has to be predefined during first grid init. Every plugin should be inherited from BasePlugin.
+          * Custom grid plugins. Can be added or removed at runtime. Every plugin should be inherited from BasePlugin class.  For more details check [Plugin guide](https://rv-grid.com/guide/plugin/)
          */
         "plugins": GridPlugin[];
         /**
@@ -1511,7 +1511,7 @@ declare namespace LocalJSX {
          */
         "pinnedTopSource"?: DataType[];
         /**
-          * Custom grid plugins. Has to be predefined during first grid init. Every plugin should be inherited from BasePlugin.
+          * Custom grid plugins. Can be added or removed at runtime. Every plugin should be inherited from BasePlugin class.  For more details check [Plugin guide](https://rv-grid.com/guide/plugin/)
          */
         "plugins"?: GridPlugin[];
         /**
