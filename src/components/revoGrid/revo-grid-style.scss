@@ -21,24 +21,24 @@ revo-grid {
 
   .attribution {
     $size: 4px;
-    $color: rgba(#266ae8, 0.6);
+    $color: rgba(#266ae8, 0.9);
 
     position: absolute;
-    top: 0;
+    bottom: 0;
     left: 0;
     right: 0;
-    z-index: 100;
+    z-index: 1000;
     width: 0;
     height: 0;
     border-left: $size solid $color;
-    border-top: $size solid $color;
-    border-bottom: $size solid transparent;
+    border-bottom: $size solid $color;
+    border-top: $size solid transparent;
     border-right: $size solid transparent;
     cursor: pointer;
 
     .value {
       position: absolute;
-      top: 0;
+      bottom: 0;
       left: 0;
       background-color: rgba(255, 255, 255, 0.9);
       padding: 4px;
