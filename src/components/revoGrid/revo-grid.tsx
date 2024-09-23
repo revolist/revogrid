@@ -80,6 +80,7 @@ import type { GridPlugin } from '../../plugins/base.plugin';
 import { ColumnCollection, getColumnByProp, getColumns } from '../../utils/column.utils';
 import { WCAGPlugin } from '../../plugins/wcag';
 import { ColumnFilterConfig, FilterCollection } from '../../plugins/filter/filter.types';
+import { PluginService } from './plugin.service';
 
 
 /**
@@ -174,9 +175,10 @@ export class RevoGridComponent {
   @Prop() applyOnClose = false;
 
   /**
-   * Custom grid plugins.
-   * Has to be predefined during first grid init.
-   * Every plugin should be inherited from BasePlugin.
+   * Custom grid plugins. Can be added or removed at runtime.
+   * Every plugin should be inherited from BasePlugin class.
+   * 
+   * For more details check [Plugin guide](https://rv-grid.com/guide/plugin/)
    */
   @Prop() plugins: GridPlugin[] = [];
 
@@ -816,7 +818,7 @@ export class RevoGridComponent {
    * Get all active plugins instances
    */
   @Method() async getPlugins(): Promise<PluginBaseComponent[]> {
-    return [...this.internalPlugins];
+    return this.pluginService.get();
   }
 
   /**
@@ -1026,6 +1028,7 @@ export class RevoGridComponent {
   dimensionProvider?: DimensionProvider;
   viewportProvider?: ViewportProvider;
   themeService: ThemeService;
+  pluginService = new PluginService();
   viewport: ViewportService | null = null;
   isInited = false;
 
@@ -1033,11 +1036,6 @@ export class RevoGridComponent {
   selectionStoreConnector: SelectionStoreConnector;
   scrollingService: GridScrollingService;
 
-  /**
-   * Plugins
-   * Define plugins collection
-   */
-  internalPlugins: PluginBaseComponent[] = [];
   // #endregion
 
   // #region Watchers
@@ -1244,14 +1242,7 @@ export class RevoGridComponent {
    * Grouping
    */
   @Watch('grouping') groupingChanged(newVal: GroupingOptions = {}) {
-    let grPlugin: GroupingRowPlugin | undefined;
-    for (let p of this.internalPlugins) {
-      const isGrouping = p as unknown as GroupingRowPlugin;
-      if (!!isGrouping.setGrouping) {
-        grPlugin = isGrouping;
-        break;
-      }
-    }
+    const grPlugin = this.pluginService.getByClass(GroupingRowPlugin);
     grPlugin?.setGrouping(newVal || {});
   }
   /**
@@ -1264,23 +1255,20 @@ export class RevoGridComponent {
     if (isStretch === 'false') {
       isStretch = false;
     }
-    let stretch = this.internalPlugins.filter(p => isStretchPlugin(p))[0];
+
+    const pluginData = this.getPluginData();
+    if (!pluginData) {
+      return;
+    }
+    const stretch = this.pluginService.getByClass(StretchColumn);
     if ((typeof isStretch === 'boolean' && isStretch) || isStretch === 'true') {
       if (!stretch) {
-        const pluginData: PluginProviders = {
-          data: this.dataProvider,
-          column: this.columnProvider,
-          dimension: this.dimensionProvider,
-          viewport: this.viewportProvider,
-          selection: this.selectionStoreConnector,
-        };
-        this.internalPlugins.push(new StretchColumn(this.element, pluginData));
+        this.pluginService.add(new StretchColumn(this.element, pluginData));
       } else if (isStretchPlugin(stretch)) {
         stretch.applyStretch(this.columnProvider.getRawColumns());
       }
     } else if (stretch) {
-      const index = this.internalPlugins.indexOf(stretch);
-      this.internalPlugins.splice(index, 1);
+      this.pluginService.remove(stretch);
     }
   }
 
@@ -1303,21 +1291,12 @@ export class RevoGridComponent {
     this.additionaldatachanged.emit(data);
   }
 
-  @Watch('plugins') pluginsChanged(plugins: GridPlugin[] = [], _prevPlugins?: GridPlugin[]) {
-    // pass data provider to plugins
-    const pluginData = this.getPluginData();
-    if (!pluginData) {
-      return;
-    }
-    // todo: remove old plugins if any was removed based on _prevPlugins
-    // register user plugins
-    plugins?.forEach(userPlugin => {
-      const existingPlugin = this.internalPlugins.find(createdPlugin => createdPlugin instanceof userPlugin);
-      if (existingPlugin) {
-        return;
-      }
-      this.internalPlugins.push(new userPlugin(this.element, pluginData));
-    });
+  /**
+   * User can add plugins via plugins property
+   */
+  @Watch('plugins') pluginsChanged(plugins: GridPlugin[] = [], prevPlugins?: GridPlugin[]) {
+    this.pluginService.addUserPluginsAndCreate(this.element, plugins, prevPlugins, this.getPluginData());
+ 
   }
   // #endregion
 
@@ -1325,33 +1304,37 @@ export class RevoGridComponent {
   private setPlugins() {
     // remove old plugins if any
     this.removePlugins();
-
     // pass data provider to plugins
     const pluginData = this.getPluginData();
     if (!pluginData) {
       return;
     }
 
+    // register system plugins
+    this.setCorePlugins(pluginData);
+    // register user plugins
+    this.pluginsChanged(this.plugins);
+  }
+  
+  private setCorePlugins(pluginData: PluginProviders) {
     if (this.accessible) {
-      this.internalPlugins.push(new WCAGPlugin(this.element, pluginData));
+      this.pluginService.add(new WCAGPlugin(this.element, pluginData));
     }
 
     // register auto size plugin
     if (this.autoSizeColumn) {
-      this.internalPlugins.push(
-        new AutoSize(
-          this.element,
-          pluginData,
-          typeof this.autoSizeColumn === 'object'
-            ? this.autoSizeColumn
-            : undefined,
-        ),
-      );
+      this.pluginService.add(new AutoSize(
+        this.element,
+        pluginData,
+        typeof this.autoSizeColumn === 'object'
+          ? this.autoSizeColumn
+          : undefined,
+      ));
     }
 
     // register filter plugin
     if (this.filter) {
-      this.internalPlugins.push(
+      this.pluginService.add(
         new FilterPlugin(
           this.element,
           pluginData,
@@ -1362,20 +1345,17 @@ export class RevoGridComponent {
 
     // register export plugin
     if (this.exporting) {
-      this.internalPlugins.push(new ExportFilePlugin(this.element, pluginData));
+      this.pluginService.add(new ExportFilePlugin(this.element, pluginData));
     }
 
     // register sorting plugin
-    this.internalPlugins.push(new SortingPlugin(this.element, pluginData));
+    this.pluginService.add(new SortingPlugin(this.element, pluginData));
 
     // register grouping plugin
-    this.internalPlugins.push(new GroupingRowPlugin(this.element, pluginData));
+    this.pluginService.add(new GroupingRowPlugin(this.element, pluginData));
     if (this.canMoveColumns) {
-      this.internalPlugins.push(new ColumnPlugin(this.element, pluginData));
+      this.pluginService.add(new ColumnPlugin(this.element, pluginData));
     }
-
-    // register user plugins
-    this.pluginsChanged(this.plugins);
   }
 
   private getPluginData(): PluginProviders | undefined {
@@ -1396,8 +1376,7 @@ export class RevoGridComponent {
   }
 
   private removePlugins() {
-    this.internalPlugins.forEach(p => p.destroy?.());
-    this.internalPlugins = [];
+    this.pluginService.destroy();
   }
   // #endregion
 
@@ -1698,7 +1677,8 @@ export class RevoGridComponent {
   }
 
   disconnectedCallback() {
-    // Remove all plugins, to avoid memory leaks and unexpected behaviour when the component is removed
+    // Remove all plugins, to avoid memory leaks
+    // and unexpected behaviour when the component is removed
     this.removePlugins();
   }
 }
