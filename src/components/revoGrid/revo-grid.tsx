@@ -811,7 +811,7 @@ export class RevoGridComponent {
     if (event.defaultPrevented) {
       return;
     }
-    this.selectionStoreConnector.clearAll();
+    this.selectionStoreConnector?.clearAll();
   }
 
   /**
@@ -1033,7 +1033,7 @@ export class RevoGridComponent {
   isInited = false;
 
   orderService: OrdererService;
-  selectionStoreConnector: SelectionStoreConnector;
+  selectionStoreConnector?: SelectionStoreConnector;
   scrollingService: GridScrollingService;
 
   // #endregion
@@ -1359,7 +1359,7 @@ export class RevoGridComponent {
   }
 
   private getPluginData(): PluginProviders | undefined {
-    if (!this.dimensionProvider || !this.dataProvider || !this.columnProvider || !this.viewportProvider) {
+    if (!this.dimensionProvider || !this.dataProvider || !this.columnProvider || !this.viewportProvider || !this.selectionStoreConnector) {
       return;
     }
 
@@ -1464,7 +1464,7 @@ export class RevoGridComponent {
   }
 
   render() {
-    if (!this.dimensionProvider || !this.dataProvider || !this.columnProvider || !this.viewportProvider) {
+    if (!this.dimensionProvider || !this.dataProvider || !this.columnProvider || !this.viewportProvider || !this.selectionStoreConnector) {
       return;
     }
     const contentHeight =
@@ -1551,7 +1551,7 @@ export class RevoGridComponent {
             {...data}
             isMobileDevice={isMobile}
             selectionStore={data.segmentSelectionStore}
-            onSelectall={() => this.selectionStoreConnector.selectAll()}
+            onSelectall={() => this.selectionStoreConnector?.selectAll()}
             editors={this.editors}
             readonly={this.readonly}
             range={this.range}
@@ -1559,12 +1559,12 @@ export class RevoGridComponent {
             applyChangesOnClose={this.applyOnClose}
             additionalData={this.additionalData}
             slot={data.slot}
-            onBeforenextvpfocus={(e) => this.selectionStoreConnector.beforeNextFocusCell(e.detail)}
-            onCanceledit={() => this.selectionStoreConnector.setEdit(false)}
+            onBeforenextvpfocus={(e) => this.selectionStoreConnector?.beforeNextFocusCell(e.detail)}
+            onCanceledit={() => this.selectionStoreConnector?.setEdit(false)}
             onSetedit={({ detail }) => {
               const event = this.beforeeditstart.emit(detail);
               if (!event.defaultPrevented) {
-                this.selectionStoreConnector.setEdit(detail.val);
+                this.selectionStoreConnector?.setEdit(detail.val);
               }
             }}
           >
