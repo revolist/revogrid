@@ -38,30 +38,27 @@ export function calculateDimensionData(
 
   // prepare order sorted new sizes and calculate changed real size
   const newIndexes = Object.keys(newSizes).map(Number).sort((a, b) => a - b);
-  // fill new coordinates based on what is changed
-  newIndexes.reduce(
-    (previous: PositionItem | undefined, itemIndex: number, i: number) => {
-      const newItem: PositionItem = {
-        itemIndex,
-        start: 0,
-        end: 0,
-      };
-      // if previous item was changed too
-      if (previous) {
-        const itemsBetween =
-          (itemIndex - previous.itemIndex - 1) * originItemSize;
-        newItem.start = itemsBetween + previous.end;
-      } else {
-        newItem.start = itemIndex * originItemSize;
-      }
-      newItem.end = newItem.start + newSizes[itemIndex];
-      positionIndexes.push(newItem.start);
-      indexToItem[itemIndex] = positionIndexToItem[i] = newItem;
-      return newItem;
-    },
-    undefined,
-  );
-
+  let previous: PositionItem | undefined;
+  for (let i = 0; i < newIndexes.length; i++) {
+    const itemIndex = newIndexes[i];
+    const newItem: PositionItem = {
+      itemIndex,
+      start: 0,
+      end: 0,
+    };
+    // if previous item was changed too
+    if (previous) {
+      const itemsBetween =
+        (itemIndex - previous.itemIndex - 1) * originItemSize;
+      newItem.start = itemsBetween + previous.end;
+    } else {
+      newItem.start = itemIndex * originItemSize;
+    }
+    newItem.end = newItem.start + newSizes[itemIndex];
+    positionIndexes.push(newItem.start);
+    indexToItem[itemIndex] = positionIndexToItem[i] = newItem;
+    previous = newItem;
+  }
   return {
     indexes: newIndexes,
     positionIndexes: [...positionIndexes],
