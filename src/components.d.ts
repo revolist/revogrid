@@ -1079,14 +1079,14 @@ declare global {
         "setedit": BeforeEdit;
         "beforeapplyrange": FocusRenderEvent;
         "beforesetrange": any;
-        "beforeeditrender": FocusRenderEvent;
         "setrange": RangeArea & { type: MultiDimensionType };
+        "beforeeditrender": FocusRenderEvent;
         "selectall": any;
         "canceledit": any;
         "settemprange": Nullable<TempRange> | null;
         "beforesettemprange": { tempRange: Nullable<TempRange> | null } & EventData & AllDimensionType;
         "applyfocus": FocusRenderEvent;
-        "focuscell": ApplyFocusEvent;
+        "focuscell": ApplyFocusEvent & FocusRenderEvent;
         "beforerangedataapply": FocusRenderEvent;
         "selectionchangeinit": ChangedRange;
         "beforerangecopyapply": ChangedRange;
@@ -1344,11 +1344,11 @@ declare namespace LocalJSX {
     order: Record<ColumnProp, 'asc' | 'desc' | undefined>;
   }>) => void;
         /**
-          * Triggered after data applied or range changed.
+          * After data applied or range changed.
          */
         "onAfteredit"?: (event: RevoGridCustomEvent<AfterEditEvent>) => void;
         /**
-          * Triggered after focus render finished. Can be used to access a focus element through `event.target`. This is just a duplicate of `afterfocus` from `revogr-focus.tsx`.
+          * After focus render finished. Can be used to access a focus element through `event.target`. This is just a duplicate of `afterfocus` from `revogr-focus.tsx`.
          */
         "onAfterfocus"?: (event: RevoGridCustomEvent<FocusAfterRenderEvent>) => void;
         /**
@@ -1382,11 +1382,11 @@ declare namespace LocalJSX {
     source: DataType[];
   }>) => void;
         /**
-          * This event is triggered before autofill is applied. To prevent the default behavior of applying the edit data, you can call `e.preventDefault()`.
+          * Before autofill is applied. To prevent the default behavior of applying the edit data, you can call `e.preventDefault()`.
          */
         "onBeforeautofill"?: (event: RevoGridCustomEvent<ChangedRange>) => void;
         /**
-          * This event is triggered before the cell focus is changed. To prevent the default behavior of changing the cell focus, you can call `e.preventDefault()`.
+          * Before the cell focus is changed. To prevent the default behavior of changing the cell focus, you can call `e.preventDefault()`.
          */
         "onBeforecellfocus"?: (event: RevoGridCustomEvent<BeforeSaveDataDetails>) => void;
         /**
@@ -1398,7 +1398,7 @@ declare namespace LocalJSX {
          */
         "onBeforecolumnsset"?: (event: RevoGridCustomEvent<ColumnCollection>) => void;
         /**
-          * This event is triggered before the data is edited. To prevent the default behavior of editing data and use your own implementation, call `e.preventDefault()`. To override the edit result with your own value, set the `e.val` property to your desired value.
+          * Before the data is edited. To prevent the default behavior of editing data and use your own implementation, call `e.preventDefault()`. To override the edit result with your own value, set the `e.val` property to your desired value.
          */
         "onBeforeedit"?: (event: RevoGridCustomEvent<BeforeSaveDataDetails>) => void;
         /**
@@ -1421,7 +1421,7 @@ declare namespace LocalJSX {
     itemsToFilter: Record<number, boolean>;
   }>) => void;
         /**
-          * This event is triggered before the grid focus is lost. To prevent the default behavior of changing the cell focus, you can call `e.preventDefault()`.
+          * Before the grid focus is lost. To prevent the default behavior of changing the cell focus, you can call `e.preventDefault()`.
          */
         "onBeforefocuslost"?: (event: RevoGridCustomEvent<FocusedData | null>) => void;
         /**
@@ -1429,11 +1429,11 @@ declare namespace LocalJSX {
          */
         "onBeforegridrender"?: (event: RevoGridCustomEvent<any>) => void;
         /**
-          * Triggered before range applied. Use e.preventDefault() to prevent range.
+          * Before autofill is applied. Runs before beforeautofill event. Use e.preventDefault() to prevent range.
          */
         "onBeforerange"?: (event: RevoGridCustomEvent<ChangedRange>) => void;
         /**
-          * This event is triggered before applying range data, specifically when a range selection occurs. To customize the data and prevent the default edit data from being set, you can call `e.preventDefault()`.
+          * Before applying range data, specifically when a range selection occurs. To customize the data and prevent the default edit data from being set, you can call `e.preventDefault()`.
          */
         "onBeforerangeedit"?: (event: RevoGridCustomEvent<BeforeRangeSaveDataDetails>) => void;
         /**
@@ -1441,7 +1441,7 @@ declare namespace LocalJSX {
          */
         "onBeforerowdefinition"?: (event: RevoGridCustomEvent<{ vals: any; oldVals: any }>) => void;
         /**
-          * Triggered by sorting.plugin.ts Before sorting event. Initial sorting triggered, if this event stops no other event called. Use e.preventDefault() to prevent sorting.
+          * By sorting.plugin.ts Before sorting event. Initial sorting triggered, if this event stops no other event called. Use e.preventDefault() to prevent sorting.
          */
         "onBeforesorting"?: (event: RevoGridCustomEvent<{
     column: ColumnRegular;
@@ -1449,7 +1449,7 @@ declare namespace LocalJSX {
     additive: boolean;
   }>) => void;
         /**
-          * Triggered by sorting.plugin.ts Before sorting apply. Use e.preventDefault() to prevent sorting data change.
+          * By sorting.plugin.ts Before sorting apply. Use e.preventDefault() to prevent sorting data change.
          */
         "onBeforesortingapply"?: (event: RevoGridCustomEvent<{
     column: ColumnRegular;
@@ -1495,7 +1495,7 @@ declare namespace LocalJSX {
          */
         "onRowheaderschanged"?: (event: RevoGridCustomEvent<any>) => void;
         /**
-          * This event is triggered before the order of `rgRow` is applied. To prevent the default behavior of changing the order of `rgRow`, you can call `e.preventDefault()`.
+          * Before the order of `rgRow` is applied. To prevent the default behavior of changing the order of `rgRow`, you can call `e.preventDefault()`.
          */
         "onRoworderchanged"?: (event: RevoGridCustomEvent<{ from: number; to: number }>) => void;
         /**
@@ -2053,7 +2053,7 @@ declare namespace LocalJSX {
          */
         "onBeforesettemprange"?: (event: RevogrOverlaySelectionCustomEvent<{ tempRange: Nullable<TempRange> | null } & EventData & AllDimensionType>) => void;
         /**
-          * Used for editors support when editor close requested.
+          * Cancel edit. Used for editors support when editor close requested.
          */
         "onCanceledit"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
         /**
@@ -2071,17 +2071,17 @@ declare namespace LocalJSX {
         /**
           * Cell get focused. To prevent the default behavior of applying the edit data, you can call `e.preventDefault()`.
          */
-        "onFocuscell"?: (event: RevogrOverlaySelectionCustomEvent<ApplyFocusEvent>) => void;
+        "onFocuscell"?: (event: RevogrOverlaySelectionCustomEvent<ApplyFocusEvent & FocusRenderEvent>) => void;
         /**
           * Range data apply. Triggers datasource edit on the root level.
          */
         "onRangeeditapply"?: (event: RevogrOverlaySelectionCustomEvent<BeforeRangeSaveDataDetails>) => void;
         /**
-          * Select all.
+          * Select all cells from keyboard.
          */
         "onSelectall"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
         /**
-          * Selection range changed.
+          * Autofill data in range. First step in applyRangeWithData
          */
         "onSelectionchangeinit"?: (event: RevogrOverlaySelectionCustomEvent<ChangedRange>) => void;
         /**
@@ -2089,7 +2089,7 @@ declare namespace LocalJSX {
          */
         "onSetedit"?: (event: RevogrOverlaySelectionCustomEvent<BeforeEdit>) => void;
         /**
-          * Set range.
+          * Set range. Third step in triggerRangeEvent.
          */
         "onSetrange"?: (event: RevogrOverlaySelectionCustomEvent<RangeArea & { type: MultiDimensionType }>) => void;
         /**

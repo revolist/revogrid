@@ -171,14 +171,24 @@ export class OverlaySelection {
   @Event({ eventName: 'setedit' }) setEdit: EventEmitter<BeforeEdit>;
 
   /**
-   * Before range applied. First step in triggerRangeEvent.
+   * Before range applied.
+   * First step in triggerRangeEvent.
    */
   @Event({ eventName: 'beforeapplyrange' })
   beforeApplyRange: EventEmitter<FocusRenderEvent>;
   /**
-   * Before range selection applied. Second step in triggerRangeEvent.
+   * Before range selection applied.
+   * Second step in triggerRangeEvent.
    */
   @Event({ eventName: 'beforesetrange' }) beforeSetRange: EventEmitter;
+
+  /**
+   * Set range.
+   * Third step in triggerRangeEvent.
+   */
+  @Event({ eventName: 'setrange' }) setRange: EventEmitter<
+    RangeArea & { type: MultiDimensionType }
+  >;
 
   /**
    * Before editor render.
@@ -186,17 +196,11 @@ export class OverlaySelection {
   @Event({ eventName: 'beforeeditrender' })
   beforeEditRender: EventEmitter<FocusRenderEvent>;
 
-  /**
-   * Set range.
-   */
-  @Event({ eventName: 'setrange' }) setRange: EventEmitter<
-    RangeArea & { type: MultiDimensionType }
-  >;
 
-  /** Select all. */
+  /** Select all cells from keyboard. */
   @Event({ eventName: 'selectall' }) selectAll: EventEmitter;
   /**
-   * Used for editors support when editor close requested.
+   * Cancel edit. Used for editors support when editor close requested.
    */
   @Event({ eventName: 'canceledit' }) cancelEdit: EventEmitter;
 
@@ -225,11 +229,11 @@ export class OverlaySelection {
    * Cell get focused.
    * To prevent the default behavior of applying the edit data, you can call `e.preventDefault()`.
    */
-  @Event({ eventName: 'focuscell' }) focusCell: EventEmitter<ApplyFocusEvent>;
+  @Event({ eventName: 'focuscell' }) focusCell: EventEmitter<ApplyFocusEvent & FocusRenderEvent>;
   /** Range data apply. */
   @Event({ eventName: 'beforerangedataapply' })
   beforeRangeDataApply: EventEmitter<FocusRenderEvent>;
-  /** Selection range changed. */
+  /** Autofill data in range. First step in applyRangeWithData */
   @Event({ eventName: 'selectionchangeinit', cancelable: true })
   selectionChange: EventEmitter<ChangedRange>;
   /** Before range copy. */
@@ -622,6 +626,7 @@ export class OverlaySelection {
    * Executes the focus operation on the specified range of cells.
    */
   private doFocus(focus: Cell, end: Cell, changes?: Partial<Cell>) {
+    // 1. Trigger beforeFocus event
     const { defaultPrevented } = this.beforeFocusCell.emit(
       this.columnService.getSaveData(focus.y, focus.x),
     );
@@ -639,11 +644,15 @@ export class OverlaySelection {
       rowDimension: { ...this.dimensionRow.state },
       colDimension: { ...this.dimensionCol.state },
     };
+
+    // 2. Trigger apply focus event
     const applyEvent = this.applyFocus.emit(evData);
     if (applyEvent.defaultPrevented) {
       return false;
     }
     const { range } = applyEvent.detail;
+
+    // 3. Trigger focus event
     return !this.focusCell.emit({
       focus: {
         x: range.x,
@@ -659,6 +668,7 @@ export class OverlaySelection {
 
   private triggerRangeEvent(range: RangeArea) {
     const type = this.types.rowType;
+    // 1. Apply range
     const applyEvent = this.beforeApplyRange.emit({
       range: { ...range },
       ...this.types,
@@ -672,7 +682,12 @@ export class OverlaySelection {
       applyEvent.detail.range,
       this.dataStore,
     );
+    // 2. Before set range
     let e = this.beforeSetRange.emit(data);
+    if (e.defaultPrevented) {
+      return false;
+    }
+    // 3. Set range
     e = this.setRange.emit({ ...applyEvent.detail.range, type });
     if (e.defaultPrevented) {
       return false;

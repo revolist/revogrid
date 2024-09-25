@@ -77,8 +77,8 @@ export type RevogridEvents = 'contentsizechanged'|
   'setedit'|
   'beforeapplyrange'|
   'beforesetrange'|
-  'beforeeditrender'|
   'setrange'|
+  'beforeeditrender'|
   'selectall'|
   'canceledit'|
   'settemprange'|
@@ -181,8 +181,8 @@ export const REVOGRID_EVENTS = new Map<RevogridEvents, RevogridEvents>([
   ['setedit', 'setedit'],
   ['beforeapplyrange', 'beforeapplyrange'],
   ['beforesetrange', 'beforesetrange'],
-  ['beforeeditrender', 'beforeeditrender'],
   ['setrange', 'setrange'],
+  ['beforeeditrender', 'beforeeditrender'],
   ['selectall', 'selectall'],
   ['canceledit', 'canceledit'],
   ['settemprange', 'settemprange'],
