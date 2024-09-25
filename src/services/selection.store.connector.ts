@@ -4,6 +4,8 @@ import type {
   DimensionCols,
   DimensionRows,
   Cell,
+  EditCellStore,
+  RangeArea,
 } from '@type';
 
 type StoreByDimension = Record<number, SelectionStore>;
@@ -51,15 +53,15 @@ export default class SelectionStoreConnector {
     return null;
   }
 
-  get edit() {
+  get edit(): EditCellStore | null | undefined {
     return this.focusedStore?.entity.store.get('edit');
   }
 
-  get focused() {
+  get focused(): Cell | null | undefined {
     return this.focusedStore?.entity.store.get('focus');
   }
 
-  get selectedRange() {
+  get selectedRange(): RangeArea | null | undefined {
     return this.focusedStore?.entity.store.get('range');
   }
 
