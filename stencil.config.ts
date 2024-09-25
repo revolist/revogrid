@@ -3,7 +3,7 @@ import { sass } from '@stencil/sass';
 import { angularOutputTarget } from '@stencil/angular-output-target';
 import { reactOutputTarget } from '@stencil/react-output-target';
 import { vueOutputTarget } from '@stencil/vue-output-target';
-import { svelteOutputTarget } from '@stencil/svelte-output-target';
+import { svelteOutputTarget } from '@revolist/svelte-output-target';
 import { vueOutputTarget as vue2OutputTarget } from '@revolist/stencil-vue2-output-target';
 import { eventListOutputTarget } from './scripts/event-list.plugin';
 

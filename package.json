@@ -110,7 +110,7 @@
     "@stencil/react-output-target": "0.5.3",
     "@stencil/sass": "^3.0.12",
     "@stencil/store": "^2.0.16",
-    "@stencil/svelte-output-target": "0.0.3",
+    "@revolist/svelte-output-target": "0.0.3",
     "@stencil/vue-output-target": "^0.8.9",
     "@types/events": "^3.0.3",
     "@types/jest": "^29.5.12",
