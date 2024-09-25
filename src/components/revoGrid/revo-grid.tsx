@@ -308,50 +308,50 @@ export class RevoGridComponent {
   @Event() contentsizechanged: EventEmitter<MultiDimensionType>;
 
   /**
-   * This event is triggered before the data is edited.
+   * Before the data is edited.
    * To prevent the default behavior of editing data and use your own implementation, call `e.preventDefault()`.
    * To override the edit result with your own value, set the `e.val` property to your desired value.
    */
   @Event() beforeedit: EventEmitter<BeforeSaveDataDetails>;
 
   /**
-   * This event is triggered before applying range data, specifically when a range selection occurs.
+   * Before applying range data, specifically when a range selection occurs.
    * To customize the data and prevent the default edit data from being set, you can call `e.preventDefault()`.
    */
   @Event() beforerangeedit: EventEmitter<BeforeRangeSaveDataDetails>;
 
   /**
-   * Triggered after data applied or range changed.
+   * After data applied or range changed.
    */
   @Event() afteredit: EventEmitter<AfterEditEvent>;
 
   /**
-   * This event is triggered before autofill is applied.
+   * Before autofill is applied.
    * To prevent the default behavior of applying the edit data, you can call `e.preventDefault()`.
    */
   @Event() beforeautofill: EventEmitter<ChangedRange>;
 
   /**
-   * Triggered before range applied.
+   * Before autofill is applied. Runs before beforeautofill event.
    * Use e.preventDefault() to prevent range.
    */
   @Event() beforerange: EventEmitter<ChangedRange>;
 
   /**
-   * Triggered after focus render finished.
+   * After focus render finished.
    * Can be used to access a focus element through `event.target`.
    * This is just a duplicate of `afterfocus` from `revogr-focus.tsx`.
    */
   @Event() afterfocus: EventEmitter<FocusAfterRenderEvent>;
 
   /**
-   * This event is triggered before the order of `rgRow` is applied.
+   * Before the order of `rgRow` is applied.
    * To prevent the default behavior of changing the order of `rgRow`, you can call `e.preventDefault()`.
    */
   @Event() roworderchanged: EventEmitter<{ from: number; to: number }>;
 
   /**
-   * Triggered by sorting.plugin.ts
+   * By sorting.plugin.ts
    * Before sorting apply.
    * Use e.preventDefault() to prevent sorting data change.
    */
@@ -362,7 +362,7 @@ export class RevoGridComponent {
   }>;
 
   /**
-   * Triggered by sorting.plugin.ts
+   * By sorting.plugin.ts
    * Before sorting event.
    * Initial sorting triggered, if this event stops no other event called.
    * Use e.preventDefault() to prevent sorting.
@@ -389,13 +389,13 @@ export class RevoGridComponent {
   @Event() headerclick: EventEmitter<ColumnRegular>;
 
   /**
-   * This event is triggered before the cell focus is changed.
+   * Before the cell focus is changed.
    * To prevent the default behavior of changing the cell focus, you can call `e.preventDefault()`.
    */
   @Event() beforecellfocus: EventEmitter<BeforeSaveDataDetails>;
 
   /**
-   * This event is triggered before the grid focus is lost.
+   * Before the grid focus is lost.
    * To prevent the default behavior of changing the cell focus, you can call `e.preventDefault()`.
    */
   @Event() beforefocuslost: EventEmitter<FocusedData | null>;
