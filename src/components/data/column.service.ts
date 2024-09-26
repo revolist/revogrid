@@ -117,13 +117,8 @@ export default class ColumnService {
       val = getCellData(data.value);
     }
     return {
-      prop: data.prop,
-      rowIndex,
-      colIndex,
+      ...data,
       val,
-      model: data.model,
-      colType: this.type,
-      type: this.dataStore.get('type'),
     };
   }
 

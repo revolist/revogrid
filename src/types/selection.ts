@@ -103,15 +103,13 @@ export type SaveDataDetails = {
 
 export type BeforeEdit = BeforeSaveDataDetails;
 
-export type BeforeSaveDataDetails = {
-  prop: ColumnProp;
-  model: DataType;
+export interface BeforeSaveDataDetails extends ColumnDataSchemaModel {
+  /**
+   * Value from editor to save, not part of the model value yet
+   */
   val?: SaveData;
-  rowIndex: number;
-  colIndex: number;
-  colType: DimensionCols;
-  type: DimensionRows;
-};
+}
+
 export type BeforeRangeSaveDataDetails = {
   data: DataLookup;
   models: Partial<DataLookup>;
