@@ -60,9 +60,10 @@ export type ColumnDataSchemaModel = {
    */
   data: DataType[];
   /**
-   * Current cell data
+   * Current cell data value
+   * Mapped from model through column property like model['prop']
    */
-  value: any;
+  value?: any;
 };
 /**
  * Template property for each cell, extends the column data schema model.
