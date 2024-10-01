@@ -400,11 +400,28 @@ export namespace Components {
          */
         "saveOnClose": boolean;
     }
+    /**
+     * Contains extra elements for stencil components.
+     * Performs rendering and updates for external components.
+     * @example In Plugins if you want to add extra elements to grid and use stenciljs vnodes reactivity:
+     * function paginationPanel(this: PaginationPlugin, config: { refresh: () => void }) {
+     *    // use `config.refresh()` for component to re-render
+     *    return h('div')
+     * }
+     * revogrid.registerVNode = [
+     *    ...existingNodes,
+     *     paginationPanel.bind(this)
+     * ];
+     * /**
+     */
     interface RevogrExtra {
         /**
           * Nodes to render
          */
-        "nodes": ((VNode) |  (() => VNode))[] | null;
+        "nodes": (
+    | ReturnType<typeof h>
+    | ((c?: Partial<ExtraNodeFuncConfig>) => ReturnType<typeof h>)
+  )[];
         /**
           * Refreshes the extra component. Useful if you want to manually force the component to re-render.
          */
@@ -961,6 +978,20 @@ declare global {
         prototype: HTMLRevogrEditElement;
         new (): HTMLRevogrEditElement;
     };
+    /**
+     * Contains extra elements for stencil components.
+     * Performs rendering and updates for external components.
+     * @example In Plugins if you want to add extra elements to grid and use stenciljs vnodes reactivity:
+     * function paginationPanel(this: PaginationPlugin, config: { refresh: () => void }) {
+     *    // use `config.refresh()` for component to re-render
+     *    return h('div')
+     * }
+     * revogrid.registerVNode = [
+     *    ...existingNodes,
+     *     paginationPanel.bind(this)
+     * ];
+     * /**
+     */
     interface HTMLRevogrExtraElement extends Components.RevogrExtra, HTMLStencilElement {
     }
     var HTMLRevogrExtraElement: {
@@ -1749,11 +1780,28 @@ declare namespace LocalJSX {
          */
         "saveOnClose"?: boolean;
     }
+    /**
+     * Contains extra elements for stencil components.
+     * Performs rendering and updates for external components.
+     * @example In Plugins if you want to add extra elements to grid and use stenciljs vnodes reactivity:
+     * function paginationPanel(this: PaginationPlugin, config: { refresh: () => void }) {
+     *    // use `config.refresh()` for component to re-render
+     *    return h('div')
+     * }
+     * revogrid.registerVNode = [
+     *    ...existingNodes,
+     *     paginationPanel.bind(this)
+     * ];
+     * /**
+     */
     interface RevogrExtra {
         /**
           * Nodes to render
          */
-        "nodes"?: ((VNode) |  (() => VNode))[] | null;
+        "nodes"?: (
+    | ReturnType<typeof h>
+    | ((c?: Partial<ExtraNodeFuncConfig>) => ReturnType<typeof h>)
+  )[];
     }
     interface RevogrFilterPanel {
         /**
@@ -2291,6 +2339,20 @@ declare module "@stencil/core" {
              * and managing the lifecycle of the editor instance.
              */
             "revogr-edit": LocalJSX.RevogrEdit & JSXBase.HTMLAttributes<HTMLRevogrEditElement>;
+            /**
+             * Contains extra elements for stencil components.
+             * Performs rendering and updates for external components.
+             * @example In Plugins if you want to add extra elements to grid and use stenciljs vnodes reactivity:
+             * function paginationPanel(this: PaginationPlugin, config: { refresh: () => void }) {
+             *    // use `config.refresh()` for component to re-render
+             *    return h('div')
+             * }
+             * revogrid.registerVNode = [
+             *    ...existingNodes,
+             *     paginationPanel.bind(this)
+             * ];
+             * /**
+             */
             "revogr-extra": LocalJSX.RevogrExtra & JSXBase.HTMLAttributes<HTMLRevogrExtraElement>;
             "revogr-filter-panel": LocalJSX.RevogrFilterPanel & JSXBase.HTMLAttributes<HTMLRevogrFilterPanelElement>;
             /**
