@@ -37,7 +37,7 @@ import {
   RangeArea,
   SelectionStoreState,
 } from '@type';
-import { Observable } from '../../utils/store.utils';
+import { Observable } from '../../utils';
 
 /**
  * This component is responsible for rendering data

@@ -5,7 +5,7 @@
 import reduce from 'lodash/reduce';
 import { createStore } from '@stencil/store';
 
-import { setStore, Observable } from '../../utils/store.utils';
+import { setStore, Observable } from '../../utils';
 import { calculateDimensionData } from './dimension.helpers';
 import {
   DimensionCalc,

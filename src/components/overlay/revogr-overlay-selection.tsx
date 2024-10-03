@@ -25,10 +25,8 @@ import { isEditInput } from '../editors/edit.utils';
 import { KeyboardService } from './keyboard.service';
 import { AutoFillService } from './autofill.service';
 import { verifyTouchTarget } from '../../utils/events';
-import { getCellData } from '../../utils';
-import type {
-  Observable,
-} from '../../components';
+import { getCellData, type Observable } from '../../utils';
+
 import type {
   SelectionStoreState,
   DimensionSettingsState,

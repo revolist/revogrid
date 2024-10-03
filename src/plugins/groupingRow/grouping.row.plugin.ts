@@ -26,8 +26,8 @@ import {
   TRIMMED_GROUPING,
 } from './grouping.trimmed.service';
 import { BeforeSaveDataDetails, ColumnRegular, DataType, DimensionRows, PluginProviders } from '@type';
-import { Observable } from '../../utils/store.utils';
-import { ColumnCollection } from '../../utils/column.utils';
+import type { Observable } from '../../utils';
+import type { ColumnCollection } from '../../utils/column.utils';
 
 export default class GroupingRowPlugin extends BasePlugin {
   private options: GroupingOptions | undefined;

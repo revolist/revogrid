@@ -13,11 +13,10 @@ import { GroupingOptions } from "./plugins/groupingRow/grouping.row.types";
 import { FocusedData } from "./components/revoGrid/viewport.service";
 import { ColumnCollection } from "./utils/column.utils";
 import { DataInput } from "./plugins/export/types";
-import { Observable } from "./utils/store.utils";
+import { Observable } from "./utils";
 import { DSourceState, Groups } from "./store/index";
 import { ResizeProps } from "./components/header/resizable.directive";
 import { HeaderRenderProps } from "./components/header/header-renderer";
-import { Observable as Observable1 } from "./components";
 import { EventData } from "./components/overlay/selection.utils";
 import { VNode } from "@stencil/core";
 export { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, CellTemplateProp, ChangedRange, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, ExtraNodeFuncConfig, FocusAfterRenderEvent, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, Nullable, PluginBaseComponent, PositionItem, Providers, RangeArea, RangeClipboardCopyEventProps, RangeClipboardPasteEvent, RowDefinition, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp, VNodeResponse } from "./types/index";
@@ -28,11 +27,10 @@ export { GroupingOptions } from "./plugins/groupingRow/grouping.row.types";
 export { FocusedData } from "./components/revoGrid/viewport.service";
 export { ColumnCollection } from "./utils/column.utils";
 export { DataInput } from "./plugins/export/types";
-export { Observable } from "./utils/store.utils";
+export { Observable } from "./utils";
 export { DSourceState, Groups } from "./store/index";
 export { ResizeProps } from "./components/header/resizable.directive";
 export { HeaderRenderProps } from "./components/header/header-renderer";
-export { Observable as Observable1 } from "./components";
 export { EventData } from "./components/overlay/selection.utils";
 export { VNode } from "@stencil/core";
 export namespace Components {
@@ -207,7 +205,7 @@ export namespace Components {
          */
         "refreshExtraElements": () => Promise<void>;
         /**
-          * Register new virtual node inside of grid. Used for additional items creation such as plugin elements. Should be set before grid render inside of plugins.
+          * Register new virtual node inside of grid. Used for additional items creation such as plugin elements. Should be set before grid render inside of plugins. Can return VNode result of h() function or a function that returns VNode. Function can be used for performance improvement and additional renders.
          */
         "registerVNode": (
     | VNodeResponse
@@ -574,19 +572,19 @@ export namespace Components {
         /**
           * Column data store.
          */
-        "colData": Observable1<DSourceState<ColumnRegular, DimensionCols>>;
+        "colData": Observable<DSourceState<ColumnRegular, DimensionCols>>;
         /**
           * Row data store.
          */
-        "dataStore": Observable1<DSourceState<DataType, DimensionRows>>;
+        "dataStore": Observable<DSourceState<DataType, DimensionRows>>;
         /**
           * Dimension settings X.
          */
-        "dimensionCol": Observable1<DimensionSettingsState>;
+        "dimensionCol": Observable<DimensionSettingsState>;
         /**
           * Dimension settings Y.
          */
-        "dimensionRow": Observable1<DimensionSettingsState>;
+        "dimensionRow": Observable<DimensionSettingsState>;
         /**
           * Custom editors register.
          */
@@ -610,7 +608,7 @@ export namespace Components {
         /**
           * Selection, range, focus.
          */
-        "selectionStore": Observable1<SelectionStoreState>;
+        "selectionStore": Observable<SelectionStoreState>;
         /**
           * Enable revogr-clipboard component (read more in revogr-clipboard component). Allows copy/paste.
          */
@@ -1557,7 +1555,7 @@ declare namespace LocalJSX {
          */
         "readonly"?: boolean;
         /**
-          * Register new virtual node inside of grid. Used for additional items creation such as plugin elements. Should be set before grid render inside of plugins.
+          * Register new virtual node inside of grid. Used for additional items creation such as plugin elements. Should be set before grid render inside of plugins. Can return VNode result of h() function or a function that returns VNode. Function can be used for performance improvement and additional renders.
          */
         "registerVNode"?: (
     | VNodeResponse
@@ -2025,19 +2023,19 @@ declare namespace LocalJSX {
         /**
           * Column data store.
          */
-        "colData"?: Observable1<DSourceState<ColumnRegular, DimensionCols>>;
+        "colData"?: Observable<DSourceState<ColumnRegular, DimensionCols>>;
         /**
           * Row data store.
          */
-        "dataStore"?: Observable1<DSourceState<DataType, DimensionRows>>;
+        "dataStore"?: Observable<DSourceState<DataType, DimensionRows>>;
         /**
           * Dimension settings X.
          */
-        "dimensionCol": Observable1<DimensionSettingsState>;
+        "dimensionCol": Observable<DimensionSettingsState>;
         /**
           * Dimension settings Y.
          */
-        "dimensionRow"?: Observable1<DimensionSettingsState>;
+        "dimensionRow"?: Observable<DimensionSettingsState>;
         /**
           * Custom editors register.
          */
@@ -2161,7 +2159,7 @@ declare namespace LocalJSX {
         /**
           * Selection, range, focus.
          */
-        "selectionStore"?: Observable1<SelectionStoreState>;
+        "selectionStore"?: Observable<SelectionStoreState>;
         /**
           * Enable revogr-clipboard component (read more in revogr-clipboard component). Allows copy/paste.
          */

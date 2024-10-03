@@ -18,7 +18,7 @@ import {
 } from './selection.utils';
 import { RESIZE_INTERVAL } from '../../utils/consts';
 import { Cell, Nullable, RangeArea, SelectionStoreState } from '@type';
-import { Observable } from '../../utils/store.utils';
+import { Observable } from '../../utils';
 
 type Config = {
   selectionStore: Observable<SelectionStoreState>;

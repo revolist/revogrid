@@ -2,9 +2,8 @@ import { Component, Prop, h, Host } from '@stencil/core';
 import throttle from 'lodash/throttle';
 import { TMP_SELECTION_BG_CLASS } from '../../utils/consts';
 import { getCell, styleByCellProps } from '../overlay/selection.utils';
-import { DimensionSettingsState } from '@type';
-import { SelectionStoreState, RangeArea } from '@type';
-import { Observable } from '../../utils/store.utils';
+import { DimensionSettingsState, SelectionStoreState, RangeArea } from '@type';
+import type { Observable } from '../../utils';
 
 /**
  * Temporary range selection component. Shows temporary range selection.

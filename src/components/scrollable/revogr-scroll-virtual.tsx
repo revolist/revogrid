@@ -18,7 +18,7 @@ import {
 } from '@type';
 import { AutohideScrollPlugin } from './autohide-scroll.plugin';
 import { LocalScrollTimer } from '../../services/local.scroll.timer';
-import { Observable } from '../../utils/store.utils';
+import type { Observable } from '../../utils';
 
 /**
  * Virtual scroll component

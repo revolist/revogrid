@@ -77,7 +77,7 @@ import { rowDefinitionByType, rowDefinitionRemoveByType } from './grid.helpers';
 import ColumnPlugin from '../../plugins/moveColumn/column.drag.plugin';
 import { getPropertyFromEvent } from '../../utils/events';
 import { isMobileDevice } from '../../utils/mobile';
-import type { Observable } from '../../utils/store.utils';
+import type { Observable } from '../../utils';
 import type { GridPlugin } from '../../plugins/base.plugin';
 import { ColumnCollection, getColumnByProp, getColumns } from '../../utils/column.utils';
 import { WCAGPlugin } from '../../plugins/wcag';

@@ -12,7 +12,7 @@ import type {
   ViewportStoreCollection,
   DSourceState,
 } from '@store';
-import { Observable } from '../utils/store.utils';
+import type { Observable } from '../utils';
 import type { RowDataSources } from '../services/data.provider';
 import type { JSX } from '..';
 

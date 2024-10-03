@@ -24,7 +24,7 @@ import {
   DimensionCols,
   SelectionStoreState,
 } from '@type';
-import { Observable } from '../../utils/store.utils';
+import { Observable } from '../../utils';
 
 @Component({
   tag: 'revogr-header',

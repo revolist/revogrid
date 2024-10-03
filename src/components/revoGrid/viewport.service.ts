@@ -23,7 +23,7 @@ import {
   ViewPortResizeEvent,
   ViewSettingSizeProp,
 } from '@type';
-import { Observable } from '../../utils/store.utils';
+import { Observable } from '../../utils';
 
 export type ResizeDetails = { [index: number]: ColumnRegular };
 type Config = {

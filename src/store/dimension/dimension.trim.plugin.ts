@@ -1,5 +1,5 @@
 import { DimensionSettingsState } from '@type';
-import { Observable, PluginSubscribe } from '../../utils';
+import type { Observable, PluginSubscribe } from '../../utils';
 /**
  * Plugin for trimming
  *

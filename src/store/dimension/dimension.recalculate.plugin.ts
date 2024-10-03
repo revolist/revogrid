@@ -1,5 +1,5 @@
 import { DimensionSettingsState } from '@type';
-import { Observable, PluginSubscribe } from '../../utils';
+import type { Observable, PluginSubscribe } from '../../utils';
 
 /**
  * Plugin which recalculates realSize on changes of sizes, originItemSize and count

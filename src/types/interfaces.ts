@@ -15,7 +15,7 @@ import type {
   RangeArea,
   SelectionStoreState,
 } from './selection';
-import type { Observable } from '../utils/store.utils';
+import type { Observable } from '../utils';
 import type { JSXBase } from '@stencil/core/internal';
 
 export type Nullable<T> = {
