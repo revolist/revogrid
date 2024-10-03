@@ -1,6 +1,6 @@
 import { getRange } from '@store';
-import { codesLetter } from '../../utils/key.codes';
 import {
+  codesLetter,
   isAll,
   isClear,
   isCopy,
@@ -8,17 +8,17 @@ import {
   isEnterKeyValue,
   isPaste,
   isTab,
-} from '../../utils/key.utils';
-import { timeout } from '../../utils';
+  timeout,
+  RESIZE_INTERVAL,
+  type Observable,
+} from '../../utils';
 import {
   EventData,
   getCoordinate,
   isAfterLast,
   isBeforeFirst,
 } from './selection.utils';
-import { RESIZE_INTERVAL } from '../../utils/consts';
 import { Cell, Nullable, RangeArea, SelectionStoreState } from '@type';
-import { Observable } from '../../utils';
 
 type Config = {
   selectionStore: Observable<SelectionStoreState>;
@@ -29,7 +29,11 @@ type Config = {
   cancel(): void;
 
   clearCell(): void;
-  focus(focus: Cell, changes: Partial<Cell>, focusNextViewport?: number): boolean;
+  focus(
+    focus: Cell,
+    changes: Partial<Cell>,
+    focusNextViewport?: number,
+  ): boolean;
 
   getData(): any;
   internalPaste(): void;
@@ -202,7 +206,7 @@ export class KeyboardService {
           return { changes: { x: -1 }, isMulti: false };
       }
     }
-  
+
     switch (e.code) {
       case codesLetter.ARROW_UP:
         return { changes: { y: -1 }, isMulti };
