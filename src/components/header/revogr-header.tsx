@@ -5,8 +5,8 @@ import {
   EventEmitter,
   h,
   Prop,
+  type VNode,
 } from '@stencil/core';
-import { HTMLStencilElement, VNode } from '@stencil/core/internal';
 import keyBy from 'lodash/keyBy';
 
 import { HEADER_ACTUAL_ROW_CLASS, HEADER_ROW_CLASS } from '../../utils/consts';
@@ -131,7 +131,7 @@ export class RevogrHeaderComponent {
 
   // #endregion
 
-  @Element() element!: HTMLStencilElement;
+  @Element() element!: HTMLElement;
 
   private onResize({ width }: { width?: number }, index: number) {
     const col = this.colData[index];

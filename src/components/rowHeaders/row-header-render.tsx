@@ -1,5 +1,5 @@
-import { VNode } from '@stencil/core';
-import { HyperFunc } from '@type';
+import type { VNode } from '@stencil/core';
+import type { HyperFunc } from '@type';
 
 type HeaderRender = {
   (start: number): (h: HyperFunc<VNode>, e: { rowIndex: number }) => number;

@@ -1,4 +1,4 @@
-import { h, VNode } from '@stencil/core';
+import { h, type VNode } from '@stencil/core';
 import { PositionItem } from '@type';
 import { Cell } from '@type';
 

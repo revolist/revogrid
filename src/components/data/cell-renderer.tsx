@@ -1,4 +1,4 @@
-import { h, VNode, Build, EventEmitter } from '@stencil/core';
+import { h, type VNode, Build, EventEmitter } from '@stencil/core';
 import {
   DragStartEvent,
   CellTemplateProp,

@@ -1,4 +1,4 @@
-import { h, VNode } from '@stencil/core';
+import { h } from '@stencil/core';
 import findIndex from 'lodash/findIndex';
 import { Group, getItemByIndex } from '@store';
 import { DimensionSettingsState, Providers, DimensionCols } from '@type';
@@ -19,9 +19,9 @@ type Props<T> = {
 
 const ColumnGroupsRenderer = ({
   additionalData, providers, depth, groups, visibleProps, dimensionCol, canResize, active, onResize
-}: Props<DimensionCols | 'rowHeaders'>): VNode[] => {
+}: Props<DimensionCols | 'rowHeaders'>): ReturnType<typeof h>[] => {
   // render group columns
-  const groupRow: VNode[] = [];
+  const groupRow: ReturnType<typeof h>[] = [];
   for (let i = 0; i < depth; i++) {
     if (groups[i]) {
       for (let group of groups[i]) {

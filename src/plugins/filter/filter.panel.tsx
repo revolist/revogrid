@@ -8,7 +8,7 @@ import {
   Method,
   Prop,
   State,
-  VNode,
+  type VNode,
   Element,
 } from '@stencil/core';
 import debounce from 'lodash/debounce';

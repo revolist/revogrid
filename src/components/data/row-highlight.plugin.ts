@@ -1,4 +1,4 @@
-import { VNode } from '@stencil/core';
+import { type VNode } from '@stencil/core';
 import { ROW_FOCUSED_CLASS } from '../../utils/consts';
 import { RangeArea } from '@type';
 

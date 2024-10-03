@@ -1,4 +1,5 @@
 import {
+  type VNode,
   Component,
   Prop,
   h,
@@ -8,7 +9,6 @@ import {
   Event,
   EventEmitter,
   Method,
-  VNode,
   Host,
 } from '@stencil/core';
 
@@ -42,6 +42,8 @@ import type {
   HeaderProperties,
   PluginProviders,
   FocusAfterRenderEvent,
+  ExtraNodeFuncConfig,
+  VNodeResponse,
 } from '@type';
 
 import ColumnDataProvider from '../../services/column.data.provider';
@@ -287,8 +289,13 @@ export class RevoGridComponent {
    * Register new virtual node inside of grid.
    * Used for additional items creation such as plugin elements.
    * Should be set before grid render inside of plugins.
+   * Can return VNode result of h() function or a function that returns VNode.
+   * Function can be used for performance improvement and additional renders.
    */
-  @Prop() registerVNode: (VNode | (() => VNode))[] = [];
+  @Prop() registerVNode: (
+    | VNodeResponse
+    | ((c?: Partial<ExtraNodeFuncConfig>) => VNodeResponse)
+  )[] = [];
 
 
   /**
@@ -1016,7 +1023,7 @@ export class RevoGridComponent {
 
   // #region Private Properties
   @Element() element: HTMLRevoGridElement;
-  extraElements: (VNode | (() => VNode))[] = [];
+  extraElements: HTMLRevogrExtraElement['nodes'] = [];
   /** 
    * Service for rendering extra elements as virtual nodes
    * Part of extraElements and registerVNode methods
@@ -1283,7 +1290,7 @@ export class RevoGridComponent {
   /**
    * Register external VNodes
    */
-  @Watch('registerVNode') registerOutsideVNodes(elements: (VNode | (() => VNode))[] = []) {
+  @Watch('registerVNode') registerOutsideVNodes(elements: HTMLRevogrExtraElement['nodes'] = []) {
     this.extraElements = elements;
   }
 

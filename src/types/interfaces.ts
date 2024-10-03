@@ -1,13 +1,13 @@
 import type { VNode } from '@stencil/core';
 
-import {
+import type {
   DimensionCols,
   DimensionRows,
   DimensionColPin,
   DimensionType,
   MultiDimensionType,
 } from './dimension';
-import {
+import type {
   Cell,
   EditorCtr,
   FocusedCells,
@@ -16,7 +16,7 @@ import {
   SelectionStoreState,
 } from './selection';
 import type { Observable } from '../utils/store.utils';
-import { JSXBase } from '@stencil/core/internal';
+import type { JSXBase } from '@stencil/core/internal';
 
 export type Nullable<T> = {
   [P in keyof T]: T[P] | null;
@@ -318,6 +318,14 @@ export interface HyperFunc<T> {
   // (tag: any): T;
   (tag: any): T;
 }
+
+/**
+ * `HyperFunc` is a function that takes an HTML tag or component, and returns a
+ * JSX element. This function is used to create JSX elements in a context where
+ * JSX is not valid.
+ */
+export type VNodeResponse = (VNode | string | number) | (VNode | string | number)[] | null | undefined;
+
 /**
  * `HyperFunc` is a function that takes an HTML tag or component, and returns a
  * JSX element. This function is used to create JSX elements in a context where
@@ -370,6 +378,12 @@ export interface HyperFunc<T> {
 export interface HyperFunc<T> {
   (sel: any, data: any, children: T): T;
 }
+
+/**
+ * `ExtraNodeFuncConfig` is a configuration object for `External nodes rendered in grid in HTMLRevogrExtraElement`.
+ */
+export interface ExtraNodeFuncConfig { refresh: () => void };
+
 /**
  * `FocusTemplateFunc` is a function that takes an HTML tag or component, and
  * returns a JSX element. This function is used to create JSX elements in a

@@ -5,7 +5,7 @@ import {
   EventEmitter,
   Host,
   Prop,
-  VNode,
+  type VNode,
   h,
 } from '@stencil/core';
 

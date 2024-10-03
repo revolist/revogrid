@@ -1,11 +1,11 @@
 import {
+  type VNode,
   Component,
   Host,
   Watch,
   Element,
   Event,
   Prop,
-  VNode,
   EventEmitter,
   h,
   Method,

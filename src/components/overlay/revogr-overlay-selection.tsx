@@ -6,7 +6,7 @@ import {
   Host,
   Listen,
   Prop,
-  VNode,
+  type VNode,
   Element,
   Watch,
 } from '@stencil/core';
@@ -26,18 +26,18 @@ import { KeyboardService } from './keyboard.service';
 import { AutoFillService } from './autofill.service';
 import { verifyTouchTarget } from '../../utils/events';
 import { getCellData } from '../../utils';
-import {
+import type {
   Observable,
+} from '../../components';
+import type {
   SelectionStoreState,
   DimensionSettingsState,
   DataType,
   DimensionRows,
   ColumnRegular,
   DimensionCols,
-  Cell,
   DragStartEvent,
-} from '../../components';
-import type {
+  Cell,
   MultiDimensionType,
   Nullable,
   RangeClipboardCopyEventProps,

@@ -1,5 +1,5 @@
-import { VNode } from '@stencil/core';
-import { HyperFunc, ColumnProp, DimensionRows, DataType } from '@type';
+import type { VNode } from '@stencil/core';
+import type { HyperFunc, ColumnProp, DimensionRows, DataType } from '@type';
 
 export type GroupLabelTemplateFunc = (
   createElement: HyperFunc<VNode>,

@@ -1,4 +1,4 @@
-import { h, VNode } from '@stencil/core';
+import { h } from '@stencil/core';
 import type {
   VirtualPositionItem,
   ColumnTemplateProp,
@@ -31,7 +31,7 @@ export type HeaderRenderProps = {
   onDblClick?(data: InitialHeaderClick): void;
 } & Partial<Pick<ResizeProps, 'active'>>;
 
-const HeaderRenderer = (p: HeaderRenderProps): VNode => {
+const HeaderRenderer = (p: HeaderRenderProps): ReturnType<typeof h> => {
   const cellClass: { [key: string]: boolean } = {
     [HEADER_CLASS]: true,
     [HEADER_SORTABLE_CLASS]: !!p.data?.sortable,
