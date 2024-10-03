@@ -5,11 +5,12 @@
  * It contains typing information for all components that exist in this project.
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
-import { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, CellTemplateProp, ChangedRange, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, ExtraNodeFuncConfig, FocusAfterRenderEvent, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, Nullable, PluginBaseComponent, PositionItem, Providers, RangeArea, RangeClipboardCopyEventProps, RangeClipboardPasteEvent, RowDefinition, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp, VNodeResponse } from "./types/index";
+import { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, CellTemplateProp, ChangedRange, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, ExtraNodeFuncConfig, FocusAfterRenderEvent, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, Nullable, PluginBaseComponent, PositionItem, Providers, RangeArea, RangeClipboardCopyEventProps, RangeClipboardPasteEvent, RowDefinition, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
 import { GridPlugin } from "./plugins/base.plugin";
 import { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
 import { ColumnFilterConfig, FilterCaptions, FilterCollection, LogicFunction, MultiFilterItem, ShowData } from "./plugins/filter/filter.types";
 import { GroupingOptions } from "./plugins/groupingRow/grouping.row.types";
+import { VNode } from "@stencil/core";
 import { FocusedData } from "./components/revoGrid/viewport.service";
 import { ColumnCollection } from "./utils/column.utils";
 import { DataInput } from "./plugins/export/types";
@@ -18,12 +19,12 @@ import { DSourceState, Groups } from "./store/index";
 import { ResizeProps } from "./components/header/resizable.directive";
 import { HeaderRenderProps } from "./components/header/header-renderer";
 import { EventData } from "./components/overlay/selection.utils";
-import { VNode } from "@stencil/core";
-export { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, CellTemplateProp, ChangedRange, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, ExtraNodeFuncConfig, FocusAfterRenderEvent, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, Nullable, PluginBaseComponent, PositionItem, Providers, RangeArea, RangeClipboardCopyEventProps, RangeClipboardPasteEvent, RowDefinition, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp, VNodeResponse } from "./types/index";
+export { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, CellTemplateProp, ChangedRange, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, ExtraNodeFuncConfig, FocusAfterRenderEvent, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, Nullable, PluginBaseComponent, PositionItem, Providers, RangeArea, RangeClipboardCopyEventProps, RangeClipboardPasteEvent, RowDefinition, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
 export { GridPlugin } from "./plugins/base.plugin";
 export { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
 export { ColumnFilterConfig, FilterCaptions, FilterCollection, LogicFunction, MultiFilterItem, ShowData } from "./plugins/filter/filter.types";
 export { GroupingOptions } from "./plugins/groupingRow/grouping.row.types";
+export { VNode } from "@stencil/core";
 export { FocusedData } from "./components/revoGrid/viewport.service";
 export { ColumnCollection } from "./utils/column.utils";
 export { DataInput } from "./plugins/export/types";
@@ -32,7 +33,6 @@ export { DSourceState, Groups } from "./store/index";
 export { ResizeProps } from "./components/header/resizable.directive";
 export { HeaderRenderProps } from "./components/header/header-renderer";
 export { EventData } from "./components/overlay/selection.utils";
-export { VNode } from "@stencil/core";
 export namespace Components {
     /**
      * Revogrid - High-performance, customizable grid library for managing large datasets.
@@ -208,8 +208,8 @@ export namespace Components {
           * Register new virtual node inside of grid. Used for additional items creation such as plugin elements. Should be set before grid render inside of plugins. Can return VNode result of h() function or a function that returns VNode. Function can be used for performance improvement and additional renders.
          */
         "registerVNode": (
-    | VNodeResponse
-    | ((c?: Partial<ExtraNodeFuncConfig>) => VNodeResponse)
+    | VNode
+    | ((c: ExtraNodeFuncConfig) => VNode)
   )[];
         /**
           * When true, columns are resizable.
@@ -420,8 +420,8 @@ export namespace Components {
           * Nodes to render
          */
         "nodes": (
-    | VNodeResponse
-    | ((c?: Partial<ExtraNodeFuncConfig>) => VNodeResponse)
+    | VNode
+    | ((c: ExtraNodeFuncConfig) => VNode)
   )[];
         /**
           * Refreshes the extra component. Useful if you want to manually force the component to re-render.
@@ -1558,8 +1558,8 @@ declare namespace LocalJSX {
           * Register new virtual node inside of grid. Used for additional items creation such as plugin elements. Should be set before grid render inside of plugins. Can return VNode result of h() function or a function that returns VNode. Function can be used for performance improvement and additional renders.
          */
         "registerVNode"?: (
-    | VNodeResponse
-    | ((c?: Partial<ExtraNodeFuncConfig>) => VNodeResponse)
+    | VNode
+    | ((c: ExtraNodeFuncConfig) => VNode)
   )[];
         /**
           * When true, columns are resizable.
@@ -1803,8 +1803,8 @@ declare namespace LocalJSX {
           * Nodes to render
          */
         "nodes"?: (
-    | VNodeResponse
-    | ((c?: Partial<ExtraNodeFuncConfig>) => VNodeResponse)
+    | VNode
+    | ((c: ExtraNodeFuncConfig) => VNode)
   )[];
     }
     interface RevogrFilterPanel {

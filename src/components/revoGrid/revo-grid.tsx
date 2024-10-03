@@ -293,7 +293,7 @@ export class RevoGridComponent {
    */
   @Prop() registerVNode: (
     | VNode
-    | ((c?: Partial<ExtraNodeFuncConfig>) => VNode)
+    | ((c: ExtraNodeFuncConfig) => VNode)
   )[] = [];
 
 

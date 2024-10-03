@@ -30,7 +30,7 @@ export class RevoGridExtra {
    */
   @Prop() nodes: (
     | VNode
-    | ((c?: Partial<ExtraNodeFuncConfig>) => VNode)
+    | ((c: ExtraNodeFuncConfig) => VNode)
   )[] = [];
   /**
    * Force component to re-render
