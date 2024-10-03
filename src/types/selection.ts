@@ -1,6 +1,6 @@
-import { VNode } from '@stencil/core';
-import { DimensionRows, DimensionCols } from './dimension';
-import {
+import { type VNode } from '@stencil/core';
+import type { DimensionRows, DimensionCols } from './dimension';
+import type {
   ColumnProp,
   DataType,
   DataLookup,

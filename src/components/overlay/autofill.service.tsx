@@ -24,7 +24,7 @@ import {
   Cell,
   DimensionRows, Nullable,
 } from '@type';
-import { Observable } from '../../utils/store.utils';
+import { Observable } from '../../utils';
 
 type Config = {
   dimensionRow: Observable<DimensionSettingsState>;

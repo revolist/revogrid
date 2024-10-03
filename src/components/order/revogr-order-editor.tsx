@@ -12,7 +12,7 @@ import {
   PositionItem,
   Cell,
 } from '@type';
-import { Observable } from '../../utils/store.utils';
+import { Observable } from '../../utils';
 
 /**
  * Component for handling row order editor.

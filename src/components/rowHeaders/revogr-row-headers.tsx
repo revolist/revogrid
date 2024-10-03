@@ -17,7 +17,7 @@ import {
   DimensionRows,
   DimensionCols,
 } from '@type';
-import { JSX } from '../../components';
+import { type JSX } from '../../components';
 
 /**
  * Row headers component

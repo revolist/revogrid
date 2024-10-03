@@ -16,7 +16,7 @@ import type {
   EditCellStore,
 } from '@type';
 import { getPropertyFromEvent } from '../../utils/events';
-import { Observable } from '../../utils/store.utils';
+import { Observable } from '../../utils';
 
 export type EventData = {
   el: HTMLElement;

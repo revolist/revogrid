@@ -1,4 +1,4 @@
-import { VNode, h as createElement } from '@stencil/core';
+import { type VNode, h as createElement } from '@stencil/core';
 import { isEnterKeyValue, isTab } from '../../utils/key.utils';
 import { timeout } from '../../utils';
 import { ColumnDataSchemaModel } from '@type';

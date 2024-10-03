@@ -1,4 +1,4 @@
-import { FunctionalComponent, h, VNode } from '@stencil/core';
+import { type FunctionalComponent, h } from '@stencil/core';
 import { dispatch } from '../../plugins/dispatcher';
 import { doPropMerge } from '../data/column.service';
 import {
@@ -14,7 +14,7 @@ export const HeaderCellRenderer: FunctionalComponent<{
   additionalData: any;
   data?: ColumnTemplateProp;
 }> = ({ data, props, additionalData }, children) => {
-  let colTemplate: VNode | VNode[] | string = data?.name || '';
+  let colTemplate: ReturnType<typeof h> = data?.name || '';
   let cellProps = props;
   if (data?.columnTemplate) {
     colTemplate = data.columnTemplate(h, data, additionalData);

@@ -11,7 +11,7 @@ import {
   ItemsToUpdate,
 } from './viewport.helpers';
 import { createStore } from '@stencil/store';
-import { type Observable, setStore } from '../../utils/store.utils';
+import { type Observable, setStore } from '../../utils';
 import type {
   VirtualPositionItem,
   ViewportState,

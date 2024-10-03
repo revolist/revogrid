@@ -10,7 +10,7 @@ import {
 import { FOCUS_CLASS } from '../../utils/consts';
 import { getCell, styleByCellProps } from '../overlay/selection.utils';
 import { DSourceState, getSourceItem } from '@store';
-import {
+import type {
   Cell,
   SelectionStoreState,
   ColumnRegular,
@@ -22,7 +22,7 @@ import {
   DimensionRows,
   FocusAfterRenderEvent,
 } from '@type';
-import { Observable } from '../../utils/store.utils';
+import type { Observable } from '../../utils';
 
 /**
  * Focus component. Shows focus layer around the cell that is currently in focus.

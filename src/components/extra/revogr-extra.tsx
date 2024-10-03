@@ -1,6 +1,5 @@
 import { h, Component, Method, Prop, State } from '@stencil/core';
-
-type ExtraNodeFuncConfig = { refresh: () => void };
+import type { ExtraNodeFuncConfig, VNodeResponse } from '@type';
 
 /**
  * Contains extra elements for stencil components.
@@ -30,8 +29,8 @@ export class RevoGridExtra {
    * Nodes to render
    */
   @Prop() nodes: (
-    | ReturnType<typeof h>
-    | ((c?: Partial<ExtraNodeFuncConfig>) => ReturnType<typeof h>)
+    | VNodeResponse
+    | ((c?: Partial<ExtraNodeFuncConfig>) => VNodeResponse)
   )[] = [];
   /**
    * Force component to re-render

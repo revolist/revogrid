@@ -1,5 +1,5 @@
-import { VNode } from '@stencil/core';
-import { JSX } from '../../components';
+import { type VNode } from '@stencil/core';
+import { type JSX } from '../../components';
 
 /**
  * Converts a VNode element into an HTML element and appends it to the specified parentHolder.

@@ -1,4 +1,4 @@
-import { FunctionalComponent, h, VNode } from '@stencil/core';
+import { type FunctionalComponent, h, type VNode } from '@stencil/core';
 import {
   ResizeProps,
   ResizeDirective,

@@ -1,4 +1,4 @@
-import { h, VNode } from '@stencil/core';
+import { h, type VNode } from '@stencil/core';
 import { JSXBase } from '@stencil/core/internal';
 import { DATA_ROW } from '../../utils/consts';
 
