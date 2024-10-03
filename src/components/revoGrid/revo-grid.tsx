@@ -43,7 +43,6 @@ import type {
   PluginProviders,
   FocusAfterRenderEvent,
   ExtraNodeFuncConfig,
-  VNodeResponse,
 } from '@type';
 
 import ColumnDataProvider from '../../services/column.data.provider';
@@ -293,8 +292,8 @@ export class RevoGridComponent {
    * Function can be used for performance improvement and additional renders.
    */
   @Prop() registerVNode: (
-    | VNodeResponse
-    | ((c?: Partial<ExtraNodeFuncConfig>) => VNodeResponse)
+    | VNode
+    | ((c?: Partial<ExtraNodeFuncConfig>) => VNode)
   )[] = [];
 
 
