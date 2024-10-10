@@ -10,3 +10,4 @@ export * from './groupingRow/grouping.row.plugin';
 export * from './moveColumn/column.drag.plugin';
 export * from './sorting/sorting.plugin';
 export * from './sorting/sorting.sign';
+export * from "./add-rows-on-past.plugin";
