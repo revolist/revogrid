@@ -1,10 +1,10 @@
 import { PluginProviders } from "../types/plugin.types";
 import { BasePlugin } from "./base.plugin";
 
-  /**
-   * Automatically adds new rows when pasted data is larger than current rows
-   * @event newRows - is triggered when new rows are added. Data of new rows can be filled with default values. If the event is prevented, no rows will be added. Event data: { newRows: RowData[] }
-   */
+/**
+ * Automatically adds new rows when pasted data is larger than current rows
+ * @event newRows - is triggered when new rows are added. Data of new rows can be filled with default values. If the event is prevented, no rows will be added. Event data: { newRows: RowData[] }
+ */
 export class AutoAddRowsPlugin extends BasePlugin {
     constructor(revogrid: HTMLRevoGridElement, providers: PluginProviders) {
         super(revogrid, providers);
@@ -23,30 +23,24 @@ export class AutoAddRowsPlugin extends BasePlugin {
 
         const endRow = start.y + event.detail.parsed.length;
 
-        if(rowLength < endRow) {
+        if (rowLength < endRow) {
 
             const count = endRow - rowLength;
-            const newRows = [];
-
-            for(let i = 0; i < count; i++) {
-                newRows.push({ index: rowLength + i, data: {} });
-            }
+            const newRows = Array.from({ length: count }, (_, i) => ({ index: rowLength + i, data: {} }));
 
             const event = this.emit('newRows', { newRows: newRows });
 
-            if(event.defaultPrevented) {
+            if (event.defaultPrevented) {
                 return;
             }
 
-            const items = this.providers.data.stores.rgRow.store.get('source');
-
-            items.push(...event.detail.newRows.map(j => j.data))
-
+            const items = [
+                ...this.providers.data.stores.rgRow.store.get('source'),
+                ...event.detail.newRows.map(j => j.data)
+            ]
 
             this.providers.data.setData(items);
         }
-
-
     }
 
     override clearSubscriptions(): void {
