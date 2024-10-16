@@ -121,6 +121,7 @@
     "@types/resize-observer-browser": "^0.1.11",
     "bootstrap": "^5.3.2",
     "chalk": "^5.3.0",
+    "minimist": "^1.2.8",
     "execa": "^9.2.0",
     "fs": "^0.0.1-security",
     "jest": "^29.7.0",
