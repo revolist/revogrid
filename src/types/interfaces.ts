@@ -561,7 +561,7 @@ export type DataSourceState<
 > = {
   // items - index based array for mapping to source tree
   items: number[];
-  // all items, used as proxy for sorting, trimming and others manipulations
+  // stores items even if they trimmed in items[] there will be a sorted list here
   proxyItems: number[];
   // original data source
   source: T[];

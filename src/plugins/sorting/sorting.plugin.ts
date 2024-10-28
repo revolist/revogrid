@@ -112,6 +112,7 @@ export default class SortingPlugin extends BasePlugin {
 
   startSorting(order?: SortingOrder, sortingFunc?: SortingOrderFunction) {
     if (!this.sortingPromise) {
+      // add job before render
       this.revogrid.jobsBeforeRender.push(
         new Promise<void>(resolve => {
           this.sortingPromise = resolve;
@@ -211,7 +212,7 @@ export default class SortingPlugin extends BasePlugin {
     types: DimensionRows[] = rowTypes,
   ) {
     // if no sorting - reset
-    if (!size(sorting)) {
+    if (!Object.keys(sorting || {}).length) {
       this.sorting = undefined;
       this.sortingFunc = undefined;
 
@@ -222,9 +223,9 @@ export default class SortingPlugin extends BasePlugin {
         // row indexes
         const proxyItems = storeService.store.get('proxyItems');
         // row indexes
-        const newItemsOrder = storeService.store.get('items'); // recover indexes range(0, source.length)
+        const newItemsOrder = Array.from({ length: source.length }, (_, i) => i); // recover indexes range(0, source.length)
         this.providers.dimension.updateSizesPositionByNewDataIndexes(type, newItemsOrder, proxyItems);
-        storeService.setData({ proxyItems: newItemsOrder, source: [...source] });
+        storeService.setData({ proxyItems: newItemsOrder, source: [...source], });
       }
     } else {
       // set sorting
