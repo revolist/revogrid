@@ -14,10 +14,12 @@ export const trimmedPlugin = <T extends GDataType>(
   set(k, newVal) {
     switch (k) {
       case 'trimmed': {
+        // full sorted items list
         const proxy = store.get('proxyItems');
         const trimmed = gatherTrimmedItems(newVal as Trimmed);
         const newItems = proxy.filter(v => !trimmed[v]);
 
+        // set trimmed items in store
         store.set('items', newItems);
         break;
       }
