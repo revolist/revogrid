@@ -52,28 +52,30 @@ import DimensionProvider from '../../services/dimension.provider';
 import ViewportProvider from '../../services/viewport.provider';
 import ThemeService from '../../themeManager/theme.service';
 import { timeout } from '../../utils';
-import AutoSize, {
-  AutoSizeColumnConfig,
+import {
+  AutoSizeColumnPlugin,
+  type AutoSizeColumnConfig,
 } from '../../plugins/column.auto-size.plugin';
 
 import {
   FilterPlugin,
 } from '../../plugins/filter/filter.plugin';
-import SortingPlugin from '../../plugins/sorting/sorting.plugin';
-import ExportFilePlugin from '../../plugins/export/export.plugin';
+import { SortingPlugin } from '../../plugins/sorting/sorting.plugin';
+import { ExportFilePlugin } from '../../plugins/export/export.plugin';
 import { DataInput } from '../../plugins/export/types';
-import GroupingRowPlugin from '../../plugins/groupingRow/grouping.row.plugin';
+import { GroupingRowPlugin } from '../../plugins/groupingRow/grouping.row.plugin';
 import { GroupingOptions } from '../../plugins/groupingRow/grouping.row.types';
 import ViewportService, { FocusedData } from './viewport.service';
 import { DATA_SLOT, HEADER_SLOT } from './viewport.helpers';
 import GridScrollingService from './viewport.scrolling.service';
-import SelectionStoreConnector from '../../services/selection.store.connector';
+import { SelectionStoreConnector } from '../../services/selection.store.connector';
 import OrderRenderer, { OrdererService } from '../order/order-renderer';
-import StretchColumn, {
+import {
+  StretchColumn,
   isStretchPlugin,
 } from '../../plugins/column.stretch.plugin';
 import { rowDefinitionByType, rowDefinitionRemoveByType } from './grid.helpers';
-import ColumnPlugin from '../../plugins/moveColumn/column.drag.plugin';
+import { ColumnMovePlugin } from '../../plugins/moveColumn/column.drag.plugin';
 import { getPropertyFromEvent } from '../../utils/events';
 import { isMobileDevice } from '../../utils/mobile';
 import type { Observable } from '../../utils';
@@ -1329,7 +1331,7 @@ export class RevoGridComponent {
 
     // register auto size plugin
     if (this.autoSizeColumn) {
-      this.pluginService.add(new AutoSize(
+      this.pluginService.add(new AutoSizeColumnPlugin(
         this.element,
         pluginData,
         typeof this.autoSizeColumn === 'object'
@@ -1360,7 +1362,7 @@ export class RevoGridComponent {
     // register grouping plugin
     this.pluginService.add(new GroupingRowPlugin(this.element, pluginData));
     if (this.canMoveColumns) {
-      this.pluginService.add(new ColumnPlugin(this.element, pluginData));
+      this.pluginService.add(new ColumnMovePlugin(this.element, pluginData));
     }
   }
 

@@ -21,7 +21,7 @@ const DOUBLE_QT = String.fromCharCode(34);
 const NO_BREAK_SPACE = String.fromCharCode(0xfeff);
 const escapeRegex = new RegExp('"', 'g');
 
-export default class ExportCsv implements Formatter {
+export class ExportCsv implements Formatter {
   readonly options: Readonly<CSVFormat>;
   constructor(options: Partial<CSVFormat> = {}) {
     this.options = { ...INITIAL, ...options };

@@ -3,9 +3,12 @@ import { columnTypes, rowTypes, Group, Groups } from '@store';
 
 import { timeout } from '../../utils';
 import { BasePlugin } from '../base.plugin';
-import ExportCsv from './csv';
-import { ColSource, CSVFormat, DataInput, Formatter } from './types';
+import { ExportCsv } from './csv';
+import type { ColSource, CSVFormat, DataInput, Formatter } from './types';
 import { DimensionCols, ColumnProp, DataType } from '@type';
+
+export * from './csv';
+export * from './types';
 
 enum ExportTypes {
   csv = 'csv',
@@ -13,7 +16,7 @@ enum ExportTypes {
 
 export type ExportFormat = Partial<CSVFormat>;
 
-export default class ExportFilePlugin extends BasePlugin {
+export class ExportFilePlugin extends BasePlugin {
   /** Exports string */
   async exportString(options: ExportFormat = {}, t: ExportTypes = ExportTypes.csv) {
     const data = await this.beforeexport();

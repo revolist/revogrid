@@ -45,7 +45,7 @@ export type ColumnDragEventData = {
   scrollOffset: number;
   type: DimensionCols;
 };
-export default class ColumnPlugin extends BasePlugin {
+export class ColumnMovePlugin extends BasePlugin {
   private moveFunc = debounce((e: MouseEvent) => this.doMove(e), 5);
   private staticDragData: StaticData | null = null;
   private dragData: ColumnDragEventData | null = null;

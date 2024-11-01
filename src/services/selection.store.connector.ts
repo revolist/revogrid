@@ -19,7 +19,7 @@ type StoresMapping<T> = { [xOrY: number]: Partial<T> };
 
 export const EMPTY_INDEX = -1;
 
-export default class SelectionStoreConnector {
+export class SelectionStoreConnector {
   // dirty flag required to cleanup whole store in case visibility of panels changed
   private dirty = false;
   readonly stores: { [y: number]: { [x: number]: SelectionStore } } = {};
