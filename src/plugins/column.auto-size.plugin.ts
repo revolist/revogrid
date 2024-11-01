@@ -61,7 +61,7 @@ enum ColumnAutoSizeMode {
   autoSizeAll = 'autoSizeAll',
 }
 
-export default class AutoSizeColumnPlugin extends BasePlugin {
+export class AutoSizeColumnPlugin extends BasePlugin {
   autoSizeColumns: Partial<AutoSizeColumns> | null = null;
   readonly letterBlockSize: number;
 

@@ -1,5 +1,5 @@
 import DimensionProvider from '../../services/dimension.provider';
-import SelectionStoreConnector, { EMPTY_INDEX } from '../../services/selection.store.connector';
+import { type SelectionStoreConnector, EMPTY_INDEX } from '../../services/selection.store.connector';
 import ViewportProvider from '../../services/viewport.provider';
 import { columnTypes, DSourceState, getSourceItem, getVisibleSourceItem, rowTypes } from '@store';
 import { OrdererService } from '../order/order-renderer';

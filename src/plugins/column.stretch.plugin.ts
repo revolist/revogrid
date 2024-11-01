@@ -20,7 +20,7 @@ type StretchedData = {
   index: number;
 };
 
-export default class StretchColumn extends BasePlugin {
+export class StretchColumn extends BasePlugin {
   private stretchedColumn: StretchedData | null = null;
   private readonly scrollSize;
   constructor(

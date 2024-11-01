@@ -2,7 +2,7 @@ import size from 'lodash/size';
 import debounce from 'lodash/debounce';
 
 import { BasePlugin } from '../base.plugin';
-import {
+import type {
   ColumnProp,
   Order,
   CellCompareFunc,
@@ -31,7 +31,7 @@ type ColumnSetEvent = {
  * Note: If you prevent an event, it will not proceed to the subsequent steps.
  */
 
-export default class SortingPlugin extends BasePlugin {
+export class SortingPlugin extends BasePlugin {
   // sorting order per column
   sorting?: SortingOrder;
 
