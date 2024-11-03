@@ -537,6 +537,13 @@ export interface ViewportState extends ViewportStateItems {
    * The virtual size of the viewport.
    */
   virtualSize: number;
+
+  /**
+   * The client size of the viewport.
+   * Usually it's same as virtual size.
+   * Until virtualization is not disabled.
+   */
+  clientSize: number;
 }
 
 /**

@@ -6,8 +6,9 @@ import { Trimmed, trimmedPlugin } from './trimmed.plugin';
 import { setStore, Observable } from '../../utils';
 import { proxyPlugin } from './data.proxy';
 import { GroupLabelTemplateFunc } from '../../plugins/groupingRow/grouping.row.types';
-import { DimensionRows, DimensionCols } from '@type';
 import type {
+  DimensionRows,
+  DimensionCols,
   ColumnProperties,
   ColumnGrouping,
   ColumnRegular,

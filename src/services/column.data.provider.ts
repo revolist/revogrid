@@ -14,7 +14,6 @@ import type {
   ColumnProp,
   ColumnRegular,
   DimensionCols,
-  DimensionColPin,
 } from '@type';
 import { ColumnCollection, getColumnType } from '../utils/column.utils';
 
@@ -54,8 +53,8 @@ export default class ColumnDataProvider {
     );
   }
 
-  column(c: number, pin?: DimensionColPin): ColumnRegular | undefined {
-    return this.getColumn(c, pin || 'rgCol');
+  column(c: number, type: DimensionCols = 'rgCol'): ColumnRegular | undefined {
+    return this.getColumn(c, type);
   }
 
   getColumn(
