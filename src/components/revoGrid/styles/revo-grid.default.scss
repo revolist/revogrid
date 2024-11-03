@@ -13,6 +13,11 @@ revo-grid:not([theme]) {
 
   font-size: 12px;
 
+  .rowHeaders revogr-header {
+    $shadow-right: -1px 0 0 0 $header-border-color inset;
+    box-shadow: $shadow-right;
+  }
+
   revogr-header {
     $shadow-left: -1px 0 0 0 $header-border-color;
     $shadow-right: -1px 0 0 0 $header-border-color inset;
