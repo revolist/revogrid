@@ -580,23 +580,37 @@ export class RevoGridComponent {
   }
 
   /**
-   * Sets data at specified cell.
+   * Refreshes data at specified cell.
    * Useful for performance optimization.
    * No viewport update will be triggered.
+   * 
+   * @example
+   * const grid = document.querySelector('revo-grid');
+   * grid.setDataAt({ row: 0, col: 0, val: 'test' }); // refresh
    */
   @Method() async setDataAt(
-    data: {
+    { row, col, colType = 'rgCol', rowType = 'rgRow', val, skipDataUpdate = false }: {
       row: number;
       col: number;
+      val?: any;
+      skipDataUpdate?: boolean;
     } & AllDimensionType,
   ) {
+    if (this.dataProvider && !skipDataUpdate) {
+      this.dataProvider.setCellData({
+        type: rowType,
+        rowIndex: row,
+        prop: col,
+        val,
+      }, false);
+    }
     const dataElement: HTMLRevogrDataElement | null =
       this.element.querySelector(
-        `revogr-data[type="${data.rowType}"][col-type="${data.colType}"]`,
+        `revogr-data[type="${rowType}"][col-type="${colType}"]`,
       );
     return dataElement?.updateCell({
-      row: data.row,
-      col: data.col,
+      row,
+      col,
     });
   }
 

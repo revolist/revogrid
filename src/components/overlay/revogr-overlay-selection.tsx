@@ -85,7 +85,7 @@ export class OverlaySelection {
 
   /** Stores */
   /** Selection, range, focus. */
-  @Prop() selectionStore: Observable<SelectionStoreState>;
+  @Prop() selectionStore!: Observable<SelectionStoreState>;
   /** Dimension settings Y. */
   @Prop() dimensionRow: Observable<DimensionSettingsState>;
   /** Dimension settings X. */
@@ -100,12 +100,12 @@ export class OverlaySelection {
   /**
    * Row data store.
    */
-  @Prop() dataStore: Observable<DSourceState<DataType, DimensionRows>>;
+  @Prop() dataStore!: Observable<DSourceState<DataType, DimensionRows>>;
 
   /**
    * Column data store.
    */
-  @Prop() colData: Observable<DSourceState<ColumnRegular, DimensionCols>>;
+  @Prop() colData!: Observable<DSourceState<ColumnRegular, DimensionCols>>;
   /**
    * Last real coordinates positions + 1.
    */
@@ -366,17 +366,17 @@ export class OverlaySelection {
    * Selection & Keyboard
    */
   @Watch('selectionStore') selectionServiceSet(
-    s: Observable<SelectionStoreState>,
+    selectionStore: Observable<SelectionStoreState>,
   ) {
     // clear subscriptions
     this.unsubscribeSelectionStore.forEach(v => v());
     this.unsubscribeSelectionStore.length = 0;
     this.unsubscribeSelectionStore.push(
-      s.onChange('nextFocus', v => v && this.doFocus(v, v)),
+      selectionStore.onChange('nextFocus', v => v && this.doFocus(v, v)),
     );
 
     this.keyboardService = new KeyboardService({
-      selectionStore: s,
+      selectionStore,
       range: r => !!r && this.triggerRangeEvent(r),
       focus: (f, changes, focusNextViewport) => {
         if (focusNextViewport) {
