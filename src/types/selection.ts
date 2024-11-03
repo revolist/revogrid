@@ -91,7 +91,7 @@ export type RangeAreaCss = {
   height: string;
 };
 
-export type SaveData = string;
+export type SaveData = any;
 export type SaveDataDetails = {
   rgRow: RowIndex;
   rgCol: ColIndex;

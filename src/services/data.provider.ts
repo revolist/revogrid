@@ -76,7 +76,7 @@ export class DataProvider {
   }
 
   setCellData(
-    { type, rowIndex, prop, val }: BeforeSaveDataDetails,
+    { type, rowIndex, prop, val }: Pick<BeforeSaveDataDetails, 'type' | 'rowIndex' | 'prop' | 'val'>, 
     mutate = true,
   ) {
     const model = this.getModel(rowIndex, type);
