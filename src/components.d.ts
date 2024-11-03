@@ -256,9 +256,10 @@ export namespace Components {
          */
         "setCellsFocus": (cellStart?: Cell, cellEnd?: Cell, colType?: string, rowType?: string) => Promise<void>;
         /**
-          * Sets data at specified cell. Useful for performance optimization. No viewport update will be triggered.
+          * Refreshes data at specified cell. Useful for performance optimization. No viewport update will be triggered.
+          * @example const grid = document.querySelector('revo-grid'); grid.setDataAt({ row: 0, col: 0, val: 'test' }); // refresh
          */
-        "setDataAt": (data: { row: number; col: number; } & AllDimensionType) => Promise<void | undefined>;
+        "setDataAt": ({ row, col, colType, rowType, val, skipDataUpdate }: { row: number; col: number; val?: any; skipDataUpdate?: boolean; } & AllDimensionType) => Promise<void | undefined>;
         /**
           * Source - defines main data source. Can be an Object or 2 dimensional array([][]); Keys/indexes referenced from columns Prop.
          */
@@ -2023,11 +2024,11 @@ declare namespace LocalJSX {
         /**
           * Column data store.
          */
-        "colData"?: Observable<DSourceState<ColumnRegular, DimensionCols>>;
+        "colData": Observable<DSourceState<ColumnRegular, DimensionCols>>;
         /**
           * Row data store.
          */
-        "dataStore"?: Observable<DSourceState<DataType, DimensionRows>>;
+        "dataStore": Observable<DSourceState<DataType, DimensionRows>>;
         /**
           * Dimension settings X.
          */
@@ -2159,7 +2160,7 @@ declare namespace LocalJSX {
         /**
           * Selection, range, focus.
          */
-        "selectionStore"?: Observable<SelectionStoreState>;
+        "selectionStore": Observable<SelectionStoreState>;
         /**
           * Enable revogr-clipboard component (read more in revogr-clipboard component). Allows copy/paste.
          */

@@ -47,9 +47,6 @@ export type ViewportColumn = {
   Partial<JSX.RevogrHeader>;
 
 export type ViewportData = {
-  /** Selection connection */
-  segmentSelectionStore: Observable<SelectionStoreState>;
-
   /** Slot to put data */
   slot: SlotType;
   style?: { [key: string]: string };

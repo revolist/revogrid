@@ -149,7 +149,7 @@ export default class ViewportService {
             colType: val,
             ...rgRow,
             rowSelectionStore,
-            segmentSelectionStore: segmentSelection.store,
+            selectionStore: segmentSelection.store,
             ref: (e) =>
               config.selectionStoreConnector.registerSection(e),
             onSetrange: e => {

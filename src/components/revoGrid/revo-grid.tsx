@@ -1572,7 +1572,6 @@ export class RevoGridComponent {
           <revogr-overlay-selection
             {...data}
             isMobileDevice={isMobile}
-            selectionStore={data.segmentSelectionStore}
             onSelectall={() => this.selectionStoreConnector?.selectAll()}
             editors={this.editors}
             readonly={this.readonly}
@@ -1605,7 +1604,7 @@ export class RevoGridComponent {
               <slot name={`data-${view.type}-${data.type}`} />
             </revogr-data>
             <revogr-temp-range
-              selectionStore={data.segmentSelectionStore}
+              selectionStore={data.selectionStore}
               dimensionRow={data.dimensionRow}
               dimensionCol={data.dimensionCol}
             />
@@ -1615,7 +1614,7 @@ export class RevoGridComponent {
               focusTemplate={this.focusTemplate}
               rowType={data.type}
               colType={view.type}
-              selectionStore={data.segmentSelectionStore}
+              selectionStore={data.selectionStore}
               dimensionRow={data.dimensionRow}
               dimensionCol={data.dimensionCol}
             >
