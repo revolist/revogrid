@@ -590,19 +590,22 @@ export class RevoGridComponent {
    */
   @Method() async setDataAt(
     { row, col, colType = 'rgCol', rowType = 'rgRow', val, skipDataUpdate = false }: {
-      row: number;
-      col: number;
+      row: number; // virtual
+      col: number; // virtual
       val?: any;
       skipDataUpdate?: boolean;
     } & AllDimensionType,
   ) {
-    if (this.dataProvider && !skipDataUpdate) {
-      this.dataProvider.setCellData({
-        type: rowType,
-        rowIndex: row,
-        prop: col,
-        val,
-      }, false);
+    if (this.dataProvider && this.columnProvider && !skipDataUpdate) {
+      const columnProp = this.columnProvider.getColumn(col, colType)?.prop;
+      if (typeof columnProp !== 'undefined') {
+        this.dataProvider.setCellData({
+          type: rowType,
+          rowIndex: row,
+          prop: columnProp,
+          val,
+        }, false);
+      }
     }
     const dataElement: HTMLRevogrDataElement | null =
       this.element.querySelector(

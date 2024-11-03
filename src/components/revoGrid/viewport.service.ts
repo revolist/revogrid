@@ -8,7 +8,7 @@ import { CONTENT_SLOT, FOOTER_SLOT, HEADER_SLOT, viewportDataPartition, VPPartit
 
 import ColumnDataProvider from '../../services/column.data.provider';
 import { DataProvider } from '../../services/data.provider';
-import {
+import type {
   Cell,
   ColumnRegular,
   DimensionCols,
@@ -21,6 +21,7 @@ import {
   ViewportProperties,
   ViewportProps,
   ViewPortResizeEvent,
+  ViewportState,
   ViewSettingSizeProp,
 } from '@type';
 import { Observable } from '../../utils';
@@ -120,14 +121,16 @@ export default class ViewportService {
       };
       if (val === 'rgCol') {
         column.onResizeviewport = (e: CustomEvent<ViewPortResizeEvent>) => {
-          if (config.disableVirtualY && e.detail.dimension === 'rgRow') {
-            return;
-          } else if (config.disableVirtualX && e.detail.dimension === 'rgCol') {
-            return;
+          const vpState: Partial<ViewportState> = {
+            clientSize: e.detail.size,
+          };
+
+          // virtual size will be handled by dimension provider if disabled
+          if ((e.detail.dimension === 'rgRow' && !config.disableVirtualY)
+              || (e.detail.dimension === 'rgCol' && !config.disableVirtualX)) {
+                vpState.virtualSize = e.detail.size;
           }
-          config.viewportProvider?.setViewport(e.detail.dimension, {
-            virtualSize: e.detail.size,
-          });
+          config.viewportProvider?.setViewport(e.detail.dimension, vpState);
         };
       }
       const colData = gatherColumnData(column);

@@ -9,16 +9,15 @@ import {
   Prop,
 } from '@stencil/core';
 import LocalScrollService, { getContentSize } from '../../services/local.scroll.service';
-import { getScrollbarSize } from '../../utils';
-import { DimensionType } from '@type';
-import {
+import type {
+  DimensionType,
   ViewportState,
   DimensionSettingsState,
   ViewPortScrollEvent,
 } from '@type';
 import { AutohideScrollPlugin } from './autohide-scroll.plugin';
 import { LocalScrollTimer } from '../../services/local.scroll.timer';
-import type { Observable } from '../../utils';
+import { type Observable, getScrollbarSize } from '../../utils';
 
 /**
  * Virtual scroll component
@@ -138,7 +137,7 @@ export class RevogrScrollVirtual {
       {
         contentSize: this.dimensionStore.get('realSize'),
         clientSize: this.size,
-        virtualSize: this.viewportStore.get('virtualSize'),
+        virtualSize: this.viewportStore.get('clientSize'),
       },
       this.dimension,
     );
@@ -161,16 +160,16 @@ export class RevogrScrollVirtual {
 
   render() {
     const sizeType = this.dimension === 'rgRow' ? 'height' : 'width';
+    const size = getContentSize(
+      this.dimensionStore.get('realSize'),
+      this.size,
+      this.viewportStore.get('clientSize') // content viewport size
+    );
     return (
       <Host onScroll={(e: MouseEvent) => this.onScroll(e)}>
         <div
           style={{
-            [sizeType]: `${
-              getContentSize(
-                this.dimensionStore.get('realSize'),
-                this.size,
-                this.viewportStore.get('virtualSize')
-              )}px`,
+            [sizeType]: `${size}px`,
           }}
         />
       </Host>

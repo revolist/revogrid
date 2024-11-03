@@ -31,11 +31,14 @@ function initialState(): ViewportState {
     start: 0,
     end: 0,
 
-    // size of viewport in px
+    // size of virtual viewport in px
     virtualSize: 0,
 
     // total number of items
     realCount: 0,
+
+    // size of viewport in px
+    clientSize: 0,
   };
 }
 
