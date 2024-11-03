@@ -15,7 +15,7 @@ import type { EditCell, EditorBase, ColumnDataSchemaModel } from '@type';
  * Closes editor when called
  * @param preventFocus - if true editor will not be closed and next cell will not be focused
  */
-export type SaveCallback = (value: any | undefined, preventFocus: boolean) => void;
+export type SaveCallback = (value: any, preventFocus: boolean) => void;
 
 export class TextEditor implements EditorBase {
   editInput: HTMLInputElement | null = null;
