@@ -91,7 +91,6 @@ export type RangeAreaCss = {
   height: string;
 };
 
-export type SaveData = any;
 export type SaveDataDetails = {
   rgRow: RowIndex;
   rgCol: ColIndex;
@@ -107,7 +106,7 @@ export interface BeforeSaveDataDetails extends ColumnDataSchemaModel {
   /**
    * Value from editor to save, not part of the model value yet
    */
-  val?: SaveData;
+  val?: any;
 }
 
 export type BeforeRangeSaveDataDetails = {
@@ -122,7 +121,7 @@ export type AfterEditEvent = BeforeRangeSaveDataDetails | BeforeSaveDataDetails;
  * Edit cell info for store
  */
 export interface EditCellStore extends Cell {
-  val?: SaveData;
+  val?: any;
 }
 /**
  * Edit cell info for editor
@@ -148,7 +147,7 @@ export type EditorCtr = EditorCtrCallable | EditorCtrConstructible;
 export type EditorCtrCallable = {
   (
     column: ColumnDataSchemaModel,
-    save: (value: SaveData, preventFocus?: boolean) => void,
+    save: (value?: any, preventFocus?: boolean) => void,
     close: (focusNext?: boolean) => void,
   ): EditorBase;
 }
@@ -158,7 +157,7 @@ export type EditorCtrCallable = {
 export interface EditorCtrConstructible {
   new (
     column: ColumnDataSchemaModel,
-    save: (value: SaveData, preventFocus?: boolean) => void,
+    save: (value: any, preventFocus?: boolean) => void,
     close: (focusNext?: boolean) => void,
   ): EditorBase;
 }

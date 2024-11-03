@@ -16,7 +16,6 @@ import {
   EditorCtr,
   SaveDataDetails,
   EditorBase,
-  SaveData,
 } from '@type';
 
 import { isEditorCtrConstructible } from './edit.utils';
@@ -106,7 +105,7 @@ export class RevoEdit {
    * Closes editor when called.
    * @param preventFocus - if true, editor will not be closed & next cell will not be focused.
    */
-  onSave(val?: SaveData, preventFocus?: boolean) {
+  onSave(val?: any, preventFocus?: boolean) {
     this.preventSaveOnClose = true;
     if (this.editCell) {
       this.cellEdit.emit({

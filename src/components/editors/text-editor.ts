@@ -1,8 +1,7 @@
 import { type VNode, h as createElement } from '@stencil/core';
 import { isEnterKeyValue, isTab } from '../../utils/key.utils';
 import { timeout } from '../../utils';
-import { ColumnDataSchemaModel } from '@type';
-import { EditCell, EditorBase, SaveData } from '@type';
+import type { EditCell, EditorBase, ColumnDataSchemaModel } from '@type';
 
 /**
  * Represents a cell editor in a grid.
@@ -16,7 +15,7 @@ import { EditCell, EditorBase, SaveData } from '@type';
  * Closes editor when called
  * @param preventFocus - if true editor will not be closed and next cell will not be focused
  */
-export type SaveCallback = (value: SaveData | undefined, preventFocus: boolean) => void;
+export type SaveCallback = (value: any | undefined, preventFocus: boolean) => void;
 
 export class TextEditor implements EditorBase {
   editInput: HTMLInputElement | null = null;
