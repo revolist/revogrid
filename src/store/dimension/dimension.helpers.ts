@@ -76,7 +76,7 @@ export const getItemByPosition = (
     positionIndexes,
     originItemSize,
     positionIndexToItem,
-  }: DimensionPosition,
+  }: Pick<DimensionPosition, 'indexes' | 'positionIndexes' | 'originItemSize' | 'positionIndexToItem'>,
   pos: number,
 ) => {
   const item: PositionItem = {

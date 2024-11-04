@@ -7,7 +7,7 @@ import { getItemByPosition } from '@store';
 import { BasePlugin } from '../base.plugin';
 import { ColumnOrderHandler } from './order-column.handler';
 import { dispatch } from '../dispatcher';
-import { ColumnPropProp, ColumnRegular, DimensionSettingsState, PositionItem, DimensionCols, MultiDimensionType, PluginProviders } from '@type';
+import type { ColumnPropProp, ColumnTemplateProp, DimensionSettingsState, PositionItem, DimensionCols, MultiDimensionType, PluginProviders } from '@type';
 import { ON_COLUMN_CLICK } from '../../components/header/header-cell-renderer';
 import { isColGrouping } from '../../utils/column.utils';
 
@@ -27,7 +27,7 @@ export type DragStartEventDetails = {
 type StaticData = {
   startPos: number;
   startItem: PositionItem;
-  data: ColumnRegular;
+  data: ColumnTemplateProp;
   dataEl: HTMLElement;
   scrollEl: Element;
   gridEl: HTMLElement;
@@ -138,6 +138,11 @@ export class ColumnMovePlugin extends BasePlugin {
       const x = getLeftRelative(e.x, this.dragData.gridRect.left, this.dragData.scrollOffset);
       const rgCol = getItemByPosition(this.staticDragData.cols, x);
       this.orderUi.autoscroll(x, dragData.elRect.width);
+
+      // prevent position change if out of bounds
+      if (rgCol.itemIndex >= this.staticDragData.cols.count) {
+        return;
+      }
       this.orderUi.showHandler(
         rgCol.end + dragData.scrollOffset,
         dragData.gridRect.width
@@ -163,20 +168,22 @@ export class ColumnMovePlugin extends BasePlugin {
       const newPosition = getItemByPosition(this.staticDragData.cols, relativePos);
 
       const store = this.providers.column.stores[this.dragData.type].store;
-      const items = [...store.get('items')];
+      const newItems = [...store.get('items')];
 
       // prevent position change if needed
       const { defaultPrevented: stopDrag } = dispatch(this.revogrid, BEFORE_DRAG_END, {
         ...this.staticDragData,
         startPosition: this.staticDragData.startItem,
         newPosition,
-        newItem: store.get('source')[items[this.staticDragData.startItem.itemIndex]]
+        newItem: store.get('source')[newItems[this.staticDragData.startItem.itemIndex]]
       });
       if (!stopDrag) {
+        const prevItems = [...newItems];
         // todo: if move item out of group remove item from group
-        const toMove = items.splice(this.staticDragData.startItem.itemIndex, 1);
-        items.splice(newPosition.itemIndex, 0, ...toMove);
-        store.set('items', items);
+        const toMove = newItems.splice(this.staticDragData.startItem.itemIndex, 1);
+        newItems.splice(newPosition.itemIndex, 0, ...toMove);
+        store.set('items', newItems);
+        this.providers.dimension.updateSizesPositionByNewDataIndexes(this.dragData.type, newItems, prevItems);
       }
       dispatch(this.revogrid, DRAG_END, this.dragData);
     }
