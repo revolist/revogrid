@@ -1,4 +1,4 @@
-import { PluginProviders } from '../types/plugin.types';
+import type { PluginProviders } from '../types/plugin.types';
 import { BasePlugin } from './base.plugin';
 
 /**
