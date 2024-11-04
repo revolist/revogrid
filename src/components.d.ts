@@ -436,7 +436,6 @@ export namespace Components {
         "disableDynamicFiltering": boolean;
         "filterCaptions": FilterCaptions | undefined;
         "filterEntities": Record<string, LogicFunction>;
-        "filterItems": MultiFilterItem;
         "filterNames": Record<string, string>;
         "getChanges": () => Promise<ShowData | undefined>;
         "show": (newEntity?: ShowData) => Promise<void>;
@@ -1815,7 +1814,6 @@ declare namespace LocalJSX {
         "disableDynamicFiltering"?: boolean;
         "filterCaptions"?: FilterCaptions | undefined;
         "filterEntities"?: Record<string, LogicFunction>;
-        "filterItems"?: MultiFilterItem;
         "filterNames"?: Record<string, string>;
         "onFilterChange"?: (event: RevogrFilterPanelCustomEvent<MultiFilterItem>) => void;
         "onResetChange"?: (event: RevogrFilterPanelCustomEvent<ColumnProp>) => void;

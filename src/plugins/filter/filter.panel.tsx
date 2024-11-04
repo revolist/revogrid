@@ -60,7 +60,7 @@ export class FilterPanel {
   @State() currentFilterId = -1;
   @State() currentFilterType: FilterType = defaultType;
   @State() changes: ShowData | undefined;
-  @Prop() filterItems: MultiFilterItem = {};
+  @State() filterItems: MultiFilterItem = {};
   @Prop() filterNames: Record<string, string> = {};
   @Prop() filterEntities: Record<string, LogicFunction> = {};
   @Prop() filterCaptions: FilterCaptions | undefined;
@@ -105,6 +105,7 @@ export class FilterPanel {
 
   @Method() async show(newEntity?: ShowData) {
     this.changes = newEntity;
+    this.filterItems = newEntity?.filterItems || {};
     if (this.changes) {
       this.changes.type = this.changes.type || defaultType;
     }
@@ -127,7 +128,7 @@ export class FilterPanel {
 
   getFilterItemsList() {
     const prop = this.changes?.prop;
-    if (!(prop || prop === 0)) return '';
+    if (typeof prop === 'undefined') return '';
 
     const propFilters = this.filterItems[prop] || [];
     const capts = Object.assign(
