@@ -101,7 +101,6 @@ export class FilterPlugin extends BasePlugin {
         });
       }
       if (Object.keys(this.multiFilterItems).length === 0) {
-        this.onFilterReset();
         return;
       }
       await this.runFiltering(this.multiFilterItems);
@@ -114,7 +113,7 @@ export class FilterPlugin extends BasePlugin {
     this.addEventListener(
       FILTER_CONFIG_CHANGED_EVENT,
       ({ detail }: CustomEvent<ColumnFilterConfig | boolean>) => {
-        if (!detail) {
+        if (!detail || typeof detail === 'object' && (!detail.multiFilterItems || !Object.keys(detail.multiFilterItems).length)) {
           this.clearFiltering();
           return;
         }
