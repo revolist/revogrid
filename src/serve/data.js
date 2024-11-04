@@ -115,7 +115,7 @@ export function generateFakeDataObject(config = {}) {
           'custom-row-index': rowIndex
         };
       }
-      columns[rgCol].cellParser = () => 'a';
+      // columns[rgCol].cellParser = () => 'a';
       columns[rgCol].cellTemplate = (h, { value }) => {
       //   // delay
       //   // for(let i = 0; i < 10000000; i++) {

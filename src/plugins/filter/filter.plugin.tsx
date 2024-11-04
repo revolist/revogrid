@@ -1,5 +1,4 @@
 import { h } from '@stencil/core';
-import reduce from 'lodash/reduce';
 
 import type { ColumnProp, ColumnRegular, DataType, PluginProviders } from '@type';
 import { BasePlugin } from '../base.plugin';
@@ -74,7 +73,6 @@ export class FilterPlugin extends BasePlugin {
     this.revogrid.registerVNode = [
       ...existingNodes,
       <revogr-filter-panel
-        filterItems={this.multiFilterItems}
         filterNames={this.filterNameIndexByType}
         filterEntities={this.filterFunctionsIndexedByType}
         filterCaptions={config?.localization?.captions}
@@ -115,7 +113,7 @@ export class FilterPlugin extends BasePlugin {
     this.addEventListener(
       FILTER_CONFIG_CHANGED_EVENT,
       ({ detail }: CustomEvent<ColumnFilterConfig | boolean>) => {
-        if (!detail) {
+        if (!detail || typeof detail === 'object' && (!detail.multiFilterItems || !Object.keys(detail.multiFilterItems).length)) {
           this.clearFiltering();
           return;
         }
@@ -138,6 +136,8 @@ export class FilterPlugin extends BasePlugin {
   initConfig(config: ColumnFilterConfig) {
     if (config.multiFilterItems) {
       this.multiFilterItems = { ...config.multiFilterItems };
+    } else {
+      this.multiFilterItems = {};
     }
     // Add custom filters
     if (config.customFilters) {
@@ -181,18 +181,13 @@ export class FilterPlugin extends BasePlugin {
     }
 
     if (config.collection) {
-      this.filterCollection = reduce(
-        config.collection,
-        (result: FilterCollection, item, prop) => {
-          if (this.filterFunctionsIndexedByType[item.type]) {
-            result[prop] = item;
-          } else {
-            console.warn(`${item.type} type is not found.`);
-          }
-          return result;
-        },
-        {},
+      this.filterCollection = Object.fromEntries(
+        Object.entries(config.collection).filter(
+          ([, item]) => this.filterFunctionsIndexedByType[item.type],
+        ),
       );
+    } else {
+      this.filterCollection = {};
     }
 
     if (config.localization) {
@@ -212,14 +207,6 @@ export class FilterPlugin extends BasePlugin {
       return;
     }
     e.preventDefault();
-
-    // close if same
-    const changes = await this.pop?.getChanges();
-    if (changes && changes?.prop === e.detail.prop) {
-      this.pop?.show();
-      return;
-    }
-
     if (!this.pop) {
       return;
     }
@@ -236,6 +223,7 @@ export class FilterPlugin extends BasePlugin {
       autoCorrect: true,
       prop,
       filterTypes: this.getColumnFilter(e.detail.filter),
+      filterItems: this.multiFilterItems,
     });
   }
 

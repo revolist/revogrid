@@ -129,4 +129,5 @@ export type ShowData = {
    */
   autoCorrect?: boolean;
   filterTypes?: Record<string, string[]>;
+  filterItems?: MultiFilterItem;
 } & FilterItem;

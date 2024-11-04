@@ -237,16 +237,13 @@ window.theme = function (theme) {
 
 window.onload = onLoad;
 
-/**
- * On load function
- */
-function onLoad() {
+window.clearFilter = () => {
   const grid = document.querySelector('revo-grid');
+  grid.filter = {};
+};
 
-  grid.readonly = false;
-  grid.range = true;
-  grid.resize = true;
-
+window.setFilter = () => {
+  const grid = document.querySelector('revo-grid');
   const filterFunc = (cellValue, extraValue) => {
     if (!cellValue) {
       return false;
@@ -260,7 +257,7 @@ function onLoad() {
   filterFunc.extra = 'input';
 
   const filterConfig = {
-    include: ['newEqual'],
+    // include: ['newEqual'],
     customFilters: {
       newEqual: {
         columnFilterType: 'myFilterType', // column filter type id
@@ -269,11 +266,30 @@ function onLoad() {
       },
     },
     disableDynamicFiltering: true,
+    multiFilterItems: {
+      0: [
+        {
+          type: "contains",
+          value: '9:0',
+        },
+      ],
+    },
   };
 
   grid.filter = filterConfig;
+};
 
+/**
+ * On load function
+ */
+function onLoad() {
+  const grid = document.querySelector('revo-grid');
+
+  grid.readonly = false;
+  grid.range = true;
+  grid.resize = true;
   grid.filter = true;
+
   grid.exporting = true;
   grid.rowHeaders = true;
   grid.rowDefinitions = [{
