@@ -151,7 +151,7 @@ export class GroupingRowPlugin extends BasePlugin {
   private subscribe() {
     /** if grouping present and new data source arrived */
     this.addEventListener('beforesourceset', ({ detail }) => {
-      if (!this.options?.props?.length || !detail?.source || !detail.source.length) {
+      if (!(this.options?.props?.length && detail?.source?.length)) {
         return;
       }
       this.onDataSet(detail);
