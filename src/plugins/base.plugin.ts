@@ -1,7 +1,8 @@
 import { h } from '@stencil/core';
-import { PluginProviders, PluginBaseComponent } from '..';
+import type { PluginProviders, PluginBaseComponent, RevoGridCustomEvent } from '..';
 
-type WatchConfig = { immediate: boolean };
+
+export type WatchConfig = { immediate: boolean };
 
 /**
  * Base layer for plugins
@@ -17,12 +18,12 @@ export class BasePlugin implements PluginBaseComponent {
    * @param eventName - event name to subscribe to in revo-grid component (e.g. 'beforeheaderclick')
    * @param callback - callback function for event
    */
-  addEventListener<T = any>(
-    eventName: string,
-    callback: (e: CustomEvent<T>) => void,
+  addEventListener<K extends keyof HTMLRevoGridElementEventMap>(
+    eventName: K,
+    callback: (this: BasePlugin, e: RevoGridCustomEvent<HTMLRevoGridElementEventMap[K]>) => void,
   ) {
-    this.revogrid.addEventListener(eventName, callback);
-    this.subscriptions[eventName] = callback;
+    this.revogrid.addEventListener(eventName as string, callback);
+    this.subscriptions[eventName as string] = callback;
   }
 
   /**

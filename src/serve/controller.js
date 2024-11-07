@@ -70,6 +70,7 @@ window.setGrouping = function (props = [], expandedAll = false) {
   grid.grouping = {
     props,
     expandedAll,
+    prevExpanded: { a: true },
     groupLabelTemplate: (createElement, { name, depth }) =>
       createElement('span', null, ` ${props[depth]}: ${name}`),
   };

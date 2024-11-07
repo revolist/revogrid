@@ -7,16 +7,10 @@ import {
   PSEUDO_GROUP_ITEM_ID,
   PSEUDO_GROUP_ITEM_VALUE,
   GROUP_ORIGINAL_INDEX,
+  GROUP_COLUMN_PROP,
 } from './grouping.const';
-import { GroupLabelTemplateFunc } from './grouping.row.types';
+import type { ExpandedOptions, SourceGather } from './grouping.row.types';
 
-export type ExpandedOptions = {
-  prevExpanded?: Record<string, boolean>;
-  expandedAll?: boolean; // skip trim
-
-  getGroupValue?(item: DataType, prop: string | number): any;
-  groupLabelTemplate?: GroupLabelTemplateFunc;
-};
 
 type GroupedData = Map<string, GroupedData | DataType[]>;
 
@@ -24,15 +18,53 @@ function getGroupValueDefault(item: DataType, prop: string | number) {
   return item[prop] || null;
 }
 
+// get source based on proxy item collection to preserve rgRow order
+export function getSource(
+  source: DataType[],
+  items: number[],
+  withoutGrouping = false,
+) {
+  let index = 0;
+  const result: Required<SourceGather> = {
+    source: [],
+    prevExpanded: {},
+    oldNewIndexes: {},
+  };
+  // order important here, expected parent is first, then others
+  items.forEach(i => {
+    const model = source[i];
+    if (!withoutGrouping) {
+      result.source.push(model);
+      return;
+    }
+
+    // grouping filter
+    if (isGrouping(model)) {
+      if (getExpanded(model)) {
+        result.prevExpanded[model[PSEUDO_GROUP_ITEM_VALUE]] = true;
+      }
+    } else {
+      result.source.push(model);
+      result.oldNewIndexes[i] = index;
+      index++;
+    }
+  });
+  return result;
+}
+
+export function getExpanded(model: DataType = {}) {
+  return model[GROUP_EXPANDED];
+}
+
 /**
  * Gather data for grouping
  * @param array - flat data array
- * @param groupIds - ids of groups
+ * @param columnProps - ids of groups
  * @param expanded - potentially expanded items if present
  */
 export function gatherGrouping(
   array: DataType[],
-  groupIds: ColumnProp[],
+  columnProps: ColumnProp[],
   {
     prevExpanded,
     expandedAll,
@@ -41,7 +73,7 @@ export function gatherGrouping(
 ) {
   const groupedItems: GroupedData = new Map();
   array.forEach((item, originalIndex) => {
-    const groupLevelValues = groupIds.map(groupId =>
+    const groupLevelValues = columnProps.map(groupId =>
       getGroupValue(item, groupId),
     );
     const lastLevelValue = groupLevelValues.pop();
@@ -63,7 +95,7 @@ export function gatherGrouping(
   });
 
   let itemIndex = -1;
-  const groupingDepth = groupIds.length;
+  const groupingDepth = columnProps.length;
   // collapse all groups in the beginning
   const trimmed: Record<number, boolean> = {};
   // index mapping
@@ -88,6 +120,7 @@ export function gatherGrouping(
         [PSEUDO_GROUP_ITEM_ID]: JSON.stringify(levelIds),
         [PSEUDO_GROUP_ITEM_VALUE]: mergedIds,
         [GROUP_EXPANDED]: isGroupExpanded,
+        [GROUP_COLUMN_PROP]: columnProps[depth],
       });
       itemIndex += 1;
       if (!isGroupExpanded && depth) {

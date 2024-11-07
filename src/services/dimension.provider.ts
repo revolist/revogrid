@@ -175,6 +175,11 @@ export default class DimensionProvider {
     }
   }
 
+  /**
+   * Gets the full size of the grid by summing up the sizes of all dimensions
+   * Goes through all dimensions columnTypes (x) and rowTypes (y) and sums up their sizes
+   */
+
   getFullSize(): { x: number; y: number } {
     let x = 0;
     let y = 0;

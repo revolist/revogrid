@@ -31,3 +31,10 @@ export type PluginProviders = {
      */
     viewport: ViewportProvider;
 };
+
+
+declare global {
+    interface HTMLRevoGridElementEventMap extends HTMLRevogrClipboardElementEventMap, HTMLRevogrFocusElementEventMap, HTMLRevogrDataElementEventMap, HTMLRevogrEditElementEventMap, HTMLRevogrFilterPanelElementEventMap, HTMLRevogrHeaderElementEventMap, HTMLRevogrOrderEditorElementEventMap, HTMLRevogrOverlaySelectionElementEventMap, HTMLRevogrRowHeadersElementEventMap, HTMLRevogrScrollVirtualElementEventMap, HTMLRevogrViewportScrollElementEventMap, HTMLVnodeHtmlElementEventMap, Record<string, any> {
+        //
+    }
+}
