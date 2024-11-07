@@ -130,29 +130,29 @@ export class FilterPanel {
     const prop = this.changes?.prop;
     if (typeof prop === 'undefined') return '';
 
-    const propFilters = this.filterItems[prop] || [];
+    const propFilters = this.filterItems[prop]?.filter(f => !f.hidden) || [];
     const capts = Object.assign(
       this.filterCaptionsInternal,
       this.filterCaptions,
     );
     return (
       <div key={this.filterId}>
-        {propFilters.map((d, index) => {
+        {propFilters.map((filter, index) => {
           let andOrButton;
 
           // hide toggle button if there is only one filter and the last one
           if (index !== this.filterItems[prop].length - 1) {
             andOrButton = (
-              <div onClick={() => this.toggleFilterAndOr(d.id)}>
+              <div onClick={() => this.toggleFilterAndOr(filter.id)}>
                 <AndOrButton
-                  text={d.relation === 'and' ? capts.and : capts.or}
+                  text={filter.relation === 'and' ? capts.and : capts.or}
                 />
               </div>
             );
           }
 
           return (
-            <div key={d.id} class={FILTER_LIST_CLASS}>
+            <div key={filter.id} class={FILTER_LIST_CLASS}>
               <div class={{ 'select-input': true }}>
                 <select
                   class="select-css select-filter"
@@ -164,7 +164,7 @@ export class FilterPanel {
                   )}
                 </select>
                 <div class={FILTER_LIST_CLASS_ACTION}>{andOrButton}</div>
-                <div onClick={() => this.onRemoveFilter(d.id)}>
+                <div onClick={() => this.onRemoveFilter(filter.id)}>
                   <TrashButton />
                 </div>
               </div>

@@ -112,8 +112,21 @@ export type FilterItem = {
 
 export type FilterData = {
   id: number;
+  /**
+   * Filter type
+   */
   type: FilterType;
+  /**
+   * Filter value
+   */
   value?: any;
+  /**
+   * Filter invisible in filter panel
+   */
+  hidden?: boolean;
+  /**
+   * Filter relation
+   */
   relation: 'and' | 'or';
 };
 
