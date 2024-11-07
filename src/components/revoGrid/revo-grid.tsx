@@ -1267,8 +1267,7 @@ export class RevoGridComponent {
    * Grouping
    */
   @Watch('grouping') groupingChanged(newVal: GroupingOptions = {}) {
-    const grPlugin = this.pluginService.getByClass(GroupingRowPlugin);
-    grPlugin?.setGrouping(newVal || {});
+    this.pluginService.getByClass(GroupingRowPlugin)?.setGrouping(newVal || {});
   }
   /**
    * Stretch Plugin Apply

@@ -1,8 +1,9 @@
 import { h } from '@stencil/core';
 import RowRenderer, { RowProps } from '../../components/data/row-renderer';
-import { GROUP_DEPTH, GROUP_EXPANDED, GROUP_EXPAND_BTN, GROUP_EXPAND_EVENT, PSEUDO_GROUP_ITEM } from './grouping.const';
+import { GROUP_DEPTH, GROUP_EXPANDED, GROUP_EXPAND_BTN, PSEUDO_GROUP_ITEM } from './grouping.const';
 import { GroupLabelTemplateFunc } from './grouping.row.types';
 import { DataType, PositionItem } from '@type';
+import { RevoGridCustomEvent } from 'src';
 
 interface GroupRowPros extends RowProps {
   model: DataType;
@@ -12,22 +13,23 @@ interface GroupRowPros extends RowProps {
 type Props = GroupRowPros & PositionItem;
 
 function expandEvent(e: MouseEvent, model: DataType, virtualIndex: number) {
-  const event = new CustomEvent(GROUP_EXPAND_EVENT, {
+  const event = new CustomEvent('groupexpandclick', {
     detail: {
       model,
       virtualIndex,
     },
     cancelable: true,
     bubbles: true,
-  });
+  }) as RevoGridCustomEvent<HTMLRevoGridElementEventMap['groupexpandclick']>;
   e.target?.dispatchEvent(event);
 }
 
 const GroupingRowRenderer = (props: Props) => {
   const { model, itemIndex, hasExpand, groupingCustomRenderer } = props;
-  const name: string = model[PSEUDO_GROUP_ITEM];
+  const name = model[PSEUDO_GROUP_ITEM];
   const expanded = model[GROUP_EXPANDED];
   const depth = parseInt(model[GROUP_DEPTH], 10) || 0;
+  
   if (!hasExpand) {
     return <RowRenderer {...props} rowClass="groupingRow" depth={depth} />;
   }
@@ -36,7 +38,7 @@ const GroupingRowRenderer = (props: Props) => {
     return (
       <RowRenderer {...props} rowClass="groupingRow" depth={depth}>
         <div onClick={e => expandEvent(e, model, itemIndex)}>
-          {groupingCustomRenderer(h, { name, itemIndex, expanded, depth })}
+          {groupingCustomRenderer(h, { name, model, itemIndex, expanded, depth })}
         </div>
       </RowRenderer>
     );
