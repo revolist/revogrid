@@ -1,33 +1,27 @@
 @mixin revoGridDark() {
-  $font-color: #d8d8d8;
-  color: $font-color;
-
-  $cell-border-color: #404040;
-  $cell-shadow-cell: 0 -1px 0 0 $cell-border-color inset;
-  $focused-header: rgba(#7394a0, 0.15);
-  $el-color: #28272b;
+  color: $font-color-dark;
 
   .rowHeaders {
-    background-color: rgba($el-color, 0.8);
+    background-color: rgba($el-color-dark, 0.8);
     revogr-data .rgCell {
-      color: rgba($font-color, 0.8);
+      color: rgba($font-color-dark, 0.8);
     }
   }
 
   revogr-edit {
-    background-color: $el-color;
+    background-color: $el-color-dark;
   }
 
   revogr-header {
     .header-rgRow {
       &.group {
-        $shadow-bottom: 0 -1px 0 0 $cell-border-color inset;
+        $shadow-bottom: 0 -1px 0 0 $cell-border-color-dark inset;
         box-shadow: $shadow-bottom;
       }
 
       &:not(.group) {
-        $shadow-bottom: 0 -1px 0 0 $cell-border-color inset;
-        $shadow-top: 0 -1px 0 0 $cell-border-color;
+        $shadow-bottom: 0 -1px 0 0 $cell-border-color-dark inset;
+        $shadow-top: 0 -1px 0 0 $cell-border-color-dark;
         box-shadow: $shadow-top, $shadow-bottom;
       }
     }
@@ -35,39 +29,39 @@
     .rgHeaderCell {
       &.sortable {
         &:hover {
-          background-color: rgba($cell-border-color, 0.5);
+          background-color: rgba($cell-border-color-dark, 0.5);
         }
       }
       &.focused-cell {
-        background: $focused-header;
+        background: $focused-header-dark;
       }
     }
   }
 
   .footer-wrapper revogr-data {
-    box-shadow: 0 -1px 0 $cell-border-color;
+    box-shadow: 0 -1px 0 $cell-border-color-dark;
   }
 
   revogr-data {
     .rgCell {
-      color: rgba($font-color, 0.9);
+      color: rgba($font-color-dark, 0.9);
     }
 
     .rgRow {
-      box-shadow: $cell-shadow-cell;
+      box-shadow: $cell-shadow-cell-dark;
       &.focused-rgRow {
-        background-color: $focused-header;
+        background-color: $focused-header-dark;
       }
     }
   }
 
   revogr-viewport-scroll {
     &.colPinStart {
-      box-shadow: -1px 0 0 $cell-border-color inset;
+      box-shadow: -1px 0 0 $cell-border-color-dark inset;
     }
 
     &.colPinEnd {
-      box-shadow: -1px 0 0 $cell-border-color;
+      box-shadow: -1px 0 0 $cell-border-color-dark;
     }
   }
 }

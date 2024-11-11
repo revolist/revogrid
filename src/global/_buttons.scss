@@ -4,7 +4,7 @@
   position: relative;
   overflow: hidden;
   color: #fff;
-  background-color: #6200ee;
+  background-color: #4545ff;
   height: $h;
   line-height: $h;
   padding: 0 15px;
@@ -17,13 +17,11 @@
   &.green {
     $bg: #009037;
     background-color: $bg;
-    border: 1px solid darken($color: $bg, $amount: 5);
   }
 
   &.red {
     $bg: #E0662E;
     background-color: $bg;
-    border: 1px solid darken($color: $bg, $amount: 5);
   }
 
   &:disabled,
@@ -32,8 +30,8 @@
     filter: opacity(0.35) !important;
   }
 
-  &.light {
-    $br-color: #cedefa;
+  &.outline {
+    $br-color: #dbdbdb;
     $color: #000;
     border: 1px solid $br-color;
     line-height: $h - 2;
@@ -41,7 +39,13 @@
     color: $color;
     box-shadow: none;
   }
+}
 
-  
-  
+revo-grid[theme^='dark'] {
+  .revo-button {
+    &.outline {
+      border: 1px solid $cell-border-color-dark;
+      color: $font-color-dark;
+    }
+  }
 }
