@@ -62,6 +62,7 @@ export const config: Config = {
     sass({
       injectGlobalPaths: [
         'src/global/_colors.scss',
+        'src/global/_colors.dark.scss',
         'src/global/_icons.scss',
         'src/global/_mixins.scss',
         'src/global/_buttons.scss',

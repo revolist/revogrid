@@ -487,7 +487,7 @@ export class FilterPanel {
             <button
               id="revo-button-reset"
               aria-label="reset"
-              class="revo-button light"
+              class="revo-button outline"
               onClick={() => this.onReset()}
             >
               {capts.reset}
