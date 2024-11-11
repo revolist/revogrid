@@ -10,7 +10,7 @@ revogr-scroll-virtual {
       top: 0;
       right: 0;
 
-      &:hover, &[visible] {
+      &[visible] {
         min-width: $min-size !important;
       }
     }
@@ -19,7 +19,7 @@ revogr-scroll-virtual {
       bottom: 0;
       left: 0;
 
-      &:hover, &[visible] {
+      &[visible] {
         min-height: $min-size !important;
       }
     }
