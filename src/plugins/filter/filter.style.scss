@@ -205,3 +205,18 @@ revogr-filter-panel {
   justify-content: space-between;
   align-items: center;
 }
+
+revo-grid[theme^='dark'] {
+  revogr-filter-panel {
+    background-color: $el-color-dark;
+
+    .add-filter-divider {
+      border-bottom-color: $el-color-dark;
+    }
+
+    input[type=text] {
+      background-color: $font-color-dark;
+      color: black;
+    }
+  }
+}
