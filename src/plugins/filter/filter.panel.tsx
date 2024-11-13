@@ -21,7 +21,7 @@ import {
   MultiFilterItem,
   ShowData,
 } from './filter.types';
-import { ColumnProp } from '@type';
+import { ColumnProp, HyperFunc } from '@type';
 import { FilterType } from './filter.indexed';
 
 const defaultType: FilterType = 'none';
@@ -68,6 +68,8 @@ export class FilterPanel {
    * Disables dynamic filtering. A way to apply filters on Save only
    */
   @Prop() disableDynamicFiltering = false;
+
+  @Prop() extraContent?: (h: HyperFunc<VNode>, data: ShowData) => VNode | VNode[];
 
   @Event() filterChange: EventEmitter<MultiFilterItem>;
   @Event() resetChange: EventEmitter<ColumnProp>;
@@ -442,6 +444,7 @@ export class FilterPanel {
         }}
       >
         <slot slot="header" />
+        { this.extraContent?.(h, this.changes) }
         <label>{capts.title}</label>
         <div class="filter-holder">{this.getFilterItemsList()}</div>
 
