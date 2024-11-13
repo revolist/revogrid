@@ -1,6 +1,6 @@
-import { h } from '@stencil/core';
+import { h, type VNode } from '@stencil/core';
 
-import type { ColumnProp, ColumnRegular, DataType, PluginProviders } from '@type';
+import type { ColumnProp, ColumnRegular, DataType, HyperFunc, PluginProviders } from '@type';
 import { BasePlugin } from '../base.plugin';
 import { FILTER_PROP, isFilterBtn } from './filter.button';
 import {
@@ -14,6 +14,7 @@ import type {
   FilterCollection,
   LogicFunction,
   MultiFilterItem,
+  ShowData,
 } from './filter.types';
 
 import { getCellDataParsed } from '../../utils';
@@ -57,6 +58,8 @@ export class FilterPlugin extends BasePlugin {
 
   filterProp = FILTER_PROP;
 
+  extraHyperContent?: (h: HyperFunc<VNode>, data: ShowData) => VNode | VNode[];
+
   constructor(
     public revogrid: HTMLRevoGridElement,
     providers: PluginProviders,
@@ -79,6 +82,7 @@ export class FilterPlugin extends BasePlugin {
         onFilterChange={e => this.onFilterChange(e.detail)}
         onResetChange={e => this.onFilterReset(e.detail)}
         disableDynamicFiltering={config?.disableDynamicFiltering}
+        extraContent={this.extraHyperContent}
         ref={e => (this.pop = e)}
       > { this.extraContent() }</revogr-filter-panel>,
     ];
