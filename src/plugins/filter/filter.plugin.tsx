@@ -1,6 +1,6 @@
 import { h, type VNode } from '@stencil/core';
 
-import type { ColumnProp, ColumnRegular, DataType, HyperFunc, PluginProviders } from '@type';
+import type { ColumnProp, ColumnRegular, DataType, PluginProviders } from '@type';
 import { BasePlugin } from '../base.plugin';
 import { FILTER_PROP, isFilterBtn } from './filter.button';
 import {
@@ -47,6 +47,14 @@ export class FilterPlugin extends BasePlugin {
   filterCollection: FilterCollection = {};
   multiFilterItems: MultiFilterItem = {};
 
+  /**
+   * Filter types
+   * @example
+   * {
+   *    string: ['contains', 'beginswith'],
+   *    number: ['eqN', 'neqN', 'gt']
+   *  }
+   */
   filterByType: Record<string, string[]> =
     { ...filterTypes };
   filterNameIndexByType: Record<string, string> = {
@@ -58,12 +66,12 @@ export class FilterPlugin extends BasePlugin {
 
   filterProp = FILTER_PROP;
 
-  extraHyperContent?: (h: HyperFunc<VNode>, data: ShowData) => VNode | VNode[];
+  extraHyperContent?: (data: ShowData) => VNode | VNode[];
 
   constructor(
     public revogrid: HTMLRevoGridElement,
     providers: PluginProviders,
-    config?: ColumnFilterConfig,
+    public config?: ColumnFilterConfig,
   ) {
     super(revogrid, providers);
     if (config) {
@@ -82,7 +90,6 @@ export class FilterPlugin extends BasePlugin {
         onFilterChange={e => this.onFilterChange(e.detail)}
         onResetChange={e => this.onFilterReset(e.detail)}
         disableDynamicFiltering={config?.disableDynamicFiltering}
-        extraContent={this.extraHyperContent}
         ref={e => (this.pop = e)}
       > { this.extraContent() }</revogr-filter-panel>,
     ];
@@ -111,7 +118,7 @@ export class FilterPlugin extends BasePlugin {
     };
     this.addEventListener(
       'headerclick',
-      (e: CustomEvent<HTMLRevoGridElementEventMap['headerclick']>) =>
+      (e) =>
         this.headerclick(e),
     );
     this.addEventListener(
@@ -220,14 +227,18 @@ export class FilterPlugin extends BasePlugin {
     const buttonPos = el.getBoundingClientRect();
     const prop = e.detail.prop;
 
-    this.pop.show({
+    const data: ShowData = {
+      ...e.detail,
       ...this.filterCollection[prop],
       x: buttonPos.x - gridPos.x,
       y: buttonPos.y - gridPos.y + buttonPos.height,
       autoCorrect: true,
-      prop,
       filterTypes: this.getColumnFilter(e.detail.filter),
       filterItems: this.multiFilterItems,
+    };
+    this.pop.show({
+      ...data,
+      extraContent: this.extraHyperContent,
     });
   }
 

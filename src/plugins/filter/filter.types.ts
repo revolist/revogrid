@@ -1,5 +1,5 @@
-import { ColumnProp } from '@type';
-import { FilterType } from './filter.indexed';
+import type { ColumnProp, ColumnRegular } from '@type';
+import type { FilterType } from './filter.indexed';
 
 export type DateEnum =
   | 'today'
@@ -143,4 +143,6 @@ export type ShowData = {
   autoCorrect?: boolean;
   filterTypes?: Record<string, string[]>;
   filterItems?: MultiFilterItem;
-} & FilterItem;
+  // pass vnodes from plugins
+  extraContent?: (data: ShowData) => any;
+} & FilterItem & Omit<ColumnRegular, 'filter'>;
