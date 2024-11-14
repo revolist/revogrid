@@ -21,7 +21,7 @@ import {
   MultiFilterItem,
   ShowData,
 } from './filter.types';
-import { ColumnProp, HyperFunc } from '@type';
+import type { ColumnProp } from '@type';
 import { FilterType } from './filter.indexed';
 
 const defaultType: FilterType = 'none';
@@ -48,7 +48,7 @@ export class FilterPanel {
     // drops the filter
     reset: 'Reset',
     cancel: 'Cancel',
-    add: 'Add more condition...',
+    add: 'Add condition',
     placeholder: 'Enter value...',
     and: 'and',
     or: 'or',
@@ -68,9 +68,6 @@ export class FilterPanel {
    * Disables dynamic filtering. A way to apply filters on Save only
    */
   @Prop() disableDynamicFiltering = false;
-
-  @Prop() extraContent?: (h: HyperFunc<VNode>, data: ShowData) => VNode | VNode[];
-
   @Event() filterChange: EventEmitter<MultiFilterItem>;
   @Event() resetChange: EventEmitter<ColumnProp>;
 
@@ -132,7 +129,7 @@ export class FilterPanel {
     const prop = this.changes?.prop;
     if (typeof prop === 'undefined') return '';
 
-    const propFilters = this.filterItems[prop]?.filter(f => !f.hidden) || [];
+    const propFilters = this.filterItems[prop];
     const capts = Object.assign(
       this.filterCaptionsInternal,
       this.filterCaptions,
@@ -141,6 +138,9 @@ export class FilterPanel {
       <div key={this.filterId}>
         {propFilters.map((filter, index) => {
           let andOrButton;
+          if (filter.hidden) {
+            return;
+          }
 
           // hide toggle button if there is only one filter and the last one
           if (index !== this.filterItems[prop].length - 1) {
@@ -175,7 +175,7 @@ export class FilterPanel {
           );
         })}
 
-        {propFilters.length > 0 ? <div class="add-filter-divider" /> : ''}
+        {propFilters.filter(f => !f.hidden).length > 0 ? <div class="add-filter-divider" /> : ''}
       </div>
     );
   }
@@ -365,6 +365,15 @@ export class FilterPanel {
     const options: VNode[] = [];
     const prop = this.changes.prop;
 
+    const hidden = new Set<string>();
+    Object.entries(this.filterItems).forEach(([_, values]) => {
+      values.forEach((filter) => {
+        if (filter.hidden) {
+          hidden.add(filter.type);
+        }
+      })
+    });
+
     if (!isDefaultTypeRemoved) {
       const capts = Object.assign(
         this.filterCaptionsInternal,
@@ -384,14 +393,17 @@ export class FilterPanel {
     }
 
     for (let gIndex in this.changes.filterTypes) {
-      options.push(
-        ...this.changes.filterTypes[gIndex].map(k => (
-          <option value={k} selected={type === k}>
-            {this.filterNames[k]}
-          </option>
-        )),
-      );
-      options.push(<option disabled></option>);
+      const group = this.changes.filterTypes[gIndex].filter(k => !hidden.has(k));
+      if (group.length) {
+        options.push(
+          ...group.map(k => (
+            <option value={k} selected={type === k}>
+              {this.filterNames[k]}
+            </option>
+          )),
+        );
+        options.push(<option disabled></option>);
+      }
     }
     return options;
   }
@@ -444,7 +456,7 @@ export class FilterPanel {
         }}
       >
         <slot slot="header" />
-        { this.extraContent?.(h, this.changes) }
+        { this.changes.extraContent?.(this.changes) || '' }
         <label>{capts.title}</label>
         <div class="filter-holder">{this.getFilterItemsList()}</div>
 

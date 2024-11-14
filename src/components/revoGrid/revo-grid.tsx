@@ -1394,6 +1394,7 @@ export class RevoGridComponent {
       dimension: this.dimensionProvider,
       viewport: this.viewportProvider,
       selection: this.selectionStoreConnector,
+      plugins: this.pluginService,
     };
 
     return pluginData;

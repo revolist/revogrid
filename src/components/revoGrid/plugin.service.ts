@@ -1,11 +1,11 @@
-import { PluginBaseComponent, PluginProviders } from '@type';
-import { BasePlugin, GridPlugin } from 'src/plugins';
+import { PluginBaseComponent, PluginProviders, PluginServiceBase } from '@type';
+import { GridPlugin } from 'src/plugins';
 
 /**
  * Plugin service
  * Manages plugins
  */
-export class PluginService {
+export class PluginService implements PluginServiceBase {
   /**
    * Plugins
    * Define plugins collection
@@ -72,7 +72,7 @@ export class PluginService {
   /**
    * Get plugin by class
    */
-  getByClass<T extends BasePlugin>(
+  getByClass<T extends PluginBaseComponent>(
     pluginClass: new (...args: any[]) => T,
   ): T | undefined {
     return this.internalPlugins.find(p => p instanceof pluginClass) as
