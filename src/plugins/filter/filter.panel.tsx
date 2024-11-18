@@ -129,7 +129,7 @@ export class FilterPanel {
     const prop = this.changes?.prop;
     if (typeof prop === 'undefined') return '';
 
-    const propFilters = this.filterItems[prop];
+    const propFilters = this.filterItems[prop] ?? [];
     const capts = Object.assign(
       this.filterCaptionsInternal,
       this.filterCaptions,

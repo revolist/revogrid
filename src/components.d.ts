@@ -5,7 +5,7 @@
  * It contains typing information for all components that exist in this project.
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
-import { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, CellTemplateProp, ChangedRange, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, ExtraNodeFuncConfig, FocusAfterRenderEvent, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, Nullable, PluginBaseComponent, PositionItem, Providers, RangeArea, RangeClipboardCopyEventProps, RangeClipboardPasteEvent, RowDefinition, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
+import { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, CellTemplateProp, ChangedRange, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, ExtraNodeFuncConfig, FocusAfterRenderEvent, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, Nullable, PluginBaseComponent, PositionItem, Providers, RangeArea, RangeClipboardCopyEventProps, RangeClipboardPasteEvent, RowDefinition, RowDragStartDetails, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
 import { GridPlugin } from "./plugins/base.plugin";
 import { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
 import { ColumnFilterConfig, FilterCaptions, FilterCollection, LogicFunction, MultiFilterItem, ShowData } from "./plugins/filter/filter.types";
@@ -19,7 +19,7 @@ import { DSourceState, Groups } from "./store/index";
 import { ResizeProps } from "./components/header/resizable.directive";
 import { HeaderRenderProps } from "./components/header/header-renderer";
 import { EventData } from "./components/overlay/selection.utils";
-export { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, CellTemplateProp, ChangedRange, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, ExtraNodeFuncConfig, FocusAfterRenderEvent, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, Nullable, PluginBaseComponent, PositionItem, Providers, RangeArea, RangeClipboardCopyEventProps, RangeClipboardPasteEvent, RowDefinition, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
+export { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, CellTemplateProp, ChangedRange, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, ExtraNodeFuncConfig, FocusAfterRenderEvent, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, Nullable, PluginBaseComponent, PositionItem, Providers, RangeArea, RangeClipboardCopyEventProps, RangeClipboardPasteEvent, RowDefinition, RowDragStartDetails, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
 export { GridPlugin } from "./plugins/base.plugin";
 export { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
 export { ColumnFilterConfig, FilterCaptions, FilterCollection, LogicFunction, MultiFilterItem, ShowData } from "./plugins/filter/filter.types";
@@ -795,10 +795,7 @@ declare global {
     order: 'desc' | 'asc';
     additive: boolean;
   };
-        "rowdragstart": {
-    pos: PositionItem;
-    text: string;
-  };
+        "rowdragstart": RowDragStartDetails;
         "headerclick": ColumnRegular;
         "beforecellfocus": BeforeSaveDataDetails;
         "beforefocuslost": FocusedData | null;
@@ -1063,14 +1060,7 @@ declare global {
         new (): HTMLRevogrHeaderElement;
     };
     interface HTMLRevogrOrderEditorElementEventMap {
-        "rowdragstartinit": {
-    cell: Cell;
-    text: string;
-    pos: PositionItem;
-    event: MouseEvent;
-    rowType: DimensionRows;
-    model: any;
-  };
+        "rowdragstartinit": RowDragStartDetails;
         "rowdragendinit": { rowType: DimensionRows };
         "rowdragmoveinit": PositionItem & { rowType: DimensionRows };
         "rowdragmousemove": Cell & { rowType: DimensionRows };
@@ -1518,10 +1508,7 @@ declare namespace LocalJSX {
         /**
           * This event is triggered when the row order change is started. To prevent the default behavior of changing the row order, you can call `e.preventDefault()`. To change the item name at the start of the row order change, you can set `e.text` to the desired new name.
          */
-        "onRowdragstart"?: (event: RevoGridCustomEvent<{
-    pos: PositionItem;
-    text: string;
-  }>) => void;
+        "onRowdragstart"?: (event: RevoGridCustomEvent<RowDragStartDetails>) => void;
         /**
           * Emmited when the row headers are changed.
          */
@@ -1973,14 +1960,7 @@ declare namespace LocalJSX {
         /**
           * Row drag started
          */
-        "onRowdragstartinit"?: (event: RevogrOrderEditorCustomEvent<{
-    cell: Cell;
-    text: string;
-    pos: PositionItem;
-    event: MouseEvent;
-    rowType: DimensionRows;
-    model: any;
-  }>) => void;
+        "onRowdragstartinit"?: (event: RevogrOrderEditorCustomEvent<RowDragStartDetails>) => void;
         /**
           * Row dragged, new range ready to be applied
          */

@@ -1,18 +1,19 @@
 import { Component, Method, Event, EventEmitter, Prop } from '@stencil/core';
 import debounce from 'lodash/debounce';
 
-import { DSourceState, getSourceItem } from '@store';
+import { type DSourceState, getSourceItem } from '@store';
 import { DRAGG_TEXT } from '../../utils/consts';
 import RowOrderService from './order-row.service';
-import {
+import type {
   DimensionRows,
   DataType,
   DimensionSettingsState,
   DragStartEvent,
   PositionItem,
   Cell,
+  RowDragStartDetails,
 } from '@type';
-import { Observable } from '../../utils';
+import type { Observable } from '../../utils';
 
 /**
  * Component for handling row order editor.
@@ -36,14 +37,7 @@ export class OrderEditor {
   // #region Events
   /** Row drag started */
   @Event({ eventName: 'rowdragstartinit', cancelable: true })
-  rowDragStart: EventEmitter<{
-    cell: Cell;
-    text: string;
-    pos: PositionItem;
-    event: MouseEvent;
-    rowType: DimensionRows;
-    model: any;
-  }>;
+  rowDragStart: EventEmitter<RowDragStartDetails>;
 
   /** Row drag ended started */
   @Event({ eventName: 'rowdragendinit' })
