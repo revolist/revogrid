@@ -6,12 +6,12 @@ import type { SelectionStoreConnector } from '../services/selection.store.connec
 import ViewportProvider from '../services/viewport.provider';
 
 export interface PluginServiceBase {
-    get(): PluginBaseComponent[];
-    add(plugin: PluginBaseComponent): void;
-    remove(plugin: PluginBaseComponent): void;
-    getByClass<T extends PluginBaseComponent>(
-        pluginClass: new (...args: any[]) => T,
-      ): T | undefined;
+  get(): PluginBaseComponent[];
+  add(plugin: PluginBaseComponent): void;
+  remove(plugin: PluginBaseComponent): void;
+  getByClass<T extends PluginBaseComponent>(
+    pluginClass: new (...args: any[]) => T,
+  ): T | undefined;
 }
 
 /**
@@ -20,37 +20,50 @@ export interface PluginServiceBase {
  * by the plugins.
  */
 export type PluginProviders = {
-    /**
-     * The data service provides access to the grid data.
-     */
-    data: DataProvider;
-    /**
-     * The dimension service provides access to the grid's dimensions and settings.
-     */
-    dimension: DimensionProvider;
-    /**
-     * The selection service provides access to the grid's selection state.
-     */
-    selection: SelectionStoreConnector;
-    /**
-     * The column service provides access to the grid's column data.
-     */
-    column: ColumnDataProvider;
-    /**
-     * The viewport service provides access to the grid's viewport state.
-     */
-    viewport: ViewportProvider;
+  /**
+   * The data service provides access to the grid data.
+   */
+  data: DataProvider;
+  /**
+   * The dimension service provides access to the grid's dimensions and settings.
+   */
+  dimension: DimensionProvider;
+  /**
+   * The selection service provides access to the grid's selection state.
+   */
+  selection: SelectionStoreConnector;
+  /**
+   * The column service provides access to the grid's column data.
+   */
+  column: ColumnDataProvider;
+  /**
+   * The viewport service provides access to the grid's viewport state.
+   */
+  viewport: ViewportProvider;
 
-    /**
-     * Plugin services
-     */
+  /**
+   * Plugin services
+   */
 
-    plugins: PluginServiceBase;
+  plugins: PluginServiceBase;
 };
 
-
 declare global {
-    interface HTMLRevoGridElementEventMap extends HTMLRevogrClipboardElementEventMap, HTMLRevogrFocusElementEventMap, HTMLRevogrDataElementEventMap, HTMLRevogrEditElementEventMap, HTMLRevogrFilterPanelElementEventMap, HTMLRevogrHeaderElementEventMap, HTMLRevogrOrderEditorElementEventMap, HTMLRevogrOverlaySelectionElementEventMap, HTMLRevogrRowHeadersElementEventMap, HTMLRevogrScrollVirtualElementEventMap, HTMLRevogrViewportScrollElementEventMap, HTMLVnodeHtmlElementEventMap, Record<string, any> {
-        //
-    }
+  type CombinedHTMLRevoGridElementEventMap = Record<string, any> &
+    HTMLRevogrClipboardElementEventMap &
+    HTMLRevogrFocusElementEventMap &
+    HTMLRevogrDataElementEventMap &
+    HTMLRevogrEditElementEventMap &
+    HTMLRevogrFilterPanelElementEventMap &
+    HTMLRevogrHeaderElementEventMap &
+    HTMLRevogrOrderEditorElementEventMap &
+    HTMLRevogrOverlaySelectionElementEventMap &
+    HTMLRevogrRowHeadersElementEventMap &
+    HTMLRevogrScrollVirtualElementEventMap &
+    HTMLRevogrViewportScrollElementEventMap &
+    HTMLVnodeHtmlElementEventMap;
+    
+  interface HTMLRevoGridElementEventMap extends CombinedHTMLRevoGridElementEventMap {
+    //
+  }
 }

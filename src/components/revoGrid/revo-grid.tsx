@@ -43,6 +43,7 @@ import type {
   PluginProviders,
   FocusAfterRenderEvent,
   ExtraNodeFuncConfig,
+  RowDragStartDetails,
 } from '@type';
 
 import ColumnDataProvider from '../../services/column.data.provider';
@@ -386,10 +387,7 @@ export class RevoGridComponent {
    * To prevent the default behavior of changing the row order, you can call `e.preventDefault()`.
    * To change the item name at the start of the row order change, you can set `e.text` to the desired new name.
    */
-  @Event() rowdragstart: EventEmitter<{
-    pos: PositionItem;
-    text: string;
-  }>;
+  @Event() rowdragstart: EventEmitter<RowDragStartDetails>;
 
   /**
    * On header click.

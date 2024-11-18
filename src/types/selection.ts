@@ -6,6 +6,7 @@ import type {
   DataLookup,
   HyperFunc,
   ColumnDataSchemaModel,
+  PositionItem,
 } from './interfaces';
 
 export type RowIndex = number;
@@ -101,6 +102,15 @@ export type SaveDataDetails = {
 };
 
 export type BeforeEdit = BeforeSaveDataDetails;
+
+export type RowDragStartDetails = {
+  cell: Cell;
+  text: string;
+  pos: PositionItem;
+  event: MouseEvent;
+  rowType: DimensionRows;
+  model: any;
+};
 
 export interface BeforeSaveDataDetails extends ColumnDataSchemaModel {
   /**
