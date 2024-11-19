@@ -36,6 +36,7 @@ export type RevogridEvents = 'contentsizechanged'|
   'aftergridinit'|
   'additionaldatachanged'|
   'afterthemechanged'|
+  'created'|
   'beforepaste'|
   'beforepasteapply'|
   'pasteregion'|
@@ -140,6 +141,7 @@ export const REVOGRID_EVENTS = new Map<RevogridEvents, RevogridEvents>([
   ['aftergridinit', 'aftergridinit'],
   ['additionaldatachanged', 'additionaldatachanged'],
   ['afterthemechanged', 'afterthemechanged'],
+  ['created', 'created'],
   ['beforepaste', 'beforepaste'],
   ['beforepasteapply', 'beforepasteapply'],
   ['pasteregion', 'pasteregion'],

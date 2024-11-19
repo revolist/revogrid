@@ -846,6 +846,7 @@ declare global {
         "aftergridinit": any;
         "additionaldatachanged": any;
         "afterthemechanged": Theme;
+        "created": any;
     }
     /**
      * Revogrid - High-performance, customizable grid library for managing large datasets.
@@ -1497,6 +1498,10 @@ declare namespace LocalJSX {
           * New content size has been applied. The size excludes the header. Currently, the event responsible for applying the new content size does not provide the actual size. To retrieve the actual content size, you can utilize the `getContentSize` function after the event has been triggered.
          */
         "onContentsizechanged"?: (event: RevoGridCustomEvent<MultiDimensionType>) => void;
+        /**
+          * Emmited after grid created
+         */
+        "onCreated"?: (event: RevoGridCustomEvent<any>) => void;
         /**
           * Emitted when the filter configuration is changed
          */

@@ -561,7 +561,13 @@ export class RevoGridComponent {
   /**
    * Emmited after the theme is changed
    */
-  @Event() afterthemechanged: EventEmitter<Theme>
+  @Event() afterthemechanged: EventEmitter<Theme>;
+
+
+  /**
+   * Emmited after grid created
+   */
+  @Event() created: EventEmitter;
 
   // #endregion
 
@@ -1409,6 +1415,7 @@ export class RevoGridComponent {
     if (this.isInited) {
       this.setPlugins();
     }
+    this.created.emit();
   }
 
   /**
