@@ -24,6 +24,8 @@ export type RowDataSources = {
 
 /**
  * Data source provider
+ * 
+ * @dependsOn DimensionProvider
  */
 
 export class DataProvider {

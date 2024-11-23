@@ -7,12 +7,11 @@ import type {
   Order,
   CellCompareFunc,
   ColumnRegular,
-  InitialHeaderClick,
   DataType,
   DimensionRows,
   PluginProviders,
 } from '@type';
-import type { SortingOrder, SortingOrderFunction, ColumnSetEvent } from './sorting.types';
+import type { SortingOrder, SortingOrderFunction } from './sorting.types';
 import { getCellRaw, getColumnByProp } from '../../utils/column.utils';
 import { rowTypes } from '@store';
 import { sortIndexByItems } from './sorting.func';
@@ -35,16 +34,17 @@ export class SortingPlugin extends BasePlugin {
   sortingFunc?: SortingOrderFunction;
   sortingPromise: (() => void) | null = null;
   postponeSort = debounce(
-    (order?: SortingOrder, comparison?: SortingOrderFunction) =>
-      this.runSorting(order, comparison),
+    (order?: SortingOrder, comparison?: SortingOrderFunction, ignoreViewportUpdate?: boolean) =>
+      this.runSorting(order, comparison, ignoreViewportUpdate),
     50,
   );
 
   runSorting(
     order?: SortingOrder,
     comparison?: SortingOrderFunction,
+    ignoreViewportUpdate?: boolean
   ) {
-    this.sort(order, comparison);
+    this.sort(order, comparison, undefined, ignoreViewportUpdate);
     this.sortingPromise?.();
     this.sortingPromise = null;
   }
@@ -55,12 +55,9 @@ export class SortingPlugin extends BasePlugin {
   ) {
     super(revogrid, providers);
 
-    const beforeanysource = ({
+    this.addEventListener('beforeanysource', ({
       detail: { type },
-    }: CustomEvent<{
-      type: DimensionRows;
-      source: any[];
-    }>) => {
+    }) => {
       // if sorting was provided - sort data
       if (!!this.sorting && this.sortingFunc) {
         const beforeEvent = this.emit('beforesorting', { type });
@@ -69,10 +66,10 @@ export class SortingPlugin extends BasePlugin {
         }
         this.startSorting(this.sorting, this.sortingFunc);
       }
-    };
-    const aftercolumnsset = ({
+    });
+    this.addEventListener('aftercolumnsset', ({
       detail: { order },
-    }: CustomEvent<ColumnSetEvent>) => {
+    }) => {
       const columns = this.providers.column.getColumns();
       const sortingFunc: SortingOrderFunction = {};
 
@@ -83,9 +80,9 @@ export class SortingPlugin extends BasePlugin {
         );
         sortingFunc[prop] = cmp;
       }
-      this.runSorting(order, sortingFunc);
-    };
-    const headerclick = (e: CustomEvent<InitialHeaderClick>) => {
+      this.startSorting(order, sortingFunc);
+    });
+    this.addEventListener('beforeheaderclick', (e) => {
       if (e.defaultPrevented) {
         return;
       }
@@ -99,11 +96,7 @@ export class SortingPlugin extends BasePlugin {
         e.detail.index,
         e.detail?.originalEvent?.shiftKey,
       );
-    };
-
-    this.addEventListener('beforeanysource', beforeanysource);
-    this.addEventListener('aftercolumnsset', aftercolumnsset);
-    this.addEventListener('beforeheaderclick', headerclick);
+    });
   }
 
   startSorting(order?: SortingOrder, sortingFunc?: SortingOrderFunction) {
@@ -206,6 +199,7 @@ export class SortingPlugin extends BasePlugin {
     sorting?: SortingOrder,
     sortingFunc?: SortingOrderFunction,
     types: DimensionRows[] = rowTypes,
+    ignoreViewportUpdate = false
   ) {
     // if no sorting - reset
     if (!Object.keys(sorting || {}).length) {
@@ -249,7 +243,10 @@ export class SortingPlugin extends BasePlugin {
         });
         // take currently visible row indexes
         const newItems = storeService.store.get('items');
-        this.providers.dimension.updateSizesPositionByNewDataIndexes(type, newItems, prevItems);
+        if (!ignoreViewportUpdate) {
+          this.providers.dimension
+            .updateSizesPositionByNewDataIndexes(type, newItems, prevItems);
+        }
       }
     }
     this.emit('aftersortingapply');
