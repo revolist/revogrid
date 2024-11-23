@@ -67,14 +67,34 @@ export class DataProvider {
   }
 
   changeOrder({ rowType = 'rgRow', from, to }: { rowType: DimensionRows, from: number; to: number }) {
-    const service = this.stores[rowType];
-    const items = [...service.store.get('items')];
-    const prevItems = [...items];
+    const storeService = this.stores[rowType];
 
-    const toMove = items.splice(from, 1);
-    items.splice(to, 0, ...toMove);
-    this.dimensionProvider.updateSizesPositionByNewDataIndexes(rowType, items, prevItems);
-    service.setData({ items });
+    // take currently visible row indexes
+    const newItemsOrder = [...storeService.store.get('proxyItems')];
+    const prevItems = storeService.store.get('items');
+
+    // take out
+    const toMove = newItemsOrder.splice(
+      newItemsOrder.indexOf(prevItems[from]), // get index in proxy
+      1
+    );
+    // insert before
+    newItemsOrder.splice(
+      newItemsOrder.indexOf(prevItems[to]),  // get index in proxy
+      0,
+      ...toMove
+    );
+    storeService.setData({
+      proxyItems: newItemsOrder,
+    });
+
+    // take currently visible row indexes
+    const newItems = storeService.store.get('items');
+    this.dimensionProvider.updateSizesPositionByNewDataIndexes(
+      rowType,
+      newItems,
+      prevItems
+    );
   }
 
   setCellData(

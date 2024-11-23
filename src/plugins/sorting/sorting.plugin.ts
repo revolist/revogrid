@@ -80,7 +80,7 @@ export class SortingPlugin extends BasePlugin {
         );
         sortingFunc[prop] = cmp;
       }
-      this.startSorting(order, sortingFunc);
+      this.startSorting(order, sortingFunc, true);
     });
     this.addEventListener('beforeheaderclick', (e) => {
       if (e.defaultPrevented) {
@@ -99,7 +99,7 @@ export class SortingPlugin extends BasePlugin {
     });
   }
 
-  startSorting(order?: SortingOrder, sortingFunc?: SortingOrderFunction) {
+  startSorting(order?: SortingOrder, sortingFunc?: SortingOrderFunction, ignoreViewportUpdate?: boolean) {
     if (!this.sortingPromise) {
       // add job before render
       this.revogrid.jobsBeforeRender.push(
@@ -108,7 +108,7 @@ export class SortingPlugin extends BasePlugin {
         }),
       );
     }
-    this.postponeSort(order, sortingFunc);
+    this.postponeSort(order, sortingFunc, ignoreViewportUpdate);
   }
 
   getComparer(column: ColumnRegular | undefined, order: Order): CellCompareFunc | undefined {
