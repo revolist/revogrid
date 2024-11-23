@@ -4,6 +4,11 @@ import type { Observable, PluginSubscribe } from '../../utils';
 type State = DSourceState<any, any>;
 
 /**
+ * Todo:
+ * Refactor proxy plugin: when items changed outside proxy get recalculated
+ */
+
+/**
  * Proxy plugin for data source.
  * 
  * This plugin is used keep sortint in the data source, even when trimming is applied sorting has to be preserved.

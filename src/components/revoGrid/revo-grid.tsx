@@ -1183,7 +1183,9 @@ export class RevoGridComponent {
         break;
       case 'source':
         type = 'rgRow';
-        /** applied for source only for cross compatability between plugins */
+        /**
+         * Applied for source only for cross compatability between plugins
+         */
         const beforesourceset = this.beforesourceset.emit({
           type,
           source: newVal,
@@ -1198,7 +1200,9 @@ export class RevoGridComponent {
     const newSource = [...beforesourceset.detail.source];
     this.dataProvider.setData(newSource, type, this.disableVirtualY);
 
-    /** applied for source only for cross compatability between plugins */
+    /** 
+     * Applied for source only for cross compatability between plugins
+     */
     if (watchName === 'source') {
       this.aftersourceset.emit({
         type,
