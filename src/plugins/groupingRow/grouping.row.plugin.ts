@@ -37,6 +37,7 @@ import type {
   PluginProviders,
 } from '@type';
 import type { Observable, ColumnCollection } from '../../utils';
+import { SortingPlugin } from '../sorting/sorting.plugin';
 
 declare global {
   interface HTMLRevoGridElementEventMap {
@@ -147,6 +148,11 @@ export class GroupingRowPlugin extends BasePlugin {
     }
   }
 
+  private isSortingRunning() {
+    const sortingPlugin = this.providers.plugins.getByClass(SortingPlugin);
+    return !!sortingPlugin?.sortingPromise;
+  }
+
   // subscribe to grid events to process them accordingly
   private subscribe() {
     /** if grouping present and new data source arrived */
@@ -154,11 +160,15 @@ export class GroupingRowPlugin extends BasePlugin {
       if (!(this.options?.props?.length && detail?.source?.length)) {
         return;
       }
+      // if sorting is running don't apply grouping, wait for sorting, then it'll apply in @aftersortingapply
+      if (this.isSortingRunning()) {
+        return;
+      }
       this.onDataSet(detail);
     });
-    this.addEventListener('beforecolumnsset', ({ detail }) =>
-      this.setColumns(detail),
-    );
+    this.addEventListener('beforecolumnsset', ({ detail }) => {
+      this.setColumns(detail);
+    });
 
     /**
      * filter applied need to clear grouping and apply again

@@ -9,6 +9,7 @@ import { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEven
 import { GridPlugin } from "./plugins/base.plugin";
 import { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
 import { ColumnFilterConfig, FilterCaptions, FilterCollection, LogicFunction, MultiFilterItem, ShowData } from "./plugins/filter/filter.types";
+import { SortingConfig } from "./plugins/sorting/sorting.types";
 import { GroupingOptions } from "./plugins/groupingRow/grouping.row.types";
 import { VNode } from "@stencil/core";
 import { FocusedData } from "./components/revoGrid/viewport.service";
@@ -23,6 +24,7 @@ export { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEven
 export { GridPlugin } from "./plugins/base.plugin";
 export { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
 export { ColumnFilterConfig, FilterCaptions, FilterCollection, LogicFunction, MultiFilterItem, ShowData } from "./plugins/filter/filter.types";
+export { SortingConfig } from "./plugins/sorting/sorting.types";
 export { GroupingOptions } from "./plugins/groupingRow/grouping.row.types";
 export { VNode } from "@stencil/core";
 export { FocusedData } from "./components/revoGrid/viewport.service";
@@ -260,6 +262,10 @@ export namespace Components {
           * @example const grid = document.querySelector('revo-grid'); grid.setDataAt({ row: 0, col: 0, val: 'test' }); // refresh
          */
         "setDataAt": ({ row, col, colType, rowType, val, skipDataUpdate }: { row: number; col: number; val?: any; skipDataUpdate?: boolean; } & AllDimensionType) => Promise<void | undefined>;
+        /**
+          * Alternative way to set sorting. `{columns: [{prop: 'name', order: 'asc'}]}`
+         */
+        "sorting"?: SortingConfig;
         /**
           * Source - defines main data source. Can be an Object or 2 dimensional array([][]); Keys/indexes referenced from columns Prop.
          */
@@ -840,6 +846,7 @@ declare global {
   };
         "beforerowdefinition": { vals: any; oldVals: any };
         "filterconfigchanged": any;
+        "sortingconfigchanged": SortingConfig;
         "rowheaderschanged": any;
         "beforegridrender": any;
         "aftergridrender": any;
@@ -1523,6 +1530,10 @@ declare namespace LocalJSX {
          */
         "onRoworderchanged"?: (event: RevoGridCustomEvent<{ from: number; to: number }>) => void;
         /**
+          * Emitted when the sorting configuration is changed
+         */
+        "onSortingconfigchanged"?: (event: RevoGridCustomEvent<SortingConfig>) => void;
+        /**
           * Emitted when the viewport is scrolled. Useful for tracking viewport scrolling events.
          */
         "onViewportscroll"?: (event: RevoGridCustomEvent<ViewPortScrollEvent>) => void;
@@ -1573,6 +1584,10 @@ declare namespace LocalJSX {
           * Indicates default rgRow size. By default 0, means theme package size will be applied  Alternatively you can use `rowSize` to reset viewport
          */
         "rowSize"?: number;
+        /**
+          * Alternative way to set sorting. `{columns: [{prop: 'name', order: 'asc'}]}`
+         */
+        "sorting"?: SortingConfig;
         /**
           * Source - defines main data source. Can be an Object or 2 dimensional array([][]); Keys/indexes referenced from columns Prop.
          */

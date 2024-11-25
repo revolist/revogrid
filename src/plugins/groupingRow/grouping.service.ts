@@ -1,4 +1,4 @@
-import { DataType, ColumnProp, ColumnRegular } from '@type';
+import type { DataType, ColumnProp, ColumnRegular } from '@type';
 import {
   GROUP_DEPTH,
   GROUP_EXPANDED,
@@ -121,6 +121,7 @@ export function gatherGrouping(
         [PSEUDO_GROUP_ITEM_VALUE]: mergedIds,
         [GROUP_EXPANDED]: isGroupExpanded,
         [GROUP_COLUMN_PROP]: columnProps[depth],
+        [columnProps[depth]]: groupId,
       });
       itemIndex += 1;
       if (!isGroupExpanded && depth) {
@@ -169,6 +170,7 @@ type GroupingItem = {
   [GROUP_EXPANDED]: boolean;
   [PSEUDO_GROUP_ITEM_VALUE]: string;
   [GROUP_DEPTH]: number;
+  [GROUP_COLUMN_PROP]: ColumnProp;
 };
 
 export function isGrouping(rgRow?: DataType): rgRow is GroupingItem {
@@ -176,7 +178,7 @@ export function isGrouping(rgRow?: DataType): rgRow is GroupingItem {
 }
 
 export function isGroupingColumn(column?: ColumnRegular) {
-  return column && typeof column[PSEUDO_GROUP_COLUMN] !== 'undefined';
+  return typeof column?.[PSEUDO_GROUP_COLUMN] !== 'undefined';
 }
 
 export function measureEqualDepth<T>(groupA: T[], groupB: T[]) {
