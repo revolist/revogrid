@@ -293,18 +293,18 @@ function onLoad() {
 
   grid.exporting = true;
   grid.rowHeaders = true;
-  grid.rowDefinitions = [{
-    size: 200,
-    type: 'rgRow',
-    index: 2,
-  }];
+  // grid.rowDefinitions = [{
+  //   size: 200,
+  //   type: 'rgRow',
+  //   index: 2,
+  // }];
   // grid.stretch = true;
   /* 
   grid.autoSizeColumn = {
     mode: 'autoSizeAll',
   };*/
   // default
-  setData({ rows: 100, cols: 2 });
+  setData({ rows: 100, cols: 100 });
 
   // events testing
   // 'beforerange', 'setRange', 'beforefocuslost', 'beforecellfocus', 'afterfocus', 'beforeedit', 'aftercolumnresize'

@@ -11,7 +11,7 @@ import type {
   DimensionRows,
   PluginProviders,
 } from '@type';
-import type { SortingOrder, SortingOrderFunction } from './sorting.types';
+import type { SortingConfig, SortingOrder, SortingOrderFunction } from './sorting.types';
 import { getCellRaw, getColumnByProp } from '../../utils/column.utils';
 import { rowTypes } from '@store';
 import { sortIndexByItems } from './sorting.func';
@@ -52,8 +52,32 @@ export class SortingPlugin extends BasePlugin {
   constructor(
     public revogrid: HTMLRevoGridElement,
     providers: PluginProviders,
+    config?: SortingConfig,
   ) {
     super(revogrid, providers);
+
+    const setConfig = (cfg?: SortingConfig) => {
+      if (cfg) {
+        const sortingFunc: SortingOrderFunction = {};
+        const order: SortingOrder = {};
+        cfg.columns?.forEach(col => {
+          sortingFunc[col.prop] = this.getComparer(col, col.order);
+          order[col.prop] = col.order;
+        });
+
+        // // set sorting
+        this.sorting = order;
+        this.sortingFunc = sortingFunc;
+      }
+    }
+
+    setConfig(config);
+
+    this.addEventListener('sortingconfigchanged', ({ detail }) => {
+      config = detail;
+      setConfig(detail);
+      this.startSorting(this.sorting, this.sortingFunc);
+    });
 
     this.addEventListener('beforeanysource', ({
       detail: { type },
@@ -70,6 +94,11 @@ export class SortingPlugin extends BasePlugin {
     this.addEventListener('aftercolumnsset', ({
       detail: { order },
     }) => {
+      // if config provided - do nothing, read from config
+      if (config) {
+        return;
+      }
+
       const columns = this.providers.column.getColumns();
       const sortingFunc: SortingOrderFunction = {};
 
@@ -80,7 +109,10 @@ export class SortingPlugin extends BasePlugin {
         );
         sortingFunc[prop] = cmp;
       }
-      this.startSorting(order, sortingFunc, true);
+
+      // set sorting
+      this.sorting = order;
+      this.sortingFunc = order && sortingFunc;
     });
     this.addEventListener('beforeheaderclick', (e) => {
       if (e.defaultPrevented) {
@@ -111,9 +143,9 @@ export class SortingPlugin extends BasePlugin {
     this.postponeSort(order, sortingFunc, ignoreViewportUpdate);
   }
 
-  getComparer(column: ColumnRegular | undefined, order: Order): CellCompareFunc | undefined {
+  getComparer(column: Partial<ColumnRegular> | undefined, order: Order): CellCompareFunc | undefined {
     const cellCmp: CellCompareFunc =
-      column?.cellCompare?.bind({ order }) || this.defaultCellCompare?.bind({ column });
+      column?.cellCompare?.bind({ order }) || this.defaultCellCompare?.bind({ column, order });
     if (order == 'asc') {
       return cellCmp;
     }
@@ -203,9 +235,6 @@ export class SortingPlugin extends BasePlugin {
   ) {
     // if no sorting - reset
     if (!Object.keys(sorting || {}).length) {
-      this.sorting = undefined;
-      this.sortingFunc = undefined;
-
       for (let type of types) {
         const storeService = this.providers.data.stores[type];
         // row data
@@ -218,10 +247,6 @@ export class SortingPlugin extends BasePlugin {
         storeService.setData({ proxyItems: newItemsOrder, source: [...source], });
       }
     } else {
-      // set sorting
-      this.sorting = sorting;
-      this.sortingFunc = sortingFunc;
-
       for (let type of types) {
         const storeService = this.providers.data.stores[type];
         // row data
