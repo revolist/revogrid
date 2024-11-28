@@ -1,7 +1,12 @@
 // filter.plugin.tsx
 import { h, type VNode } from '@stencil/core';
 
-import type { ColumnProp, ColumnRegular, DataType, PluginProviders } from '@type';
+import type {
+  ColumnProp,
+  ColumnRegular,
+  DataType,
+  PluginProviders,
+} from '@type';
 import { BasePlugin } from '../base.plugin';
 import { FILTER_PROP, isFilterBtn } from './filter.button';
 import {
@@ -13,6 +18,7 @@ import {
 import type {
   ColumnFilterConfig,
   FilterCollectionItem,
+  FilterData,
   LogicFunction,
   MultiFilterItem,
   ShowData,
@@ -31,17 +37,17 @@ export const FILTE_PANEL = 'revogr-filter-panel';
 /**
  * @typedef ColumnFilterConfig
  * @type {object}
- * 
+ *
  * @property {MultiFilterItem|undefined} multiFilterItems - data for multi filtering with relation
- * 
+ *
  * @property {Record<ColumnProp, FilterCollectionItem>|undefined} collection - preserved filter data, relation for filters will be applied as 'and'
- * 
+ *
  * @property {string[]|undefined} include - filters to be included, if defined everything else out of scope will be ignored
- * 
+ *
  * @property {Record<string, CustomFilter>|undefined} customFilters - hash map of {FilterType:CustomFilter}.
- * 
+ *
  * @property {FilterLocalization|undefined} localization - translation for filter popup captions.
- * 
+ *
  * @property {boolean|undefined} disableDynamicFiltering - disables dynamic filtering. A way to apply filters on Save only.
  */
 /**
@@ -61,8 +67,7 @@ export class FilterPlugin extends BasePlugin {
    *    number: ['eqN', 'neqN', 'gt']
    *  }
    */
-  filterByType: Record<string, string[]> =
-    { ...filterTypes };
+  filterByType: Record<string, string[]> = { ...filterTypes };
   filterNameIndexByType: Record<string, string> = {
     ...filterNames,
   };
@@ -97,7 +102,10 @@ export class FilterPlugin extends BasePlugin {
         onResetChange={e => this.onFilterReset(e.detail)}
         disableDynamicFiltering={config?.disableDynamicFiltering}
         ref={e => (this.pop = e)}
-      > { this.extraContent() }</revogr-filter-panel>,
+      >
+        {' '}
+        {this.extraContent()}
+      </revogr-filter-panel>,
     ];
 
     const aftersourceset = async () => {
@@ -122,15 +130,16 @@ export class FilterPlugin extends BasePlugin {
       }
       await this.runFiltering(this.multiFilterItems);
     };
-    this.addEventListener(
-      'headerclick',
-      (e) =>
-        this.headerclick(e),
-    );
+    this.addEventListener('headerclick', e => this.headerclick(e));
     this.addEventListener(
       FILTER_CONFIG_CHANGED_EVENT,
       ({ detail }: CustomEvent<ColumnFilterConfig | boolean>) => {
-        if (!detail || typeof detail === 'object' && (!detail.multiFilterItems || !Object.keys(detail.multiFilterItems).length)) {
+        if (
+          !detail ||
+          (typeof detail === 'object' &&
+            (!detail.multiFilterItems ||
+              !Object.keys(detail.multiFilterItems).length))
+        ) {
           this.clearFiltering();
           return;
         }
@@ -201,10 +210,12 @@ export class FilterPlugin extends BasePlugin {
     }
 
     if (config.collection) {
-      const filtersWithFilterFunctionPresent = Object.entries(config.collection).filter(
-        ([, item]) => this.filterFunctionsIndexedByType[item.type],
+      const filtersWithFilterFunctionPresent = Object.entries(
+        config.collection,
+      ).filter(([, item]) => this.filterFunctionsIndexedByType[item.type]);
+      this.filterCollection = Object.fromEntries(
+        filtersWithFilterFunctionPresent,
       );
-      this.filterCollection = Object.fromEntries(filtersWithFilterFunctionPresent);
     } else {
       this.filterCollection = {};
     }
@@ -331,7 +342,7 @@ export class FilterPlugin extends BasePlugin {
         column[this.filterProp] = true;
       }
     });
-    const itemsToTrim = await this.getRowFilter(source, filterItems, columnByProp);
+    const itemsToTrim = this.getRowFilter(source, filterItems, columnByProp);
     // check is filter event prevented
     const { defaultPrevented, detail } = this.emit('beforefiltertrimmed', {
       collection,
@@ -408,80 +419,92 @@ export class FilterPlugin extends BasePlugin {
   /**
    * Get trimmed rows based on filter
    */
-  async getRowFilter(
+  getRowFilter(
     rows: DataType[],
     filterItems: MultiFilterItem,
-    columnByProp: Record<string, ColumnRegular>
-  ): Promise<Record<number, boolean>> {
+    columnByProp: Record<string, ColumnRegular>,
+  ): Record<number, boolean> {
     const propKeys = Object.keys(filterItems);
 
     const trimmed: Record<number, boolean> = {};
-    let propFilterSatisfiedCount = 0;
-    let lastFilterResults: boolean[] = [];
 
     // each rows
     for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
-      const model = rows[rowIndex];
       // check filter by column properties
       for (const prop of propKeys) {
-        const propFilters = filterItems[prop];
-
-        // reset the count of satisfied filters
-        propFilterSatisfiedCount = 0;
-        // reset the array of last filter results
-        lastFilterResults = [];
-
-        // testing each filter for a prop
-        for (const [filterIndex, filterData] of propFilters.entries()) {
-          // the filter LogicFunction based on the type
-          const filterFunc = this.filterFunctionsIndexedByType[filterData.type];
-
-          // THE MAGIC OF FILTERING IS HERE
-          const column = columnByProp[prop];
-          // If there is no column but user wants to filter by a property
-          const value = column ? getCellDataParsed(model, columnByProp[prop]) : model[prop];
-          // OR relation
-          if (filterData.relation === 'or') {
-            // reset the array of last filter results
-            lastFilterResults = [];
-            // if the filter is satisfied, continue to the next filter
-            if (filterFunc(value, filterData.value)) {
-              continue;
-            }
-            // if the filter is not satisfied, count it
-            propFilterSatisfiedCount++;
-
-          // AND relation
-          } else {
-            // 'and' relation will need to know the next filter
-            // so we save this current filter to include it in the next filter
-            lastFilterResults.push(!filterFunc(value, filterData.value));
-
-            // check first if we have a filter on the next index to pair it with this current filter
-            const nextFilterData = propFilters[filterIndex + 1];
-            // stop the sequence if there is no next filter or if the next filter is not an 'and' relation
-            if (!nextFilterData || nextFilterData.relation && nextFilterData.relation !== 'and') {
-              // let's just continue since for sure propFilterSatisfiedCount cannot be satisfied
-              if (lastFilterResults.indexOf(true) === -1) {
-                // reset the array of last filter results
-                lastFilterResults = [];
-                continue;
-              }
-
-              // we need to add all of the lastFilterResults since we need to satisfy all
-              propFilterSatisfiedCount += lastFilterResults.length;
-              // reset the array of last filter results
-              lastFilterResults = [];
-            }
-          }
-        } // end of propFilters forEach
-
         // add to the list of removed/trimmed rows of filter condition is satisfied
-        if (propFilterSatisfiedCount === propFilters.length) {
+        if (
+          this.shouldTrimRow(
+            rows[rowIndex],
+            filterItems[prop],
+            prop,
+            columnByProp[prop],
+          )
+        ) {
           trimmed[rowIndex] = true;
         }
       } // end of for-of propKeys
     }
     return trimmed;
+  }
+
+  private shouldTrimRow(
+    model: DataType = {},
+    propFilters: FilterData[],
+    prop: ColumnProp,
+    column?: ColumnRegular,
+  ) {
+    // reset the count of satisfied filters
+    let propFilterSatisfiedCount = 0;
+    // reset the array of last filter results
+    let lastFilterResults: boolean[] = [];
+
+    // testing each filter for a prop
+    for (const [filterIndex, filterData] of propFilters.entries()) {
+      // the filter LogicFunction based on the type
+      const filterFunc = this.filterFunctionsIndexedByType[filterData.type];
+
+      // THE MAGIC OF FILTERING IS HERE
+      // If there is no column but user wants to filter by a property
+      const value = column ? getCellDataParsed(model, column) : model[prop];
+      // OR relation
+      if (filterData.relation === 'or') {
+        // reset the array of last filter results
+        lastFilterResults = [];
+        // if the filter is satisfied, continue to the next filter
+        if (filterFunc(value, filterData.value)) {
+          continue;
+        }
+        // if the filter is not satisfied, count it
+        propFilterSatisfiedCount++;
+
+        // AND relation
+      } else {
+        // 'and' relation will need to know the next filter
+        // so we save this current filter to include it in the next filter
+        lastFilterResults.push(!filterFunc(value, filterData.value));
+
+        // check first if we have a filter on the next index to pair it with this current filter
+        const nextFilterData = propFilters[filterIndex + 1];
+        // stop the sequence if there is no next filter or if the next filter is not an 'and' relation
+        if (
+          !nextFilterData ||
+          (nextFilterData.relation && nextFilterData.relation !== 'and')
+        ) {
+          // let's just continue since for sure propFilterSatisfiedCount cannot be satisfied
+          if (lastFilterResults.indexOf(true) === -1) {
+            // reset the array of last filter results
+            lastFilterResults = [];
+            continue;
+          }
+
+          // we need to add all of the lastFilterResults since we need to satisfy all
+          propFilterSatisfiedCount += lastFilterResults.length;
+          // reset the array of last filter results
+          lastFilterResults = [];
+        }
+      }
+    } // end of propFilters forEach
+    return propFilterSatisfiedCount === propFilters.length;
   }
 }
