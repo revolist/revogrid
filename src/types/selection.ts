@@ -55,11 +55,11 @@ export type TempRange = {
   area: RangeArea;
 };
 export type OldNewRangeMapping = {
-  [rowIndex: number]: {
-    [T in ColumnProp]: {
-      rowIndex: number;
-      colIndex: number;
-      colProp: ColumnProp;
+  [newRowIndex: number]: {
+    [T in ColumnProp]: { // new column prop
+      rowIndex: number; // original row
+      colIndex: number; // original col
+      colProp: ColumnProp; // original column prop
     };
   };
 };
@@ -70,7 +70,7 @@ export type ChangedRange = {
   oldRange: RangeArea; // range to copy from
   mapping: OldNewRangeMapping;
   newData: {
-    [key: number]: DataType;
+    [newRowIndex: number]: DataType;
   };
 };
 
