@@ -151,6 +151,8 @@ export type ShowData = {
   autoCorrect?: boolean;
   filterTypes?: Record<string, string[]>;
   filterItems?: MultiFilterItem;
+  // hide default filters
+  hideDefaultFilters?: boolean;
   // pass vnodes from plugins
   extraContent?: (data: ShowData) => any;
 } & FilterItem & Omit<ColumnRegular, 'filter'>;

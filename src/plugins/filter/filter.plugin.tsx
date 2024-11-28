@@ -155,6 +155,10 @@ export class FilterPlugin extends BasePlugin {
     );
   }
 
+  beforeshow(_: ShowData) {
+    // used as hook for filter panel
+  }
+
   extraContent(): any {
     return null;
   }
@@ -254,11 +258,10 @@ export class FilterPlugin extends BasePlugin {
       autoCorrect: true,
       filterTypes: this.getColumnFilter(e.detail.filter),
       filterItems: this.multiFilterItems,
-    };
-    this.pop.show({
-      ...data,
       extraContent: this.extraHyperContent,
-    });
+    };
+    this.beforeshow?.(data);
+    this.pop.show(data);
   }
 
   getColumnFilter(
