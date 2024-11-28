@@ -262,10 +262,10 @@ export class AutoFillService {
   /**
    * Trigger range apply events and handle responses
    */
-  onRangeApply(data: DataLookup, range: RangeArea | null) {
+  onRangeApply(newData: DataLookup, range: RangeArea | null) {
     this.sv.rangeDataApply({
-      data,
-      models: collectModelsOfRange(data, this.sv.dataStore),
+      data: newData,
+      models: collectModelsOfRange(newData, this.sv.dataStore),
       type: this.sv.dataStore.get('type'),
     });
 
