@@ -484,15 +484,9 @@ export class FilterPlugin extends BasePlugin {
         // so we save this current filter to include it in the next filter
         lastFilterResults.push(!filterFunc(value, filterData.value));
 
-        // check first if we have a filter on the next index to pair it with this current filter
-        const nextFilterData = propFilters[filterIndex + 1];
-        // stop the sequence if there is no next filter or if the next filter is not an 'and' relation
-        if (
-          !nextFilterData ||
-          (nextFilterData.relation && nextFilterData.relation !== 'and')
-        ) {
+        if (isFinalAndFilter(filterIndex, propFilters)) {
           // let's just continue since for sure propFilterSatisfiedCount cannot be satisfied
-          if (lastFilterResults.indexOf(true) === -1) {
+          if (allAndConditionsSatisfied(lastFilterResults)) {
             // reset the array of last filter results
             lastFilterResults = [];
             continue;
@@ -507,4 +501,25 @@ export class FilterPlugin extends BasePlugin {
     } // end of propFilters forEach
     return propFilterSatisfiedCount === propFilters.length;
   }
+}
+/**
+ * Checks if the current filter is the final one in an AND sequence.
+ * @param index - Current filter index in the list.
+ * @param filters - Array of filters for the property.
+ * @returns True if this is the last AND condition; false otherwise.
+ */
+function isFinalAndFilter(index: number, filters: MultiFilterItem[string]): boolean {
+  const nextFilter = filters[index + 1]; // Get the next filter in the list.
+  // Return true if there's no next filter or if the next filter defined and is not part of the AND sequence.
+  return !nextFilter || (!!nextFilter.relation && nextFilter.relation !== 'and');
+}
+
+/**
+ * Determines if all conditions in an AND sequence are satisfied.
+ * @param pendingResults - An array of results from the AND conditions.
+ * @returns True if all conditions are satisfied; false otherwise.
+ */
+function allAndConditionsSatisfied(pendingResults: boolean[]): boolean {
+  // Check if there are any failed conditions in the pending results.
+  return !pendingResults.includes(true);
 }
