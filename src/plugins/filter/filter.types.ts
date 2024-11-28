@@ -1,3 +1,5 @@
+// filter.types.ts
+
 import type { ColumnProp, ColumnRegular } from '@type';
 import type { FilterType } from './filter.indexed';
 
@@ -36,9 +38,18 @@ export type LogicFunction<T1 = LogicFunctionParam, T2 = LogicFunctionExtraParam>
   extra?: ExtraField;
 };
 
-type CustomFilter<T1 = LogicFunctionParam, T2 = LogicFunctionExtraParam> = {
-  columnFilterType: string; // property defined in column filter: string/number/abstract/enum...etc
+export type CustomFilter<T1 = LogicFunctionParam, T2 = LogicFunctionExtraParam> = {
+  /**
+   * Property defined in column { filter: string/number/abstract/enum...etc }
+   */
+  columnFilterType: string;
+  /**
+   * Filter name
+   */
   name: string;
+  /**
+   * Function to apply the filter
+   */
   func: LogicFunction<T1, T2>;
 };
 
@@ -65,7 +76,7 @@ export type ColumnFilterConfig = {
   /**
    * The collection of filters to be applied to the column.
    */
-  collection?: FilterCollection;
+  collection?: Record<ColumnProp, FilterCollectionItem>;
   /**
    * The names of the filters to be included in the filter dropdown.
    */
@@ -92,13 +103,10 @@ export type ColumnFilterConfig = {
    */
   disableDynamicFiltering?: boolean;
 };
-type FilterCollectionItem = {
-  filter: LogicFunction;
+export type FilterCollectionItem = {
   type: FilterType;
   value?: any;
 };
-
-export type FilterCollection = Record<ColumnProp, FilterCollectionItem>;
 
 
 export type FilterItem = {
@@ -127,7 +135,7 @@ export type FilterData = {
   /**
    * Filter relation
    */
-  relation: 'and' | 'or';
+  relation?: 'and' | 'or';
 };
 
 export type MultiFilterItem = {

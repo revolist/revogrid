@@ -83,7 +83,7 @@ import type { Observable } from '../../utils';
 import type { GridPlugin } from '../../plugins/base.plugin';
 import { ColumnCollection, getColumnByProp, getColumns } from '../../utils/column.utils';
 import { WCAGPlugin } from '../../plugins/wcag';
-import { ColumnFilterConfig, FilterCollection } from '../../plugins/filter/filter.types';
+import { ColumnFilterConfig, FilterCollectionItem } from '../../plugins/filter/filter.types';
 import { PluginService } from './plugin.service';
 
 
@@ -464,7 +464,7 @@ export class RevoGridComponent {
    * Use e.preventDefault() to prevent cell focus change.
    * Modify if you need to change filters.
    */
-  @Event() beforefilterapply: EventEmitter<{ collection: FilterCollection }>;
+  @Event() beforefilterapply: EventEmitter<{ collection: Record<ColumnProp, FilterCollectionItem> }>;
 
   /**
    * Emitted before applying a filter to the data source.
@@ -473,7 +473,7 @@ export class RevoGridComponent {
    * Modify the `itemsToFilter` property if you want to filter the indexes for trimming.
    */
   @Event() beforefiltertrimmed: EventEmitter<{
-    collection: FilterCollection;
+    collection: Record<ColumnProp, FilterCollectionItem>;
     itemsToFilter: Record<number, boolean>;
   }>;
 

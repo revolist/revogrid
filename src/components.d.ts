@@ -8,7 +8,7 @@ import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 import { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, CellTemplateProp, ChangedRange, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, ExtraNodeFuncConfig, FocusAfterRenderEvent, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, Nullable, PluginBaseComponent, PositionItem, Providers, RangeArea, RangeClipboardCopyEventProps, RangeClipboardPasteEvent, RowDefinition, RowDragStartDetails, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
 import { GridPlugin } from "./plugins/base.plugin";
 import { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
-import { ColumnFilterConfig, FilterCaptions, FilterCollection, LogicFunction, MultiFilterItem, ShowData } from "./plugins/filter/filter.types";
+import { ColumnFilterConfig, FilterCaptions, FilterCollectionItem, LogicFunction, MultiFilterItem, ShowData } from "./plugins/filter/filter.types";
 import { GroupingOptions } from "./plugins/groupingRow/grouping.row.types";
 import { VNode } from "@stencil/core";
 import { FocusedData } from "./components/revoGrid/viewport.service";
@@ -22,7 +22,7 @@ import { EventData } from "./components/overlay/selection.utils";
 export { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, CellTemplateProp, ChangedRange, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, ExtraNodeFuncConfig, FocusAfterRenderEvent, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, Nullable, PluginBaseComponent, PositionItem, Providers, RangeArea, RangeClipboardCopyEventProps, RangeClipboardPasteEvent, RowDefinition, RowDragStartDetails, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
 export { GridPlugin } from "./plugins/base.plugin";
 export { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
-export { ColumnFilterConfig, FilterCaptions, FilterCollection, LogicFunction, MultiFilterItem, ShowData } from "./plugins/filter/filter.types";
+export { ColumnFilterConfig, FilterCaptions, FilterCollectionItem, LogicFunction, MultiFilterItem, ShowData } from "./plugins/filter/filter.types";
 export { GroupingOptions } from "./plugins/groupingRow/grouping.row.types";
 export { VNode } from "@stencil/core";
 export { FocusedData } from "./components/revoGrid/viewport.service";
@@ -821,9 +821,9 @@ declare global {
     columns: ColumnCollection;
     order: Record<ColumnProp, 'asc' | 'desc' | undefined>;
   };
-        "beforefilterapply": { collection: FilterCollection };
+        "beforefilterapply": { collection: Record<ColumnProp, FilterCollectionItem> };
         "beforefiltertrimmed": {
-    collection: FilterCollection;
+    collection: Record<ColumnProp, FilterCollectionItem>;
     itemsToFilter: Record<number, boolean>;
   };
         "beforetrimmed": {
@@ -1435,12 +1435,12 @@ declare namespace LocalJSX {
         /**
           * Emitted before applying a filter to the data source. Use e.preventDefault() to prevent cell focus change. Modify if you need to change filters.
          */
-        "onBeforefilterapply"?: (event: RevoGridCustomEvent<{ collection: FilterCollection }>) => void;
+        "onBeforefilterapply"?: (event: RevoGridCustomEvent<{ collection: Record<ColumnProp, FilterCollectionItem> }>) => void;
         /**
           * Emitted before applying a filter to the data source. Use e.preventDefault() to prevent the default behavior of trimming values and applying the filter. Modify the `collection` property if you want to change the filters. Modify the `itemsToFilter` property if you want to filter the indexes for trimming.
          */
         "onBeforefiltertrimmed"?: (event: RevoGridCustomEvent<{
-    collection: FilterCollection;
+    collection: Record<ColumnProp, FilterCollectionItem>;
     itemsToFilter: Record<number, boolean>;
   }>) => void;
         /**

@@ -1,3 +1,5 @@
+// filter.indexed.ts
+
 import eq, { notEq } from './conditions/equal';
 import gtThan from './conditions/number/greaterThan';
 import gtThanEq from './conditions/number/greaterThanOrEqual';
