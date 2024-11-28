@@ -8,3 +8,7 @@ export type SortingOrderFunction = Record<
 export type ColumnSetEvent = {
   order: SortingOrder;
 };
+
+export type SortingConfig = {
+  columns?: { prop: ColumnProp; order: Order; cellCompare?: CellCompareFunc }[];
+};

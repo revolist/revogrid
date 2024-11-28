@@ -84,9 +84,6 @@ export class RevogrViewportScroll implements ElementScroll {
 
   @Element() horizontalScroll: HTMLElement;
 
-  private oldValY = this.contentHeight;
-  private oldValX = this.contentWidth;
-
   private verticalScroll?: HTMLElement;
   private header?: HTMLElement;
   private footer?: HTMLElement;
@@ -285,18 +282,6 @@ export class RevogrViewportScroll implements ElementScroll {
   }
 
   async componentDidRender() {
-    // scroll update if number of rows changed
-    if (this.contentHeight < this.oldValY && this.verticalScroll) {
-      this.verticalScroll.scrollTop += this.contentHeight - this.oldValY;
-    }
-    this.oldValY = this.contentHeight;
-
-    // scroll update if number of cols changed
-    if (this.contentWidth < this.oldValX) {
-      this.horizontalScroll.scrollLeft += this.contentWidth - this.oldValX;
-    }
-    this.oldValX = this.contentWidth;
-
     this.localScrollService.setParams(
       {
         contentSize: this.contentHeight,

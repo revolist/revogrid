@@ -30,6 +30,7 @@ export type RevogridEvents = 'contentsizechanged'|
   'aftercolumnresize'|
   'beforerowdefinition'|
   'filterconfigchanged'|
+  'sortingconfigchanged'|
   'rowheaderschanged'|
   'beforegridrender'|
   'aftergridrender'|
@@ -135,6 +136,7 @@ export const REVOGRID_EVENTS = new Map<RevogridEvents, RevogridEvents>([
   ['aftercolumnresize', 'aftercolumnresize'],
   ['beforerowdefinition', 'beforerowdefinition'],
   ['filterconfigchanged', 'filterconfigchanged'],
+  ['sortingconfigchanged', 'sortingconfigchanged'],
   ['rowheaderschanged', 'rowheaderschanged'],
   ['beforegridrender', 'beforegridrender'],
   ['aftergridrender', 'aftergridrender'],

@@ -85,6 +85,7 @@ import { ColumnCollection, getColumnByProp, getColumns } from '../../utils/colum
 import { WCAGPlugin } from '../../plugins/wcag';
 import { ColumnFilterConfig, FilterCollectionItem } from '../../plugins/filter/filter.types';
 import { PluginService } from './plugin.service';
+import { SortingConfig } from 'src/plugins/sorting/sorting.types';
 
 
 /**
@@ -220,6 +221,12 @@ export class RevoGridComponent {
    * Or can be filter collection See `FilterCollection` for more info.
    */
   @Prop() filter: boolean | ColumnFilterConfig = false;
+
+  /**
+   * Alternative way to set sorting.
+   * `{columns: [{prop: 'name', order: 'asc'}]}`
+   */
+  @Prop() sorting?: SortingConfig;
 
   /**
    * Apply changes typed in editor on editor close except Escape cases.
@@ -531,6 +538,11 @@ export class RevoGridComponent {
    * Emitted when the filter configuration is changed
    */
   @Event() filterconfigchanged: EventEmitter;
+
+  /**
+   * Emitted when the sorting configuration is changed
+   */
+  @Event() sortingconfigchanged: EventEmitter<SortingConfig>;
 
   /**
    * Emmited when the row headers are changed.
@@ -1183,7 +1195,9 @@ export class RevoGridComponent {
         break;
       case 'source':
         type = 'rgRow';
-        /** applied for source only for cross compatability between plugins */
+        /**
+         * Applied for source only for cross compatability between plugins
+         */
         const beforesourceset = this.beforesourceset.emit({
           type,
           source: newVal,
@@ -1198,7 +1212,9 @@ export class RevoGridComponent {
     const newSource = [...beforesourceset.detail.source];
     this.dataProvider.setData(newSource, type, this.disableVirtualY);
 
-    /** applied for source only for cross compatability between plugins */
+    /** 
+     * Applied for source only for cross compatability between plugins
+     */
     if (watchName === 'source') {
       this.aftersourceset.emit({
         type,
@@ -1302,6 +1318,10 @@ export class RevoGridComponent {
 
   @Watch('filter') applyFilter(cfg: boolean | ColumnFilterConfig) {
     this.filterconfigchanged.emit(cfg);
+  }
+
+  @Watch('sorting') applySorting(cfg?: SortingConfig) {
+    this.sortingconfigchanged.emit(cfg);
   }
 
   @Watch('rowHeaders') rowHeadersChange(rowHeaders?: RowHeaders | boolean) {

@@ -12,7 +12,7 @@ import {
   gatherTrimmedItems,
   Trimmed,
 } from '@store';
-import {
+import type {
   DimensionCols,
   DimensionType,
   MultiDimensionType,
@@ -30,6 +30,8 @@ export type DimensionConfig = {
 /**
  * Dimension provider
  * Stores dimension information and custom sizes
+ * 
+ * @dependsOn ViewportProvider
  */
 export default class DimensionProvider {
   readonly stores: DimensionStoreCollection;
@@ -86,7 +88,11 @@ export default class DimensionProvider {
       };
     }
     this.stores[type].setDimensionSize(newSizes);
-    this.updateViewport(type, true);
+    this.setViewPortCoordinate({
+      coordinate: this.viewports.stores[type].lastCoordinate,
+      type,
+      force: true,
+    });
   }
 
   setItemCount(realCount: number, type: MultiDimensionType) {
@@ -103,11 +109,15 @@ export default class DimensionProvider {
     const allTrimmed = gatherTrimmedItems(trimmed);
     const dimStoreType = this.stores[type];
     dimStoreType.setStore({ trimmed: allTrimmed });
-    this.updateViewport(type, true);
+    this.setViewPortCoordinate({
+      coordinate: this.viewports.stores[type].lastCoordinate,
+      type,
+      force: true,
+    });
   }
 
   /**
-   * Sets dimension data and view port coordinate
+   * Sets dimension data and viewport coordinate
    * @param itemCount
    * @param type - dimension type
    * @param noVirtual - disable virtual data
@@ -122,7 +132,10 @@ export default class DimensionProvider {
         virtualSize: dimension.realSize,
       });
     }
-    this.updateViewport(type);
+    this.setViewPortCoordinate({
+      coordinate: this.viewports.stores[type].lastCoordinate,
+      type,
+    });
   }
 
   /**
@@ -192,14 +205,6 @@ export default class DimensionProvider {
     return { y, x };
   }
 
-  updateViewport(type: MultiDimensionType, force = false) {
-    this.setViewPortCoordinate({
-      coordinate: this.viewports.stores[type].lastCoordinate,
-      type,
-      force,
-    });
-  }
-
   setViewPortCoordinate({
     coordinate,
     type,
@@ -252,6 +257,10 @@ export default class DimensionProvider {
       newItemsOrder,
       prevItemsOrder,
     );
-    this.updateViewport(type, true);
+    this.setViewPortCoordinate({
+      coordinate: this.viewports.stores[type].lastCoordinate,
+      type,
+      force: true,
+    });
   }
 }
