@@ -457,18 +457,23 @@ export class FilterPanel {
       >
         <slot slot="header" />
         { this.changes.extraContent?.(this.changes) || '' }
-        <label>{capts.title}</label>
-        <div class="filter-holder">{this.getFilterItemsList()}</div>
 
-        <div class="add-filter">
-          <select
-            id={FILTER_ID}
-            class="select-css"
-            onChange={e => this.onAddNewFilter(e)}
-          >
-            {this.renderSelectOptions(this.currentFilterType)}
-          </select>
-        </div>
+        { this.changes?.hideDefaultFilters !== true && (
+          [
+            <label>{capts.title}</label>,
+            <div class="filter-holder">{this.getFilterItemsList()}</div>,
+            <div class="add-filter">
+              <select
+                id={FILTER_ID}
+                class="select-css"
+                onChange={e => this.onAddNewFilter(e)}
+              >
+                {this.renderSelectOptions(this.currentFilterType)}
+              </select>
+            </div>
+          ]
+        )}
+
         <slot />
         <div class="filter-actions">
           {this.disableDynamicFiltering && [
