@@ -435,10 +435,10 @@ export class FilterPlugin extends BasePlugin {
         // add to the list of removed/trimmed rows of filter condition is satisfied
         if (
           this.shouldTrimRow(
-            rows[rowIndex],
             filterItems[prop],
             prop,
             columnByProp[prop],
+            rows[rowIndex],
           )
         ) {
           trimmed[rowIndex] = true;
@@ -449,10 +449,10 @@ export class FilterPlugin extends BasePlugin {
   }
 
   private shouldTrimRow(
-    model: DataType = {},
     propFilters: FilterData[],
     prop: ColumnProp,
     column?: ColumnRegular,
+    model: DataType = {},
   ) {
     // reset the count of satisfied filters
     let propFilterSatisfiedCount = 0;
