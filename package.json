@@ -62,26 +62,26 @@
   "types": "dist/types/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/types/index.d.ts",
       "import": "./dist/index.js",
-      "require": "./dist/index.cjs.js",
-      "types": "./dist/types/index.d.ts"
+      "require": "./dist/index.cjs.js"
     },
     "./standalone": {
-      "import": "./standalone/revo-grid.js",
-      "types": "./standalone/revo-grid.d.ts"
+      "types": "./standalone/revo-grid.d.ts",
+      "import": "./standalone/revo-grid.js"
     },
     "./standalone/revo-grid.js": {
-      "import": "./standalone/revo-grid.js",
-      "types": "./standalone/revo-grid.d.ts"
+      "types": "./standalone/revo-grid.d.ts",
+      "import": "./standalone/revo-grid.js"
     },
     "./standalone/revogr-filter-panel.js": {
-      "import": "./standalone/revogr-filter-panel.js",
-      "types": "./standalone/revogr-filter-panel.d.ts"
+      "types": "./standalone/revogr-filter-panel.d.ts",
+      "import": "./standalone/revogr-filter-panel.js"
     },
     "./loader": {
+      "types": "./loader/index.d.ts",
       "import": "./loader/index.js",
-      "require": "./loader/index.cjs",
-      "types": "./loader/index.d.ts"
+      "require": "./loader/index.cjs"
     }
   },
   "files": [
@@ -105,7 +105,7 @@
     "@angular/core": "^18.1.2",
     "@juggle/resize-observer": "^3.4.0",
     "@revolist/stencil-vue2-output-target": "^0.0.6",
-    "@revolist/svelte-output-target": "0.0.3",
+    "@revolist/svelte-output-target": "0.0.5",
     "@stencil/angular-output-target": "0.8.4",
     "@stencil/core": "4.20.0",
     "@stencil/react-output-target": "0.5.3",
@@ -133,10 +133,10 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "rxjs": "^7.8.1",
-    "svelte": "^4.2.18",
+    "svelte": "^5.2.10",
     "typedoc": "^0.26.5",
     "typedoc-plugin-markdown": "^4.2.3",
-    "typescript": "^5.5.4",
+    "typescript": "^5.6.3",
     "url": "^0.11.3",
     "vue": "^3.4.34"
   },
