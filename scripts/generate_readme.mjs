@@ -47,6 +47,7 @@ function main() {
         output = `packages/${pkg}/${output}`;
         break;
       case 'svelte':
+        files.unshift('usage.svelte-5.md');
         files.unshift('usage.deprecated.md');
         files.push('usage.svelte.md');
         output = `packages/${pkg}/${output}`;
