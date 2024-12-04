@@ -262,14 +262,16 @@ export class AutoFillService {
   /**
    * Trigger range apply events and handle responses
    */
-  onRangeApply(newData: DataLookup, range: RangeArea | null) {
+  onRangeApply(newData: DataLookup, newRange: RangeArea | null, oldRange: RangeArea | null) {
     this.sv.rangeDataApply({
       data: newData,
       models: collectModelsOfRange(newData, this.sv.dataStore),
       type: this.sv.dataStore.get('type'),
+      oldRange,
+      newRange
     });
 
-    this.sv.setRange(range);
+    this.sv.setRange(newRange);
   }
 
   /** Apply range and copy data during range application */
@@ -301,7 +303,7 @@ export class AutoFillService {
       this.sv.setRange(newRange);
       return;
     }
-    this.onRangeApply(rangeData.newData, newRange);
+    this.onRangeApply(rangeData.newData, newRange, rangeToCopy);
   }
 
   /**

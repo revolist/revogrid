@@ -997,7 +997,7 @@ export class RevoGridComponent {
   }
 
   @Listen('rangeeditapply') onRangeEdit(
-    e: CustomEvent<BeforeRangeSaveDataDetails>,
+    e: CustomEvent<HTMLRevogrOverlaySelectionElementEventMap['rangeeditapply']>,
   ) {
     if (!this.dataProvider) {
       throw new Error('Not connected');
@@ -1011,7 +1011,8 @@ export class RevoGridComponent {
     this.afteredit.emit(detail);
   }
 
-  @Listen('selectionchangeinit') onRangeChanged(e: CustomEvent<ChangedRange>) {
+  @Listen('selectionchangeinit') onRangeChanged(
+    e: CustomEvent<HTMLRevogrOverlaySelectionElementEventMap['selectionchangeinit']>) {
     const beforeange = this.beforerange.emit(e.detail);
     if (beforeange.defaultPrevented) {
       e.preventDefault();
