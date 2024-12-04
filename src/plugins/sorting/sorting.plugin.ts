@@ -119,7 +119,7 @@ export class SortingPlugin extends BasePlugin {
         return;
       }
 
-      if (!e.detail.column.sortable) {
+      if (!e.detail?.column?.sortable) {
         return;
       }
 
