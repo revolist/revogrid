@@ -123,6 +123,8 @@ export type BeforeRangeSaveDataDetails = {
   data: DataLookup;
   models: Partial<DataLookup>;
   type: DimensionRows;
+  newRange: RangeArea | null;
+  oldRange: RangeArea | null;
 };
 
 export type AfterEditEvent = BeforeRangeSaveDataDetails | BeforeSaveDataDetails;

@@ -844,7 +844,7 @@ export class OverlaySelection {
     if (canPaste) {
       return;
     }
-    this.autoFillService?.onRangeApply(changed, range);
+    this.autoFillService?.onRangeApply(changed, range, range);
   }
 
   private async focusNext() {
@@ -863,7 +863,7 @@ export class OverlaySelection {
     const range = this.selectionStore.get('range');
     if (range && !isRangeSingleCell(range)) {
       const data = this.columnService.getRangeStaticData(range, '');
-      this.autoFillService?.onRangeApply(data, range);
+      this.autoFillService?.onRangeApply(data, range, range);
     } else if (this.canEdit()) {
       const focused = this.selectionStore.get('focus');
       if (!focused) {
