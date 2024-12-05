@@ -104,6 +104,8 @@ import { SortingConfig } from 'src/plugins/sorting/sorting.types';
  * @slot data-{column-type}-{row-type}. @example data-rgCol-rgRow - main data slot. Applies extra elements in <revogr-data />.
  * @slot focus-{column-type}-{row-type}. @example focus-rgCol-rgRow - focus layer for main data. Applies extra elements in <revogr-focus />.
  * @slot viewport - Viewport slot.
+ * @slot header - Header slot.
+ * @slot footer - Footer slot.
 */
 @Component({
   tag: 'revo-grid',
@@ -1691,6 +1693,7 @@ export class RevoGridComponent {
         {this.hideAttribution ? null : (
           <revogr-attribution class="attribution" />
         )}
+        <slot name="header" />
         <div
           class="main-viewport"
           onClick={(e: MouseEvent) => {
@@ -1722,6 +1725,7 @@ export class RevoGridComponent {
           onScrollvirtual={e => this.scrollingService.proxyScroll(e.detail)}
         />
         <revogr-extra ref={el => (this.extraService = el)} nodes={this.extraElements} />
+        <slot name="footer" />
       </Host>
     );
   }

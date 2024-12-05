@@ -7,6 +7,7 @@ export * from './filter/filter.plugin';
 export * from './groupingColumn/columnGroupsRenderer';
 export * from './groupingColumn/headerGroupRenderer';
 export * from './groupingRow/grouping.row.plugin';
+export * from './groupingRow/grouping.service';
 export * from './moveColumn/column.drag.plugin';
 export * from './sorting/sorting.plugin';
 export * from './sorting/sorting.sign';
