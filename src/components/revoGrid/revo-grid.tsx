@@ -1409,7 +1409,7 @@ export class RevoGridComponent {
     }
   }
 
-  private getPluginData(): PluginProviders | undefined {
+  getPluginData(): PluginProviders | undefined {
     if (!this.dimensionProvider || !this.dataProvider || !this.columnProvider || !this.viewportProvider || !this.selectionStoreConnector) {
       return;
     }
