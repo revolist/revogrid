@@ -132,12 +132,13 @@ export function getColumns(
     (res: ColumnCollection, colData: ColumnGrouping | ColumnRegular) => {
       // Grouped column
       if (isColGrouping(colData)) {
-        return gatherGroup(
+        res = gatherGroup(
           res,
           colData,
           getColumns(colData.children, level + 1, types),
           level,
         );
+        return res;
       }
       // Column type
       const columnDefinitionFromType = colData.columnType && types?.[colData.columnType];
@@ -211,6 +212,10 @@ export function gatherGroup<T extends ColumnCollection>(
   }
   res.maxLevel = Math.max(res.maxLevel, collection.maxLevel);
   res.sort = { ...res.sort, ...collection.sort };
+  res.columnByProp = {
+    ...res.columnByProp,
+    ...collection.columnByProp,
+  };
   return res;
 }
 
