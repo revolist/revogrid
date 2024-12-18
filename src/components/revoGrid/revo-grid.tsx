@@ -85,7 +85,7 @@ import { ColumnCollection, getColumnByProp, getColumns } from '../../utils/colum
 import { WCAGPlugin } from '../../plugins/wcag';
 import { ColumnFilterConfig, FilterCollectionItem } from '../../plugins/filter/filter.types';
 import { PluginService } from './plugin.service';
-import { SortingConfig } from 'src/plugins/sorting/sorting.types';
+import { SortingConfig, SortingOrder } from '../../plugins';
 
 
 /**
@@ -369,23 +369,34 @@ export class RevoGridComponent {
   @Event() roworderchanged: EventEmitter<{ from: number; to: number }>;
 
   /**
-   * By sorting.plugin.ts
-   * Before sorting apply.
-   * Use e.preventDefault() to prevent sorting data change.
+   * By `sorting.plugin.ts`
+   * <br>Triggered immediately after header click.
+   * <br>First in sorting event sequence. Ff this event stops no other event called.
+   * <br>Use `e.preventDefault()` to prevent sorting.
    */
-  @Event() beforesortingapply: EventEmitter<{
+  @Event() beforesorting: EventEmitter<{
     column: ColumnRegular;
     order: 'desc' | 'asc';
     additive: boolean;
   }>;
 
   /**
-   * By sorting.plugin.ts
-   * Before sorting event.
-   * Initial sorting triggered, if this event stops no other event called.
-   * Use e.preventDefault() to prevent sorting.
+   * By `sorting.plugin.ts`
+   * <br>Same as `beforesorting` but triggered after `beforeanysource` (when source is changed).
+   * <br>Use `e.preventDefault()` to prevent sorting data change.
    */
-  @Event() beforesorting: EventEmitter<{
+  @Event() beforesourcesortingapply: EventEmitter<{
+    type: DimensionRows;
+    sorting?: SortingOrder;
+  }>;
+
+  /**
+   * By `sorting.plugin.ts`
+   * <br> After `beforesorting`
+   * <br>Triggered after column data updated with new sorting order.
+   * <br>Use `e.preventDefault()` to prevent sorting data change.
+   */
+  @Event() beforesortingapply: EventEmitter<{
     column: ColumnRegular;
     order: 'desc' | 'asc';
     additive: boolean;
