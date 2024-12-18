@@ -9,7 +9,7 @@ import { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEven
 import { GridPlugin } from "./plugins/base.plugin";
 import { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
 import { ColumnFilterConfig, FilterCaptions, FilterCollectionItem, LogicFunction, MultiFilterItem, ShowData } from "./plugins/filter/filter.types";
-import { SortingConfig } from "./plugins/sorting/sorting.types";
+import { SortingConfig, SortingOrder } from "./plugins";
 import { GroupingOptions } from "./plugins/groupingRow/grouping.row.types";
 import { VNode } from "@stencil/core";
 import { FocusedData } from "./components/revoGrid/viewport.service";
@@ -24,7 +24,7 @@ export { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEven
 export { GridPlugin } from "./plugins/base.plugin";
 export { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
 export { ColumnFilterConfig, FilterCaptions, FilterCollectionItem, LogicFunction, MultiFilterItem, ShowData } from "./plugins/filter/filter.types";
-export { SortingConfig } from "./plugins/sorting/sorting.types";
+export { SortingConfig, SortingOrder } from "./plugins";
 export { GroupingOptions } from "./plugins/groupingRow/grouping.row.types";
 export { VNode } from "@stencil/core";
 export { FocusedData } from "./components/revoGrid/viewport.service";
@@ -791,12 +791,16 @@ declare global {
         "beforerange": ChangedRange;
         "afterfocus": FocusAfterRenderEvent;
         "roworderchanged": { from: number; to: number };
-        "beforesortingapply": {
+        "beforesorting": {
     column: ColumnRegular;
     order: 'desc' | 'asc';
     additive: boolean;
   };
-        "beforesorting": {
+        "beforesourcesortingapply": {
+    type: DimensionRows;
+    sorting?: SortingOrder;
+  };
+        "beforesortingapply": {
     column: ColumnRegular;
     order: 'desc' | 'asc';
     additive: boolean;
@@ -1471,7 +1475,7 @@ declare namespace LocalJSX {
          */
         "onBeforerowdefinition"?: (event: RevoGridCustomEvent<{ vals: any; oldVals: any }>) => void;
         /**
-          * By sorting.plugin.ts Before sorting event. Initial sorting triggered, if this event stops no other event called. Use e.preventDefault() to prevent sorting.
+          * By `sorting.plugin.ts` <br>Triggered immediately after header click. <br>First in sorting event sequence. Ff this event stops no other event called. <br>Use `e.preventDefault()` to prevent sorting.
          */
         "onBeforesorting"?: (event: RevoGridCustomEvent<{
     column: ColumnRegular;
@@ -1479,7 +1483,7 @@ declare namespace LocalJSX {
     additive: boolean;
   }>) => void;
         /**
-          * By sorting.plugin.ts Before sorting apply. Use e.preventDefault() to prevent sorting data change.
+          * By `sorting.plugin.ts` <br> After `beforesorting` <br>Triggered after column data updated with new sorting order. <br>Use `e.preventDefault()` to prevent sorting data change.
          */
         "onBeforesortingapply"?: (event: RevoGridCustomEvent<{
     column: ColumnRegular;
@@ -1492,6 +1496,13 @@ declare namespace LocalJSX {
         "onBeforesourceset"?: (event: RevoGridCustomEvent<{
     type: DimensionRows;
     source: DataType[];
+  }>) => void;
+        /**
+          * By `sorting.plugin.ts` <br>Same as `beforesorting` but triggered after `beforeanysource` (when source is changed). <br>Use `e.preventDefault()` to prevent sorting data change.
+         */
+        "onBeforesourcesortingapply"?: (event: RevoGridCustomEvent<{
+    type: DimensionRows;
+    sorting?: SortingOrder;
   }>) => void;
         /**
           * Emitted before trimming values. Use e.preventDefault() to prevent the default behavior of trimming values. Modify the `trimmed` property if you want to filter the indexes for trimming.
