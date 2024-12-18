@@ -38,14 +38,13 @@ export { EventData } from "./components/overlay/selection.utils";
 export namespace Components {
     /**
      * Revogrid - High-performance, customizable grid library for managing large datasets.
-     * :::tip
+     * ### Events guide
+     * For a comprehensive events guide, check the [Events API Page](./events.md).
+     * All events propagate to the root level of the grid. [Dependency tree](#Dependencies).
+     * ### Type definitions
      * Read [type definition file](https://github.com/revolist/revogrid/blob/master/src/interfaces.d.ts) for the full interface information.
      * All complex property types such as `ColumnRegular`, `ColumnProp`, `ColumnDataSchemaModel` can be found there.
-     * :::
-     * :::info
-     * For a comprehensive events guide, check the [Events](./events.md).
-     * All events propagate to the root level of the grid. [Dependency tree](#Dependencies).
-     * :::
+     * ### HTMLRevoGridElement
      * @example data-rgCol-rgRow - main data slot. Applies extra elements in <revogr-data />.
      * @example focus-rgCol-rgRow - focus layer for main data. Applies extra elements in <revogr-focus />.
      */
@@ -861,14 +860,13 @@ declare global {
     }
     /**
      * Revogrid - High-performance, customizable grid library for managing large datasets.
-     * :::tip
+     * ### Events guide
+     * For a comprehensive events guide, check the [Events API Page](./events.md).
+     * All events propagate to the root level of the grid. [Dependency tree](#Dependencies).
+     * ### Type definitions
      * Read [type definition file](https://github.com/revolist/revogrid/blob/master/src/interfaces.d.ts) for the full interface information.
      * All complex property types such as `ColumnRegular`, `ColumnProp`, `ColumnDataSchemaModel` can be found there.
-     * :::
-     * :::info
-     * For a comprehensive events guide, check the [Events](./events.md).
-     * All events propagate to the root level of the grid. [Dependency tree](#Dependencies).
-     * :::
+     * ### HTMLRevoGridElement
      * @example data-rgCol-rgRow - main data slot. Applies extra elements in <revogr-data />.
      * @example focus-rgCol-rgRow - focus layer for main data. Applies extra elements in <revogr-focus />.
      */
@@ -1264,14 +1262,13 @@ declare global {
 declare namespace LocalJSX {
     /**
      * Revogrid - High-performance, customizable grid library for managing large datasets.
-     * :::tip
+     * ### Events guide
+     * For a comprehensive events guide, check the [Events API Page](./events.md).
+     * All events propagate to the root level of the grid. [Dependency tree](#Dependencies).
+     * ### Type definitions
      * Read [type definition file](https://github.com/revolist/revogrid/blob/master/src/interfaces.d.ts) for the full interface information.
      * All complex property types such as `ColumnRegular`, `ColumnProp`, `ColumnDataSchemaModel` can be found there.
-     * :::
-     * :::info
-     * For a comprehensive events guide, check the [Events](./events.md).
-     * All events propagate to the root level of the grid. [Dependency tree](#Dependencies).
-     * :::
+     * ### HTMLRevoGridElement
      * @example data-rgCol-rgRow - main data slot. Applies extra elements in <revogr-data />.
      * @example focus-rgCol-rgRow - focus layer for main data. Applies extra elements in <revogr-focus />.
      */
@@ -2325,14 +2322,13 @@ declare module "@stencil/core" {
         interface IntrinsicElements {
             /**
              * Revogrid - High-performance, customizable grid library for managing large datasets.
-             * :::tip
+             * ### Events guide
+             * For a comprehensive events guide, check the [Events API Page](./events.md).
+             * All events propagate to the root level of the grid. [Dependency tree](#Dependencies).
+             * ### Type definitions
              * Read [type definition file](https://github.com/revolist/revogrid/blob/master/src/interfaces.d.ts) for the full interface information.
              * All complex property types such as `ColumnRegular`, `ColumnProp`, `ColumnDataSchemaModel` can be found there.
-             * :::
-             * :::info
-             * For a comprehensive events guide, check the [Events](./events.md).
-             * All events propagate to the root level of the grid. [Dependency tree](#Dependencies).
-             * :::
+             * ### HTMLRevoGridElement
              * @example data-rgCol-rgRow - main data slot. Applies extra elements in <revogr-data />.
              * @example focus-rgCol-rgRow - focus layer for main data. Applies extra elements in <revogr-focus />.
              */
