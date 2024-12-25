@@ -17,6 +17,8 @@ export class Attribution {
       <Host>
         <a
           href="https://rv-grid.com/guide/attribution"
+          target="_blank"
+          rel="noopener noreferrer"
           title="Made with ❤️ by Revolist OU Team"
           class="value"
         >
