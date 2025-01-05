@@ -39,6 +39,7 @@ export const config: Config = {
   hashFileNames: false,
   autoprefixCss: false,
   minifyCss: true,
+  minifyJs: false,
   preamble: 'Built by Revolist OU ❤️',
   hashedFileNameLength: 8,
   invisiblePrehydration: false,
@@ -98,8 +99,7 @@ export const config: Config = {
 
     // #region React
     reactOutputTarget({
-      componentCorePackage,
-      proxiesFile: directivesProxyFile('react'),
+      outDir: `${parent}/react/lib`,
       excludeComponents,
     }),
     // #endregion
@@ -122,6 +122,7 @@ export const config: Config = {
       dir: customElementsDir,
       generateTypeDeclarations: true,
       empty: true,
+      externalRuntime: false,
     },
     {
       type: 'dist',

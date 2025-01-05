@@ -6,7 +6,10 @@
 @import './styles/revo-grid.compact.scss';
 
 revo-grid {
-  display: block;
+  /*
+  * Grid required to have a flex property to be able to stretch
+  */
+  display: flex !important;
   height: 100%;
   /**
   * In some cases the min-height is not enough for safari
