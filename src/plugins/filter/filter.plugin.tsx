@@ -192,7 +192,7 @@ export class FilterPlugin extends BasePlugin {
 
     /**
      * which filters has to be included/excluded
-     * convinient way to exclude system filters
+     * convenient way to exclude system filters
      */
     const cfgInlcude = config.include;
     if (cfgInlcude) {

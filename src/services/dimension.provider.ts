@@ -89,7 +89,6 @@ export default class DimensionProvider {
     }
     this.stores[type].setDimensionSize(newSizes);
     this.setViewPortCoordinate({
-      coordinate: this.viewports.stores[type].lastCoordinate,
       type,
       force: true,
     });
@@ -110,7 +109,6 @@ export default class DimensionProvider {
     const dimStoreType = this.stores[type];
     dimStoreType.setStore({ trimmed: allTrimmed });
     this.setViewPortCoordinate({
-      coordinate: this.viewports.stores[type].lastCoordinate,
       type,
       force: true,
     });
@@ -133,7 +131,6 @@ export default class DimensionProvider {
       });
     }
     this.setViewPortCoordinate({
-      coordinate: this.viewports.stores[type].lastCoordinate,
       type,
     });
   }
@@ -182,7 +179,6 @@ export default class DimensionProvider {
       // Update the viewport
       this.viewports.stores[type].setViewport(vpUpdate);
       this.setViewPortCoordinate({
-        coordinate: this.viewports.stores[type].lastCoordinate,
         type,
       });
     }
@@ -206,11 +202,11 @@ export default class DimensionProvider {
   }
 
   setViewPortCoordinate({
-    coordinate,
     type,
+    coordinate = this.viewports.stores[type].lastCoordinate,
     force = false,
   }: {
-    coordinate: number;
+    coordinate?: number;
     type: MultiDimensionType;
     force?: boolean;
   }) {
@@ -258,7 +254,6 @@ export default class DimensionProvider {
       prevItemsOrder,
     );
     this.setViewPortCoordinate({
-      coordinate: this.viewports.stores[type].lastCoordinate,
       type,
       force: true,
     });

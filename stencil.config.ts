@@ -39,6 +39,7 @@ export const config: Config = {
   hashFileNames: false,
   autoprefixCss: false,
   minifyCss: true,
+  minifyJs: true,
   preamble: 'Built by Revolist OU ❤️',
   hashedFileNameLength: 8,
   invisiblePrehydration: false,
