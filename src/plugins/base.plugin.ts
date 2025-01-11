@@ -1,5 +1,5 @@
 import { h } from '@stencil/core';
-import type { PluginProviders, PluginBaseComponent, RevoGridCustomEvent } from '..';
+import type { PluginProviders, PluginBaseComponent } from '../types';
 
 
 export type WatchConfig = { immediate: boolean };
@@ -20,7 +20,7 @@ export class BasePlugin implements PluginBaseComponent {
    */
   addEventListener<K extends keyof HTMLRevoGridElementEventMap>(
     eventName: K,
-    callback: (this: BasePlugin, e: RevoGridCustomEvent<HTMLRevoGridElementEventMap[K]>) => void,
+    callback: (this: BasePlugin, e: CustomEvent<HTMLRevoGridElementEventMap[K]>) => void,
   ) {
     this.revogrid.addEventListener(eventName as string, callback);
     this.subscriptions[eventName as string] = callback;
