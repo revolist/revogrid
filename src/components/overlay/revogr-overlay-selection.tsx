@@ -543,18 +543,6 @@ export class OverlaySelection {
           editCell.x,
           this.editors,
         )}
-        onCloseedit={e => this.closeEdit(e)}
-        onCelledit={e => {
-          const saveEv = this.beforeCellSave.emit(e.detail);
-          if (!saveEv.defaultPrevented) {
-            this.cellEdit(saveEv.detail);
-          }
-
-          // if not clear navigate to next cell after edit
-          if (!saveEv.detail.preventFocus) {
-            this.focusNext();
-          }
-        }}
       />
     );
   }
@@ -613,6 +601,18 @@ export class OverlaySelection {
         onDblClick={(e: MouseEvent) => this.onElementDblClick(e)}
         onMouseDown={(e: MouseEvent) => this.onElementMouseDown(e)}
         onTouchStart={(e: TouchEvent) => this.onElementMouseDown(e, true)}
+        onCloseedit={(e: CustomEvent<boolean | undefined>) => this.closeEdit(e)}
+        onCelledit={(e: CustomEvent<SaveDataDetails>) => {
+          const saveEv = this.beforeCellSave.emit(e.detail);
+          if (!saveEv.defaultPrevented) {
+            this.cellEdit(saveEv.detail);
+          }
+
+          // if not clear navigate to next cell after edit
+          if (!saveEv.detail.preventFocus) {
+            this.focusNext();
+          }
+        }}
       >
         {nodes}
         <slot name="data" />
