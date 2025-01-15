@@ -10,7 +10,7 @@ import {
   Element,
   Watch,
 } from '@stencil/core';
-import ColumnService from '../data/column.service';
+import ColumnService, { getCellEditor } from '../data/column.service';
 import { codesLetter } from '../../utils/key.codes';
 import { MOBILE_CLASS, SELECTION_BORDER_CLASS } from '../../utils/consts';
 import { type DSourceState, getRange, isRangeSingleCell } from '@store';
@@ -538,9 +538,8 @@ export class OverlaySelection {
         editCell={editable}
         saveOnClose={this.applyChangesOnClose}
         column={this.columnService.rowDataModel(editCell.y, editCell.x)}
-        editor={this.columnService.getCellEditor(
-          editCell.y,
-          editCell.x,
+        editor={getCellEditor(
+          this.columnService.columns[editCell.x],
           this.editors,
         )}
       />
