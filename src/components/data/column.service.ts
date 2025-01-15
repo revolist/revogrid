@@ -39,6 +39,21 @@ export type RowStores = {
   [T in DimensionRows]: Observable<DSourceState<DataType, DimensionRows>>;
 };
 
+export function getCellEditor(
+  column: Pick<ColumnRegular, 'editor'> | undefined,
+  editors: Editors = {},
+): EditorCtr | undefined {
+  const editor = column?.editor;
+  if (!editor) {
+    return undefined;
+  }
+  // reference
+  if (typeof editor === 'string') {
+    return editors[editor];
+  }
+  return editor;
+}
+
 export default class ColumnService {
   private unsubscribe: { (): void }[] = [];
   get columns(): ColumnRegular[] {
@@ -120,22 +135,6 @@ export default class ColumnService {
       ...data,
       val,
     };
-  }
-
-  getCellEditor(
-    _r: number,
-    c: number,
-    editors: Editors,
-  ): EditorCtr | undefined {
-    const editor = this.columns[c]?.editor;
-    if (!editor) {
-      return undefined;
-    }
-    // reference
-    if (typeof editor === 'string') {
-      return editors[editor];
-    }
-    return editor;
   }
 
   /**
