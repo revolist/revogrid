@@ -65,7 +65,7 @@ export class AutoSizeColumnPlugin extends BasePlugin {
   autoSizeColumns: Partial<AutoSizeColumns> | null = null;
   readonly letterBlockSize: number;
 
-  /** for config option when @preciseSize enabled */
+  /** for config option when preciseSize enabled */
   readonly precsizeCalculationArea: HTMLElement;
 
   /** for edge case when no columns defined before data */

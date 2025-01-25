@@ -26,7 +26,7 @@ export type Nullable<T> = {
  * Advanced column data schema model.
  * Used for transpassing data to cell renderer and editor.
  */
-export type ColumnDataSchemaModel = {
+export interface ColumnDataSchemaModel {
   /**
    * Column prop used for mapping value to cell from data source model/row
    */
@@ -64,7 +64,7 @@ export type ColumnDataSchemaModel = {
    * Mapped from model through column property like model['prop']
    */
   value?: any;
-};
+}
 /**
  * Template property for each cell, extends the column data schema model.
  * Additionally, it provides access to the providers injected into the template.

@@ -7,6 +7,7 @@
     "excludePrivate": true,
     "excludeInternal": true,
     "excludeReferences": true,
+    "includeVersion": true,
     "hideParameterTypesInTitle": true,
     "readme": "none",
     "flattenOutputFiles": true,
@@ -16,9 +17,11 @@
     "useCodeBlocks": true,
     "expandObjects": true,
     "expandParameters": true,
+    "hideGenerator": true,
     "parametersFormat": "table",
     "propertiesFormat": "table",
     "enumMembersFormat": "table",
     "typeDeclarationFormat": "table",
-    "indexFormat": "table"
+    "indexFormat": "table",
+    "name": "RevoGrid Documentation"
   }

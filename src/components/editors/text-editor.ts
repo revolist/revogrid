@@ -72,8 +72,6 @@ export class TextEditor implements EditorBase {
   /**
    * Render method for Editor plugin.
    * Renders input element with passed data from cell.
-   *
-   * @required @method
    * @param {Function} h - h function from stencil render.
    * @param {Object} _additionalData - additional data from plugin.
    * @returns {VNode} - input element.

@@ -22,7 +22,7 @@ export * from './sorting.types';
  * Lifecycle
  * 1. @event `beforesorting` - Triggered when sorting just starts. Nothing has happened yet. This can be triggered from a column or from the source. If the type is from rows, the column will be undefined.
  * 1.1. @event `beforesourcesortingapply` - Triggered before the sorting data is applied to the data source. You can prevent this event, and the data will not be sorted.
- * 2. @method `updateColumnSorting` - Updates the column sorting icon on the grid and the column itself, but the data remains untouched.
+ * 2. Method `updateColumnSorting` - Updates the column sorting icon on the grid and the column itself, but the data remains untouched.
  * 3. @event `beforesortingapply` - Triggered before the sorting data is applied to the data source. You can prevent this event, and the data will not be sorted. This event is only called from a column sorting click.
  * 4. @event `aftersortingapply` - Triggered after sorting has been applied and completed. This event occurs for both row and column sorting.
  *
