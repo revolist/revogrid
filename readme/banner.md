@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://rv-grid.com">
-    <img src="./assets/logo.svg" alt="RevoGrid" height="150" />
+    <img src="./assets/logo.svg" alt="RevoGrid Data Grid" height="150" />
   </a>
 </p>
 

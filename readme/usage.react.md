@@ -14,6 +14,7 @@ yarn add @revolist/react-datagrid;
 
 ```tsx
 // App.tsx
+import { useState } from 'react';
 import { RevoGrid, Template, Editor, type EditorType, type ColumnDataSchemaModel, type Editors } from '@revolist/react-datagrid';
 
 /**
@@ -30,31 +31,30 @@ const Button = ({ close } : EditorType) => {
   return <button onClick={close}>Close</button>
 };
 
+const MY_EDITOR = 'custom-editor';
+const gridEditors: Editors = { [MY_EDITOR]: Editor(Button) };
+
+/**
+ * note: columns & source need a "stable" reference in order to prevent infinite re-renders
+ */
+const columns = [
+  {
+    prop: 'name',
+    name: 'First',
+    editor: MY_EDITOR,
+    cellTemplate: Template(Cell),
+  },
+  {
+    prop: 'details',
+    name: 'Second',
+  },
+];
+
 function App() {
-  const MY_EDITOR = 'custom-editor';
-  const columns = [
-    {
-      prop: 'name',
-      name: 'First',
-      editor: MY_EDITOR,
-      cellTemplate: Template(Cell),
-    },
-    {
-      prop: 'details',
-      name: 'Second',
-    },
-  ];
-  const source = [
-    {
-      name: '1',
-      details: 'Item 1',
-    },
-    {
-      name: '2',
-      details: 'Item 2',
-    },
-  ];
-  const gridEditors: Editors = { [MY_EDITOR]: Editor(Button) };
+  const [source] = useState([
+    { name: '1', details: 'Item 1' },
+    { name: '2', details: 'Item 2' },
+  ]);
   return (
     <>
       <RevoGrid columns={columns} source={source} editors={gridEditors} />

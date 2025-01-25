@@ -3,7 +3,7 @@ import { BasePlugin } from './base.plugin';
 
 /**
  * Automatically adds new rows when pasted data is larger than current rows
- * @event newRows - is triggered when new rows are added. Data of new rows can be filled with default values. If the event is prevented, no rows will be added. Event data: { newRows: RowData[] }
+ * @event newRows - is triggered when new rows are added. Data of new rows can be filled with default values. If the event is prevented, no rows will be added
  */
 export class AutoAddRowsPlugin extends BasePlugin {
   constructor(revogrid: HTMLRevoGridElement, providers: PluginProviders) {
