@@ -45,11 +45,6 @@ jobs:
           npm install
           npm run build
         shell: bash
-          
-      # Copy CNAME file
-      - name: Copy CNAME
-        run: cp ./demo/CNAME ./demo/src/.vuepress/dist
-
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
