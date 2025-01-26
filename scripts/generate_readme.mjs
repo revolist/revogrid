@@ -2,7 +2,10 @@ import fs from 'fs/promises';
 import path from 'path';
 import chalk from 'chalk';
 
-async function generateReadme(files, output) {
+const mainRepoLink = 'https://github.com/revolist/revogrid';
+const stencilJSLink = 'https://stenciljs.com';
+
+async function generateReadme(files, output, variables, pkg) {
   try {
     // Clear the existing README.md if it exists
     await fs.writeFile(output, '');
@@ -11,8 +14,14 @@ async function generateReadme(files, output) {
     for (const file of files) {
       const filePath = path.join('readme', file);
       try {
-        const content = await fs.readFile(filePath, 'utf-8');
-        console.log(chalk.green(`Processing ${file}...`));
+        let content = await fs.readFile(filePath, 'utf-8');
+        console.log(chalk.blue(`Processing ${file}...`));
+
+        // Replace variables in the content
+        content = content.replace(/\{\{(\w+)\}\}/g, (_, variable) => {
+          return variables[variable] || `{{${variable}}}`; // Replace or keep the placeholder if not found
+        });
+
         await fs.appendFile(output, content + '\n\n'); // Add a newline for separation between sections
       } catch (err) {
         if (err.code === 'ENOENT') {
@@ -23,7 +32,7 @@ async function generateReadme(files, output) {
       }
     }
 
-    console.log(chalk.green('README.md has been successfully generated.'));
+    console.log(chalk.green(`${pkg || 'JS'}: README.md successfully generated`));
   } catch (err) {
     console.error(chalk.red(`Error generating README.md: ${err.message}`));
   }
@@ -33,42 +42,52 @@ function main() {
 
   const packages = ['angular', 'react', 'svelte', 'vue2', 'vue3', ''];
   packages.forEach(pkg => {
+    const variables = {
+      logo: 'RevoGrid Data Grid',
+      description: `Powerful data grid component built with <a href="${stencilJSLink}" target="_blank">StencilJS</a>.`
+    };
     const files = ['banner.md', 'features.md'];
     let output = 'README.md';
     switch (pkg) {
       case 'angular':
-        files.unshift('usage.deprecated.md');
-        files.push('usage.angular.md');
+        variables.description = `Powerful Angular Data Grid component built on top of <a href="${mainRepoLink}" target="_blank">RevoGrid</a>.`;
+        variables.logo = 'Angular Data Grid';
+        files.push('usage.deprecated.md', 'angular.usage.md');
         output = `packages/${pkg}/${output}`;
         break;
       case 'react':
-        files.unshift('usage.deprecated.md');
-        files.push('usage.react.md');
+        variables.description = `Powerful React Data Grid component built on top of <a href="${mainRepoLink}" target="_blank">RevoGrid</a>.`;
+        variables.logo = 'React Data Grid';
+        files.unshift('react.title.md');
+        files.push('react.cell.md', 'usage.deprecated.md', 'react.install.md', 'react.usage.md');
         output = `packages/${pkg}/${output}`;
         break;
       case 'svelte':
-        files.unshift('usage.svelte-5.md');
-        files.unshift('usage.deprecated.md');
-        files.push('usage.svelte.md');
+        variables.description = `Powerful Svelte Data Grid component built on top of <a href="${mainRepoLink}" target="_blank">RevoGrid</a>.`;
+        variables.logo = 'Svelte Data Grid';
+        files.push('usage.deprecated.md', 'svelte.usage.md', 'svelte-5.usage.md');
         output = `packages/${pkg}/${output}`;
         break;
       case 'vue2':
-        files.unshift('usage.deprecated.md');
-        files.push('usage.vue2.md');
+        variables.description = `Powerful Vue 2 Data Grid component built on top of <a href="${mainRepoLink}" target="_blank">RevoGrid</a>.`;
+        variables.logo = 'Vue 2 Data Grid';
+        files.unshift('vue2.title.md');
+        files.push('usage.deprecated.md', 'vue2.usage.md');
         output = `packages/${pkg}/${output}`;
         break;
       case 'vue3':
-        files.unshift('usage.deprecated.md');
-        files.push('usage.vue3.md');
+        variables.description = `Powerful Vue 3 Data Grid component built on top of <a href="${mainRepoLink}" target="_blank">RevoGrid</a>.`;
+        variables.logo = 'Vue 3 Data Grid';
+        files.push('usage.deprecated.md', 'vue3.usage.md');
         output = `packages/${pkg}/${output}`;
         break;
       default:
-        files.push('framework.md', 'install.md', 'usage.basic.md', 'usage.js.md');
+        files.push('framework.md', 'install.md', 'usage.basic.md', 'js.usage.md');
         break;
     }
 
     files.push('version.md', 'sponsors.md', 'contribute.md', 'LICENSE.md');
-    generateReadme(files, output);
+    generateReadme(files, output, variables, pkg);
   });
 }
 

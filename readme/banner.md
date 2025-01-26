@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://rv-grid.com">
-    <img src="./assets/logo.svg" alt="RevoGrid Data Grid" height="150" />
+    <img src="./assets/logo.svg" alt="{{logo}}" height="150" />
   </a>
 </p>
 
@@ -13,12 +13,10 @@
   <img src="https://sonarcloud.io/api/project_badges/measure?project=revolist_revogrid&metric=alert_status" alt="Sonar Quality Gate"/>
 </p>
 
-#
 
-<h3 align="center">Powerful data grid component built with <a href="https://stenciljs.com" target="_blank">StencilJS</a>.</h3>
+<h3 align="center">{{description}}</h3>
 <p align="center">
 Support Millions of cells and thousands of columns easy and efficiently for fast data rendering. Easy to use.
-  
 </p>
 
 <p align="center">
