@@ -1,9 +1,14 @@
+  - [Cell template](https://rv-grid.com/guide/vue2/renderer) (create your own cell views).
+  - [Cell editor](https://rv-grid.com/guide/vue2/editor) (use predefined or apply your own custom editors and cell types).
+
+- **Rich API & Additional Improvements**: Explore hundreds of other small customizations and improvements in [RevoGrid](https://rv-grid.com/).
+
 ### Usage Vue 2
 
 With NPM:
 
 ```bash
-npm i @revolist/vue-datagrid --save;
+npm i @revolist/vue2-datagrid --save;
 ```
 
 With Yarn:
