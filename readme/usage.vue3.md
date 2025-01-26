@@ -4,10 +4,11 @@
 
 - **Rich API & Additional Improvements**: Explore hundreds of other small customizations and improvements in [RevoGrid](https://rv-grid.com/).
 
+### Usage Vue 3
+
 > [!TIP]
 > For Vue 2, use [this repo](https://github.com/revolist/vue-datagrid)
 
-### Usage Vue 3
 
 With NPM:
 
