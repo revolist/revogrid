@@ -26,8 +26,3 @@ yarn add @revolist/revogrid;
 
 In `<revo-grid />` we have developed a sophisticated Continuous Delivery (CD) system powered by GitHub Actions. This advanced system automatically builds and delivers grid versions across multiple frameworks, including React, Angular, Svelte, Vue 2, and Vue 3, with full type support. This ensures continuous version delivery, providing the latest grid enhancements and upgrades across all supported frameworks ✨. In the future (version 5), we are planning to switch to monorepo based development.
 
-- [JavaScript](https://rv-grid.com/guide/);
-- [VueJs](https://rv-grid.com/guide/vue3/);
-- [Svelte](https://rv-grid.com/guide/svelte/);
-- [React](https://rv-grid.com/guide/react/);
-- [Angular](https://rv-grid.com/guide/angular/).

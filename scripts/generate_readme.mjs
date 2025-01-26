@@ -82,11 +82,11 @@ function main() {
         output = `packages/${pkg}/${output}`;
         break;
       default:
-        files.push('framework.md', 'install.md', 'usage.basic.md', 'js.usage.md');
+        files.push('framework.md', 'install.md', 'install.framework.md', 'usage.basic.md', 'js.usage.md');
         break;
     }
 
-    files.push('version.md', 'sponsors.md', 'contribute.md', 'LICENSE.md');
+    files.push('install.framework.md', 'version.md', 'sponsors.md', 'contribute.md', 'LICENSE.md');
     generateReadme(files, output, variables, pkg);
   });
 }

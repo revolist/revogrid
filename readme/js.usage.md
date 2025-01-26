@@ -1,36 +1,41 @@
-### JavaScript Data Grid Usage
+### JavaScript Data Grid Simple Usage
 
 ```javascript
 // Select the RevoGrid element from the DOM
 const grid = document.querySelector('revo-grid');
 
 // Define the columns for the grid
-const columns = [
-  { prop: 'name', name: 'First Column' }, // Simple column definition
+grid.columns = [{ prop: 'name', name: 'First Column' }, { prop: 'details' }];
+// Define the data source for the grid
+grid.source = [{ name: 'New Item', details: 'Item Description' }];
+```
+
+### Custom cell template
+
+```javascript
+// Select the RevoGrid element from the DOM
+const grid = document.querySelector('revo-grid');
+
+// Define the columns for the grid
+grid.columns = [
   {
-    prop: 'details',
-    name: 'Second Column',
-    // Custom cell template for the 'details' column
-    cellTemplate: (createElement, props) => {
-      return createElement(
+    prop: 'name',
+    name: 'Custom cell template',
+    // Custom cell template
+    cellTemplate(h, { value }) {
+      return h(
         'div',
         {
           style: { backgroundColor: 'red' }, // Styling the cell background
           class: { 'inner-cell': true }, // Adding a CSS class
         },
-        props.model[props.prop] || '' // Display the cell content or an empty string if undefined
+        value || '' // Display the cell content or an empty string if undefined
       );
     },
   },
 ];
-
 // Define the data source for the grid
-const items = [{ name: 'New Item', details: 'Item Description' }];
-
-// Assign the columns and data source to the grid
-grid.columns = columns;
-grid.source = items;
+grid.source = [{ name: 'New Item' }];
 ```
-
 
 [Example and guide](https://rv-grid.com/guide/)
