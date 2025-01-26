@@ -34,10 +34,6 @@ jobs:
       - name: Package build
         working-directory: ./demo
         run: npm run build
-        
-      # Copy CNAME file
-      - name: Copy CNAME
-        run: cp ./demo/CNAME ./demo/src/.vuepress/dist
 
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4
