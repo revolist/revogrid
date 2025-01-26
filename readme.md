@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://rv-grid.com">
-    <img src="./assets/logo.svg" alt="RevoGrid" height="150" />
+    <img src="./assets/logo.svg" alt="RevoGrid Data Grid" height="150" />
   </a>
 </p>
 
@@ -39,83 +39,79 @@ Support Millions of cells and thousands of columns easy and efficiently for fast
 
 - **High Performance**: Handles millions of cells in the viewport with a powerful core built by default.
 
-- **Accessibility**: Follows WAI-ARIA best practices.
+- **[Accessibility](https://rv-grid.com/guide/wcag)**: Follows WAI-ARIA best practices.
 
-- **Keyboard Support**:
+- **[Keyboard Support](https://rv-grid.com/guide/defs#Keyboard)**:
   - Excel-like focus for efficient navigation and editing.
   - Seamless copy/paste from Excel, Google Sheets, or any other sheet format.
 
 
 - **Lightweight**: Minimal initial bundle size ![Min size](https://badgen.net/bundlephobia/min/@revolist/revogrid@latest). Can be imported with polyfills or as a module for modern browsers.
 
-- **Intelligent Virtual DOM**: Smart row recombination to minimize redraws.
+- **[Intelligent Virtual DOM](https://rv-grid.com/guide/overview#VNode-Reactive-DOM)**: Smart row recombination to minimize redraws.
 
-- **Virtual Scroll**: Handles large datasets with infinite scroll.
+- **[Virtual Scroll](https://rv-grid.com/guide/viewports)**: Handles large datasets with infinite scroll.
 
-- **Formula Support**: Evaluate formulas in cell data.
+- **[Drag and Drop](https://rv-grid.com/guide/row/order)**: Drag and drop in [rows](https://rv-grid.com/guide/row/order) and [columns](https://rv-grid.com/guide/column/order).
 
-- **Master Detail/Subtables/Forms**: Expand rows to reveal child data.
+- **[Sorting](https://rv-grid.com/guide/sorting)**: Multiple options, customizable per column, with advanced event handling.
 
-- **Drag and Drop**: Drag and drop in rows and columns.
-
-- **Sorting**: Multiple options, customizable per column, with advanced event handling.
-
-- **Filtering**:
+- **[Filtering](https://rv-grid.com/guide/filters)**:
   - Predefined system filters.
+  - Multi column filters.
+  - Conditional filters.
   - Preserve existing collections.
   - Custom filters to extend system filters with your own set.
 
-- **Export**: Export data to file.
+- **[Export](https://rv-grid.com/guide/export.plugin)**: Export data to file.
 
-- **Custom Sizes**: Define custom sizes for columns and rows. Automatic sizing based on content.
+- **Custom Sizes**: Define custom sizes for [columns](https://rv-grid.com/guide/column/#Column-Size) and [rows](https://rv-grid.com/guide/row/height). Automatic sizing based on content.
 
-- **Column Resizing**: Adjust column widths.
+- **[Column Resizing](https://rv-grid.com/guide/column/resize)**: Adjust column widths.
 
 - **Pinned/Sticky/Freezed Elements**:
-  - Columns (define left or right).
-  - Rows (define top or bottom).
+  - [Columns](https://rv-grid.com/guide/column/pin) (define left or right).
+  - [Rows](https://rv-grid.com/guide/row/pin) (define top or bottom).
 
 - **Grouping**:
-  - Column grouping (nested headers).
-  - Row grouping (nested rows).
-
-- **Cell Editing**: In-place editing of cell data.
-
-- **Cell Merging**: Merge cells to form groups.
-
-- **Customizations**:
-  - Column header template.
-  - Row header template.
-  - Cell template (create your own cell views).
-  - Cell editor (use predefined or apply your own custom editors and cell types).
-  - Cell properties (define custom properties for rendered cells).
+  - [Column grouping](https://rv-grid.com/guide/column/grouping) (nested headers).
+  - [Row grouping](https://rv-grid.com/guide/row/grouping) (nested rows).
 
 - **Column Types**: [More details](https://rv-grid.com/guide/column/#Column-Formats)
-  - Text/String (default).
-  - Number.
-  - Select.
-  - Date.
+  - [Text/String](https://rv-grid.com/guide/column/types#String) (default).
+  - [Number](https://rv-grid.com/guide/column/types#Number).
+  - [Select/Dropdown](https://rv-grid.com/guide/column/types#Select-Dropdown).
+  - [Date](https://rv-grid.com/guide/column/types#Date).
   - Custom (create extended styles using any template).
 
 - **Range Operations**:
-  - Selection.
-  - Editing.
+  - [Selection](https://rv-grid.com/guide/defs#Range).
+  - [Editing](https://rv-grid.com/guide/defs#Range-Autofill).
 
-- **Theme Packages**:
+- **[Theme Packages](https://rv-grid.com/guide/theme)**:
   - Excel-like (default).
   - Material (compact, dark, or light).
 
-- **Extensibility**: Modern VNode features and tsx support for easy extension.
+- **[Extensibility](https://rv-grid.com/guide/jsx.template)**: Modern VNode features and tsx support for easy extension.
 
-- **Trimmed Rows**: Hide rows on demand.
+- **[Trimmed Rows](https://rv-grid.com/guide/row/#Trimmed-Rows)**: Hide rows on demand.
 
-- **Plugin System**: Create custom plugins or extend existing ones easily.
+- **[Plugin System](https://rv-grid.com/guide/plugin/)**: Create custom plugins or extend existing ones easily.
 
-- **Additional Customizations and Improvements**: Explore hundreds of other small customizations and improvements in [RevoGrid](https://rv-grid.com/).
+- **[Formula Support](https://rv-grid.com/guide/cell/formula)**: Evaluate formulas in cell data.
 
-<br>
+- **[Master Detail/Subtables/Forms](https://rv-grid.com/guide/row/master.pro)**: Expand rows to reveal child data.
+- **[Cell/Column/Row Span/Merge](https://rv-grid.com/guide/cell/merge)**: Merge cells to form groups.
 
+- **Customizations**:
+  - [Column header template](https://rv-grid.com/guide/column/header.template).
+  - [Row header template](https://rv-grid.com/guide/row/headers).
+  - [Cell properties](https://rv-grid.com/guide/cell/) (define custom properties for rendered cells).
 
+  - [Cell template](https://rv-grid.com/guide/cell/renderer) (create your own cell views).
+  - [Cell editor](https://rv-grid.com/guide/cell/editor) (use predefined or apply your own custom editors and cell types).
+
+- **Rich API & Additional Improvements**: Explore hundreds of other small customizations and improvements in [RevoGrid](https://rv-grid.com/).
 
 <h2 align="center">Framework Friendly</h2>
 
@@ -172,7 +168,7 @@ RevoGrid functions as a web component. Simply place the component on your page a
 
 - [Import the grid into your project](https://rv-grid.com/guide/installation)
 
-### Vanilla JS Grid Usage
+### JavaScript Data Grid Usage
 
 ```javascript
 // Select the RevoGrid element from the DOM

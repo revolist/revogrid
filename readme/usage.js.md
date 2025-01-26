@@ -1,4 +1,4 @@
-### Vanilla JS Grid Usage
+### JavaScript Data Grid Usage
 
 ```javascript
 // Select the RevoGrid element from the DOM
