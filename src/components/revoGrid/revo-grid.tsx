@@ -1622,7 +1622,7 @@ export class RevoGridComponent {
         const dataView = (
           <revogr-overlay-selection
             {...data}
-            canDrag={data.canDrag}
+            canDrag={this.canDrag && data.canDrag}
             isMobileDevice={isMobile}
             onSelectall={() => this.selectionStoreConnector?.selectAll()}
             editors={this.editors}
