@@ -317,6 +317,13 @@ export class RevoGridComponent {
    */
   @Prop() accessible = true;
 
+
+
+  /**
+   * Disable native drag&drop plugin.
+   */
+  @Prop() canDrag = true;
+
   // #endregion
 
   // #region Events
@@ -1615,6 +1622,7 @@ export class RevoGridComponent {
         const dataView = (
           <revogr-overlay-selection
             {...data}
+            canDrag={data.canDrag}
             isMobileDevice={isMobile}
             onSelectall={() => this.selectionStoreConnector?.selectAll()}
             editors={this.editors}
