@@ -5,8 +5,20 @@ import {
   type TrimmedEntity,
   type DSourceState,
 } from '@store';
+import type {
+  BeforeSaveDataDetails,
+  ColumnRegular,
+  DataType,
+  DimensionRows,
+  PluginProviders,
+} from '@type';
+
 import { BasePlugin } from '../base.plugin';
 import { FILTER_TRIMMED_TYPE } from '../filter/filter.plugin';
+
+import type { Observable, ColumnCollection } from '../../utils';
+import { SortingPlugin } from '../sorting/sorting.plugin';
+
 import {
   GROUPING_ROW_TYPE,
   PSEUDO_GROUP_COLUMN,
@@ -29,15 +41,11 @@ import {
   processDoubleConversionTrimmed,
   TRIMMED_GROUPING,
 } from './grouping.trimmed.service';
-import type {
-  BeforeSaveDataDetails,
-  ColumnRegular,
-  DataType,
-  DimensionRows,
-  PluginProviders,
-} from '@type';
-import type { Observable, ColumnCollection } from '../../utils';
-import { SortingPlugin } from '../sorting/sorting.plugin';
+
+export * from './grouping.row.expand.service';
+export * from './grouping.row.types';
+export * from './grouping.service';
+export * from './grouping.row.renderer';
 
 declare global {
   interface HTMLRevoGridElementEventMap {
@@ -153,8 +161,112 @@ export class GroupingRowPlugin extends BasePlugin {
     return !!sortingPlugin?.sortingPromise;
   }
 
-  // subscribe to grid events to process them accordingly
-  private subscribe() {
+  /**
+   * Starts global source update with group clearing and applying new one
+   * Initiated when need to reapply grouping
+   */
+  private doSourceUpdate(options?: ExpandedOptions) {
+    /**
+     * Get source without grouping
+     * @param newOldIndexMap - provides us mapping with new indexes vs old indexes, we would use it for trimmed mapping
+     */
+    const { source, prevExpanded, oldNewIndexes } = getSource(
+      this.getStore().get('source'),
+      this.getStore().get('proxyItems'),
+      true,
+    );
+    const expanded: ExpandedOptions = {
+      prevExpanded,
+      ...options,
+    };
+    /**
+     * Group again
+     * @param oldNewIndexMap - provides us mapping with new indexes vs old indexes
+     */
+    const {
+      sourceWithGroups,
+      depth,
+      trimmed,
+      oldNewIndexMap,
+    } = gatherGrouping(source, this.options?.props || [], expanded);
+
+    const customRenderer = options?.groupLabelTemplate;
+
+    // setup source
+    this.providers.data.setData(
+      sourceWithGroups,
+      GROUPING_ROW_TYPE,
+      this.revogrid.disableVirtualY,
+      { depth, customRenderer },
+      true,
+    );
+    this.updateTrimmed(
+      trimmed,
+      oldNewIndexes ?? {},
+      oldNewIndexMap,
+    );
+  }
+
+  /**
+   * Apply grouping on data set
+   * Clear grouping from source
+   * If source came from other plugin
+   */
+  private onDataSet(data: BeforeSourceSetEvent) {
+    let preservedExpanded: ExpandedOptions['prevExpanded'] = {};
+    if (this.options?.preserveGroupingOnUpdate !== false) {
+      let { prevExpanded } = getSource(
+        this.getStore().get('source'),
+        this.getStore().get('proxyItems'),
+        true,
+      );
+      preservedExpanded = prevExpanded;
+    }
+    const source = data.source.filter(s => !isGrouping(s));
+    const options: ExpandedOptions = {
+      ...(this.revogrid.grouping || {}),
+      prevExpanded: preservedExpanded,
+    };
+    const {
+      sourceWithGroups,
+      depth,
+      trimmed,
+      oldNewIndexMap,
+    } = gatherGrouping(source, this.options?.props || [], options);
+    data.source = sourceWithGroups;
+    this.providers.data.setGrouping({ depth });
+    this.updateTrimmed(trimmed, oldNewIndexMap);
+  }
+
+  /**
+   * External call to apply grouping. Called by revogrid when prop changed.
+   */
+  setGrouping(options: GroupingOptions) {
+    // unsubscribe from all events when group applied
+    this.clearSubscriptions();
+    this.options = options;
+    // clear props, no grouping exists
+    if (!this.options?.props?.length) {
+      this.clearGrouping();
+      return;
+    }
+    // props exist and source initd
+    const { source } = getSource(
+      this.getStore().get('source'),
+      this.getStore().get('proxyItems'),
+    );
+    if (source.length) {
+      this.doSourceUpdate({ ...options });
+    }
+    // props exist and columns initd
+    for (let t of columnTypes) {
+      if (this.setColumnGrouping(this.providers.column.getColumns(t))) {
+        this.providers.column.refreshByType(t);
+        break;
+      }
+    }
+
+    // if has any grouping subscribe to events again
     /** if grouping present and new data source arrived */
     this.addEventListener('beforesourceset', ({ detail }) => {
       if (!(this.options?.props?.length && detail?.source?.length)) {
@@ -206,118 +318,6 @@ export class GroupingRowPlugin extends BasePlugin {
     this.addEventListener('groupexpandclick', e => this.onExpand(e.detail));
   }
 
-  /**
-   * Starts global source update with group clearing and applying new one
-   * Initiated when need to reapply grouping
-   */
-  private doSourceUpdate(options?: ExpandedOptions) {
-    /**
-     * Get source without grouping
-     * @param newOldIndexMap - provides us mapping with new indexes vs old indexes, we would use it for trimmed mapping
-     */
-    const { source, prevExpanded, oldNewIndexes } = getSource(
-      this.getStore().get('source'),
-      this.getStore().get('proxyItems'),
-      true,
-    );
-    const expanded: ExpandedOptions = {
-      prevExpanded,
-      ...options,
-    };
-    /**
-     * Group again
-     * @param oldNewIndexMap - provides us mapping with new indexes vs old indexes
-     */
-    const {
-      sourceWithGroups,
-      depth,
-      trimmed,
-      oldNewIndexMap,
-      childrenByGroup,
-    } = gatherGrouping(source, this.options?.props || [], expanded);
-
-    const customRenderer = options?.groupLabelTemplate;
-
-    // setup source
-    this.providers.data.setData(
-      sourceWithGroups,
-      GROUPING_ROW_TYPE,
-      this.revogrid.disableVirtualY,
-      { depth, customRenderer },
-      true,
-    );
-    this.updateTrimmed(
-      trimmed,
-      childrenByGroup,
-      oldNewIndexes ?? {},
-      oldNewIndexMap,
-    );
-  }
-
-  /**
-   * Apply grouping on data set
-   * Clear grouping from source
-   * If source came from other plugin
-   */
-  private onDataSet(data: BeforeSourceSetEvent) {
-    let preservedExpanded: ExpandedOptions['prevExpanded'] = {};
-    if (this.options?.preserveGroupingOnUpdate !== false) {
-      let { prevExpanded } = getSource(
-        this.getStore().get('source'),
-        this.getStore().get('proxyItems'),
-        true,
-      );
-      preservedExpanded = prevExpanded;
-    }
-    const source = data.source.filter(s => !isGrouping(s));
-    const options: ExpandedOptions = {
-      ...(this.revogrid.grouping || {}),
-      prevExpanded: preservedExpanded,
-    };
-    const {
-      sourceWithGroups,
-      depth,
-      trimmed,
-      oldNewIndexMap,
-      childrenByGroup,
-    } = gatherGrouping(source, this.options?.props || [], options);
-    data.source = sourceWithGroups;
-    this.providers.data.setGrouping({ depth });
-    this.updateTrimmed(trimmed, childrenByGroup, oldNewIndexMap);
-  }
-
-  /**
-   * Externam call to apply grouping. Called by revogrid when prop changed.
-   */
-  setGrouping(options: GroupingOptions) {
-    // unsubscribe from all events when group applied
-    this.clearSubscriptions();
-    this.options = options;
-    // clear props, no grouping exists
-    if (!this.options?.props?.length) {
-      this.clearGrouping();
-      return;
-    }
-    // props exist and source inited
-    const { source } = getSource(
-      this.getStore().get('source'),
-      this.getStore().get('proxyItems'),
-    );
-    if (source.length) {
-      this.doSourceUpdate({ ...options });
-    }
-    // props exist and columns inited
-    for (let t of columnTypes) {
-      if (this.setColumnGrouping(this.providers.column.getColumns(t))) {
-        this.providers.column.refreshByType(t);
-        break;
-      }
-    }
-
-    // if has any grouping subscribe to events again
-    this.subscribe();
-  }
-
   // clear grouping
   clearGrouping() {
     // clear columns
@@ -353,7 +353,6 @@ export class GroupingRowPlugin extends BasePlugin {
 
   private updateTrimmed(
     trimmedGroup: TrimmedEntity = {},
-    _childrenByGroup: Record<number, number[]> = {},
     firstLevelMap: Record<number, number> = {},
     secondLevelMap?: Record<number, number>,
   ) {

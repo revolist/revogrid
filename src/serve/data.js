@@ -72,6 +72,11 @@ export function generateFakeDataObject(config = {}) {
       } else {
         result[rgRow].key = 'b';
       }
+      if (rgRow % 4) {
+        result[rgRow].key2 = 'c';
+      } else if (rgRow % 3) {
+        result[rgRow].key2 = 'd';
+      }
     }
     if (!columns[rgCol]) {
       columns[rgCol] = {

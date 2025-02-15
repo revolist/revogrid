@@ -25,6 +25,7 @@ import type {
 } from './filter.types';
 
 import { getCellDataParsed } from '../../utils';
+import { TrimmedEntity } from '@store';
 
 export * from './filter.types';
 export * from './filter.indexed';
@@ -357,14 +358,7 @@ export class FilterPlugin extends BasePlugin {
       return;
     }
 
-    // check is trimmed event prevented
-    const isAddedEvent = await this.revogrid.addTrimmed(
-      detail.itemsToFilter,
-      FILTER_TRIMMED_TYPE,
-    );
-    if (isAddedEvent.defaultPrevented) {
-      return;
-    }
+    this.providers.data.setTrimmed({ [FILTER_TRIMMED_TYPE]: detail.itemsToFilter });
 
     // applies the hasFilter to the columns to show filter icon
     this.providers.column.updateColumns(columnsToUpdate);
@@ -426,10 +420,10 @@ export class FilterPlugin extends BasePlugin {
     rows: DataType[],
     filterItems: MultiFilterItem,
     columnByProp: Record<string, ColumnRegular>,
-  ): Record<number, boolean> {
+  ): TrimmedEntity {
     const propKeys = Object.keys(filterItems);
 
-    const trimmed: Record<number, boolean> = {};
+    const trimmed: TrimmedEntity = {};
 
     // each rows
     for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {

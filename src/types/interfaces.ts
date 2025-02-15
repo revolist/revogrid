@@ -566,18 +566,31 @@ export type DataSourceState<
   T extends DataType | ColumnRegular,
   ST extends DimensionRows | DimensionCols,
 > = {
-  // items - index based array for mapping to source tree
+  /**
+   * List of indices for visible items in the grid
+   */
   items: number[];
-  // stores items even if they trimmed in items[] there will be a sorted list here
+  /**
+   * List of indices for visible items in the grid, even if they are trimmed
+   * Update this collection if you want to change items order
+   */
   proxyItems: number[];
-  // original data source
+  /**
+   * Actual data array
+   */
   source: T[];
-  // grouping
+  /**
+   * Grouping information
+   */
   groupingDepth: number;
   groups: Record<any, any>;
-  // data source type
+  /**
+   * Dimension type, can be rows or columns depending on context
+   */
   type: ST;
-  // trim data, to hide entities from visible data source
+  /**
+   * Info for trimming or filtering the data, to hide entities from visible data source
+   */
   trimmed: Record<any, any>;
 };
 export interface PositionItem {

@@ -17,7 +17,7 @@ import { DATA_COL, DATA_ROW, ROW_FOCUSED_CLASS } from '../../utils/consts';
 
 import { DSourceState, getSourceItem } from '@store';
 import RowRenderer, { PADDING_DEPTH } from './row-renderer';
-import GroupingRowRenderer from '../../plugins/groupingRow/grouping.row.renderer';
+import GroupingRowRenderer, { RowGroupingProps } from '../../plugins/groupingRow/grouping.row.renderer';
 import { isGrouping } from '../../plugins/groupingRow/grouping.service';
 import { AllDimensionType, CellTemplateProp, DimensionCols, DimensionRows } from '@type';
 import { RowHighlightPlugin } from './row-highlight.plugin';
@@ -231,15 +231,15 @@ export class RevogrData {
 
       // #region Grouping
       if (isGrouping(dataItem)) {
-        rowsEls.push(
-          <GroupingRowRenderer
-            {...rgRow}
-            index={rgRow.itemIndex}
-            model={dataItem}
-            groupingCustomRenderer={groupingCustomRenderer}
-            hasExpand={this.columnService.hasGrouping}
-          />,
-        );
+        const gmodel: RowGroupingProps = {
+          ...rgRow,
+          index: rgRow.itemIndex,
+          model: dataItem,
+          groupingCustomRenderer: groupingCustomRenderer,
+          hasExpand: this.columnService.hasGrouping,
+          providers: this.providers,
+        };
+        rowsEls.push(<GroupingRowRenderer {...gmodel} />);
         continue;
       }
       // #endregion

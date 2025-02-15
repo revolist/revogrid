@@ -33,7 +33,7 @@ function renderCell(v: RenderProps) {
   else {
     if (!v.schemaModel.column) {
       // something is wrong with data
-      if (Build.isDev) {
+      if (Build?.isDev) {
         console.error('Investigate column problem.', v.schemaModel);
       }
       return '';

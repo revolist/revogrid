@@ -39,7 +39,7 @@ export namespace Components {
     /**
      * Revogrid - High-performance, customizable grid library for managing large datasets.
      * ### Events guide
-     * For a comprehensive events guide, check the [Events API Page](./events.md).
+     * For a comprehensive events guide, check the [Events API Page](/guide/api/events).
      * All events propagate to the root level of the grid. [Dependency tree](#Dependencies).
      * ### Type definitions
      * Read [type definition file](https://github.com/revolist/revogrid/blob/master/src/interfaces.d.ts) for the full interface information.
@@ -70,6 +70,10 @@ export namespace Components {
           * Autosize config. Enables columns autoSize. For more details check `autoSizeColumn` plugin. By default disabled, hence operation is not performance efficient. `true` to enable with default params (double header separator click for autosize). Or define config. See `AutoSizeColumnConfig` for more details.
          */
         "autoSizeColumn": boolean | AutoSizeColumnConfig;
+        /**
+          * Disable native drag&drop plugin.
+         */
+        "canDrag": boolean;
         /**
           * When true cell focus appear.
          */
@@ -861,7 +865,7 @@ declare global {
     /**
      * Revogrid - High-performance, customizable grid library for managing large datasets.
      * ### Events guide
-     * For a comprehensive events guide, check the [Events API Page](./events.md).
+     * For a comprehensive events guide, check the [Events API Page](/guide/api/events).
      * All events propagate to the root level of the grid. [Dependency tree](#Dependencies).
      * ### Type definitions
      * Read [type definition file](https://github.com/revolist/revogrid/blob/master/src/interfaces.d.ts) for the full interface information.
@@ -1263,7 +1267,7 @@ declare namespace LocalJSX {
     /**
      * Revogrid - High-performance, customizable grid library for managing large datasets.
      * ### Events guide
-     * For a comprehensive events guide, check the [Events API Page](./events.md).
+     * For a comprehensive events guide, check the [Events API Page](/guide/api/events).
      * All events propagate to the root level of the grid. [Dependency tree](#Dependencies).
      * ### Type definitions
      * Read [type definition file](https://github.com/revolist/revogrid/blob/master/src/interfaces.d.ts) for the full interface information.
@@ -1290,6 +1294,10 @@ declare namespace LocalJSX {
           * Autosize config. Enables columns autoSize. For more details check `autoSizeColumn` plugin. By default disabled, hence operation is not performance efficient. `true` to enable with default params (double header separator click for autosize). Or define config. See `AutoSizeColumnConfig` for more details.
          */
         "autoSizeColumn"?: boolean | AutoSizeColumnConfig;
+        /**
+          * Disable native drag&drop plugin.
+         */
+        "canDrag"?: boolean;
         /**
           * When true cell focus appear.
          */
@@ -2323,7 +2331,7 @@ declare module "@stencil/core" {
             /**
              * Revogrid - High-performance, customizable grid library for managing large datasets.
              * ### Events guide
-             * For a comprehensive events guide, check the [Events API Page](./events.md).
+             * For a comprehensive events guide, check the [Events API Page](/guide/api/events).
              * All events propagate to the root level of the grid. [Dependency tree](#Dependencies).
              * ### Type definitions
              * Read [type definition file](https://github.com/revolist/revogrid/blob/master/src/interfaces.d.ts) for the full interface information.
