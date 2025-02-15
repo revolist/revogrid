@@ -70,7 +70,7 @@ export class DataProvider {
     const storeService = this.stores[rowType];
 
     // take currently visible row indexes
-    const newItemsOrder = [...storeService.store.get('proxyItems')];
+    const newItemsOrder = [...storeService.store.get('proxyItems')]; // todo: verify if it's working with filters
     const prevItems = storeService.store.get('items');
 
     // take out

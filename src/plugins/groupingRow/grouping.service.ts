@@ -11,7 +11,6 @@ import {
 } from './grouping.const';
 import type { ExpandedOptions, SourceGather } from './grouping.row.types';
 
-
 type GroupedData = Map<string, GroupedData | DataType[]>;
 
 function getGroupValueDefault(item: DataType, prop: string | number) {
@@ -56,6 +55,82 @@ export function getExpanded(model: DataType = {}) {
   return model[GROUP_EXPANDED];
 }
 
+function flattenGroupMaps({
+  groupedValues,
+  parentIds,
+  isExpanded,
+  itemIndex,
+  expandedAll,
+  prevExpanded,
+  columnProps,
+}: {
+  groupedValues: GroupedData;
+  parentIds: string[];
+  isExpanded: boolean;
+  itemIndex: number;
+  expandedAll: boolean;
+  prevExpanded: Record<string, boolean>;
+  columnProps: ColumnProp[];
+}) {
+  const depth = parentIds.length;
+  const sourceWithGroups: DataType[] = [];
+  // collapse all groups in the beginning
+  let trimmed: Record<number, boolean> = {};
+
+  // index mapping
+  let oldNewIndexMap: Record<number, number> = {};
+
+  groupedValues.forEach((innerGroupedValues, groupId) => {
+    const levelIds = [...parentIds, groupId];
+    const mergedIds = levelIds.join(',');
+    const isGroupExpanded =
+      isExpanded && (!!expandedAll || !!prevExpanded[mergedIds]);
+    sourceWithGroups.push({
+      [PSEUDO_GROUP_ITEM]: groupId,
+      [GROUP_DEPTH]: depth,
+      [PSEUDO_GROUP_ITEM_ID]: JSON.stringify(levelIds),
+      [PSEUDO_GROUP_ITEM_VALUE]: mergedIds,
+      [GROUP_EXPANDED]: isGroupExpanded,
+      [GROUP_COLUMN_PROP]: columnProps[depth],
+      [columnProps[depth]]: groupId,
+    });
+    itemIndex += 1;
+    if (!isGroupExpanded && depth) {
+      trimmed[itemIndex] = true;
+    }
+    if (Array.isArray(innerGroupedValues)) {
+      innerGroupedValues.forEach(value => {
+        itemIndex += 1;
+        if (!isGroupExpanded) {
+          trimmed[itemIndex] = true;
+        }
+        oldNewIndexMap[value[GROUP_ORIGINAL_INDEX]] = itemIndex;
+      });
+      sourceWithGroups.push(...innerGroupedValues);
+    } else {
+      const children = flattenGroupMaps({
+        groupedValues: innerGroupedValues,
+        parentIds: levelIds,
+        isExpanded: isGroupExpanded,
+        itemIndex,
+        expandedAll,
+        prevExpanded,
+        columnProps,
+      });
+      sourceWithGroups.push(...children.source);
+      trimmed = { ...children.trimmed, ...trimmed };
+      oldNewIndexMap = { ...children.oldNewIndexMap, ...oldNewIndexMap };
+      itemIndex = children.itemIndex;
+    }
+  });
+  return {
+    source: sourceWithGroups,
+    oldNewIndexMap,
+    trimmed,
+    itemIndex,
+  };
+}
+
 /**
  * Gather data for grouping
  * @param array - flat data array
@@ -66,16 +141,15 @@ export function gatherGrouping(
   array: DataType[],
   columnProps: ColumnProp[],
   {
-    prevExpanded,
-    expandedAll,
+    prevExpanded = {},
+    expandedAll = false,
     getGroupValue = getGroupValueDefault,
   }: ExpandedOptions,
 ) {
   const groupedItems: GroupedData = new Map();
+  
   array.forEach((item, originalIndex) => {
-    const groupLevelValues = columnProps.map(groupId =>
-      getGroupValue(item, groupId),
-    );
+    const groupLevelValues = columnProps.map(groupId => getGroupValue(item, groupId));
     const lastLevelValue = groupLevelValues.pop();
     let currentGroupLevel = groupedItems;
     groupLevelValues.forEach(value => {
@@ -85,7 +159,8 @@ export function gatherGrouping(
       currentGroupLevel = currentGroupLevel.get(value) as GroupedData;
     });
     if (!currentGroupLevel.has(lastLevelValue)) {
-      currentGroupLevel.set(lastLevelValue, []);
+      const groupItems: DataType[] = [];
+      currentGroupLevel.set(lastLevelValue, groupItems);
     }
     const lastLevelItems = currentGroupLevel.get(lastLevelValue) as DataType[];
     lastLevelItems.push({
@@ -94,75 +169,28 @@ export function gatherGrouping(
     });
   });
 
-  let itemIndex = -1;
   const groupingDepth = columnProps.length;
-  // collapse all groups in the beginning
-  const trimmed: Record<number, boolean> = {};
-  // index mapping
-  const oldNewIndexMap: Record<number, number> = {};
-  // check if group header exists
-  const pseudoGroupTest: Record<string, number[]> = {};
-  const sourceWithGroups: DataType[] = [];
-  function flattenGroupMaps(
-    groupedValues: GroupedData,
-    parentIds: string[],
-    isExpanded: boolean,
-  ) {
-    const depth = parentIds.length;
-    groupedValues.forEach((innerGroupedValues, groupId) => {
-      const levelIds = [...parentIds, groupId];
-      const mergedIds = levelIds.join(',');
-      const isGroupExpanded =
-        isExpanded && (!!expandedAll || !!prevExpanded?.[mergedIds]);
-      sourceWithGroups.push({
-        [PSEUDO_GROUP_ITEM]: groupId,
-        [GROUP_DEPTH]: depth,
-        [PSEUDO_GROUP_ITEM_ID]: JSON.stringify(levelIds),
-        [PSEUDO_GROUP_ITEM_VALUE]: mergedIds,
-        [GROUP_EXPANDED]: isGroupExpanded,
-        [GROUP_COLUMN_PROP]: columnProps[depth],
-        [columnProps[depth]]: groupId,
-      });
-      itemIndex += 1;
-      if (!isGroupExpanded && depth) {
-        trimmed[itemIndex] = true;
-      }
-      if (Array.isArray(innerGroupedValues)) {
-        innerGroupedValues.forEach(value => {
-          itemIndex += 1;
-          if (!isGroupExpanded) {
-            trimmed[itemIndex] = true;
-          }
-          oldNewIndexMap[value[GROUP_ORIGINAL_INDEX]] = itemIndex;
-          const pseudoGroupTestIds = levelIds.map((_value, index) =>
-            levelIds.slice(0, index + 1).join(','),
-          );
-          pseudoGroupTestIds.forEach(pseudoGroupTestId => {
-            if (!pseudoGroupTest[pseudoGroupTestId]) {
-              pseudoGroupTest[pseudoGroupTestId] = [];
-            }
-            pseudoGroupTest[pseudoGroupTestId].push(itemIndex);
-          });
-        });
-        sourceWithGroups.push(...innerGroupedValues);
-      } else {
-        flattenGroupMaps(innerGroupedValues, levelIds, isGroupExpanded);
-      }
-    });
-  }
-  flattenGroupMaps(groupedItems, [], true);
+
+  const { source: sourceWithGroups, trimmed, oldNewIndexMap } = flattenGroupMaps({
+    groupedValues: groupedItems,
+    parentIds: [],
+    isExpanded: true,
+    itemIndex: -1,
+    expandedAll,
+    prevExpanded,
+    columnProps
+  });
 
   return {
     sourceWithGroups, // updates source mirror
     depth: groupingDepth, // largest depth for grouping
     trimmed, // used for expand/collapse grouping values
     oldNewIndexMap, // used for mapping old values to new
-    childrenByGroup: pseudoGroupTest, // used to get child items in group
   };
 }
 
 export function getGroupingName(rgRow?: DataType) {
-  return rgRow && rgRow[PSEUDO_GROUP_ITEM];
+  return rgRow?.[PSEUDO_GROUP_ITEM];
 }
 
 type GroupingItem = {

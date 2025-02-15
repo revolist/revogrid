@@ -1,9 +1,25 @@
 import type { VNode } from '@stencil/core';
-import type { HyperFunc, ColumnProp, DimensionRows, DataType } from '@type';
+import type {
+  HyperFunc,
+  ColumnProp,
+  DimensionRows,
+  DataType,
+  Providers,
+} from '@type';
+
+
+interface GroupTemplateProp {
+  name: string;
+  itemIndex: number;
+  expanded: boolean;
+  depth: number;
+  providers: Providers;
+  model?: DataType;
+}
 
 export type GroupLabelTemplateFunc = (
   createElement: HyperFunc<VNode>,
-  props: { name: string; itemIndex: number; expanded: boolean; depth: number; model?: DataType },
+  props: GroupTemplateProp,
 ) => any;
 
 export type GroupingOptions = {
@@ -17,7 +33,7 @@ export type GroupingOptions = {
    * Corresponds to prop values as: source = [{ me: 'a' }, { me: 'b' }, { me: 'c' }], to set expanded: { a: true }
    */
   prevExpanded?: Record<string, boolean>;
-  
+
   /**
    * Is expanded by default
    */

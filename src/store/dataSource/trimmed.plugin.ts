@@ -1,7 +1,7 @@
 import { Observable, PluginSubscribe } from '../../utils';
 import { DSourceState, GDataType } from './data.store';
 
-export type TrimmedEntity = Record<number, boolean>;
+export type TrimmedEntity = { [physicalIndexInSource: number]: boolean };
 export type Trimmed = Record<string, TrimmedEntity>;
 
 /**
@@ -17,6 +17,8 @@ export const trimmedPlugin = <T extends GDataType>(
         // full sorted items list
         const proxy = store.get('proxyItems');
         const trimmed = gatherTrimmedItems(newVal as Trimmed);
+
+        // filter our physical indexes which are not trimmed
         const newItems = proxy.filter(v => !trimmed[v]);
 
         // set trimmed items in store
