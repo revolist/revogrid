@@ -42,6 +42,7 @@ import {
   TRIMMED_GROUPING,
 } from './grouping.trimmed.service';
 
+export * from './grouping.const';
 export * from './grouping.row.expand.service';
 export * from './grouping.row.types';
 export * from './grouping.service';
