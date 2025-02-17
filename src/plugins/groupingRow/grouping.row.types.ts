@@ -20,6 +20,7 @@ interface GroupTemplateProp {
 export type GroupLabelTemplateFunc = (
   createElement: HyperFunc<VNode>,
   props: GroupTemplateProp,
+  ...args: any[]
 ) => any;
 
 export type GroupingOptions = {

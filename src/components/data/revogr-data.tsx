@@ -235,7 +235,7 @@ export class RevogrData {
           ...rgRow,
           index: rgRow.itemIndex,
           model: dataItem,
-          groupingCustomRenderer: groupingCustomRenderer,
+          groupingCustomRenderer,
           hasExpand: this.columnService.hasGrouping,
           providers: this.providers,
         };

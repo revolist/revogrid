@@ -26,7 +26,7 @@ export function getCellData(val?: any) {
   return val;
 }
 
-export function getCellRaw(model: DataType, column?: ColumnRegular) {
+export function getCellRaw(model: DataType = {}, column?: ColumnRegular) {
   if (!column) {
     return;
   }
