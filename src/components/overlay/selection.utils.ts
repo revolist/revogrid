@@ -29,15 +29,13 @@ export type EventData = {
 };
 
 export function collectModelsOfRange(
-  data: DataLookup,
   store: Observable<DSourceState<DataType, DimensionRows>>,
+  range: RangeArea
 ) {
   const models: Partial<DataLookup> = {};
-  for (let i in data) {
-    const rowIndex = parseInt(i, 10);
-    models[rowIndex] = getSourceItem(store, rowIndex);
+  for (let i = range.y; i <= range.y1; i++) {
+    models[i] = getSourceItem(store, i);
   }
-
   return models;
 }
 

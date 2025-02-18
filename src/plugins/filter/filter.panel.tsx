@@ -44,16 +44,16 @@ const FILTER_ID = 'add-filter';
 })
 export class FilterPanel {
   private filterCaptionsInternal: FilterCaptions = {
-    title: 'Filter by',
-    ok: 'Ok',
-    save: 'Save',
-    // drops the filter
-    reset: 'Reset',
-    cancel: 'Cancel',
-    add: 'Add condition',
-    placeholder: 'Enter value...',
-    and: 'and',
-    or: 'or',
+    title: 'Фильтр по',
+    ok: 'Ок',
+    save: 'Сохранить',
+    // сброс фильтра
+    reset: 'Сбросить',
+    cancel: 'Отмена',
+    add: 'Добавить условие',
+    placeholder: 'Введите значение...',
+    and: 'и',
+    or: 'или',
   };
 
   @Element() element!: HTMLElement;

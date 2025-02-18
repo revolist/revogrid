@@ -5,7 +5,7 @@
  * It contains typing information for all components that exist in this project.
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
-import { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, CellTemplateProp, ChangedRange, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, ExtraNodeFuncConfig, FocusAfterRenderEvent, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, Nullable, PluginBaseComponent, PositionItem, Providers, RangeArea, RangeClipboardCopyEventProps, RangeClipboardPasteEvent, RowDefinition, RowDragStartDetails, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
+import { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, CellTemplateProp, ChangedRange, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataLookup, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, ExtraNodeFuncConfig, FocusAfterRenderEvent, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, Nullable, PluginBaseComponent, PositionItem, Providers, RangeArea, RangeClipboardCopyEventProps, RangeClipboardPasteEvent, RowDefinition, RowDragStartDetails, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
 import { GridPlugin } from "./plugins/base.plugin";
 import { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
 import { ColumnFilterConfig, FilterCaptions, FilterCollectionItem, LogicFunction, MultiFilterItem, ShowData } from "./plugins/filter/filter.types";
@@ -20,7 +20,7 @@ import { DSourceState, Groups } from "./store/index";
 import { ResizeProps } from "./components/header/resizable.directive";
 import { HeaderRenderProps } from "./components/header/header-renderer";
 import { EventData } from "./components/overlay/selection.utils";
-export { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, CellTemplateProp, ChangedRange, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, ExtraNodeFuncConfig, FocusAfterRenderEvent, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, Nullable, PluginBaseComponent, PositionItem, Providers, RangeArea, RangeClipboardCopyEventProps, RangeClipboardPasteEvent, RowDefinition, RowDragStartDetails, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
+export { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, CellTemplateProp, ChangedRange, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataLookup, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, ExtraNodeFuncConfig, FocusAfterRenderEvent, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, Nullable, PluginBaseComponent, PositionItem, Providers, RangeArea, RangeClipboardCopyEventProps, RangeClipboardPasteEvent, RowDefinition, RowDragStartDetails, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
 export { GridPlugin } from "./plugins/base.plugin";
 export { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
 export { ColumnFilterConfig, FilterCaptions, FilterCollectionItem, LogicFunction, MultiFilterItem, ShowData } from "./plugins/filter/filter.types";
@@ -86,6 +86,7 @@ export namespace Components {
           * Clear current grid focus. Grid has no longer focus on it.
          */
         "clearFocus": () => Promise<void>;
+        "clearFocusOnOutsideClick": boolean;
         /**
           * Clears column sorting
          */
@@ -252,6 +253,7 @@ export namespace Components {
           * Scrolls viewport to specified row by index.
          */
         "scrollToRow": (coordinate?: number) => Promise<void>;
+        "selectWholeRow": boolean;
         /**
           * Open editor for cell.
          */
@@ -301,6 +303,10 @@ export namespace Components {
           * When true enable clipboard.
          */
         "useClipboard": boolean;
+        /**
+          * If true, enables context menu behavior.
+         */
+        "useContextMenu": boolean;
     }
     interface RevogrAttribution {
     }
@@ -313,6 +319,11 @@ export namespace Components {
           * If readonly mode - disabled Paste event
          */
         "readonly": boolean;
+    }
+    interface RevogrContextMenu {
+        "closeMenu": () => Promise<void>;
+        "handleContextMenu": (event: MouseEvent) => Promise<void>;
+        "items": MenuItem[];
     }
     /**
      * This component is responsible for rendering data
@@ -483,6 +494,10 @@ export namespace Components {
          */
         "rowType": DimensionRows;
         /**
+          * If true, selects the whole row instead of individual cells.
+         */
+        "selectWholeRow": boolean;
+        /**
           * Selection, range, focus for selection
          */
         "selectionStore": Observable<SelectionStoreState>;
@@ -615,6 +630,10 @@ export namespace Components {
          */
         "readonly": boolean;
         /**
+          * If true, selects the whole row instead of individual cells.
+         */
+        "selectWholeRow": boolean;
+        /**
           * Selection, range, focus.
          */
         "selectionStore": Observable<SelectionStoreState>;
@@ -622,6 +641,10 @@ export namespace Components {
           * Enable revogr-clipboard component (read more in revogr-clipboard component). Allows copy/paste.
          */
         "useClipboard": boolean;
+        /**
+          * If true, enables context menu behavior.
+         */
+        "useContextMenu": boolean;
     }
     /**
      * Row headers component
@@ -739,6 +762,10 @@ export interface RevoGridCustomEvent<T> extends CustomEvent<T> {
 export interface RevogrClipboardCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLRevogrClipboardElement;
+}
+export interface RevogrContextMenuCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLRevogrContextMenuElement;
 }
 export interface RevogrDataCustomEvent<T> extends CustomEvent<T> {
     detail: T;
@@ -861,6 +888,7 @@ declare global {
         "additionaldatachanged": any;
         "afterthemechanged": Theme;
         "created": any;
+        "onrangeselectionchanged": Partial<DataLookup>;
     }
     /**
      * Revogrid - High-performance, customizable grid library for managing large datasets.
@@ -941,6 +969,23 @@ declare global {
     var HTMLRevogrClipboardElement: {
         prototype: HTMLRevogrClipboardElement;
         new (): HTMLRevogrClipboardElement;
+    };
+    interface HTMLRevogrContextMenuElementEventMap {
+        "menuClosed": void;
+    }
+    interface HTMLRevogrContextMenuElement extends Components.RevogrContextMenu, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLRevogrContextMenuElementEventMap>(type: K, listener: (this: HTMLRevogrContextMenuElement, ev: RevogrContextMenuCustomEvent<HTMLRevogrContextMenuElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLRevogrContextMenuElementEventMap>(type: K, listener: (this: HTMLRevogrContextMenuElement, ev: RevogrContextMenuCustomEvent<HTMLRevogrContextMenuElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLRevogrContextMenuElement: {
+        prototype: HTMLRevogrContextMenuElement;
+        new (): HTMLRevogrContextMenuElement;
     };
     interface HTMLRevogrDataElementEventMap {
         "beforerowrender": BeforeRowRenderEvent;
@@ -1132,6 +1177,7 @@ declare global {
         "beforekeydown": { original: KeyboardEvent } & EventData;
         "beforekeyup": { original: KeyboardEvent } & EventData;
         "beforecellsave": any;
+        "onrangeselectionchangedinit": Partial<DataLookup>;
     }
     /**
      * Component for overlaying the grid with the selection.
@@ -1248,6 +1294,7 @@ declare global {
         "revo-grid": HTMLRevoGridElement;
         "revogr-attribution": HTMLRevogrAttributionElement;
         "revogr-clipboard": HTMLRevogrClipboardElement;
+        "revogr-context-menu": HTMLRevogrContextMenuElement;
         "revogr-data": HTMLRevogrDataElement;
         "revogr-edit": HTMLRevogrEditElement;
         "revogr-extra": HTMLRevogrExtraElement;
@@ -1306,6 +1353,7 @@ declare namespace LocalJSX {
           * Enable column move plugin.
          */
         "canMoveColumns"?: boolean;
+        "clearFocusOnOutsideClick"?: boolean;
         /**
           * Indicates default column size.
          */
@@ -1534,6 +1582,10 @@ declare namespace LocalJSX {
          */
         "onHeaderclick"?: (event: RevoGridCustomEvent<ColumnRegular>) => void;
         /**
+          * Emmited when the focus is changed returns the new focused range
+         */
+        "onOnrangeselectionchanged"?: (event: RevoGridCustomEvent<Partial<DataLookup>>) => void;
+        /**
           * This event is triggered when the row order change is started. To prevent the default behavior of changing the row order, you can call `e.preventDefault()`. To change the item name at the start of the row order change, you can set `e.text` to the desired new name.
          */
         "onRowdragstart"?: (event: RevoGridCustomEvent<RowDragStartDetails>) => void;
@@ -1600,6 +1652,7 @@ declare namespace LocalJSX {
           * Indicates default rgRow size. By default 0, means theme package size will be applied  Alternatively you can use `rowSize` to reset viewport
          */
         "rowSize"?: number;
+        "selectWholeRow"?: boolean;
         /**
           * Alternative way to set sorting. `{columns: [{prop: 'name', order: 'asc'}]}`
          */
@@ -1624,6 +1677,10 @@ declare namespace LocalJSX {
           * When true enable clipboard.
          */
         "useClipboard"?: boolean;
+        /**
+          * If true, enables context menu behavior.
+         */
+        "useContextMenu"?: boolean;
     }
     interface RevogrAttribution {
     }
@@ -1693,6 +1750,10 @@ declare namespace LocalJSX {
           * If readonly mode - disabled Paste event
          */
         "readonly"?: boolean;
+    }
+    interface RevogrContextMenu {
+        "items"?: MenuItem[];
+        "onMenuClosed"?: (event: RevogrContextMenuCustomEvent<void>) => void;
     }
     /**
      * This component is responsible for rendering data
@@ -1886,6 +1947,10 @@ declare namespace LocalJSX {
           * Row type
          */
         "rowType": DimensionRows;
+        /**
+          * If true, selects the whole row instead of individual cells.
+         */
+        "selectWholeRow"?: boolean;
         /**
           * Selection, range, focus for selection
          */
@@ -2140,6 +2205,10 @@ declare namespace LocalJSX {
          */
         "onFocuscell"?: (event: RevogrOverlaySelectionCustomEvent<ApplyFocusEvent & FocusRenderEvent>) => void;
         /**
+          * Emmited when the focus is changed returns the new focused range
+         */
+        "onOnrangeselectionchangedinit"?: (event: RevogrOverlaySelectionCustomEvent<Partial<DataLookup>>) => void;
+        /**
           * Range data apply. Triggers datasource edit on the root level.
          */
         "onRangeeditapply"?: (event: RevogrOverlaySelectionCustomEvent<BeforeRangeSaveDataDetails>) => void;
@@ -2172,6 +2241,10 @@ declare namespace LocalJSX {
          */
         "readonly"?: boolean;
         /**
+          * If true, selects the whole row instead of individual cells.
+         */
+        "selectWholeRow"?: boolean;
+        /**
           * Selection, range, focus.
          */
         "selectionStore": Observable<SelectionStoreState>;
@@ -2179,6 +2252,10 @@ declare namespace LocalJSX {
           * Enable revogr-clipboard component (read more in revogr-clipboard component). Allows copy/paste.
          */
         "useClipboard"?: boolean;
+        /**
+          * If true, enables context menu behavior.
+         */
+        "useContextMenu"?: boolean;
     }
     /**
      * Row headers component
@@ -2309,6 +2386,7 @@ declare namespace LocalJSX {
         "revo-grid": RevoGrid;
         "revogr-attribution": RevogrAttribution;
         "revogr-clipboard": RevogrClipboard;
+        "revogr-context-menu": RevogrContextMenu;
         "revogr-data": RevogrData;
         "revogr-edit": RevogrEdit;
         "revogr-extra": RevogrExtra;
@@ -2346,6 +2424,7 @@ declare module "@stencil/core" {
              * This Clipboard provides functionality for handling clipboard events in a web application.
              */
             "revogr-clipboard": LocalJSX.RevogrClipboard & JSXBase.HTMLAttributes<HTMLRevogrClipboardElement>;
+            "revogr-context-menu": LocalJSX.RevogrContextMenu & JSXBase.HTMLAttributes<HTMLRevogrContextMenuElement>;
             /**
              * This component is responsible for rendering data
              * Rows, columns, groups and cells

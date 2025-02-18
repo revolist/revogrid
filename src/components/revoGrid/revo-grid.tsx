@@ -44,6 +44,7 @@ import type {
   FocusAfterRenderEvent,
   ExtraNodeFuncConfig,
   RowDragStartDetails,
+  DataLookup,
 } from '@type';
 
 import ColumnDataProvider from '../../services/column.data.provider';
@@ -324,6 +325,14 @@ export class RevoGridComponent {
    */
   @Prop() canDrag = true;
 
+  /**
+   * If true, enables context menu behavior.
+   */
+  @Prop() useContextMenu = false;
+
+  @Prop() clearFocusOnOutsideClick = false;
+
+  @Prop() selectWholeRow = false;
   // #endregion
 
   // #region Events
@@ -602,6 +611,12 @@ export class RevoGridComponent {
    * Emmited after grid created
    */
   @Event() created: EventEmitter;
+
+  /**
+   * Emmited when the focus is changed
+   * returns the new focused range
+   */
+  @Event() onrangeselectionchanged: EventEmitter<Partial<DataLookup>>;
 
   // #endregion
 
@@ -960,7 +975,9 @@ export class RevoGridComponent {
         !(this.element.shadowRoot && path.includes(this.element.shadowRoot))
       ) {
       // Perform actions if the click is outside the component
-      await this.clearFocus();
+      if (this.clearFocusOnOutsideClick) {
+        await this.clearFocus();
+      }
     }
   }
   // #endregion
@@ -1074,6 +1091,12 @@ export class RevoGridComponent {
     if (!this.canFocus || defaultPrevented) {
       e.preventDefault();
     }
+  }
+
+  @Listen('onrangeselectionchangedinit') onRangeSelectionChanged(
+    e: CustomEvent<Partial<DataLookup>>,
+  ) {
+    this.onrangeselectionchanged.emit(e.detail);
   }
 
   // #endregion
@@ -1632,6 +1655,8 @@ export class RevoGridComponent {
             applyChangesOnClose={this.applyOnClose}
             additionalData={this.additionalData}
             slot={data.slot}
+            selectWholeRow={this.selectWholeRow}
+            useContextMenu={this.useContextMenu}
             onBeforenextvpfocus={(e) => this.selectionStoreConnector?.beforeNextFocusCell(e.detail)}
             onCanceledit={() => this.selectionStoreConnector?.setEdit(false)}
             onSetedit={({ detail }) => {
@@ -1666,6 +1691,7 @@ export class RevoGridComponent {
               focusTemplate={this.focusTemplate}
               rowType={data.type}
               colType={view.type}
+              selectWholeRow={this.selectWholeRow}
               selectionStore={data.selectionStore}
               dimensionRow={data.dimensionRow}
               dimensionCol={data.dimensionCol}

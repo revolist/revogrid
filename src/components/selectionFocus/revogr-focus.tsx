@@ -62,7 +62,10 @@ export class RevogrFocus {
    * Focus template custom function. Can be used to render custom focus layer.
    */
   @Prop() focusTemplate: FocusTemplateFunc | null = null;
-
+  /**
+   * If true, selects the whole row instead of individual cells.
+   */
+  @Prop() selectWholeRow: boolean = false;
   /**
    * Before focus render event.
    * Can be prevented by event.preventDefault().
@@ -117,6 +120,10 @@ export class RevogrFocus {
   }
 
   render() {
+    // Если включено выделение всей строки, не рендерим фокус
+    if (this.selectWholeRow) {
+      return null;
+    }
     const editCell = this.selectionStore.get('edit');
     if (editCell) {
       return;

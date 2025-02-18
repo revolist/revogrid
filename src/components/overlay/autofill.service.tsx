@@ -265,7 +265,7 @@ export class AutoFillService {
   onRangeApply(newData: DataLookup, newRange: RangeArea | null, oldRange: RangeArea | null) {
     this.sv.rangeDataApply({
       data: newData,
-      models: collectModelsOfRange(newData, this.sv.dataStore),
+      models: collectModelsOfRange(this.sv.dataStore, newRange!!),
       type: this.sv.dataStore.get('type'),
       oldRange,
       newRange

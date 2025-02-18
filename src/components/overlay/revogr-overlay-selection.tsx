@@ -52,6 +52,7 @@ import type {
   ChangedRange,
   BeforeRangeSaveDataDetails,
   SaveDataDetails,
+  DataLookup,
 } from '@type';
 
 /**
@@ -127,6 +128,16 @@ export class OverlaySelection {
    * Is mobile view mode.
    */
   @Prop() isMobileDevice: boolean;
+  
+  /**
+   * If true, selects the whole row instead of individual cells.
+   */
+  @Prop() selectWholeRow: boolean = false;
+
+  /**
+   * If true, enables context menu behavior.
+   */
+  @Prop() useContextMenu: boolean = false;
 
   // #endregion
 
@@ -281,6 +292,12 @@ export class OverlaySelection {
   @Event({ eventName: 'beforecellsave', cancelable: true })
   beforeCellSave: EventEmitter;
 
+  /**
+   * Emmited when the focus is changed
+   * returns the new focused range
+   */
+  @Event({ eventName: 'onrangeselectionchangedinit', cancelable: true })
+  onRangeSelectionChanged: EventEmitter<Partial<DataLookup>>;
   // #endregion
 
   // #region Private Properties
@@ -293,7 +310,7 @@ export class OverlaySelection {
   private orderEditor?: HTMLRevogrOrderEditorElement;
   private revogrEdit?: HTMLRevogrEditElement;
   private unsubscribeSelectionStore: { (): void }[] = [];
-  // #endregion
+
 
   // #region Listeners
   @Listen('touchmove', { target: 'document' })
@@ -557,26 +574,29 @@ export class OverlaySelection {
       const range = this.selectionStore.get('range');
       const focus = this.selectionStore.get('focus');
 
-      // Clipboard
-      if ((range || focus) && this.useClipboard) {
-        nodes.push(
-          <revogr-clipboard
-            readonly={this.readonly}
-            onCopyregion={e => this.onCopy(e.detail)}
-            onClearregion={() => !this.readonly && this.clearCell()}
-            ref={e => (this.clipboard = e)}
-            onPasteregion={e => this.onPaste(e.detail)}
-          />,
-        );
-      }
+      // Если включено выделение всей строки, не рендерим выделение ячеек
+      if (!this.selectWholeRow) {
+        // Clipboard
+        if ((range || focus) && this.useClipboard) {
+          nodes.push(
+            <revogr-clipboard
+              readonly={this.readonly}
+              onCopyregion={e => this.onCopy(e.detail)}
+              onClearregion={() => !this.readonly && this.clearCell()}
+              ref={e => (this.clipboard = e)}
+              onPasteregion={e => this.onPaste(e.detail)}
+            />,
+          );
+        }
 
-      // Range
-      if (range) {
-        nodes.push(...this.renderRange(range));
-      }
-      // Autofill
-      if (focus && !this.readonly && this.range) {
-        nodes.push(this.autoFillService?.renderAutofill(range, focus));
+        // Range
+        if (range) {
+          nodes.push(...this.renderRange(range));
+        }
+        // Autofill
+        if (focus && !this.readonly && this.range) {
+          nodes.push(this.autoFillService?.renderAutofill(range, focus));
+        }
       }
 
       // Order
@@ -594,6 +614,8 @@ export class OverlaySelection {
         );
       }
     }
+
+
     return (
       <Host
         class={{ mobile: this.isMobileDevice }}
@@ -648,6 +670,10 @@ export class OverlaySelection {
       return false;
     }
     const { range } = applyEvent.detail;
+    if (range) {
+      const models = collectModelsOfRange(this.dataStore, range);
+      this.onRangeSelectionChanged.emit(models);
+    }
 
     // 3. Trigger focus event
     return !this.focusCell.emit({
@@ -675,6 +701,12 @@ export class OverlaySelection {
     if (applyEvent.defaultPrevented) {
       return false;
     }
+
+    if (range) {
+      const models = collectModelsOfRange(this.dataStore, range);
+      this.onRangeSelectionChanged.emit(models);
+    }
+
     const data = this.columnService.getRangeTransformedToProps(
       applyEvent.detail.range,
       this.dataStore,
@@ -689,9 +721,9 @@ export class OverlaySelection {
     if (e.defaultPrevented) {
       return false;
     }
+
     return !e.defaultPrevented;
   }
-
   /**
    * Open Editor on DblClick
    */
@@ -728,8 +760,22 @@ export class OverlaySelection {
       return;
     }
 
-    // Set focus on the current cell
-    this.focus(focusCell, this.range && e.shiftKey);
+    // Check for right-click (context menu)
+    if (this.useContextMenu && e instanceof MouseEvent && e.button === 2) {
+      e.preventDefault(); // Предотвращаем стандартное контекстное меню
+      const range = this.selectionStore.get('range');
+      if (range && this.isCellInRange(focusCell, range)) {
+        return;
+      }
+      // Show context menu
+    }
+    // Set focus on the current cell or the whole row
+    if (this.selectWholeRow) {
+      const rowFocus = { x: 0, y: focusCell.y }; // Start from the first cell in the row
+      this.focus(rowFocus, this.range && e.shiftKey);
+    } else {
+      this.focus(focusCell, this.range && e.shiftKey);
+    }
 
     // Initiate autofill selection
     if (this.range) {
@@ -748,6 +794,15 @@ export class OverlaySelection {
         e.preventDefault();
       }
     }
+  }
+
+  private isCellInRange(cell: Cell, range: RangeArea): boolean {
+    return (
+      cell.x >= range.x &&
+      cell.x <= range.x1 &&
+      cell.y >= range.y &&
+      cell.y <= range.y1
+    );
   }
 
   /**
@@ -835,7 +890,7 @@ export class OverlaySelection {
     );
     const { defaultPrevented: canPaste } = this.rangeClipboardPaste.emit({
       data: changed,
-      models: collectModelsOfRange(changed, this.dataStore),
+      models: collectModelsOfRange(this.dataStore, range!!),
       range,
       ...this.types,
     });
@@ -915,7 +970,6 @@ export class OverlaySelection {
         return this.triggerRangeEvent(range);
       }
     }
-
     return this.doFocus(cell, end);
   }
 
