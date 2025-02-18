@@ -65,14 +65,14 @@ export type FilterCaptions = {
   or: string;
 };
 
-export type FilterLocalization = {
+export interface FilterLocalization {
   captions: FilterCaptions;
   filterNames: Record<FilterType, string>;
-};
+}
 /**
  * Filter configuration for a column. This is the type of the `filter` property on a column.
  */
-export type ColumnFilterConfig = {
+export interface ColumnFilterConfig {
   /**
    * The collection of filters to be applied to the column.
    */
@@ -102,7 +102,8 @@ export type ColumnFilterConfig = {
    * when the user clicks on the filter button.
    */
   disableDynamicFiltering?: boolean;
-};
+}
+
 export type FilterCollectionItem = {
   type: FilterType;
   value?: any;
