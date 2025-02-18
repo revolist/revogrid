@@ -53,7 +53,7 @@ export type CustomFilter<T1 = LogicFunctionParam, T2 = LogicFunctionExtraParam> 
   func: LogicFunction<T1, T2>;
 };
 
-export type FilterCaptions = {
+export interface FilterCaptions {
   title: string;
   save: string;
   reset: string;
