@@ -40,6 +40,7 @@ export type RevogridEvents = 'contentsizechanged'|
   'afterthemechanged'|
   'created'|
   'onrangeselectionchanged'|
+  'ondblclick'|
   'beforepaste'|
   'beforepasteapply'|
   'pasteregion'|
@@ -100,6 +101,7 @@ export type RevogridEvents = 'contentsizechanged'|
   'beforekeyup'|
   'beforecellsave'|
   'onrangeselectionchangedinit'|
+  'ondblclickinit'|
   'scrollview'|
   'ref'|
   'scrollvirtual'|
@@ -150,6 +152,7 @@ export const REVOGRID_EVENTS = new Map<RevogridEvents, RevogridEvents>([
   ['afterthemechanged', 'afterthemechanged'],
   ['created', 'created'],
   ['onrangeselectionchanged', 'onrangeselectionchanged'],
+  ['ondblclick', 'ondblclick'],
   ['beforepaste', 'beforepaste'],
   ['beforepasteapply', 'beforepasteapply'],
   ['pasteregion', 'pasteregion'],
@@ -210,6 +213,7 @@ export const REVOGRID_EVENTS = new Map<RevogridEvents, RevogridEvents>([
   ['beforekeyup', 'beforekeyup'],
   ['beforecellsave', 'beforecellsave'],
   ['onrangeselectionchangedinit', 'onrangeselectionchangedinit'],
+  ['ondblclickinit', 'ondblclickinit'],
   ['scrollview', 'scrollview'],
   ['ref', 'ref'],
   ['scrollvirtual', 'scrollvirtual'],

@@ -889,6 +889,7 @@ declare global {
         "afterthemechanged": Theme;
         "created": any;
         "onrangeselectionchanged": Partial<DataLookup>;
+        "ondblclick": DataLookup;
     }
     /**
      * Revogrid - High-performance, customizable grid library for managing large datasets.
@@ -1178,6 +1179,7 @@ declare global {
         "beforekeyup": { original: KeyboardEvent } & EventData;
         "beforecellsave": any;
         "onrangeselectionchangedinit": Partial<DataLookup>;
+        "ondblclickinit": DataLookup;
     }
     /**
      * Component for overlaying the grid with the selection.
@@ -1581,6 +1583,10 @@ declare namespace LocalJSX {
           * On header click.
          */
         "onHeaderclick"?: (event: RevoGridCustomEvent<ColumnRegular>) => void;
+        /**
+          * Emmited when the double click on row is triggered
+         */
+        "onOndblclick"?: (event: RevoGridCustomEvent<DataLookup>) => void;
         /**
           * Emmited when the focus is changed returns the new focused range
          */
@@ -2204,6 +2210,7 @@ declare namespace LocalJSX {
           * Cell get focused. To prevent the default behavior of applying the edit data, you can call `e.preventDefault()`.
          */
         "onFocuscell"?: (event: RevogrOverlaySelectionCustomEvent<ApplyFocusEvent & FocusRenderEvent>) => void;
+        "onOndblclickinit"?: (event: RevogrOverlaySelectionCustomEvent<DataLookup>) => void;
         /**
           * Emmited when the focus is changed returns the new focused range
          */

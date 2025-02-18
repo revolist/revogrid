@@ -300,6 +300,10 @@ export class OverlaySelection {
   onRangeSelectionChanged: EventEmitter<Partial<DataLookup>>;
   // #endregion
 
+  @Event({ eventName: 'ondblclickinit', cancelable: true })
+  onDblClickInit: EventEmitter<DataLookup>;
+  // #endregion
+
   // #region Private Properties
   @Element() element: HTMLElement;
   private clipboard?: HTMLRevogrClipboardElement;
@@ -732,7 +736,7 @@ export class OverlaySelection {
     if (e.defaultPrevented) {
       return;
     }
-
+    this.onDblClickInit.emit(this.getData());
     // Get data from the component
     const data = this.getData();
     const focusCell = getFocusCellBasedOnEvent(e, data);
