@@ -7,7 +7,6 @@ import {
   isCut,
   isEnterKeyValue,
   isPaste,
-  isTab,
   timeout,
   RESIZE_INTERVAL,
   type Observable,
@@ -42,7 +41,6 @@ type Config = {
 };
 
 const DIRECTION_CODES: string[] = [
-  codesLetter.TAB,
   codesLetter.ARROW_UP,
   codesLetter.ARROW_DOWN,
   codesLetter.ARROW_LEFT,
@@ -63,9 +61,6 @@ export class KeyboardService {
         case codesLetter.ESCAPE:
           this.sv.cancel();
           break;
-        case codesLetter.TAB:
-          this.keyChangeSelection(e, canRange);
-          break;
       }
       return;
     }
@@ -83,11 +78,6 @@ export class KeyboardService {
       return;
     }
 
-    // tab key means same as arrow right
-    if (isTab(e.code)) {
-      this.keyChangeSelection(e, canRange);
-      return;
-    }
 
     // pressed enter
     if (isEnterKeyValue(e.key)) {
@@ -200,13 +190,6 @@ export class KeyboardService {
       e.preventDefault();
     }
 
-    if (e.shiftKey) {
-      switch (e.code) {
-        case codesLetter.TAB:
-          return { changes: { x: -1 }, isMulti: false };
-      }
-    }
-
     switch (e.code) {
       case codesLetter.ARROW_UP:
         return { changes: { y: -1 }, isMulti };
@@ -214,7 +197,6 @@ export class KeyboardService {
         return { changes: { y: 1 }, isMulti };
       case codesLetter.ARROW_LEFT:
         return { changes: { x: -1 }, isMulti };
-      case codesLetter.TAB:
       case codesLetter.ARROW_RIGHT:
         return { changes: { x: 1 }, isMulti };
     }

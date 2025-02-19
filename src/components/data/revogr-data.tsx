@@ -102,6 +102,12 @@ export class RevogrData {
    * When several plugins require initial rendering this will prevent double initial rendering.
    */
   @Prop() jobsBeforeRender: (Promise<any> | (() => Promise<any>))[] = [];
+  
+  /**
+   * Show tooltip on cell
+   */
+  @Prop() showTooltip = true;
+  
   // #endregion
 
   /**
@@ -297,6 +303,7 @@ export class RevogrData {
             schemaModel,
             additionalData: this.additionalData,
             dragStartCell: this.dragStartCell,
+            showTooltip: this.showTooltip,
           }}
           cellProps={props}
         />;

@@ -66,7 +66,7 @@ revogr-header {
       z-index: 10;
 
       .resizable {
-        background-color: deepskyblue;
+        background-color: hsl(var(--primary));
       }
     }
     .header-content {
@@ -82,7 +82,7 @@ revogr-header {
       touch-action: none;
       user-select: none;
       &:hover {
-        background-color: deepskyblue;
+        background-color: hsl(var(--primary));
       }
     }
     $size: 6px;

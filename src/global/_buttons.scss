@@ -15,12 +15,12 @@
   cursor: pointer;
 
   &.green {
-    $bg: #009037;
+    $bg: hsl(var(--primary));
     background-color: $bg;
   }
 
   &.red {
-    $bg: #E0662E;
+    $bg: hsl(var(--muted));
     background-color: $bg;
   }
 
@@ -31,8 +31,8 @@
   }
 
   &.outline {
-    $br-color: #dbdbdb;
-    $color: #000;
+    $br-color: hsl(var(--muted));
+    $color: hsl(var(--foreground));
     border: 1px solid $br-color;
     line-height: $h - 2;
     background: none;

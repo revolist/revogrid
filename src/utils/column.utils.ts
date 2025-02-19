@@ -33,7 +33,7 @@ export function getCellRaw(model: DataType, column?: ColumnRegular) {
   if (column.cellParser) {
     return column.cellParser(model, column);
   }
-  return model[column.prop];
+  return column.prop.toString().split('.').reduce((o, key) => (o || {})[key], model);
 }
 
 export function getCellDataParsed(model: DataType, column: ColumnRegular) {

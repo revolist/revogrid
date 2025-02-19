@@ -36,8 +36,8 @@ export const filterTypes: Record<string, FilterType[]> = {
 
 export const filterNames = {
   none: 'Нет',
-  empty: 'Не установлено',
-  notEmpty: 'Установлено',
+  empty: 'Пусто',
+  notEmpty: 'Не пусто',
 
   eq: 'Равно',
   notEq: 'Не равно',

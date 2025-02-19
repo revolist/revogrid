@@ -21,7 +21,6 @@ enum codes {
   SPACE = 32,
   SHIFT = 16,
   CAPS_LOCK = 20,
-  TAB = 9,
   ARROW_RIGHT = 39,
   ARROW_LEFT = 37,
   ARROW_UP = 38,
@@ -58,7 +57,6 @@ export enum codesLetter {
   X = 'KeyX',
   V = 'KeyV',
   ESCAPE = 'Escape',
-  TAB = 'Tab',
   BACKSPACE = 'Backspace',
   DELETE = 'Delete',
   ARROW_RIGHT = 'ArrowRight',
@@ -70,7 +68,6 @@ export enum codesLetter {
 
 export enum keyValues {
   ENTER = 'Enter', // Enter + NumpadEnter
-  TAB = 'Tab',
 }
 
 export default codes;

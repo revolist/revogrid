@@ -179,6 +179,14 @@ export namespace Components {
          */
         "hideAttribution": boolean;
         /**
+          * Need to higlight filter on range headers
+         */
+        "highlightFilter": boolean;
+        /**
+          * Need to higlight header on range cells
+         */
+        "highlightHeader": boolean;
+        /**
           * Prevent rendering until job is done. Can be used for initial rendering performance improvement. When several plugins require initial rendering this will prevent double initial rendering.
          */
         "jobsBeforeRender": Promise<any>[];
@@ -267,6 +275,10 @@ export namespace Components {
           * @example const grid = document.querySelector('revo-grid'); grid.setDataAt({ row: 0, col: 0, val: 'test' }); // refresh
          */
         "setDataAt": ({ row, col, colType, rowType, val, skipDataUpdate }: { row: number; col: number; val?: any; skipDataUpdate?: boolean; } & AllDimensionType) => Promise<void | undefined>;
+        /**
+          * Show tooltip on cell
+         */
+        "showTooltip": boolean;
         /**
           * Alternative way to set sorting. `{columns: [{prop: 'name', order: 'asc'}]}`
          */
@@ -370,6 +382,10 @@ export namespace Components {
           * Selection, range, focus for row selection
          */
         "rowSelectionStore": Observable<SelectionStoreState>;
+        /**
+          * Show tooltip on cell
+         */
+        "showTooltip": boolean;
         /**
           * Row data type
          */
@@ -531,6 +547,14 @@ export namespace Components {
           * Column groups
          */
         "groups": Groups;
+        /**
+          * Need to higlight filter on range cells
+         */
+        "highlightFilter": boolean;
+        /**
+          * Need to higlight header on range cells
+         */
+        "highlightHeader": boolean;
         /**
           * Readonly mode
          */
@@ -1405,6 +1429,14 @@ declare namespace LocalJSX {
          */
         "hideAttribution"?: boolean;
         /**
+          * Need to higlight filter on range headers
+         */
+        "highlightFilter"?: boolean;
+        /**
+          * Need to higlight header on range cells
+         */
+        "highlightHeader"?: boolean;
+        /**
           * Prevent rendering until job is done. Can be used for initial rendering performance improvement. When several plugins require initial rendering this will prevent double initial rendering.
          */
         "jobsBeforeRender"?: Promise<any>[];
@@ -1660,6 +1692,10 @@ declare namespace LocalJSX {
         "rowSize"?: number;
         "selectWholeRow"?: boolean;
         /**
+          * Show tooltip on cell
+         */
+        "showTooltip"?: boolean;
+        /**
           * Alternative way to set sorting. `{columns: [{prop: 'name', order: 'asc'}]}`
          */
         "sorting"?: SortingConfig;
@@ -1827,6 +1863,10 @@ declare namespace LocalJSX {
          */
         "rowSelectionStore": Observable<SelectionStoreState>;
         /**
+          * Show tooltip on cell
+         */
+        "showTooltip"?: boolean;
+        /**
           * Row data type
          */
         "type": DimensionRows;
@@ -1991,6 +2031,14 @@ declare namespace LocalJSX {
           * Column groups
          */
         "groups"?: Groups;
+        /**
+          * Need to higlight filter on range cells
+         */
+        "highlightFilter"?: boolean;
+        /**
+          * Need to higlight header on range cells
+         */
+        "highlightHeader"?: boolean;
         /**
           * After all header cells rendered. Finalizes cell rendering.
          */

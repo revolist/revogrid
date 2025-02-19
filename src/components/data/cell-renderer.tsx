@@ -16,6 +16,7 @@ interface RenderProps {
   schemaModel: CellTemplateProp;
   additionalData?: any;
   dragStartCell?: EventEmitter<DragStartEvent>;
+  showTooltip?: boolean;
 }
 
 
@@ -59,9 +60,11 @@ function renderCell(v: RenderProps) {
       );
     }
     
-    els.push(`${
-      getCellDataParsed(v.schemaModel.model, v.schemaModel.column)
-    }`);
+    els.push(
+      <span title={v.showTooltip ? getCellDataParsed(v.schemaModel.model, v.schemaModel.column) : ''}>
+        {getCellDataParsed(v.schemaModel.model, v.schemaModel.column)}
+      </span>
+    );
   }
   return els;
 }

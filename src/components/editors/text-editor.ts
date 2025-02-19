@@ -1,5 +1,5 @@
 import { type VNode, h as createElement } from '@stencil/core';
-import { isEnterKeyValue, isTab } from '../../utils/key.utils';
+import { isEnterKeyValue } from '../../utils/key.utils';
 import { timeout } from '../../utils';
 import type { EditCell, EditorBase, ColumnDataSchemaModel } from '@type';
 
@@ -40,10 +40,9 @@ export class TextEditor implements EditorBase {
 
   onKeyDown(e: KeyboardEvent) {
     const isEnter = isEnterKeyValue(e.key);
-    const isKeyTab = isTab(e.key);
 
     if (
-      (isKeyTab || isEnter) &&
+      (isEnter) &&
       e.target &&
       this.saveCallback &&
       !e.isComposing
@@ -51,7 +50,7 @@ export class TextEditor implements EditorBase {
       // blur is needed to avoid autoscroll
       this.beforeDisconnect();
       // request callback which will close cell after all
-      this.saveCallback(this.getValue(), isKeyTab);
+      this.saveCallback(this.getValue(), false);
     }
   }
 

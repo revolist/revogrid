@@ -26,6 +26,8 @@ export type HeaderRenderProps = {
   range?: RangeArea | null;
   canResize?: boolean;
   canFilter?: boolean;
+  highlightFilter?: boolean;
+  highlightHeader?: boolean;
   onResize?(e: ResizeEvent): void;
   onClick?(data: InitialHeaderClick): void;
   onDblClick?(data: InitialHeaderClick): void;
@@ -71,13 +73,21 @@ const HeaderRenderer = (p: HeaderRenderProps): ReturnType<typeof h> => {
       });
     },
   };
-  if (p.range) {
+
+  if (p.highlightHeader && p.range) {
     if (p.column.itemIndex >= p.range.x && p.column.itemIndex <= p.range.x1) {
       if (typeof dataProps.class === 'object') {
         dataProps.class[FOCUS_CLASS] = true;
       }
     }
   }
+
+  if (p.highlightFilter && p.data?.hasFilter) {
+    if (typeof dataProps.class === 'object') {
+      dataProps.class[FOCUS_CLASS] = true;
+    }
+  }
+
   return (
     <HeaderCellRenderer
       data={p.data}

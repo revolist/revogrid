@@ -24,7 +24,6 @@ export function isMetaKey(code: number): boolean {
     KeyCodesEnum.F10,
     KeyCodesEnum.F11,
     KeyCodesEnum.F12,
-    KeyCodesEnum.TAB,
     KeyCodesEnum.PAGE_DOWN,
     KeyCodesEnum.PAGE_UP,
     KeyCodesEnum.ENTER,
@@ -61,13 +60,6 @@ export function isCtrlMetaKey(code: KeyCodesEnum): boolean {
 
 export function isClear(code: string): boolean {
   return codesLetter.BACKSPACE === code || codesLetter.DELETE === code;
-}
-
-export function isTab(code: string): boolean {
-  return codesLetter.TAB === code;
-}
-export function isTabKeyValue(key: string): boolean {
-  return keyValues.TAB === key;
 }
 
 export function isEnterKeyValue(key: string): boolean {

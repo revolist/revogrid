@@ -3,12 +3,12 @@
 revo-grid[theme='default'],
 revo-grid:not([theme]) {
   $header-size: 30px;
-  $header-bg: #f8f9fa;
-  $header-color: #000;
-  $header-border-color: #cecece;
+  $header-bg: hsl(var(--background));
+  $header-color: hsl(var(--foreground));
+  $header-border-color: hsl(var(--border));
   $default-rows-size: 27px;
-  $cell-border-color: #e2e3e3;
-  $focused-header: rgba(#e9eaed, 0.5);
+  $cell-border-color: hsl(var(--border));
+  $focused-header: hsl(var(--muted));
   border: 1px solid $header-border-color;
 
   font-size: 12px;

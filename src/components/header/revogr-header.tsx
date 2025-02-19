@@ -65,6 +65,16 @@ export class RevogrHeaderComponent {
   @Prop() resizeHandler: ResizeProps['active'];
 
   /**
+   * Need to higlight header on range cells
+   */
+  @Prop() highlightHeader = false;
+
+  /**
+   * Need to higlight filter on range cells
+   */
+  @Prop() highlightFilter = true;
+
+  /**
    * Columns - defines an array of grid columns.
    */
   @Prop() colData: ColumnRegular[];
@@ -188,6 +198,8 @@ export class RevogrHeaderComponent {
         canFilter: !!this.columnFilter,
         canResize: this.canResize,
         active: this.resizeHandler,
+        highlightFilter: this.highlightFilter,
+        highlightHeader: this.highlightHeader,
         onResize: e => this.onResize(e, rgCol.itemIndex),
         onDblClick: e => this.headerdblClick.emit(e),
         onClick: e => this.initialHeaderClick.emit(e),

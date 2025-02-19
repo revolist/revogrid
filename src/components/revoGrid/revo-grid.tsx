@@ -300,6 +300,16 @@ export class RevoGridComponent {
   @Prop() jobsBeforeRender: Promise<any>[] = [];
 
   /**
+   * Need to higlight header on range cells
+   */
+  @Prop() highlightHeader = false;
+
+  /**
+   * Need to higlight filter on range headers
+   */
+  @Prop() highlightFilter = false;
+
+  /**
    * Register new virtual node inside of grid.
    * Used for additional items creation such as plugin elements.
    * Should be set before grid render inside of plugins.
@@ -318,7 +328,10 @@ export class RevoGridComponent {
    */
   @Prop() accessible = true;
 
-
+  /**
+   * Show tooltip on cell
+   */
+  @Prop() showTooltip = true;
 
   /**
    * Disable native drag&drop plugin.
@@ -1641,6 +1654,8 @@ export class RevoGridComponent {
         viewportCol: view.viewportCol,
         selectionStore: view.columnSelectionStore,
         canResize: this.resize,
+        highlightHeader: this.highlightHeader,
+        highlightFilter: this.highlightFilter,
         readonly: this.readonly,
         columnFilter: !!this.filter,
       };
@@ -1687,6 +1702,7 @@ export class RevoGridComponent {
               additionalData={this.additionalData}
               jobsBeforeRender={this.jobsBeforeRender}
               slot={DATA_SLOT}
+              showTooltip={this.showTooltip}
             >
               <slot name={`data-${view.type}-${data.type}`} />
             </revogr-data>
