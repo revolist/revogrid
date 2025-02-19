@@ -314,7 +314,6 @@ export class RevogrViewportScroll implements ElementScroll {
   render() {
     return (
       <Host
-        onWheel={this.horizontalMouseWheel}
         onScroll={(e: UIEvent) => this.applyScroll('rgCol', e)}
       >
         <div
@@ -327,7 +326,13 @@ export class RevogrViewportScroll implements ElementScroll {
           <div
             class="vertical-inner"
             ref={el => (this.verticalScroll = el)}
-            onWheel={this.verticalMouseWheel}
+            onWheel={(e: WheelEvent) => {
+              if (e.shiftKey) {
+                this.horizontalMouseWheel(e);
+              } else {
+                this.verticalMouseWheel(e);
+              }
+            }}
             onScroll={(e: MouseEvent) => this.applyScroll('rgRow', e)}
           >
             <div
