@@ -11,7 +11,7 @@ export default class GridResizeService {
     width: 0,
     height: 0,
   };
-  private apply = throttle(
+  private readonly apply = throttle(
     (e: ReadonlyArray<ResizeObserverEntry>) => {
       const entry = {
         width: e[0].contentRect.width,
@@ -24,7 +24,7 @@ export default class GridResizeService {
   );
   constructor(
     el: HTMLElement,
-    private resize: (
+    private readonly resize: (
       entry: ResizeEntry,
       previousSize: ResizeEntry,
     ) => void,

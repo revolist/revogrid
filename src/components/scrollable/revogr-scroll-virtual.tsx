@@ -140,14 +140,26 @@ export class RevogrScrollVirtual {
     // Set scroll size based on whether scroll is needed
     this.size = hasScroll ? this.scrollSize : 0;
 
+    let additionalScrollbarSize = 0;
+    if (this.dimension === 'rgRow') {
+      additionalScrollbarSize =
+        this.element.scrollWidth > this.element.clientWidth
+          ? scrollbarSize
+          : 0;
+    } else {
+      additionalScrollbarSize =
+        this.element.scrollHeight > this.element.clientHeight
+          ? scrollbarSize
+          : 0;
+    }
+
+    const clientSize = this.size + additionalScrollbarSize;
+
     this.localScrollService.setParams(
       {
         contentSize: this.dimensionStore.get('realSize'),
         // Add scrollbar size to clientSize if other dimension has scroll
-        clientSize: this.size + (this.dimension === 'rgRow' ? 
-          (this.element.scrollWidth > this.element.clientWidth ? scrollbarSize : 0) :
-          (this.element.scrollHeight > this.element.clientHeight ? scrollbarSize : 0)
-        ),
+        clientSize,
         virtualSize: this.viewportStore.get('clientSize'),
       },
       this.dimension,
