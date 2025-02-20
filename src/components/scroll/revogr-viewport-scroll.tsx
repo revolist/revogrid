@@ -24,7 +24,7 @@ import type {
   ElementScroll,
   ScrollCoordinateEvent,
   ViewPortResizeEvent,
-  ViewPortScrollEvent
+  ViewPortScrollEvent,
 } from '@type';
 
 type Delta = 'deltaX' | 'deltaY';
@@ -45,7 +45,7 @@ type LocalScrollEvent = {
 export class RevogrViewportScroll implements ElementScroll {
   /**
    * Enable row header
-  */
+   */
   @Prop() readonly rowHeader: boolean;
 
   /**
@@ -62,11 +62,13 @@ export class RevogrViewportScroll implements ElementScroll {
   /**
    * Before scroll event
    */
-  @Event({ eventName: 'scrollviewport', bubbles: true }) scrollViewport: EventEmitter<ViewPortScrollEvent>;
+  @Event({ eventName: 'scrollviewport', bubbles: true })
+  scrollViewport: EventEmitter<ViewPortScrollEvent>;
   /**
    * Viewport resize
    */
-  @Event({ eventName: 'resizeviewport' }) resizeViewport: EventEmitter<ViewPortResizeEvent>;
+  @Event({ eventName: 'resizeviewport' })
+  resizeViewport: EventEmitter<ViewPortResizeEvent>;
 
   /**
    * Triggered on scroll change, can be used to get information about scroll visibility
@@ -79,8 +81,9 @@ export class RevogrViewportScroll implements ElementScroll {
   /**
    * Silently scroll to coordinate
    * Made to align negative coordinates for mobile devices
-  */
-  @Event({ eventName: 'scrollviewportsilent' }) silentScroll: EventEmitter<ViewPortScrollEvent>;
+   */
+  @Event({ eventName: 'scrollviewportsilent' })
+  silentScroll: EventEmitter<ViewPortScrollEvent>;
 
   @Element() horizontalScroll: HTMLElement;
 
@@ -98,7 +101,6 @@ export class RevogrViewportScroll implements ElementScroll {
   private localScrollService: LocalScrollService;
   private localScrollTimer: LocalScrollTimer;
 
-
   @Method() async setScroll(e: ViewPortScrollEvent) {
     this.localScrollTimer.latestScrollUpdate(e.dimension);
     this.localScrollService?.setScroll(e);
@@ -108,10 +110,7 @@ export class RevogrViewportScroll implements ElementScroll {
    * update on delta in case we don't know existing position or external change
    * @param e
    */
-  @Method() async changeScroll(
-    e: ViewPortScrollEvent,
-    silent = false,
-  ) {
+  @Method() async changeScroll(e: ViewPortScrollEvent, silent = false) {
     if (silent) {
       if (e.coordinate && this.verticalScroll) {
         switch (e.dimension) {
@@ -177,7 +176,9 @@ export class RevogrViewportScroll implements ElementScroll {
       'rgCol',
       'deltaX',
     );
-    this.localScrollTimer = new LocalScrollTimer('ontouchstart' in document.documentElement ? 0 : 10);
+    this.localScrollTimer = new LocalScrollTimer(
+      'ontouchstart' in document.documentElement ? 0 : 10,
+    );
     /**
      * Create local scroll service
      */
@@ -209,29 +210,50 @@ export class RevogrViewportScroll implements ElementScroll {
 
   componentDidLoad() {
     // track horizontal viewport resize
-    this.resizeService = new GridResizeService(this.horizontalScroll, {
-      resize: entries => {
-        let height = entries[0]?.contentRect.height || 0;
-        if (height) {
-          height -= (this.header?.clientHeight ?? 0) + (this.footer?.clientHeight ?? 0);
-        }
-        const els = {
-          rgRow: {
+    this.resizeService = new GridResizeService(
+      this.horizontalScroll,
+      (entry, previousSize) => {
+        const els: Partial<
+          Record<
+            DimensionType,
+            {
+              size: number;
+              contentSize: number;
+              scroll: number;
+              noScroll: boolean;
+            }
+          >
+        > = {};
+        if (entry.height !== previousSize.height) {
+          let height = entry.height || 0;
+          if (height) {
+            height -=
+              (this.header?.clientHeight ?? 0) +
+              (this.footer?.clientHeight ?? 0);
+          }
+          els.rgRow = {
             size: height,
             contentSize: this.contentHeight,
-            scroll: this.verticalScroll?.scrollTop,
+            scroll: this.verticalScroll?.scrollTop ?? 0,
             noScroll: false,
-          },
-          rgCol: {
-            size: entries[0]?.contentRect.width || 0,
+          };
+        }
+        if (entry.width !== previousSize.width) {
+          els.rgCol = {
+            size: entry.width || 0,
             contentSize: this.contentWidth,
             scroll: this.horizontalScroll.scrollLeft,
             noScroll: this.colType !== 'rgCol',
-          },
-        };
+          };
+        }
+
         for (const [dim, item] of Object.entries(els)) {
           const dimension = dim as DimensionType;
-          this.resizeViewport.emit({ dimension, size: item.size, rowHeader: this.rowHeader });
+          this.resizeViewport.emit({
+            dimension,
+            size: item.size,
+            rowHeader: this.rowHeader,
+          });
           if (item.noScroll) {
             continue;
           }
@@ -240,7 +262,7 @@ export class RevogrViewportScroll implements ElementScroll {
           this.setScrollVisibility(dimension, item.size, item.contentSize);
         }
       },
-    });
+    );
   }
 
   /**
@@ -406,7 +428,7 @@ export class RevogrViewportScroll implements ElementScroll {
     const scrollHeight = this.verticalScroll?.scrollHeight ?? 0;
 
     // Detect if the user has reached the bottom
-    const atBottom = (scrollTop + clientHeight >= scrollHeight) && e.deltaY > 0;
+    const atBottom = scrollTop + clientHeight >= scrollHeight && e.deltaY > 0;
     const atTop = scrollTop === 0 && e.deltaY < 0;
     if (!atBottom && !atTop) {
       e.preventDefault?.();
@@ -433,7 +455,7 @@ export class RevogrViewportScroll implements ElementScroll {
     const { scrollLeft, scrollWidth, clientWidth } = this.horizontalScroll;
 
     // Detect if the user has reached the right end
-    const atRight = (scrollLeft + clientWidth >= scrollWidth) && e.deltaX > 0;
+    const atRight = scrollLeft + clientWidth >= scrollWidth && e.deltaX > 0;
 
     // Detect if the user has reached the left end
     const atLeft = scrollLeft === 0 && e.deltaX < 0;
