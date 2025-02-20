@@ -13,6 +13,9 @@ export default class GridResizeService {
   };
   private readonly apply = throttle(
     (e: ReadonlyArray<ResizeObserverEntry>) => {
+      if (!e.length) {
+        return;
+      }
       const entry = {
         width: e[0].contentRect.width,
         height: e[0].contentRect.height,
