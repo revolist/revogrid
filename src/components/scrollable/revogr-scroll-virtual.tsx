@@ -8,7 +8,9 @@ import {
   Method,
   Prop,
 } from '@stencil/core';
-import LocalScrollService, { getContentSize } from '../../services/local.scroll.service';
+import LocalScrollService, {
+  getContentSize,
+} from '../../services/local.scroll.service';
 import type {
   DimensionType,
   ViewportState,
@@ -106,7 +108,9 @@ export class RevogrScrollVirtual {
 
   connectedCallback() {
     this.autohideScrollPlugin = new AutohideScrollPlugin(this.element);
-    this.localScrollTimer = new LocalScrollTimer('ontouchstart' in document.documentElement ? 0 : 10);
+    this.localScrollTimer = new LocalScrollTimer(
+      'ontouchstart' in document.documentElement ? 0 : 10,
+    );
     this.localScrollService = new LocalScrollService({
       runScroll: e => this.scrollVirtual.emit(e),
       applyScroll: e => {
@@ -128,15 +132,34 @@ export class RevogrScrollVirtual {
 
   componentDidRender() {
     const type = this.dimension === 'rgRow' ? 'scrollHeight' : 'scrollWidth';
-    if (this.element[type] > this.size) {
-      this.size = this.scrollSize;
+    // Get scrollbar size once during component initialization
+    const scrollbarSize = this.scrollSize;
+    // Calculate if content exceeds viewport size
+    // Add scrollbar size to the comparison to account for other dimension's scrollbar
+    const hasScroll = this.element[type] > this.size + scrollbarSize;
+    // Set scroll size based on whether scroll is needed
+    this.size = hasScroll ? this.scrollSize : 0;
+
+    let additionalScrollbarSize = 0;
+    if (this.dimension === 'rgRow') {
+      additionalScrollbarSize =
+        this.element.scrollWidth > this.element.clientWidth
+          ? scrollbarSize
+          : 0;
     } else {
-      this.size = 0;
+      additionalScrollbarSize =
+        this.element.scrollHeight > this.element.clientHeight
+          ? scrollbarSize
+          : 0;
     }
+
+    const clientSize = this.size + additionalScrollbarSize;
+
     this.localScrollService.setParams(
       {
         contentSize: this.dimensionStore.get('realSize'),
-        clientSize: this.size,
+        // Add scrollbar size to clientSize if other dimension has scroll
+        clientSize,
         virtualSize: this.viewportStore.get('clientSize'),
       },
       this.dimension,
@@ -163,7 +186,7 @@ export class RevogrScrollVirtual {
     const size = getContentSize(
       this.dimensionStore.get('realSize'),
       this.size,
-      this.viewportStore.get('clientSize') // content viewport size
+      this.viewportStore.get('clientSize'), // content viewport size
     );
     return (
       <Host onScroll={(e: MouseEvent) => this.onScroll(e)}>

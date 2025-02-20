@@ -36,6 +36,9 @@ export function getContentSize(
   clientSize: number,
   virtualSize = 0,
 ): number {
+  if (virtualSize > contentSize) {
+    return 0;
+  }
   return contentSize + (virtualSize ? clientSize - virtualSize : 0);
 }
 
