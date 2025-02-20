@@ -346,6 +346,12 @@ export class RevoGridComponent {
   @Prop() clearFocusOnOutsideClick = false;
 
   @Prop() selectWholeRow = false;
+
+  /** Строка поиска для глобального фильтра */
+  @Prop() searchQuery: string = '';
+
+  /** Исходные данные, которые не изменяются */
+  private originalData: DataType[] = [];
   // #endregion
 
   // #region Events
@@ -947,6 +953,42 @@ export class RevoGridComponent {
    */
   @Method() async refreshExtraElements() {
     this.extraService?.refresh();
+  }
+
+  /**
+   * Фильтрует строки на основе строки поиска.
+   * Отображает только те строки, которые содержат строку поиска.
+   */
+  @Method() async filterRows() {
+    if (!this.dataProvider) {
+      throw new Error('Not connected');
+    }
+
+    // Если оригинальные данные еще не сохранены, сохраняем их
+    if (this.originalData.length === 0) {
+      this.originalData = await this.getSource();
+    }
+
+    // Если строка поиска пуста, восстанавливаем все данные
+    if (!this.searchQuery) {
+      this.dataProvider.setData(this.originalData, 'rgRow', this.disableVirtualY);
+      return;
+    }
+
+    const filteredRows = this.originalData.filter(row => {
+      return Object.values(row).some(value => {
+        if (value == null) {
+          return false;
+        }
+        return value.toString().toLowerCase().includes(this.searchQuery.toLowerCase());
+      });
+    });
+    this.dataProvider.setData(filteredRows, 'rgRow', this.disableVirtualY);
+  }
+
+  @Watch('searchQuery')
+  onSearchQueryChange() {
+    this.filterRows();
   }
 
   // #endregion

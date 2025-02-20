@@ -3,7 +3,7 @@
 
   position: relative;
   overflow: hidden;
-  color: #fff;
+  color: hsl(var(--primary-foreground));
   background-color: #4545ff;
   height: $h;
   line-height: $h;

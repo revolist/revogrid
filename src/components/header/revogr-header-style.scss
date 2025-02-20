@@ -81,11 +81,13 @@ revogr-header {
       z-index: 90;
       touch-action: none;
       user-select: none;
+      background-color: hsl(var(--muted));
       &:hover {
+        width: 5px;
         background-color: hsl(var(--primary));
       }
     }
-    $size: 6px;
+    $size: 1px;
     > .resizable-r {
       cursor: ew-resize;
       width: $size;

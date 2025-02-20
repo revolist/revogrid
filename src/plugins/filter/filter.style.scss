@@ -84,7 +84,7 @@ revogr-filter-panel {
 
     .filter-img {
       $img-size: 11px;
-      color: hsl(var(--primary));
+      color: hsl(var(----primary-foreground));
       width: $img-size;
     }
   }
