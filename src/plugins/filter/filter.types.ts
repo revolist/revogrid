@@ -66,7 +66,7 @@ export interface FilterCaptions {
 };
 
 export interface FilterLocalization {
-  captions: FilterCaptions;
+  captions: Partial<FilterCaptions>;
   filterNames: Record<FilterType, string>;
 }
 /**
