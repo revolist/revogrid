@@ -33,12 +33,12 @@ export type LogicFunctionExtraParam =
   | string
   | string[]
   | number[];
-export type LogicFunction<T1 = LogicFunctionParam, T2 = LogicFunctionExtraParam> = {
+export interface LogicFunction<T1 = LogicFunctionParam, T2 = LogicFunctionExtraParam> {
   (value: T1, extra?: T2): boolean;
   extra?: ExtraField;
-};
+}
 
-export type CustomFilter<T1 = LogicFunctionParam, T2 = LogicFunctionExtraParam> = {
+export interface CustomFilter<T1 = LogicFunctionParam, T2 = LogicFunctionExtraParam> {
   /**
    * Property defined in column { filter: string/number/abstract/enum...etc }
    */
@@ -66,7 +66,7 @@ export interface FilterCaptions {
 };
 
 export interface FilterLocalization {
-  captions: FilterCaptions;
+  captions: Partial<FilterCaptions>;
   filterNames: Record<FilterType, string>;
 }
 /**
@@ -110,16 +110,16 @@ export type FilterCollectionItem = {
 };
 
 
-export type FilterItem = {
+export interface FilterItem {
   // column id
   prop?: ColumnProp;
   // filter type definition
   type?: FilterType;
   // value for additional filtering, text value or some id
   value?: any;
-};
+}
 
-export type FilterData = {
+export interface FilterData {
   id: number;
   /**
    * Filter type
@@ -139,11 +139,11 @@ export type FilterData = {
   relation?: 'and' | 'or';
 };
 
-export type MultiFilterItem = {
+export interface MultiFilterItem {
   [prop: string]: FilterData[];
-};
+}
 
-export type ShowData = {
+export interface ShowData extends FilterItem, Omit<ColumnRegular, 'filter'> {
   x: number;
   y: number;
   /**
@@ -156,4 +156,4 @@ export type ShowData = {
   hideDefaultFilters?: boolean;
   // pass vnodes from plugins
   extraContent?: (data: ShowData) => any;
-} & FilterItem & Omit<ColumnRegular, 'filter'>;
+}

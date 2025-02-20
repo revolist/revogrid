@@ -443,7 +443,7 @@ export namespace Components {
           * Disables dynamic filtering. A way to apply filters on Save only
          */
         "disableDynamicFiltering": boolean;
-        "filterCaptions": FilterCaptions | undefined;
+        "filterCaptions": Partial<FilterCaptions> | undefined;
         "filterEntities": Record<string, LogicFunction>;
         "filterNames": Record<string, string>;
         "getChanges": () => Promise<ShowData | undefined>;
@@ -1835,7 +1835,7 @@ declare namespace LocalJSX {
           * Disables dynamic filtering. A way to apply filters on Save only
          */
         "disableDynamicFiltering"?: boolean;
-        "filterCaptions"?: FilterCaptions | undefined;
+        "filterCaptions"?: Partial<FilterCaptions> | undefined;
         "filterEntities"?: Record<string, LogicFunction>;
         "filterNames"?: Record<string, string>;
         "onFilterChange"?: (event: RevogrFilterPanelCustomEvent<MultiFilterItem>) => void;

@@ -65,7 +65,7 @@ export class FilterPanel {
   @State() filterItems: MultiFilterItem = {};
   @Prop() filterNames: Record<string, string> = {};
   @Prop() filterEntities: Record<string, LogicFunction> = {};
-  @Prop() filterCaptions: FilterCaptions | undefined;
+  @Prop() filterCaptions: Partial<FilterCaptions> | undefined;
   /**
    * Disables dynamic filtering. A way to apply filters on Save only
    */

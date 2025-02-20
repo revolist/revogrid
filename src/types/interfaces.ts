@@ -94,7 +94,7 @@ export type RowDrag =
 /**
  * `ColumnGrouping` type is used to define a grouping in a column.
  */
-export type ColumnGrouping<T = any> = {
+export interface ColumnGrouping<T = any> {
   /**
    * An array of objects that represent the children of the grouping.
    */
@@ -103,7 +103,7 @@ export type ColumnGrouping<T = any> = {
    * A `DataFormat` object that represents the name of the grouping.
    */
   name: DataFormat<T>;
-};
+}
 /**
  * Configuration for header inner template properties
  */
@@ -827,15 +827,15 @@ export type ScrollCoordinateEvent = {
 };
 
 /** Range paste. */
-export type RangeClipboardPasteEvent = {
+export interface RangeClipboardPasteEvent extends AllDimensionType {
   data: DataLookup;
   models: Partial<DataLookup>;
   range: RangeArea | null;
-} & AllDimensionType;
+}
 
 /** Range copy. */
-export type RangeClipboardCopyEventProps<T = any> = {
+export interface RangeClipboardCopyEventProps<T = any> extends AllDimensionType {
   data: DataFormat<T>[][];
   range: RangeArea;
   mapping: OldNewRangeMapping;
-} & AllDimensionType;
+}
