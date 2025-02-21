@@ -4,7 +4,7 @@
 
   $cell-shadow-cell: 0 -1px 0 0 $cell-border-color inset;
 
-  $focused-header: hsl(var(--muted));
+  $focused-header: hsl(var(--primary));
 
   .rowHeaders {
     background-color: #f7faff;
@@ -32,7 +32,8 @@
         }
       }
       &.focused-cell {
-        background: $focused-header;
+        color: hsl(var(--primary-foreground));
+        background: hsl(var(--primary));
       }
     }
   }
@@ -55,7 +56,7 @@
     .rgRow {
       box-shadow: $cell-shadow-cell;
       &.focused-rgRow {
-        background-color: $focused-header;
+        background-color: hsl(var(--muted));
       }
     }
 

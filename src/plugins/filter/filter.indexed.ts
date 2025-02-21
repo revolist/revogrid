@@ -14,9 +14,9 @@ import { LogicFunction } from './filter.types';
 export const filterCoreFunctionsIndexedByType: Record<FilterType, LogicFunction> = {
   none: () => true,
   empty: notSet,
-  notEmpty: set,
+  notEmpty: set,/* 
   eq: eq,
-  notEq: notEq,
+  notEq: notEq, */
   begins: beginsWith,
   contains: contains,
   notContains: notContains,
@@ -30,7 +30,7 @@ export const filterCoreFunctionsIndexedByType: Record<FilterType, LogicFunction>
 };
 
 export const filterTypes: Record<string, FilterType[]> = {
-  string: ['notEmpty', 'empty', 'eq', 'notEq', 'begins', 'contains', 'notContains'],
+  string: ['notEmpty', 'empty', 'contains', 'notContains', 'begins'],
   number: ['notEmpty', 'empty', 'eqN', 'neqN', 'gt', 'gte', 'lt', 'lte'],
 };
 
@@ -38,9 +38,9 @@ export const filterNames = {
   none: 'Нет',
   empty: 'Пусто',
   notEmpty: 'Не пусто',
-
+/* 
   eq: 'Равно',
-  notEq: 'Не равно',
+  notEq: 'Не равно', */
   begins: 'Начинается с',
   contains: 'Содержит',
   notContains: 'Не содержит',

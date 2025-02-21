@@ -33,7 +33,8 @@
         }
       }
       &.focused-cell {
-        background: $focused-header-dark;
+        color: hsl(var(--primary-foreground));
+        background: hsl(var(--primary));
       }
     }
   }

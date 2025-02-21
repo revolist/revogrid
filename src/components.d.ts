@@ -124,6 +124,10 @@ export namespace Components {
          */
         "filter": boolean | ColumnFilterConfig;
         /**
+          * Фильтрует строки на основе строки поиска. Отображает только те строки, которые содержат строку поиска.
+         */
+        "filterRows": () => Promise<void>;
+        /**
           * Apply changes typed in editor on editor close except Escape cases. If custom editor in use method `getValue` required. Check `interfaces.d.ts` `EditorBase` for more info.
          */
         "focusTemplate": FocusTemplateFunc;
@@ -261,6 +265,10 @@ export namespace Components {
           * Scrolls viewport to specified row by index.
          */
         "scrollToRow": (coordinate?: number) => Promise<void>;
+        /**
+          * Строка поиска для глобального фильтра
+         */
+        "searchQuery": string;
         "selectWholeRow": boolean;
         /**
           * Open editor for cell.
@@ -1690,6 +1698,10 @@ declare namespace LocalJSX {
           * Indicates default rgRow size. By default 0, means theme package size will be applied  Alternatively you can use `rowSize` to reset viewport
          */
         "rowSize"?: number;
+        /**
+          * Строка поиска для глобального фильтра
+         */
+        "searchQuery"?: string;
         "selectWholeRow"?: boolean;
         /**
           * Show tooltip on cell

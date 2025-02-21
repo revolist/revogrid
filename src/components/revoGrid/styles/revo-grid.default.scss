@@ -8,7 +8,7 @@ revo-grid:not([theme]) {
   $header-border-color: hsl(var(--border));
   $default-rows-size: 27px;
   $cell-border-color: hsl(var(--border));
-  $focused-header: hsl(var(--muted));
+  $focused-header: hsl(var(--primary));
   border: 1px solid $header-border-color;
 
   font-size: 12px;
@@ -46,7 +46,8 @@ revo-grid:not([theme]) {
       box-shadow: $shadow-right, $shadow-top, $shadow-bottom;
 
       &.focused-cell {
-        background: $focused-header;
+        color: hsl(var(--primary-foreground));
+        background: hsl(var(--primary));
       }
     }
   }
@@ -123,7 +124,7 @@ revo-grid:not([theme]) {
     .rgRow {
       line-height: $default-rows-size;
       &.focused-rgRow {
-        background-color: $focused-header;
+        background-color: hsl(var(--muted));
       }
     }
     .rgCell {
