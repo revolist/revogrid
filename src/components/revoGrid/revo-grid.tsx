@@ -976,12 +976,18 @@ export class RevoGridComponent {
     }
 
     const filteredRows = this.originalData.filter(row => {
-      return Object.values(row).some(value => {
-        if (value == null) {
-          return false;
-        }
-        return value.toString().toLowerCase().includes(this.searchQuery.toLowerCase());
-      });
+      const searchInObject = (obj: any): boolean => {
+        return Object.values(obj).some(value => {
+          if (value == null) {
+            return false;
+          }
+          if (typeof value === 'object') {
+            return searchInObject(value);
+          }
+          return value.toString().toLowerCase().includes(this.searchQuery.toLowerCase());
+        });
+      };
+      return searchInObject(row);
     });
     this.dataProvider.setData(filteredRows, 'rgRow', this.disableVirtualY);
   }
