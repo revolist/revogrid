@@ -9,6 +9,7 @@ import { CONTENT_SLOT, FOOTER_SLOT, HEADER_SLOT, viewportDataPartition, VPPartit
 import ColumnDataProvider from '../../services/column.data.provider';
 import { DataProvider } from '../../services/data.provider';
 import type {
+  AllDimensionType,
   Cell,
   ColumnRegular,
   DimensionCols,
@@ -324,8 +325,29 @@ export default class ViewportService {
     }
   }
 
-  getSelectedRange(): RangeArea | null | undefined {
-    return this.config.selectionStoreConnector.selectedRange;
+  getSelectedRange(): RangeArea & AllDimensionType | null | undefined {
+
+    const focused = this.config.selectionStoreConnector.focusedStore;
+    if (!focused) {
+      return null;
+    }
+    // get column data
+    const colType =
+      this.config.selectionStoreConnector.storesXToType[focused.position.x];
+
+    // get row data
+    const rowType =
+      this.config.selectionStoreConnector.storesYToType[focused.position.y];
+
+    const range = focused.entity.store.get('range');
+    if (!range) {
+      return null;
+    }
+    return {
+      ...range,
+      colType,
+      rowType,
+    }
   }
 
   setEdit(
