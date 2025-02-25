@@ -904,7 +904,7 @@ export class RevoGridComponent {
   /**
    * Get the currently selected Range.
    */
-  @Method() async getSelectedRange(): Promise<RangeArea | null> {
+  @Method() async getSelectedRange(): Promise<RangeArea & AllDimensionType | null> {
     return this.viewport?.getSelectedRange() ?? null;
   }
 
