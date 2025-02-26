@@ -7,7 +7,7 @@ import reduce from 'lodash/reduce';
 
 import { BasePlugin } from './base.plugin';
 import { getSourceItem, columnTypes } from '@store';
-import {
+import type {
   DimensionCols,
   DimensionRows,
   ColumnRegular,
@@ -52,7 +52,7 @@ export type AutoSizeColumnConfig = {
 
 const LETTER_BLOCK_SIZE = 7;
 
-enum ColumnAutoSizeMode {
+export const enum ColumnAutoSizeMode {
   // increases column width on header click according the largest text value
   headerClickAutosize = 'headerClickAutoSize',
   // increases column width on data set and text edit, decreases performance
@@ -91,42 +91,39 @@ export class AutoSizeColumnPlugin extends BasePlugin {
     }: CustomEvent<SourceSetEvent>) => {
       this.setSource(source);
     };
-    const afteredit = ({ detail }: CustomEvent<EditEvent>) => {
-      this.afteredit(detail);
-    };
-    const afterEditAll = ({ detail }: CustomEvent<EditEvent>) => {
-      this.afterEditAll(detail);
-    };
     const beforecolumnsset = ({
       detail: { columns },
     }: CustomEvent<ColumnCollection>) => {
       this.columnSet(columns);
     };
-    const headerDblClick = ({ detail }: CustomEvent<InitialHeaderClick>) => {
-      const type = getColumnType(detail.column);
-      const size = this.getColumnSize(detail.index, type);
-      if (size) {
-        this.providers.dimension.setCustomSizes(
-          type,
-          {
-            [detail.index]: size,
-          },
-          true,
-        );
-      }
-    };
     this.addEventListener('beforecolumnsset', beforecolumnsset);
     switch (config?.mode) {
       case ColumnAutoSizeMode.autoSizeOnTextOverlap:
         this.addEventListener('aftersourceset', aftersourceset);
-        this.addEventListener('afteredit', afteredit);
+        this.addEventListener('afteredit',  ({ detail }: CustomEvent<EditEvent>) => {
+          this.afteredit(detail);
+        });
         break;
       case ColumnAutoSizeMode.autoSizeAll:
         this.addEventListener('aftersourceset', aftersourceset);
-        this.addEventListener('afteredit', afterEditAll);
+        this.addEventListener('afteredit', ({ detail }) => {
+          this.afterEditAll(detail);
+        });
         break;
       default:
-        this.addEventListener('headerdblclick', headerDblClick);
+        this.addEventListener('headerdblclick', ({ detail }: CustomEvent<InitialHeaderClick>) => {
+          const type = getColumnType(detail.column);
+          const size = this.getColumnSize(detail.index, type);
+          if (size) {
+            this.providers.dimension.setCustomSizes(
+              type,
+              {
+                [detail.index]: size,
+              },
+              true,
+            );
+          }
+        });
         break;
     }
   }
@@ -305,6 +302,7 @@ export class AutoSizeColumnPlugin extends BasePlugin {
       whiteSpace: 'nowrap',
       top: '0',
       overflowX: 'scroll',
+      display: 'block',
     };
 
     const el = document.createElement('div');
