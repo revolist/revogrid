@@ -206,7 +206,6 @@ export class RevogrHeaderComponent {
         <ColumnGroupsRenderer
           canResize={this.canResize}
           active={this.resizeHandler}
-          visibleProps={visibleProps}
           providers={this.providers}
           cols={cols}
           groups={this.groups}

@@ -6,7 +6,6 @@ import { GroupHeaderRenderer } from './headerGroupRenderer';
 import { ResizeProps } from '../../components/header/resizable.directive';
 
 type Props<T> = {
-  visibleProps: { [prop: string]: number };
   groups: Record<number, Group[]>;
   dimensionCol: Pick<DimensionSettingsState, 'indexes' | 'originItemSize' | 'indexToItem'>;
   cols: PositionItem[];
