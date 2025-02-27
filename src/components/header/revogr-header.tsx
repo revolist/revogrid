@@ -12,7 +12,7 @@ import keyBy from 'lodash/keyBy';
 import { HEADER_ACTUAL_ROW_CLASS, HEADER_ROW_CLASS } from '../../utils/consts';
 import { Groups } from '@store';
 import HeaderRenderer, { HeaderRenderProps } from './header-renderer';
-import ColumnGroupsRenderer from '../../plugins/groupingColumn/columnGroupsRenderer';
+import { ColumnGroupsRenderer } from '../../plugins/groupingColumn/columnGroupsRenderer';
 import { ResizeProps } from './resizable.directive';
 import {
   ColumnRegular,
@@ -208,6 +208,7 @@ export class RevogrHeaderComponent {
           active={this.resizeHandler}
           visibleProps={visibleProps}
           providers={this.providers}
+          cols={cols}
           groups={this.groups}
           dimensionCol={this.dimensionCol.state}
           depth={this.groupingDepth}

@@ -1,15 +1,15 @@
 import { h } from '@stencil/core';
-import findIndex from 'lodash/findIndex';
 import { Group, getItemByIndex } from '@store';
-import { DimensionSettingsState, Providers, DimensionCols } from '@type';
+import { DimensionSettingsState, Providers, DimensionCols, PositionItem } from '@type';
 import { HEADER_ROW_CLASS } from '../../utils/consts';
-import GroupHeaderRenderer from './headerGroupRenderer';
+import { GroupHeaderRenderer } from './headerGroupRenderer';
 import { ResizeProps } from '../../components/header/resizable.directive';
 
 type Props<T> = {
   visibleProps: { [prop: string]: number };
   groups: Record<number, Group[]>;
   dimensionCol: Pick<DimensionSettingsState, 'indexes' | 'originItemSize' | 'indexToItem'>;
+  cols: PositionItem[];
   depth: number;
   canResize: boolean;
   providers: Providers<T>;
@@ -17,25 +17,30 @@ type Props<T> = {
   onResize(changedX: number, startIndex: number, endIndex: number): void;
 } & Partial<Pick<ResizeProps, 'active'>>;
 
-const ColumnGroupsRenderer = ({
-  additionalData, providers, depth, groups, visibleProps, dimensionCol, canResize, active, onResize
+export const ColumnGroupsRenderer = ({
+  additionalData, providers, depth, groups, dimensionCol, cols, canResize, active, onResize
 }: Props<DimensionCols | 'rowHeaders'>): ReturnType<typeof h>[] => {
   // render group columns
   const groupRow: ReturnType<typeof h>[] = [];
+  const visibleIndexes = cols.map(col => col.itemIndex);
+
   for (let i = 0; i < depth; i++) {
+    let groupStartIndex = 0;
     if (groups[i]) {
       for (let group of groups[i]) {
-        // if group in visible range
-        // find first visible group prop in visible columns range
-        const indexFirstVisibleCol: number | undefined = findIndex(group.ids, id => typeof visibleProps[id] === 'number');
-        if (indexFirstVisibleCol > -1) {
-          const colVisibleIndex = visibleProps[group.ids[indexFirstVisibleCol]]; // get column index
-          const groupStartIndex = colVisibleIndex - indexFirstVisibleCol; // first column index in group
-          const groupEndIndex = groupStartIndex + group.ids.length - 1; // last column index in group
+        // Calculate group boundaries based on array positions
+        const groupEndIndex = groupStartIndex + group.ids.length - 1;
+        
+        // Check if any visible column is within this group's range
+        const isVisible = visibleIndexes.some(index => 
+          index >= groupStartIndex && index <= groupEndIndex
+        );
 
-          // coordinates
+        if (isVisible) {
+          // Get actual visible boundaries
           const groupStart = getItemByIndex(dimensionCol, groupStartIndex).start;
           const groupEnd = getItemByIndex(dimensionCol, groupEndIndex).end;
+
           groupRow.push(
             <GroupHeaderRenderer
               providers={providers}
@@ -49,11 +54,12 @@ const ColumnGroupsRenderer = ({
             />,
           );
         }
+        
+        // Move start index for next group
+        groupStartIndex = groupEndIndex + 1;
       }
     }
     groupRow.push(<div class={`${HEADER_ROW_CLASS} group`} />);
   }
   return groupRow;
 };
-
-export default ColumnGroupsRenderer;

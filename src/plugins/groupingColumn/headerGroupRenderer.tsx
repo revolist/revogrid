@@ -15,7 +15,7 @@ type Props = {
   onResize?(e: ResizeEvent): void;
 } & Partial<Pick<ResizeProps, 'active'>>;
 
-const GroupHeaderRenderer = (p: Props): ReturnType<typeof h> => {
+export const GroupHeaderRenderer = (p: Props): ReturnType<typeof h> => {
   const groupProps: CellProps & Partial<ResizeProps> = {
     canResize: p.canResize,
     minWidth: p.group.ids.length * MIN_COL_SIZE,
@@ -44,5 +44,3 @@ const GroupHeaderRenderer = (p: Props): ReturnType<typeof h> => {
     />
   );
 };
-
-export default GroupHeaderRenderer;
