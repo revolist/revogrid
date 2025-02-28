@@ -964,12 +964,10 @@ export class RevoGridComponent {
       throw new Error('Not connected');
     }
 
-    // Если оригинальные данные еще не сохранены, сохраняем их
-    if (this.originalData.length === 0) {
-      this.originalData = await this.getSource();
-    }
-
-    // Если строка поиска пуста, восстанавливаем все данные
+    // Перенесем сохранение оригинальных данных в отдельный метод
+    this.initializeOriginalData();
+    
+    // Остальная часть метода без изменений...
     if (!this.searchQuery) {
       this.dataProvider.setData(this.originalData, 'rgRow', this.disableVirtualY);
       return;
@@ -990,6 +988,13 @@ export class RevoGridComponent {
       return searchInObject(row);
     });
     this.dataProvider.setData(filteredRows, 'rgRow', this.disableVirtualY);
+  }
+
+  // Новый метод для инициализации оригинальных данных
+  @Method() async initializeOriginalData() {
+    if (this.originalData.length === 0) {
+      this.originalData = await this.getSource();
+    }
   }
 
   @Watch('searchQuery')
@@ -1463,6 +1468,14 @@ export class RevoGridComponent {
     this.pluginService.addUserPluginsAndCreate(this.element, plugins, prevPlugins, this.getPluginData());
  
   }
+
+  @Watch('source')
+  sourceChanged(newVal: DataType[]) {
+    this.originalData = [...newVal];
+    if (this.searchQuery) {
+      this.filterRows();
+    }
+  }
   // #endregion
 
   // #region Plugins
@@ -1616,6 +1629,17 @@ export class RevoGridComponent {
     this.aftergridinit.emit();
     // set inited flag for connectedCallback
     this.isInited = true;
+
+    // После загрузки данных инициализируем оригинальные данные
+    this.dataSourceChanged(this.source, undefined, 'source');
+    this.initializeOriginalData().then(() => {
+      // Если есть начальный поисковый запрос - применяем фильтрацию
+      console.log('searchQuery', this.searchQuery);
+      if (this.searchQuery) {
+        this.filterRows();
+        console.log('filterRows');
+      }
+    });
   }
 
   componentWillRender() {

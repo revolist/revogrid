@@ -190,6 +190,7 @@ export namespace Components {
           * Need to higlight header on range cells
          */
         "highlightHeader": boolean;
+        "initializeOriginalData": () => Promise<void>;
         /**
           * Prevent rendering until job is done. Can be used for initial rendering performance improvement. When several plugins require initial rendering this will prevent double initial rendering.
          */
