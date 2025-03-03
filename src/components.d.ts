@@ -154,7 +154,7 @@ export namespace Components {
         /**
           * Get the currently selected Range.
          */
-        "getSelectedRange": () => Promise<RangeArea | null>;
+        "getSelectedRange": () => Promise<(RangeArea & AllDimensionType) | null>;
         /**
           * Get data from source
          */
