@@ -39,7 +39,7 @@ export const config: Config = {
   hashFileNames: false,
   autoprefixCss: false,
   minifyCss: true,
-  minifyJs: true,
+  minifyJs: false, // Keep VNode unminified for inner properties access
   preamble: 'Built by Revolist OU ❤️',
   hashedFileNameLength: 8,
   invisiblePrehydration: false,

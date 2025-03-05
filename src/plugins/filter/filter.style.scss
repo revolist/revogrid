@@ -10,11 +10,12 @@ revogr-filter-panel {
 
   opacity: 1;
   transform: none;
-  background-color: #fff;
+  background-color: var(--revo-grid-filter-panel-bg, #fff);
+  border: 1px solid var(--revo-grid-filter-panel-border, #cecece);
   transform-origin: 62px 0px;
-  box-shadow: 0 5px 18px -2px rgba(black, 20%);
+  box-shadow: 0 5px 18px -2px var(--revo-grid-filter-panel-shadow, rgba(0, 0, 0, 0.15));
   padding: 10px;
-  border-radius: 4px;
+  border-radius: 8px;
 
   min-width: 220px;
   text-align: left;
@@ -38,7 +39,7 @@ revogr-filter-panel {
     border: 0;
     min-height: 34px;
     margin: 5px 0;
-    background: #f3f3f3;
+    background: var(--revo-grid-filter-panel-input-bg, #f3f3f3);
     border-radius: 5px;
     padding: 0 10px;
     box-sizing: border-box;
@@ -92,25 +93,21 @@ revogr-filter-panel {
 
 .select-css {
   $gradient: 'data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007CB2%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E';
-  $linearGradient: linear-gradient(to bottom, #ffffff 0%, #ffffff 100%);
-  $borderColor: #f1f1f1;
 
   display: block;
   font-family: sans-serif;
-  font-weight: 600;
-  color: #444;
   line-height: 1.3;
   padding: 0.6em 1.4em 0.5em 0.8em;
   width: 100%;
   max-width: 100%; /* useful when width is set to anything other than 100% */
   box-sizing: border-box;
   margin: 0;
-  border: 1px solid $borderColor;
+  border: 1px solid var(--revo-grid-filter-panel-select-border, #d9d9d9);
   box-shadow: transparent;
   border-radius: 0.5em;
   appearance: none;
-  background-color: #fff;
-  background-image: url($gradient), $linearGradient;
+  background-color: var(--revo-grid-filter-panel-input-bg, #f3f3f3);
+  background-image: url($gradient);
   background-repeat: no-repeat, repeat;
   /* arrow icon position (1em from the right, 50% vertical) , then gradient position*/
   background-position:
@@ -127,14 +124,13 @@ revogr-filter-panel {
   }
   /* Hover style */
   &:hover {
-    border-color: rgb(197, 197, 197);
+    border-color: var(--revo-grid-filter-panel-select-border, #d9d9d9);
   }
   /* Focus style */
   &:focus {
-    border-color: $borderColor;
+    border-color: var(--revo-grid-filter-panel-select-border-hover, #d9d9d9);
     box-shadow: 0 0 1px 3px rgba(59, 153, 252, 0.7);
     box-shadow: 0 0 0 3px -moz-mac-focusring;
-    color: #222;
     outline: none;
   }
 
@@ -153,7 +149,7 @@ revogr-filter-panel {
 
   &:disabled:hover,
   &[aria-disabled='true'] {
-    border-color: $borderColor;
+    border-color: var(--revo-grid-filter-panel-select-border, #d9d9d9);
   }
 }
 
@@ -196,7 +192,7 @@ revogr-filter-panel {
   display: block;
   margin: 0 -10px 10px -10px;
 
-  border-bottom: 1px solid #d9d9d9;
+  border-bottom: 1px solid var(--revo-grid-filter-panel-divider, #d9d9d9);
   height: 10px;
 }
 
@@ -204,19 +200,4 @@ revogr-filter-panel {
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-
-revo-grid[theme^='dark'] {
-  revogr-filter-panel {
-    background-color: $el-color-dark;
-
-    .add-filter-divider {
-      border-bottom-color: $el-color-dark;
-    }
-
-    input[type=text] {
-      background-color: $font-color-dark;
-      color: black;
-    }
-  }
 }

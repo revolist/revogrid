@@ -1,32 +1,28 @@
 @import './revo-grid.mixin.scss';
+@import './revo-grid.common.scss';
 
 revo-grid[theme='default'],
 revo-grid:not([theme]) {
   $header-size: 30px;
-  $header-bg: #f8f9fa;
-  $header-color: #000;
-  $header-border-color: #cecece;
   $default-rows-size: 27px;
-  $cell-border-color: #e2e3e3;
-  $focused-header: rgba(#e9eaed, 0.5);
-  border: 1px solid $header-border-color;
+  border: 1px solid var(--revo-grid-header-border);
 
   font-size: 12px;
 
   .rowHeaders revogr-header {
-    $shadow-right: -1px 0 0 0 $header-border-color inset;
+    $shadow-right: -1px 0 0 0 var(--revo-grid-header-border) inset;
     box-shadow: $shadow-right;
   }
 
   revogr-header {
-    $shadow-left: -1px 0 0 0 $header-border-color;
-    $shadow-right: -1px 0 0 0 $header-border-color inset;
-    $shadow-bottom: 0 -1px 0 0 $header-border-color inset;
-    $shadow-top: 0 -1px 0 0 $header-border-color;
+    $shadow-left: -1px 0 0 0 var(--revo-grid-header-border);
+    $shadow-right: -1px 0 0 0 var(--revo-grid-header-border) inset;
+    $shadow-bottom: 0 -1px 0 0 var(--revo-grid-header-border) inset;
+    $shadow-top: 0 -1px 0 0 var(--revo-grid-header-border);
 
     text-align: center;
     line-height: $header-size;
-    background-color: $header-bg;
+    background-color: var(--revo-grid-header-bg);
 
     .group-rgRow {
       box-shadow: none;
@@ -35,7 +31,7 @@ revo-grid:not([theme]) {
     .group-rgRow {
       text-transform: uppercase;
       font-size: 12px;
-      color: $header-color;
+      color: var(--revo-grid-header-color);
     }
     .header-rgRow {
       height: $header-size;
@@ -44,24 +40,20 @@ revo-grid:not([theme]) {
 
     .rgHeaderCell {
       box-shadow: $shadow-right, $shadow-top, $shadow-bottom;
-
-      &.focused-cell {
-        background: $focused-header;
-      }
     }
   }
 
   .rowHeaders {
-    background-color: $header-bg;
+    background-color: var(--revo-grid-header-bg);
 
-    $cell-shadow-right: -1px 0 0 0 $header-border-color inset;
-    $cell-shadow-bottom: 0 -1px 0 0 $header-border-color inset;
-    $cell-shadow-left: 1px 0 0 0 $header-border-color inset;
-    $cell-shadow-right: 1px 0 0 0 $header-border-color inset;
+    $cell-shadow-right: -1px 0 0 0 var(--revo-grid-header-border) inset;
+    $cell-shadow-bottom: 0 -1px 0 0 var(--revo-grid-header-border) inset;
+    $cell-shadow-left: 1px 0 0 0 var(--revo-grid-header-border) inset;
+    $cell-shadow-right: 1px 0 0 0 var(--revo-grid-header-border) inset;
 
     revogr-data {
       .rgCell {
-        color: $header-color;
+        color: var(--revo-grid-header-color);
 
         &:first-child {
           box-shadow: $cell-shadow-bottom;
@@ -70,7 +62,7 @@ revo-grid:not([theme]) {
           box-shadow: $cell-shadow-bottom, $cell-shadow-right;
         }
         &:last-child {
-          border-right: 1px solid $header-border-color;
+          border-right: 1px solid var(--revo-grid-header-border);
         }
       }
 
@@ -84,14 +76,14 @@ revo-grid:not([theme]) {
     &.colPinStart {
       revogr-data .rgRow .rgCell:last-child {
         $cell-shadow-cell:
-          0 -1px 0 0 $cell-border-color inset,
-          -1px 0 0 0 $header-border-color inset;
+          0 -1px 0 0 var(--revo-grid-cell-border) inset,
+          -1px 0 0 0 var(--revo-grid-header-border) inset;
         box-shadow: $cell-shadow-cell;
       }
       .footer-wrapper revogr-data .rgRow:first-child .rgCell {
         $cell-shadow-cell:
-          0 1px 0 0 $header-border-color inset,
-          -1px 0 0 0 $header-border-color inset;
+          0 1px 0 0 var(--revo-grid-header-border) inset,
+          -1px 0 0 0 var(--revo-grid-header-border) inset;
         box-shadow: $cell-shadow-cell;
       }
     }
@@ -99,21 +91,21 @@ revo-grid:not([theme]) {
     &.colPinEnd {
       &,
       revogr-header {
-        box-shadow: 1px 0 0 $header-border-color inset;
+        box-shadow: 1px 0 0 var(--revo-grid-header-border) inset;
       }
     }
   }
 
   .footer-wrapper revogr-data .rgRow:first-child .rgCell {
-    $cell-shadow-top: 0 1px 0 0 $cell-border-color inset;
-    $cell-shadow-right: -1px 0 0 0 $cell-border-color inset;
-    $cell-shadow-bottom: 0 -1px 0 0 $cell-border-color inset;
+    $cell-shadow-top: 0 1px 0 0 var(--revo-grid-cell-border) inset;
+    $cell-shadow-right: -1px 0 0 0 var(--revo-grid-cell-border) inset;
+    $cell-shadow-bottom: 0 -1px 0 0 var(--revo-grid-cell-border) inset;
     box-shadow: $cell-shadow-top, $cell-shadow-right, $cell-shadow-bottom;
   }
 
   revogr-data {
-    $cell-shadow-bottom: 0 -1px 0 0 $cell-border-color inset;
-    $cell-shadow-right: -1px 0 0 0 $cell-border-color inset;
+    $cell-shadow-bottom: 0 -1px 0 0 var(--revo-grid-cell-border) inset;
+    $cell-shadow-right: -1px 0 0 0 var(--revo-grid-cell-border) inset;
     text-align: center;
 
     .revo-draggable {
@@ -122,16 +114,9 @@ revo-grid:not([theme]) {
 
     .rgRow {
       line-height: $default-rows-size;
-      &.focused-rgRow {
-        background-color: $focused-header;
-      }
     }
     .rgCell {
       box-shadow: $cell-shadow-bottom, $cell-shadow-right;
-
-      &.disabled {
-        background-color: $cell-shadow-bottom, $cell-shadow-right;
-      }
     }
   }
 }
