@@ -1,6 +1,7 @@
-import type { DataType } from '@type';
+import type { CellCompareFunc, ColumnProp, ColumnRegular, DataType, Order } from '@type';
 import type { SortingOrderFunction } from './sorting.types';
 import { isGrouping } from '../groupingRow/grouping.service';
+import { getCellRaw } from '../../utils/column.utils';
 
 export function sortIndexByItems(
   indexes: number[],
@@ -42,4 +43,43 @@ export function sortIndexByItems(
     }
     return 0;
   });
+}
+
+export function defaultCellCompare(this: { column?: ColumnRegular }, prop: ColumnProp, a: DataType, b: DataType) {
+  const aRaw = this.column ? getCellRaw(a, this.column) : a?.[prop];
+  const bRaw = this.column ? getCellRaw(b, this.column) : b?.[prop];
+  const av = aRaw?.toString().toLowerCase();
+  const bv = bRaw?.toString().toLowerCase();
+
+  return av == bv ? 0 : av > bv ? 1 : -1;
+}
+
+export function descCellCompare(cmp: CellCompareFunc) {
+  return (prop: ColumnProp, a: DataType, b: DataType): number => {
+    return -1 * cmp(prop, a, b);
+  };
+}
+
+export function getNextOrder(currentOrder: Order): Order {
+  switch (currentOrder) {
+    case undefined:
+      return 'asc';
+    case 'asc':
+      return 'desc';
+    case 'desc':
+      return undefined;
+  }
+}
+
+
+export function getComparer(column: Partial<ColumnRegular> | undefined, order: Order): CellCompareFunc | undefined {
+  const cellCmp: CellCompareFunc =
+    column?.cellCompare?.bind({ order }) || defaultCellCompare?.bind({ column, order });
+  if (order == 'asc') {
+    return cellCmp;
+  }
+  if (order == 'desc') {
+    return descCellCompare(cellCmp);
+  }
+  return undefined;
 }
