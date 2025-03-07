@@ -51,7 +51,13 @@ export function defaultCellCompare(this: { column?: ColumnRegular }, prop: Colum
   const av = aRaw?.toString().toLowerCase();
   const bv = bRaw?.toString().toLowerCase();
 
-  return av == bv ? 0 : av > bv ? 1 : -1;
+  if (av === bv) {
+    return 0;
+  }
+  if (av > bv) {
+    return 1;
+  }
+  return -1;
 }
 
 export function descCellCompare(cmp: CellCompareFunc) {
