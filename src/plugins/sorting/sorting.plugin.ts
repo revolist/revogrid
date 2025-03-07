@@ -17,6 +17,8 @@ import { rowTypes } from '@store';
 import { sortIndexByItems } from './sorting.func';
 
 export * from './sorting.types';
+export * from './sorting.func';
+export * from './sorting.sign';
 
 /**
  * Lifecycle
