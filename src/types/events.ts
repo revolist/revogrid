@@ -1,5 +1,6 @@
 
 export type RevogridEvents = 'contentsizechanged'|
+  'datasizechanged'|
   'beforeedit'|
   'beforerangeedit'|
   'afteredit'|
@@ -112,6 +113,7 @@ export type RevogridEvents = 'contentsizechanged'|
   'html'
 export const REVOGRID_EVENTS = new Map<RevogridEvents, RevogridEvents>([
   ['contentsizechanged', 'contentsizechanged'],
+  ['datasizechanged', 'datasizechanged'],
   ['beforeedit', 'beforeedit'],
   ['beforerangeedit', 'beforerangeedit'],
   ['afteredit', 'afteredit'],

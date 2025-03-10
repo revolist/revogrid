@@ -363,6 +363,11 @@ export class RevoGridComponent {
   @Event() contentsizechanged: EventEmitter<MultiDimensionType>;
 
   /**
+   * Emitted when the data size changes.
+   */
+  @Event() datasizechanged: EventEmitter<number>;
+
+  /**
    * Before the data is edited.
    * To prevent the default behavior of editing data and use your own implementation, call `e.preventDefault()`.
    * To override the edit result with your own value, set the `e.val` property to your desired value.
@@ -970,6 +975,7 @@ export class RevoGridComponent {
     // Остальная часть метода без изменений...
     if (!this.searchQuery) {
       this.dataProvider.setData(this.originalData, 'rgRow', this.disableVirtualY);
+      this.datasizechanged.emit(this.originalData.length);
       return;
     }
 
@@ -988,6 +994,7 @@ export class RevoGridComponent {
       return searchInObject(row);
     });
     this.dataProvider.setData(filteredRows, 'rgRow', this.disableVirtualY);
+    this.datasizechanged.emit(filteredRows.length);
   }
 
   // Новый метод для инициализации оригинальных данных
@@ -1317,9 +1324,6 @@ export class RevoGridComponent {
         break;
       case 'source':
         type = 'rgRow';
-        /**
-         * Applied for source only for cross compatability between plugins
-         */
         const beforesourceset = this.beforesourceset.emit({
           type,
           source: newVal,
@@ -1334,14 +1338,12 @@ export class RevoGridComponent {
     const newSource = [...beforesourceset.detail.source];
     this.dataProvider.setData(newSource, type, this.disableVirtualY);
 
-    /** 
-     * Applied for source only for cross compatability between plugins
-     */
     if (watchName === 'source') {
       this.aftersourceset.emit({
         type,
         source: newVal,
       });
+      this.datasizechanged.emit(newVal.length);
     }
     this.afteranysource.emit({
       type,
@@ -1439,6 +1441,7 @@ export class RevoGridComponent {
   }
 
   @Watch('filter') applyFilter(cfg: boolean | ColumnFilterConfig) {
+    console.log('applyFilter', cfg);
     this.filterconfigchanged.emit(cfg);
   }
 

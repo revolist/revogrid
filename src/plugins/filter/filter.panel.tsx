@@ -95,6 +95,11 @@ export class FilterPanel {
 
     const isOutside = !path.includes(this.element);
 
+    if (isOutside) {
+      //hide filter panel
+      this.changes = undefined;
+    }
+
     if (
       e.target instanceof HTMLElement &&
       isOutside &&

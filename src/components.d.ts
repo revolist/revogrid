@@ -847,6 +847,7 @@ export interface VnodeHtmlCustomEvent<T> extends CustomEvent<T> {
 declare global {
     interface HTMLRevoGridElementEventMap {
         "contentsizechanged": MultiDimensionType;
+        "datasizechanged": number;
         "beforeedit": BeforeSaveDataDetails;
         "beforerangeedit": BeforeRangeSaveDataDetails;
         "afteredit": AfterEditEvent;
@@ -1616,6 +1617,10 @@ declare namespace LocalJSX {
           * Emmited after grid created
          */
         "onCreated"?: (event: RevoGridCustomEvent<any>) => void;
+        /**
+          * Emitted when the data size changes.
+         */
+        "onDatasizechanged"?: (event: RevoGridCustomEvent<number>) => void;
         /**
           * Emitted when the filter configuration is changed
          */
