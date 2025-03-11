@@ -77,6 +77,7 @@ revo-grid {
   font-family: Helvetica, Arial, Sans-Serif, serif;
   font-size: 14px;
   position: relative;
+  color: var(--revo-grid-text);
 
   @include noSelect;
 
