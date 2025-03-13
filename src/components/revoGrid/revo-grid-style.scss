@@ -1,4 +1,5 @@
 @import './styles/revo-grid.mixin.scss';
+@import './styles/revo-grid.common.scss';
 @import './styles/revo-grid.default.scss';
 @import './styles/revo-grid.material.scss';
 @import './styles/revo-grid.dark.material.scss';
@@ -6,6 +7,63 @@
 @import './styles/revo-grid.compact.scss';
 
 revo-grid {
+  /* Base theme variables */
+  --revo-grid-primary: #266ae8;
+  --revo-grid-primary-transparent: rgba(38, 106, 232, 0.9);
+  --revo-grid-background: #fff;
+  --revo-grid-foreground: black;
+  --revo-grid-divider: gray;
+  --revo-grid-shadow: rgba(0, 0, 0, 0.15);
+  --revo-grid-text: black;
+  --revo-grid-border: rgba(0, 0, 0, 0.2);
+  
+  /* Filter panel variables */
+  --revo-grid-filter-panel-bg: #fff;
+  --revo-grid-filter-panel-border: #d9d9d9;
+  --revo-grid-filter-panel-shadow: rgba(0, 0, 0, 0.15);
+  --revo-grid-filter-panel-input-bg: #eaeaeb;
+  --revo-grid-filter-panel-divider: #d9d9d9;
+  --revo-grid-filter-panel-select-border: transparent;
+  --revo-grid-filter-panel-select-border-hover: transparent;
+
+  /* Grid specific variables */
+  --revo-grid-header-bg: #f8f9fa;
+  --revo-grid-header-color: #000;
+  --revo-grid-header-border: #cecece;
+  --revo-grid-cell-border: #e2e3e3;
+  --revo-grid-focused-bg: rgba(233, 234, 237, 0.5);
+  --revo-grid-row-hover: #f1f1f1;
+  --revo-grid-row-headers-bg: #f7faff;
+  --revo-grid-row-headers-color: #757a82;
+  --revo-grid-cell-disabled-bg: rgba(0, 0, 0, 0.07);
+  
+  /* Dark theme overrides - applied when theme contains 'dark' */
+  &[theme*='dark'] {
+    --revo-grid-background: #212529;
+    --revo-grid-foreground: #fff;
+    --revo-grid-text: rgba(255, 255, 255, 0.9);
+    --revo-grid-divider: #505050;
+    --revo-grid-border: rgba(255, 255, 255, 0.2);
+
+    /* Filter panel variables */
+    --revo-grid-filter-panel-bg: #212529;
+    --revo-grid-filter-panel-border: #505050;
+    --revo-grid-filter-panel-input-bg: #343a40;
+    --revo-grid-filter-panel-divider: #505050;
+
+    --revo-grid-header-bg: #343a40;
+    --revo-grid-header-color: #fff;
+    --revo-grid-header-border: #505050;
+    --revo-grid-cell-border: #424242;
+    --revo-grid-focused-bg: rgba(52, 58, 64, 0.5);
+    --revo-grid-row-hover: rgba(80, 80, 80, 0.5);
+    --revo-grid-row-headers-bg: rgba(52, 58, 64, 0.8);
+    --revo-grid-row-headers-color: rgba(255, 255, 255, 0.8);
+    --revo-grid-cell-disabled-bg: rgba(255, 255, 255, 0.07);
+  }
+  
+  @include revoGridCommon;
+  
   /*
   * Grid required to have a flex property to be able to stretch
   */
@@ -19,12 +77,13 @@ revo-grid {
   font-family: Helvetica, Arial, Sans-Serif, serif;
   font-size: 14px;
   position: relative;
+  color: var(--revo-grid-text);
 
   @include noSelect;
 
   .attribution {
     $size: 4px;
-    $color: rgba(#266ae8, 0.9);
+    $color: var(--revo-grid-primary-transparent);
 
     position: absolute;
     bottom: 0;
@@ -43,13 +102,13 @@ revo-grid {
       position: absolute;
       bottom: 0;
       left: 0;
-      background-color: rgba(255, 255, 255, 0.9);
+      background-color: var(--revo-grid-background);
       padding: 4px;
       border-radius: 4px;
-      box-shadow: 0 1px 10px rgba(0, 0, 0, 0.2);
+      box-shadow: 0 1px 10px var(--revo-grid-border);
       white-space: nowrap;
       text-decoration: none;
-      color: black;
+      color: var(--revo-grid-text);
       letter-spacing: 0.3px;
       font-size: 11px;
       opacity: 0;
@@ -121,13 +180,13 @@ revo-grid {
     position: fixed;
     height: $s;
     line-height: $s;
-    background: #fff;
+    background: var(--revo-grid-background);
     border-radius: 3px;
     display: block;
     z-index: 100;
     margin-top: 5px;
     margin-right: -20px;
-    box-shadow: 0 4px 20px 0 rgba(black, 0.15);
+    box-shadow: 0 4px 20px 0 var(--revo-grid-shadow);
     padding-left: 20px;
     padding-right: 5px;
 
@@ -136,7 +195,7 @@ revo-grid {
     }
 
     .revo-alt-icon {
-      $alt-icon-color: black;
+      $alt-icon-color: var(--revo-grid-foreground);
       background-color: $alt-icon-color;
       position: absolute;
       left: 5px;
@@ -156,7 +215,7 @@ revo-grid {
     right: 0;
     height: 1px;
     z-index: 2;
-    background: gray;
+    background: var(--revo-grid-divider);
     pointer-events: none;
   }
 
@@ -167,7 +226,7 @@ revo-grid {
     bottom: 0;
     width: 1px;
     z-index: 2;
-    background: gray;
+    background: var(--revo-grid-divider);
     pointer-events: none;
   }
 

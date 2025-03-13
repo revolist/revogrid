@@ -3,20 +3,19 @@ import debounce from 'lodash/debounce';
 
 import { BasePlugin } from '../base.plugin';
 import type {
-  ColumnProp,
   Order,
-  CellCompareFunc,
   ColumnRegular,
-  DataType,
   DimensionRows,
   PluginProviders,
 } from '@type';
 import type { SortingConfig, SortingOrder, SortingOrderFunction } from './sorting.types';
-import { getCellRaw, getColumnByProp } from '../../utils/column.utils';
+import { getColumnByProp } from '../../utils/column.utils';
 import { rowTypes } from '@store';
-import { sortIndexByItems } from './sorting.func';
+import { getComparer, getNextOrder, sortIndexByItems } from './sorting.func';
 
 export * from './sorting.types';
+export * from './sorting.func';
+export * from './sorting.sign';
 
 /**
  * Lifecycle
@@ -64,7 +63,7 @@ export class SortingPlugin extends BasePlugin {
         const sortingFunc: SortingOrderFunction = {};
         const order: SortingOrder = {};
         cfg.columns?.forEach(col => {
-          sortingFunc[col.prop] = this.getComparer(col, col.order);
+          sortingFunc[col.prop] = getComparer(col, col.order);
           order[col.prop] = col.order;
         });
 
@@ -106,7 +105,7 @@ export class SortingPlugin extends BasePlugin {
       const sortingFunc: SortingOrderFunction = {};
 
       for (let prop in order) {
-        const cmp = this.getComparer(
+        const cmp = getComparer(
           getColumnByProp(columns, prop),
           order[prop],
         );
@@ -146,24 +145,13 @@ export class SortingPlugin extends BasePlugin {
     this.postponeSort(order, sortingFunc, ignoreViewportUpdate);
   }
 
-  getComparer(column: Partial<ColumnRegular> | undefined, order: Order): CellCompareFunc | undefined {
-    const cellCmp: CellCompareFunc =
-      column?.cellCompare?.bind({ order }) || this.defaultCellCompare?.bind({ column, order });
-    if (order == 'asc') {
-      return cellCmp;
-    }
-    if (order == 'desc') {
-      return this.descCellCompare(cellCmp);
-    }
-    return undefined;
-  }
 
   /**
    * Apply sorting to data on header click
    * If additive - add to existing sorting, multiple columns can be sorted
    */
   headerclick(column: ColumnRegular, index: number, additive: boolean) {
-    let order: Order = this.getNextOrder(column.order);
+    let order: Order = getNextOrder(column.order);
     const beforeEvent = this.emit('beforesorting', { column, order, additive });
     if (beforeEvent.defaultPrevented) {
       return;
@@ -185,7 +173,7 @@ export class SortingPlugin extends BasePlugin {
     if (beforeApplyEvent.defaultPrevented) {
       return;
     }
-    const cmp = this.getComparer(beforeApplyEvent.detail.column, beforeApplyEvent.detail.order);
+    const cmp = getComparer(beforeApplyEvent.detail.column, beforeApplyEvent.detail.order);
 
     if (beforeApplyEvent.detail.additive && this.sorting) {
       const sorting: SortingOrder = {};
@@ -279,30 +267,6 @@ export class SortingPlugin extends BasePlugin {
     }
     this.emit('aftersortingapply');
   }
-
-  defaultCellCompare(this: { column?: ColumnRegular }, prop: ColumnProp, a: DataType, b: DataType) {
-    const aRaw = this.column ? getCellRaw(a, this.column) : a?.[prop];
-    const bRaw = this.column ? getCellRaw(b, this.column) : b?.[prop];
-    const av = aRaw?.toString().toLowerCase();
-    const bv = bRaw?.toString().toLowerCase();
-
-    return av == bv ? 0 : av > bv ? 1 : -1;
-  }
-
-  descCellCompare(cmp: CellCompareFunc) {
-    return (prop: ColumnProp, a: DataType, b: DataType): number => {
-      return -1 * cmp(prop, a, b);
-    };
-  }
-
-  getNextOrder(currentOrder: Order): Order {
-    switch (currentOrder) {
-      case undefined:
-        return 'asc';
-      case 'asc':
-        return 'desc';
-      case 'desc':
-        return undefined;
-    }
-  }
 }
+
+

@@ -1,0 +1,58 @@
+@mixin revoGridCommon() {
+  revogr-header {
+    .header-rgRow {
+      &.group {
+        $shadow-bottom: 0 -1px 0 0 var(--revo-grid-header-border) inset;
+        box-shadow: $shadow-bottom;
+      }
+
+      &:not(.group) {
+        $shadow-bottom: 0 -1px 0 0 var(--revo-grid-header-border) inset;
+        $shadow-top: 0 -1px 0 0 var(--revo-grid-header-border);
+        box-shadow: $shadow-top, $shadow-bottom;
+      }
+    }
+    
+    .rgHeaderCell {
+      &.sortable {
+        &:hover {
+          background-color: var(--revo-grid-row-hover);
+        }
+      }
+      &.focused-cell {
+        background: var(--revo-grid-focused-bg);
+      }
+    }
+  }
+
+  .footer-wrapper revogr-data {
+    box-shadow: 0 -1px 0 var(--revo-grid-cell-border);
+  }
+
+  revogr-viewport-scroll {
+    &.colPinStart {
+      box-shadow: -1px 0 0 var(--revo-grid-cell-border) inset;
+    }
+
+    &.colPinEnd {
+      box-shadow: -1px 0 0 var(--revo-grid-cell-border);
+    }
+  }
+
+  revogr-data {
+    .rgRow {
+      box-shadow: 0 -1px 0 0 var(--revo-grid-cell-border) inset;
+      &.focused-rgRow {
+        background-color: var(--revo-grid-focused-bg);
+      }
+    }
+
+    .rgCell {
+      color: var(--revo-grid-text);
+
+      &.disabled {
+        background-color: var(--revo-grid-cell-disabled-bg);
+      }
+    }
+  }
+} 

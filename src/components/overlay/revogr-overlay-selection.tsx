@@ -52,6 +52,7 @@ import type {
   ChangedRange,
   BeforeRangeSaveDataDetails,
   SaveDataDetails,
+  EditCellStore,
 } from '@type';
 
 /**
@@ -896,7 +897,7 @@ export class OverlaySelection {
     return focus && !this.columnService?.isReadOnly(focus.y, focus.x);
   }
 
-  get edited() {
+  get edited(): EditCellStore | null {
     return this.selectionStore.get('edit');
   }
 

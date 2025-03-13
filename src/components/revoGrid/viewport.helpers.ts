@@ -2,8 +2,20 @@
  * Collects data for pinned columns in the required @ViewportProps format.
  */
 
-import { DimensionRows, MultiDimensionType, SlotType, Cell, ViewportColumn } from '@type';
-
+import type {
+  DimensionRows,
+  MultiDimensionType,
+  SlotType,
+  Cell,
+  ViewportColumn,
+  ColumnRegular,
+  DimensionCols,
+  ViewportState,
+  DimensionSettingsState,
+  DataType,
+} from '@type';
+import type { Observable } from '../../utils';
+import type { DSourceState } from '../../store';
 /**
  * Represents the slot names for the viewport slots.
  */
@@ -34,13 +46,30 @@ export function getLastCell(
   };
 }
 
+/**
+ * Represents the partition of viewport data.
+ */
+export type VPPartition = {
+  colData: Observable<DSourceState<ColumnRegular, DimensionCols>>;
+  viewportCol: Observable<ViewportState>;
+  viewportRow: Observable<ViewportState>;
+  lastCell: Cell;
+  slot: SlotType;
+  type: DimensionRows;
+  canDrag: boolean;
+  position: Cell;
+  dataStore: Observable<DSourceState<DataType, DimensionRows>>;
+  dimensionCol: Observable<DimensionSettingsState>;
+  dimensionRow: Observable<DimensionSettingsState>;
+  style?: { height: string };
+};
 
 export function viewportDataPartition(
   data: ViewportColumn,
   type: DimensionRows,
   slot: SlotType,
   fixed?: boolean,
-) {
+): VPPartition {
   return {
     colData: data.colStore,
     viewportCol: data.viewports[data.colType].store,
@@ -59,5 +88,3 @@ export function viewportDataPartition(
       : undefined,
   };
 }
-
-export type VPPartition = ReturnType<typeof viewportDataPartition>;
