@@ -646,6 +646,11 @@ export class RevoGridComponent {
    * Emmited when the double click on row is triggered
    */
   @Event() ondblclick: EventEmitter<DataLookup>;
+
+    /**
+   * Emmited when the double click on row is triggered
+   */
+    @Event() onrowclick: EventEmitter<DataLookup>;
   // #endregion
 
   // #region Methods
@@ -1180,6 +1185,12 @@ export class RevoGridComponent {
     e: CustomEvent<DataLookup>,
   ) {
     this.ondblclick.emit(e.detail);
+  }
+
+  @Listen('onrowclickinit') onRowClickInit(
+    e: CustomEvent<DataLookup>,
+  ) {
+    this.onrowclick.emit(e.detail);
   }
 
   // #endregion

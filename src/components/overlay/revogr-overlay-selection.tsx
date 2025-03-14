@@ -302,6 +302,9 @@ export class OverlaySelection {
 
   @Event({ eventName: 'ondblclickinit', cancelable: true })
   onDblClickInit: EventEmitter<DataLookup>;
+
+  @Event({ eventName: 'onrowclickinit', cancelable: true })
+  onRowClickInit: EventEmitter<DataLookup>;
   // #endregion
 
   // #region Private Properties
@@ -750,6 +753,7 @@ export class OverlaySelection {
    * Handle mouse down event on Host element
    */
   private onElementMouseDown(e: MouseEvent | TouchEvent, touch = false) {
+
     // Get the target element from the event object
     const targetElement = e.target as HTMLElement | undefined;
     // Ignore focus if clicked input
@@ -763,6 +767,9 @@ export class OverlaySelection {
     if (!focusCell) {
       return;
     }
+
+    this.onRowClickInit.emit(data);
+    console.log('focusCell', focusCell);
 
     // Check for right-click (context menu)
     if (this.useContextMenu && e instanceof MouseEvent && e.button === 2) {

@@ -924,6 +924,7 @@ declare global {
         "created": any;
         "onrangeselectionchanged": Partial<DataLookup>;
         "ondblclick": DataLookup;
+        "onrowclick": DataLookup;
     }
     /**
      * Revogrid - High-performance, customizable grid library for managing large datasets.
@@ -1214,6 +1215,7 @@ declare global {
         "beforecellsave": any;
         "onrangeselectionchangedinit": Partial<DataLookup>;
         "ondblclickinit": DataLookup;
+        "onrowclickinit": DataLookup;
     }
     /**
      * Component for overlaying the grid with the selection.
@@ -1637,6 +1639,10 @@ declare namespace LocalJSX {
           * Emmited when the focus is changed returns the new focused range
          */
         "onOnrangeselectionchanged"?: (event: RevoGridCustomEvent<Partial<DataLookup>>) => void;
+        /**
+          * Emmited when the double click on row is triggered
+         */
+        "onOnrowclick"?: (event: RevoGridCustomEvent<DataLookup>) => void;
         /**
           * This event is triggered when the row order change is started. To prevent the default behavior of changing the row order, you can call `e.preventDefault()`. To change the item name at the start of the row order change, you can set `e.text` to the desired new name.
          */
@@ -2281,6 +2287,7 @@ declare namespace LocalJSX {
           * Emmited when the focus is changed returns the new focused range
          */
         "onOnrangeselectionchangedinit"?: (event: RevogrOverlaySelectionCustomEvent<Partial<DataLookup>>) => void;
+        "onOnrowclickinit"?: (event: RevogrOverlaySelectionCustomEvent<DataLookup>) => void;
         /**
           * Range data apply. Triggers datasource edit on the root level.
          */
