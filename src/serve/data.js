@@ -164,6 +164,11 @@ export function generateFakeDataObject(config = {}) {
     grouped.push({
       name: 'Grouped2',
       children: grouped2,
+      columnTemplate: (h, { value }) => {
+        return h('div', {
+          class: 'grouped-header',
+        }, 'Grouped2');
+      },
     });
     headers.splice(
       6,
