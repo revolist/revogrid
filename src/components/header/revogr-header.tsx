@@ -8,13 +8,13 @@ import {
   type VNode,
 } from '@stencil/core';
 import keyBy from 'lodash/keyBy';
+import findIndex from 'lodash/findIndex';
 
+import { getItemByIndex, Groups } from '@store';
 import { HEADER_ACTUAL_ROW_CLASS, HEADER_ROW_CLASS } from '../../utils/consts';
-import { Groups } from '@store';
 import HeaderRenderer, { HeaderRenderProps } from './header-renderer';
-import ColumnGroupsRenderer from '../../plugins/groupingColumn/columnGroupsRenderer';
 import { ResizeProps } from './resizable.directive';
-import {
+import type {
   ColumnRegular,
   DimensionSettingsState,
   InitialHeaderClick,
@@ -24,7 +24,8 @@ import {
   DimensionCols,
   SelectionStoreState,
 } from '@type';
-import { Observable } from '../../utils';
+import type { Observable } from '../../utils';
+import GroupHeaderRenderer, { HeaderGroupRendererProps } from './header-group-renderer';
 
 @Component({
   tag: 'revogr-header',
@@ -124,6 +125,12 @@ export class RevogrHeaderComponent {
   beforeHeaderRender: EventEmitter<HeaderRenderProps>;
 
   /**
+   * Before each group header cell render function. Allows to override group header cell properties
+   */
+  @Event({ eventName: 'beforegroupheaderrender' })
+  beforeGroupHeaderRender: EventEmitter<HeaderGroupRendererProps>;
+
+  /**
    * After all header cells rendered. Finalizes cell rendering.
    */
   @Event({ eventName: 'afterheaderrender' })
@@ -174,11 +181,13 @@ export class RevogrHeaderComponent {
     const cells: VNode[] = [];
     const visibleProps: { [prop: string]: number } = {};
 
-    // render header columns
+    /**
+     * Render header columns
+     */
     for (let rgCol of cols) {
       const colData = this.colData[rgCol.itemIndex];
       const props: HeaderRenderProps = {
-        range: range,
+        range,
         column: rgCol,
         data: {
           ...colData,
@@ -201,22 +210,66 @@ export class RevogrHeaderComponent {
       visibleProps[colData?.prop] = rgCol.itemIndex;
     }
 
-    return [
-      <div class="group-rgRow">
-        <ColumnGroupsRenderer
-          canResize={this.canResize}
-          active={this.resizeHandler}
-          visibleProps={visibleProps}
-          providers={this.providers}
-          groups={this.groups}
-          dimensionCol={this.dimensionCol.state}
-          depth={this.groupingDepth}
-          onResize={(changedX, startIndex, endIndex) =>
-            this.onResizeGroup(changedX, startIndex, endIndex)
+    /**
+     * Grouping columns
+     */
+    const groupRow: VNode[] = [];
+    for (let i = 0; i < this.groupingDepth; i++) {
+      if (this.groups[i]) {
+        for (let group of this.groups[i]) {
+          // if group in visible range
+          // find first visible group prop in visible columns range
+          const indexFirstVisibleCol: number | undefined = findIndex(
+            group.ids,
+            id => typeof visibleProps[id] === 'number',
+          );
+          if (indexFirstVisibleCol > -1) {
+            const colVisibleIndex =
+              visibleProps[group.ids[indexFirstVisibleCol]]; // get column index
+            const groupStartIndex = colVisibleIndex - indexFirstVisibleCol; // first column index in group
+            const groupEndIndex = groupStartIndex + group.ids.length - 1; // last column index in group
+
+            // coordinates
+            const groupStart = getItemByIndex(
+              this.dimensionCol.state,
+              groupStartIndex,
+            ).start;
+            const groupEnd = getItemByIndex(
+              this.dimensionCol.state,
+              groupEndIndex,
+            ).end;
+
+            /**
+             * Render group header
+             */
+            const props: HeaderGroupRendererProps = {
+              providers: this.providers,
+              start: groupStart,
+              end: groupEnd,
+              group,
+              active: this.resizeHandler,
+              canResize: this.canResize,
+              onResize: e =>
+                this.onResizeGroup(
+                  e.changedX ?? 0,
+                  groupStartIndex,
+                  groupEndIndex,
+                ),
+              additionalData: this.additionalData,
+            };  
+            const event = this.beforeGroupHeaderRender.emit(props);
+            if (event.defaultPrevented) {
+              continue;
+            }
+            groupRow.push(<GroupHeaderRenderer {...event.detail} />);
           }
-          additionalData={this.additionalData}
-        />
-      </div>,
+        }
+      }
+      groupRow.push(<div class={`${HEADER_ROW_CLASS} group`} />);
+    }
+
+    return [
+      <div class="group-rgRow">{groupRow}</div>,
       <div class={`${HEADER_ROW_CLASS} ${HEADER_ACTUAL_ROW_CLASS}`}>
         {cells}
       </div>,

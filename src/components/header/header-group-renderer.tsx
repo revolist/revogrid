@@ -1,11 +1,11 @@
 import { h } from '@stencil/core';
 import { Group } from '@store';
 import type { CellProps, Providers, DimensionCols } from '@type';
-import { ResizeEvent, ResizeProps } from '../../components/header/resizable.directive';
+import { ResizeEvent, ResizeProps } from './resizable.directive';
 import { HEADER_CLASS, MIN_COL_SIZE } from '../../utils/consts';
-import { HeaderCellRenderer } from '../../components/header/header-cell-renderer';
+import { HeaderCellRenderer } from './header-cell-renderer';
 
-type Props = {
+export type HeaderGroupRendererProps = {
   start: number;
   end: number;
   group: Group;
@@ -15,7 +15,7 @@ type Props = {
   onResize?(e: ResizeEvent): void;
 } & Partial<Pick<ResizeProps, 'active'>>;
 
-const GroupHeaderRenderer = (p: Props): ReturnType<typeof h> => {
+const HeaderGroupRenderer = (p: HeaderGroupRendererProps): ReturnType<typeof h> => {
   const groupProps: CellProps & Partial<ResizeProps> = {
     canResize: p.canResize,
     minWidth: p.group.ids.length * MIN_COL_SIZE,
@@ -45,4 +45,4 @@ const GroupHeaderRenderer = (p: Props): ReturnType<typeof h> => {
   );
 };
 
-export default GroupHeaderRenderer;
+export default HeaderGroupRenderer;

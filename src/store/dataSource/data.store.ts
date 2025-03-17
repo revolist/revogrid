@@ -23,7 +23,7 @@ export interface Group extends ColumnProperties {
   // props/ids
   ids: (string | number)[];
 }
-export type Groups = Record<any, any>;
+export type Groups = Record<number, Group[]>;
 export type GDataType = DataType | ColumnRegular;
 export type GDimension = DimensionRows | DimensionCols;
 export type DSourceState<

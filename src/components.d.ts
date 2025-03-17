@@ -19,6 +19,7 @@ import { Observable } from "./utils";
 import { DSourceState, Groups } from "./store/index";
 import { ResizeProps } from "./components/header/resizable.directive";
 import { HeaderRenderProps } from "./components/header/header-renderer";
+import { HeaderGroupRendererProps } from "./components/header/header-group-renderer";
 import { EventData } from "./components/overlay/selection.utils";
 export { AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, CellTemplateProp, ChangedRange, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, ExtraNodeFuncConfig, FocusAfterRenderEvent, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, Nullable, PluginBaseComponent, PositionItem, Providers, RangeArea, RangeClipboardCopyEventProps, RangeClipboardPasteEvent, RowDefinition, RowDragStartDetails, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
 export { GridPlugin } from "./plugins/base.plugin";
@@ -34,6 +35,7 @@ export { Observable } from "./utils";
 export { DSourceState, Groups } from "./store/index";
 export { ResizeProps } from "./components/header/resizable.directive";
 export { HeaderRenderProps } from "./components/header/header-renderer";
+export { HeaderGroupRendererProps } from "./components/header/header-group-renderer";
 export { EventData } from "./components/overlay/selection.utils";
 export namespace Components {
     /**
@@ -1057,6 +1059,7 @@ declare global {
         "beforeheaderresize": ColumnRegular[];
         "headerdblclick": InitialHeaderClick;
         "beforeheaderrender": HeaderRenderProps;
+        "beforegroupheaderrender": HeaderGroupRendererProps;
         "afterheaderrender": Providers<DimensionCols | 'rowHeaders'>;
     }
     interface HTMLRevogrHeaderElement extends Components.RevogrHeader, HTMLStencilElement {
@@ -1924,6 +1927,10 @@ declare namespace LocalJSX {
           * After all header cells rendered. Finalizes cell rendering.
          */
         "onAfterheaderrender"?: (event: RevogrHeaderCustomEvent<Providers<DimensionCols | 'rowHeaders'>>) => void;
+        /**
+          * Before each group header cell render function. Allows to override group header cell properties
+         */
+        "onBeforegroupheaderrender"?: (event: RevogrHeaderCustomEvent<HeaderGroupRendererProps>) => void;
         /**
           * On initial header click
          */
