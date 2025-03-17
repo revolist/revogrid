@@ -20,8 +20,8 @@ import type {
 export interface Group extends ColumnProperties {
   name: string;
   children: (ColumnGrouping | ColumnRegular)[];
-  // props/ids
-  ids: (string | number)[];
+  // physical indexes to start from
+  indexes: number[];
 }
 export type Groups = Record<number, Group[]>;
 export type GDataType = DataType | ColumnRegular;

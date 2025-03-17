@@ -1,7 +1,7 @@
 import isArray from 'lodash/isArray';
 import reduce from 'lodash/reduce';
 
-import {
+import type {
   ColumnData,
   ColumnGrouping,
   ColumnProp,
@@ -11,7 +11,7 @@ import {
   DimensionCols,
   ViewSettingSizeProp,
 } from '@type';
-import { Group as StoreGroup } from '@store';
+import { columnTypes, type Group as StoreGroup } from '@store';
 
 export type ColumnItems = Record<DimensionCols, ColumnRegular[]>;
 export interface ColumnGroup extends StoreGroup {
@@ -181,29 +181,32 @@ export function gatherGroup<T extends ColumnCollection>(
   const group: ColumnGroup = {
     ...colData,
     level,
-    ids: [],
+    indexes: [],
   };
 
   // check columns for update
-  for (let k in collection.columns) {
-    const key = k as keyof ColumnCollection['columns'];
-    const resultItem = res.columns[key];
-    const collectionItem = collection.columns[key];
+  columnTypes.forEach(type => {
+    const resultItem = res.columns[type];
+    const collectionItem = collection.columns[type];
 
     // if column data
     if (isArray(resultItem) && isArray(collectionItem)) {
-      // fill columns
-      resultItem.push(...collectionItem);
 
       // fill grouping
-      if (collectionItem.length) {
-        res.columnGrouping[key].push({
+      const itemLength = collectionItem.length;
+      if (itemLength) {
+        const columnLength = resultItem.length;
+        // fill columns
+        resultItem.push(...collectionItem);
+
+        // fill indexes per each viewport
+        res.columnGrouping[type].push({
           ...group,
-          ids: collectionItem.map(item => item.prop),
+          indexes: Array(itemLength).fill(columnLength).map((v, i) => v + i),
         });
       }
     }
-  }
+  });
   // merge column groupings
   for (let k in collection.columnGrouping) {
     const key = k as DimensionCols;

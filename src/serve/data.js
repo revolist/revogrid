@@ -158,10 +158,10 @@ export function generateFakeDataObject(config = {}) {
   }
   let headers = Object.keys(columns).map(k => columns[k]);
 
-  if (groupedHeader) {
-    const grouped = headers.splice(1, 4);
-    const grouped2 = grouped.splice(0, 2);
-    grouped.push({
+  if (groupedHeader && headers.length > 2) {
+    const grouped = headers.splice(1, Math.min(headers.length - 1, 30));
+    const grouped2 = grouped.splice(0, Math.min(headers.length - 1, 2));
+    grouped2.length && grouped.push({
       name: 'Grouped2',
       children: grouped2,
       columnTemplate: (h, { value }) => {
@@ -170,7 +170,7 @@ export function generateFakeDataObject(config = {}) {
         }, 'Grouped2');
       },
     });
-    headers.splice(
+    grouped.length && headers.splice(
       6,
       0,
       ...[
@@ -180,9 +180,9 @@ export function generateFakeDataObject(config = {}) {
         },
       ],
     );
-    const grouped4 = headers.splice(1, 3);
-    headers.splice(
-      1,
+    const grouped4 = headers.splice(0, Math.min(headers.length - 1, 4));
+    grouped4.length && headers.splice(
+      0,
       0,
       ...[
         {

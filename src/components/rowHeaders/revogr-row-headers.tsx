@@ -1,13 +1,8 @@
 import { h, Host, Component, Prop, Event, EventEmitter } from '@stencil/core';
-import { JSXBase } from '@stencil/core/internal';
+import type { JSXBase } from '@stencil/core/internal';
 
 import { ViewportStore, DataStore } from '@store';
-
-import { ROW_HEADER_TYPE } from '../../utils/consts';
-import { RowHeaderRender } from './row-header-render';
-import { calculateRowHeaderSize } from '../../utils/row-header-utils';
-import { HEADER_SLOT } from '../revoGrid/viewport.helpers';
-import {
+import type {
   RowHeaders,
   ViewPortScrollEvent,
   DataType,
@@ -17,6 +12,11 @@ import {
   DimensionRows,
   DimensionCols,
 } from '@type';
+
+import { ROW_HEADER_TYPE } from '../../utils/consts';
+import { RowHeaderRender } from './row-header-render';
+import { calculateRowHeaderSize } from '../../utils/row-header-utils';
+import { HEADER_SLOT } from '../revoGrid/viewport.helpers';
 import { type JSX } from '../../components';
 
 /**
@@ -142,6 +142,8 @@ export class RevogrRowHeaders {
     };
     const viewportHeader: JSX.RevogrHeader & { slot: string } = {
       ...this.headerProp,
+      // groups not present on row headers
+      groups: [],
       colData:
         typeof this.rowHeaderColumn === 'object' ? [this.rowHeaderColumn] : [],
       viewportCol: viewport.store,

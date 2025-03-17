@@ -18,7 +18,7 @@ export type HeaderGroupRendererProps = {
 const HeaderGroupRenderer = (p: HeaderGroupRendererProps): ReturnType<typeof h> => {
   const groupProps: CellProps & Partial<ResizeProps> = {
     canResize: p.canResize,
-    minWidth: p.group.ids.length * MIN_COL_SIZE,
+    minWidth: p.group.indexes.length * MIN_COL_SIZE,
     maxWidth: 0,
 
     active: p.active || ['r'],
