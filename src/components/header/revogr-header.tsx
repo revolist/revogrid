@@ -23,9 +23,13 @@ import type {
   ViewSettingSizeProp,
   DimensionCols,
   SelectionStoreState,
+  RangeArea,
+  VirtualPositionItem,
 } from '@type';
 import type { Observable } from '../../utils';
-import GroupHeaderRenderer, { HeaderGroupRendererProps } from './header-group-renderer';
+import GroupHeaderRenderer, {
+  HeaderGroupRendererProps,
+} from './header-group-renderer';
 
 @Component({
   tag: 'revogr-header',
@@ -178,12 +182,24 @@ export class RevogrHeaderComponent {
   render() {
     const cols = this.viewportCol.get('items');
     const range = this.selectionStore?.get('range');
+
+    const { cells, visibleProps } = this.renderHeaderColumns(cols, range);
+    const groupRow = this.renderGroupingColumns(visibleProps);
+
+    return [
+      <div class="group-rgRow">{groupRow}</div>,
+      <div class={`${HEADER_ROW_CLASS} ${HEADER_ACTUAL_ROW_CLASS}`}>
+        {cells}
+      </div>,
+    ];
+  }
+
+  private renderHeaderColumns(
+    cols: VirtualPositionItem[],
+    range: RangeArea | null,
+  ) {
     const cells: VNode[] = [];
     const visibleProps: { [prop: string]: number } = {};
-
-    /**
-     * Render header columns
-     */
     for (let rgCol of cols) {
       const colData = this.colData[rgCol.itemIndex];
       const props: HeaderRenderProps = {
@@ -197,39 +213,37 @@ export class RevogrHeaderComponent {
         canFilter: !!this.columnFilter,
         canResize: this.canResize,
         active: this.resizeHandler,
+        additionalData: this.additionalData,
         onResize: e => this.onResize(e, rgCol.itemIndex),
         onDblClick: e => this.headerdblClick.emit(e),
         onClick: e => this.initialHeaderClick.emit(e),
-        additionalData: this.additionalData,
       };
       const event = this.beforeHeaderRender.emit(props);
-      if (event.defaultPrevented) {
-        continue;
+      if (!event.defaultPrevented) {
+        cells.push(<HeaderRenderer {...event.detail} />);
+        visibleProps[colData?.prop] = rgCol.itemIndex;
       }
-      cells.push(<HeaderRenderer {...event.detail} />);
-      visibleProps[colData?.prop] = rgCol.itemIndex;
     }
+    return { cells, visibleProps };
+  }
 
-    /**
-     * Grouping columns
-     */
+  private renderGroupingColumns(visibleProps: {
+    [prop: string]: number;
+  }): VNode[] {
     const groupRow: VNode[] = [];
     for (let i = 0; i < this.groupingDepth; i++) {
       if (this.groups[i]) {
         for (let group of this.groups[i]) {
-          // if group in visible range
-          // find first visible group prop in visible columns range
-          const indexFirstVisibleCol: number | undefined = findIndex(
+          const indexFirstVisibleCol = findIndex(
             group.ids,
             id => typeof visibleProps[id] === 'number',
           );
           if (indexFirstVisibleCol > -1) {
             const colVisibleIndex =
-              visibleProps[group.ids[indexFirstVisibleCol]]; // get column index
-            const groupStartIndex = colVisibleIndex - indexFirstVisibleCol; // first column index in group
-            const groupEndIndex = groupStartIndex + group.ids.length - 1; // last column index in group
+              visibleProps[group.ids[indexFirstVisibleCol]];
+            const groupStartIndex = colVisibleIndex - indexFirstVisibleCol;
+            const groupEndIndex = groupStartIndex + group.ids.length - 1;
 
-            // coordinates
             const groupStart = getItemByIndex(
               this.dimensionCol.state,
               groupStartIndex,
@@ -239,9 +253,6 @@ export class RevogrHeaderComponent {
               groupEndIndex,
             ).end;
 
-            /**
-             * Render group header
-             */
             const props: HeaderGroupRendererProps = {
               providers: this.providers,
               start: groupStart,
@@ -249,31 +260,24 @@ export class RevogrHeaderComponent {
               group,
               active: this.resizeHandler,
               canResize: this.canResize,
+              additionalData: this.additionalData,
               onResize: e =>
                 this.onResizeGroup(
                   e.changedX ?? 0,
                   groupStartIndex,
                   groupEndIndex,
                 ),
-              additionalData: this.additionalData,
-            };  
+            };
             const event = this.beforeGroupHeaderRender.emit(props);
-            if (event.defaultPrevented) {
-              continue;
+            if (!event.defaultPrevented) {
+              groupRow.push(<GroupHeaderRenderer {...event.detail} />);
             }
-            groupRow.push(<GroupHeaderRenderer {...event.detail} />);
           }
         }
       }
       groupRow.push(<div class={`${HEADER_ROW_CLASS} group`} />);
     }
-
-    return [
-      <div class="group-rgRow">{groupRow}</div>,
-      <div class={`${HEADER_ROW_CLASS} ${HEADER_ACTUAL_ROW_CLASS}`}>
-        {cells}
-      </div>,
-    ];
+    return groupRow;
   }
 
   get providers(): Providers<DimensionCols | 'rowHeaders'> {
