@@ -1799,7 +1799,7 @@ declare namespace LocalJSX {
          */
         "editor"?: EditorCtr | null;
         /**
-          * Cell edit event
+          * Cell edit event initiator, first in the cellEdit event chain
          */
         "onCelleditinit"?: (event: RevogrEditCustomEvent<SaveDataDetails>) => void;
         /**
@@ -2131,6 +2131,9 @@ declare namespace LocalJSX {
           * Cancel edit. Used for editors support when editor close requested.
          */
         "onCanceledit"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
+        /**
+          * Runs when edit finished save started, first in chain event
+         */
         "onCelledit"?: (event: RevogrOverlaySelectionCustomEvent<SaveDataDetails>) => void;
         /**
           * Cell edit apply to the data source. Triggers datasource edit on the root level.

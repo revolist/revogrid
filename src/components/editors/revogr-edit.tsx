@@ -54,7 +54,7 @@ export class RevoEdit {
   @Prop() additionalData: any;
 
   /**
-   * Cell edit event
+   * Cell edit event initiator, first in the cellEdit event chain
    */
   @Event({ eventName: 'celleditinit' }) cellEdit: EventEmitter<SaveDataDetails>;
 

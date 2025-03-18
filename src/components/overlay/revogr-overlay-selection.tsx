@@ -282,7 +282,10 @@ export class OverlaySelection {
   @Event({ eventName: 'beforecellsave', cancelable: true })
   beforeCellSave: EventEmitter;
 
-  @Event({ eventName: 'celledit' }) cellEditInit: EventEmitter<SaveDataDetails>;
+  /**
+   * Runs when edit finished save started, first in chain event
+   */
+  @Event({ eventName: 'celledit' }) cellEditDone: EventEmitter<SaveDataDetails>;
 
   // #endregion
 
@@ -541,7 +544,7 @@ export class OverlaySelection {
         editCell={editable}
         saveOnClose={this.applyChangesOnClose}
         onCelleditinit={(e) => {
-          this.cellEditInit.emit(e.detail);
+          this.cellEditDone.emit(e.detail);
         }}
         column={this.columnService.rowDataModel(editCell.y, editCell.x)}
         editor={getCellEditor(
