@@ -56,7 +56,7 @@ export class RevoEdit {
   /**
    * Cell edit event
    */
-  @Event({ eventName: 'celledit' }) cellEdit: EventEmitter<SaveDataDetails>;
+  @Event({ eventName: 'celleditinit' }) cellEdit: EventEmitter<SaveDataDetails>;
 
   /**
    * Close editor event
