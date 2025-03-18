@@ -8,7 +8,6 @@ import {
   type VNode,
 } from '@stencil/core';
 import keyBy from 'lodash/keyBy';
-import findIndex from 'lodash/findIndex';
 
 import { getItemByIndex, Groups } from '@store';
 import { HEADER_ACTUAL_ROW_CLASS, HEADER_ROW_CLASS } from '../../utils/consts';
@@ -183,8 +182,8 @@ export class RevogrHeaderComponent {
     const cols = this.viewportCol.get('items');
     const range = this.selectionStore?.get('range');
 
-    const { cells, visibleProps } = this.renderHeaderColumns(cols, range);
-    const groupRow = this.renderGroupingColumns(visibleProps);
+    const { cells } = this.renderHeaderColumns(cols, range);
+    const groupRow = this.renderGroupingColumns();
 
     return [
       <div class="group-rgRow">{groupRow}</div>,
@@ -199,7 +198,6 @@ export class RevogrHeaderComponent {
     range: RangeArea | null,
   ) {
     const cells: VNode[] = [];
-    const visibleProps: { [prop: string]: number } = {};
     for (let rgCol of cols) {
       const colData = this.colData[rgCol.itemIndex];
       const props: HeaderRenderProps = {
@@ -221,28 +219,19 @@ export class RevogrHeaderComponent {
       const event = this.beforeHeaderRender.emit(props);
       if (!event.defaultPrevented) {
         cells.push(<HeaderRenderer {...event.detail} />);
-        visibleProps[colData?.prop] = rgCol.itemIndex;
       }
     }
-    return { cells, visibleProps };
+    return { cells };
   }
 
-  private renderGroupingColumns(visibleProps: {
-    [prop: string]: number;
-  }): VNode[] {
+  private renderGroupingColumns(): VNode[] {
     const groupRow: VNode[] = [];
     for (let i = 0; i < this.groupingDepth; i++) {
       if (this.groups[i]) {
         for (let group of this.groups[i]) {
-          const indexFirstVisibleCol = findIndex(
-            group.ids,
-            id => typeof visibleProps[id] === 'number',
-          );
-          if (indexFirstVisibleCol > -1) {
-            const colVisibleIndex =
-              visibleProps[group.ids[indexFirstVisibleCol]];
-            const groupStartIndex = colVisibleIndex - indexFirstVisibleCol;
-            const groupEndIndex = groupStartIndex + group.ids.length - 1;
+          const groupStartIndex = group.indexes[0] ?? -1;
+          if (groupStartIndex > -1) {
+            const groupEndIndex = groupStartIndex + group.indexes.length - 1;
 
             const groupStart = getItemByIndex(
               this.dimensionCol.state,

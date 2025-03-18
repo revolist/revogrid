@@ -5,7 +5,7 @@ import { timeout } from '../../utils';
 import { BasePlugin } from '../base.plugin';
 import { ExportCsv } from './csv';
 import type { ColSource, CSVFormat, DataInput, Formatter } from './types';
-import { DimensionCols, ColumnProp, DataType } from '@type';
+import type { DimensionCols, ColumnProp, DataType } from '@type';
 
 export * from './csv';
 export * from './types';
@@ -115,14 +115,12 @@ export class ExportFilePlugin extends BasePlugin {
     const groups = store.get('groups');
     const colNames: string[] = [];
     const colProps: ColumnProp[] = [];
-    const visibleItems = virtualIndexes.reduce((r: Record<string, number>, v: number, virtualIndex: number) => {
+    virtualIndexes.forEach((v: number) => {
       const prop = source[v].prop;
       colNames.push(source[v].name || '');
       colProps.push(prop);
-      r[prop] = virtualIndex;
-      return r;
-    }, {});
-    const rows: string[][] = this.getGroupHeaders(depth, groups, virtualIndexes, visibleItems);
+    });
+    const rows: string[][] = this.getGroupHeaders(depth, groups, virtualIndexes);
     rows.push(colNames);
     return {
       headers: rows,
@@ -130,7 +128,7 @@ export class ExportFilePlugin extends BasePlugin {
     };
   }
 
-  private getGroupHeaders(depth: number, groups: Groups, items: number[], visibleItems: Record<string, number>) {
+  private getGroupHeaders(depth: number, groups: Groups, items: number[]) {
     const rows: string[][] = [];
     const template = fill(new Array(items.length), '');
     for (let d = 0; d < depth; d++) {
@@ -143,26 +141,13 @@ export class ExportFilePlugin extends BasePlugin {
 
       // add names of groups
       levelGroups.forEach((group: Group) => {
-        const minIndex = this.findGroupStartIndex(group.ids, visibleItems);
+        const minIndex = group.indexes[0];
         if (typeof minIndex === 'number') {
           rgRow[minIndex] = group.name;
         }
       });
     }
     return rows;
-  }
-
-  private findGroupStartIndex(ids: (string | number)[], visibleItems: Record<string, number>): number | undefined {
-    let min: number | undefined;
-    ids.forEach(id => {
-      const current = visibleItems[id];
-      if (typeof current === 'number') {
-        if (typeof min !== 'number' || min > current) {
-          min = current;
-        }
-      }
-    });
-    return min;
   }
 
   private async getSource() {

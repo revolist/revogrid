@@ -26,6 +26,10 @@ revo-grid:not([theme]) {
 
     .group-rgRow {
       box-shadow: none;
+
+      .rgHeaderCell {
+        box-shadow: $shadow-left, $shadow-right, $shadow-top, $shadow-bottom;
+      }
     }
     .header-rgRow,
     .group-rgRow {

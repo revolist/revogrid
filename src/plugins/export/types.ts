@@ -1,4 +1,4 @@
-import { DataType } from '@type';
+import type { DataType } from '@type';
 
 export type ColSource = {
   headers: string[][];
