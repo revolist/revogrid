@@ -53,7 +53,7 @@ export type RevogridEvents = 'contentsizechanged'|
   'beforecellrender'|
   'beforedatarender'|
   'dragstartcell'|
-  'celledit'|
+  'celleditinit'|
   'closeedit'|
   'filterChange'|
   'resetChange'|
@@ -98,6 +98,7 @@ export type RevogridEvents = 'contentsizechanged'|
   'beforekeydown'|
   'beforekeyup'|
   'beforecellsave'|
+  'celledit'|
   'scrollview'|
   'ref'|
   'scrollvirtual'|
@@ -161,7 +162,7 @@ export const REVOGRID_EVENTS = new Map<RevogridEvents, RevogridEvents>([
   ['beforecellrender', 'beforecellrender'],
   ['beforedatarender', 'beforedatarender'],
   ['dragstartcell', 'dragstartcell'],
-  ['celledit', 'celledit'],
+  ['celleditinit', 'celleditinit'],
   ['closeedit', 'closeedit'],
   ['filterChange', 'filterChange'],
   ['resetChange', 'resetChange'],
@@ -206,6 +207,7 @@ export const REVOGRID_EVENTS = new Map<RevogridEvents, RevogridEvents>([
   ['beforekeydown', 'beforekeydown'],
   ['beforekeyup', 'beforekeyup'],
   ['beforecellsave', 'beforecellsave'],
+  ['celledit', 'celledit'],
   ['scrollview', 'scrollview'],
   ['ref', 'ref'],
   ['scrollvirtual', 'scrollvirtual'],

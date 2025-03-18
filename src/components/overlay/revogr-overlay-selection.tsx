@@ -282,6 +282,11 @@ export class OverlaySelection {
   @Event({ eventName: 'beforecellsave', cancelable: true })
   beforeCellSave: EventEmitter;
 
+  /**
+   * Runs when edit finished save started, first in chain event
+   */
+  @Event({ eventName: 'celledit' }) cellEditDone: EventEmitter<SaveDataDetails>;
+
   // #endregion
 
   // #region Private Properties
@@ -538,6 +543,9 @@ export class OverlaySelection {
         additionalData={this.additionalData}
         editCell={editable}
         saveOnClose={this.applyChangesOnClose}
+        onCelleditinit={(e) => {
+          this.cellEditDone.emit(e.detail);
+        }}
         column={this.columnService.rowDataModel(editCell.y, editCell.x)}
         editor={getCellEditor(
           this.columnService.columns[editCell.x],
@@ -545,6 +553,21 @@ export class OverlaySelection {
         )}
       />
     );
+  }
+
+  private onEditCell(e: CustomEvent<SaveDataDetails>) {
+    if (e.defaultPrevented) {
+      return;
+    }
+    const saveEv = this.beforeCellSave.emit(e.detail);
+    if (!saveEv.defaultPrevented) {
+      this.cellEdit(saveEv.detail);
+    }
+
+    // if not clear navigate to next cell after edit
+    if (!saveEv.detail.preventFocus) {
+      this.focusNext();
+    }
   }
 
   render() {
@@ -602,17 +625,8 @@ export class OverlaySelection {
         onMouseDown={(e: MouseEvent) => this.onElementMouseDown(e)}
         onTouchStart={(e: TouchEvent) => this.onElementMouseDown(e, true)}
         onCloseedit={(e: CustomEvent<boolean | undefined>) => this.closeEdit(e)}
-        onCelledit={(e: CustomEvent<SaveDataDetails>) => {
-          const saveEv = this.beforeCellSave.emit(e.detail);
-          if (!saveEv.defaultPrevented) {
-            this.cellEdit(saveEv.detail);
-          }
-
-          // if not clear navigate to next cell after edit
-          if (!saveEv.detail.preventFocus) {
-            this.focusNext();
-          }
-        }}
+        // it's done to be able to throw events from different levels, not just from editor
+        onCelledit={(e: CustomEvent<SaveDataDetails>) => this.onEditCell(e)}
       >
         {nodes}
         <slot name="data" />
