@@ -26,6 +26,7 @@
   - Preserve existing collections.
   - Selection.
   - Slider.
+  - Header filtering.
   - Custom filters to extend system filters with your own set.
 
 - **[Export](https://rv-grid.com/guide/export.plugin)**: Export data to file.
@@ -41,6 +42,7 @@
 
 - **Grouping**:
   - [Column grouping](https://rv-grid.com/guide/column/grouping) (nested headers).
+  - Column grouping Drill Down: Collapse grouping columns to streamline your grid view, trimming away unnecessary columns and enhancing data organization. Perfect for focusing on the information that matters most, while keeping your workspace clean and efficient.
   - [Row grouping](https://rv-grid.com/guide/row/grouping) (nested rows).
 
 - **Column Types**: [More details](https://rv-grid.com/guide/column/#Column-Formats)
@@ -69,8 +71,12 @@
 
 - **[Master Detail/Subtables/Forms](https://rv-grid.com/guide/row/master.pro)**: Expand rows to reveal child data.
 - **[Cell/Column/Row Span/Merge](https://rv-grid.com/guide/cell/merge)**: Merge cells to form groups.
+- **Auto Merge**: Automatically merges cells with identical values in a column.
+- **Form editig**: Edit forms directly within the grid, featuring all necessary fields, including custom options and markdown support for a fast and enhanced data entry experience.
 
 - **Customizations**:
   - [Column header template](https://rv-grid.com/guide/column/header.template).
   - [Row header template](https://rv-grid.com/guide/row/headers).
   - [Cell properties](https://rv-grid.com/guide/cell/) (define custom properties for rendered cells).
+  - Nested grids: Build a grid inside a grid, showcasing advanced editing options and user interactions for a more dynamic data presentation.
+  - Context Menu: Build context menus for any grid element - from cells to headers. Cut, copy, paste, add rows, modify columns, and more. Fully customizable with your own actions and behaviors.
