@@ -970,7 +970,7 @@ declare global {
         new (): HTMLRevogrDataElement;
     };
     interface HTMLRevogrEditElementEventMap {
-        "celledit": SaveDataDetails;
+        "celleditinit": SaveDataDetails;
         "closeedit": boolean | undefined;
     }
     /**
@@ -1135,6 +1135,7 @@ declare global {
         "beforekeydown": { original: KeyboardEvent } & EventData;
         "beforekeyup": { original: KeyboardEvent } & EventData;
         "beforecellsave": any;
+        "celledit": SaveDataDetails;
     }
     /**
      * Component for overlaying the grid with the selection.
@@ -1798,9 +1799,9 @@ declare namespace LocalJSX {
          */
         "editor"?: EditorCtr | null;
         /**
-          * Cell edit event
+          * Cell edit event initiator, first in the cellEdit event chain
          */
-        "onCelledit"?: (event: RevogrEditCustomEvent<SaveDataDetails>) => void;
+        "onCelleditinit"?: (event: RevogrEditCustomEvent<SaveDataDetails>) => void;
         /**
           * Close editor event pass true if requires focus next
          */
@@ -2130,6 +2131,10 @@ declare namespace LocalJSX {
           * Cancel edit. Used for editors support when editor close requested.
          */
         "onCanceledit"?: (event: RevogrOverlaySelectionCustomEvent<any>) => void;
+        /**
+          * Runs when edit finished save started, first in chain event
+         */
+        "onCelledit"?: (event: RevogrOverlaySelectionCustomEvent<SaveDataDetails>) => void;
         /**
           * Cell edit apply to the data source. Triggers datasource edit on the root level.
          */
