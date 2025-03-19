@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
-  <title>Revo Grid - Virtual reactive data grid spreadsheet component</title>
+  <title>Virtual reactive data grid spreadsheet component</title>
   <style type="text/css">
     revo-grid {
       display: block;
@@ -37,7 +37,7 @@
         <div class="py-2 mb-auto">
 
           <!-- Data size picker -->
-          <h6>Data size</h6>
+          <h6>Data</h6>
           <div class="btn-group" role="group" aria-label="Basic example">
             <button type="button" class="btn btn-outline-primary btn-sm" onclick="setData({ rows: 1, cols: 1 })">1x1</button>
             <button type="button" class="btn btn-outline-primary btn-sm" onclick="setData({ rows: 20, cols: 2 })">20x2</button>
@@ -48,12 +48,19 @@
             <button type="button" class="btn btn-outline-primary btn-sm"
               onclick="setData({ rows: 10000, cols: 5000 })">10Kx5K</button>
           </div>
+          <button type="button" class="btn btn-outline-primary btn-sm mt-1" onclick="exportGrid()">Export CSV</button>
 
-          <h6 class="mt-4">Action</h6>
+          <h6 class="mt-4">Filter</h6>
           <button type="button" class="btn btn-outline-primary btn-sm mt-1" onclick="setFilter()">Set filter</button>
           <button type="button" class="btn btn-outline-primary btn-sm mt-1" onclick="clearFilter()">Clear filter</button>
           <button type="button" class="btn btn-primary btn-sm mt-1" onclick="setTrimmed([2])">Trim 3rd row</button>
           <button type="button" class="btn btn-outline-primary btn-sm mt-1" onclick="setTrimmed([])">Clear trimmed</button>
+          <h6 class="mt-4">Sorting</h6>
+          <button type="button" class="btn btn-outline-primary btn-sm mt-1" onclick="sortColumn(1)">Sort 2nd</button>
+          <button type="button" class="btn btn-outline-primary btn-sm mt-1" onclick="clearSorting()">Clear sorting</button>
+
+
+          <h6 class="mt-4">Layout</h6>
           <button type="button" class="btn btn-primary btn-sm mt-1" onclick="setGrouping(['key', 'key2'])">Group by:
             'key'</button>
           <button type="button" class="btn btn-outline-primary btn-sm mt-1" onclick="clearGrouping()">Clear grouping</button>
@@ -61,7 +68,6 @@
           <button type="button" class="btn btn-outline-primary btn-sm mt-1" onclick="setEdit(30, 1)">Edit X2:Y31</button>
 
           <button type="button" class="btn btn-outline-primary btn-sm mt-1" onclick="setRowSize(50)">Row sizes 50px</button>
-          <button type="button" class="btn btn-outline-primary btn-sm mt-1" onclick="exportGrid()">Export CSV</button>
           <h6 class="mt-4">Pin</h6>
           <div>
             <table class="table table-bordered">

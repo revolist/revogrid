@@ -11,4 +11,5 @@ export type ColumnSetEvent = {
 
 export type SortingConfig = {
   columns?: { prop: ColumnProp; order: Order; cellCompare?: CellCompareFunc }[];
+  additive?: boolean;
 };
