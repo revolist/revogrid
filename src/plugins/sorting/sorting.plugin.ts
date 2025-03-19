@@ -41,7 +41,7 @@ export class SortingPlugin extends BasePlugin {
   /**
    * We need to sort only so often
    */
-  private postponeSort = debounce(
+  postponeSort = debounce(
     (order?: SortingOrder, comparison?: SortingOrderFunction, ignoreViewportUpdate?: boolean) =>
       this.runSorting(order, comparison, ignoreViewportUpdate),
     50,
