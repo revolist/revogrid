@@ -485,7 +485,7 @@ export class RevoGridComponent {
   /**  Column updated */
   @Event() aftercolumnsset: EventEmitter<{
     columns: ColumnCollection;
-    order: Record<ColumnProp, 'asc' | 'desc' | undefined>;
+    order: SortingOrder;
   }>;
 
   /**
@@ -823,36 +823,32 @@ export class RevoGridComponent {
 
   /**
    * Update column sorting
-   * @param column - full column details to update
-   * @param index - virtual column index
+   * @param column - column prop and cellCompare
    * @param order - order to apply
    * @param additive - if false will replace current order
    */
   @Method() async updateColumnSorting(
-    column: ColumnRegular,
-    index: number,
+    column: Pick<ColumnRegular, 'prop' | 'cellCompare'>,
     order: 'asc' | 'desc' | undefined,
     additive: boolean,
   ) {
-    if (!this.columnProvider) {
-      throw new Error('Not connected');
-    }
-    return this.columnProvider.updateColumnSorting(
-      column,
-      index,
-      order,
+    this.sortingconfigchanged.emit({
+      columns: [{
+        prop: column.prop,
+        order,
+        cellCompare: column.cellCompare,
+      }],
       additive,
-    );
+    });
   }
 
   /**
    * Clears column sorting
    */
   @Method() async clearSorting() {
-    if (!this.columnProvider) {
-      throw new Error('Not connected');
-    }
-    this.columnProvider.clearSorting();
+    this.sortingconfigchanged.emit({
+      columns: [],
+    });
   }
 
   /**
@@ -1138,7 +1134,7 @@ export class RevoGridComponent {
     const columns = this.columnProvider.setColumns(beforeApplyEvent.detail);
     this.aftercolumnsset.emit({
       columns,
-      order: this.columnProvider.order,
+      order: this.pluginService.getByClass(SortingPlugin)?.sorting || {},
     });
   }
 

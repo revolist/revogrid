@@ -67,9 +67,20 @@ export class SortingPlugin extends BasePlugin {
           order[col.prop] = col.order;
         });
 
-        // // set sorting
-        this.sorting = order;
-        this.sortingFunc = sortingFunc;
+        if (cfg.additive) {
+          this.sorting = {
+            ...this.sorting,
+            ...order,
+          };
+          this.sortingFunc = {
+            ...this.sortingFunc,
+            ...sortingFunc,
+          };
+        } else {
+          // // set sorting
+          this.sorting = order;
+          this.sortingFunc = sortingFunc;
+        }
       }
     }
 
@@ -79,6 +90,18 @@ export class SortingPlugin extends BasePlugin {
       config = detail;
       setConfig(detail);
       this.startSorting(this.sorting, this.sortingFunc);
+    });
+
+    this.addEventListener('beforeheaderrender', ({
+      detail,
+    }) => {
+      const { data: column } = detail;
+      if (column.sortable) {
+        detail.data = {
+          ...column,
+          order: this.sorting?.[column.prop],
+        };
+      }
     });
 
     this.addEventListener('beforeanysource', ({
@@ -127,7 +150,6 @@ export class SortingPlugin extends BasePlugin {
 
       this.headerclick(
         e.detail.column,
-        e.detail.index,
         e.detail?.originalEvent?.shiftKey,
       );
     });
@@ -150,23 +172,17 @@ export class SortingPlugin extends BasePlugin {
    * Apply sorting to data on header click
    * If additive - add to existing sorting, multiple columns can be sorted
    */
-  headerclick(column: ColumnRegular, index: number, additive: boolean) {
+  headerclick(column: ColumnRegular, additive: boolean) {
     let order: Order = getNextOrder(column.order);
     const beforeEvent = this.emit('beforesorting', { column, order, additive });
     if (beforeEvent.defaultPrevented) {
       return;
     }
     order = beforeEvent.detail.order;
-    const newCol = this.providers.column.updateColumnSorting(
-      beforeEvent.detail.column,
-      index,
-      order,
-      additive,
-    );
 
     // apply sort data
     const beforeApplyEvent = this.emit('beforesortingapply', {
-      column: newCol,
+      column: beforeEvent.detail.column,
       order,
       additive,
     });

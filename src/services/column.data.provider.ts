@@ -1,6 +1,4 @@
 import reduce from 'lodash/reduce';
-import each from 'lodash/each';
-
 import {
   columnTypes,
   DataStore,
@@ -21,24 +19,10 @@ export type ColumnDataSources = Record<
   DimensionCols,
   DataStore<ColumnRegular, DimensionCols>
 >;
-type Sorting = Record<ColumnProp, ColumnRegular>;
-type SortingOrder = Record<ColumnProp, 'asc' | 'desc' | undefined>;
 
 export default class ColumnDataProvider {
   readonly dataSources: ColumnDataSources;
-  sorting: Sorting | null = null;
   collection: ColumnCollection | null = null;
-
-  get order() {
-    const order: SortingOrder = {};
-    const sorting = this.sorting;
-    if (sorting) {
-      Object.keys(sorting).forEach(prop => {
-        order[prop] = sorting[prop].order;
-      });
-    }
-    return order;
-  }
 
   get stores() {
     return this.dataSources;
@@ -123,7 +107,6 @@ export default class ColumnDataProvider {
         }, {}),
       });
     });
-    this.sorting = data.sort;
     this.collection = data;
     return data;
   }
@@ -186,42 +169,5 @@ export default class ColumnDataProvider {
   updateColumn(column: ColumnRegular, index: number) {
     const type = getColumnType(column);
     setSourceByVirtualIndex(this.dataSources[type].store, { [index]: column });
-  }
-
-  updateColumnSorting(
-    column: ColumnRegular,
-    index: number,
-    sorting: 'asc' | 'desc' | undefined,
-    additive: boolean,
-  ): ColumnRegular {
-    if (!additive) {
-      this.clearSorting();
-    }
-    column.order = sorting;
-    if (!this.sorting) {
-      this.sorting = {};
-    }
-    this.sorting[column.prop] = column;
-    this.updateColumn(column, index);
-    return column;
-  }
-
-  clearSorting() {
-    const types = reduce(
-      this.sorting,
-      (r: { [key in Partial<DimensionCols>]: boolean }, c: ColumnRegular) => {
-        const k = getColumnType(c);
-        r[k] = true;
-        return r;
-      },
-      {} as { [key in Partial<DimensionCols>]: boolean },
-    );
-    each(types, (_, type: DimensionCols) => {
-      const cols = this.dataSources[type].store.get('source');
-      each(cols, (c: ColumnRegular) => (c.order = undefined));
-      this.dataSources[type].setData({ source: [...cols] });
-    });
-
-    this.sorting = {};
   }
 }

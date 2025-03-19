@@ -289,12 +289,11 @@ export namespace Components {
         "trimmedRows": Record<number, boolean>;
         /**
           * Update column sorting
-          * @param column - full column details to update
-          * @param index - virtual column index
+          * @param column - column prop and cellCompare
           * @param order - order to apply
           * @param additive - if false will replace current order
          */
-        "updateColumnSorting": (column: ColumnRegular, index: number, order: "asc" | "desc" | undefined, additive: boolean) => Promise<ColumnRegular>;
+        "updateColumnSorting": (column: Pick<ColumnRegular, "prop" | "cellCompare">, order: "asc" | "desc" | undefined, additive: boolean) => Promise<void>;
         /**
           * Update columns
          */
@@ -834,7 +833,7 @@ declare global {
         "beforecolumnapplied": ColumnCollection;
         "aftercolumnsset": {
     columns: ColumnCollection;
-    order: Record<ColumnProp, 'asc' | 'desc' | undefined>;
+    order: SortingOrder;
   };
         "beforefilterapply": { collection: Record<ColumnProp, FilterCollectionItem> };
         "beforefiltertrimmed": {
@@ -1384,7 +1383,7 @@ declare namespace LocalJSX {
          */
         "onAftercolumnsset"?: (event: RevoGridCustomEvent<{
     columns: ColumnCollection;
-    order: Record<ColumnProp, 'asc' | 'desc' | undefined>;
+    order: SortingOrder;
   }>) => void;
         /**
           * After data applied or range changed.
