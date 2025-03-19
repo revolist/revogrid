@@ -268,7 +268,7 @@ export namespace Components {
          */
         "setDataAt": ({ row, col, colType, rowType, val, skipDataUpdate }: { row: number; col: number; val?: any; skipDataUpdate?: boolean; } & AllDimensionType) => Promise<void | undefined>;
         /**
-          * Alternative way to set sorting. `{columns: [{prop: 'name', order: 'asc'}]}`
+          * Alternative way to set sorting. `{columns: [{prop: 'name', order: 'asc'}]}` Use SortingPlugin to get current sorting state
          */
         "sorting"?: SortingConfig;
         /**
@@ -291,7 +291,7 @@ export namespace Components {
           * Update column sorting
           * @param column - column prop and cellCompare
           * @param order - order to apply
-          * @param additive - if false will replace current order
+          * @param additive - if false will replace current order  later passed to SortingPlugin
          */
         "updateColumnSorting": (column: Pick<ColumnRegular, "prop" | "cellCompare">, order: "asc" | "desc" | undefined, additive: boolean) => Promise<void>;
         /**
@@ -1483,7 +1483,7 @@ declare namespace LocalJSX {
          */
         "onBeforerowdefinition"?: (event: RevoGridCustomEvent<{ vals: any; oldVals: any }>) => void;
         /**
-          * By `sorting.plugin.ts` <br>Triggered immediately after header click. <br>First in sorting event sequence. Ff this event stops no other event called. <br>Use `e.preventDefault()` to prevent sorting.
+          * By `SortingPlugin` <br>Triggered immediately after header click. <br>First in sorting event sequence. Ff this event stops no other event called. <br>Use `e.preventDefault()` to prevent sorting.
          */
         "onBeforesorting"?: (event: RevoGridCustomEvent<{
     column: ColumnRegular;
@@ -1491,7 +1491,7 @@ declare namespace LocalJSX {
     additive: boolean;
   }>) => void;
         /**
-          * By `sorting.plugin.ts` <br> After `beforesorting` <br>Triggered after column data updated with new sorting order. <br>Use `e.preventDefault()` to prevent sorting data change.
+          * By `SortingPlugin` <br> After `beforesorting` <br>Triggered after column data updated with new sorting order. <br>Use `e.preventDefault()` to prevent sorting data change.
          */
         "onBeforesortingapply"?: (event: RevoGridCustomEvent<{
     column: ColumnRegular;
@@ -1506,7 +1506,7 @@ declare namespace LocalJSX {
     source: DataType[];
   }>) => void;
         /**
-          * By `sorting.plugin.ts` <br>Same as `beforesorting` but triggered after `beforeanysource` (when source is changed). <br>Use `e.preventDefault()` to prevent sorting data change.
+          * By `SortingPlugin` <br>Same as `beforesorting` but triggered after `beforeanysource` (when source is changed). <br>Use `e.preventDefault()` to prevent sorting data change.
          */
         "onBeforesourcesortingapply"?: (event: RevoGridCustomEvent<{
     type: DimensionRows;
@@ -1549,7 +1549,7 @@ declare namespace LocalJSX {
          */
         "onRoworderchanged"?: (event: RevoGridCustomEvent<{ from: number; to: number }>) => void;
         /**
-          * Emitted when the sorting configuration is changed
+          * Emitted when the sorting configuration is changed SortingPlugin subsribed to this event
          */
         "onSortingconfigchanged"?: (event: RevoGridCustomEvent<SortingConfig>) => void;
         /**
@@ -1604,7 +1604,7 @@ declare namespace LocalJSX {
          */
         "rowSize"?: number;
         /**
-          * Alternative way to set sorting. `{columns: [{prop: 'name', order: 'asc'}]}`
+          * Alternative way to set sorting. `{columns: [{prop: 'name', order: 'asc'}]}` Use SortingPlugin to get current sorting state
          */
         "sorting"?: SortingConfig;
         /**

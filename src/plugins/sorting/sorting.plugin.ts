@@ -10,7 +10,7 @@ import type {
 } from '@type';
 import type { SortingConfig, SortingOrder, SortingOrderFunction } from './sorting.types';
 import { getColumnByProp } from '../../utils/column.utils';
-import { rowTypes } from '@store';
+import { columnTypes, rowTypes } from '@store';
 import { getComparer, getNextOrder, sortIndexByItems } from './sorting.func';
 
 export * from './sorting.types';
@@ -20,8 +20,7 @@ export * from './sorting.sign';
 /**
  * Lifecycle
  * 1. @event `beforesorting` - Triggered when sorting just starts. Nothing has happened yet. This can be triggered from a column or from the source. If the type is from rows, the column will be undefined.
- * 1.1. @event `beforesourcesortingapply` - Triggered before the sorting data is applied to the data source. You can prevent this event, and the data will not be sorted.
- * 2. Method `updateColumnSorting` - Updates the column sorting icon on the grid and the column itself, but the data remains untouched.
+ * 2. @event `beforesourcesortingapply` - Triggered before the sorting data is applied to the data source. You can prevent this event, and the data will not be sorted.
  * 3. @event `beforesortingapply` - Triggered before the sorting data is applied to the data source. You can prevent this event, and the data will not be sorted. This event is only called from a column sorting click.
  * 4. @event `aftersortingapply` - Triggered after sorting has been applied and completed. This event occurs for both row and column sorting.
  *
@@ -29,27 +28,24 @@ export * from './sorting.sign';
  */
 
 export class SortingPlugin extends BasePlugin {
-  // sorting order per column
+  // Current sorting order per column prop
   sorting?: SortingOrder;
 
-  // sorting function per column, multiple columns sorting supported
+  // Each column sorting function, multiple columns sorting supported
   sortingFunc?: SortingOrderFunction;
+  /**
+   * Delayed sorting promise
+   */
   sortingPromise: (() => void) | null = null;
-  postponeSort = debounce(
+
+  /**
+   * We need to sort only so often
+   */
+  private postponeSort = debounce(
     (order?: SortingOrder, comparison?: SortingOrderFunction, ignoreViewportUpdate?: boolean) =>
       this.runSorting(order, comparison, ignoreViewportUpdate),
     50,
   );
-
-  runSorting(
-    order?: SortingOrder,
-    comparison?: SortingOrderFunction,
-    ignoreViewportUpdate?: boolean
-  ) {
-    this.sort(order, comparison, undefined, ignoreViewportUpdate);
-    this.sortingPromise?.();
-    this.sortingPromise = null;
-  }
 
   constructor(
     public revogrid: HTMLRevoGridElement,
@@ -155,6 +151,9 @@ export class SortingPlugin extends BasePlugin {
     });
   }
 
+  /**
+   * Entry point for sorting, waits for all delayes, registers jobs
+   */
   startSorting(order?: SortingOrder, sortingFunc?: SortingOrderFunction, ignoreViewportUpdate?: boolean) {
     if (!this.sortingPromise) {
       // add job before render
@@ -173,7 +172,8 @@ export class SortingPlugin extends BasePlugin {
    * If additive - add to existing sorting, multiple columns can be sorted
    */
   headerclick(column: ColumnRegular, additive: boolean) {
-    let order: Order = getNextOrder(column.order);
+    const columnProp = column.prop;
+    let order: Order = getNextOrder(this.sorting?.[columnProp]);
     const beforeEvent = this.emit('beforesorting', { column, order, additive });
     if (beforeEvent.defaultPrevented) {
       return;
@@ -205,25 +205,35 @@ export class SortingPlugin extends BasePlugin {
         ...sortingFunc,
       };
 
-      if (column.prop in sorting && size(sorting) > 1 && order === undefined) {
-        delete sorting[column.prop];
-        delete sortingFunc[column.prop];
+      if (columnProp in sorting && size(sorting) > 1 && order === undefined) {
+        delete sorting[columnProp];
+        delete sortingFunc[columnProp];
       } else {
-        sorting[column.prop] = order;
-        sortingFunc[column.prop] = cmp;
+        sorting[columnProp] = order;
+        sortingFunc[columnProp] = cmp;
       }
     } else {
       if (order) {
         // reset sorting
-        this.sorting = { [column.prop]: order };
-        this.sortingFunc = { [column.prop]: cmp };
+        this.sorting = { [columnProp]: order };
+        this.sortingFunc = { [columnProp]: cmp };
       } else {
-        delete this.sorting?.[column.prop];
-        delete this.sortingFunc?.[column.prop];
+        delete this.sorting?.[columnProp];
+        delete this.sortingFunc?.[columnProp];
       }
     }
 
     this.startSorting(this.sorting, this.sortingFunc);
+  }
+
+  runSorting(
+    order?: SortingOrder,
+    comparison?: SortingOrderFunction,
+    ignoreViewportUpdate?: boolean
+  ) {
+    this.sort(order, comparison, undefined, ignoreViewportUpdate);
+    this.sortingPromise?.();
+    this.sortingPromise = null;
   }
 
   /**
@@ -281,6 +291,10 @@ export class SortingPlugin extends BasePlugin {
         }
       }
     }
+    // refresh columns to redraw column headers and show correct icon
+    columnTypes.forEach((type) => {
+      this.providers.column.dataSources[type].refresh();
+    });
     this.emit('aftersortingapply');
   }
 }

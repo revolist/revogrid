@@ -243,6 +243,18 @@ window.clearFilter = () => {
   grid.filter = {};
 };
 
+window.sortColumn = (columnProp= 0, additive = false) => {
+  const grid = document.querySelector('revo-grid');
+  grid.updateColumnSorting({
+    prop: columnProp,
+  }, 'asc', additive);
+};
+
+window.clearSorting = () => {
+  const grid = document.querySelector('revo-grid');
+  grid.clearSorting();
+};
+
 window.setFilter = () => {
   const grid = document.querySelector('revo-grid');
   const filterFunc = (cellValue, extraValue) => {
