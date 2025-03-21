@@ -40,11 +40,11 @@ export interface ColumnDataSchemaModel {
    */
   column: ColumnRegular;
   /**
-   * Index of the row in the viewport
+   * Virtual index of the row in the viewport
    */
   rowIndex: number;
   /**
-   * Index of the column in the viewport
+   * Virtual index of the column in the viewport
    */
   colIndex: number;
   /**
@@ -799,11 +799,11 @@ export interface FocusAfterRenderEvent extends AllDimensionType {
   model?: any;
   column?: ColumnRegular;
   /**
-   * Index of the row in the viewport
+   * Virtual index of the row in the viewport
    */
   rowIndex: number;
   /**
-   * Index of the column in the viewport
+   * Virtual index of the column in the viewport
    */
   colIndex: number;
 }
