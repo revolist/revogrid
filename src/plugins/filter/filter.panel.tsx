@@ -268,32 +268,6 @@ export class FilterPanel {
     }, 0);
   }
 
-  private onUserInput(index: number, prop: ColumnProp, event: Event) {
-    // update the value of the filter item
-    this.filterItems[prop][index].value = (
-      event.target as HTMLInputElement
-    ).value;
-
-    if (!this.disableDynamicFiltering) {
-      this.debouncedApplyFilter();
-    }
-  }
-
-  private onKeyDown(e: KeyboardEvent) {
-    if (e.key.toLowerCase() === 'enter') {
-      const select = document.getElementById('add-filter') as HTMLSelectElement;
-      if (select) {
-        select.value = defaultType;
-        this.currentFilterType = defaultType;
-        this.addNewFilterToProp();
-        select.focus();
-      }
-      return;
-    }
-    // keep event local, don't escalate farther to dom
-    e.stopPropagation();
-  }
-
   private onSave() {
     this.filterChange.emit(this.filterItems);
   }
@@ -415,22 +389,68 @@ export class FilterPanel {
 
     if (!currentFilter) return '';
 
-    if (this.filterEntities[currentFilter[index].type].extra !== 'input')
-      return '';
+    const applyFilter = (value?: any) => {
+      this.filterItems[prop][index].value = value;
+      if (!this.disableDynamicFiltering) {
+        this.debouncedApplyFilter();
+      }
+    };
+
+    const focusNext = () => {
+      const select = document.getElementById('add-filter') as HTMLSelectElement;
+      if (select) {
+        select.value = defaultType;
+        this.currentFilterType = defaultType;
+        this.addNewFilterToProp();
+        select.focus();
+      }
+    };
 
     const capts = Object.assign(
       this.filterCaptionsInternal,
       this.filterCaptions,
     );
-
+    const extra = this.filterEntities[currentFilter[index].type].extra;
+    if (typeof extra === 'function') {
+      return extra(h, {
+        value: currentFilter[index].value,
+        filter: currentFilter[index],
+        prop,
+        index,
+        placeholder: capts.placeholder,
+        onInput: (value: any) => {
+          applyFilter(value);
+        },
+        onFocus: () => {
+          focusNext();
+        }
+      });
+    }
+    if (extra !== 'input' && extra !== 'datepicker') {
+      return '';
+    }
     return (
       <input
         id={`filter-input-${currentFilter[index].id}`}
         placeholder={capts.placeholder}
-        type="text"
+        type={extra === 'datepicker' ? 'date' : 'text'}
         value={currentFilter[index].value}
-        onInput={this.onUserInput.bind(this, index, prop)}
-        onKeyDown={e => this.onKeyDown(e)}
+        onInput={(e) => {
+          if (e.target instanceof HTMLInputElement) {
+            applyFilter(e.target.value);
+          }
+        }}
+        onKeyDown={e => {
+          if (e.key.toLowerCase() === 'enter') {
+            const select = document.getElementById('add-filter') as HTMLSelectElement;
+            if (select) {
+              focusNext();
+            }
+            return;
+          }
+          // keep event local, don't escalate farther to dom
+          e.stopPropagation();
+        }}
       />
     );
   }

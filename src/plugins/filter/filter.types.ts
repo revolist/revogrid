@@ -1,7 +1,8 @@
 // filter.types.ts
 
-import type { ColumnProp, ColumnRegular } from '@type';
+import type { ColumnProp, ColumnRegular, HyperFunc } from '@type';
 import type { FilterType } from './filter.indexed';
+import type { VNode } from '@stencil/core';
 
 export type DateEnum =
   | 'today'
@@ -17,7 +18,15 @@ export type DateEnum =
   | 'lastyear'
   | 'nextyear';
 
-export type ExtraField = 'input' | 'select' | 'multi' | 'datepicker';
+export type ExtraField = 'input' | 'datepicker' | ((h: HyperFunc<VNode>, config: {
+  value: any;
+  filter: FilterItem;
+  prop: ColumnProp;
+  index: number;
+  placeholder: string;
+  onInput: (value: any) => void;
+  onFocus: () => void;
+}) => VNode | VNode[]);
 
 export type LogicFunctionParam = any;
 export type LogicFunctionExtraParam =
