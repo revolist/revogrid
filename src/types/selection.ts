@@ -9,7 +9,9 @@ import type {
   PositionItem,
 } from './interfaces';
 
+// Virtual index of row
 export type RowIndex = number;
+// Virtual index of row
 export type ColIndex = number;
 
 /**
@@ -44,6 +46,8 @@ export type SelectionStoreState = {
    */
   nextFocus: Cell | null;
 };
+
+// Virtual index of row (y) and column (x)
 export type RangeArea = {
   x: ColIndex;
   y: RowIndex;
@@ -57,8 +61,8 @@ export type TempRange = {
 export type OldNewRangeMapping = {
   [newRowIndex: number]: {
     [T in ColumnProp]: { // new column prop
-      rowIndex: number; // original row
-      colIndex: number; // original col
+      rowIndex: number; // Virtual index of original row
+      colIndex: number; // Virtual index of original col
       colProp: ColumnProp; // original column prop
     };
   };
@@ -78,8 +82,8 @@ export type ChangedRange = {
  * Cell coordinates
  */
 export interface Cell {
-  x: ColIndex;
-  y: RowIndex;
+  x: ColIndex; // Virtual index of column
+  y: RowIndex; // Virtual index of row
 }
 export type FocusedCells = {
   focus: Cell;
@@ -93,8 +97,8 @@ export type RangeAreaCss = {
 };
 
 export type SaveDataDetails = {
-  rgRow: RowIndex;
-  rgCol: ColIndex;
+  rgRow: RowIndex;  // Virtual index of row
+  rgCol: ColIndex; // Virtual index of column
   type: DimensionRows;
   prop: ColumnProp;
   val: any;
