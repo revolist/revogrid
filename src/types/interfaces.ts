@@ -7,6 +7,7 @@ import type {
   DimensionType,
   MultiDimensionType,
 } from './dimension';
+
 import type {
   Cell,
   EditorCtr,
@@ -838,4 +839,11 @@ export interface RangeClipboardCopyEventProps<T = any> extends AllDimensionType 
   data: DataFormat<T>[][];
   range: RangeArea;
   mapping: OldNewRangeMapping;
+}
+
+export interface AdditionalData {
+  /**
+   * Additional data for grid and plugins
+   */
+  [key: string]: any;
 }
