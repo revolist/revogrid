@@ -44,6 +44,7 @@ import type {
   FocusAfterRenderEvent,
   ExtraNodeFuncConfig,
   RowDragStartDetails,
+  AdditionalData,
 } from '@type';
 
 import ColumnDataProvider from '../../services/column.data.provider';
@@ -272,7 +273,7 @@ export class RevoGridComponent {
    * Additional data to be passed to plugins, renders or editors.
    * For example if you need to pass Vue component instance.
    */
-  @Prop() additionalData: any = {};
+  @Prop() additionalData: AdditionalData = {};
 
   /**
    * Disable lazy rendering mode for the `X axis`.
