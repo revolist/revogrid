@@ -111,6 +111,11 @@ export interface ColumnFilterConfig {
    * when the user clicks on the filter button.
    */
   disableDynamicFiltering?: boolean;
+
+  /**
+   * Whether or not to close the filter panel when clicking outside
+   */
+  closeFilterPanelOnOutsideClick?: boolean;
 }
 
 export type FilterCollectionItem = {

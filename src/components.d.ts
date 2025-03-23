@@ -441,6 +441,10 @@ export namespace Components {
     }
     interface RevogrFilterPanel {
         /**
+          * If true, closes the filter panel when clicking outside
+         */
+        "closeOnOutsideClick": boolean;
+        /**
           * Disables dynamic filtering. A way to apply filters on Save only
          */
         "disableDynamicFiltering": boolean;
@@ -1834,6 +1838,10 @@ declare namespace LocalJSX {
   )[];
     }
     interface RevogrFilterPanel {
+        /**
+          * If true, closes the filter panel when clicking outside
+         */
+        "closeOnOutsideClick"?: boolean;
         /**
           * Disables dynamic filtering. A way to apply filters on Save only
          */

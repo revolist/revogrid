@@ -15,15 +15,15 @@ import {
 import ColumnService from './column.service';
 import { DATA_COL, DATA_ROW, ROW_FOCUSED_CLASS } from '../../utils/consts';
 
-import { DSourceState, getSourceItem } from '@store';
+import { type DSourceState, getSourceItem } from '@store';
 import RowRenderer, { PADDING_DEPTH } from './row-renderer';
-import GroupingRowRenderer, { RowGroupingProps } from '../../plugins/groupingRow/grouping.row.renderer';
+import GroupingRowRenderer from '../../plugins/groupingRow/grouping.row.renderer';
 import { isGrouping } from '../../plugins/groupingRow/grouping.service';
-import { AllDimensionType, CellTemplateProp, DimensionCols, DimensionRows } from '@type';
+import type { AllDimensionType, CellTemplateProp, DimensionCols, DimensionRows } from '@type';
 import { RowHighlightPlugin } from './row-highlight.plugin';
 import { convertVNodeToHTML } from '../vnode/vnode.utils';
 import { CellRenderer } from './cell-renderer';
-import {
+import type {
   ViewportState,
   DimensionSettingsState,
   BeforeRowRenderEvent,
@@ -37,7 +37,8 @@ import {
   RangeArea,
   SelectionStoreState,
 } from '@type';
-import { Observable } from '../../utils';
+import type { Observable } from '../../utils';
+import type { RowGroupingProps } from '../../plugins';
 
 /**
  * This component is responsible for rendering data
@@ -237,6 +238,7 @@ export class RevogrData {
           model: dataItem,
           groupingCustomRenderer,
           hasExpand: this.columnService.hasGrouping,
+          columnItems: cols,
           providers: this.providers,
         };
         rowsEls.push(<GroupingRowRenderer {...gmodel} />);

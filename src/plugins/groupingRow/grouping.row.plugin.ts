@@ -20,6 +20,7 @@ import type { Observable, ColumnCollection } from '../../utils';
 import { SortingPlugin } from '../sorting/sorting.plugin';
 
 import {
+  GROUP_EXPAND_EVENT,
   GROUPING_ROW_TYPE,
   PSEUDO_GROUP_COLUMN,
 } from './grouping.const';
@@ -48,11 +49,6 @@ export * from './grouping.row.types';
 export * from './grouping.service';
 export * from './grouping.row.renderer';
 
-declare global {
-  interface HTMLRevoGridElementEventMap {
-    groupexpandclick: OnExpandEvent;
-  }
-}
 
 export class GroupingRowPlugin extends BasePlugin {
   private options: GroupingOptions | undefined;
@@ -64,8 +60,8 @@ export class GroupingRowPlugin extends BasePlugin {
   }
 
   constructor(
-    public revogrid: HTMLRevoGridElement,
-    public providers: PluginProviders,
+    revogrid: HTMLRevoGridElement,
+    providers: PluginProviders,
   ) {
     super(revogrid, providers);
   }
@@ -171,9 +167,10 @@ export class GroupingRowPlugin extends BasePlugin {
      * Get source without grouping
      * @param newOldIndexMap - provides us mapping with new indexes vs old indexes, we would use it for trimmed mapping
      */
+    const store = this.getStore();
     const { source, prevExpanded, oldNewIndexes } = getSource(
-      this.getStore().get('source'),
-      this.getStore().get('proxyItems'),
+      store.get('source'),
+      store.get('proxyItems'),
       true,
     );
     const expanded: ExpandedOptions = {
@@ -191,6 +188,7 @@ export class GroupingRowPlugin extends BasePlugin {
       oldNewIndexMap,
     } = gatherGrouping(source, this.options?.props || [], expanded);
 
+    console.log('sourceWithGroups', gatherGrouping(source, this.options?.props || [], expanded))
     const customRenderer = options?.groupLabelTemplate;
 
     // setup source
@@ -252,9 +250,10 @@ export class GroupingRowPlugin extends BasePlugin {
       return;
     }
     // props exist and source initd
+    const store = this.getStore();
     const { source } = getSource(
-      this.getStore().get('source'),
-      this.getStore().get('proxyItems'),
+      store.get('source'),
+      store.get('proxyItems'),
     );
     if (source.length) {
       this.doSourceUpdate({ ...options });
@@ -316,7 +315,7 @@ export class GroupingRowPlugin extends BasePlugin {
     /**
      * When grouping expand icon was clicked
      */
-    this.addEventListener('groupexpandclick', e => this.onExpand(e.detail));
+    this.addEventListener(GROUP_EXPAND_EVENT, e => this.onExpand(e.detail));
   }
 
   // clear grouping

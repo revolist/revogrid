@@ -70,9 +70,10 @@ window.setGrouping = function (props = [], expandedAll = false) {
   grid.grouping = {
     props,
     expandedAll,
-    prevExpanded: { a: true },
-    groupLabelTemplate: (createElement, { name, depth }) =>
-      createElement('span', null, ` ${props[depth]}: ${name}`),
+    prevExpanded: { 'a': true, 'a,c': true },
+    groupLabelTemplate(createElement, { name, depth, expanded }) {
+      return createElement('span', null, `${expanded ? '-' : '+'} ${props[depth]}: ${name}`);
+    },
   };
 };
 

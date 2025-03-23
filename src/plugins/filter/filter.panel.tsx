@@ -45,7 +45,7 @@ const FILTER_ID = 'add-filter';
 export class FilterPanel {
   private filterCaptionsInternal: FilterCaptions = {
     title: 'Filter by',
-    ok: 'Ok',
+    ok: 'Close',
     save: 'Save',
     // drops the filter
     reset: 'Reset',
@@ -70,12 +70,16 @@ export class FilterPanel {
    * Disables dynamic filtering. A way to apply filters on Save only
    */
   @Prop() disableDynamicFiltering = false;
+  /**
+   * If true, closes the filter panel when clicking outside
+   */
+  @Prop() closeOnOutsideClick = true;
   @Event() filterChange: EventEmitter<MultiFilterItem>;
   @Event() resetChange: EventEmitter<ColumnProp>;
 
   @Listen('mousedown', { target: 'document' }) onMouseDown(e: MouseEvent) {
     // click on anything then select drops values to default
-    if (!this.changes || e.defaultPrevented) {
+    if (!this.changes) {
       return;
     }
     const path = e.composedPath();
@@ -98,7 +102,8 @@ export class FilterPanel {
     if (
       e.target instanceof HTMLElement &&
       isOutside &&
-      !isFilterBtn(e.target)
+      !isFilterBtn(e.target) &&
+      this.closeOnOutsideClick
     ) {
       this.changes = undefined;
     }
@@ -186,8 +191,15 @@ export class FilterPanel {
     if (!el) {
       return;
     }
+
+    const revoGrid = el.closest('revo-grid');
+    if (!revoGrid) {
+      return;
+    }
+
     const pos = el.getBoundingClientRect();
-    const maxLeft = window.innerWidth - pos.width;
+    const gridPos = revoGrid.getBoundingClientRect();
+    const maxLeft = gridPos.right - pos.width;
 
     if (pos.left > maxLeft && el.offsetLeft) {
       el.style.left = `${maxLeft - (el.parentElement?.getBoundingClientRect().left ?? 0)}px`;
@@ -474,7 +486,7 @@ export class FilterPanel {
       <Host
         style={style}
         ref={el => {
-          this.changes?.autoCorrect && this.autoCorrect(el);
+          this.changes?.autoCorrect !== false && this.autoCorrect(el);
         }}
       >
         <slot slot="header" />
