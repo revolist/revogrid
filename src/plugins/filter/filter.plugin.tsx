@@ -102,6 +102,7 @@ export class FilterPlugin extends BasePlugin {
         onFilterChange={e => this.onFilterChange(e.detail)}
         onResetChange={e => this.onFilterReset(e.detail)}
         disableDynamicFiltering={config?.disableDynamicFiltering}
+        closeOnOutsideClick={config?.closeFilterPanelOnOutsideClick}
         ref={e => (this.pop = e)}
       >
         {' '}

@@ -95,19 +95,22 @@ function flattenGroupMaps({
       [columnProps[depth]]: groupId,
     });
     itemIndex += 1;
-    if (!isGroupExpanded && depth) {
+    // If parent group is collapsed, mark all items as hidden
+    if (!isExpanded && depth) {
       trimmed[itemIndex] = true;
     }
     if (Array.isArray(innerGroupedValues)) {
+      // This branch handles leaf nodes (actual data items)
       innerGroupedValues.forEach(value => {
         itemIndex += 1;
         if (!isGroupExpanded) {
-          trimmed[itemIndex] = true;
+          trimmed[itemIndex] = true; // Mark items as hidden if group is collapsed
         }
-        oldNewIndexMap[value[GROUP_ORIGINAL_INDEX]] = itemIndex;
+        oldNewIndexMap[value[GROUP_ORIGINAL_INDEX]] = itemIndex; // Keep track of new positions
       });
       sourceWithGroups.push(...innerGroupedValues);
     } else {
+      // This branch handles nested groups (further subgroups)
       const children = flattenGroupMaps({
         groupedValues: innerGroupedValues,
         parentIds: levelIds,
@@ -116,7 +119,7 @@ function flattenGroupMaps({
         expandedAll,
         prevExpanded,
         columnProps,
-      });
+      }); // Recursively process subgroups
       sourceWithGroups.push(...children.source);
       trimmed = { ...children.trimmed, ...trimmed };
       oldNewIndexMap = { ...children.oldNewIndexMap, ...oldNewIndexMap };

@@ -1,24 +1,18 @@
 import { h } from '@stencil/core';
-import RowRenderer, { RowProps } from '../../components/data/row-renderer';
+import RowRenderer from '../../components/data/row-renderer';
 import {
   GROUP_DEPTH,
   GROUP_EXPANDED,
   GROUP_EXPAND_BTN,
   PSEUDO_GROUP_ITEM,
+  GROUP_EXPAND_EVENT,
 } from './grouping.const';
-import { GroupLabelTemplateFunc } from './grouping.row.types';
-import { DataType, PositionItem, Providers } from '@type';
+import type { RowGroupingProps } from './grouping.row.types';
+import type { DataType } from '@type';
 
-interface GroupRowPros extends RowProps {
-  model: DataType;
-  hasExpand: boolean;
-  providers: Providers;
-  groupingCustomRenderer?: GroupLabelTemplateFunc | null;
-}
-export type RowGroupingProps = GroupRowPros & PositionItem;
 
 export function expandEvent(e: MouseEvent, model: DataType, virtualIndex: number) {
-  const event = new CustomEvent('groupexpandclick', {
+  const event = new CustomEvent(GROUP_EXPAND_EVENT, {
     detail: {
       model,
       virtualIndex,
@@ -30,7 +24,7 @@ export function expandEvent(e: MouseEvent, model: DataType, virtualIndex: number
 }
 
 export const GroupingRowRenderer = (props: RowGroupingProps) => {
-  const { model, itemIndex, hasExpand, groupingCustomRenderer, providers } =
+  const { model, itemIndex, hasExpand, groupingCustomRenderer } =
     props;
   const name = model[PSEUDO_GROUP_ITEM];
   const expanded = model[GROUP_EXPANDED];
@@ -45,12 +39,10 @@ export const GroupingRowRenderer = (props: RowGroupingProps) => {
       <RowRenderer {...props} rowClass="groupingRow" depth={depth}>
         <div onClick={e => expandEvent(e, model, itemIndex)}>
           {groupingCustomRenderer(h, {
+            ...props,
             name,
-            model,
-            itemIndex,
             expanded,
             depth,
-            providers,
           })}
         </div>
       </RowRenderer>

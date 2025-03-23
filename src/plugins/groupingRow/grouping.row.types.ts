@@ -5,7 +5,11 @@ import type {
   DimensionRows,
   DataType,
   Providers,
+  VirtualPositionItem,
+  PositionItem,
 } from '@type';
+import type { RowProps } from '../../components/data/row-renderer';
+import { GROUP_EXPAND_EVENT } from './grouping.const';
 
 
 interface GroupTemplateProp {
@@ -17,9 +21,23 @@ interface GroupTemplateProp {
   model?: DataType;
 }
 
+export type RowGroupingProps = GroupRowPros & PositionItem & {
+  /**
+   * Visible columns in the grid, can be used to get the width of the column and position of the column
+   * to calculate the position of the cells in the grouping row
+   */
+  columnItems: VirtualPositionItem[];
+};
+export interface GroupRowPros extends RowProps {
+  model: DataType;
+  hasExpand: boolean;
+  providers: Providers;
+  groupingCustomRenderer?: GroupLabelTemplateFunc | null;
+}
+
 export type GroupLabelTemplateFunc = (
   createElement: HyperFunc<VNode>,
-  props: GroupTemplateProp,
+  props: GroupTemplateProp & RowGroupingProps,
   ...args: any[]
 ) => any;
 
@@ -31,7 +49,13 @@ export type GroupingOptions = {
 
   /**
    * Currently expanded items.
-   * Corresponds to prop values as: source = [{ me: 'a' }, { me: 'b' }, { me: 'c' }], to set expanded: { a: true }
+   * Corresponds to prop values as:
+   * source = [{ me: 'a' }, { me: 'b' }, { me: 'c' }]
+   * to set expanded: { a: true }
+   * 
+   * for nested groups:
+   * to set expanded: { 'a': true, 'a,c': true }
+   * to set expanded: { 'a': true, 'a,b': true, 'a,b,c': true }
    */
   prevExpanded?: Record<string, boolean>;
 
@@ -83,3 +107,14 @@ export type ExpandedOptions = {
    */
   groupLabelTemplate?: GroupLabelTemplateFunc;
 };
+
+declare global {
+  /**
+   * grid.addEventListener(GROUP_EXPAND_EVENT, (e: OnExpandEvent) => {
+   *  console.log(e)
+   * })
+   */
+  interface HTMLRevoGridElementEventMap {
+    [GROUP_EXPAND_EVENT]: OnExpandEvent;
+  }
+}
