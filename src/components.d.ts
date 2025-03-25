@@ -675,18 +675,22 @@ export namespace Components {
          */
         "changeScroll": (e: ViewPortScrollEvent) => Promise<ViewPortScrollEvent>;
         /**
+          * Client size
+         */
+        "clientSize": number;
+        /**
           * Scroll dimension (`X` - `rgCol` or `Y` - `rgRow`)
          */
         "dimension": DimensionType;
         /**
           * Dimensions
          */
-        "dimensionStore": Observable<DimensionSettingsState>;
+        "realSize": number;
         "setScroll": (e: ViewPortScrollEvent) => Promise<void>;
         /**
-          * Viewport
+          * Virtual size
          */
-        "viewportStore": Observable<ViewportState>;
+        "virtualSize": number;
     }
     /**
      * Temporary range selection component. Shows temporary range selection.
@@ -2250,21 +2254,25 @@ declare namespace LocalJSX {
      */
     interface RevogrScrollVirtual {
         /**
+          * Client size
+         */
+        "clientSize": number;
+        /**
           * Scroll dimension (`X` - `rgCol` or `Y` - `rgRow`)
          */
         "dimension"?: DimensionType;
-        /**
-          * Dimensions
-         */
-        "dimensionStore": Observable<DimensionSettingsState>;
         /**
           * Scroll event
          */
         "onScrollvirtual"?: (event: RevogrScrollVirtualCustomEvent<ViewPortScrollEvent>) => void;
         /**
-          * Viewport
+          * Dimensions
          */
-        "viewportStore": Observable<ViewportState>;
+        "realSize": number;
+        /**
+          * Virtual size
+         */
+        "virtualSize": number;
     }
     /**
      * Temporary range selection component. Shows temporary range selection.
