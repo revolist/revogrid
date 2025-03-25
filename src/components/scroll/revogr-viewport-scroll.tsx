@@ -224,31 +224,39 @@ export class RevogrViewportScroll implements ElementScroll {
             }
           >
         > = {};
+
+        let calculatedHeight = 0;
         if (entry.height !== previousSize.height) {
-          let height = entry.height || 0;
-          if (height) {
-            height -=
+          calculatedHeight = entry.height || 0;
+          if (calculatedHeight) {
+            calculatedHeight -=
               (this.header?.clientHeight ?? 0) +
               (this.footer?.clientHeight ?? 0);
           }
+
           els.rgRow = {
-            size: height,
+            size: calculatedHeight,
             contentSize: this.contentHeight,
             scroll: this.verticalScroll?.scrollTop ?? 0,
             noScroll: false,
           };
         }
+        let calculatedWidth = 0;
         if (entry.width !== previousSize.width) {
+          calculatedWidth = entry.width || 0;
           els.rgCol = {
-            size: entry.width || 0,
+            size: calculatedWidth,
             contentSize: this.contentWidth,
             scroll: this.horizontalScroll.scrollLeft,
             noScroll: this.colType !== 'rgCol',
           };
         }
 
-        for (const [dim, item] of Object.entries(els)) {
-          const dimension = dim as DimensionType;
+        // Process changes in order: width first, then height
+        const dimensions: DimensionType[] = ['rgCol', 'rgRow'];
+        for (const dimension of dimensions) {
+          const item = els[dimension];
+          if (!item) continue;
           this.resizeViewport.emit({
             dimension,
             size: item.size,
@@ -400,8 +408,7 @@ export class RevogrViewportScroll implements ElementScroll {
     coordinate: number,
     outside = false,
   ) {
-    // apply after throttling
-    if (this.localScrollTimer.isReady(type, coordinate)) {
+    const lastScrollUpdate = () => {
       this.localScrollService?.scroll(
         coordinate,
         type,
@@ -409,6 +416,12 @@ export class RevogrViewportScroll implements ElementScroll {
         undefined,
         outside,
       );
+    };
+    // apply after throttling
+    if (this.localScrollTimer.isReady(type, coordinate)) {
+      lastScrollUpdate();
+    } else {
+      this.localScrollTimer.throttleLastScrollUpdate(type, coordinate, () => lastScrollUpdate());
     }
   }
 

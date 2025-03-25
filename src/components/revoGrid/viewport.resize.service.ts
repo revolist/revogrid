@@ -23,7 +23,11 @@ export default class GridResizeService {
       this.resize?.(entry, this.previousSize);
       this.previousSize = entry;
     },
-    10,
+    40,
+    {
+      leading: false,
+      trailing: true,
+    }
   );
   constructor(
     el: HTMLElement,

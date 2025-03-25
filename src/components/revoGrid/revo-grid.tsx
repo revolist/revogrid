@@ -1712,6 +1712,30 @@ export class RevoGridComponent {
     const viewports = this.viewportProvider.stores;
     const dimensions = this.dimensionProvider.stores;
 
+    const verticalScroll = (
+      <revogr-scroll-virtual
+        class="vertical"
+        dimension={typeRow}
+        clientSize={viewports[typeRow].store.get('clientSize')}
+        virtualSize={viewports[typeRow].store.get('virtualSize')}
+        realSize={dimensions[typeRow].store.get('realSize')}
+        ref={el => this.scrollingService.registerElement(el, 'rowScroll')}
+        onScrollvirtual={e => this.scrollingService.proxyScroll(e.detail)}
+      />
+    );
+
+    const horizontalScroll = (
+      <revogr-scroll-virtual
+          class="horizontal"
+          dimension={typeCol}
+          clientSize={viewports[typeCol].store.get('clientSize')}
+          virtualSize={viewports[typeCol].store.get('virtualSize')}
+          realSize={dimensions[typeCol].store.get('realSize')}
+          ref={el => this.scrollingService.registerElement(el, 'colScroll')}
+          onScrollvirtual={e => this.scrollingService.proxyScroll(e.detail)}
+        />
+    );
+
     return (
       <Host>
         {this.hideAttribution ? null : (
@@ -1729,25 +1753,11 @@ export class RevoGridComponent {
           <div class="viewports">
             <slot name="viewport" />
             {viewportSections}
-            <revogr-scroll-virtual
-              class="vertical"
-              dimension={typeRow}
-              viewportStore={viewports[typeRow].store}
-              dimensionStore={dimensions[typeRow].store}
-              ref={el => this.scrollingService.registerElement(el, 'rowScroll')}
-              onScrollvirtual={e => this.scrollingService.proxyScroll(e.detail)}
-            />
+            {verticalScroll}
             <OrderRenderer ref={e => (this.orderService = e)} />
           </div>
         </div>
-        <revogr-scroll-virtual
-          class="horizontal"
-          dimension={typeCol}
-          viewportStore={viewports[typeCol].store}
-          dimensionStore={dimensions[typeCol].store}
-          ref={el => this.scrollingService.registerElement(el, 'colScroll')}
-          onScrollvirtual={e => this.scrollingService.proxyScroll(e.detail)}
-        />
+        {horizontalScroll}
         <revogr-extra ref={el => (this.extraService = el)} nodes={this.extraElements} />
         <slot name="footer" />
       </Host>

@@ -13,13 +13,11 @@ import LocalScrollService, {
 } from '../../services/local.scroll.service';
 import type {
   DimensionType,
-  ViewportState,
-  DimensionSettingsState,
   ViewPortScrollEvent,
 } from '@type';
 import { AutohideScrollPlugin } from './autohide-scroll.plugin';
 import { LocalScrollTimer } from '../../services/local.scroll.timer';
-import { type Observable, getScrollbarSize } from '../../utils';
+import { getScrollbarSize } from '../../utils';
 
 /**
  * Virtual scroll component
@@ -35,13 +33,19 @@ export class RevogrScrollVirtual {
   @Prop() dimension: DimensionType = 'rgRow';
 
   /**
-   * Viewport
-   */
-  @Prop() viewportStore!: Observable<ViewportState>;
-  /**
    * Dimensions
    */
-  @Prop() dimensionStore!: Observable<DimensionSettingsState>;
+  @Prop() realSize!: number;
+
+  /**
+   * Virtual size
+   */
+  @Prop() virtualSize!: number;
+
+  /**
+   * Client size
+   */
+  @Prop() clientSize!: number;
 
   /**
    * Scroll event
@@ -65,8 +69,8 @@ export class RevogrScrollVirtual {
     if (e.coordinate) {
       this.autohideScrollPlugin.checkScroll({
         scrollSize: this.scrollSize,
-        contentSize: this.dimensionStore.get('realSize'),
-        virtualSize: this.viewportStore.get('virtualSize'),
+        contentSize: this.realSize,
+        virtualSize: this.virtualSize,
       });
     }
   }
@@ -88,22 +92,6 @@ export class RevogrScrollVirtual {
       this.setScroll(e);
     }
     return e;
-  }
-
-  set size(s: number) {
-    this.autohideScrollPlugin.setScrollSize(s);
-    if (this.dimension === 'rgRow') {
-      this.element.style.minWidth = `${s}px`;
-      return;
-    }
-    this.element.style.minHeight = `${s}px`;
-  }
-
-  get size(): number {
-    if (this.dimension === 'rgRow') {
-      return this.element.clientHeight;
-    }
-    return this.element.clientWidth;
   }
 
   connectedCallback() {
@@ -131,36 +119,20 @@ export class RevogrScrollVirtual {
   }
 
   componentDidRender() {
-    const type = this.dimension === 'rgRow' ? 'scrollHeight' : 'scrollWidth';
-    // Get scrollbar size once during component initialization
-    const scrollbarSize = this.scrollSize;
-    // Calculate if content exceeds viewport size
-    // Add scrollbar size to the comparison to account for other dimension's scrollbar
-    const hasScroll = this.element[type] > this.size + scrollbarSize;
-    // Set scroll size based on whether scroll is needed
-    this.size = hasScroll ? this.scrollSize : 0;
-
-    let additionalScrollbarSize = 0;
+    let scrollSize = 0;
     if (this.dimension === 'rgRow') {
-      additionalScrollbarSize =
-        this.element.scrollWidth > this.element.clientWidth
-          ? scrollbarSize
-          : 0;
+      scrollSize = this.element.scrollHeight > this.element.clientHeight ? this.scrollSize : 0;
+      this.element.style.minWidth = `${scrollSize}px`;
     } else {
-      additionalScrollbarSize =
-        this.element.scrollHeight > this.element.clientHeight
-          ? scrollbarSize
-          : 0;
+      scrollSize = this.element.scrollWidth > this.element.clientWidth ? this.scrollSize : 0;
+      this.element.style.minHeight = `${scrollSize}px`;
     }
-
-    const clientSize = this.size + additionalScrollbarSize;
-
+    this.autohideScrollPlugin.setScrollSize(scrollSize);
     this.localScrollService.setParams(
       {
-        contentSize: this.dimensionStore.get('realSize'),
-        // Add scrollbar size to clientSize if other dimension has scroll
-        clientSize,
-        virtualSize: this.viewportStore.get('clientSize'),
+        contentSize: this.realSize,
+        clientSize: this.dimension === 'rgRow' ?  this.element.clientHeight : this.element.clientWidth,
+        virtualSize: this.clientSize,
       },
       this.dimension,
     );
@@ -175,24 +147,29 @@ export class RevogrScrollVirtual {
     if (this.dimension === 'rgRow') {
       type = 'scrollTop';
     }
-    // apply after throttling
-    if (this.localScrollTimer.isReady(this.dimension, target[type] || 0)) {
+
+    const setScroll = () => {
       this.localScrollService?.scroll(target[type] || 0, this.dimension);
+    };
+    // apply after throttling
+    if (this.localScrollTimer.isReady(this.dimension, target[type])) {
+      setScroll();
+    } else {
+      this.localScrollTimer.throttleLastScrollUpdate(this.dimension, target[type] || 0, () => setScroll());
     }
   }
 
   render() {
-    const sizeType = this.dimension === 'rgRow' ? 'height' : 'width';
     const size = getContentSize(
-      this.dimensionStore.get('realSize'),
-      this.size,
-      this.viewportStore.get('clientSize'), // content viewport size
+      this.realSize,
+      this.dimension === 'rgRow' ?  this.element.clientHeight : this.element.clientWidth,
+      this.clientSize, // content viewport size
     );
     return (
       <Host onScroll={(e: MouseEvent) => this.onScroll(e)}>
         <div
           style={{
-            [sizeType]: `${size}px`,
+            [this.dimension === 'rgRow' ? 'height' : 'width']: `${size}px`,
           }}
         />
       </Host>
