@@ -49,7 +49,6 @@ export * from './grouping.row.types';
 export * from './grouping.service';
 export * from './grouping.row.renderer';
 
-
 export class GroupingRowPlugin extends BasePlugin {
   private options: GroupingOptions | undefined;
 

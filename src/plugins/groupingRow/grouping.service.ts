@@ -9,9 +9,14 @@ import {
   GROUP_ORIGINAL_INDEX,
   GROUP_COLUMN_PROP,
 } from './grouping.const';
-import type { ExpandedOptions, SourceGather } from './grouping.row.types';
+import type { ExpandedOptions } from './grouping.row.types';
 
 type GroupedData = Map<string, GroupedData | DataType[]>;
+type SourceGather = {
+  source: DataType[];
+  prevExpanded: Record<string, boolean>;
+  oldNewIndexes?: Record<number, number>;
+};
 
 function getGroupValueDefault(item: DataType, prop: string | number) {
   return item[prop] || null;
