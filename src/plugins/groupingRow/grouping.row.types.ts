@@ -48,23 +48,6 @@ export type GroupingOptions = {
   props?: ColumnProp[];
 
   /**
-   * Currently expanded items.
-   * Corresponds to prop values as:
-   * source = [{ me: 'a' }, { me: 'b' }, { me: 'c' }]
-   * to set expanded: { a: true }
-   * 
-   * for nested groups:
-   * to set expanded: { 'a': true, 'a,c': true }
-   * to set expanded: { 'a': true, 'a,b': true, 'a,b,c': true }
-   */
-  prevExpanded?: Record<string, boolean>;
-
-  /**
-   * Is expanded by default
-   */
-  expandedAll?: boolean;
-
-  /**
    * Should grouping be preserved on source update.
    * default: true
    */
@@ -85,14 +68,12 @@ export type OnExpandEvent = {
   virtualIndex: number;
 };
 
-export type SourceGather = {
-  source: DataType[];
-  prevExpanded: Record<string, boolean>;
-  oldNewIndexes?: Record<number, number>;
-};
-
 export type ExpandedOptions = {
+  /**
+   * Currently expanded items. to set expanded: '{ 'a': true, 'a,b': true, 'a,b,c': true }'
+   */
   prevExpanded?: Record<string, boolean>;
+
   /**
    * Is expanded by default
    */

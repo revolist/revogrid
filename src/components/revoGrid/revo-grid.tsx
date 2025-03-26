@@ -66,7 +66,7 @@ import { SortingPlugin } from '../../plugins/sorting/sorting.plugin';
 import { ExportFilePlugin } from '../../plugins/export/export.plugin';
 import { DataInput } from '../../plugins/export/types';
 import { GroupingRowPlugin } from '../../plugins/groupingRow/grouping.row.plugin';
-import { GroupingOptions } from '../../plugins/groupingRow/grouping.row.types';
+import type { GroupingOptions } from '../../plugins/groupingRow/grouping.row.types';
 import ViewportService, { FocusedData } from './viewport.service';
 import { DATA_SLOT, HEADER_SLOT } from './viewport.helpers';
 import GridScrollingService from './viewport.scrolling.service';
