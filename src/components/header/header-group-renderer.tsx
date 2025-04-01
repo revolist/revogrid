@@ -1,6 +1,6 @@
 import { h } from '@stencil/core';
 import { Group } from '@store';
-import type { CellProps, Providers, DimensionCols } from '@type';
+import type { CellProps, ProvidersColumns } from '@type';
 import { ResizeEvent, ResizeProps } from './resizable.directive';
 import { HEADER_CLASS, MIN_COL_SIZE } from '../../utils/consts';
 import { HeaderCellRenderer } from './header-cell-renderer';
@@ -9,7 +9,7 @@ export type HeaderGroupRendererProps = {
   start: number;
   end: number;
   group: Group;
-  providers: Providers<DimensionCols | 'rowHeaders'>;
+  providers: ProvidersColumns;
   additionalData: any;
   canResize?: boolean;
   onResize?(e: ResizeEvent): void;

@@ -172,8 +172,10 @@ export class RevogrData {
     // make sure we have correct data, before render
     this.providers = {
       type: this.type,
+      colType: this.colType,
       readonly: this.readonly,
       data: this.dataStore,
+      columns: this.colData,
       viewport: this.viewportCol,
       dimension: this.dimensionRow,
       selection: this.rowSelectionStore,

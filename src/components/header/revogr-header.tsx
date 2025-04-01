@@ -17,13 +17,13 @@ import type {
   ColumnRegular,
   DimensionSettingsState,
   InitialHeaderClick,
-  Providers,
   ViewportState,
   ViewSettingSizeProp,
   DimensionCols,
   SelectionStoreState,
   RangeArea,
   VirtualPositionItem,
+  ProvidersColumns,
 } from '@type';
 import type { Observable } from '../../utils';
 import GroupHeaderRenderer, {
@@ -137,7 +137,7 @@ export class RevogrHeaderComponent {
    * After all header cells rendered. Finalizes cell rendering.
    */
   @Event({ eventName: 'afterheaderrender' })
-  afterHeaderRender: EventEmitter<Providers<DimensionCols | 'rowHeaders'>>;
+  afterHeaderRender: EventEmitter<ProvidersColumns>;
 
   // #endregion
 
@@ -269,7 +269,7 @@ export class RevogrHeaderComponent {
     return groupRow;
   }
 
-  get providers(): Providers<DimensionCols | 'rowHeaders'> {
+  get providers(): ProvidersColumns<DimensionCols | 'rowHeaders'> {
     return {
       type: this.type,
       readonly: this.readonly,
