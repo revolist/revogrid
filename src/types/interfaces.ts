@@ -257,7 +257,7 @@ export interface ColumnTemplateProp extends ColumnRegular {
   /**
    * Providers injected into the template.
    */
-  providers: Providers<DimensionCols | 'rowHeaders'>;
+  providers: ProvidersColumns;
   /**
    * Index of the column, used for mapping value to cell from data source model/row.
    */
@@ -280,15 +280,28 @@ export type CellProps = JSXBase.HTMLAttributes<HTMLDivElement> & {
   [attr: string]: string | number | object | boolean | undefined;
 };
 
+/**
+ * Providers for columns which are going to be injected into each header renderer
+ */
+export interface ProvidersColumns<T = DimensionCols | 'rowHeaders'> extends Omit<Providers<T>, 'data' | 'columns' | 'colType'> {
+  /**
+   * Column data source store
+   */
+  data: ColumnRegular[];
+}
 
 /**
  * Providers for grid which are going to be injected into each cell template
  */
-export type Providers<T = DimensionRows> = {
+export interface Providers<T = DimensionRows> {
   /**
    * Dimension type (e.g. row or column)
    */
   type: T;
+  /**
+   * Dimension type (e.g. row or column)
+   */
+  colType: DimensionCols | 'rowHeaders';
   /**
    * Flag indicating if grid is in readonly mode
    */
@@ -296,7 +309,11 @@ export type Providers<T = DimensionRows> = {
   /**
    * Data source store
    */
-  data: Observable<DataSourceState<any, any>> | ColumnRegular[];
+  data: Observable<DataSourceState<any, any>>;
+  /**
+   * Column data source store
+   */
+  columns: Observable<DataSourceState<ColumnRegular, DimensionCols>>;
   /**
    * Viewport store
    */
@@ -309,7 +326,7 @@ export type Providers<T = DimensionRows> = {
    * Selection store
    */
   selection: Observable<SelectionStoreState>;
-};
+}
 /**
  * `HyperFunc` is a function that takes an HTML tag or component, and returns a
  * JSX element. This function is used to create JSX elements in a context where
@@ -498,7 +515,7 @@ export type InitialHeaderClick = {
    * The column that was clicked.
    */
   column: ColumnRegular;
-  providers: Providers<DimensionCols | 'rowHeaders'>;
+  providers: ProvidersColumns;
 };
 
 /**
