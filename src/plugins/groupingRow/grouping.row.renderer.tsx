@@ -38,6 +38,7 @@ export const GroupingRowRenderer = (props: RowGroupingProps) => {
         <div onClick={e => expandEvent(e, model, itemIndex)}>
           {groupingCustomRenderer(h, {
             ...props,
+            colType: props.providers.colType,
             name,
             expanded,
             depth,

@@ -7,17 +7,42 @@ import type {
   Providers,
   VirtualPositionItem,
   PositionItem,
+  DimensionCols,
 } from '@type';
 import type { RowProps } from '../../components/data/row-renderer';
 import { GROUP_EXPAND_EVENT } from './grouping.const';
 
-
+/**
+ * Properties for the grouping row template
+ */
 interface GroupTemplateProp {
+  /**
+   * Name of the grouping row
+   */
   name: string;
+  /**
+   * Index of the grouping row
+   */
   itemIndex: number;
+  /**
+   * Expanded state of the grouping row
+   */
   expanded: boolean;
+  /**
+   * Depth of the grouping row
+   */
   depth: number;
+  /**
+   * Providers for the grid
+   */
   providers: Providers;
+  /**
+   * Dimension type (e.g. rgCol, colPinStart, colPinEnd, rowHeaders)
+   */
+  colType: DimensionCols | 'rowHeaders';
+  /**
+   * Model of the grouping row
+   */
   model?: DataType;
 }
 

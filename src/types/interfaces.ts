@@ -73,6 +73,7 @@ export interface ColumnDataSchemaModel {
 export interface CellTemplateProp extends ColumnDataSchemaModel {
   /**
    * Providers injected into the template
+   * Also to get grouping depth
    */
   providers: Providers;
 }
