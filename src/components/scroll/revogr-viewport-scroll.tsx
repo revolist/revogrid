@@ -209,10 +209,10 @@ export class RevogrViewportScroll implements ElementScroll {
   }
 
   componentDidLoad() {
-    // track horizontal viewport resize
+    // track viewport resize
     this.resizeService = new GridResizeService(
       this.horizontalScroll,
-      (entry, previousSize) => {
+      (entry) => {
         const els: Partial<
           Record<
             DimensionType,
@@ -225,33 +225,25 @@ export class RevogrViewportScroll implements ElementScroll {
           >
         > = {};
 
-        let calculatedHeight = 0;
-        if (entry.height !== previousSize.height) {
-          calculatedHeight = entry.height || 0;
-          if (calculatedHeight) {
-            calculatedHeight -=
-              (this.header?.clientHeight ?? 0) +
-              (this.footer?.clientHeight ?? 0);
-          }
-
-          els.rgRow = {
-            size: calculatedHeight,
-            contentSize: this.contentHeight,
-            scroll: this.verticalScroll?.scrollTop ?? 0,
-            noScroll: false,
-          };
+        let calculatedHeight = entry.height || 0;
+        if (calculatedHeight) {
+          calculatedHeight -=
+            (this.header?.clientHeight ?? 0) +
+            (this.footer?.clientHeight ?? 0);
         }
-        let calculatedWidth = 0;
-        if (entry.width !== previousSize.width) {
-          calculatedWidth = entry.width || 0;
-          els.rgCol = {
-            size: calculatedWidth,
-            contentSize: this.contentWidth,
-            scroll: this.horizontalScroll.scrollLeft,
-            noScroll: this.colType !== 'rgCol',
-          };
-        }
-
+        els.rgRow = {
+          size: calculatedHeight,
+          contentSize: this.contentHeight,
+          scroll: this.verticalScroll?.scrollTop ?? 0,
+          noScroll: false,
+        };
+        const calculatedWidth = entry.width || 0;
+        els.rgCol = {
+          size: calculatedWidth,
+          contentSize: this.contentWidth,
+          scroll: this.horizontalScroll.scrollLeft,
+          noScroll: this.colType !== 'rgCol',
+        };
         // Process changes in order: width first, then height
         const dimensions: DimensionType[] = ['rgCol', 'rgRow'];
         for (const dimension of dimensions) {
