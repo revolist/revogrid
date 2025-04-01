@@ -239,7 +239,8 @@ export class RevogrData {
           index: rgRow.itemIndex,
           model: dataItem,
           groupingCustomRenderer,
-          hasExpand: this.columnService.hasGrouping,
+          // Only show expand button if grouping is enabled and not in row headers
+          hasExpand: this.columnService.hasGrouping && this.colType !== 'rowHeaders',
           columnItems: cols,
           providers: this.providers,
         };

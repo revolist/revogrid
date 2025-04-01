@@ -71,7 +71,8 @@ window.setGrouping = function (props = [], expandedAll = false) {
     props,
     expandedAll,
     prevExpanded: { 'a': true, 'a,c': true },
-    groupLabelTemplate(createElement, { name, depth, expanded }) {
+    groupLabelTemplate(createElement, { name, depth, expanded, providers }) {
+      if (providers.colType !== 'rgCol') return;
       return createElement('span', null, `${expanded ? '-' : '+'} ${props[depth]}: ${name}`);
     },
   };
