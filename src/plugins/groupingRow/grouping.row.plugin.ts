@@ -187,7 +187,6 @@ export class GroupingRowPlugin extends BasePlugin {
       oldNewIndexMap,
     } = gatherGrouping(source, this.options?.props || [], expanded);
 
-    console.log('sourceWithGroups', gatherGrouping(source, this.options?.props || [], expanded))
     const customRenderer = options?.groupLabelTemplate;
 
     // setup source
