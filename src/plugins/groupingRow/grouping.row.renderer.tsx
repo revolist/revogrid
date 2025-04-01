@@ -10,8 +10,11 @@ import {
 import type { RowGroupingProps } from './grouping.row.types';
 import type { DataType } from '@type';
 
-
-export function expandEvent(e: MouseEvent, model: DataType, virtualIndex: number) {
+export function expandEvent(
+  e: MouseEvent,
+  model: DataType,
+  virtualIndex: number,
+) {
   const event = new CustomEvent(GROUP_EXPAND_EVENT, {
     detail: {
       model,
@@ -24,15 +27,10 @@ export function expandEvent(e: MouseEvent, model: DataType, virtualIndex: number
 }
 
 export const GroupingRowRenderer = (props: RowGroupingProps) => {
-  const { model, itemIndex, hasExpand, groupingCustomRenderer } =
-    props;
+  const { model, itemIndex, hasExpand, groupingCustomRenderer } = props;
   const name = model[PSEUDO_GROUP_ITEM];
   const expanded = model[GROUP_EXPANDED];
   const depth = parseInt(model[GROUP_DEPTH], 10) || 0;
-
-  if (!hasExpand) {
-    return <RowRenderer {...props} rowClass="groupingRow" depth={depth} />;
-  }
 
   if (groupingCustomRenderer) {
     return (
@@ -51,13 +49,15 @@ export const GroupingRowRenderer = (props: RowGroupingProps) => {
 
   return (
     <RowRenderer {...props} rowClass="groupingRow" depth={depth}>
-      <button
-        class={{ [GROUP_EXPAND_BTN]: true }}
-        onClick={e => expandEvent(e, model, itemIndex)}
-      >
-        {expandSvgIconVNode(expanded)}
-      </button>
-      {name}
+      {hasExpand && [
+        <button
+          class={{ [GROUP_EXPAND_BTN]: true }}
+          onClick={e => expandEvent(e, model, itemIndex)}
+        >
+          {expandSvgIconVNode(expanded)}
+        </button>,
+        name,
+      ]}
     </RowRenderer>
   );
 };

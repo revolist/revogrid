@@ -239,7 +239,7 @@ export class RevogrData {
           index: rgRow.itemIndex,
           model: dataItem,
           groupingCustomRenderer,
-          hasExpand: this.columnService.hasGrouping,
+          hasExpand: this.columnService.hasGrouping && this.colType !== 'rowHeaders',
           columnItems: cols,
           providers: this.providers,
         };
