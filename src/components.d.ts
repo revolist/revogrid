@@ -12,6 +12,7 @@ import { ColumnFilterConfig, FilterCaptions, FilterCollectionItem, LogicFunction
 import { SortingConfig, SortingOrder } from "./plugins";
 import { GroupingOptions } from "./plugins/groupingRow/grouping.row.types";
 import { VNode } from "@stencil/core";
+import { AutoSizeRowConfig } from "./plugins/row.auto-size.plugin";
 import { FocusedData } from "./components/revoGrid/viewport.service";
 import { ColumnCollection } from "./utils/column.utils";
 import { DataInput } from "./plugins/export/types";
@@ -27,6 +28,7 @@ export { ColumnFilterConfig, FilterCaptions, FilterCollectionItem, LogicFunction
 export { SortingConfig, SortingOrder } from "./plugins";
 export { GroupingOptions } from "./plugins/groupingRow/grouping.row.types";
 export { VNode } from "@stencil/core";
+export { AutoSizeRowConfig } from "./plugins/row.auto-size.plugin";
 export { FocusedData } from "./components/revoGrid/viewport.service";
 export { ColumnCollection } from "./utils/column.utils";
 export { DataInput } from "./plugins/export/types";
@@ -70,6 +72,10 @@ export namespace Components {
           * Autosize config. Enables columns autoSize. For more details check `autoSizeColumn` plugin. By default disabled, hence operation is not performance efficient. `true` to enable with default params (double header separator click for autosize). Or define config. See `AutoSizeColumnConfig` for more details.
          */
         "autoSizeColumn": boolean | AutoSizeColumnConfig;
+        /**
+          * Конфигурация автоматического изменения высоты строк. Включает автоматическое изменение высоты строк в зависимости от контента. По умолчанию отключено.
+         */
+        "autoSizeRow": boolean | AutoSizeRowConfig;
         /**
           * Disable native drag&drop plugin.
          */
@@ -227,9 +233,9 @@ export namespace Components {
           * Register new virtual node inside of grid. Used for additional items creation such as plugin elements. Should be set before grid render inside of plugins. Can return VNode result of h() function or a function that returns VNode. Function can be used for performance improvement and additional renders.
          */
         "registerVNode": (
-    | VNode
-    | ((c: ExtraNodeFuncConfig) => VNode)
-  )[];
+		| VNode
+		| ((c: ExtraNodeFuncConfig) => VNode)
+	)[];
         /**
           * When true, columns are resizable.
          */
@@ -856,62 +862,62 @@ declare global {
         "afterfocus": FocusAfterRenderEvent;
         "roworderchanged": { from: number; to: number };
         "beforesorting": {
-    column: ColumnRegular;
-    order: 'desc' | 'asc';
-    additive: boolean;
-  };
+		column: ColumnRegular;
+		order: 'desc' | 'asc';
+		additive: boolean;
+	};
         "beforesourcesortingapply": {
-    type: DimensionRows;
-    sorting?: SortingOrder;
-  };
+		type: DimensionRows;
+		sorting?: SortingOrder;
+	};
         "beforesortingapply": {
-    column: ColumnRegular;
-    order: 'desc' | 'asc';
-    additive: boolean;
-  };
+		column: ColumnRegular;
+		order: 'desc' | 'asc';
+		additive: boolean;
+	};
         "rowdragstart": RowDragStartDetails;
         "headerclick": ColumnRegular;
         "beforecellfocus": BeforeSaveDataDetails;
         "beforefocuslost": FocusedData | null;
         "beforesourceset": {
-    type: DimensionRows;
-    source: DataType[];
-  };
+		type: DimensionRows;
+		source: DataType[];
+	};
         "beforeanysource": {
-    type: DimensionRows;
-    source: DataType[];
-  };
+		type: DimensionRows;
+		source: DataType[];
+	};
         "aftersourceset": {
-    type: DimensionRows;
-    source: DataType[];
-  };
+		type: DimensionRows;
+		source: DataType[];
+	};
         "afteranysource": {
-    type: DimensionRows;
-    source: DataType[];
-  };
+		type: DimensionRows;
+		source: DataType[];
+	};
         "beforecolumnsset": ColumnCollection;
         "beforecolumnapplied": ColumnCollection;
         "aftercolumnsset": {
-    columns: ColumnCollection;
-    order: Record<ColumnProp, 'asc' | 'desc' | undefined>;
-  };
+		columns: ColumnCollection;
+		order: Record<ColumnProp, 'asc' | 'desc' | undefined>;
+	};
         "beforefilterapply": { collection: Record<ColumnProp, FilterCollectionItem> };
         "beforefiltertrimmed": {
-    collection: Record<ColumnProp, FilterCollectionItem>;
-    itemsToFilter: Record<number, boolean>;
-  };
+		collection: Record<ColumnProp, FilterCollectionItem>;
+		itemsToFilter: Record<number, boolean>;
+	};
         "beforetrimmed": {
-    trimmed: Record<number, boolean>;
-    trimmedType: string;
-    type: string;
-  };
+		trimmed: Record<number, boolean>;
+		trimmedType: string;
+		type: string;
+	};
         "aftertrimmed": any;
         "viewportscroll": ViewPortScrollEvent;
         "beforeexport": DataInput;
         "beforeeditstart": BeforeSaveDataDetails;
         "aftercolumnresize": {
-    [index: number]: ColumnRegular;
-  };
+		[index: number]: ColumnRegular;
+	};
         "beforerowdefinition": { vals: any; oldVals: any };
         "filterconfigchanged": any;
         "sortingconfigchanged": SortingConfig;
@@ -1380,6 +1386,10 @@ declare namespace LocalJSX {
          */
         "autoSizeColumn"?: boolean | AutoSizeColumnConfig;
         /**
+          * Конфигурация автоматического изменения высоты строк. Включает автоматическое изменение высоты строк в зависимости от контента. По умолчанию отключено.
+         */
+        "autoSizeRow"?: boolean | AutoSizeRowConfig;
+        /**
           * Disable native drag&drop plugin.
          */
         "canDrag"?: boolean;
@@ -1460,22 +1470,22 @@ declare namespace LocalJSX {
           * Emitted after each source update, whether from the pinned or main viewport. Useful for tracking all changes originating from sources in both the pinned and main viewports.
          */
         "onAfteranysource"?: (event: RevoGridCustomEvent<{
-    type: DimensionRows;
-    source: DataType[];
-  }>) => void;
+		type: DimensionRows;
+		source: DataType[];
+	}>) => void;
         /**
           * Emitted after column resizing. Useful for retrieving the resized columns.
          */
         "onAftercolumnresize"?: (event: RevoGridCustomEvent<{
-    [index: number]: ColumnRegular;
-  }>) => void;
+		[index: number]: ColumnRegular;
+	}>) => void;
         /**
           * Column updated
          */
         "onAftercolumnsset"?: (event: RevoGridCustomEvent<{
-    columns: ColumnCollection;
-    order: Record<ColumnProp, 'asc' | 'desc' | undefined>;
-  }>) => void;
+		columns: ColumnCollection;
+		order: Record<ColumnProp, 'asc' | 'desc' | undefined>;
+	}>) => void;
         /**
           * After data applied or range changed.
          */
@@ -1496,9 +1506,9 @@ declare namespace LocalJSX {
           * After main source/rows updated
          */
         "onAftersourceset"?: (event: RevoGridCustomEvent<{
-    type: DimensionRows;
-    source: DataType[];
-  }>) => void;
+		type: DimensionRows;
+		source: DataType[];
+	}>) => void;
         /**
           * Emmited after the theme is changed
          */
@@ -1511,9 +1521,9 @@ declare namespace LocalJSX {
           * Before data apply on any source type. Can be source from pinned and main viewport. You can override data source here
          */
         "onBeforeanysource"?: (event: RevoGridCustomEvent<{
-    type: DimensionRows;
-    source: DataType[];
-  }>) => void;
+		type: DimensionRows;
+		source: DataType[];
+	}>) => void;
         /**
           * Before autofill is applied. To prevent the default behavior of applying the edit data, you can call `e.preventDefault()`.
          */
@@ -1550,9 +1560,9 @@ declare namespace LocalJSX {
           * Emitted before applying a filter to the data source. Use e.preventDefault() to prevent the default behavior of trimming values and applying the filter. Modify the `collection` property if you want to change the filters. Modify the `itemsToFilter` property if you want to filter the indexes for trimming.
          */
         "onBeforefiltertrimmed"?: (event: RevoGridCustomEvent<{
-    collection: Record<ColumnProp, FilterCollectionItem>;
-    itemsToFilter: Record<number, boolean>;
-  }>) => void;
+		collection: Record<ColumnProp, FilterCollectionItem>;
+		itemsToFilter: Record<number, boolean>;
+	}>) => void;
         /**
           * Before the grid focus is lost. To prevent the default behavior of changing the cell focus, you can call `e.preventDefault()`.
          */
@@ -1577,40 +1587,40 @@ declare namespace LocalJSX {
           * By `sorting.plugin.ts` <br>Triggered immediately after header click. <br>First in sorting event sequence. Ff this event stops no other event called. <br>Use `e.preventDefault()` to prevent sorting.
          */
         "onBeforesorting"?: (event: RevoGridCustomEvent<{
-    column: ColumnRegular;
-    order: 'desc' | 'asc';
-    additive: boolean;
-  }>) => void;
+		column: ColumnRegular;
+		order: 'desc' | 'asc';
+		additive: boolean;
+	}>) => void;
         /**
           * By `sorting.plugin.ts` <br> After `beforesorting` <br>Triggered after column data updated with new sorting order. <br>Use `e.preventDefault()` to prevent sorting data change.
          */
         "onBeforesortingapply"?: (event: RevoGridCustomEvent<{
-    column: ColumnRegular;
-    order: 'desc' | 'asc';
-    additive: boolean;
-  }>) => void;
+		column: ColumnRegular;
+		order: 'desc' | 'asc';
+		additive: boolean;
+	}>) => void;
         /**
           * Before main source/rows data apply. You can override data source here
          */
         "onBeforesourceset"?: (event: RevoGridCustomEvent<{
-    type: DimensionRows;
-    source: DataType[];
-  }>) => void;
+		type: DimensionRows;
+		source: DataType[];
+	}>) => void;
         /**
           * By `sorting.plugin.ts` <br>Same as `beforesorting` but triggered after `beforeanysource` (when source is changed). <br>Use `e.preventDefault()` to prevent sorting data change.
          */
         "onBeforesourcesortingapply"?: (event: RevoGridCustomEvent<{
-    type: DimensionRows;
-    sorting?: SortingOrder;
-  }>) => void;
+		type: DimensionRows;
+		sorting?: SortingOrder;
+	}>) => void;
         /**
           * Emitted before trimming values. Use e.preventDefault() to prevent the default behavior of trimming values. Modify the `trimmed` property if you want to filter the indexes for trimming.
          */
         "onBeforetrimmed"?: (event: RevoGridCustomEvent<{
-    trimmed: Record<number, boolean>;
-    trimmedType: string;
-    type: string;
-  }>) => void;
+		trimmed: Record<number, boolean>;
+		trimmedType: string;
+		type: string;
+	}>) => void;
         /**
           * New content size has been applied. The size excludes the header. Currently, the event responsible for applying the new content size does not provide the actual size. To retrieve the actual content size, you can utilize the `getContentSize` function after the event has been triggered.
          */
@@ -1687,9 +1697,9 @@ declare namespace LocalJSX {
           * Register new virtual node inside of grid. Used for additional items creation such as plugin elements. Should be set before grid render inside of plugins. Can return VNode result of h() function or a function that returns VNode. Function can be used for performance improvement and additional renders.
          */
         "registerVNode"?: (
-    | VNode
-    | ((c: ExtraNodeFuncConfig) => VNode)
-  )[];
+		| VNode
+		| ((c: ExtraNodeFuncConfig) => VNode)
+	)[];
         /**
           * When true, columns are resizable.
          */

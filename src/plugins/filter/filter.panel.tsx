@@ -76,6 +76,7 @@ export class FilterPanel {
   @Listen('mousedown', { target: 'document' }) onMouseDown(e: MouseEvent) {
     // click on anything then select drops values to default
     if (!this.changes || e.defaultPrevented) {
+      this.changes = undefined;
       return;
     }
     const path = e.composedPath();
