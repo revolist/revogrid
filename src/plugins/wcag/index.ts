@@ -54,7 +54,7 @@ export class WCAGPlugin extends BasePlugin {
             const result = columnProperties?.(...args) || {};
 
             result.role = 'columnheader';
-            result['aria-colindex'] = index;
+            result['aria-colindex'] = `${index}`;
 
             return result;
           };
@@ -62,8 +62,8 @@ export class WCAGPlugin extends BasePlugin {
           column.cellProperties = (...args) => {
             const wcagProps: CellProps = {
               ['role']: 'gridcell',
-              ['aria-colindex']: index,
-              ['aria-rowindex']: args[0].rowIndex,
+              ['aria-colindex']: `${index}`,
+              ['aria-rowindex']: `${args[0].rowIndex}`,
               ['tabindex']: -1,
             };
             const columnProps: CellProps = cellProperties?.(...args) || {};
