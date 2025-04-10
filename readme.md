@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://rv-grid.com">
-    <img src="http://10.17.1.216:3000/LocatorTeam/locagrid/raw/branch/main/locagrid_banner.png" alt="RevoGrid Data Grid" height="150" />
+    <img src="https://github.com/LT-Devs/locagrid/blob/main/locagrid_banner.png?raw=true" alt="RevoGrid Data Grid" height="150" />
   </a>
 </p>
 
