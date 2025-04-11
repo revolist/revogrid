@@ -10,6 +10,7 @@ import {
 	EventEmitter,
 	Method,
 	Host,
+	State,
 } from '@stencil/core';
 
 import type {
@@ -360,6 +361,9 @@ export class RevoGridComponent {
 	 * По умолчанию отключено.
 	 */
 	@Prop() autoSizeRow: boolean | AutoSizeRowConfig = false;
+
+	/** Состояние фокуса компонента */
+	@State() isFocused: boolean = false;
 	// #endregion
 
 	// #region Events
@@ -660,6 +664,8 @@ export class RevoGridComponent {
    */
 	@Event() onrowclick: EventEmitter<DataLookup>;
 	// #endregion
+
+	
 
 	// #region Methods
 	/**
@@ -1058,16 +1064,11 @@ export class RevoGridComponent {
 			return;
 		}
 
-		// Check if action finished inside the document
-		// if event prevented, or it is current table don't clear focus
 		const path = event.composedPath();
-		if (!path.includes(this.element) &&
-			!(this.element.shadowRoot && path.includes(this.element.shadowRoot))
-		) {
-			// Perform actions if the click is outside the component
-			if (this.clearFocusOnOutsideClick) {
-				await this.clearFocus();
-			}
+		this.isFocused = Boolean(path.includes(this.element) || (this.element.shadowRoot && path.includes(this.element.shadowRoot)));
+		
+		if (!this.isFocused && this.clearFocusOnOutsideClick) {
+			await this.clearFocus();
 		}
 	}
 	// #endregion
@@ -1776,6 +1777,7 @@ export class RevoGridComponent {
 						editors={this.editors}
 						readonly={this.readonly}
 						range={this.range}
+						isFocused={this.isFocused}
 						useClipboard={this.useClipboard}
 						applyChangesOnClose={this.applyOnClose}
 						additionalData={this.additionalData}

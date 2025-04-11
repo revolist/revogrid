@@ -653,6 +653,10 @@ export namespace Components {
          */
         "editors": Editors;
         /**
+          * Is focused
+         */
+        "isFocused": boolean;
+        /**
           * Is mobile view mode.
          */
         "isMobileDevice": boolean;
@@ -2208,6 +2212,10 @@ declare namespace LocalJSX {
           * Custom editors register.
          */
         "editors"?: Editors;
+        /**
+          * Is focused
+         */
+        "isFocused"?: boolean;
         /**
           * Is mobile view mode.
          */

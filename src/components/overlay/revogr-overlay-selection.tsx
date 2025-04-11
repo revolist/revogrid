@@ -128,11 +128,16 @@ export class OverlaySelection {
    * Is mobile view mode.
    */
   @Prop() isMobileDevice: boolean;
-  
+
   /**
    * If true, selects the whole row instead of individual cells.
    */
   @Prop() selectWholeRow: boolean = false;
+
+  /**
+   * Is focused
+   */
+  @Prop() isFocused: boolean = false;
 
   /**
    * If true, enables context menu behavior.
@@ -359,8 +364,10 @@ export class OverlaySelection {
    * This event is fired when keyboard key is released.
    */
   @Listen('keyup', { target: 'document' }) onKeyUp(e: KeyboardEvent) {
-    // Emit before key up event.
-    this.beforeKeyUp.emit({ original: e, ...this.getData() });
+    if (this.isFocused) {
+      // Emit before key up event.
+      this.beforeKeyUp.emit({ original: e, ...this.getData() });
+    }
   }
 
   /**
@@ -368,21 +375,24 @@ export class OverlaySelection {
    * This event is fired when keyboard key is pressed.
    */
   @Listen('keydown', { target: 'document' }) onKeyDown(e: KeyboardEvent) {
-    // Emit before key down event and check if default prevention is set.
-    const proxy = this.beforeKeyDown.emit({ original: e, ...this.getData() });
-    if (e.defaultPrevented || proxy.defaultPrevented) {
-      return;
+    console.log(this.isFocused)
+    if (this.isFocused) {
+      // Emit before key down event and check if default prevention is set.
+      const proxy = this.beforeKeyDown.emit({ original: e, ...this.getData() });
+      if (e.defaultPrevented || proxy.defaultPrevented) {
+        return;
+      }
+      // Invoke key down on keyboard service.
+      this.keyboardService?.keyDown(
+        e,
+        this.range,
+        !!this.selectionStore.get('edit'),
+        {
+          focus: this.selectionStore.get('focus'),
+          range: this.selectionStore.get('range'),
+        },
+      );
     }
-    // Invoke key down on keyboard service.
-    this.keyboardService?.keyDown(
-      e,
-      this.range,
-      !!this.selectionStore.get('edit'),
-      {
-        focus: this.selectionStore.get('focus'),
-        range: this.selectionStore.get('range'),
-      },
-    );
   }
   // #endregion
 
@@ -403,6 +413,7 @@ export class OverlaySelection {
       selectionStore,
       range: r => !!r && this.triggerRangeEvent(r),
       focus: (f, changes, focusNextViewport) => {
+        if (!this.isFocused) return false;
         if (focusNextViewport) {
           this.beforeNextViewportFocus.emit(f);
           return false;
@@ -411,19 +422,20 @@ export class OverlaySelection {
         }
       },
       change: val => {
-        if (this.readonly) {
+        if (this.readonly || !this.isFocused) {
           return;
         }
         this.doEdit(val);
       },
       cancel: async () => {
+        if (!this.isFocused) return;
         await this.revogrEdit?.cancelChanges();
         this.closeEdit();
       },
-      clearCell: () => !this.readonly && this.clearCell(),
-      internalPaste: () => !this.readonly && this.beforeRegionPaste.emit(),
+      clearCell: () => !this.readonly && this.isFocused && this.clearCell(),
+      internalPaste: () => !this.readonly && this.isFocused && this.beforeRegionPaste.emit(),
       getData: () => this.getData(),
-      selectAll: () => this.selectAll.emit(),
+      selectAll: () => { if (this.isFocused) this.selectAll.emit() },
     });
     this.createAutoFillService();
   }
@@ -521,9 +533,9 @@ export class OverlaySelection {
     }
     const enteredOrModelValue =
       editCell.val ||
-        getCellData(
-          this.columnService.rowDataModel(editCell.y, editCell.x).value
-        );
+      getCellData(
+        this.columnService.rowDataModel(editCell.y, editCell.x).value
+      );
     const editable = {
       ...editCell,
       ...this.columnService.getSaveData(
@@ -595,15 +607,28 @@ export class OverlaySelection {
             />,
           );
         }
+      }
+      else {
+        if ((range || focus) && this.useClipboard) {
+          nodes.push(
+            <revogr-clipboard
+              readonly={this.readonly}
+              onCopyregion={e => this.onCopy(e.detail)}
+              onClearregion={() => !this.readonly && this.clearCell()}
+              ref={e => (this.clipboard = e)}
+              onPasteregion={e => this.onPaste(e.detail)}
+            />,
+          );
+        }
+      }
 
-        // Range
-        if (range) {
-          nodes.push(...this.renderRange(range));
-        }
-        // Autofill
-        if (focus && !this.readonly && this.range) {
-          nodes.push(this.autoFillService?.renderAutofill(range, focus));
-        }
+      // Range
+      if (range) {
+        nodes.push(...this.renderRange(range));
+      }
+      // Autofill
+      if (focus && !this.readonly && this.range) {
+        nodes.push(this.autoFillService?.renderAutofill(range, focus));
       }
 
       // Order
@@ -769,7 +794,6 @@ export class OverlaySelection {
     }
 
     this.onRowClickInit.emit(data);
-    console.log('focusCell', focusCell);
 
     // Check for right-click (context menu)
     if (this.useContextMenu && e instanceof MouseEvent && e.button === 2) {
