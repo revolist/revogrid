@@ -362,11 +362,6 @@ export class FilterPlugin extends BasePlugin {
 
     // applies the hasFilter to the columns to show filter icon
     this.providers.column.updateColumns(columnsToUpdate);
-    this.emit('afterfilterapply', {
-      multiFilterItems: filterItems,
-      source,
-      collection,
-    });
   }
 
   async clearFiltering() {
@@ -405,6 +400,8 @@ export class FilterPlugin extends BasePlugin {
     if (defaultPrevented) {
       return;
     }
+
+
     this.doFiltering(
       detail.collection,
       detail.source,
@@ -422,11 +419,14 @@ export class FilterPlugin extends BasePlugin {
     columnByProp: Record<string, ColumnRegular>,
   ): TrimmedEntity {
     const propKeys = Object.keys(filterItems);
-
     const trimmed: TrimmedEntity = {};
+    const filteredRows: DataType[] = []; // Массив для хранения отфильтрованных объектов
 
     // each rows
     for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+      const row = rows[rowIndex]; // Получаем текущую строку
+      let shouldTrim = false; // Флаг для отслеживания, нужно ли отфильтровать строку
+
       // check filter by column properties
       for (const prop of propKeys) {
         // add to the list of removed/trimmed rows of filter condition is satisfied
@@ -435,14 +435,24 @@ export class FilterPlugin extends BasePlugin {
             filterItems[prop],
             prop,
             columnByProp[prop],
-            rows[rowIndex],
+            row,
           )
         ) {
-          trimmed[rowIndex] = true;
+          trimmed[rowIndex] = true; // Сохраняем индекс отфильтрованной строки
+          shouldTrim = true; // Устанавливаем флаг, что строка должна быть отфильтрована
+          break; // Выходим из цикла, если строка не проходит фильтрацию
         }
-      } // end of for-of propKeys
+      }
+
+      // Если строка не должна быть отфильтрована, добавляем её в массив
+      if (!shouldTrim) {
+        filteredRows.push(row);
+      }
     }
-    return trimmed;
+    this.emit('afterfilterapply', {
+      filteredRows
+    });
+    return trimmed; // Возвращаем индексы отфильтрованных строк
   }
 
   private shouldTrimRow(
