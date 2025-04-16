@@ -33,7 +33,8 @@ export * from './filter.button';
 
 export const FILTER_TRIMMED_TYPE = 'filter';
 export const FILTER_CONFIG_CHANGED_EVENT = 'filterconfigchanged';
-export const FILTE_PANEL = 'revogr-filter-panel';
+export const FILTER_PANEL = 'revogr-filter-panel';
+export const FILTER_POPUP = 'revogr-filter-popup';
 
 /**
  * @typedef ColumnFilterConfig
@@ -49,25 +50,20 @@ export const FILTE_PANEL = 'revogr-filter-panel';
  *
  * @property {FilterLocalization|undefined} localization - translation for filter popup captions.
  *
- * @property {boolean|undefined} disableDynamicFiltering - disables dynamic filtering. A way to apply filters on Save only.
- */
-/**
- * @internal
+ * @property {boolean|undefined} disableDynamicFiltering - if true, filter will be applied only on Save button click
+ *
+ * @property {boolean|undefined} closeFilterPanelOnOutsideClick - if true, filter panel will be closed when clicking outside
  */
 
+/**
+ * @class FilterPlugin
+ * @extends BasePlugin
+ */
 export class FilterPlugin extends BasePlugin {
-  pop?: HTMLRevogrFilterPanelElement;
+  private popupRef: HTMLRevogrFilterPopupElement | undefined;
+  private panelRef: HTMLRevogrFilterPanelElement | undefined;
   filterCollection: Record<ColumnProp, FilterCollectionItem> = {};
   multiFilterItems: MultiFilterItem = {};
-
-  /**
-   * Filter types
-   * @example
-   * {
-   *    string: ['contains', 'beginswith'],
-   *    number: ['eqN', 'neqN', 'gt']
-   *  }
-   */
   filterByType: Record<string, string[]> = { ...filterTypes };
   filterNameIndexByType: Record<string, string> = {
     ...filterNames,
@@ -75,9 +71,7 @@ export class FilterPlugin extends BasePlugin {
   filterFunctionsIndexedByType: Record<string, LogicFunction> = {
     ...filterCoreFunctionsIndexedByType,
   };
-
   filterProp = FILTER_PROP;
-
   extraHyperContent?: (data: ShowData) => VNode | VNode[];
 
   constructor(
@@ -91,23 +85,27 @@ export class FilterPlugin extends BasePlugin {
     }
 
     const existingNodes = this.revogrid.registerVNode.filter(
-      n => typeof n === 'object' && n.$tag$ !== FILTE_PANEL,
+      n => typeof n === 'object' && n.$tag$ !== FILTER_PANEL && n.$tag$ !== FILTER_POPUP,
     );
     this.revogrid.registerVNode = [
       ...existingNodes,
+      <revogr-filter-popup
+      closeOnOutsideClick={config?.closeFilterPanelOnOutsideClick}
+      ref={(el?: HTMLRevogrFilterPopupElement) => (this.popupRef = el)}
+      onClose={() => this.onPopupClose()}
+    >
       <revogr-filter-panel
         filterNames={this.filterNameIndexByType}
         filterEntities={this.filterFunctionsIndexedByType}
         filterCaptions={config?.localization?.captions}
-        onFilterChange={e => this.onFilterChange(e.detail)}
-        onResetChange={e => this.onFilterReset(e.detail)}
         disableDynamicFiltering={config?.disableDynamicFiltering}
-        closeOnOutsideClick={config?.closeFilterPanelOnOutsideClick}
-        ref={e => (this.pop = e)}
+        ref={(el?: HTMLRevogrFilterPanelElement) => (this.panelRef = el)}
+        onFilterChange={(e: CustomEvent<MultiFilterItem>) => this.onFilterChange(e.detail)}
+        onResetChange={(e: CustomEvent<ColumnProp>) => this.onFilterReset(e.detail)}
       >
-        {' '}
         {this.extraContent()}
-      </revogr-filter-panel>,
+      </revogr-filter-panel>
+    </revogr-filter-popup>,
     ];
 
     const aftersourceset = async () => {
@@ -157,12 +155,24 @@ export class FilterPlugin extends BasePlugin {
     );
   }
 
-  beforeshow(_: ShowData) {
-    // used as hook for filter panel
+  private onPopupClose() {
+    // Handle popup close event
+    if (this.panelRef) {
+      this.panelRef.show(undefined);
+    }
+  }
+
+  beforeshow(data: ShowData) {
+    if (data) {
+      this.popupRef?.show(data.x, data.y);
+      this.panelRef?.show(data);
+    } else {
+      this.popupRef?.hide();
+    }
   }
 
   extraContent(): any {
-    return null;
+    return this.extraHyperContent;
   }
 
   initConfig(config: ColumnFilterConfig) {
@@ -243,7 +253,7 @@ export class FilterPlugin extends BasePlugin {
       return;
     }
     e.preventDefault();
-    if (!this.pop) {
+    if (!this.panelRef && !this.popupRef) {
       return;
     }
 
@@ -263,7 +273,6 @@ export class FilterPlugin extends BasePlugin {
       extraContent: this.extraHyperContent,
     };
     this.beforeshow?.(data);
-    this.pop.show(data);
   }
 
   getColumnFilter(

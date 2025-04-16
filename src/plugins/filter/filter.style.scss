@@ -1,21 +1,25 @@
-revogr-filter-panel {
+revogr-filter-popup {
   position: absolute;
-  display: block;
   top: 0;
   left: 0;
   z-index: 100;
-  max-height: calc(100% - 80px);
-  min-width: 250px;
-  overflow: auto;
-
-  opacity: 1;
-  transform: none;
+  display: block;
   background-color: var(--revo-grid-filter-panel-bg, #fff);
   border: 1px solid var(--revo-grid-filter-panel-border, #cecece);
+  transform: none;
   transform-origin: 62px 0px;
   box-shadow: 0 5px 18px -2px var(--revo-grid-filter-panel-shadow, rgba(0, 0, 0, 0.15));
+  overflow: auto;
+
   padding: 10px;
   border-radius: 8px;
+  opacity: 1;
+  max-height: calc(100% - 80px);
+}
+
+revogr-filter-panel {
+  display: block;
+  min-width: 250px;
 
   min-width: 220px;
   text-align: left;
