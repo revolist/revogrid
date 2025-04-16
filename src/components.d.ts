@@ -441,10 +441,6 @@ export namespace Components {
     }
     interface RevogrFilterPanel {
         /**
-          * If true, closes the filter panel when clicking outside
-         */
-        "closeOnOutsideClick": boolean;
-        /**
           * Disables dynamic filtering. A way to apply filters on Save only
          */
         "disableDynamicFiltering": boolean;
@@ -452,7 +448,15 @@ export namespace Components {
         "filterEntities": Record<string, LogicFunction>;
         "filterNames": Record<string, string>;
         "getChanges": () => Promise<ShowData | undefined>;
-        "show": (newEntity?: ShowData) => Promise<void>;
+        "show": (newEntity?: ShowData) => Promise<any[] | null>;
+    }
+    /**
+     * Filter popup component that handles positioning and outside click detection
+     */
+    interface RevogrFilterPopup {
+        "closeOnOutsideClick": boolean;
+        "hide": () => Promise<void>;
+        "show": (x: number, y: number) => Promise<void>;
     }
     /**
      * Focus component. Shows focus layer around the cell that is currently in focus.
@@ -761,6 +765,10 @@ export interface RevogrFilterPanelCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLRevogrFilterPanelElement;
 }
+export interface RevogrFilterPopupCustomEvent<T> extends CustomEvent<T> {
+    detail: T;
+    target: HTMLRevogrFilterPopupElement;
+}
 export interface RevogrFocusCustomEvent<T> extends CustomEvent<T> {
     detail: T;
     target: HTMLRevogrFocusElement;
@@ -1037,6 +1045,26 @@ declare global {
         prototype: HTMLRevogrFilterPanelElement;
         new (): HTMLRevogrFilterPanelElement;
     };
+    interface HTMLRevogrFilterPopupElementEventMap {
+        "close": void;
+    }
+    /**
+     * Filter popup component that handles positioning and outside click detection
+     */
+    interface HTMLRevogrFilterPopupElement extends Components.RevogrFilterPopup, HTMLStencilElement {
+        addEventListener<K extends keyof HTMLRevogrFilterPopupElementEventMap>(type: K, listener: (this: HTMLRevogrFilterPopupElement, ev: RevogrFilterPopupCustomEvent<HTMLRevogrFilterPopupElementEventMap[K]>) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+        addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLRevogrFilterPopupElementEventMap>(type: K, listener: (this: HTMLRevogrFilterPopupElement, ev: RevogrFilterPopupCustomEvent<HTMLRevogrFilterPopupElementEventMap[K]>) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof DocumentEventMap>(type: K, listener: (this: Document, ev: DocumentEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener<K extends keyof HTMLElementEventMap>(type: K, listener: (this: HTMLElement, ev: HTMLElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+        removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+    }
+    var HTMLRevogrFilterPopupElement: {
+        prototype: HTMLRevogrFilterPopupElement;
+        new (): HTMLRevogrFilterPopupElement;
+    };
     interface HTMLRevogrFocusElementEventMap {
         "beforefocusrender": FocusRenderEvent;
         "beforescrollintoview": { el: HTMLElement };
@@ -1263,6 +1291,7 @@ declare global {
         "revogr-edit": HTMLRevogrEditElement;
         "revogr-extra": HTMLRevogrExtraElement;
         "revogr-filter-panel": HTMLRevogrFilterPanelElement;
+        "revogr-filter-popup": HTMLRevogrFilterPopupElement;
         "revogr-focus": HTMLRevogrFocusElement;
         "revogr-header": HTMLRevogrHeaderElement;
         "revogr-order-editor": HTMLRevogrOrderEditorElement;
@@ -1843,10 +1872,6 @@ declare namespace LocalJSX {
     }
     interface RevogrFilterPanel {
         /**
-          * If true, closes the filter panel when clicking outside
-         */
-        "closeOnOutsideClick"?: boolean;
-        /**
           * Disables dynamic filtering. A way to apply filters on Save only
          */
         "disableDynamicFiltering"?: boolean;
@@ -1855,6 +1880,13 @@ declare namespace LocalJSX {
         "filterNames"?: Record<string, string>;
         "onFilterChange"?: (event: RevogrFilterPanelCustomEvent<MultiFilterItem>) => void;
         "onResetChange"?: (event: RevogrFilterPanelCustomEvent<ColumnProp>) => void;
+    }
+    /**
+     * Filter popup component that handles positioning and outside click detection
+     */
+    interface RevogrFilterPopup {
+        "closeOnOutsideClick"?: boolean;
+        "onClose"?: (event: RevogrFilterPopupCustomEvent<void>) => void;
     }
     /**
      * Focus component. Shows focus layer around the cell that is currently in focus.
@@ -2340,6 +2372,7 @@ declare namespace LocalJSX {
         "revogr-edit": RevogrEdit;
         "revogr-extra": RevogrExtra;
         "revogr-filter-panel": RevogrFilterPanel;
+        "revogr-filter-popup": RevogrFilterPopup;
         "revogr-focus": RevogrFocus;
         "revogr-header": RevogrHeader;
         "revogr-order-editor": RevogrOrderEditor;
@@ -2400,6 +2433,10 @@ declare module "@stencil/core" {
              */
             "revogr-extra": LocalJSX.RevogrExtra & JSXBase.HTMLAttributes<HTMLRevogrExtraElement>;
             "revogr-filter-panel": LocalJSX.RevogrFilterPanel & JSXBase.HTMLAttributes<HTMLRevogrFilterPanelElement>;
+            /**
+             * Filter popup component that handles positioning and outside click detection
+             */
+            "revogr-filter-popup": LocalJSX.RevogrFilterPopup & JSXBase.HTMLAttributes<HTMLRevogrFilterPopupElement>;
             /**
              * Focus component. Shows focus layer around the cell that is currently in focus.
              * @example focus-rgCol-rgRow

@@ -6,7 +6,6 @@ import {
   Event,
   EventEmitter,
   Host,
-  Listen,
   Method,
   Prop,
   State,
@@ -15,7 +14,7 @@ import {
 } from '@stencil/core';
 import debounce from 'lodash/debounce';
 
-import { AndOrButton, isFilterBtn, TrashButton } from './filter.button';
+import { AndOrButton, TrashButton } from './filter.button';
 import '../../utils/closest.polifill';
 import {
   FilterCaptions,
@@ -70,44 +69,8 @@ export class FilterPanel {
    * Disables dynamic filtering. A way to apply filters on Save only
    */
   @Prop() disableDynamicFiltering = false;
-  /**
-   * If true, closes the filter panel when clicking outside
-   */
-  @Prop() closeOnOutsideClick = true;
   @Event() filterChange: EventEmitter<MultiFilterItem>;
   @Event() resetChange: EventEmitter<ColumnProp>;
-
-  @Listen('mousedown', { target: 'document' }) onMouseDown(e: MouseEvent) {
-    // click on anything then select drops values to default
-    if (!this.changes) {
-      return;
-    }
-    const path = e.composedPath();
-    const select = document.getElementById(FILTER_ID);
-    if (select instanceof HTMLSelectElement) {
-      // click on select should be skipped
-      if (path.includes(select)) {
-        return;
-      }
-      select.value = defaultType;
-    }
-    this.currentFilterType = defaultType;
-    if (this.changes) {
-      this.changes.type = defaultType;
-    }
-    this.currentFilterId = -1;
-
-    const isOutside = !path.includes(this.element);
-
-    if (
-      e.target instanceof HTMLElement &&
-      isOutside &&
-      !isFilterBtn(e.target) &&
-      this.closeOnOutsideClick
-    ) {
-      this.changes = undefined;
-    }
-  }
 
   @Method() async show(newEntity?: ShowData) {
     this.changes = newEntity;
@@ -115,6 +78,9 @@ export class FilterPanel {
     if (this.changes) {
       this.changes.type = this.changes.type || defaultType;
     }
+    
+    // Return the rendered content
+    return this.renderContent();
   }
 
   @Method() async getChanges() {
@@ -185,25 +151,6 @@ export class FilterPanel {
         {propFilters.filter(f => !f.hidden).length > 0 ? <div class="add-filter-divider" /> : ''}
       </div>
     );
-  }
-
-  private autoCorrect(el?: HTMLElement | null) {
-    if (!el) {
-      return;
-    }
-
-    const revoGrid = el.closest('revo-grid');
-    if (!revoGrid) {
-      return;
-    }
-
-    const pos = el.getBoundingClientRect();
-    const gridPos = revoGrid.getBoundingClientRect();
-    const maxLeft = gridPos.right - pos.width;
-
-    if (pos.left > maxLeft && el.offsetLeft) {
-      el.style.left = `${maxLeft - (el.parentElement?.getBoundingClientRect().left ?? 0)}px`;
-    }
   }
 
   private onFilterTypeChange(e: Event, prop: ColumnProp, index: number) {
@@ -467,32 +414,21 @@ export class FilterPanel {
     );
   }
 
-  render() {
+  renderContent() {
     if (!this.changes) {
-      return <Host style={{ display: 'none' }}></Host>;
+      return null;
     }
-    const style = {
-      display: 'block',
-      left: `${this.changes.x}px`,
-      top: `${this.changes.y}px`,
-    };
 
     const capts = Object.assign(
       this.filterCaptionsInternal,
       this.filterCaptions,
     );
 
-    return (
-      <Host
-        style={style}
-        ref={el => {
-          this.changes?.autoCorrect !== false && this.autoCorrect(el);
-        }}
-      >
-        <slot slot="header" />
-        { this.changes.extraContent?.(this.changes) || '' }
+    return [
+      <slot slot="header" />,
+      this.changes.extraContent?.(this.changes) || '',
 
-        { this.changes?.hideDefaultFilters !== true && (
+        this.changes?.hideDefaultFilters !== true ? (
           [
             <label>{capts.title}</label>,
             <div class="filter-holder">{this.getFilterItemsList()}</div>,
@@ -506,9 +442,9 @@ export class FilterPanel {
               </select>
             </div>
           ]
-        )}
+        ) : '',
 
-        <slot />
+        <slot />,
         <div class="filter-actions">
           {this.disableDynamicFiltering && [
             <button
@@ -547,8 +483,14 @@ export class FilterPanel {
               {capts.reset}
             </button>,
           ]}
-        </div>
-        <slot slot="footer" />
+        </div>,
+        <slot slot="footer" />];
+  }
+
+  render() {
+    return (
+      <Host>
+        {this.renderContent()}
       </Host>
     );
   }

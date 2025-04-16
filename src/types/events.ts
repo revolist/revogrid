@@ -57,6 +57,7 @@ export type RevogridEvents = 'contentsizechanged'|
   'closeedit'|
   'filterChange'|
   'resetChange'|
+  'close'|
   'beforefocusrender'|
   'beforescrollintoview'|
   'afterfocus'|
@@ -166,6 +167,7 @@ export const REVOGRID_EVENTS = new Map<RevogridEvents, RevogridEvents>([
   ['closeedit', 'closeedit'],
   ['filterChange', 'filterChange'],
   ['resetChange', 'resetChange'],
+  ['close', 'close'],
   ['beforefocusrender', 'beforefocusrender'],
   ['beforescrollintoview', 'beforescrollintoview'],
   ['afterfocus', 'afterfocus'],
