@@ -1,6 +1,4 @@
 import throttle from 'lodash/throttle';
-import { resizeObserver } from '../../utils/resize-observer.polifill';
-
 type ResizeEntry = {
   width: number;
   height: number;
@@ -43,8 +41,7 @@ export default class GridResizeService {
     this.init(el, extras);
   }
 
-  async init(el: HTMLElement, extras: HTMLElement[] = []): Promise<void> {
-    await resizeObserver();
+  init(el: HTMLElement, extras: HTMLElement[] = []) {
     const observer = this.resizeObserver = new ResizeObserver((e) => {
       if (e.length) {
         if (e[0].target === el) {
@@ -60,7 +57,7 @@ export default class GridResizeService {
     });
   }
 
-  public destroy() {
+  destroy() {
     this.resizeObserver?.disconnect();
     this.resizeObserver = null;
   }
