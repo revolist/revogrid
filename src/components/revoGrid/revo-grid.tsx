@@ -918,6 +918,14 @@ export class RevoGridComponent {
     this.extraService?.refresh();
   }
 
+  /**
+   * Get all providers for grid
+   * Useful for external grid integration
+   */
+  @Method() async getProviders() {
+    return this.getPluginData();
+  }
+
   // #endregion
 
   // #region Listeners outside scope
