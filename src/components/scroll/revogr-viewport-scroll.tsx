@@ -262,6 +262,7 @@ export class RevogrViewportScroll implements ElementScroll {
           this.setScrollVisibility(dimension, item.size, item.contentSize);
         }
       },
+      [this.footer, this.header],
     );
   }
 

@@ -1,6 +1,4 @@
 import throttle from 'lodash/throttle';
-import { resizeObserver } from '../../utils/resize-observer.polifill';
-
 type ResizeEntry = {
   width: number;
   height: number;
@@ -11,14 +9,11 @@ export default class GridResizeService {
     width: 0,
     height: 0,
   };
-  private readonly apply = throttle(
-    (e: ReadonlyArray<ResizeObserverEntry>) => {
-      if (!e.length) {
-        return;
-      }
+  readonly apply = throttle(
+    (e: { width: number, height: number }) => {
       const entry = {
-        width: e[0].contentRect.width,
-        height: e[0].contentRect.height,
+        width: e.width,
+        height: e.height,
       };
       this.resize?.(entry, this.previousSize);
       this.previousSize = entry;
@@ -35,17 +30,34 @@ export default class GridResizeService {
       entry: ResizeEntry,
       previousSize: ResizeEntry,
     ) => void,
+    elements: (HTMLElement | undefined)[],
   ) {
-    this.init(el);
+    const extras: HTMLElement[] = [];
+    elements.forEach((element) => {
+      if (element) {
+        extras.push(element);
+      }
+    });
+    this.init(el, extras);
   }
 
-  async init(el: HTMLElement): Promise<void> {
-    await resizeObserver();
-    this.resizeObserver = new ResizeObserver(this.apply);
-    this.resizeObserver?.observe(el);
+  init(el: HTMLElement, extras: HTMLElement[] = []) {
+    const observer = this.resizeObserver = new ResizeObserver((e) => {
+      if (e.length) {
+        if (e[0].target === el) {
+          this.apply(e[0].contentRect);
+        } else {
+          this.apply(el.getBoundingClientRect());
+        }
+      }
+    });
+    observer.observe(el);
+    extras.forEach((extra) => {
+      observer.observe(extra);
+    });
   }
 
-  public destroy() {
+  destroy() {
     this.resizeObserver?.disconnect();
     this.resizeObserver = null;
   }
