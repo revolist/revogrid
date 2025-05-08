@@ -600,7 +600,7 @@ export class OverlaySelection {
       }
       // Autofill
       if (focus && !this.readonly && this.range) {
-        nodes.push(this.autoFillService?.renderAutofill(range, focus));
+        nodes.push(this.autoFillService?.renderAutofill(range, focus, this.isMobileDevice));
       }
 
       // Order

@@ -66,7 +66,7 @@ export class AutoFillService {
    * @param range
    * @param selectionFocus
    */
-  renderAutofill(range: RangeArea | null, selectionFocus: Cell) {
+  renderAutofill(range: RangeArea | null, selectionFocus: Cell, isMobile = false) {
     let handlerStyle;
     if (range) {
       handlerStyle = getCell(
@@ -89,7 +89,7 @@ export class AutoFillService {
       <div
         class={{
           [CELL_HANDLER_CLASS]: true,
-          [MOBILE_CLASS]: true,
+          [MOBILE_CLASS]: isMobile,
         }}
         style={{
           left: `${handlerStyle.right}px`,
