@@ -48,7 +48,7 @@ export const ResizableElement: FunctionalComponent = (
               e.preventDefault();
               props.onDblClick?.(e);
             }}
-            class={`no-resize resizable resizable-${props.active[p]}`}
+            class={`no-resize`}
           />,
         );
       }
