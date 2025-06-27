@@ -39,6 +39,8 @@ Support Millions of cells and thousands of columns easy and efficiently for fast
 
 - **[Accessibility](https://rv-grid.com/guide/wcag)**: Follows WAI-ARIA best practices.
 
+- **[RTL Support](https://rv-grid.com/guide/rtl)**: Comprehensive Right-to-Left language support for Arabic, Hebrew, Persian, and other RTL languages. Features automatic column reordering, proper text alignment, and layout adjustments for RTL interfaces.
+
 - **[Keyboard Support](https://rv-grid.com/guide/defs#Keyboard)**:
   - Excel-like focus for efficient navigation and editing.
   - Seamless copy/paste from Excel, Google Sheets, or any other sheet format.
