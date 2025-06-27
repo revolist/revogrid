@@ -87,6 +87,7 @@ import { WCAGPlugin } from '../../plugins/wcag';
 import { ColumnFilterConfig, FilterCollectionItem } from '../../plugins/filter/filter.types';
 import { PluginService } from './plugin.service';
 import { SortingConfig, SortingOrder } from '../../plugins';
+import { RTLPlugin } from '../../plugins/rtl/rtl.plugin';
 
 
 /**
@@ -319,7 +320,11 @@ export class RevoGridComponent {
    */
   @Prop() accessible = true;
 
-
+  /**
+   * Enable right-to-left (RTL) mode. When enabled, columns will be displayed from right to left.
+   * @default false
+   */
+  @Prop() rtl = false;
 
   /**
    * Disable native drag&drop plugin.
@@ -1375,11 +1380,19 @@ export class RevoGridComponent {
   }
 
   /**
+   * Watch for RTL changes and reapply column ordering
+   */
+  @Watch('rtl') rtlChanged() {
+    // The RTL plugin will handle the transformation automatically
+    // Just trigger a column refresh to ensure the plugin processes the change
+    this.columnChanged(this.columns);
+  }
+
+  /**
    * User can add plugins via plugins property
    */
   @Watch('plugins') pluginsChanged(plugins: GridPlugin[] = [], prevPlugins?: GridPlugin[]) {
     this.pluginService.addUserPluginsAndCreate(this.element, plugins, prevPlugins, this.getPluginData());
- 
   }
   // #endregion
 
@@ -1403,6 +1416,9 @@ export class RevoGridComponent {
     if (this.accessible) {
       this.pluginService.add(new WCAGPlugin(this.element, pluginData));
     }
+
+    // register RTL plugin
+    this.pluginService.add(new RTLPlugin(this.element, pluginData));
 
     // register auto size plugin
     if (this.autoSizeColumn) {
@@ -1463,7 +1479,6 @@ export class RevoGridComponent {
     this.pluginService.destroy();
   }
   // #endregion
-
 
   // if reconnect to dom we need to set up plugins
   connectedCallback() {
@@ -1746,7 +1761,7 @@ export class RevoGridComponent {
     );
 
     return (
-      <Host>
+      <Host dir={this.rtl ? 'rtl' : 'ltr'}>
         {this.hideAttribution ? null : (
           <revogr-attribution class="attribution" />
         )}
