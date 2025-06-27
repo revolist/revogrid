@@ -138,30 +138,6 @@ export class RTLPlugin extends BasePlugin {
   }
 
   /**
-   * Enable RTL mode
-   */
-  public enableRTL() {
-    this.isRTLEnabled = true;
-    this.emit('rtlstatechanged', { rtl: this.isRTLEnabled });
-  }
-
-  /**
-   * Disable RTL mode
-   */
-  public disableRTL() {
-    this.isRTLEnabled = false;
-    this.emit('rtlstatechanged', { rtl: this.isRTLEnabled });
-  }
-
-  /**
-   * Toggle RTL mode
-   */
-  public toggleRTL() {
-    this.isRTLEnabled = !this.isRTLEnabled;
-    this.emit('rtlstatechanged', { rtl: this.isRTLEnabled });
-  }
-
-  /**
    * Get current RTL state
    */
   public getRTLState(): boolean {

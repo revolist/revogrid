@@ -144,8 +144,7 @@ revo-grid[dir='rtl'] {
   &:not([theme]) {
     .rowHeaders {
         background-color: var(--revo-grid-header-bg);
-    
-        $cell-shadow-left: -1px 0 0 0 var(--revo-grid-header-border) inset;
+
         $cell-shadow-bottom: 0 -1px 0 0 var(--revo-grid-header-border) inset;
         $cell-shadow-left: 1px 0 0 0 var(--revo-grid-header-border) inset;
         $cell-shadow-right: 1px 0 0 0 var(--revo-grid-header-border) inset;
