@@ -1,7 +1,6 @@
 import { BasePlugin } from '../base.plugin';
 import type { PluginProviders } from '@type';
-import { ColumnCollection } from '../../utils/column.utils';
-import { isColGrouping } from '../../utils/column.utils';
+import { type ColumnCollection, isColGrouping } from '../../utils/column.utils';
 
 /**
  * RTL (Right-to-Left) Plugin for RevoGrid

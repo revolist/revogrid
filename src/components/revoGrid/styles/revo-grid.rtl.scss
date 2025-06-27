@@ -31,13 +31,6 @@ revo-grid[dir='rtl'] {
     }
   }
 
-  // Adjust scrollbar positioning for RTL
-//   revogr-scroll-virtual {
-//     &.horizontal {
-//       transform: scaleX(-1);
-//     }
-//   }
-
   // Adjust filter panel positioning for RTL
   revogr-filter-panel {
     direction: rtl;
