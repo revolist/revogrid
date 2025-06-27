@@ -1,6 +1,6 @@
 import { BasePlugin } from '../base.plugin';
 import type { PluginProviders } from '@type';
-import { type ColumnCollection, isColGrouping } from '../../utils/column.utils';
+import { type ColumnCollection } from '../../utils/column.utils';
 
 /**
  * RTL (Right-to-Left) Plugin for RevoGrid
@@ -82,7 +82,7 @@ export class RTLPlugin extends BasePlugin {
       const columns = collection.columns[columnType];
       
       // Apply RTL transformation to columns
-      transformedCollection.columns[columnType] = this.applyRTLTransformationToColumns(columns);
+      transformedCollection.columns[columnType] = columns.reverse();
       
       // Transform column grouping for this type
       transformedCollection.columnGrouping[columnType] = this.applyRTLTransformationToGroups(
@@ -92,22 +92,6 @@ export class RTLPlugin extends BasePlugin {
     });
 
     return transformedCollection;
-  }
-
-  /**
-   * Apply RTL transformation to a list of columns
-   */
-  private applyRTLTransformationToColumns(columns: any[]): any[] {
-    return columns.map(column => {
-      if (isColGrouping(column)) {
-        // For grouped columns, recursively transform children
-        return {
-          ...column,
-          children: this.applyRTLTransformationToColumns(column.children)
-        };
-      }
-      return column;
-    }).reverse(); // Reverse the column order for RTL
   }
 
   /**
