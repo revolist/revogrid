@@ -81,8 +81,9 @@ export class RTLPlugin extends BasePlugin {
       const columnType = type as keyof typeof collection.columns;
       const columns = collection.columns[columnType];
       
-      // Apply RTL transformation to columns
-      transformedCollection.columns[columnType] = columns.reverse();
+      // Apply RTL transformation to columns - create new reversed array
+      const reversedColumns = [...columns].reverse();
+      transformedCollection.columns[columnType] = reversedColumns;
       
       // Transform column grouping for this type
       transformedCollection.columnGrouping[columnType] = this.applyRTLTransformationToGroups(
