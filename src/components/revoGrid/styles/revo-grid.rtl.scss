@@ -1,0 +1,193 @@
+/**
+ * RTL (Right-to-Left) styles for RevoGrid
+ * Applied when the rtl attribute is present on the revo-grid element
+ */
+
+revo-grid[dir='rtl'] {
+  // Reverse the direction of viewports container
+  .viewports {
+    flex-direction: row-reverse;
+  }
+  // Adjust header text alignment for RTL
+  revogr-header {
+    .rgHeaderCell {
+      text-align: right;
+    }
+  }
+
+  // Adjust data cell text alignment for RTL
+  revogr-data {
+    .rgCell {
+      text-align: right;
+    }
+  }
+
+  // Adjust row headers for RTL
+  .rowHeaders {
+    revogr-data {
+      .rgCell {
+        text-align: right;
+      }
+    }
+  }
+
+  // Adjust filter panel positioning for RTL
+  revogr-filter-panel {
+    direction: rtl;
+  }
+
+  // Adjust dropdown positioning for RTL
+  revo-dropdown {
+    .rv-dr-root {
+      text-align: right;
+    }
+  }
+
+  // Adjust drag indicators for RTL
+  .drag-position {
+    right: 0;
+    left: auto;
+  }
+
+  // Adjust auto-scroll indicators for RTL
+  .drag-auto-scroll-y {
+    right: 0;
+    left: auto;
+  }
+
+  // Adjust clipboard positioning for RTL
+  .clipboard {
+    right: 0;
+    left: auto;
+  }
+
+  // Adjust draggable positioning for RTL
+  .draggable {
+    margin-left: -20px;
+    margin-right: 0;
+    padding-right: 20px;
+    padding-left: 5px;
+
+    .revo-alt-icon {
+      right: 5px;
+      left: auto;
+    }
+  }
+
+  // Adjust focus indicators for RTL
+  .focused-cell {
+    border-right: 2px solid var(--revo-grid-primary);
+    border-left: none;
+  }
+
+  // Adjust selection indicators for RTL
+  .selection-range {
+    border-right: 2px solid var(--revo-grid-primary);
+    border-left: none;
+  }
+
+  // Adjust resize handles for RTL
+  .resize-handle {
+    right: 0;
+    left: auto;
+  }
+
+  // Adjust sorting indicators for RTL
+  .sort-indicator {
+    margin-left: 0;
+    margin-right: 5px;
+  }
+
+  // Adjust filter buttons for RTL
+  .filter-button {
+    margin-left: 0;
+    margin-right: 5px;
+  }
+
+  // Adjust grouping expand/collapse buttons for RTL
+  .group-expand {
+    margin-right: 0;
+    margin-left: 2px;
+    padding-right: 5px;
+    padding-left: 0;
+  }
+
+  // Adjust cell padding for RTL
+  .rgCell,
+  .rgHeaderCell {
+    padding-left: 5px;
+    padding-right: 5px;
+  }
+
+  revogr-edit {
+    direction: rtl;
+  }
+
+  .rgHeaderCell {
+    direction: rtl;
+  }
+
+  // Adjust material theme specific RTL styles
+  &[theme='material'],
+  &[theme='darkMaterial'] {
+    revogr-header {
+      text-align: right;
+    }
+
+    revogr-data {
+      text-align: right;
+    }
+  }
+
+  // Adjust default theme specific RTL styles
+  &[theme='default'],
+  &:not([theme]) {
+    .rowHeaders {
+        background-color: var(--revo-grid-header-bg);
+
+        $cell-shadow-bottom: 0 -1px 0 0 var(--revo-grid-header-border) inset;
+        $cell-shadow-left: 1px 0 0 0 var(--revo-grid-header-border) inset;
+        $cell-shadow-right: 1px 0 0 0 var(--revo-grid-header-border) inset;
+    
+        revogr-data {
+          .rgCell {
+            color: var(--revo-grid-header-color);
+    
+            &:first-child {
+              box-shadow: $cell-shadow-bottom;
+            }
+            &:not(:first-child) {
+              box-shadow: $cell-shadow-bottom, $cell-shadow-left;
+            }
+            &:last-child {
+              border-left: 1px solid var(--revo-grid-header-border);
+              border-right: none;
+            }
+          }
+    
+          revogr-header {
+            box-shadow: $cell-shadow-bottom;
+          }
+        }
+      }
+    revogr-header {
+      text-align: right;
+    }
+
+    revogr-data {
+      text-align: right;
+    }
+  }
+
+  // Adjust compact theme specific RTL styles
+  &[theme='compact'],
+  &[theme='darkCompact'] {
+    revogr-header {
+      text-align: right;
+    }
+
+    revogr-data {
+      text-align: right;
+    }
+  }
+}

@@ -27,7 +27,6 @@ export class WCAGPlugin extends BasePlugin {
   constructor(revogrid: HTMLRevoGridElement, providers: PluginProviders) {
     super(revogrid, providers);
 
-    revogrid.setAttribute('dir', 'ltr');
     revogrid.setAttribute('role', 'treegrid');
     revogrid.setAttribute('aria-keyshortcuts', 'Enter');
     revogrid.setAttribute('aria-multiselectable', 'true');

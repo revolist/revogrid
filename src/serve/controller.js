@@ -137,6 +137,12 @@ window.setData = function (config = {}) {
   }, 0);
 };
 
+window.setRtl = function (checked) {
+  const grid = document.querySelector('revo-grid');
+  grid.rtl = checked;
+  window.document.dir = checked ? 'rtl' : 'ltr';
+};
+
 /**
  * Set pinned rows/columns
  * @param {string} type - Type of pinned rows/columns

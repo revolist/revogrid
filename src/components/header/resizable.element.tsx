@@ -39,7 +39,7 @@ export const ResizableElement: FunctionalComponent = (
         );
       }
     } else {
-      for (let p in props.active) {
+      for (let _p in props.active) {
         resizeEls.push(
           <div
             onClick={e => e.preventDefault()}

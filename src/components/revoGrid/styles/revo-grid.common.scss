@@ -1,4 +1,7 @@
 @mixin revoGridCommon() {
+  // Set the direction to ltr for the grid, this is important for the grid to work correctly
+  direction: ltr !important;
+
   revogr-header {
     .header-rgRow {
       &.group {
