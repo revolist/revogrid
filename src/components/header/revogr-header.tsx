@@ -252,19 +252,24 @@ export class RevogrHeaderComponent {
 
   private renderGroupingColumns(): VNode[] {
     const groupRow: VNode[] = [];
+
+    if (!this.groups || this.groupingDepth === 0 || !this.groups[0]) {
+      return groupRow;
+    }
+
     for (let i = 0; i < this.groupingDepth; i++) {
       let groups = this.findGroupsByDepth(this.groups[0], i);
 
       for (let group of groups) {
         if (!group.children) {
           continue; // skip leafs
-        }      
+        }
 
         for (let group of groups) {
           const groupStartIndex = group.indexes[0] ?? -1;
-          if (groupStartIndex > -1) {
-            const groupEndIndex = group.indexes[group.indexes.length - 1];
+          const groupEndIndex = group.indexes[group.indexes.length - 1];
 
+          if (groupStartIndex > -1 && groupEndIndex > -1) {
             const groupStart = getItemByIndex(
               this.dimensionCol.state,
               groupStartIndex,
