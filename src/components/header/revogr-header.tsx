@@ -9,7 +9,7 @@ import {
 } from '@stencil/core';
 import keyBy from 'lodash/keyBy';
 
-import { getItemByIndex, Groups } from '@store';
+import { getItemByIndex, Group, Groups } from '@store';
 import { HEADER_ACTUAL_ROW_CLASS, HEADER_ROW_CLASS } from '../../utils/consts';
 import HeaderRenderer, { HeaderRenderProps } from './header-renderer';
 import { ResizeProps } from './resizable.directive';
@@ -224,43 +224,78 @@ export class RevogrHeaderComponent {
     return { cells };
   }
 
+  private findGroupsByDepth(parents: Group[], maxDepth: number, currentDepth = 0): Group[] {
+    if (currentDepth === maxDepth || parents.length === 0) {
+      return parents;
+    }
+    const nextGroups = [];
+    for (let parent of parents) {
+      if (parent.children) {
+        let i = parent.indexes[0];
+
+        nextGroups.push(...parent.children.map(c => {
+          const count = c.children ? c.children.length : 1;
+          const start = i;
+          i += count;
+
+          return {
+            ...c,
+            indexes: [start, start + count - 1],
+            children: c.children ?? [],
+            name: c.name ?? '',
+          };
+        }));
+      }
+    }    
+    return this.findGroupsByDepth(nextGroups, maxDepth, currentDepth + 1);
+  }
+
   private renderGroupingColumns(): VNode[] {
     const groupRow: VNode[] = [];
+
+    if (!this.groups || this.groupingDepth === 0 || !this.groups[0]) {
+      return groupRow;
+    }
+
     for (let i = 0; i < this.groupingDepth; i++) {
-      if (this.groups[i]) {
-        for (let group of this.groups[i]) {
-          const groupStartIndex = group.indexes[0] ?? -1;
-          if (groupStartIndex > -1) {
-            const groupEndIndex = groupStartIndex + group.indexes.length - 1;
+      let groups = this.findGroupsByDepth(this.groups[0], i);
 
-            const groupStart = getItemByIndex(
-              this.dimensionCol.state,
-              groupStartIndex,
-            ).start;
-            const groupEnd = getItemByIndex(
-              this.dimensionCol.state,
-              groupEndIndex,
-            ).end;
+      for (let group of groups) {
+        if (!group.children) {
+          continue; // skip leafs
+        }
 
-            const props: HeaderGroupRendererProps = {
-              providers: this.providers,
-              start: groupStart,
-              end: groupEnd,
-              group,
-              active: this.resizeHandler,
-              canResize: this.canResize,
-              additionalData: this.additionalData,
-              onResize: e =>
-                this.onResizeGroup(
-                  e.changedX ?? 0,
-                  groupStartIndex,
-                  groupEndIndex,
-                ),
-            };
-            const event = this.beforeGroupHeaderRender.emit(props);
-            if (!event.defaultPrevented) {
-              groupRow.push(<GroupHeaderRenderer {...event.detail} />);
-            }
+        const groupStartIndex = group.indexes[0] ?? -1;
+        const groupEndIndex = group.indexes[group.indexes.length - 1];
+
+        if (groupStartIndex > -1 && groupEndIndex > -1) {
+          const groupStart = getItemByIndex(
+            this.dimensionCol.state,
+            groupStartIndex,
+          ).start;
+          const groupEnd = getItemByIndex(
+            this.dimensionCol.state,
+            groupEndIndex,
+          ).end;
+
+          const props: HeaderGroupRendererProps = {
+            providers: this.providers,
+            start: groupStart,
+            end: groupEnd,
+            group,
+            active: this.resizeHandler,
+            canResize: this.canResize,
+            additionalData: this.additionalData,
+            onResize: e =>
+              this.onResizeGroup(
+                e.changedX ?? 0,
+                groupStartIndex,
+                groupEndIndex,
+              ),
+          };
+          const event = this.beforeGroupHeaderRender.emit(props);
+          if (!event.defaultPrevented) {
+            groupRow.push(<GroupHeaderRenderer {...event.detail} />);
           }
         }
       }
