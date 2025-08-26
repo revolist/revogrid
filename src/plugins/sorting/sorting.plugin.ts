@@ -195,23 +195,24 @@ export class SortingPlugin extends BasePlugin {
       const sorting: SortingOrder = {};
       const sortingFunc: SortingOrderFunction = {};
 
-      this.sorting = {
-        ...this.sorting,
-        ...sorting,
-      };
-      // extend sorting function with new sorting for multiple columns sorting
-      this.sortingFunc = {
-        ...this.sortingFunc,
-        ...sortingFunc,
-      };
-
       if (columnProp in sorting && size(sorting) > 1 && order === undefined) {
         delete sorting[columnProp];
         delete sortingFunc[columnProp];
       } else {
         sorting[columnProp] = order;
         sortingFunc[columnProp] = cmp;
-      }
+      }      
+
+      this.sorting = {
+        ...this.sorting,
+        ...sorting,
+      };
+      
+      // extend sorting function with new sorting for multiple columns sorting
+      this.sortingFunc = {
+        ...this.sortingFunc,
+        ...sortingFunc,
+      };
     } else {
       if (order) {
         // reset sorting
