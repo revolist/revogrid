@@ -1,3 +1,5 @@
+@use './_colors.scss' as *;
+
 @mixin selection($s: 1px, $c: $selection-border) {
   box-shadow: (-$s) 0 0 $c inset, $s 0 0 $c inset, 0 (-$s) 0 $c inset, 0 $s 0 $c inset;
 }

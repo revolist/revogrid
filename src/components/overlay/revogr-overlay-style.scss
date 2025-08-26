@@ -1,3 +1,6 @@
+@use '../../global/_mixins.scss' as *;
+@use '../../global/_colors.scss' as *;
+
 @mixin autofill-handle($handler-size: 14px, $icon-size: 10px) {
   .autofill-handle {
     position: absolute;

@@ -1,5 +1,5 @@
-@import './revo-grid.mixin.scss';
-@import './revo-grid.common.scss';
+@use './revo-grid.mixin.scss' as *;
+@use './revo-grid.common.scss' as *;
 
 revo-grid[theme='default'],
 revo-grid:not([theme]) {
