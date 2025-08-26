@@ -48,8 +48,8 @@ export function sortIndexByItems(
 export function defaultCellCompare(this: { column?: ColumnRegular }, prop: ColumnProp, a: DataType, b: DataType) {
   const aRaw = this.column ? getCellRaw(a, this.column) : a?.[prop];
   const bRaw = this.column ? getCellRaw(b, this.column) : b?.[prop];
-  const av = aRaw?.toString().toLowerCase();
-  const bv = bRaw?.toString().toLowerCase();
+  const av = typeof aRaw === 'number' ? aRaw : aRaw?.toString().toLowerCase();
+  const bv = typeof bRaw === 'number' ? bRaw : bRaw?.toString().toLowerCase();
 
   if (av === bv) {
     return 0;
