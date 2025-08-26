@@ -1,4 +1,4 @@
-@import './revo-grid.common-material.scss';
+@use './revo-grid.common-material.scss' as *;
 
 revo-grid[theme='darkMaterial'] {
   $header-height: 50px;

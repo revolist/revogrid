@@ -1,11 +1,11 @@
-@import './styles/revo-grid.mixin.scss';
-@import './styles/revo-grid.common.scss';
-@import './styles/revo-grid.default.scss';
-@import './styles/revo-grid.material.scss';
-@import './styles/revo-grid.dark.material.scss';
-@import './styles/revo-grid.dark.compact.scss';
-@import './styles/revo-grid.compact.scss';
-@import './styles/revo-grid.rtl.scss';
+@use './styles/revo-grid.mixin.scss' as *;
+@use './styles/revo-grid.common.scss' as *;
+@use './styles/revo-grid.default.scss' as *;
+@use './styles/revo-grid.material.scss' as *;
+@use './styles/revo-grid.dark.material.scss' as *;
+@use './styles/revo-grid.dark.compact.scss' as *;
+@use './styles/revo-grid.compact.scss' as *;
+@use './styles/revo-grid.rtl.scss' as *;
 
 revo-grid {
   /* Base theme variables */

@@ -1,3 +1,5 @@
+@use '../../global/_mixins.scss' as *;
+
 revogr-focus.focused-cell {
   @include selection(1px);
 
