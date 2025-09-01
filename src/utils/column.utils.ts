@@ -166,7 +166,7 @@ export function getColumns(
       res.columnByProp[regularColumn.prop].push(regularColumn);
 
       // trigger setup hook if present
-      regularColumn.beforeSetup && regularColumn.beforeSetup(regularColumn);
+      regularColumn.beforeSetup?.(regularColumn);
       return res;
     },
     collection,
