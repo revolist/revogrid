@@ -25,3 +25,6 @@
 [submodule "docs"]
 	path = docs
 	url = https://github.com/revolist/revogrid-docs.git
+[submodule "packages/svelte-output-target"]
+	path = packages/svelte-output-target
+	url = git@github.com:revolist/svelte-output-target.git
