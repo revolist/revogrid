@@ -105,6 +105,7 @@ export function getColumns(
   columns: ColumnData,
   level = 0,
   types?: ColumnTypes,
+  resFromRoot?: Partial<ColumnCollection>
 ): ColumnCollection {
   const collection: ColumnCollection = {
     // columns as they are in stores per type
@@ -121,10 +122,10 @@ export function getColumns(
       colPinStart: [],
       colPinEnd: [],
     },
-    // max depth level for column grouping
-    maxLevel: level,
     // sorting
     sort: {},
+    // max depth level for column grouping
+    maxLevel: level,
   };
 
   return reduce(
@@ -135,7 +136,8 @@ export function getColumns(
         res = gatherGroup(
           res,
           colData,
-          getColumns(colData.children, level + 1, types),
+          getColumns(colData.children, level + 1, types, res),
+          resFromRoot?.columns,
           level,
         );
         return res;
@@ -175,6 +177,7 @@ export function gatherGroup<T extends ColumnCollection>(
   res: T,
   colData: ColumnGrouping,
   collection: T,
+  existingColumnsByType?: ColumnCollection['columns'],
   level = 0,
 ): T {
   // group template
@@ -195,7 +198,7 @@ export function gatherGroup<T extends ColumnCollection>(
       // fill grouping
       const itemLength = collectionItem.length;
       if (itemLength) {
-        const columnLength = resultItem.length;
+        const columnLength = [...(existingColumnsByType?.[type] || []), ...resultItem].length;
         // fill columns
         resultItem.push(...collectionItem);
 
