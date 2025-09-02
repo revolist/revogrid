@@ -2,9 +2,26 @@ revogr-header {
   position: relative;
   z-index: 5;
   display: block;
-  
+
+  .header-rgRow {
+    display: block;
+    position: relative;
+
+    &.group {
+      z-index: 0;
+    }
+  }
+
+  .group-rgRow {
+    position: relative;
+    overflow: hidden;
+  }
 
   .rgHeaderCell {
+    position: absolute;
+    box-sizing: border-box;
+    height: 100%;
+    z-index: 1;
     display: flex;
 
     &.align-center {
@@ -38,30 +55,6 @@ revogr-header {
         }
       }
     }
-  }
-
-  .rgHeaderCell {
-    position: absolute;
-    box-sizing: border-box;
-    height: 100%;
-    z-index: 1;
-  }
-
-  .header-rgRow {
-    display: block;
-    position: relative;
-
-    &.group {
-      z-index: 0;
-    }
-  }
-
-  .group-rgRow {
-    position: relative;
-    overflow: hidden;
-  }
-
-  .rgHeaderCell {
     &.active {
       z-index: 10;
 
