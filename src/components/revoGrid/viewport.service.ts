@@ -92,8 +92,6 @@ export default class ViewportService {
     private config: Config,
     contentHeight: number,
   ) {
-    this.config.selectionStoreConnector?.beforeUpdate();
-
     // ----------- Handle columns ----------- //
 
     // Transform data from stores and apply it to different components
@@ -154,8 +152,6 @@ export default class ViewportService {
             ...rgRow,
             rowSelectionStore,
             selectionStore: segmentSelection.store,
-            ref: (e) =>
-              config.selectionStoreConnector.registerSection(e),
             onSetrange: e => {
               segmentSelection.setRangeArea(e.detail);
             },
