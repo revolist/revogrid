@@ -1,5 +1,5 @@
 import DimensionProvider from '../../services/dimension.provider';
-import { type SelectionStoreConnector, EMPTY_INDEX } from '../../services/selection.store.connector';
+import { type SelectionStoreConnector } from '../../services/selection.store.connector';
 import ViewportProvider from '../../services/viewport.provider';
 import { columnTypes, DSourceState, getSourceItem, getVisibleSourceItem, rowTypes } from '@store';
 import { OrdererService } from '../order/order-renderer';
@@ -230,12 +230,9 @@ export default class ViewportService {
     // y position for selection
     let y = 0;
     return rowTypes.reduce((result: VPPartition[], type) => {
-      // filter out empty sources, we still need to return source to keep slot working
-      const isPresent =
-        data.viewports[type].store.get('realCount') || type === 'rgRow';
       const rgCol = {
         ...data,
-        position: { ...data.position, y: isPresent ? y : EMPTY_INDEX },
+        position: { ...data.position, y },
       };
       const partition = viewportDataPartition(
         rgCol,
@@ -244,9 +241,7 @@ export default class ViewportService {
         type !== 'rgRow', // is fixed row
       );
       result.push(partition);
-      if (isPresent) {
-        y++;
-      }
+      y++;
       return result;
     }, []);
   }

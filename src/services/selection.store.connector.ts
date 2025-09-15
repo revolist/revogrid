@@ -1,4 +1,4 @@
-import { cropCellToMax, isHiddenStore, nextCell, SelectionStore } from '@store';
+import { cropCellToMax, nextCell, SelectionStore } from '@store';
 import type {
   MultiDimensionType,
   DimensionCols,
@@ -16,8 +16,6 @@ type FocusedStore = {
 };
 
 type StoresMapping<T> = { [xOrY: number]: Partial<T> };
-
-export const EMPTY_INDEX = -1;
 
 export class SelectionStoreConnector {
   // dirty flag required to cleanup whole store in case visibility of panels changed
@@ -92,10 +90,6 @@ export class SelectionStoreConnector {
   }
 
   registerColumn(x: number, type: DimensionCols): SelectionStore {
-    // if hidden just create store but no operations needed
-    if (isHiddenStore(x)) {
-      return new SelectionStore();
-    }
     if (this.columnStores[x]) {
       return this.columnStores[x];
     }
@@ -107,10 +101,6 @@ export class SelectionStoreConnector {
   }
 
   registerRow(y: number, type: DimensionRows): SelectionStore {
-    // if hidden just create store
-    if (isHiddenStore(y)) {
-      return new SelectionStore();
-    }
     if (this.rowStores[y]) {
       return this.rowStores[y];
     }
@@ -125,10 +115,6 @@ export class SelectionStoreConnector {
    * Cross store proxy, based on multiple dimensions
    */
   register({ x, y }: Cell): SelectionStore {
-    // if hidden just create store
-    if (isHiddenStore(x) || isHiddenStore(y)) {
-      return new SelectionStore();
-    }
     if (!this.stores[y]) {
       this.stores[y] = {};
     }
