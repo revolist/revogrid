@@ -1,5 +1,5 @@
 import DimensionProvider from '../../services/dimension.provider';
-import { type SelectionStoreConnector, EMPTY_INDEX } from '../../services/selection.store.connector';
+import { type SelectionStoreConnector } from '../../services/selection.store.connector';
 import ViewportProvider from '../../services/viewport.provider';
 import { columnTypes, DSourceState, getSourceItem, getVisibleSourceItem, rowTypes } from '@store';
 import { OrdererService } from '../order/order-renderer';
@@ -92,8 +92,6 @@ export default class ViewportService {
     private config: Config,
     contentHeight: number,
   ) {
-    this.config.selectionStoreConnector?.beforeUpdate();
-
     // ----------- Handle columns ----------- //
 
     // Transform data from stores and apply it to different components
@@ -141,8 +139,7 @@ export default class ViewportService {
       const dataPorts = this.dataViewPort(column).reduce<ViewportData[]>(
         (r, rgRow) => {
           // register selection store for Segment
-          const segmentSelection = this.registerSegment(rgRow.position);
-          segmentSelection.setLastCell(rgRow.lastCell);
+          const segmentSelection = this.registerSegment(rgRow.position, rgRow.lastCell);
 
           // register selection store for Row
           const rowSelectionStore = this.registerRow(
@@ -154,8 +151,6 @@ export default class ViewportService {
             ...rgRow,
             rowSelectionStore,
             selectionStore: segmentSelection.store,
-            ref: (e) =>
-              config.selectionStoreConnector.registerSection(e),
             onSetrange: e => {
               segmentSelection.setRangeArea(e.detail);
             },
@@ -205,8 +200,10 @@ export default class ViewportService {
   }
 
   /** register selection store for Segment */
-  private registerSegment(position: Cell) {
-    return this.config.selectionStoreConnector.register(position);
+  private registerSegment(position: Cell, lastCell: Cell) {
+    const store = this.config.selectionStoreConnector.register(position);
+    store.setLastCell(lastCell);
+    return store;
   }
 
   /** register selection store for Row */
@@ -230,12 +227,9 @@ export default class ViewportService {
     // y position for selection
     let y = 0;
     return rowTypes.reduce((result: VPPartition[], type) => {
-      // filter out empty sources, we still need to return source to keep slot working
-      const isPresent =
-        data.viewports[type].store.get('realCount') || type === 'rgRow';
       const rgCol = {
         ...data,
-        position: { ...data.position, y: isPresent ? y : EMPTY_INDEX },
+        position: { ...data.position, y },
       };
       const partition = viewportDataPartition(
         rgCol,
@@ -244,9 +238,7 @@ export default class ViewportService {
         type !== 'rgRow', // is fixed row
       );
       result.push(partition);
-      if (isPresent) {
-        y++;
-      }
+      y++;
       return result;
     }, []);
   }

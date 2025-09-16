@@ -39,6 +39,7 @@ export type SelectionStoreState = {
   edit: EditCellStore | null;
   /**
    * Last cell which was focused
+   * The last real coordinate + 1
    */
   lastCell: Cell | null;
   /**

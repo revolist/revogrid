@@ -1,9 +1,4 @@
-import { EMPTY_INDEX } from '../../services/selection.store.connector';
 import { Cell, RangeArea } from '@type';
-
-export function isHiddenStore(pos: number) {
-  return pos === EMPTY_INDEX;
-}
 
 export function nextCell(cell: Cell, lastCell: Cell): Partial<Cell> | null {
   const nextItem: Partial<Cell> = {};

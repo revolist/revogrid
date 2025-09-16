@@ -1,4 +1,4 @@
-import { cropCellToMax, isHiddenStore, nextCell, SelectionStore } from '@store';
+import { cropCellToMax, nextCell, SelectionStore } from '@store';
 import type {
   MultiDimensionType,
   DimensionCols,
@@ -17,11 +17,7 @@ type FocusedStore = {
 
 type StoresMapping<T> = { [xOrY: number]: Partial<T> };
 
-export const EMPTY_INDEX = -1;
-
 export class SelectionStoreConnector {
-  // dirty flag required to cleanup whole store in case visibility of panels changed
-  private dirty = false;
   readonly stores: { [y: number]: { [x: number]: SelectionStore } } = {};
 
   readonly columnStores: StoreByDimension = {};
@@ -65,37 +61,7 @@ export class SelectionStoreConnector {
     return this.focusedStore?.entity.store.get('range');
   }
 
-  private readonly sections: Element[] = [];
-
-  registerSection(e?: Element) {
-    if (!e) {
-      this.sections.length = 0;
-      // some elements removed, rebuild stores
-      this.dirty = true;
-      return;
-    }
-    if (this.sections.indexOf(e) === -1) {
-      this.sections.push(e);
-    }
-  }
-
-  // check if require to cleanup all stores
-  beforeUpdate() {
-    if (this.dirty) {
-      for (let y in this.stores) {
-        for (let x in this.stores[y]) {
-          this.stores[y][x].dispose();
-        }
-      }
-      this.dirty = false;
-    }
-  }
-
   registerColumn(x: number, type: DimensionCols): SelectionStore {
-    // if hidden just create store but no operations needed
-    if (isHiddenStore(x)) {
-      return new SelectionStore();
-    }
     if (this.columnStores[x]) {
       return this.columnStores[x];
     }
@@ -107,10 +73,6 @@ export class SelectionStoreConnector {
   }
 
   registerRow(y: number, type: DimensionRows): SelectionStore {
-    // if hidden just create store
-    if (isHiddenStore(y)) {
-      return new SelectionStore();
-    }
     if (this.rowStores[y]) {
       return this.rowStores[y];
     }
@@ -125,26 +87,23 @@ export class SelectionStoreConnector {
    * Cross store proxy, based on multiple dimensions
    */
   register({ x, y }: Cell): SelectionStore {
-    // if hidden just create store
-    if (isHiddenStore(x) || isHiddenStore(y)) {
-      return new SelectionStore();
-    }
     if (!this.stores[y]) {
       this.stores[y] = {};
     }
-    if (this.stores[y][x]) {
+    let store = this.stores[y][x];
+    if (store) {
       // Store already registered. Do not register twice
-      return this.stores[y][x];
+      return store;
     }
-    this.stores[y][x] = new SelectionStore();
+    this.stores[y][x] = store = new SelectionStore();
     // proxy update, column store trigger only range area
-    this.stores[y][x]?.onChange('range', c => {
+    store.onChange('range', c => {
       this.columnStores[x].setRangeArea(c);
       this.rowStores[y].setRangeArea(c);
     });
     // clean up on remove
-    this.stores[y][x]?.store.on('dispose', () => this.destroy(x, y));
-    return this.stores[y][x];
+    store.store.on('dispose', () => this.destroy(x, y));
+    return store;
   }
 
   private destroy(x: number, y: number) {
@@ -295,7 +254,12 @@ export class SelectionStoreConnector {
           }
         }
     });
-  }
+    }
+    // if last cell is empty store is empty, no next store
+    const lastCellNext = nextStore?.store.get('lastCell');
+    if (!lastCellNext?.x || !lastCellNext?.y) {
+      nextStore = undefined;
+    }
     return {
       store: nextStore,
       item: nextItem,
