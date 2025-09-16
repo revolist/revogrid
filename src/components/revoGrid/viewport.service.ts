@@ -139,8 +139,7 @@ export default class ViewportService {
       const dataPorts = this.dataViewPort(column).reduce<ViewportData[]>(
         (r, rgRow) => {
           // register selection store for Segment
-          const segmentSelection = this.registerSegment(rgRow.position);
-          segmentSelection.setLastCell(rgRow.lastCell);
+          const segmentSelection = this.registerSegment(rgRow.position, rgRow.lastCell);
 
           // register selection store for Row
           const rowSelectionStore = this.registerRow(
@@ -201,8 +200,10 @@ export default class ViewportService {
   }
 
   /** register selection store for Segment */
-  private registerSegment(position: Cell) {
-    return this.config.selectionStoreConnector.register(position);
+  private registerSegment(position: Cell, lastCell: Cell) {
+    const store = this.config.selectionStoreConnector.register(position);
+    store.setLastCell(lastCell);
+    return store;
   }
 
   /** register selection store for Row */

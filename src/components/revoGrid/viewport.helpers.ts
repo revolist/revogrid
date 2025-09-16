@@ -53,6 +53,9 @@ export type VPPartition = {
   colData: Observable<DSourceState<ColumnRegular, DimensionCols>>;
   viewportCol: Observable<ViewportState>;
   viewportRow: Observable<ViewportState>;
+  /**
+   * lastCell is the last real coordinate + 1, saved to selection store
+   */
   lastCell: Cell;
   slot: SlotType;
   type: DimensionRows;
@@ -74,7 +77,9 @@ export function viewportDataPartition(
     colData: data.colStore,
     viewportCol: data.viewports[data.colType].store,
     viewportRow: data.viewports[type].store,
-    // lastCell is the last real coordinate + 1
+    /**
+     * lastCell is the last real coordinate + 1, saved to selection store
+     */
     lastCell: getLastCell(data, type),
     slot,
     type,

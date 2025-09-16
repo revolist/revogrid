@@ -98,10 +98,6 @@ export class SelectionStoreConnector {
     this.stores[y][x] = store = new SelectionStore();
     // proxy update, column store trigger only range area
     store.onChange('range', c => {
-      const last = store.store.get('lastCell');
-      if (!last?.x || !last?.y) {
-        return;
-      }
       this.columnStores[x].setRangeArea(c);
       this.rowStores[y].setRangeArea(c);
     });
