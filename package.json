@@ -68,7 +68,7 @@
       "require": "./dist/index.cjs.js"
     },
     "./standalone": {
-      "types": "./standalone/revo-grid.d.ts",
+      "types": "./standalone/index.d.ts",
       "import": "./standalone/revo-grid.js"
     },
     "./standalone/revo-grid.js": {
