@@ -6,6 +6,7 @@
 @use './styles/revo-grid.dark.compact.scss' as *;
 @use './styles/revo-grid.compact.scss' as *;
 @use './styles/revo-grid.rtl.scss' as *;
+@use '../../global/_icons.scss' as *;
 
 revo-grid {
   /* Base theme variables */
