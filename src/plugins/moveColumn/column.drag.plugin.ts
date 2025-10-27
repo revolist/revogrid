@@ -7,7 +7,7 @@ import { getItemByPosition } from '@store';
 import { BasePlugin } from '../base.plugin';
 import { ColumnOrderHandler } from './order-column.handler';
 import { dispatch } from '../dispatcher';
-import type { ColumnPropProp, ColumnTemplateProp, DimensionSettingsState, PositionItem, DimensionCols, MultiDimensionType, PluginProviders } from '@type';
+import type { ColumnPropProp, DimensionSettingsState, PositionItem, DimensionCols, MultiDimensionType, PluginProviders, DimensionColPin } from '@type';
 import { ON_COLUMN_CLICK } from '../../components/header/header-cell-renderer';
 import { isColGrouping } from '../../utils/column.utils';
 
@@ -27,7 +27,7 @@ export type DragStartEventDetails = {
 type StaticData = {
   startPos: number;
   startItem: PositionItem;
-  data: ColumnTemplateProp;
+  pin?: DimensionColPin;
   dataEl: HTMLElement;
   scrollEl: Element;
   gridEl: HTMLElement;
@@ -110,7 +110,7 @@ export class ColumnMovePlugin extends BasePlugin {
     this.staticDragData = {
       startPos: event.x,
       startItem,
-      data,
+      pin: data.pin,
       dataEl,
       scrollEl,
       gridEl: this.revogrid,
@@ -211,7 +211,7 @@ export class ColumnMovePlugin extends BasePlugin {
   private getData({
     gridEl,
     dataEl,
-    data,
+    pin,
   }: StaticData): ColumnDragEventData {
     const gridRect = gridEl.getBoundingClientRect();
     const elRect = dataEl.getBoundingClientRect();
@@ -219,7 +219,7 @@ export class ColumnMovePlugin extends BasePlugin {
     return {
       elRect,
       gridRect,
-      type: data.pin || 'rgCol',
+      type: pin || 'rgCol',
       scrollOffset,
     };
   }
