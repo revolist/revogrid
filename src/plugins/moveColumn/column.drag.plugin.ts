@@ -46,12 +46,13 @@ export type ColumnDragEventData = {
   type: DimensionCols;
 };
 export class ColumnMovePlugin extends BasePlugin {
-  private moveFunc = debounce((e: MouseEvent) => this.doMove(e), 5);
-  private staticDragData: StaticData | null = null;
-  private dragData: ColumnDragEventData | null = null;
-  private readonly orderUi: ColumnOrderHandler;
-  protected readonly localSubscriptions: LocalSubscriptions = {};
-  constructor(public revogrid: HTMLRevoGridElement, public providers: PluginProviders) {
+  protected moveFunc = debounce((e: MouseEvent) => this.doMove(e), 5);
+  protected staticDragData: StaticData | null = null;
+  protected dragData: ColumnDragEventData | null = null;
+  readonly orderUi: ColumnOrderHandler;
+  readonly localSubscriptions: LocalSubscriptions = {};
+
+  constructor(revogrid: HTMLRevoGridElement, providers: PluginProviders) {
     super(revogrid, providers);
     this.orderUi = new ColumnOrderHandler();
     revogrid.appendChild(this.orderUi.render());
@@ -190,7 +191,7 @@ export class ColumnMovePlugin extends BasePlugin {
     this.clearOrder();
   }
 
-  private clearLocalSubscriptions() {
+  protected clearLocalSubscriptions() {
     each(this.localSubscriptions, ({ target, callback }, key) => target.removeEventListener(key, callback));
   }
 
@@ -208,7 +209,7 @@ export class ColumnMovePlugin extends BasePlugin {
     this.clearLocalSubscriptions();
   }
 
-  private getData({
+  protected getData({
     gridEl,
     dataEl,
     pin,
@@ -223,7 +224,7 @@ export class ColumnMovePlugin extends BasePlugin {
       scrollOffset,
     };
   }
-  private getDimension(type: MultiDimensionType) {
+  protected getDimension(type: MultiDimensionType) {
     return this.providers.dimension.stores[type].getCurrentState();
   }
 }
