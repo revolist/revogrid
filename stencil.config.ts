@@ -1,6 +1,6 @@
 import { Config } from '@stencil/core';
 import { sass } from '@stencil/sass';
-import { angularOutputTarget } from '@stencil/angular-output-target';
+import { angularOutputTarget } from '@revolist/stencil-angular-output';
 import { reactOutputTarget } from '@stencil/react-output-target';
 import { vueOutputTarget } from '@stencil/vue-output-target';
 import { svelteOutputTarget } from '@revolist/svelte-output-target';
@@ -86,6 +86,7 @@ export const config: Config = {
       directivesProxyFile: angularPath('angular-datagrid', `components.ts`),
       directivesArrayFile: angularPath('angular-datagrid', entry),
       excludeComponents,
+      lazyLoadCustomElements: true,
     }),
     // #endregion
 

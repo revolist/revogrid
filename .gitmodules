@@ -25,3 +25,9 @@
 [submodule "docs"]
 	path = docs
 	url = https://github.com/revolist/revogrid-docs.git
+[submodule "packages/stencil-output-targets"]
+	path = packages/stencil-output-targets
+	url = https://github.com/revolist/stencil-output-targets.git
+[submodule "packages/svelte-output-target"]
+	path = packages/svelte-output-target
+	url = https://github.com/revolist/svelte-output-target.git
