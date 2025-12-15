@@ -22,7 +22,6 @@ log.txt
 .vscode/
 .sass-cache/
 .versions/
-packages/
 node_modules/
 vscode-data.json
 
