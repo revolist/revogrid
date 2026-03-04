@@ -1338,6 +1338,8 @@ declare global {
     }
 }
 declare namespace LocalJSX {
+    type OneOf<K extends string, PropT, AttrT = PropT> = { [P in K]: PropT } & { [P in `attr:${K}` | `prop:${K}`]?: never } | { [P in `attr:${K}`]: AttrT } & { [P in K | `prop:${K}`]?: never } | { [P in `prop:${K}`]: PropT } & { [P in K | `attr:${K}`]?: never };
+
     /**
      * Revogrid - High-performance, customizable grid library for managing large datasets.
      * ### Events guide
@@ -2454,22 +2456,110 @@ declare namespace LocalJSX {
          */
         "redraw"?: (() => VNode[]) | null | undefined;
     }
+
+    interface RevoGridAttributes {
+        "rowHeaders": RowHeaders | boolean;
+        "frameSize": number;
+        "rowSize": number;
+        "colSize": number;
+        "range": boolean;
+        "readonly": boolean;
+        "resize": boolean;
+        "canFocus": boolean;
+        "useClipboard": boolean;
+        "applyOnClose": boolean;
+        "theme": Theme;
+        "rowClass": string;
+        "autoSizeColumn": boolean | AutoSizeColumnConfig;
+        "filter": boolean | ColumnFilterConfig;
+        "canMoveColumns": boolean;
+        "exporting": boolean;
+        "stretch": string;
+        "disableVirtualX": boolean;
+        "disableVirtualY": boolean;
+        "hideAttribution": boolean;
+        "accessible": boolean;
+        "rtl": boolean;
+        "canDrag": boolean;
+    }
+    interface RevogrClipboardAttributes {
+        "readonly": boolean;
+    }
+    interface RevogrDataAttributes {
+        "readonly": boolean;
+        "range": boolean;
+        "rowClass": string;
+        "additionalData": string;
+        "type": DimensionRows;
+        "colType": DimensionCols | 'rowHeaders';
+    }
+    interface RevogrEditAttributes {
+        "saveOnClose": boolean;
+        "additionalData": string;
+    }
+    interface RevogrFilterPanelAttributes {
+        "disableDynamicFiltering": boolean;
+        "closeOnOutsideClick": boolean;
+    }
+    interface RevogrFocusAttributes {
+        "colType": DimensionCols;
+        "rowType": DimensionRows;
+    }
+    interface RevogrHeaderAttributes {
+        "groupingDepth": number;
+        "readonly": boolean;
+        "canResize": boolean;
+        "columnFilter": boolean;
+        "type": DimensionCols | 'rowHeaders';
+        "additionalData": string;
+    }
+    interface RevogrOrderEditorAttributes {
+        "rowType": DimensionRows;
+    }
+    interface RevogrOverlaySelectionAttributes {
+        "readonly": boolean;
+        "range": boolean;
+        "canDrag": boolean;
+        "useClipboard": boolean;
+        "applyChangesOnClose": boolean;
+        "additionalData": string;
+        "isMobileDevice": boolean;
+    }
+    interface RevogrRowHeadersAttributes {
+        "height": number;
+        "rowClass": string;
+        "resize": boolean;
+        "additionalData": string;
+    }
+    interface RevogrScrollVirtualAttributes {
+        "dimension": DimensionType;
+        "realSize": number;
+        "virtualSize": number;
+        "clientSize": number;
+    }
+    interface RevogrViewportScrollAttributes {
+        "rowHeader": boolean;
+        "contentWidth": number;
+        "contentHeight": number;
+        "colType": DimensionCols | 'rowHeaders';
+    }
+
     interface IntrinsicElements {
-        "revo-grid": RevoGrid;
+        "revo-grid": Omit<RevoGrid, keyof RevoGridAttributes> & { [K in keyof RevoGrid & keyof RevoGridAttributes]?: RevoGrid[K] } & { [K in keyof RevoGrid & keyof RevoGridAttributes as `attr:${K}`]?: RevoGridAttributes[K] } & { [K in keyof RevoGrid & keyof RevoGridAttributes as `prop:${K}`]?: RevoGrid[K] };
         "revogr-attribution": RevogrAttribution;
-        "revogr-clipboard": RevogrClipboard;
-        "revogr-data": RevogrData;
-        "revogr-edit": RevogrEdit;
+        "revogr-clipboard": Omit<RevogrClipboard, keyof RevogrClipboardAttributes> & { [K in keyof RevogrClipboard & keyof RevogrClipboardAttributes]?: RevogrClipboard[K] } & { [K in keyof RevogrClipboard & keyof RevogrClipboardAttributes as `attr:${K}`]?: RevogrClipboardAttributes[K] } & { [K in keyof RevogrClipboard & keyof RevogrClipboardAttributes as `prop:${K}`]?: RevogrClipboard[K] };
+        "revogr-data": Omit<RevogrData, keyof RevogrDataAttributes> & { [K in keyof RevogrData & keyof RevogrDataAttributes]?: RevogrData[K] } & { [K in keyof RevogrData & keyof RevogrDataAttributes as `attr:${K}`]?: RevogrDataAttributes[K] } & { [K in keyof RevogrData & keyof RevogrDataAttributes as `prop:${K}`]?: RevogrData[K] } & OneOf<"type", RevogrData["type"], RevogrDataAttributes["type"]> & OneOf<"colType", RevogrData["colType"], RevogrDataAttributes["colType"]>;
+        "revogr-edit": Omit<RevogrEdit, keyof RevogrEditAttributes> & { [K in keyof RevogrEdit & keyof RevogrEditAttributes]?: RevogrEdit[K] } & { [K in keyof RevogrEdit & keyof RevogrEditAttributes as `attr:${K}`]?: RevogrEditAttributes[K] } & { [K in keyof RevogrEdit & keyof RevogrEditAttributes as `prop:${K}`]?: RevogrEdit[K] };
         "revogr-extra": RevogrExtra;
-        "revogr-filter-panel": RevogrFilterPanel;
-        "revogr-focus": RevogrFocus;
-        "revogr-header": RevogrHeader;
-        "revogr-order-editor": RevogrOrderEditor;
-        "revogr-overlay-selection": RevogrOverlaySelection;
-        "revogr-row-headers": RevogrRowHeaders;
-        "revogr-scroll-virtual": RevogrScrollVirtual;
+        "revogr-filter-panel": Omit<RevogrFilterPanel, keyof RevogrFilterPanelAttributes> & { [K in keyof RevogrFilterPanel & keyof RevogrFilterPanelAttributes]?: RevogrFilterPanel[K] } & { [K in keyof RevogrFilterPanel & keyof RevogrFilterPanelAttributes as `attr:${K}`]?: RevogrFilterPanelAttributes[K] } & { [K in keyof RevogrFilterPanel & keyof RevogrFilterPanelAttributes as `prop:${K}`]?: RevogrFilterPanel[K] };
+        "revogr-focus": Omit<RevogrFocus, keyof RevogrFocusAttributes> & { [K in keyof RevogrFocus & keyof RevogrFocusAttributes]?: RevogrFocus[K] } & { [K in keyof RevogrFocus & keyof RevogrFocusAttributes as `attr:${K}`]?: RevogrFocusAttributes[K] } & { [K in keyof RevogrFocus & keyof RevogrFocusAttributes as `prop:${K}`]?: RevogrFocus[K] } & OneOf<"colType", RevogrFocus["colType"], RevogrFocusAttributes["colType"]> & OneOf<"rowType", RevogrFocus["rowType"], RevogrFocusAttributes["rowType"]>;
+        "revogr-header": Omit<RevogrHeader, keyof RevogrHeaderAttributes> & { [K in keyof RevogrHeader & keyof RevogrHeaderAttributes]?: RevogrHeader[K] } & { [K in keyof RevogrHeader & keyof RevogrHeaderAttributes as `attr:${K}`]?: RevogrHeaderAttributes[K] } & { [K in keyof RevogrHeader & keyof RevogrHeaderAttributes as `prop:${K}`]?: RevogrHeader[K] } & OneOf<"type", RevogrHeader["type"], RevogrHeaderAttributes["type"]>;
+        "revogr-order-editor": Omit<RevogrOrderEditor, keyof RevogrOrderEditorAttributes> & { [K in keyof RevogrOrderEditor & keyof RevogrOrderEditorAttributes]?: RevogrOrderEditor[K] } & { [K in keyof RevogrOrderEditor & keyof RevogrOrderEditorAttributes as `attr:${K}`]?: RevogrOrderEditorAttributes[K] } & { [K in keyof RevogrOrderEditor & keyof RevogrOrderEditorAttributes as `prop:${K}`]?: RevogrOrderEditor[K] };
+        "revogr-overlay-selection": Omit<RevogrOverlaySelection, keyof RevogrOverlaySelectionAttributes> & { [K in keyof RevogrOverlaySelection & keyof RevogrOverlaySelectionAttributes]?: RevogrOverlaySelection[K] } & { [K in keyof RevogrOverlaySelection & keyof RevogrOverlaySelectionAttributes as `attr:${K}`]?: RevogrOverlaySelectionAttributes[K] } & { [K in keyof RevogrOverlaySelection & keyof RevogrOverlaySelectionAttributes as `prop:${K}`]?: RevogrOverlaySelection[K] };
+        "revogr-row-headers": Omit<RevogrRowHeaders, keyof RevogrRowHeadersAttributes> & { [K in keyof RevogrRowHeaders & keyof RevogrRowHeadersAttributes]?: RevogrRowHeaders[K] } & { [K in keyof RevogrRowHeaders & keyof RevogrRowHeadersAttributes as `attr:${K}`]?: RevogrRowHeadersAttributes[K] } & { [K in keyof RevogrRowHeaders & keyof RevogrRowHeadersAttributes as `prop:${K}`]?: RevogrRowHeaders[K] };
+        "revogr-scroll-virtual": Omit<RevogrScrollVirtual, keyof RevogrScrollVirtualAttributes> & { [K in keyof RevogrScrollVirtual & keyof RevogrScrollVirtualAttributes]?: RevogrScrollVirtual[K] } & { [K in keyof RevogrScrollVirtual & keyof RevogrScrollVirtualAttributes as `attr:${K}`]?: RevogrScrollVirtualAttributes[K] } & { [K in keyof RevogrScrollVirtual & keyof RevogrScrollVirtualAttributes as `prop:${K}`]?: RevogrScrollVirtual[K] } & OneOf<"realSize", RevogrScrollVirtual["realSize"], RevogrScrollVirtualAttributes["realSize"]> & OneOf<"virtualSize", RevogrScrollVirtual["virtualSize"], RevogrScrollVirtualAttributes["virtualSize"]> & OneOf<"clientSize", RevogrScrollVirtual["clientSize"], RevogrScrollVirtualAttributes["clientSize"]>;
         "revogr-temp-range": RevogrTempRange;
-        "revogr-viewport-scroll": RevogrViewportScroll;
+        "revogr-viewport-scroll": Omit<RevogrViewportScroll, keyof RevogrViewportScrollAttributes> & { [K in keyof RevogrViewportScroll & keyof RevogrViewportScrollAttributes]?: RevogrViewportScroll[K] } & { [K in keyof RevogrViewportScroll & keyof RevogrViewportScrollAttributes as `attr:${K}`]?: RevogrViewportScrollAttributes[K] } & { [K in keyof RevogrViewportScroll & keyof RevogrViewportScrollAttributes as `prop:${K}`]?: RevogrViewportScroll[K] } & OneOf<"colType", RevogrViewportScroll["colType"], RevogrViewportScrollAttributes["colType"]>;
         "vnode-html": VnodeHtml;
     }
 }
@@ -2489,23 +2579,23 @@ declare module "@stencil/core" {
              * @example data-rgCol-rgRow - main data slot. Applies extra elements in <revogr-data />.
              * @example focus-rgCol-rgRow - focus layer for main data. Applies extra elements in <revogr-focus />.
              */
-            "revo-grid": LocalJSX.RevoGrid & JSXBase.HTMLAttributes<HTMLRevoGridElement>;
-            "revogr-attribution": LocalJSX.RevogrAttribution & JSXBase.HTMLAttributes<HTMLRevogrAttributionElement>;
+            "revo-grid": LocalJSX.IntrinsicElements["revo-grid"] & JSXBase.HTMLAttributes<HTMLRevoGridElement>;
+            "revogr-attribution": LocalJSX.IntrinsicElements["revogr-attribution"] & JSXBase.HTMLAttributes<HTMLRevogrAttributionElement>;
             /**
              * This Clipboard provides functionality for handling clipboard events in a web application.
              */
-            "revogr-clipboard": LocalJSX.RevogrClipboard & JSXBase.HTMLAttributes<HTMLRevogrClipboardElement>;
+            "revogr-clipboard": LocalJSX.IntrinsicElements["revogr-clipboard"] & JSXBase.HTMLAttributes<HTMLRevogrClipboardElement>;
             /**
              * This component is responsible for rendering data
              * Rows, columns, groups and cells
              */
-            "revogr-data": LocalJSX.RevogrData & JSXBase.HTMLAttributes<HTMLRevogrDataElement>;
+            "revogr-data": LocalJSX.IntrinsicElements["revogr-data"] & JSXBase.HTMLAttributes<HTMLRevogrDataElement>;
             /**
              * Represents a cell editor in a grid.
              * It manages the editing of cells by handling events, saving data, rendering the editor UI,
              * and managing the lifecycle of the editor instance.
              */
-            "revogr-edit": LocalJSX.RevogrEdit & JSXBase.HTMLAttributes<HTMLRevogrEditElement>;
+            "revogr-edit": LocalJSX.IntrinsicElements["revogr-edit"] & JSXBase.HTMLAttributes<HTMLRevogrEditElement>;
             /**
              * Contains extra elements for stencil components.
              * Performs rendering and updates for external components.
@@ -2520,40 +2610,40 @@ declare module "@stencil/core" {
              * ];
              * /**
              */
-            "revogr-extra": LocalJSX.RevogrExtra & JSXBase.HTMLAttributes<HTMLRevogrExtraElement>;
-            "revogr-filter-panel": LocalJSX.RevogrFilterPanel & JSXBase.HTMLAttributes<HTMLRevogrFilterPanelElement>;
+            "revogr-extra": LocalJSX.IntrinsicElements["revogr-extra"] & JSXBase.HTMLAttributes<HTMLRevogrExtraElement>;
+            "revogr-filter-panel": LocalJSX.IntrinsicElements["revogr-filter-panel"] & JSXBase.HTMLAttributes<HTMLRevogrFilterPanelElement>;
             /**
              * Focus component. Shows focus layer around the cell that is currently in focus.
              * @example focus-rgCol-rgRow
              */
-            "revogr-focus": LocalJSX.RevogrFocus & JSXBase.HTMLAttributes<HTMLRevogrFocusElement>;
-            "revogr-header": LocalJSX.RevogrHeader & JSXBase.HTMLAttributes<HTMLRevogrHeaderElement>;
+            "revogr-focus": LocalJSX.IntrinsicElements["revogr-focus"] & JSXBase.HTMLAttributes<HTMLRevogrFocusElement>;
+            "revogr-header": LocalJSX.IntrinsicElements["revogr-header"] & JSXBase.HTMLAttributes<HTMLRevogrHeaderElement>;
             /**
              * Component for handling row order editor.
              */
-            "revogr-order-editor": LocalJSX.RevogrOrderEditor & JSXBase.HTMLAttributes<HTMLRevogrOrderEditorElement>;
+            "revogr-order-editor": LocalJSX.IntrinsicElements["revogr-order-editor"] & JSXBase.HTMLAttributes<HTMLRevogrOrderEditorElement>;
             /**
              * Component for overlaying the grid with the selection.
              */
-            "revogr-overlay-selection": LocalJSX.RevogrOverlaySelection & JSXBase.HTMLAttributes<HTMLRevogrOverlaySelectionElement>;
+            "revogr-overlay-selection": LocalJSX.IntrinsicElements["revogr-overlay-selection"] & JSXBase.HTMLAttributes<HTMLRevogrOverlaySelectionElement>;
             /**
              * Row headers component
              * Visible on the left side of the table
              */
-            "revogr-row-headers": LocalJSX.RevogrRowHeaders & JSXBase.HTMLAttributes<HTMLRevogrRowHeadersElement>;
+            "revogr-row-headers": LocalJSX.IntrinsicElements["revogr-row-headers"] & JSXBase.HTMLAttributes<HTMLRevogrRowHeadersElement>;
             /**
              * Virtual scroll component
              */
-            "revogr-scroll-virtual": LocalJSX.RevogrScrollVirtual & JSXBase.HTMLAttributes<HTMLRevogrScrollVirtualElement>;
+            "revogr-scroll-virtual": LocalJSX.IntrinsicElements["revogr-scroll-virtual"] & JSXBase.HTMLAttributes<HTMLRevogrScrollVirtualElement>;
             /**
              * Temporary range selection component. Shows temporary range selection.
              */
-            "revogr-temp-range": LocalJSX.RevogrTempRange & JSXBase.HTMLAttributes<HTMLRevogrTempRangeElement>;
+            "revogr-temp-range": LocalJSX.IntrinsicElements["revogr-temp-range"] & JSXBase.HTMLAttributes<HTMLRevogrTempRangeElement>;
             /**
              * Viewport scroll component for RevoGrid
              */
-            "revogr-viewport-scroll": LocalJSX.RevogrViewportScroll & JSXBase.HTMLAttributes<HTMLRevogrViewportScrollElement>;
-            "vnode-html": LocalJSX.VnodeHtml & JSXBase.HTMLAttributes<HTMLVnodeHtmlElement>;
+            "revogr-viewport-scroll": LocalJSX.IntrinsicElements["revogr-viewport-scroll"] & JSXBase.HTMLAttributes<HTMLRevogrViewportScrollElement>;
+            "vnode-html": LocalJSX.IntrinsicElements["vnode-html"] & JSXBase.HTMLAttributes<HTMLVnodeHtmlElement>;
         }
     }
 }
