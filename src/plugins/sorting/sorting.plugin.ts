@@ -152,7 +152,7 @@ export class SortingPlugin extends BasePlugin {
   }
 
   /**
-   * Entry point for sorting, waits for all delayes, registers jobs
+   * Entry point for sorting, waits for all delays, registers jobs
    */
   startSorting(order?: SortingOrder, sortingFunc?: SortingOrderFunction, ignoreViewportUpdate?: boolean) {
     if (!this.sortingPromise) {
