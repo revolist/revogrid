@@ -1,4 +1,6 @@
-@import './_colors.dark.scss';
+@use './_colors.scss' as *;
+@use './_colors.dark.scss' as *;
+
 
 .revo-button {
   $h: 32px;

@@ -101,7 +101,7 @@ function testAction(e: CustomEvent) {
 </template>
 
 <script lang="ts" setup>
-import { defineProps, ref, inject } from 'vue';
+import { ref, inject } from 'vue';
 import type { ColumnDataSchemaModel } from '@revolist/vue3-datagrid';
 
 const props = defineProps<ColumnDataSchemaModel>();
