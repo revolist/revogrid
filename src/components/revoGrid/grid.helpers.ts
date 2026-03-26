@@ -13,7 +13,7 @@ export const rowDefinitionByType = (newVal: RowDefinition[] = []) => {
     if (!rowDefs) {
       rowDefs = result[v.type] = {};
     }
-    if (v.size) {
+    if (typeof v.size === 'number') {
       if (!rowDefs.sizes) {
         rowDefs.sizes = {};
       }
@@ -30,7 +30,7 @@ export const rowDefinitionRemoveByType = (oldVal: RowDefinition[] = []) => {
     if (!rowDefs) {
       rowDefs = result[v.type] = [];
     }
-    if (v.size) {
+    if (typeof v.size === 'number') {
       rowDefs.push(v.index);
     }
   }
