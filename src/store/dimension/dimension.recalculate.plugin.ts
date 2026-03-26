@@ -23,10 +23,10 @@ export const recalculateRealSizePlugin = (storeService: {
           // recalculate realSize
           let realSize = 0;
           const count = storeService.store.get('count');
+          const sizes = storeService.store.get('sizes');
+          const originItemSize = storeService.store.get('originItemSize');
           for (let i = 0; i < count; i++) {
-            realSize +=
-              storeService.store.get('sizes')[i] ||
-              storeService.store.get('originItemSize');
+            realSize += sizes[i] ?? originItemSize;
           }
           storeService.setStore({ realSize });
           break;

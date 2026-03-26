@@ -131,7 +131,9 @@ export class DimensionStore {
       if (indices && indices.length > 0) {
         const originalIndex = indices.shift(); // Get the first available original index
 
-        if (originalIndex !== undefined && originalIndex !== virtIndex && customSizes[originalIndex]) {
+        if (originalIndex !== undefined &&
+          originalIndex !== virtIndex &&
+            typeof customSizes[originalIndex] === 'number') {
           newSizes[virtIndex] = customSizes[originalIndex];
           delete customSizes[originalIndex];
         }

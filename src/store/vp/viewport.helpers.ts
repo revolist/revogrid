@@ -298,7 +298,7 @@ function getItemSize(
   sizes?: ViewSettingSizeProp,
   origSize = 0,
 ): number {
-  if (sizes && sizes[index]) {
+  if (typeof sizes?.[index] === 'number') {
     return sizes[index];
   }
   return origSize;
