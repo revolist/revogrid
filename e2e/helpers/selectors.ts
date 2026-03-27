@@ -1,0 +1,20 @@
+export const SELECTORS = {
+  grid: 'revo-grid',
+  mainViewport: 'revo-grid revogr-viewport-scroll.rgCol:not([row-header])',
+  pinnedStartViewport: 'revo-grid revogr-viewport-scroll.colPinStart',
+  pinnedEndViewport: 'revo-grid revogr-viewport-scroll.colPinEnd',
+  rowHeaderViewport: 'revo-grid revogr-viewport-scroll[row-header]',
+  actualHeaderCells:
+    'revo-grid revogr-header .header-rgRow.actual-rgRow .rgHeaderCell',
+  renderedRows: 'revogr-data[type="rgRow"] .rgRow',
+  pinnedTopRows: 'revogr-data[type="rowPinStart"] .rgRow',
+  pinnedBottomRows: 'revogr-data[type="rowPinEnd"] .rgRow',
+  filterButton: '.rv-filter',
+  filterPanel: 'revogr-filter-panel',
+  filterInput: 'revogr-filter-panel input[placeholder="Enter value..."]',
+  editInput: 'revo-grid revogr-edit input',
+  focusedCell: 'revo-grid revogr-focus.focused-cell',
+  selectedRange: '.selection-border-range',
+  groupRows: 'revo-grid .groupingRow',
+  groupExpandButton: '.group-expand',
+} as const;
