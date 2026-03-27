@@ -9,12 +9,12 @@ type BrowserGridHelpers = {
 };
 
 function installBrowserGridHelpers() {
-  const browserWindow = window as Window & { __revoGridE2EHelpers?: BrowserGridHelpers };
-  if (browserWindow.__revoGridE2EHelpers) {
+  const browserGlobals = globalThis as typeof globalThis & { __revoGridE2EHelpers?: BrowserGridHelpers };
+  if (browserGlobals.__revoGridE2EHelpers) {
     return;
   }
 
-  browserWindow.__revoGridE2EHelpers = {
+  browserGlobals.__revoGridE2EHelpers = {
     toColumnProperties(testId: string) {
       return () => ({ 'data-testid': testId });
     },
@@ -47,8 +47,8 @@ export async function mountGrid(page: E2EPage, options: GridSetupOptions) {
   await page.evaluate((config: GridSetupOptions) => {
     const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
     if (!grid) throw new Error('Grid element was not created');
-    const browserWindow = window as Window & { __revoGridE2EHelpers?: BrowserGridHelpers };
-    const helpers = browserWindow.__revoGridE2EHelpers;
+    const browserGlobals = globalThis as typeof globalThis & { __revoGridE2EHelpers?: BrowserGridHelpers };
+    const helpers = browserGlobals.__revoGridE2EHelpers;
     if (!helpers) throw new Error('Grid E2E helpers were not installed');
 
     const {
