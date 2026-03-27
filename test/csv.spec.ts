@@ -14,7 +14,7 @@ function doExport(input: DataInput, options: ConstructorParameters<typeof Export
 // ---------------------------------------------------------------------------
 describe('ExportCsv', () => {
   describe('doExport — basic output', () => {
-    it('default options: output starts with BOM (\\ufeff), header cells are force-quoted → "\\ufeff\"Name\",\"Age\"\\r\\nAlice,25"', () => {
+    it('default options: output starts with BOM (\\ufeff), header cells are force-quoted → "\\ufeff"Name","Age"\\r\\nAlice,25"', () => {
       const result = new ExportCsv().doExport({
         data: [{ name: 'Alice', age: 25 }],
         headers: [['Name', 'Age']],
@@ -36,7 +36,7 @@ describe('ExportCsv', () => {
   });
 
   describe('doExport — cell escaping', () => {
-    it('value "Hello, World" → "\"Hello, World\"" (comma triggers double-quote wrapping)', () => {
+    it('value "Hello, World" → ""Hello, World"" (comma triggers double-quote wrapping)', () => {
       expect(doExport({ data: [{ v: 'Hello, World' }], headers: [], props: ['v'] })).toBe('"Hello, World"');
     });
 
@@ -54,12 +54,12 @@ describe('ExportCsv', () => {
   });
 
   describe('doExport — headers', () => {
-    it('headers=[["Group A"],["Col 1"]] → "\"Group A\"\\r\\n\"Col 1\"\\r\\n1" (two header rows above data)', () => {
+    it('headers=[["Group A"],["Col 1"]] → ""Group A"\\r\\n"Col 1"\\r\\n1" (two header rows above data)', () => {
       const result = doExport({ data: [{ a: '1' }], headers: [['Group A'], ['Col 1']], props: ['a'] });
       expect(result).toBe('"Group A"\r\n"Col 1"\r\n1');
     });
 
-    it('headers=[[],["Col 1"]] → "\"Col 1\"\\r\\n1" (empty header row [] is skipped)', () => {
+    it('headers=[[],["Col 1"]] → ""Col 1"\\r\\n1" (empty header row [] is skipped)', () => {
       const result = doExport({ data: [{ a: '1' }], headers: [[], ['Col 1']], props: ['a'] });
       expect(result).toBe('"Col 1"\r\n1');
     });

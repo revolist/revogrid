@@ -122,39 +122,23 @@ describe('beginsWith', () => {
 });
 
 // ---------------------------------------------------------------------------
-// gtThan (greater than)
+// gtThan / lt — numeric comparators
 // ---------------------------------------------------------------------------
-describe('gtThan', () => {
-  it('gtThan(10, "5") → true (10 > 5)', () => {
-    expect(gtThan(10, '5')).toBe(true);
+describe.each([
+  ['gtThan', gtThan, 10, 3] as const,
+  ['lt',     lt,      3, 10] as const,
+])('%s', (name, fn, trueVal, falseVal) => {
+  it(`fn(${trueVal}, "5") → true`, () => {
+    expect(fn(trueVal, '5')).toBe(true);
   });
 
-  it('gtThan(3, "5") → false (3 < 5), gtThan(5, "5") → false (5 === 5, not strictly greater)', () => {
-    expect(gtThan(3, '5')).toBe(false);
-    expect(gtThan(5, '5')).toBe(false);
+  it(`fn(${falseVal}, "5") → false, fn(5, "5") → false (boundary: equal is not strictly ${name === 'gtThan' ? 'greater' : 'less'})`, () => {
+    expect(fn(falseVal, '5')).toBe(false);
+    expect(fn(5, '5')).toBe(false);
   });
 
-  it('gtThan("hello", "5") → false, gtThan(undefined, "5") → false (only works on numeric values)', () => {
-    expect(gtThan('hello', '5')).toBe(false);
-    expect(gtThan(undefined, '5')).toBe(false);
-  });
-});
-
-// ---------------------------------------------------------------------------
-// lt (less than)
-// ---------------------------------------------------------------------------
-describe('lt', () => {
-  it('lt(3, "5") → true (3 < 5)', () => {
-    expect(lt(3, '5')).toBe(true);
-  });
-
-  it('lt(10, "5") → false (10 > 5), lt(5, "5") → false (5 === 5, not strictly less)', () => {
-    expect(lt(10, '5')).toBe(false);
-    expect(lt(5, '5')).toBe(false);
-  });
-
-  it('lt("hello", "5") → false, lt(undefined, "5") → false (only works on numeric values)', () => {
-    expect(lt('hello', '5')).toBe(false);
-    expect(lt(undefined, '5')).toBe(false);
+  it('fn("hello", "5") → false, fn(undefined, "5") → false (only works on numeric values)', () => {
+    expect(fn('hello', '5')).toBe(false);
+    expect(fn(undefined, '5')).toBe(false);
   });
 });

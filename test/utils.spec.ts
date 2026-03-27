@@ -44,25 +44,23 @@ describe('generateHeaderByCount', () => {
 // calculateRowHeaderSize
 // ---------------------------------------------------------------------------
 describe('calculateRowHeaderSize', () => {
-  // Default minWidth is 50. Formula: max((digits+1)*10, minWidth)
-  it('uses minWidth when digit-based width is smaller', () => {
-    // '5' has 1 digit → (1+1)*10=20 < 50 → 50
+  it('itemsLength=5 (1 digit) → (1+1)*10=20 < minWidth 50 → returns 50', () => {
     expect(calculateRowHeaderSize(5)).toBe(50);
-    // '100' has 3 digits → (3+1)*10=40 < 50 → 50
+  });
+
+  it('itemsLength=100 (3 digits) → (3+1)*10=40 < minWidth 50 → returns 50', () => {
     expect(calculateRowHeaderSize(100)).toBe(50);
   });
 
-  it('returns digit-based width when it exceeds minWidth', () => {
-    // '100000' has 6 digits → (6+1)*10=70 > 50 → 70
+  it('itemsLength=100000 (6 digits) → (6+1)*10=70 > minWidth 50 → returns 70', () => {
     expect(calculateRowHeaderSize(100000)).toBe(70);
   });
 
-  it('returns rowHeaderColumn.size when provided', () => {
+  it('rowHeaderColumn.size=80 overrides digit-based calculation → returns 80', () => {
     expect(calculateRowHeaderSize(5, { size: 80 })).toBe(80);
   });
 
-  it('respects a custom minWidth argument', () => {
-    // '5' → (1+1)*10=20 < 30 → 30
+  it('custom minWidth=30: itemsLength=5 → (1+1)*10=20 < 30 → returns 30', () => {
     expect(calculateRowHeaderSize(5, undefined, 30)).toBe(30);
   });
 });
@@ -89,14 +87,13 @@ describe('range', () => {
 // ---------------------------------------------------------------------------
 describe('findPositionInArray', () => {
   const numCompare = (a: number, b: number) => a - b;
+  const arr = [1, 3, 5, 7, 9];
 
   it('[1,3,5,7,9]: searching 5 → returns index 2 (found)', () => {
-    const arr = [1, 3, 5, 7, 9];
     expect(findPositionInArray.call(arr, 5, numCompare)).toBe(2);
   });
 
   it('[1,3,5,7,9]: searching 4 (missing) → returns negative, insertion point is index 2', () => {
-    const arr = [1, 3, 5, 7, 9];
     const idx = findPositionInArray.call(arr, 4, numCompare);
     expect(idx).toBeLessThan(0);
     expect(-idx - 1).toBe(2); // insertion point encoded as -insertionPoint - 1
