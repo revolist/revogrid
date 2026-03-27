@@ -14,7 +14,8 @@ function doExport(input: DataInput, options: ConstructorParameters<typeof Export
 // ---------------------------------------------------------------------------
 describe('ExportCsv', () => {
   describe('doExport — basic output', () => {
-    it('default options: output starts with BOM (\\ufeff), header cells are force-quoted → "\\ufeff"Name","Age"\\r\\nAlice,25"', () => {
+    it(String.raw`default options: output starts with BOM (﻿), header cells are force-quoted → "﻿"Name","Age"
+Alice,25"`, () => {
       const result = new ExportCsv().doExport({
         data: [{ name: 'Alice', age: 25 }],
         headers: [['Name', 'Age']],
@@ -29,7 +30,7 @@ describe('ExportCsv', () => {
       expect(result).toBe('Alice,25');
     });
 
-    it('3 data rows → joined with "\\r\\n" row delimiter → "A\\r\\nB\\r\\nC"', () => {
+    it(String.raw`3 data rows → joined with "\r\n" row delimiter → "A\r\nB\r\nC"`, () => {
       const result = doExport({ data: [{ n: 'A' }, { n: 'B' }, { n: 'C' }], headers: [], props: ['n'] });
       expect(result).toBe('A\r\nB\r\nC');
     });
@@ -44,7 +45,8 @@ describe('ExportCsv', () => {
       expect(doExport({ data: [{ v: 'say "hi"' }], headers: [], props: ['v'] })).toBe('"say ""hi"""');
     });
 
-    it('value "line1\\nline2" → wrapped in double quotes (newline character triggers quoting)', () => {
+    it(String.raw`value "line1
+line2" → wrapped in double quotes (newline character triggers quoting)`, () => {
       expect(doExport({ data: [{ v: 'line1\nline2' }], headers: [], props: ['v'] })).toContain('"');
     });
 
@@ -54,12 +56,15 @@ describe('ExportCsv', () => {
   });
 
   describe('doExport — headers', () => {
-    it('headers=[["Group A"],["Col 1"]] → ""Group A"\\r\\n"Col 1"\\r\\n1" (two header rows above data)', () => {
+    it(String.raw`headers=[["Group A"],["Col 1"]] → ""Group A"
+"Col 1"
+1" (two header rows above data)`, () => {
       const result = doExport({ data: [{ a: '1' }], headers: [['Group A'], ['Col 1']], props: ['a'] });
       expect(result).toBe('"Group A"\r\n"Col 1"\r\n1');
     });
 
-    it('headers=[[],["Col 1"]] → ""Col 1"\\r\\n1" (empty header row [] is skipped)', () => {
+    it(String.raw`headers=[[],["Col 1"]] → ""Col 1"
+1" (empty header row [] is skipped)`, () => {
       const result = doExport({ data: [{ a: '1' }], headers: [[], ['Col 1']], props: ['a'] });
       expect(result).toBe('"Col 1"\r\n1');
     });
