@@ -1,7 +1,8 @@
 import { expect } from '@playwright/test';
 import { test } from '@stencil/playwright';
 import {
-  buildColumns,
+  SAMPLE_ROWS,
+  basicColumns,
   getCopiedText,
   mountGrid,
   setCellsFocus,
@@ -9,23 +10,12 @@ import {
 
 test.describe('clipboard', () => {
   test('copies the selected range as tabular text', async ({ page }) => {
-      const source = [
-        { id: 1, name: 'Alice', role: 'Engineer', city: 'Lisbon' },
-        { id: 2, name: 'Ben', role: 'Designer', city: 'Porto' },
-      ];
-  
-      const columns = buildColumns([
-        { prop: 'id', name: 'ID' },
-        { prop: 'name', name: 'Name' },
-        { prop: 'role', name: 'Role' },
-      ]);
-  
-      await mountGrid(page, {
-        columns,
-        source,
-        range: true,
-      });
-  
+    await mountGrid(page, {
+      columns: basicColumns(['id', 'name', 'role']),
+      source: SAMPLE_ROWS.pair,
+      range: true,
+    });
+
     await page.context().grantPermissions(['clipboard-read', 'clipboard-write']);
     await setCellsFocus(page, { x: 1, y: 0 }, { x: 2, y: 1 });
     await page.keyboard.press('Control+C');

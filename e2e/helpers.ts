@@ -30,6 +30,24 @@ export type SampleRow = {
   city: string;
 };
 
+export const SAMPLE_ROWS = {
+  pair: [
+    { id: 1, name: 'Alice', role: 'Engineer', city: 'Lisbon' },
+    { id: 2, name: 'Ben', role: 'Designer', city: 'Porto' },
+  ] as SampleRow[],
+  trio: [
+    { id: 1, name: 'Alice', role: 'Engineer', city: 'Lisbon' },
+    { id: 2, name: 'Ben', role: 'Designer', city: 'Porto' },
+    { id: 3, name: 'Cara', role: 'Manager', city: 'Braga' },
+  ] as SampleRow[],
+  quartet: [
+    { id: 1, name: 'Alice', role: 'Engineer', city: 'Lisbon' },
+    { id: 2, name: 'Ben', role: 'Designer', city: 'Porto' },
+    { id: 3, name: 'Cara', role: 'Manager', city: 'Braga' },
+    { id: 4, name: 'Dan', role: 'Analyst', city: 'Coimbra' },
+  ] as SampleRow[],
+} as const;
+
 export type GridSetupOptions = {
   columns: ColumnData;
   source: Record<string, unknown>[];
@@ -59,6 +77,18 @@ export const withHeaderTestId = (
   __testId: testId,
   ...extra,
 });
+
+export function basicColumns(
+  props: Array<'id' | 'name' | 'role' | 'city'> = ['id', 'name', 'role', 'city'],
+): ColumnData {
+  const names = {
+    id: 'ID',
+    name: 'Name',
+    role: 'Role',
+    city: 'City',
+  } as const;
+  return buildColumns(props.map(prop => ({ prop, name: names[prop] })));
+}
 
 export function buildColumns(columns: ColumnData): ColumnData {
   return columns.map(column => {

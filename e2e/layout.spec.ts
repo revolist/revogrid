@@ -1,8 +1,9 @@
 import { expect } from '@playwright/test';
 import { test } from '@stencil/playwright';
 import {
+  SAMPLE_ROWS,
   SELECTORS,
-  buildColumns,
+  basicColumns,
   dataCell,
   expectFocusedCell,
   mountGrid,
@@ -12,20 +13,15 @@ import {
 
 test.describe('layout', () => {
   test('resizes a column and keeps header and cell widths aligned', async ({ page }) => {
-    const source = [
-      { id: 1, name: 'Alice', role: 'Engineer', city: 'Lisbon' },
-      { id: 2, name: 'Ben', role: 'Designer', city: 'Porto' },
-    ];
-
-    const columns = buildColumns([
+    const columns = [
       { prop: 'id', name: 'ID' },
       { prop: 'name', name: 'Name', size: 120, ...withHeaderTestId('resize-name') },
       { prop: 'role', name: 'Role' },
-    ]);
+    ];
 
     await mountGrid(page, {
       columns,
-      source,
+      source: SAMPLE_ROWS.pair,
       resize: true,
     });
 
@@ -60,20 +56,9 @@ test.describe('layout', () => {
   });
 
   test('supports theme switching and rtl layout without breaking focus rendering', async ({ page }) => {
-    const source = [
-      { id: 1, name: 'Alice', role: 'Engineer', city: 'Lisbon' },
-      { id: 2, name: 'Ben', role: 'Designer', city: 'Porto' },
-    ];
-
-    const columns = buildColumns([
-      { prop: 'id', name: 'ID' },
-      { prop: 'name', name: 'Name' },
-      { prop: 'role', name: 'Role' },
-    ]);
-
     await mountGrid(page, {
-      columns,
-      source,
+      columns: basicColumns(['id', 'name', 'role']),
+      source: SAMPLE_ROWS.pair,
       rtl: true,
       theme: 'compact',
       range: true,

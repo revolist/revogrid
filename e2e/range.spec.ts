@@ -1,33 +1,20 @@
 import { expect } from '@playwright/test';
 import { test } from '@stencil/playwright';
 import {
+  SAMPLE_ROWS,
+  basicColumns,
   dataCell,
   dispatchClipboardEvent,
   expectSelectedRange,
   mountGrid,
   setCellsFocus,
-  buildColumns,
-  type SampleRow,
 } from './helpers';
 
 test.describe('range selection', () => {
   test('applies pasted values across the selected range', async ({ page }) => {
-    const source: SampleRow[] = [
-      { id: 1, name: 'Alice', role: 'Engineer', city: 'Lisbon' },
-      { id: 2, name: 'Ben', role: 'Designer', city: 'Porto' },
-      { id: 3, name: 'Cara', role: 'Manager', city: 'Braga' },
-    ];
-
-    const columns = buildColumns([
-      { prop: 'id', name: 'ID' },
-      { prop: 'name', name: 'Name' },
-      { prop: 'role', name: 'Role' },
-      { prop: 'city', name: 'City' },
-    ]);
-
     await mountGrid(page, {
-      columns,
-      source,
+      columns: basicColumns(),
+      source: SAMPLE_ROWS.trio,
       range: true,
     });
 

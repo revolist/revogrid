@@ -1,30 +1,17 @@
 import { test } from '@stencil/playwright';
 import {
-  buildColumns,
+  SAMPLE_ROWS,
+  basicColumns,
   expectFocusedCell,
   mountGrid,
   setCellsFocus,
-  type SampleRow,
 } from './helpers';
 
 test.describe('navigation', () => {
   test('moves focus with arrow keys and tab navigation', async ({ page }) => {
-    const source: SampleRow[] = [
-      { id: 1, name: 'Alice', role: 'Engineer', city: 'Lisbon' },
-      { id: 2, name: 'Ben', role: 'Designer', city: 'Porto' },
-      { id: 3, name: 'Cara', role: 'Manager', city: 'Braga' },
-    ];
-
-    const columns = buildColumns([
-      { prop: 'id', name: 'ID' },
-      { prop: 'name', name: 'Name' },
-      { prop: 'role', name: 'Role' },
-      { prop: 'city', name: 'City' },
-    ]);
-
     await mountGrid(page, {
-      columns,
-      source,
+      columns: basicColumns(),
+      source: SAMPLE_ROWS.trio,
       range: true,
     });
 

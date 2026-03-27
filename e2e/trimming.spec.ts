@@ -1,7 +1,8 @@
 import { expect } from '@playwright/test';
 import { test } from '@stencil/playwright';
 import {
-  buildColumns,
+  SAMPLE_ROWS,
+  basicColumns,
   expectVisibleColumnValues,
   getVisibleSource,
   mountGrid,
@@ -9,22 +10,9 @@ import {
 
 test.describe('trimming', () => {
   test('hides trimmed rows and restores them when trimming clears', async ({ page }) => {
-    const source = [
-      { id: 1, name: 'Alice', role: 'Engineer', city: 'Lisbon' },
-      { id: 2, name: 'Ben', role: 'Designer', city: 'Porto' },
-      { id: 3, name: 'Cara', role: 'Manager', city: 'Braga' },
-      { id: 4, name: 'Dan', role: 'Analyst', city: 'Coimbra' },
-    ];
-
-    const columns = buildColumns([
-      { prop: 'id', name: 'ID' },
-      { prop: 'name', name: 'Name' },
-      { prop: 'role', name: 'Role' },
-    ]);
-
     await mountGrid(page, {
-      columns,
-      source,
+      columns: basicColumns(['id', 'name', 'role']),
+      source: SAMPLE_ROWS.quartet,
       trimmedRows: { 1: true, 3: true },
     });
 

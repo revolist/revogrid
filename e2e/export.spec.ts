@@ -1,28 +1,17 @@
 import { expect } from '@playwright/test';
 import { test } from '@stencil/playwright';
 import {
-  buildColumns,
+  SAMPLE_ROWS,
+  basicColumns,
   getExportCsv,
   mountGrid,
 } from './helpers';
 
 test.describe('export', () => {
   test('exports the visible grid data as csv', async ({ page }) => {
-    const source = [
-      { id: 1, name: 'Alice', role: 'Engineer', city: 'Lisbon' },
-      { id: 2, name: 'Ben', role: 'Designer', city: 'Porto' },
-    ];
-
-    const columns = buildColumns([
-      { prop: 'id', name: 'ID' },
-      { prop: 'name', name: 'Name' },
-      { prop: 'role', name: 'Role' },
-      { prop: 'city', name: 'City' },
-    ]);
-
     await mountGrid(page, {
-      columns,
-      source,
+      columns: basicColumns(),
+      source: SAMPLE_ROWS.pair,
       exporting: true,
     });
 
