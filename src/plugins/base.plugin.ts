@@ -45,25 +45,46 @@ export class BasePlugin implements PluginBaseComponent {
     const nativeValueDesc =
       ownValueDesc ||
       Object.getOwnPropertyDescriptor(this.revogrid.constructor.prototype, prop);
+    const isDataDescriptor = !!nativeValueDesc && 'value' in nativeValueDesc;
+    let currentValue = isDataDescriptor ? nativeValueDesc.value : undefined;
 
     // Patch the property on the element instance so plugins can observe writes
     // without mutating the component prototype for every grid on the page.
-    Object.defineProperty(this.revogrid, prop, {
-      configurable: true,
-      enumerable: nativeValueDesc?.enumerable ?? true,
-      set(val: T) {
-        const keepDefault = callback(val);
-        if (keepDefault === false) {
-          return;
-        }
-        // Continue with native behavior
-        return nativeValueDesc?.set?.call(this, val);
-      },
-      get() {
-        // Continue with native behavior
-        return nativeValueDesc?.get?.call(this);
-      },
-    });
+    Object.defineProperty(
+      this.revogrid,
+      prop,
+      isDataDescriptor
+        ? {
+            configurable: true,
+            enumerable: nativeValueDesc?.enumerable ?? true,
+            get() {
+              return currentValue;
+            },
+            set(val: T) {
+              const keepDefault = callback(val);
+              if (keepDefault === false || !nativeValueDesc.writable) {
+                return;
+              }
+              currentValue = val;
+            },
+          }
+        : {
+            configurable: true,
+            enumerable: nativeValueDesc?.enumerable ?? true,
+            set(val: T) {
+              const keepDefault = callback(val);
+              if (keepDefault === false) {
+                return;
+              }
+              // Continue with native behavior
+              return nativeValueDesc?.set?.call(this, val);
+            },
+            get() {
+              // Continue with native behavior
+              return nativeValueDesc?.get?.call(this);
+            },
+          },
+    );
     // Reconnect flows reuse the same element instance, so watched properties must
     // be restored on destroy or the next plugin init will fail redefining them.
     this.watchCleanups.push(() => {
@@ -74,7 +95,7 @@ export class BasePlugin implements PluginBaseComponent {
       }
     });
     if (immediate) {
-      callback(this.revogrid[prop as keyof HTMLRevoGridElement] as T);
+      callback((isDataDescriptor ? currentValue : this.revogrid[prop as keyof HTMLRevoGridElement]) as T);
     }
   }
 
