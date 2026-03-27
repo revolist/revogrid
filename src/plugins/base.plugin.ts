@@ -111,7 +111,9 @@ export class BasePlugin implements PluginBaseComponent {
    */
   destroy() {
     this.clearSubscriptions();
-    this.watchCleanups.forEach(cleanup => cleanup());
+    for (let i = this.watchCleanups.length - 1; i >= 0; i--) {
+      this.watchCleanups[i]?.();
+    }
     this.watchCleanups.length = 0;
   }
 }
