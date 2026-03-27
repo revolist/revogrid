@@ -101,5 +101,4 @@ describe('revo-grid-viewport', () => {
       range.end = recombined.end;
     });
   }
-  console.log(recombined);
 });

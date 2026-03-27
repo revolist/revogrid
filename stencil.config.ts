@@ -152,4 +152,11 @@ export const config: Config = {
   nodeResolve: {
     preferBuiltins: true,
   },
+  testing: {
+    // lodash is aliased to lodash-es (ESM), so we need Jest to transform it
+    transformIgnorePatterns: ['/node_modules/(?!(lodash)/)'],
+    transform: {
+      '^.+\\.(ts|tsx|jsx|css|mjs|js)$': '<rootDir>/node_modules/@stencil/core/testing/jest-preprocessor.js',
+    },
+  },
 };

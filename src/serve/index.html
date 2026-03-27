@@ -64,6 +64,8 @@
           <button type="button" class="btn btn-primary btn-sm mt-1" onclick="setGrouping(['key', 'key2'])">Group by:
             'key'</button>
           <button type="button" class="btn btn-outline-primary btn-sm mt-1" onclick="clearGrouping()">Clear grouping</button>
+          
+
           <button type="button" class="btn btn-primary btn-sm mt-1" onclick="scrollToCol(30)">Scroll to X30(AE)</button>
           <button type="button" class="btn btn-outline-primary btn-sm mt-1" onclick="setEdit(30, 1)">Edit X2:Y31</button>
 
@@ -116,6 +118,10 @@
               onchange="showColGrouping(event.target.checked)" />Column grouping</label></td></tr>
             <tr><td><label><input class="form-check-input me-1" type="checkbox"
               onchange="toggleVisibility(event.target.checked)" checked="true" />Toggle Visibility</label></td></tr>
+              <tr>
+              <td>
+              <button type="button" class="btn btn-outline-primary btn-sm" onclick="setColumnGroupOffsetBugDemo()">Column grouping demo</button></td>
+              </tr>
           </table>
 
           <h6 class="mt-4">Themes</h6>
