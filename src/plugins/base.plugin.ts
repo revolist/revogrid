@@ -3,6 +3,7 @@ import type { PluginProviders, PluginBaseComponent } from '../types';
 
 
 export type WatchConfig = { immediate: boolean };
+type WatchCleanup = () => void;
 
 /**
  * Base layer for plugins
@@ -12,6 +13,7 @@ export type WatchConfig = { immediate: boolean };
 export class BasePlugin implements PluginBaseComponent {
   readonly h = h;
   readonly subscriptions: Record<string, (...args: any[]) => void> = {};
+  readonly watchCleanups: WatchCleanup[] = [];
   constructor(public revogrid: HTMLRevoGridElement, public providers: PluginProviders) {}
   /**
    *
@@ -39,12 +41,16 @@ export class BasePlugin implements PluginBaseComponent {
     callback: (arg: T) => boolean | void,
     { immediate }: Partial<WatchConfig> = { immediate: false },
   ) {
+    const ownValueDesc = Object.getOwnPropertyDescriptor(this.revogrid, prop);
     const nativeValueDesc =
-      Object.getOwnPropertyDescriptor(this.revogrid, prop) ||
+      ownValueDesc ||
       Object.getOwnPropertyDescriptor(this.revogrid.constructor.prototype, prop);
 
-    // Overwrite property descriptor for this instance
+    // Patch the property on the element instance so plugins can observe writes
+    // without mutating the component prototype for every grid on the page.
     Object.defineProperty(this.revogrid, prop, {
+      configurable: true,
+      enumerable: nativeValueDesc?.enumerable ?? true,
       set(val: T) {
         const keepDefault = callback(val);
         if (keepDefault === false) {
@@ -58,8 +64,17 @@ export class BasePlugin implements PluginBaseComponent {
         return nativeValueDesc?.get?.call(this);
       },
     });
+    // Reconnect flows reuse the same element instance, so watched properties must
+    // be restored on destroy or the next plugin init will fail redefining them.
+    this.watchCleanups.push(() => {
+      if (ownValueDesc) {
+        Object.defineProperty(this.revogrid, prop, ownValueDesc);
+      } else {
+        delete this.revogrid[prop as keyof HTMLRevoGridElement];
+      }
+    });
     if (immediate) {
-      callback(nativeValueDesc?.value);
+      callback(this.revogrid[prop as keyof HTMLRevoGridElement] as T);
     }
   }
 
@@ -96,6 +111,8 @@ export class BasePlugin implements PluginBaseComponent {
    */
   destroy() {
     this.clearSubscriptions();
+    this.watchCleanups.forEach(cleanup => cleanup());
+    this.watchCleanups.length = 0;
   }
 }
 
