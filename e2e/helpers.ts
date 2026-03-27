@@ -66,30 +66,33 @@ export async function mountGrid(page: E2EPage, options: GridSetupOptions) {
     const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
     if (!grid) throw new Error('Grid element was not created');
 
-    const buildColumnsInBrowser = (items: any[]): any[] =>
-      items.map((column) => {
-        const next = { ...column };
-        if (next.__testId) {
-          next.columnProperties = () => ({ 'data-testid': next.__testId });
-        }
-        if (Array.isArray(next.children)) {
-          next.children = buildColumnsInBrowser(next.children);
-        }
-        return next;
-      });
+    function toColumnProperties(testId: string) {
+      return () => ({ 'data-testid': testId });
+    }
 
-    grid.columns = buildColumnsInBrowser(columns);
+    function applyColumn(column: any): any {
+      const next = { ...column };
+      if (next.__testId) {
+        next.columnProperties = toColumnProperties(next.__testId);
+      }
+      if (Array.isArray(next.children)) {
+        next.children = next.children.map(applyColumn);
+      }
+      return next;
+    }
+
+    function rowHeaderCellProperties({ rowIndex }: { rowIndex: number }) {
+      return { 'data-testid': `row-header-${rowIndex}` };
+    }
+
+    grid.columns = columns.map(applyColumn);
     grid.source = source;
     grid.filter = filter ?? false;
     if (rowHeaders && typeof rowHeaders === 'object') {
       const { __cellTestIds, ...rowHeaderConfig } = rowHeaders;
       grid.rowHeaders = {
         ...rowHeaderConfig,
-        ...(__cellTestIds && {
-          cellProperties: ({ rowIndex }: { rowIndex: number }) => ({
-            'data-testid': `row-header-${rowIndex}`,
-          }),
-        }),
+        ...(__cellTestIds && { cellProperties: rowHeaderCellProperties }),
       } as RowHeaders;
     } else {
       grid.rowHeaders = rowHeaders ?? false;
