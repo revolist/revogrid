@@ -86,7 +86,7 @@ function main() {
         break;
     }
 
-    files.push('install.framework.md', 'version.md', 'sponsors.md', 'contribute.md', 'LICENSE.md');
+    files.push('install.framework.md', 'version.md', 'sponsors.md', 'e2e.md', 'contribute.md', 'LICENSE.md');
     generateReadme(files, output, variables, pkg);
   });
 }

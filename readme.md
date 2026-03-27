@@ -284,6 +284,26 @@ If you or your company would like to support the ongoing development of RevoGrid
 Thank you for supporting RevoGrid! 🙏
 
 
+## Testing
+
+RevoGrid is thoroughly tested to ensure reliability and stability.
+
+| Suite | Command | Scope |
+|---|---|---|
+| Unit | `npm run test` | Services, utilities, pure logic |
+| E2E (Playwright) | `npm run test:e2e` | Real browser rendering & interaction |
+
+### E2E Tests
+
+End-to-end tests use [@stencil/playwright](https://www.npmjs.com/package/@stencil/playwright) to run `<revo-grid>` in a real Chromium browser. The dev server starts automatically when you run:
+
+```bash
+npm run test:e2e
+```
+
+Test files live in `e2e/` and share helpers from `e2e/helpers.ts`:
+
+
 ## Contributing
 
 By getting involved, you'll have the opportunity to enhance your skills, gain valuable experience, and make a significant impact on an innovative project. Your contribution, no matter how big or small, is valuable.
