@@ -214,6 +214,12 @@ export function gatherGroup<T extends ColumnCollection>(
   for (let k in collection.columnGrouping) {
     const key = k as DimensionCols;
     const collectionItem = collection.columnGrouping[key];
+    const delta = (existingColumnsByType?.[key] || []).length;
+    if (delta > 0) {
+      collectionItem.forEach(group => {
+        group.indexes = group.indexes.map(index => index + delta);
+      });
+    }
     res.columnGrouping[key].push(...collectionItem);
   }
   res.maxLevel = Math.max(res.maxLevel, collection.maxLevel);

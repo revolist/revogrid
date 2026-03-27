@@ -114,7 +114,7 @@
     "@stencil/store": "^2.2.2",
     "@stencil/vue-output-target": "^0.8.9",
     "@types/events": "^3.0.3",
-    "@types/jest": "^29.5.12",
+    "@types/jest": "^29.5.14",
     "@types/lodash": "^4.17.14",
     "@types/node": "^20.14.2",
     "@types/react": "^18.3.3",

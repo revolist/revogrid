@@ -301,6 +301,66 @@ window.setFilter = () => {
 };
 
 /**
+ * Minimal repro for nested column group offset bug.
+ * Deep groups should align with a1/a2/a3/b1/b2/b3, but currently shift left.
+ * https://github.com/revolist/revogrid/issues/828
+ */
+window.setColumnGroupOffsetBugDemo = () => {
+  const grid = document.querySelector('revo-grid');
+
+  grid.columns = [
+    { prop: 'q1', name: 'Q1', size: 90 },
+    { prop: 'q2', name: 'Q2', size: 90 },
+    {
+      name: 'Root',
+      children: [
+        {
+          name: 'A',
+          children: [
+            {
+              name: 'A1',
+              children: [
+                { prop: 'a1', name: 'A1-1', size: 90 },
+                { prop: 'a2', name: 'A1-2', size: 90 },
+              ],
+            },
+            {
+              name: 'A2',
+              children: [{ prop: 'a3', name: 'A2-1', size: 90 }],
+            },
+          ],
+        },
+        {
+          name: 'B',
+          children: [
+            {
+              name: 'B1',
+              children: [{ prop: 'b1', name: 'B1-1', size: 90 }],
+            },
+            {
+              name: 'B2',
+              children: [
+                { prop: 'b2', name: 'B2-1', size: 90 },
+                { prop: 'b3', name: 'B2-2', size: 90 },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  ];
+
+  grid.source = [
+    { q1: 'left-1', q2: 'left-2', a1: 'a1', a2: 'a2', a3: 'a3', b1: 'b1', b2: 'b2', b3: 'b3' },
+    { q1: 'left-3', q2: 'left-4', a1: 'a4', a2: 'a5', a3: 'a6', b1: 'b4', b2: 'b5', b3: 'b6' },
+  ];
+
+  grid.pinnedTopSource = [];
+  grid.pinnedBottomSource = [];
+  grid.rowHeaders = true;
+};
+
+/**
  * On load function
  */
 function onLoad() {
