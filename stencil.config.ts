@@ -145,12 +145,19 @@ export const config: Config = {
       copy: [
         { src: 'serve', dest: '.' },
         { src: '../node_modules/bootstrap/dist', dest: './bootstrap' },
+        { src: '**/e2e/*.html' },
+        { src: '**/e2e/*.css' },
       ],
       serviceWorker: null, // disable service workers
     },
   ],
   nodeResolve: {
     preferBuiltins: true,
+  },
+  devServer: {
+    // Bind to localhost explicitly so Chrome's Private Network Access policy
+    // does not block script requests from the 0.0.0.0 loopback address.
+    address: 'localhost',
   },
   testing: {
     // lodash is aliased to lodash-es (ESM), so we need Jest to transform it

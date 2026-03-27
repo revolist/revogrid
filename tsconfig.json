@@ -5,7 +5,7 @@
     "allowUnreachableCode": false,
     "declaration": true,
     "experimentalDecorators": true,
-    "lib": ["dom", "es2017", "ES2021"],
+    "lib": ["dom", "es2017", "ES2021", "ESNext.Disposable"],
     "moduleResolution": "node",
     "module": "esnext",
     "target": "es2017",
