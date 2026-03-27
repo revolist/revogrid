@@ -6,7 +6,7 @@ standalone/
 demo/
 demo/*
 fw/
-
+test-results
 *~
 *.sw[mnpcod]
 *.log
