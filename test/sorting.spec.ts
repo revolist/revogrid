@@ -81,9 +81,13 @@ describe('sortIndexByItems', () => {
     { name: 'Alice',   age: 25 }, // physical index 1
     { name: 'Bob',     age: 35 }, // physical index 2
   ];
-  const strCmp = (prop: string, a: any, b: any): number =>
-    a[prop]?.toString().toLowerCase() < b[prop]?.toString().toLowerCase() ? -1 :
-    a[prop]?.toString().toLowerCase() > b[prop]?.toString().toLowerCase() ? 1 : 0;
+  const strCmp = (prop: string, a: any, b: any): number => {
+    const av = a[prop]?.toString().toLowerCase();
+    const bv = b[prop]?.toString().toLowerCase();
+    if (av < bv) return -1;
+    if (av > bv) return 1;
+    return 0;
+  };
 
   it('empty sortingFunc {} → [0,1,2] (indexes unchanged, no sorting applied)', () => {
     expect(sortIndexByItems([0, 1, 2], source, {})).toEqual([0, 1, 2]);
