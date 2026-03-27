@@ -50,6 +50,6 @@ test.describe('pinning', () => {
     await expect(pinnedBottomCell(page, 0, 0)).toHaveText('Bottom');
 
     const visibleMiddleValues = await visibleColumnValues(page, 1);
-    expect(visibleMiddleValues.some(value => value === 'Middle 21')).toBe(true);
+    expect(visibleMiddleValues.includes('Middle 21')).toBe(true);
   });
 });

@@ -3,6 +3,27 @@ import type { E2EPage } from '@stencil/playwright';
 import { SELECTORS } from './selectors';
 import type { GridSetupOptions } from './types';
 
+type BrowserGridHelpers = {
+  rowHeaderCellProperties: ({ rowIndex }: { rowIndex: number }) => { 'data-testid': string };
+  toColumnProperties: (testId: string) => () => { 'data-testid': string };
+};
+
+function installBrowserGridHelpers() {
+  const browserWindow = window as Window & { __revoGridE2EHelpers?: BrowserGridHelpers };
+  if (browserWindow.__revoGridE2EHelpers) {
+    return;
+  }
+
+  browserWindow.__revoGridE2EHelpers = {
+    toColumnProperties(testId: string) {
+      return () => ({ 'data-testid': testId });
+    },
+    rowHeaderCellProperties({ rowIndex }: { rowIndex: number }) {
+      return { 'data-testid': `row-header-${rowIndex}` };
+    },
+  };
+}
+
 export async function mountGrid(page: E2EPage, options: GridSetupOptions) {
   const width = options.width ?? 900;
   const height = options.height ?? 360;
@@ -14,6 +35,7 @@ export async function mountGrid(page: E2EPage, options: GridSetupOptions) {
     .filter(Boolean)
     .join(' ');
 
+  await page.addInitScript(installBrowserGridHelpers);
   await page.setContent(`
     <div style="width:${width}px; height:${height}px;">
       <revo-grid ${initialAttrs} style="display:block; width:100%; height:100%;"></revo-grid>
@@ -25,6 +47,9 @@ export async function mountGrid(page: E2EPage, options: GridSetupOptions) {
   await page.evaluate((config: GridSetupOptions) => {
     const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
     if (!grid) throw new Error('Grid element was not created');
+    const browserWindow = window as Window & { __revoGridE2EHelpers?: BrowserGridHelpers };
+    const helpers = browserWindow.__revoGridE2EHelpers;
+    if (!helpers) throw new Error('Grid E2E helpers were not installed');
 
     const {
       columns,
@@ -46,23 +71,15 @@ export async function mountGrid(page: E2EPage, options: GridSetupOptions) {
       colSize,
     } = config;
 
-    function toColumnProperties(testId: string) {
-      return () => ({ 'data-testid': testId });
-    }
-
     function applyColumn(column: any): any {
       const next = { ...column };
       if (next.__testId) {
-        next.columnProperties = toColumnProperties(next.__testId);
+        next.columnProperties = helpers.toColumnProperties(next.__testId);
       }
       if (Array.isArray(next.children)) {
         next.children = next.children.map(applyColumn);
       }
       return next;
-    }
-
-    function rowHeaderCellProperties({ rowIndex }: { rowIndex: number }) {
-      return { 'data-testid': `row-header-${rowIndex}` };
     }
 
     grid.columns = columns.map(applyColumn);
@@ -85,7 +102,7 @@ export async function mountGrid(page: E2EPage, options: GridSetupOptions) {
       const { __cellTestIds, ...rowHeaderConfig } = rowHeaders;
       grid.rowHeaders = {
         ...rowHeaderConfig,
-        ...(__cellTestIds && { cellProperties: rowHeaderCellProperties }),
+        ...(__cellTestIds && { cellProperties: helpers.rowHeaderCellProperties }),
       } as any;
     } else {
       grid.rowHeaders = rowHeaders ?? false;
@@ -109,7 +126,7 @@ export async function callGridMethod<T = unknown>(
       }
       const fn = (grid as any)[methodName];
       if (typeof fn !== 'function') {
-        throw new Error(`Grid method "${methodName}" was not found`);
+        throw new TypeError(`Grid method "${methodName}" was not found`);
       }
       return await fn.apply(grid, methodArgs);
     },

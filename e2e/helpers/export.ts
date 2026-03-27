@@ -7,7 +7,9 @@ export async function getExportCsv(page: E2EPage): Promise<string | null> {
       throw new Error('Grid element was not found');
     }
     const plugins = await grid.getPlugins();
-    const exportPlugin = plugins.find((plugin: any) => typeof (plugin as any).exportString === 'function') as any;
+    const exportPlugin = plugins.find(
+      (plugin: { exportString?: unknown }) => typeof plugin.exportString === 'function',
+    );
     if (!exportPlugin) {
       return null;
     }
