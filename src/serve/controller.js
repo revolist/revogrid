@@ -301,8 +301,7 @@ window.setFilter = () => {
 };
 
 /**
- * Minimal repro for nested column group offset bug.
- * Deep groups should align with a1/a2/a3/b1/b2/b3, but currently shift left.
+ * Deep groups should align with a1/a2/a3/b1/b2/b3.
  * https://github.com/revolist/revogrid/issues/828
  */
 window.setColumnGroupOffsetBugDemo = () => {
