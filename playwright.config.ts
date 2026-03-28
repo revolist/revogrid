@@ -14,6 +14,11 @@ export default createConfig({
   use: {
     baseURL: 'http://localhost:3333',
   },
+  // On CI: inline annotations in the Actions log + HTML report artifact.
+  // Locally: default list output.
+  reporter: process.env.CI
+    ? [['github'], ['html', { open: 'never' }]]
+    : [['list']],
   webServer: {
     command: 'stencil build --dev --watch --serve --no-open',
     url: 'http://localhost:3333/ping',

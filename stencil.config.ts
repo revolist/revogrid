@@ -162,6 +162,7 @@ export const config: Config = {
   testing: {
     // lodash is aliased to lodash-es (ESM), so we need Jest to transform it
     transformIgnorePatterns: ['/node_modules/(?!(lodash)/)'],
+    testRegex: ['/test/.*\\.spec\\.ts$'],
     transform: {
       '^.+\\.(ts|tsx|jsx|css|mjs|js)$': '<rootDir>/node_modules/@stencil/core/testing/jest-preprocessor.js',
     },
