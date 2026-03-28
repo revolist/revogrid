@@ -12,10 +12,10 @@
   <img src="https://img.shields.io/bundlephobia/min/@revolist/revogrid" alt="Bundle size"/>
   <img src="https://sonarcloud.io/api/project_badges/measure?project=revolist_revogrid&metric=alert_status" alt="Sonar Quality Gate"/>
   <a href="https://github.com/revolist/revogrid/actions/workflows/unit.yml">
-        <img src="/revolist/revogrid/actions/workflows/unit.yml/badge.svg" alt="Workflow status badge" loading="lazy" height="20">
+        <img src="https://github.com/revolist/revogrid/actions/workflows/unit.yml/badge.svg" alt="Workflow status badge" loading="lazy" height="20">
   </a>
   <a href="https://github.com/revolist/revogrid/actions/workflows/e2e.yml">
-        <img src="/revolist/revogrid/actions/workflows/e2e.yml/badge.svg" alt="Workflow status badge" loading="lazy" height="20">
+        <img src="https://github.com/revolist/revogrid/actions/workflows/e2e.yml/badge.svg" alt="Workflow status badge" loading="lazy" height="20">
   </a>
 </p>
 
