@@ -45,6 +45,8 @@ export class BasePlugin implements PluginBaseComponent {
 
     // Overwrite property descriptor for this instance
     Object.defineProperty(this.revogrid, prop, {
+      configurable: true,
+      enumerable: nativeValueDesc?.enumerable ?? true,
       set(val: T) {
         const keepDefault = callback(val);
         if (keepDefault === false) {
