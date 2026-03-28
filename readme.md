@@ -11,6 +11,8 @@
   <img src="https://badgen.net/bundlephobia/tree-shaking/@revolist/revogrid" alt="Tree shaking"/>
   <img src="https://img.shields.io/bundlephobia/min/@revolist/revogrid" alt="Bundle size"/>
   <img src="https://sonarcloud.io/api/project_badges/measure?project=revolist_revogrid&metric=alert_status" alt="Sonar Quality Gate"/>
+  <a href="https://github.com/revolist/revogrid/actions/workflows/ci-unit.yml"><img src="https://github.com/revolist/revogrid/actions/workflows/ci-unit.yml/badge.svg?branch=main" alt="Unit Tests"/></a>
+  <a href="https://github.com/revolist/revogrid/actions/workflows/ci-e2e.yml"><img src="https://github.com/revolist/revogrid/actions/workflows/ci-e2e.yml/badge.svg?branch=main" alt="E2E Tests"/></a>
 </p>
 
 

@@ -1,5 +1,8 @@
 ## Testing
 
+[![Unit Tests](https://github.com/revolist/revogrid/actions/workflows/ci-unit.yml/badge.svg?branch=main)](https://github.com/revolist/revogrid/actions/workflows/ci-unit.yml)
+[![E2E Tests](https://github.com/revolist/revogrid/actions/workflows/ci-e2e.yml/badge.svg?branch=main)](https://github.com/revolist/revogrid/actions/workflows/ci-e2e.yml)
+
 RevoGrid is thoroughly tested to ensure reliability and stability.
 
 | Suite | Command | Scope |
