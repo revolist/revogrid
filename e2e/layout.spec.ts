@@ -43,9 +43,10 @@ test.describe('layout', () => {
     await page.mouse.move(
       handleBox!.x + handleBox!.width / 2 + 40,
       handleBox!.y + handleBox!.height / 2,
-      { steps: 8 },
+      { steps: 10 },
     );
     await page.mouse.up();
+    await page.waitForChanges();
 
     await expect(resizeHandle).toBeVisible();
     const afterHeaderBox = await header.boundingBox();
