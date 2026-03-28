@@ -18,6 +18,9 @@
 <p align="center">
 Support Millions of cells and thousands of columns easy and efficiently for fast data rendering. Easy to use.
 </p>
+<p align="center">
+Used by some of the largest companies in Europe and the United States.
+</p>
 
 <p align="center">
   <a href="https://rv-grid.com/demo/">Demo and API</a> •
