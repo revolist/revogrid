@@ -1,4 +1,4 @@
-name: CI E2E
+name: E2E
 
 on:
   pull_request:
@@ -17,7 +17,7 @@ jobs:
   e2e:
     name: E2E Tests
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 10
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -25,7 +25,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: latest
           cache: npm
 
       - name: Install dependencies

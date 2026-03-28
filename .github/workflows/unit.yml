@@ -1,4 +1,4 @@
-name: CI Unit
+name: Unit
 
 on:
   pull_request:
@@ -25,7 +25,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: latest
           cache: npm
 
       - name: Install dependencies
