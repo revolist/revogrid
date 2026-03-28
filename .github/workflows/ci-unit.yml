@@ -32,4 +32,33 @@ jobs:
         run: npm ci
 
       - name: Run unit tests
-        run: npm test -- --runInBand
+        run: npm test -- --runInBand --json --outputFile=jest-results.json || true
+
+      - name: Write job summary
+        if: always()
+        run: |
+          echo "## Unit Test Results" >> $GITHUB_STEP_SUMMARY
+          if [ -f jest-results.json ]; then
+            TOTAL=$(node -p "require('./jest-results.json').numTotalTests")
+            PASSED=$(node -p "require('./jest-results.json').numPassedTests")
+            FAILED=$(node -p "require('./jest-results.json').numFailedTests")
+            SKIPPED=$(node -p "require('./jest-results.json').numPendingTests")
+            SUITES=$(node -p "require('./jest-results.json').numTotalTestSuites")
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "| Result | Count |" >> $GITHUB_STEP_SUMMARY
+            echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+            echo "| ✅ Passed | $PASSED |" >> $GITHUB_STEP_SUMMARY
+            echo "| ❌ Failed | $FAILED |" >> $GITHUB_STEP_SUMMARY
+            echo "| ⏭️ Skipped | $SKIPPED |" >> $GITHUB_STEP_SUMMARY
+            echo "| 📦 Total | $TOTAL |" >> $GITHUB_STEP_SUMMARY
+            echo "| 🗂️ Suites | $SUITES |" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "| | |" >> $GITHUB_STEP_SUMMARY
+            echo "|---|---|" >> $GITHUB_STEP_SUMMARY
+            echo "| Branch | \`${{ github.ref_name }}\` |" >> $GITHUB_STEP_SUMMARY
+            echo "| Commit | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
+          fi
+          node -e "
+            const r = require('./jest-results.json');
+            if (r.numFailedTests > 0) process.exit(1);
+          "
