@@ -3,6 +3,7 @@ import type { E2EPage } from '@stencil/playwright';
 type ClipboardAction = {
   type: 'copy' | 'cut' | 'paste';
   text?: string;
+  html?: string;
   waitForWrite?: boolean;
 };
 
@@ -43,8 +44,13 @@ async function runClipboardAction(
     }
 
     const clipboardData = new DataTransferStub();
-    if (currentAction.type === 'paste' && currentAction.text) {
-      clipboardData.setData('text/plain', currentAction.text);
+    if (currentAction.type === 'paste') {
+      if (currentAction.text) {
+        clipboardData.setData('text/plain', currentAction.text);
+      }
+      if (currentAction.html) {
+        clipboardData.setData('text/html', currentAction.html);
+      }
     }
 
     const event = new Event(currentAction.type, {
@@ -70,8 +76,9 @@ export async function dispatchClipboardEvent(
   page: E2EPage,
   type: 'copy' | 'cut' | 'paste',
   text = '',
+  html = '',
 ): Promise<void> {
-  await runClipboardAction(page, { type, text });
+  await runClipboardAction(page, { type, text, html });
   await page.waitForChanges();
 }
 

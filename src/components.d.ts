@@ -976,12 +976,14 @@ declare global {
         "beforepasteapply": {
     raw: string;
     parsed: string[][];
+    dataText: string;
     event: ClipboardEvent;
   };
         "pasteregion": string[][];
         "afterpasteapply": {
     raw: string;
     parsed: string[][];
+    dataText: string;
     event: ClipboardEvent;
   };
         "beforecut": {
@@ -1750,6 +1752,7 @@ declare namespace LocalJSX {
         "onAfterpasteapply"?: (event: RevogrClipboardCustomEvent<{
     raw: string;
     parsed: string[][];
+    dataText: string;
     event: ClipboardEvent;
   }>) => void;
         /**
@@ -1786,6 +1789,7 @@ declare namespace LocalJSX {
         "onBeforepasteapply"?: (event: RevogrClipboardCustomEvent<{
     raw: string;
     parsed: string[][];
+    dataText: string;
     event: ClipboardEvent;
   }>) => void;
         /**

@@ -35,6 +35,7 @@ export class Clipboard {
   beforePasteApply: EventEmitter<{
     raw: string;
     parsed: string[][];
+    dataText: string;
     event: ClipboardEvent;
   }>;
 
@@ -53,6 +54,7 @@ export class Clipboard {
   @Event({ eventName: 'afterpasteapply' }) afterPasteApply: EventEmitter<{
     raw: string;
     parsed: string[][];
+    dataText: string;
     event: ClipboardEvent;
   }>;
 
@@ -128,6 +130,7 @@ export class Clipboard {
     const beforePasteApply = this.beforePasteApply.emit({
       raw: data,
       parsed: parsedData,
+      dataText,
       event: e,
     });
     if (beforePasteApply.defaultPrevented) {
@@ -138,6 +141,7 @@ export class Clipboard {
     const afterPasteApply = this.afterPasteApply.emit({
       raw: data,
       parsed: parsedData,
+      dataText,
       event: e,
     });
     // keep default behavior if needed
