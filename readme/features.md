@@ -82,3 +82,5 @@
   - [Cell properties](https://rv-grid.com/guide/cell/) (define custom properties for rendered cells).
   - Nested grids: Build a grid inside a grid, showcasing advanced editing options and user interactions for a more dynamic data presentation.
   - Context Menu: Build context menus for any grid element - from cells to headers. Cut, copy, paste, add rows, modify columns, and more. Fully customizable with your own actions and behaviors.
+
+- **[AI Agents and MCP](https://rv-grid.com/guide/mcp)**: Connect Codex, Cursor, Claude Code, and VS Code to version-aware RevoGrid docs, examples, migrations, feature availability, and typed API context.
