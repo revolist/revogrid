@@ -52,6 +52,7 @@ export class DataProvider {
    * @param disableVirtualRows Prevents recalculating virtual rows for the main row store.
    * @param grouping Optional grouping metadata applied together with the new data set.
    * @param silent Preserves the current trimmed state instead of resetting it during the update.
+   * @param preserveTrimmed Re-applies current trimmed indexes after a silent update.
    * @returns The same `data` array that was provided to the method.
    */
   setData(
@@ -65,9 +66,10 @@ export class DataProvider {
     },
     // if true, store will be updated without resetting trimmed state
     silent = false,
+    preserveTrimmed = false,
   ): DataType[] {
     // set rgRow data
-    this.stores[type].updateData([...data], grouping, silent);
+    this.stores[type].updateData([...data], grouping, silent, preserveTrimmed);
 
     // for pinned row no need virtual data
     const noVirtual = type !== 'rgRow' || disableVirtualRows;
