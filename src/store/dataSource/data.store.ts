@@ -66,10 +66,13 @@ export class DataStore<T extends GDataType, ST extends GDimension> {
   updateData(
     source: T[],
     grouping?: {
+      // grouping depth, how many levels of groups are there
       depth: number;
       groups?: Groups;
+      // custom renderer for group label, if not provided default will be used
       customRenderer?: GroupLabelTemplateFunc;
     },
+    // if true, store will be updated without resetting trimmed state
     silent = false,
   ) {
     // during full update we do drop trim
@@ -91,6 +94,7 @@ export class DataStore<T extends GDataType, ST extends GDimension> {
     if (grouping) {
       setStore(this.store, {
         groupingDepth: grouping.depth,
+        // if groups are not provided, we will consider that there is only one group with all items
         groups: grouping.groups,
         groupingCustomRenderer: grouping.customRenderer,
       });
