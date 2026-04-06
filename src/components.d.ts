@@ -205,6 +205,11 @@ export namespace Components {
          */
         "jobsBeforeRender": Promise<any>[];
         /**
+          * Prevents horizontal scroll state from being mirrored across viewport sections.
+          * @default false
+         */
+        "noHorizontalScrollTransfer": boolean;
+        /**
           * Pinned bottom Source: {[T in ColumnProp]: any} - defines pinned bottom rows data source.
           * @default []
          */
@@ -792,6 +797,10 @@ export namespace Components {
          */
         "contentWidth": number;
         /**
+          * @default false
+         */
+        "noHorizontalScrollTransfer": boolean;
+        /**
           * Enable row header
          */
         "rowHeader": boolean;
@@ -899,6 +908,9 @@ declare global {
         "afteranysource": {
     type: DimensionRows;
     source: DataType[];
+  };
+        "beforecolumnsgather": {
+    columns: (ColumnGrouping | ColumnRegular)[];
   };
         "beforecolumnsset": ColumnCollection;
         "beforecolumnapplied": ColumnCollection;
@@ -1454,6 +1466,11 @@ declare namespace LocalJSX {
          */
         "jobsBeforeRender"?: Promise<any>[];
         /**
+          * Prevents horizontal scroll state from being mirrored across viewport sections.
+          * @default false
+         */
+        "noHorizontalScrollTransfer"?: boolean;
+        /**
           * Emmited after the additional data is changed
          */
         "onAdditionaldatachanged"?: (event: RevoGridCustomEvent<any>) => void;
@@ -1527,6 +1544,12 @@ declare namespace LocalJSX {
           * Emitted before a column update is applied, after the column set is gathered and the viewport is updated. Useful for performing actions or modifications before the final application of the column update.
          */
         "onBeforecolumnapplied"?: (event: RevoGridCustomEvent<ColumnCollection>) => void;
+        /**
+          * Emitted before user column definitions are gathered into the internal column collection. Listeners can replace `detail.columns` to rewrite the raw column set before RevoGrid normalizes it.
+         */
+        "onBeforecolumnsgather"?: (event: RevoGridCustomEvent<{
+    columns: (ColumnGrouping | ColumnRegular)[];
+  }>) => void;
         /**
           * Emitted before a column update is applied. Listeners can use this event to perform any necessary actions or modifications before the column update is finalized.
          */
@@ -2430,6 +2453,10 @@ declare namespace LocalJSX {
          */
         "contentWidth"?: number;
         /**
+          * @default false
+         */
+        "noHorizontalScrollTransfer"?: boolean;
+        /**
           * Viewport resize
          */
         "onResizeviewport"?: (event: RevogrViewportScrollCustomEvent<ViewPortResizeEvent>) => void;
@@ -2469,6 +2496,7 @@ declare namespace LocalJSX {
         "range": boolean;
         "readonly": boolean;
         "resize": boolean;
+        "noHorizontalScrollTransfer": boolean;
         "canFocus": boolean;
         "useClipboard": boolean;
         "applyOnClose": boolean;
@@ -2546,6 +2574,7 @@ declare namespace LocalJSX {
         "contentWidth": number;
         "contentHeight": number;
         "colType": DimensionCols | 'rowHeaders';
+        "noHorizontalScrollTransfer": boolean;
     }
 
     interface IntrinsicElements {

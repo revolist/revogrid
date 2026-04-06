@@ -148,6 +148,11 @@ export class RevoGridComponent {
   /** When true, columns are resizable. */
   @Prop() resize = false;
 
+  /**
+   * Prevents horizontal scroll state from being mirrored across viewport sections.
+   */
+  @Prop() noHorizontalScrollTransfer = false;
+
   /** When true cell focus appear. */
   @Prop() canFocus = true;
 
@@ -475,6 +480,14 @@ export class RevoGridComponent {
   @Event() afteranysource: EventEmitter<{
     type: DimensionRows;
     source: DataType[];
+  }>;
+
+  /**
+   * Emitted before user column definitions are gathered into the internal column collection.
+   * Listeners can replace `detail.columns` to rewrite the raw column set before RevoGrid normalizes it.
+   */
+  @Event() beforecolumnsgather: EventEmitter<{
+    columns: (ColumnGrouping | ColumnRegular)[];
   }>;
 
   /**
@@ -1131,8 +1144,14 @@ export class RevoGridComponent {
     if (!this.dimensionProvider || !this.columnProvider) {
       return;
     }
+    const beforeGatherEvent = this.beforecolumnsgather.emit({
+      columns: [...newVal],
+    });
+    if (beforeGatherEvent.defaultPrevented) {
+      return;
+    }
     const columnGather = getColumns(
-      newVal,
+      beforeGatherEvent.detail.columns,
       0,
       this.columnTypes,
     );
@@ -1580,6 +1599,7 @@ export class RevoGridComponent {
         scrollingService: this.scrollingService,
         orderService: this.orderService,
         selectionStoreConnector: this.selectionStoreConnector,
+        noHorizontalScrollTransfer: this.noHorizontalScrollTransfer,
         disableVirtualX: this.disableVirtualX,
         disableVirtualY: this.disableVirtualY,
         resize: c => this.aftercolumnresize.emit(c),
@@ -1712,8 +1732,9 @@ export class RevoGridComponent {
           ref={el =>
             this.scrollingService.registerElement(el, `${view.prop.key}`)
           }
-          onScrollviewport={e =>
-            this.scrollingService.proxyScroll(e.detail, `${view.prop.key}`)
+          onScrollviewport={e => {
+              this.scrollingService.proxyScroll(e.detail, `${view.prop.key}`, this.noHorizontalScrollTransfer && e.detail.dimension === 'rgCol')
+           }
           }
           onScrollviewportsilent={e =>
             this.scrollingService.scrollSilentService(

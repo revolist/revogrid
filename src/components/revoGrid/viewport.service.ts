@@ -36,6 +36,7 @@ type Config = {
   scrollingService: GridScrollingService;
   orderService: OrdererService;
   selectionStoreConnector: SelectionStoreConnector;
+  noHorizontalScrollTransfer?: boolean;
 
   disableVirtualX?: boolean;
   disableVirtualY?: boolean;
@@ -62,6 +63,7 @@ function gatherColumnData(data: ViewportColumn) {
     contentHeight: data.contentHeight,
     key: data.colType,
     colType: data.colType,
+    noHorizontalScrollTransfer: data.noHorizontalScrollTransfer,
     onResizeviewport: data.onResizeviewport,
     // set viewport size to real size
     style: data.fixWidth ? { minWidth: `${realWidth}px` } : undefined,
@@ -114,6 +116,7 @@ export default class ViewportService {
         viewports: config.viewportProvider.stores,
         dimensions: config.dimensionProvider.stores,
         rowStores: config.dataProvider.stores,
+        noHorizontalScrollTransfer: config.noHorizontalScrollTransfer,
 
         colStore,
         onHeaderresize: e => this.onColumnResize(val, e, colStore),

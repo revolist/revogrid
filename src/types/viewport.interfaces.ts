@@ -19,6 +19,7 @@ import type { JSX } from '..';
 export type SlotType = 'content' | 'header' | 'footer';
 
 export interface ElementScroll {
+  noHorizontalScrollTransfer?: boolean;
   changeScroll?(
     e: ViewPortScrollEvent,
     silent?: boolean,
@@ -30,6 +31,9 @@ export type ElementsScroll = { [key: string]: ElementScroll[] };
 export type HeaderProperties = JSX.RevogrHeader;
 
 export type ViewportProperties = JSX.RevogrViewportScroll &
+  {
+    noHorizontalScrollTransfer?: boolean;
+  } &
   JSXBase.HTMLAttributes<HTMLRevogrViewportScrollElement>;
 
 export type ViewportColumn = {
@@ -44,6 +48,9 @@ export type ViewportColumn = {
   rowStores: RowDataSources;
   colStore: Observable<DSourceState<ColumnRegular, DimensionCols>>;
 } & Partial<JSX.RevogrViewportScroll> &
+  {
+    noHorizontalScrollTransfer?: boolean;
+  } &
   Partial<JSX.RevogrHeader>;
 
 export type ViewportData = {

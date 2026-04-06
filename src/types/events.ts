@@ -18,6 +18,7 @@ export type RevogridEvents = 'contentsizechanged'|
   'beforeanysource'|
   'aftersourceset'|
   'afteranysource'|
+  'beforecolumnsgather'|
   'beforecolumnsset'|
   'beforecolumnapplied'|
   'aftercolumnsset'|
@@ -127,6 +128,7 @@ export const REVOGRID_EVENTS = new Map<RevogridEvents, RevogridEvents>([
   ['beforeanysource', 'beforeanysource'],
   ['aftersourceset', 'aftersourceset'],
   ['afteranysource', 'afteranysource'],
+  ['beforecolumnsgather', 'beforecolumnsgather'],
   ['beforecolumnsset', 'beforecolumnsset'],
   ['beforecolumnapplied', 'beforecolumnapplied'],
   ['aftercolumnsset', 'aftercolumnsset'],
