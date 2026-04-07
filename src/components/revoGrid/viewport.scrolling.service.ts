@@ -4,11 +4,12 @@ import {
   ViewPortScrollEvent,
   ElementsScroll,
   ElementScroll,
+  MultiDimensionType,
 } from '@type';
 
 export default class GridScrollingService {
   private elements: ElementsScroll = {};
-  constructor(private setViewport: (e: ViewPortScrollEvent) => void) {}
+  constructor(private setViewport: (e: ViewPortScrollEvent<MultiDimensionType>) => void) {}
 
   async proxyScroll(e: ViewPortScrollEvent, key?: DimensionColPin | string, skipEvent?: boolean) {
     let newEventPromise: Promise<ViewPortScrollEvent | undefined> | undefined;
@@ -37,7 +38,11 @@ export default class GridScrollingService {
     if (newEvent) {
       event = newEvent;
     }
-    this.setViewport(event);
+    this.setViewport(
+      skipEvent && this.isPinnedColumn(key)
+        ? { ...event, dimension: key }
+        : event,
+    );
   }
 
   /**

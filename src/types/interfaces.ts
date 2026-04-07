@@ -480,11 +480,11 @@ export type ViewPortResizeEvent = {
  * `ViewPortScrollEvent` is an object that contains information about a scroll
  * event in the viewport.
  */
-export type ViewPortScrollEvent = {
+export type ViewPortScrollEvent<D = DimensionType> = {
   /**
    * The dimension of the viewport being scrolled.
    */
-  dimension: DimensionType;
+  dimension: D;
   /**
    * The coordinate of the scroll event.
    */
