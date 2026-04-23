@@ -52,7 +52,7 @@ export type AutoSizeColumnConfig = {
 
 const LETTER_BLOCK_SIZE = 7;
 
-export const enum ColumnAutoSizeMode {
+export enum ColumnAutoSizeMode {
   // increases column width on header click according the largest text value
   headerClickAutosize = 'headerClickAutoSize',
   // increases column width on data set and text edit, decreases performance
