@@ -4,6 +4,16 @@ import contains, { notContains } from '../src/plugins/filter/conditions/string/c
 import beginsWith from '../src/plugins/filter/conditions/string/beginswith';
 import gtThan from '../src/plugins/filter/conditions/number/greaterThan';
 import lt from '../src/plugins/filter/conditions/number/lessThan';
+import { FilterPlugin } from '../src/plugins/filter/filter.plugin';
+import type { ColumnRegular } from '../src';
+
+function createFilterPlugin() {
+  const revogrid = Object.assign(new EventTarget(), {
+    registerVNode: [],
+  }) as unknown as HTMLRevoGridElement;
+
+  return new FilterPlugin(revogrid, {} as any);
+}
 
 // ---------------------------------------------------------------------------
 // eq / notEq
@@ -140,5 +150,156 @@ describe.each([
   it('fn("hello", "5") → false, fn(undefined, "5") → false (only works on numeric values)', () => {
     expect(fn('hello', '5')).toBe(false);
     expect(fn(undefined, '5')).toBe(false);
+  });
+});
+
+describe('FilterPlugin.getRowFilter', () => {
+  const roleColumn = {
+    prop: 'role',
+    name: 'Role',
+  } as ColumnRegular;
+
+  it('returns trim indexes for rows that do not match a contains filter', () => {
+    const plugin = createFilterPlugin();
+    const trimmed = plugin.getRowFilter(
+      [
+        { name: 'Alice', role: 'Admin' },
+        { name: 'Ben', role: 'Engineer' },
+        { name: 'Cara', role: 'Admin' },
+      ],
+      {
+        role: [
+          {
+            id: 0,
+            type: 'contains',
+            value: 'Admin',
+            relation: 'and',
+          },
+        ],
+      },
+      {
+        role: roleColumn,
+      },
+    );
+
+    expect(trimmed).toEqual({
+      1: true,
+    });
+  });
+
+  it('recalculates trim indexes against a replaced source', () => {
+    const plugin = createFilterPlugin();
+    const filterItems = {
+      role: [
+        {
+          id: 0,
+          type: 'contains',
+          value: 'Admin',
+          relation: 'and',
+        },
+      ],
+    };
+
+    const firstTrimmed = plugin.getRowFilter(
+      [
+        { name: 'Alice', role: 'Admin' },
+        { name: 'Ben', role: 'Engineer' },
+        { name: 'Cara', role: 'Admin' },
+      ],
+      filterItems,
+      {
+        role: roleColumn,
+      },
+    );
+    const replacedTrimmed = plugin.getRowFilter(
+      [
+        { name: 'Eve', role: 'Manager' },
+        { name: 'Finn', role: 'Engineer' },
+        { name: 'Gia', role: 'Admin' },
+      ],
+      filterItems,
+      {
+        role: roleColumn,
+      },
+    );
+
+    expect(firstTrimmed).toEqual({
+      1: true,
+    });
+    expect(replacedTrimmed).toEqual({
+      0: true,
+      1: true,
+    });
+  });
+
+  it('keeps rows that match at least one OR filter', () => {
+    const plugin = createFilterPlugin();
+    const trimmed = plugin.getRowFilter(
+      [
+        { name: 'Alice', role: 'Admin' },
+        { name: 'Ben', role: 'Engineer' },
+        { name: 'Cara', role: 'Manager' },
+        { name: 'Dan', role: 'Designer' },
+      ],
+      {
+        role: [
+          {
+            id: 0,
+            type: 'contains',
+            value: 'Admin',
+            relation: 'or',
+          },
+          {
+            id: 1,
+            type: 'contains',
+            value: 'Manager',
+            relation: 'or',
+          },
+        ],
+      },
+      {
+        role: roleColumn,
+      },
+    );
+
+    expect(trimmed).toEqual({
+      1: true,
+      3: true,
+    });
+  });
+
+  it('trims rows unless every AND filter is satisfied', () => {
+    const plugin = createFilterPlugin();
+    const trimmed = plugin.getRowFilter(
+      [
+        { name: 'Alice', role: 'Senior Admin' },
+        { name: 'Ben', role: 'Senior Engineer' },
+        { name: 'Cara', role: 'Admin' },
+      ],
+      {
+        role: [
+          {
+            id: 0,
+            type: 'contains',
+            value: 'Senior',
+            relation: 'and',
+          },
+          {
+            id: 1,
+            type: 'contains',
+            value: 'Admin',
+            relation: 'and',
+          },
+        ],
+      },
+      {
+        role: roleColumn,
+      },
+    );
+
+    expect(trimmed).toEqual({
+      1: true,
+      2: true,
+    });
   });
 });

@@ -50,4 +50,115 @@ test.describe('filtering', () => {
     await expectVisibleColumnValues(page, 1, ['Alice', 'Ben', 'Cara', 'Dan']);
     await expect(mainDataRows(page)).toHaveCount(4);
   });
+
+  test('reapplies active filters after source replacement', async ({ page }) => {
+    const source: SampleRow[] = [
+      { id: 501, name: 'Alice', role: 'Admin', city: 'Lisbon' },
+      { id: 502, name: 'Ben', role: 'Engineer', city: 'Porto' },
+      { id: 503, name: 'Cara', role: 'Admin', city: 'Braga' },
+      { id: 504, name: 'Dan', role: 'Designer', city: 'Coimbra' },
+    ];
+
+    const columns = buildColumns([
+      { prop: 'id', name: 'ID' },
+      { prop: 'name', name: 'Name' },
+      { prop: 'role', name: 'Role', filter: true, ...withHeaderTestId('source-filter-role') },
+      { prop: 'city', name: 'City' },
+    ]);
+
+    await mountGrid(page, { columns, source, filter: true });
+
+    await page
+      .getByTestId('source-filter-role')
+      .locator(SELECTORS.filterButton)
+      .click();
+
+    const filterPanel = page.locator(SELECTORS.filterPanel);
+    await expect(filterPanel).toBeVisible();
+    await filterPanel.getByRole('combobox').selectOption({ label: 'Contains' });
+    await page.locator(SELECTORS.filterInput).fill('Admin');
+
+    await expectVisibleColumnValues(page, 1, ['Alice', 'Cara']);
+
+    await filterPanel.getByRole('button', { name: 'ok' }).click();
+    await expect(filterPanel).not.toBeVisible();
+
+    await page.evaluate(() => {
+      const grid = document.querySelector('revo-grid') as HTMLRevoGridElement | null;
+      if (!grid) {
+        throw new Error('Grid was not found');
+      }
+      grid.source = [
+        { id: 601, name: 'Eve', role: 'Admin', city: 'Madrid' },
+        { id: 602, name: 'Finn', role: 'Engineer', city: 'Paris' },
+        { id: 603, name: 'Gia', role: 'Admin', city: 'Rome' },
+      ];
+    });
+    await page.waitForChanges();
+
+    await expectVisibleColumnValues(page, 1, ['Eve', 'Gia']);
+    await expect(mainDataRows(page)).toHaveCount(2);
+  });
+
+  test('reapplies programmatic filters after source replacement', async ({ page }) => {
+    const source: SampleRow[] = [
+      { id: 501, name: 'Alice', role: 'Admin', city: 'Lisbon' },
+      { id: 502, name: 'Ben', role: 'Engineer', city: 'Porto' },
+      { id: 503, name: 'Cara', role: 'Admin', city: 'Braga' },
+    ];
+
+    const columns = buildColumns([
+      { prop: 'id', name: 'ID' },
+      { prop: 'name', name: 'Name' },
+      { prop: 'role', name: 'Role', filter: true },
+      { prop: 'city', name: 'City' },
+    ]);
+
+    await mountGrid(page, {
+      columns,
+      source,
+      filter: true,
+    });
+
+    await page.evaluate(() => {
+      const grid = document.querySelector('revo-grid') as HTMLRevoGridElement | null;
+      if (!grid) {
+        throw new Error('Grid was not found');
+      }
+      grid.dispatchEvent(
+        new CustomEvent('filter', {
+          detail: {
+            role: [
+              {
+                id: 0,
+                type: 'contains',
+                value: 'Manager',
+                relation: 'and',
+              },
+            ],
+          },
+        }),
+      );
+    });
+    await page.waitForChanges();
+
+    await expectVisibleColumnValues(page, 1, []);
+    await expect(mainDataRows(page)).toHaveCount(0);
+
+    await page.evaluate(() => {
+      const grid = document.querySelector('revo-grid') as HTMLRevoGridElement | null;
+      if (!grid) {
+        throw new Error('Grid was not found');
+      }
+      grid.source = [
+        { id: 601, name: 'Eve', role: 'Manager', city: 'Madrid' },
+        { id: 602, name: 'Finn', role: 'Engineer', city: 'Paris' },
+        { id: 603, name: 'Gia', role: 'Manager', city: 'Rome' },
+      ];
+    });
+    await page.waitForChanges();
+
+    await expectVisibleColumnValues(page, 1, ['Eve', 'Gia']);
+    await expect(mainDataRows(page)).toHaveCount(2);
+  });
 });

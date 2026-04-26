@@ -146,7 +146,7 @@ export class GroupingRowPlugin extends BasePlugin {
     if (type === FILTER_TRIMMED_TYPE) {
       const source = this.getStore().get('source');
       const updatedTrimmed = filterOutEmptyGroupRows(source, trimmed);
-      Object.keys(trimmed).forEach(index => delete trimmed[parseInt(index, 10)]);
+      Object.keys(trimmed).forEach(index => delete trimmed[Number.parseInt(index, 10)]);
       Object.assign(trimmed, updatedTrimmed);
     }
   }
@@ -205,6 +205,7 @@ export class GroupingRowPlugin extends BasePlugin {
       trimmed,
       oldNewIndexes ?? {},
       oldNewIndexMap,
+      sourceWithGroups,
     );
   }
 
@@ -236,7 +237,7 @@ export class GroupingRowPlugin extends BasePlugin {
     } = gatherGrouping(source, this.options?.props || [], options);
     data.source = sourceWithGroups;
     this.providers.data.setGrouping({ depth });
-    this.updateTrimmed(trimmed, oldNewIndexMap);
+    this.updateTrimmed(trimmed, oldNewIndexMap, undefined, sourceWithGroups);
   }
 
   /**
@@ -354,13 +355,14 @@ export class GroupingRowPlugin extends BasePlugin {
       undefined,
       true,
     );
-    this.updateTrimmed(undefined, undefined, oldNewIndexes);
+    this.updateTrimmed(undefined, undefined, oldNewIndexes, source);
   }
 
   private updateTrimmed(
     trimmedGroup: TrimmedEntity = {},
     firstLevelMap: Record<number, number> = {},
     secondLevelMap?: Record<number, number>,
+    source: DataType[] = this.getStore().get('source'),
   ) {
     // map previously trimmed data
     const trimemedOptionsToUpgrade = processDoubleConversionTrimmed(
@@ -372,7 +374,7 @@ export class GroupingRowPlugin extends BasePlugin {
       if (type === FILTER_TRIMMED_TYPE) {
         /** Regrouping changes physical indexes, so filter trim needs fresh group-header state. */
         trimemedOptionsToUpgrade[type] = filterOutEmptyGroupRows(
-          this.getStore().get('source'),
+          source,
           trimemedOptionsToUpgrade[type],
         );
       }

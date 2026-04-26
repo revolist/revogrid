@@ -4,6 +4,28 @@ import { GROUP_DEPTH } from './grouping.const';
 import { isGrouping } from './grouping.service';
 
 export const TRIMMED_GROUPING = 'grouping';
+/**
+ * Converts a trim row index through the index maps produced while regrouping.
+ *
+ * Group rows are synthetic, so they may not exist in the first map. When a
+ * second map is available, fall back to the original index so trims created
+ * against the grouped physical source can still be remapped. If neither path
+ * resolves to a number, the caller drops the stale trim entry.
+ */
+function convertTrimmedIndex(
+  initialIndex: string,
+  firstLevelMap: Record<number, number>,
+  secondLevelMap?: Record<number, number>,
+) {
+  const sourceIndex = Number.parseInt(initialIndex, 10);
+  const firstConversionIndex = firstLevelMap[sourceIndex];
+  if (!secondLevelMap) {
+    return firstConversionIndex;
+  }
+  const secondConversionKey =
+    typeof firstConversionIndex === 'number' ? firstConversionIndex : sourceIndex;
+  return secondLevelMap[secondConversionKey];
+}
 
 /**
  * Prepare trimming updated indexes for grouping
@@ -31,10 +53,11 @@ export function processDoubleConversionTrimmed(initiallyTrimed: Trimmed, firstLe
        * if item exists we find it in collection
        * we support 2 level of conversions
        */
-      let newConversionIndex = firstLevelMap[initialIndex];
-      if (secondLevelMap) {
-        newConversionIndex = secondLevelMap[newConversionIndex];
-      }
+      const newConversionIndex = convertTrimmedIndex(
+        initialIndex,
+        firstLevelMap,
+        secondLevelMap,
+      );
       // Group rows do not exist in the ungrouped index map and must not leak into new trims.
       if (typeof newConversionIndex !== 'number') {
         continue;
@@ -46,9 +69,7 @@ export function processDoubleConversionTrimmed(initiallyTrimed: Trimmed, firstLe
        */
       newItems[newConversionIndex] = true;
     }
-    if (Object.keys(newItems).length) {
-      trimemedOptionsToUpgrade[type] = newItems;
-    }
+    trimemedOptionsToUpgrade[type] = newItems;
   }
   return trimemedOptionsToUpgrade;
 }
