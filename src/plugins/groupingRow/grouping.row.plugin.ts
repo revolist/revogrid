@@ -39,6 +39,7 @@ import {
   isGroupingColumn,
 } from './grouping.service';
 import {
+  filterOutEmptyGroupRows,
   processDoubleConversionTrimmed,
   TRIMMED_GROUPING,
 } from './grouping.trimmed.service';
@@ -141,15 +142,18 @@ export class GroupingRowPlugin extends BasePlugin {
   }
 
   private beforeTrimmedApply(trimmed: Record<number, boolean>, type: string) {
-    /** Before filter apply remove grouping filtering */
+    /** Filter trim must keep group headers in sync with their visible children. */
     if (type === FILTER_TRIMMED_TYPE) {
       const source = this.getStore().get('source');
-      for (let index in trimmed) {
-        if (trimmed[index] && isGrouping(source[index])) {
-          trimmed[index] = false;
-        }
-      }
+      const updatedTrimmed = filterOutEmptyGroupRows(source, trimmed);
+      Object.keys(trimmed).forEach(index => delete trimmed[parseInt(index, 10)]);
+      Object.assign(trimmed, updatedTrimmed);
     }
+  }
+
+  private beforeFilterTrimmed(trimmed: Record<number, boolean>) {
+    const source = this.getStore().get('source');
+    return filterOutEmptyGroupRows(source, trimmed);
   }
 
   private isSortingRunning() {
@@ -289,6 +293,10 @@ export class GroupingRowPlugin extends BasePlugin {
       ({ detail: { trimmed, trimmedType } }) =>
         this.beforeTrimmedApply(trimmed, trimmedType),
     );
+    /** Filter plugin owns data-row matching; grouping decides which headers remain visible. */
+    this.addEventListener('beforefiltertrimmed', ({ detail }) => {
+      detail.itemsToFilter = this.beforeFilterTrimmed(detail.itemsToFilter);
+    });
     /**
      * sorting applied need to clear grouping and apply again
      * based on new results whole grouping order will changed
@@ -361,6 +369,13 @@ export class GroupingRowPlugin extends BasePlugin {
       secondLevelMap,
     );
     for (let type in trimemedOptionsToUpgrade) {
+      if (type === FILTER_TRIMMED_TYPE) {
+        /** Regrouping changes physical indexes, so filter trim needs fresh group-header state. */
+        trimemedOptionsToUpgrade[type] = filterOutEmptyGroupRows(
+          this.getStore().get('source'),
+          trimemedOptionsToUpgrade[type],
+        );
+      }
       this.revogrid.addTrimmed(trimemedOptionsToUpgrade[type], type);
     }
 
