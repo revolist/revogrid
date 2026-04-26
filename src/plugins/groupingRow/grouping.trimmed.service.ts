@@ -80,6 +80,9 @@ function hasVisibleGroupItems(
   groupIndex: number,
 ) {
   const depth = source[groupIndex]?.[GROUP_DEPTH];
+  if (depth == null) {
+    return false;
+  }
   // A group is visible when at least one descendant data row survives filtering.
   for (let i = groupIndex + 1; i < source.length; i++) {
     const model = source[i];

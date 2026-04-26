@@ -343,6 +343,24 @@ describe('row grouping', () => {
         1: true,
       });
     });
+
+    it('keeps malformed group rows hidden when group depth is missing', () => {
+      const trimmed = filterOutEmptyGroupRows(
+        [
+          {
+            [PSEUDO_GROUP_ITEM]: 'North',
+          },
+          { name: 'Alice' },
+        ],
+        {
+          0: true,
+        },
+      );
+
+      expect(trimmed).toEqual({
+        0: true,
+      });
+    });
   });
 
   describe('filterOutEmptyGroups', () => {
