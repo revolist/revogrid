@@ -4,6 +4,17 @@ import contains, { notContains } from '../src/plugins/filter/conditions/string/c
 import beginsWith from '../src/plugins/filter/conditions/string/beginswith';
 import gtThan from '../src/plugins/filter/conditions/number/greaterThan';
 import lt from '../src/plugins/filter/conditions/number/lessThan';
+import { FilterPlugin } from '../src/plugins/filter/filter.plugin';
+import type { ColumnRegular } from '../src';
+import type { FilterData } from '../src/plugins/filter/filter.types';
+
+function createFilterPlugin() {
+  const revogrid = Object.assign(new EventTarget(), {
+    registerVNode: [],
+  }) as unknown as HTMLRevoGridElement;
+
+  return new FilterPlugin(revogrid, {} as any);
+}
 
 // ---------------------------------------------------------------------------
 // eq / notEq
@@ -140,5 +151,107 @@ describe.each([
   it('fn("hello", "5") → false, fn(undefined, "5") → false (only works on numeric values)', () => {
     expect(fn('hello', '5')).toBe(false);
     expect(fn(undefined, '5')).toBe(false);
+  });
+});
+
+describe('FilterPlugin.getRowFilter', () => {
+  const roleColumn = {
+    prop: 'role',
+    name: 'Role',
+  } as ColumnRegular;
+  const columnsByProp = {
+    role: roleColumn,
+  };
+  const adminRows = [
+    { name: 'Alice', role: 'Admin' },
+    { name: 'Ben', role: 'Engineer' },
+    { name: 'Cara', role: 'Admin' },
+  ];
+
+  function containsRole(value: string, relation: FilterData['relation'] = 'and', id = 0): FilterData {
+    return {
+      id,
+      type: 'contains',
+      value,
+      relation,
+    };
+  }
+
+  function trimByRole(rows: Record<string, string>[], filters: FilterData[]) {
+    return createFilterPlugin().getRowFilter(
+      rows,
+      {
+        role: filters,
+      },
+      columnsByProp,
+    );
+  }
+
+  it('returns trim indexes for rows that do not match a contains filter', () => {
+    const trimmed = trimByRole(adminRows, [containsRole('Admin')]);
+
+    expect(trimmed).toEqual({
+      1: true,
+    });
+  });
+
+  it('recalculates trim indexes against a replaced source', () => {
+    const filters = [containsRole('Admin')];
+    const firstTrimmed = trimByRole(adminRows, filters);
+    const replacedTrimmed = trimByRole(
+      [
+        { name: 'Eve', role: 'Manager' },
+        { name: 'Finn', role: 'Engineer' },
+        { name: 'Gia', role: 'Admin' },
+      ],
+      filters,
+    );
+
+    expect(firstTrimmed).toEqual({
+      1: true,
+    });
+    expect(replacedTrimmed).toEqual({
+      0: true,
+      1: true,
+    });
+  });
+
+  it('keeps rows that match at least one OR filter', () => {
+    const trimmed = trimByRole(
+      [
+        { name: 'Alice', role: 'Admin' },
+        { name: 'Ben', role: 'Engineer' },
+        { name: 'Cara', role: 'Manager' },
+        { name: 'Dan', role: 'Designer' },
+      ],
+      [
+        containsRole('Admin', 'or'),
+        containsRole('Manager', 'or', 1),
+      ],
+    );
+
+    expect(trimmed).toEqual({
+      1: true,
+      3: true,
+    });
+  });
+
+  it('trims rows unless every AND filter is satisfied', () => {
+    const trimmed = trimByRole(
+      [
+        { name: 'Alice', role: 'Senior Admin' },
+        { name: 'Ben', role: 'Senior Engineer' },
+        { name: 'Cara', role: 'Admin' },
+      ],
+      [
+        containsRole('Senior'),
+        containsRole('Admin', 'and', 1),
+      ],
+    );
+
+    expect(trimmed).toEqual({
+      1: true,
+      2: true,
+    });
   });
 });
