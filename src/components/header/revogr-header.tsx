@@ -183,7 +183,7 @@ export class RevogrHeaderComponent {
     const range = this.selectionStore?.get('range');
 
     const { cells } = this.renderHeaderColumns(cols, range);
-    const groupRow = this.renderGroupingColumns();
+    const groupRow = this.renderGroupingColumns(cols);
 
     return [
       <div class="group-rgRow">{groupRow}</div>,
@@ -224,11 +224,26 @@ export class RevogrHeaderComponent {
     return { cells };
   }
 
-  private renderGroupingColumns(): VNode[] {
+  private ensureGroupingColumnVisible(visibleColIndexes: Set<number>, groupColIndexes: number[]) {
+    return groupColIndexes.some((index) => visibleColIndexes.has(index));
+  }
+
+  private renderGroupingColumns(cols: VirtualPositionItem[]): VNode[] {
     const groupRow: VNode[] = [];
+
+    // Actual visible col indexes
+    const visibleColIndexes = new Set(cols.map((col) => col.itemIndex));
+
     for (let i = 0; i < this.groupingDepth; i++) {
       if (this.groups[i]) {
         for (let group of this.groups[i]) {
+
+          const groupColumnVisible = this.ensureGroupingColumnVisible(visibleColIndexes, group.indexes);
+
+          if (!groupColumnVisible) {
+            continue;
+          }
+
           const groupStartIndex = group.indexes[0] ?? -1;
           if (groupStartIndex > -1) {
             const groupEndIndex = groupStartIndex + group.indexes.length - 1;
