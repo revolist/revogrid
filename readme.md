@@ -1,3 +1,5 @@
+[![MseeP.ai Security Assessment Badge](https://mseep.net/pr/revolist-revogrid-badge.png)](https://mseep.ai/app/revolist-revogrid)
+
 <p align="center">
   <a href="https://rv-grid.com">
     <img src="./assets/logo.svg" alt="RevoGrid Data Grid" height="150" />
