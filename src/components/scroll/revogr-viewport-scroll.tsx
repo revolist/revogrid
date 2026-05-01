@@ -30,6 +30,7 @@ import type {
 type Delta = 'deltaX' | 'deltaY';
 type LocalScrollEvent = {
   preventDefault(): void;
+  shiftKey?: boolean;
 } & { [x in Delta]: number };
 
 /**
@@ -431,6 +432,11 @@ export class RevogrViewportScroll implements ElementScroll {
     delta: Delta,
     e: LocalScrollEvent,
   ) {
+    // When Shift key is held, skip vertical scrolling.
+    // The horizontal wheel handler will convert deltaY to horizontal scroll.
+    if (e.shiftKey) {
+      return;
+    }
     const scrollTop = this.verticalScroll?.scrollTop ?? 0;
     const clientHeight = this.verticalScroll?.clientHeight ?? 0;
     const scrollHeight = this.verticalScroll?.scrollHeight ?? 0;
@@ -454,24 +460,27 @@ export class RevogrViewportScroll implements ElementScroll {
    */
   private onHorizontalMouseWheel(
     type: DimensionType,
-    delta: Delta,
+    _delta: Delta,
     e: LocalScrollEvent,
   ) {
-    if (!e.deltaX) {
+    // When Shift key is held and no horizontal delta, treat vertical delta as horizontal.
+    // Some browsers (e.g. Yandex on Windows) send deltaY with shiftKey=true instead of deltaX.
+    const effectiveDelta = e.deltaX !== 0 ? e.deltaX : (e.shiftKey ? e.deltaY : 0);
+    if (!effectiveDelta) {
       return;
     }
     const { scrollLeft, scrollWidth, clientWidth } = this.horizontalScroll;
 
     // Detect if the user has reached the right end
-    const atRight = scrollLeft + clientWidth >= scrollWidth && e.deltaX > 0;
+    const atRight = scrollLeft + clientWidth >= scrollWidth && effectiveDelta > 0;
 
     // Detect if the user has reached the left end
-    const atLeft = scrollLeft === 0 && e.deltaX < 0;
+    const atLeft = scrollLeft === 0 && effectiveDelta < 0;
     if (!atRight && !atLeft && !this.noHorizontalScrollTransfer) {
       e.preventDefault?.();
     }
-    const pos = scrollLeft + e[delta];
-    this.localScrollService?.scroll(pos, type, undefined, e[delta]);
+    const pos = scrollLeft + effectiveDelta;
+    this.localScrollService?.scroll(pos, type, undefined, effectiveDelta);
     this.localScrollTimer.latestScrollUpdate(type);
   }
 }
