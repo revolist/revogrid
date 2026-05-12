@@ -455,15 +455,21 @@ export type ColPropertiesFunc = (
   props: ColumnPropProp,
 ) => CellProps | void | undefined;
 /**
- * Represents a row data object.
+ * Represents a generic row data object used internally by the grid.
  *
- * @typeParam D - Value type for all properties (legacy usage).
- * @typeParam K - Column property keys.
+ * @typeParam D - Value type for all properties (defaults to `any`).
+ * @typeParam K - Column property keys (defaults to `ColumnProp`).
  *
- * For type-safe row models, pass your own interface directly:
+ * For type-safe usage, define your own row interface and pass it
+ * directly as the data source. Use `ColumnRegular` generics to
+ * bind column definitions to your row type:
  * ```ts
  * type MyRow = { id: number; name: string };
- * const source: DataType<MyRow>[] = [...]; // preserves per-property types
+ * const source: MyRow[] = [{ id: 1, name: 'Alice' }];
+ * const columns: ColumnRegular<keyof MyRow, MyRow>[] = [
+ *   { prop: 'id', name: 'ID' },
+ *   { prop: 'name', name: 'Name' },
+ * ];
  * ```
  */
 export type DataType<
