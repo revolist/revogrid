@@ -2,8 +2,8 @@ import { type VNode } from '@stencil/core';
 import type { DimensionRows, DimensionCols } from './dimension';
 import type {
   ColumnProp,
+  ColumnRegular,
   DataType,
-  DataLookup,
   HyperFunc,
   ColumnDataSchemaModel,
   PositionItem,
@@ -108,31 +108,36 @@ export type SaveDataDetails = {
 
 export type BeforeEdit = BeforeSaveDataDetails;
 
-export type RowDragStartDetails = {
+export type RowDragStartDetails<TModel extends DataType = DataType> = {
   cell: Cell;
   text: string;
   pos: PositionItem;
   event: MouseEvent;
   rowType: DimensionRows;
-  model: any;
+  model: TModel;
 };
 
-export interface BeforeSaveDataDetails extends ColumnDataSchemaModel {
+export interface BeforeSaveDataDetails<
+  TModel extends DataType = DataType,
+  TColumn extends ColumnRegular = ColumnRegular,
+> extends ColumnDataSchemaModel<TModel, TColumn> {
   /**
    * Value from editor to save, not part of the model value yet
    */
   val?: any;
 }
 
-export type BeforeRangeSaveDataDetails = {
-  data: DataLookup;
-  models: Partial<DataLookup>;
+export type BeforeRangeSaveDataDetails<TModel extends DataType = DataType> = {
+  data: { [rowIndex: number]: TModel };
+  models: { [rowIndex: number]: TModel | undefined };
   type: DimensionRows;
   newRange: RangeArea | null;
   oldRange: RangeArea | null;
 };
 
-export type AfterEditEvent = BeforeRangeSaveDataDetails | BeforeSaveDataDetails;
+export type AfterEditEvent<TModel extends DataType = DataType> =
+  | BeforeRangeSaveDataDetails<TModel>
+  | BeforeSaveDataDetails<TModel>;
 
 /**
  * Edit cell info for store
