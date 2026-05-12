@@ -454,6 +454,18 @@ export type PropertiesFunc = (
 export type ColPropertiesFunc = (
   props: ColumnPropProp,
 ) => CellProps | void | undefined;
+/**
+ * Represents a row data object.
+ *
+ * @typeParam D - Value type for all properties (legacy usage).
+ * @typeParam K - Column property keys.
+ *
+ * For type-safe row models, pass your own interface directly:
+ * ```ts
+ * type MyRow = { id: number; name: string };
+ * const source: DataType<MyRow>[] = [...]; // preserves per-property types
+ * ```
+ */
 export type DataType<
   D = any,
   K extends ColumnProp = ColumnProp,
@@ -840,8 +852,8 @@ export interface FocusRenderEvent extends AllDimensionType {
   next?: Partial<Cell>;
 }
 
-export interface FocusAfterRenderEvent extends AllDimensionType {
-  model?: any;
+export interface FocusAfterRenderEvent<TModel extends DataType = DataType> extends AllDimensionType {
+  model?: TModel;
   column?: ColumnRegular;
   /**
    * Virtual index of the row in the viewport
@@ -872,9 +884,9 @@ export type ScrollCoordinateEvent = {
 };
 
 /** Range paste. */
-export interface RangeClipboardPasteEvent extends AllDimensionType {
-  data: DataLookup;
-  models: Partial<DataLookup>;
+export interface RangeClipboardPasteEvent<TModel extends DataType = DataType> extends AllDimensionType {
+  data: { [rowIndex: number]: TModel };
+  models: { [rowIndex: number]: TModel | undefined };
   range: RangeArea | null;
 }
 
