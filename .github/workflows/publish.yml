@@ -6,6 +6,8 @@ permissions: write-all
 jobs:
   publish:
     runs-on: ubuntu-latest
+    env:
+      MCP_WEBHOOK_TOKEN: ${{ secrets.MCP_WEBHOOK_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/checkout@v4
@@ -30,6 +32,14 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: release-assets/*.tgz
+
+      - name: Notify MCP index update
+        if: startsWith(github.ref, 'refs/tags/') && env.MCP_WEBHOOK_TOKEN != ''
+        run: |
+          curl -X POST https://mcp.rv-grid.com/hooks/reindex \
+            -H "Content-Type: application/json" \
+            -H "X-Webhook-Token: ${MCP_WEBHOOK_TOKEN}" \
+            -d '{"updateSources":true}'
   sbom:
     needs: publish
     runs-on: ubuntu-latest
