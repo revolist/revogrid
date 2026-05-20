@@ -20,6 +20,7 @@ revogr-filter-panel {
 
   min-width: 220px;
   text-align: left;
+  animation: revogr-filter-panel-open 140ms cubic-bezier(0.2, 0, 0, 1);
 
   .filter-holder > div {
     display: flex;
@@ -55,6 +56,24 @@ revogr-filter-panel {
   .filter-actions {
     text-align: right;
     margin-right: -5px;
+  }
+}
+
+@keyframes revogr-filter-panel-open {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  revogr-filter-panel {
+    animation: none;
   }
 }
 

@@ -248,10 +248,16 @@ export class FilterPlugin extends BasePlugin {
       return;
     }
 
+    const prop = e.detail.prop;
+    const currentPanel = await this.pop.getChanges();
+    if (currentPanel?.prop === prop) {
+      await this.pop.show();
+      return;
+    }
+
     // filter button clicked, open filter dialog
     const gridPos = this.revogrid.getBoundingClientRect();
     const buttonPos = el.getBoundingClientRect();
-    const prop = e.detail.prop;
 
     const data: ShowData = {
       ...e.detail,

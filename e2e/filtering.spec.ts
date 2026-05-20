@@ -51,6 +51,33 @@ test.describe('filtering', () => {
     await expect(mainDataRows(page)).toHaveCount(4);
   });
 
+  test('toggles filter panel when clicking the same filter button twice', async ({ page }) => {
+    const source: SampleRow[] = [
+      { id: 501, name: 'Alice', role: 'Admin', city: 'Lisbon' },
+      { id: 502, name: 'Ben', role: 'Engineer', city: 'Porto' },
+    ];
+
+    const columns = buildColumns([
+      { prop: 'id', name: 'ID' },
+      { prop: 'name', name: 'Name' },
+      { prop: 'role', name: 'Role', filter: true, ...withHeaderTestId('toggle-filter-role') },
+      { prop: 'city', name: 'City' },
+    ]);
+
+    await mountGrid(page, { columns, source, filter: true });
+
+    const filterButton = page
+      .getByTestId('toggle-filter-role')
+      .locator(SELECTORS.filterButton);
+    const filterPanel = page.locator(SELECTORS.filterPanel);
+
+    await filterButton.click();
+    await expect(filterPanel).toBeVisible();
+
+    await filterButton.click();
+    await expect(filterPanel).not.toBeVisible();
+  });
+
   test('reapplies active filters after source replacement', async ({ page }) => {
     const source: SampleRow[] = [
       { id: 501, name: 'Alice', role: 'Admin', city: 'Lisbon' },
