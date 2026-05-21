@@ -2,7 +2,13 @@ name: Publish NPM
 on:
   release:
     types: [created]
-permissions: write-all
+
+permissions:
+  actions: read
+  contents: write
+  id-token: write
+  packages: write
+
 jobs:
   publish:
     runs-on: ubuntu-latest
