@@ -48,14 +48,14 @@ revogr-filter-panel {
     width: 100%;
   }
 
-  button {
-    margin-top: 10px;
-    margin-right: 5px;
-  }
-
   .filter-actions {
     text-align: right;
     margin-right: -5px;
+
+    button {
+      margin-top: 10px;
+      margin-right: 5px;
+    }
   }
 }
 
