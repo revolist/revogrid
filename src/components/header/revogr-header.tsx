@@ -294,7 +294,7 @@ export class RevogrHeaderComponent {
     type: DimensionCols | 'rowHeaders',
     duplicateProps: Set<string>,
   ) {
-    if (typeof column?.prop === 'undefined') {
+    if (column?.prop === undefined) {
       return `${type}-${String(column?.index)}`;
     }
     const propKey = String(column.prop);
@@ -309,7 +309,7 @@ export class RevogrHeaderComponent {
     const duplicateProps = new Set<string>();
 
     columns.forEach(({ data }) => {
-      if (typeof data?.prop !== 'undefined') {
+      if (data?.prop !== undefined) {
         const propKey = String(data.prop);
         if (seenProps.has(propKey)) {
           duplicateProps.add(propKey);
