@@ -98,3 +98,7 @@ export function isAll(event: KeyboardEvent): boolean {
     (event.metaKey && event.code === 'KeyA')
   ); // Cmd + A on Mac
 }
+
+export function isShortcutModifier(event: KeyboardEvent): boolean {
+  return event.ctrlKey || event.metaKey;
+}

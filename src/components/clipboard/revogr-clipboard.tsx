@@ -162,8 +162,8 @@ export class Clipboard {
       return;
     }
     const data = this.getData(beforeCopy.detail.event);
-    this.copyRegion.emit(data || undefined);
     e.preventDefault();
+    this.copyRegion.emit(data || undefined);
   }
 
   /**

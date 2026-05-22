@@ -39,5 +39,9 @@ export {
   cancelEditCellValue,
   dragBetweenLocators,
 } from './helpers/interactions';
-export { dispatchClipboardEvent, getCopiedText } from './helpers/clipboard';
+export {
+  dispatchClipboardEvent,
+  getCopiedText,
+  getFirefoxCopiedText,
+} from './helpers/clipboard';
 export { getExportCsv } from './helpers/export';
