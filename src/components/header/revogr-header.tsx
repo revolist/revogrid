@@ -197,7 +197,7 @@ export class RevogrHeaderComponent {
     cols: VirtualPositionItem[],
     range: RangeArea | null,
   ) {
-    const cells: VNode[] = [];
+    const columnsToRender: HeaderRenderProps[] = [];
     for (let rgCol of cols) {
       const colData = this.colData[rgCol.itemIndex];
       const props: HeaderRenderProps = {
@@ -218,9 +218,16 @@ export class RevogrHeaderComponent {
       };
       const event = this.beforeHeaderRender.emit(props);
       if (!event.defaultPrevented) {
-        cells.push(<HeaderRenderer {...event.detail} />);
+        columnsToRender.push(event.detail);
       }
     }
+    const duplicateProps = this.getDuplicateHeaderProps(columnsToRender);
+    const cells = columnsToRender.map(detail =>
+      h(HeaderRenderer, {
+        key: this.getHeaderCellKey(detail.data, this.type, duplicateProps),
+        ...detail,
+      }),
+    );
     return { cells };
   }
 
@@ -259,14 +266,64 @@ export class RevogrHeaderComponent {
             };
             const event = this.beforeGroupHeaderRender.emit(props);
             if (!event.defaultPrevented) {
-              groupRow.push(<GroupHeaderRenderer {...event.detail} />);
+              groupRow.push(
+                h(GroupHeaderRenderer, {
+                  key: this.getGroupHeaderCellKey(event.detail.group, i),
+                  ...event.detail,
+                }),
+              );
             }
           }
         }
       }
-      groupRow.push(<div class={`${HEADER_ROW_CLASS} group`} />);
+      groupRow.push(
+        h('div', {
+          key: `group-row-${i}`,
+          class: {
+            [HEADER_ROW_CLASS]: true,
+            group: true,
+          },
+        }),
+      );
     }
     return groupRow;
+  }
+
+  private getHeaderCellKey(
+    column: ColumnRegular | undefined,
+    type: DimensionCols | 'rowHeaders',
+    duplicateProps: Set<string>,
+  ) {
+    if (column?.prop === undefined) {
+      return `${type}-${String(column?.index)}`;
+    }
+    const propKey = String(column.prop);
+    if (duplicateProps.has(propKey)) {
+      return `${type}-${propKey}-${String(column.index)}`;
+    }
+    return `${type}-${propKey}`;
+  }
+
+  private getDuplicateHeaderProps(columns: HeaderRenderProps[]) {
+    const seenProps = new Set<string>();
+    const duplicateProps = new Set<string>();
+
+    columns.forEach(({ data }) => {
+      if (data?.prop !== undefined) {
+        const propKey = String(data.prop);
+        if (seenProps.has(propKey)) {
+          duplicateProps.add(propKey);
+        } else {
+          seenProps.add(propKey);
+        }
+      }
+    });
+
+    return duplicateProps;
+  }
+
+  private getGroupHeaderCellKey(group: Groups[number][number], level: number) {
+    return `group-${level}-${group.name}-${group.indexes.join('-')}`;
   }
 
   get providers(): ProvidersColumns<DimensionCols | 'rowHeaders'> {

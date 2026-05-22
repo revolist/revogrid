@@ -31,6 +31,10 @@ export type HeaderRenderProps = {
   onDblClick?(data: InitialHeaderClick): void;
 } & Partial<Pick<ResizeProps, 'active'>>;
 
+type KeyedResizableElementHTMLAttributes = ResizableElementHTMLAttributes & {
+  key: string;
+};
+
 const HeaderRenderer = (p: HeaderRenderProps): ReturnType<typeof h> => {
   const cellClass: { [key: string]: boolean } = {
     [HEADER_CLASS]: true,
@@ -39,7 +43,8 @@ const HeaderRenderer = (p: HeaderRenderProps): ReturnType<typeof h> => {
   if (p.data?.order) {
     cellClass[p.data.order] = true;
   }
-  const dataProps: ResizableElementHTMLAttributes = {
+  const dataProps: KeyedResizableElementHTMLAttributes = {
+    key: String(p.data?.prop ?? p.column.itemIndex),
     [DATA_COL]: p.column.itemIndex,
     canResize: p.canResize,
     minWidth: p.data?.minSize || MIN_COL_SIZE,
