@@ -21,18 +21,32 @@ yarn add @revolist/svelte-datagrid;
 ```svelte
 // App.svelte
 <script lang="ts">
-    import { RevoGrid, type ColumnRegular } from '@revolist/svelte-datagrid';
-    const source = [
+  import {
+    Editor,
+    RevoGrid,
+    Template,
+    type ColumnRegular,
+    type Editors,
+  } from '@revolist/svelte-datagrid';
+  import OperationCell from './OperationCell.svelte';
+  import OperationEditor from './OperationEditor.svelte';
+
+  const OPERATION_EDITOR = 'operation';
+
+  const source = [
     {
       name: '1',
       details: 'Item 1',
+      operation: 'Edit',
     },
     {
       name: '2',
       details: 'Item 2',
+      operation: 'Edit',
     },
   ];
-    const columns: ColumnRegular[] = [
+
+  const columns: ColumnRegular[] = [
     {
       prop: 'name',
       name: 'First',
@@ -44,13 +58,27 @@ yarn add @revolist/svelte-datagrid;
       prop: 'details',
       name: 'Second',
     },
+    {
+      prop: 'operation',
+      name: 'Operation',
+      cellTemplate: Template(OperationCell),
+      editor: OPERATION_EDITOR,
+    },
   ];
+
+  const editors: Editors = {
+    [OPERATION_EDITOR]: Editor(OperationEditor),
+  };
 </script>
 
 <main>
-	<RevoGrid {source} {columns}></RevoGrid>
+  <RevoGrid {source} {columns} {editors}></RevoGrid>
 </main>
 ```
+
+`Template(Component)` is the explicit Svelte component bridge for `cellTemplate`.
+Native RevoGrid templates like `cellTemplate(h, props)` still work unchanged.
+Use `Editor(Component)` to register Svelte components as custom editors.
 
 
 [Example and guide](https://rv-grid.com/guide/svelte/)
