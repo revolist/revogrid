@@ -32,4 +32,86 @@ test.describe('rendering', () => {
     );
     await expect(mainDataRows(page)).toHaveCount(source.length);
   });
+
+  test('keeps unchanged header cells stable when columns are replaced', async ({ page }) => {
+    const source: SampleRow[] = [
+      { id: 101, name: 'Alice', role: 'Engineer', city: 'Lisbon' },
+      { id: 102, name: 'Ben', role: 'Designer', city: 'Porto' },
+    ];
+
+    const columns = buildColumns([
+      { prop: 'id', name: 'ID', ...withHeaderTestId('header-id') },
+      { prop: 'name', name: 'Name', ...withHeaderTestId('header-name') },
+      { prop: 'role', name: 'Role', ...withHeaderTestId('header-role') },
+    ]);
+
+    await mountGrid(page, { columns, source });
+
+    await expect(page.locator(SELECTORS.actualHeaderCells)).toHaveCount(3);
+    await page.evaluate((headerSelector: string) => {
+      const headers = Array.from(document.querySelectorAll(headerSelector));
+      const nameHeader = headers.find(
+        header => header.textContent?.trim() === 'Name',
+      );
+      const roleHeader = headers.find(
+        header => header.textContent?.trim() === 'Role',
+      );
+      if (!nameHeader || !roleHeader) {
+        throw new Error('Expected initial headers to be rendered');
+      }
+      (window as any).__stableHeaders = { nameHeader, roleHeader };
+    }, SELECTORS.actualHeaderCells);
+
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      const helpers = (globalThis as any).__revoGridE2EHelpers;
+      if (!grid || !helpers) {
+        throw new Error('Grid or E2E helpers were not found');
+      }
+      grid.columns = [
+        {
+          prop: 'name',
+          name: 'Name',
+          columnProperties: helpers.toColumnProperties('header-name'),
+        },
+        {
+          prop: 'role',
+          name: 'Role',
+          columnProperties: helpers.toColumnProperties('header-role'),
+        },
+        {
+          prop: 'city',
+          name: 'City',
+          columnProperties: helpers.toColumnProperties('header-city'),
+        },
+      ];
+    });
+    await page.waitForChanges();
+
+    await expect(page.locator(SELECTORS.actualHeaderCells)).toHaveCount(3);
+    await expect(page.locator(SELECTORS.actualHeaderCells)).toContainText([
+      'Name',
+      'Role',
+      'City',
+    ]);
+    await expect
+      .poll(() => page.locator(SELECTORS.actualHeaderCells).allTextContents())
+      .toEqual(['Name', 'Role', 'City']);
+    await expect(
+      page.evaluate((headerSelector: string) => {
+        const stable = (window as any).__stableHeaders;
+        const headers = Array.from(document.querySelectorAll(headerSelector));
+        const nameHeader = headers.find(
+          header => header.textContent?.trim() === 'Name',
+        );
+        const roleHeader = headers.find(
+          header => header.textContent?.trim() === 'Role',
+        );
+        return {
+          namePreserved: stable.nameHeader === nameHeader,
+          rolePreserved: stable.roleHeader === roleHeader,
+        };
+      }, SELECTORS.actualHeaderCells),
+    ).resolves.toEqual({ namePreserved: true, rolePreserved: true });
+  });
 });

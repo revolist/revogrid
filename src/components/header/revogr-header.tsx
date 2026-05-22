@@ -218,7 +218,12 @@ export class RevogrHeaderComponent {
       };
       const event = this.beforeHeaderRender.emit(props);
       if (!event.defaultPrevented) {
-        cells.push(<HeaderRenderer {...event.detail} />);
+        cells.push(
+          h(HeaderRenderer, {
+            key: this.getHeaderCellKey(event.detail.data, this.type),
+            ...event.detail,
+          }),
+        );
       }
     }
     return { cells };
@@ -259,14 +264,32 @@ export class RevogrHeaderComponent {
             };
             const event = this.beforeGroupHeaderRender.emit(props);
             if (!event.defaultPrevented) {
-              groupRow.push(<GroupHeaderRenderer {...event.detail} />);
+              groupRow.push(
+                h(GroupHeaderRenderer, {
+                  key: this.getGroupHeaderCellKey(event.detail.group, i),
+                  ...event.detail,
+                }),
+              );
             }
           }
         }
       }
-      groupRow.push(<div class={`${HEADER_ROW_CLASS} group`} />);
+      groupRow.push(
+        <div key={`group-row-${i}`} class={`${HEADER_ROW_CLASS} group`} />,
+      );
     }
     return groupRow;
+  }
+
+  private getHeaderCellKey(
+    column: ColumnRegular | undefined,
+    type: DimensionCols | 'rowHeaders',
+  ) {
+    return `${type}-${String(column?.prop ?? column?.index)}`;
+  }
+
+  private getGroupHeaderCellKey(group: Groups[number][number], level: number) {
+    return `group-${level}-${group.name}-${group.indexes.join('-')}`;
   }
 
   get providers(): ProvidersColumns<DimensionCols | 'rowHeaders'> {

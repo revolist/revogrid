@@ -15,8 +15,13 @@ export type HeaderGroupRendererProps = {
   onResize?(e: ResizeEvent): void;
 } & Partial<Pick<ResizeProps, 'active'>>;
 
+type KeyedGroupCellProps = CellProps & Partial<ResizeProps> & {
+  key: string;
+};
+
 const HeaderGroupRenderer = (p: HeaderGroupRendererProps): ReturnType<typeof h> => {
-  const groupProps: CellProps & Partial<ResizeProps> = {
+  const groupProps: KeyedGroupCellProps = {
+    key: `${p.group.name}-${p.group.indexes.join('-')}`,
     canResize: p.canResize,
     minWidth: p.group.indexes.length * MIN_COL_SIZE,
     maxWidth: 0,
