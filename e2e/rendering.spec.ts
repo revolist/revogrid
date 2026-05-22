@@ -114,4 +114,64 @@ test.describe('rendering', () => {
       }, SELECTORS.actualHeaderCells),
     ).resolves.toEqual({ namePreserved: true, rolePreserved: true });
   });
+
+  test('keeps duplicate-prop header cells distinct when columns are replaced', async ({ page }) => {
+    const source = [
+      { name: 'Alice', role: 'Engineer' },
+      { name: 'Ben', role: 'Designer' },
+    ];
+
+    const columns = buildColumns([
+      { prop: 'name', name: 'First Name', ...withHeaderTestId('first-name') },
+      { prop: 'name', name: 'Second Name', ...withHeaderTestId('second-name') },
+      { prop: 'role', name: 'Role', ...withHeaderTestId('role') },
+    ]);
+
+    await mountGrid(page, { columns, source });
+
+    await expect(page.locator(SELECTORS.actualHeaderCells)).toHaveCount(3);
+    await expect(page.locator(SELECTORS.actualHeaderCells)).toContainText([
+      'First Name',
+      'Second Name',
+      'Role',
+    ]);
+
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      const helpers = (globalThis as any).__revoGridE2EHelpers;
+      if (!grid || !helpers) {
+        throw new Error('Grid or E2E helpers were not found');
+      }
+      grid.columns = [
+        {
+          prop: 'name',
+          name: 'Second Name Updated',
+          columnProperties: helpers.toColumnProperties('second-name-updated'),
+        },
+        {
+          prop: 'name',
+          name: 'First Name Updated',
+          columnProperties: helpers.toColumnProperties('first-name-updated'),
+        },
+        {
+          prop: 'role',
+          name: 'Role',
+          columnProperties: helpers.toColumnProperties('role'),
+        },
+      ];
+    });
+    await page.waitForChanges();
+
+    await expect(page.locator(SELECTORS.actualHeaderCells)).toContainText([
+      'Second Name Updated',
+      'First Name Updated',
+      'Role',
+    ]);
+    await expect(page.getByTestId('second-name-updated')).toHaveText(
+      /Second Name Updated/,
+    );
+    await expect(page.getByTestId('first-name-updated')).toHaveText(
+      /First Name Updated/,
+    );
+  });
 });

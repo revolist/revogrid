@@ -197,7 +197,7 @@ export class RevogrHeaderComponent {
     cols: VirtualPositionItem[],
     range: RangeArea | null,
   ) {
-    const cells: VNode[] = [];
+    const columnsToRender: HeaderRenderProps[] = [];
     for (let rgCol of cols) {
       const colData = this.colData[rgCol.itemIndex];
       const props: HeaderRenderProps = {
@@ -218,14 +218,16 @@ export class RevogrHeaderComponent {
       };
       const event = this.beforeHeaderRender.emit(props);
       if (!event.defaultPrevented) {
-        cells.push(
-          h(HeaderRenderer, {
-            key: this.getHeaderCellKey(event.detail.data, this.type),
-            ...event.detail,
-          }),
-        );
+        columnsToRender.push(event.detail);
       }
     }
+    const duplicateProps = this.getDuplicateHeaderProps(columnsToRender);
+    const cells = columnsToRender.map(detail =>
+      h(HeaderRenderer, {
+        key: this.getHeaderCellKey(detail.data, this.type, duplicateProps),
+        ...detail,
+      }),
+    );
     return { cells };
   }
 
@@ -275,7 +277,13 @@ export class RevogrHeaderComponent {
         }
       }
       groupRow.push(
-        <div key={`group-row-${i}`} class={`${HEADER_ROW_CLASS} group`} />,
+        h('div', {
+          key: `group-row-${i}`,
+          class: {
+            [HEADER_ROW_CLASS]: true,
+            group: true,
+          },
+        }),
       );
     }
     return groupRow;
@@ -284,8 +292,34 @@ export class RevogrHeaderComponent {
   private getHeaderCellKey(
     column: ColumnRegular | undefined,
     type: DimensionCols | 'rowHeaders',
+    duplicateProps: Set<string>,
   ) {
-    return `${type}-${String(column?.prop ?? column?.index)}`;
+    if (typeof column?.prop === 'undefined') {
+      return `${type}-${String(column?.index)}`;
+    }
+    const propKey = String(column.prop);
+    if (duplicateProps.has(propKey)) {
+      return `${type}-${propKey}-${String(column.index)}`;
+    }
+    return `${type}-${propKey}`;
+  }
+
+  private getDuplicateHeaderProps(columns: HeaderRenderProps[]) {
+    const seenProps = new Set<string>();
+    const duplicateProps = new Set<string>();
+
+    columns.forEach(({ data }) => {
+      if (typeof data?.prop !== 'undefined') {
+        const propKey = String(data.prop);
+        if (seenProps.has(propKey)) {
+          duplicateProps.add(propKey);
+        } else {
+          seenProps.add(propKey);
+        }
+      }
+    });
+
+    return duplicateProps;
   }
 
   private getGroupHeaderCellKey(group: Groups[number][number], level: number) {
