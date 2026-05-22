@@ -7,6 +7,7 @@ import {
   isCut,
   isEnterKeyValue,
   isPaste,
+  isShortcutModifier,
   isTab,
   timeout,
   RESIZE_INTERVAL,
@@ -120,7 +121,7 @@ export class KeyboardService {
     }
 
     // pressed letter key
-    if (e.key.length === 1) {
+    if (!isShortcutModifier(e) && e.key.length === 1) {
       this.sv.change(e.key);
       return;
     }
