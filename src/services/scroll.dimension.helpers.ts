@@ -23,7 +23,7 @@ export type ScrollDimension = {
   getRenderOffset(coordinate: number): number;
 };
 
-export function getMaxScrollSize(doc: Document | undefined = typeof document !== 'undefined' ? document : undefined): number {
+export function getMaxScrollSize(doc: Document | undefined = typeof document === 'undefined' ? undefined : document): number {
   if (typeof detectedMaxScrollSize === 'number') {
     return detectedMaxScrollSize;
   }
