@@ -217,21 +217,24 @@ export class FilterPlugin extends BasePlugin {
     }
 
     if (config.collection) {
-      const filtersWithFilterFunctionPresent = Object.entries(
-        config.collection,
-      ).filter(([, item]) => this.filterFunctionsIndexedByType[item.type]);
-      this.filterCollection = Object.fromEntries(
-        filtersWithFilterFunctionPresent,
-      );
+      const filterCollection: Record<ColumnProp, FilterCollectionItem> = {};
+      for (const prop of Object.keys(config.collection)) {
+        const item = config.collection[prop];
+        if (this.filterFunctionsIndexedByType[item.type]) {
+          filterCollection[prop] = item;
+        }
+      }
+      this.filterCollection = filterCollection;
     } else {
       this.filterCollection = {};
     }
 
     if (config.localization) {
       if (config.localization.filterNames) {
-        Object.entries(config.localization.filterNames).forEach(([k, v]) => {
+        const filterNames = config.localization.filterNames;
+        Object.keys(filterNames).forEach((k) => {
           if (this.filterNameIndexByType[k] != void 0) {
-            this.filterNameIndexByType[k] = v;
+            this.filterNameIndexByType[k] = filterNames[k as keyof typeof filterNames];
           }
         });
       }

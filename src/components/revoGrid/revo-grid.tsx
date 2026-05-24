@@ -1169,12 +1169,13 @@ export class RevoGridComponent {
       return;
     }
     const columns = this.columnProvider.setColumns(beforeApplyEvent.detail);
+    const order: SortingOrder = {};
+    for (const prop of Object.keys(beforeApplyEvent.detail.sort)) {
+      order[prop] = beforeApplyEvent.detail.sort[prop].order;
+    }
     this.aftercolumnsset.emit({
       columns,
-      order: Object.entries(beforeApplyEvent.detail.sort).reduce((acc: SortingOrder, [prop, column]) => {
-        acc[prop] = column.order;
-        return acc;
-      }, {}),
+      order,
     });
   }
 

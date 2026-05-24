@@ -16,7 +16,12 @@ import { getCellRaw } from '../../utils/column.utils';
  * Empty maps and properties with `undefined` order are treated as inactive.
  */
 export function hasActiveSorting(sorting?: SortingOrder): boolean {
-  return Object.values(sorting || {}).some(Boolean);
+  for (const prop of Object.keys(sorting || {})) {
+    if (sorting?.[prop]) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /**
@@ -97,12 +102,24 @@ function getDefaultCompareValue(
   return typeof aRaw === 'number' ? aRaw : aRaw?.toString().toLowerCase();
 }
 
+function isEmptyCompareValue(value: any) {
+  return value === '' || value === null || typeof value === 'undefined';
+}
+
 /**
  * Compares two already-normalized default comparer values.
  */
 function compareValues(av: any, bv: any) {
   if (av === bv) {
     return 0;
+  }
+  const aEmpty = isEmptyCompareValue(av);
+  const bEmpty = isEmptyCompareValue(bv);
+  if (aEmpty || bEmpty) {
+    if (aEmpty && bEmpty) {
+      return 0;
+    }
+    return aEmpty ? -1 : 1;
   }
   if (av > bv) {
     return 1;
@@ -261,14 +278,7 @@ export function defaultCellCompare(this: { column?: ColumnRegular }, prop: Colum
   const bRaw = this.column ? getCellRaw(b, this.column) : b?.[prop];
   const av = typeof aRaw === 'number' ? aRaw : aRaw?.toString().toLowerCase();
   const bv = typeof bRaw === 'number' ? bRaw : bRaw?.toString().toLowerCase();
-
-  if (av === bv) {
-    return 0;
-  }
-  if (av > bv) {
-    return 1;
-  }
-  return -1;
+  return compareValues(av, bv);
 }
 
 export function descCellCompare(cmp: CellCompareFunc) {
