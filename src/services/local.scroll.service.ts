@@ -113,6 +113,26 @@ export default class LocalScrollService {
     }
   }
 
+  async setScrollByDelta(
+    e: ViewPortScrollEvent,
+    currentPhysicalCoordinate: number,
+  ): Promise<ViewPortScrollEvent> {
+    const params = this.getParams(e.dimension);
+    const baseCoordinate = this.previousScroll[e.dimension] === NO_COORDINATE
+      ? this.toLogicalCoordinate(currentPhysicalCoordinate, params)
+      : this.previousLogicalScroll[e.dimension];
+    const coordinate = this.wrapLogicalCoordinate(
+      baseCoordinate + (e.delta ?? 0),
+      params,
+    );
+    const nextEvent = {
+      ...e,
+      coordinate,
+    };
+    await this.setScroll(nextEvent);
+    return nextEvent;
+  }
+
   /**
    * On scroll event started
    */
@@ -201,5 +221,9 @@ export default class LocalScrollService {
 
   private toPhysicalCoordinate(coordinate: number, param: Params): number {
     return param.scrollDimension?.toPhysicalCoordinate(coordinate) ?? coordinate;
+  }
+
+  private toLogicalCoordinate(coordinate: number, param: Params): number {
+    return param.scrollDimension?.toLogicalCoordinate(coordinate) ?? coordinate;
   }
 }

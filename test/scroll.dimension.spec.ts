@@ -140,6 +140,35 @@ describe('browser-limit-aware scroll dimensions', () => {
     expect(events).toHaveLength(0);
   });
 
+  it('keeps delta-based setScroll updates in logical pixels under compression', async () => {
+    const applied: any[] = [];
+    const service = new LocalScrollService({
+      skipAnimationFrame: true,
+      runScroll: () => undefined,
+      applyScroll: e => applied.push(e),
+    });
+    service.setParams({
+      contentSize: 100_000,
+      clientSize: 100,
+      virtualSize: 100,
+      maxScrollSize: 1_001_000,
+    }, 'rgRow');
+
+    const nextEvent = await service.setScrollByDelta(
+      {
+        dimension: 'rgRow',
+        coordinate: 0,
+        delta: 10,
+      },
+      450,
+    );
+
+    expect(nextEvent.coordinate).toBe(49_960);
+    expect(applied).toHaveLength(1);
+    expect(applied[0].coordinate).toBeGreaterThan(450);
+    expect(applied[0].coordinate).toBeLessThan(451);
+  });
+
   it('applies logical scroll coordinates back to physical scrollbar positions', async () => {
     const applied: any[] = [];
     const requestAnimationFrame = jest
@@ -202,6 +231,24 @@ describe('browser-limit-aware scroll dimensions', () => {
   });
 
   it('recomputes render offset when viewport size changes', () => {
+    const firstRenderOffset = getScrollDimension({
+      contentSize: 60_000_000,
+      clientSize: 600,
+      virtualSize: 600,
+      maxScrollSize: 16_000_000,
+    }).getRenderOffset(30_000_000);
+    const resizedRenderOffset = getScrollDimension({
+      contentSize: 60_000_000,
+      clientSize: 1_200,
+      virtualSize: 1_200,
+      maxScrollSize: 16_000_000,
+    }).getRenderOffset(30_000_000);
+
+    expect(resizedRenderOffset).toBeGreaterThan(0);
+    expect(resizedRenderOffset).not.toBe(firstRenderOffset);
+  });
+
+  it('stores recomputed render offset in viewport and dimension stores', () => {
     const viewports = new ViewportProvider();
     const dimensions = new DimensionProvider(viewports, {
       realSizeChanged: () => undefined,
@@ -234,8 +281,8 @@ describe('browser-limit-aware scroll dimensions', () => {
     });
     const resizedRenderOffset = viewports.stores.rgRow.store.get('renderOffset');
 
+    expect(firstRenderOffset).toBeGreaterThan(0);
     expect(resizedRenderOffset).toBeGreaterThan(0);
-    expect(resizedRenderOffset).not.toBe(firstRenderOffset);
     expect(rowDimension.store.get('renderOffset')).toBe(resizedRenderOffset);
   });
 

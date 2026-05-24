@@ -125,15 +125,19 @@ export class RevogrViewportScroll implements ElementScroll {
       return;
     }
     if (e.delta) {
+      let currentPhysicalCoordinate = 0;
       switch (e.dimension) {
         case 'rgCol':
-          e.coordinate = this.horizontalScroll.scrollLeft + e.delta;
+          currentPhysicalCoordinate = this.horizontalScroll.scrollLeft;
           break;
         case 'rgRow':
-          e.coordinate = (this.verticalScroll?.scrollTop ?? 0) + e.delta;
+          currentPhysicalCoordinate = this.verticalScroll?.scrollTop ?? 0;
           break;
       }
-      this.setScroll(e);
+      return this.localScrollService?.setScrollByDelta(
+        e,
+        currentPhysicalCoordinate,
+      ) ?? e;
     }
     return e;
   }

@@ -149,7 +149,6 @@ globalThis.setData = async function (config = {}) {
   try {
     // Let the loader paint before data generation starts.
     await new Promise(resolve => setTimeout(resolve, 0));
-    const grid = document.querySelector('revo-grid');
     const data = await generateFakeDataObjectAsync(defaultData, {
       isCanceled: () => generationId !== dataGenerationId,
       onProgress: ({ rows, totalRows }) => {
@@ -163,6 +162,11 @@ globalThis.setData = async function (config = {}) {
     });
 
     if (generationId !== dataGenerationId || !data) {
+      return;
+    }
+
+    const grid = document.querySelector('revo-grid');
+    if (!grid) {
       return;
     }
 
@@ -279,7 +283,7 @@ globalThis.timerUpdate = function (checked, inteval = 3) {
  */
 globalThis.theme = function (theme) {
   const grid = document.querySelector('revo-grid');
-  if (theme && theme.includes('dark')) {
+  if (theme?.includes('dark')) {
     document.documentElement.setAttribute('data-bs-theme', 'dark');
   } else {
     document.documentElement.removeAttribute('data-bs-theme');

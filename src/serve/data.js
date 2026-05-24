@@ -314,10 +314,12 @@ export async function generateFakeDataObjectAsync(config = {}, options = {}) {
     return null;
   }
 
-  onProgress?.({
-    rows,
-    totalRows: rows,
-  });
+  if (!rows || rows % chunkRows !== 0) {
+    onProgress?.({
+      rows,
+      totalRows: rows,
+    });
+  }
 
   return finishData({
     result,

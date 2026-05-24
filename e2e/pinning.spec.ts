@@ -216,4 +216,78 @@ test.describe('pinning', () => {
     await dispatchClipboardEvent(page, 'paste', 'Pinned Paste');
     await expect(pinnedStartCell(page, targetRow + 3, 0)).toHaveText('Pinned Paste');
   });
+
+  test('keeps pinned horizontal wheel transfer logical after compressed deep column scroll', async ({ page }) => {
+    const colSize = 300;
+    const colCount = 120_000;
+    const targetColumn = 110_000;
+
+    await page.setContent(`
+      <div style="width:720px; height:240px;">
+        <revo-grid style="display:block; width:100%; height:100%;"></revo-grid>
+      </div>
+    `);
+    await page.waitForSelector(SELECTORS.grid);
+    await page.evaluate(({ colCount, colSize }) => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) {
+        throw new Error('Grid element was not created');
+      }
+      (window as any).__viewportScrolls = [];
+      grid.addEventListener('viewportscroll', ((event: CustomEvent) => {
+        if (event.detail.dimension === 'rgCol') {
+          (window as any).__viewportScrolls.push(event.detail.coordinate);
+        }
+      }) as EventListener);
+      const cellParser = (model: Record<string, number>, column: { prop: string }) =>
+        `${model.row}:${column.prop}`;
+      grid.columns = [
+        { prop: 'pin', name: 'Pin', pin: 'colPinStart', size: 120 },
+        ...Array.from({ length: colCount }, (_, index) => ({
+          prop: `c${index}`,
+          name: `C ${index}`,
+          size: colSize,
+          cellParser,
+        })),
+      ];
+      grid.source = [{ row: 1, pin: 'Pinned' }];
+      grid.colSize = colSize;
+    }, { colCount, colSize });
+    await page.waitForChanges();
+
+    const logicalContentSize = await callGridMethod<{ x: number }>(page, 'getContentSize');
+    const physicalScrollWidth = await page
+      .locator(SELECTORS.mainViewport)
+      .evaluate((el: HTMLElement) => el.scrollWidth);
+    expect(physicalScrollWidth).toBeLessThan(logicalContentSize.x);
+
+    await callGridMethod(page, 'scrollToColumnIndex', targetColumn);
+    await page.waitForChanges();
+    await expect(dataCell(page, 0, targetColumn)).toHaveText(`1:c${targetColumn}`);
+
+    const beforeWheelCoordinate = await page.evaluate(() => {
+      const scrolls = (window as any).__viewportScrolls || [];
+      return scrolls.at(-1) ?? 0;
+    });
+    await page.locator(SELECTORS.pinnedStartViewport).dispatchEvent('wheel', {
+      bubbles: true,
+      cancelable: true,
+      deltaX: 120,
+    });
+
+    await expect
+      .poll(() =>
+        page.evaluate(() => {
+          const scrolls = (window as any).__viewportScrolls || [];
+          return scrolls.at(-1) ?? 0;
+        }),
+      )
+      .toBeGreaterThan(beforeWheelCoordinate);
+    const afterWheelCoordinate = await page.evaluate(() => {
+      const scrolls = (window as any).__viewportScrolls || [];
+      return scrolls.at(-1) ?? 0;
+    });
+    expect(afterWheelCoordinate - beforeWheelCoordinate).toBeGreaterThanOrEqual(100);
+    expect(afterWheelCoordinate - beforeWheelCoordinate).toBeLessThanOrEqual(140);
+  });
 });

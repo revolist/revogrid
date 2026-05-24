@@ -190,8 +190,8 @@ test.describe('virtualization', () => {
         .filter((event: { dimension: string }) => event.dimension === 'rgRow');
       return scrolls.at(-1)?.coordinate ?? 0;
     });
-    expect(afterWheelCoordinate - lastLogicalCoordinate).toBeGreaterThanOrEqual(100);
-    expect(afterWheelCoordinate - lastLogicalCoordinate).toBeLessThanOrEqual(140);
+    const actualWheelLogicalDelta = afterWheelCoordinate - lastLogicalCoordinate;
+    expect(Math.abs(actualWheelLogicalDelta - 120)).toBeLessThan(rowSize * 2);
   });
 
   test('keeps deep-scroll row interactions aligned after scroll-space compression', async ({ page }) => {

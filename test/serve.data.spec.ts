@@ -42,6 +42,63 @@ describe('serve demo data generation', () => {
     ]);
   });
 
+  it('does not duplicate final progress when rows end on a chunk boundary', async () => {
+    const progress: Array<{ rows: number; totalRows: number }> = [];
+
+    const data = await generateFakeDataObjectAsync(
+      {
+        rows: 4,
+        cols: 2,
+      },
+      {
+        maxCellsPerChunk: 4,
+        onProgress: event => progress.push(event),
+      },
+    );
+
+    expect(data?.rows).toHaveLength(4);
+    expect(progress).toEqual([
+      { rows: 2, totalRows: 4 },
+      { rows: 4, totalRows: 4 },
+    ]);
+  });
+
+  it('reports final progress for an empty async dataset', async () => {
+    const progress: Array<{ rows: number; totalRows: number }> = [];
+
+    const data = await generateFakeDataObjectAsync(
+      {
+        rows: 0,
+        cols: 2,
+      },
+      {
+        maxCellsPerChunk: 4,
+        onProgress: event => progress.push(event),
+      },
+    );
+
+    expect(data?.rows).toHaveLength(0);
+    expect(progress).toEqual([{ rows: 0, totalRows: 0 }]);
+  });
+
+  it('reports final progress when rows do not end on a chunk boundary', async () => {
+    const progress: Array<{ rows: number; totalRows: number }> = [];
+
+    const data = await generateFakeDataObjectAsync(
+      {
+        rows: 5,
+        cols: 2,
+      },
+      {
+        maxCellsPerChunk: 4,
+        onProgress: event => progress.push(event),
+      },
+    );
+
+    expect(data?.rows).toHaveLength(5);
+    expect(progress.at(-1)).toEqual({ rows: 5, totalRows: 5 });
+  });
+
   it('cancels stale async generation before returning data', async () => {
     const progress: Array<{ rows: number; totalRows: number }> = [];
     let canceled = false;

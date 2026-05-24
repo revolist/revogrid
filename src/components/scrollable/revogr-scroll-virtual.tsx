@@ -81,15 +81,12 @@ export class RevogrScrollVirtual {
   @Method()
   async changeScroll(e: ViewPortScrollEvent): Promise<ViewPortScrollEvent> {
     if (e.delta) {
-      switch (e.dimension) {
-        case 'rgCol':
-          e.coordinate = this.element.scrollLeft + e.delta;
-          break;
-        case 'rgRow':
-          e.coordinate = this.element.scrollTop + e.delta;
-          break;
-      }
-      this.setScroll(e);
+      const scrollProperty = e.dimension === 'rgRow' ? 'scrollTop' : 'scrollLeft';
+      const currentPhysicalCoordinate = this.element[scrollProperty];
+      return this.localScrollService.setScrollByDelta(
+        e,
+        currentPhysicalCoordinate,
+      );
     }
     return e;
   }
