@@ -3,6 +3,34 @@ import { getScrollDimension } from '../src/services/scroll.dimension.helpers';
 import DimensionProvider from '../src/services/dimension.provider';
 import ViewportProvider from '../src/services/viewport.provider';
 
+function createScrollDetectionDocument(scrollHeight: number): Document {
+  const element = {
+    appendChild: jest.fn(),
+    remove: jest.fn(),
+    scrollHeight,
+    style: {},
+  };
+  const content = {
+    appendChild: jest.fn(),
+    remove: jest.fn(),
+    scrollHeight: 0,
+    style: {},
+  };
+  const body = {
+    appendChild: jest.fn(),
+    ownerDocument: undefined as unknown,
+  };
+  const doc = {
+    body,
+    createElement: jest
+      .fn()
+      .mockReturnValueOnce(element)
+      .mockReturnValueOnce(content),
+  };
+  body.ownerDocument = doc;
+  return doc as unknown as Document;
+}
+
 describe('browser-limit-aware scroll dimensions', () => {
   it('uses 1:1 coordinates while content fits the physical scroll range', () => {
     const dimension = getScrollDimension({
@@ -82,6 +110,18 @@ describe('browser-limit-aware scroll dimensions', () => {
     expect(dimension.toPhysicalCoordinate(1_000_000)).toBe(900);
     expect(dimension.getRenderOffset(-100)).toBe(0);
     expect(dimension.getRenderOffset(1_000_000)).toBe(99_000);
+  });
+
+  it('does not cache fallback scroll size before document body exists', () => {
+    jest.isolateModules(() => {
+      const helpers = require('../src/services/scroll.dimension.helpers') as typeof import('../src/services/scroll.dimension.helpers');
+      const bodylessDocument = {} as Document;
+
+      expect(helpers.getMaxScrollSize(bodylessDocument)).toBe(16_000_000);
+      expect(
+        helpers.getMaxScrollSize(createScrollDetectionDocument(32_000_000)),
+      ).toBe(31_000_000);
+    });
   });
 
   it('keeps render offset equal to logical coordinate minus mapped physical coordinate', () => {

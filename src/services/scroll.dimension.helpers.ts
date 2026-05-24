@@ -55,10 +55,11 @@ export function getMaxScrollSize(doc: Document | undefined = typeof document ===
     if (detectedMaxScrollSize > SCROLL_SIZE_GUARD) {
       return detectedMaxScrollSize;
     }
+    detectedMaxScrollSize = FALLBACK_MAX_SCROLL_SIZE;
+    return detectedMaxScrollSize;
   }
 
-  detectedMaxScrollSize = FALLBACK_MAX_SCROLL_SIZE;
-  return detectedMaxScrollSize;
+  return FALLBACK_MAX_SCROLL_SIZE;
 }
 
 export function getScrollDimension({
