@@ -67,7 +67,7 @@ export class KeyboardService {
     }
 
     const editCell = this.sv.selectionStore.get('edit');
-    if (typeof editCell?.val !== 'string' || editCell.val.length === 0) {
+    if (typeof editCell?.val !== 'string') {
       return false;
     }
 
