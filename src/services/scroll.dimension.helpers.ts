@@ -27,34 +27,34 @@ export function getMaxScrollSize(doc: Document | undefined = typeof document !==
   if (typeof detectedMaxScrollSize === 'number') {
     return detectedMaxScrollSize;
   }
-  if (!doc?.body) {
-    detectedMaxScrollSize = FALLBACK_MAX_SCROLL_SIZE;
-    return detectedMaxScrollSize;
+  if (doc?.body) {
+    const element = doc.createElement('div');
+    element.style.cssText = [
+      'height:1px',
+      'left:-10000px',
+      'overflow:scroll',
+      'position:absolute',
+      'top:-10000px',
+      'visibility:hidden',
+      'width:1px',
+    ].join(';');
+
+    const content = doc.createElement('div');
+    content.style.height = `${FALLBACK_MAX_SCROLL_SIZE * 4}px`;
+    element.appendChild(content);
+    doc.body.appendChild(element);
+
+    detectedMaxScrollSize = Math.max(
+      0,
+      Math.min(element.scrollHeight, FALLBACK_MAX_SCROLL_SIZE * 4) - SCROLL_SIZE_GUARD,
+    );
+    element.remove();
   }
 
-  const element = doc.createElement('div');
-  element.style.cssText = [
-    'height:1px',
-    'left:-10000px',
-    'overflow:scroll',
-    'position:absolute',
-    'top:-10000px',
-    'visibility:hidden',
-    'width:1px',
-  ].join(';');
-
-  const content = doc.createElement('div');
-  content.style.height = `${FALLBACK_MAX_SCROLL_SIZE * 4}px`;
-  element.appendChild(content);
-  doc.body.appendChild(element);
-
-  detectedMaxScrollSize = Math.max(
-    0,
-    Math.min(element.scrollHeight, FALLBACK_MAX_SCROLL_SIZE * 4) - SCROLL_SIZE_GUARD,
-  );
-  element.remove();
-
-  if (!detectedMaxScrollSize) {
+  if (detectedMaxScrollSize === 0) {
+    detectedMaxScrollSize = FALLBACK_MAX_SCROLL_SIZE;
+  }
+  if (typeof detectedMaxScrollSize === 'undefined') {
     detectedMaxScrollSize = FALLBACK_MAX_SCROLL_SIZE;
   }
   return detectedMaxScrollSize;

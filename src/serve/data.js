@@ -69,10 +69,10 @@ function createColumn(rgCol, {
     // filter: 'myFilterType',
   };
 
-  if (colPinStart.indexOf(rgCol) > -1) {
+  if (colPinStart.includes(rgCol)) {
     column.pin = 'colPinStart';
   }
-  if (colPinEnd.indexOf(rgCol) > -1) {
+  if (colPinEnd.includes(rgCol)) {
     column.pin = 'colPinEnd';
   }
   if (!rgCol) {
@@ -132,7 +132,7 @@ function createRow(rgRow, cols) {
 
 function applyGroupedHeaders(headers, groupedHeader) {
   if (!groupedHeader || headers.length <= 2) {
-    return headers;
+    return;
   }
 
   const grouped = headers.splice(1, Math.min(headers.length - 1, 30));
@@ -167,7 +167,6 @@ function applyGroupedHeaders(headers, groupedHeader) {
       },
     ],
   );
-  return headers;
 }
 
 function getPinnedSets(topPinned, bottomPinned) {
@@ -198,11 +197,12 @@ function addRow({
 }
 
 function finishData({ result, pinnedTopRows, pinnedBottomRows, headers, groupedHeader }) {
+  applyGroupedHeaders(headers, groupedHeader);
   return {
     rows: result,
     pinnedTopRows,
     pinnedBottomRows,
-    headers: applyGroupedHeaders(headers, groupedHeader),
+    headers,
   };
 }
 

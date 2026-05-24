@@ -3,13 +3,13 @@ import { generateFakeDataObjectAsync } from './data.js';
 /**
  * Map of prevented events
  */
-window.eventsPrevented = {};
+globalThis.eventsPrevented = {};
 
 /**
  * Toggle row headers visibility
  * @param {boolean} isShow - Show row headers if true, hide otherwise
  */
-window.showRowHeaders = function (isShow) {
+globalThis.showRowHeaders = function (isShow) {
   const grid = document.querySelector('revo-grid');
   grid.rowHeaders = isShow;
 };
@@ -18,8 +18,8 @@ window.showRowHeaders = function (isShow) {
  * Toggle column grouping visibility
  * @param {boolean} isShow - Show column grouping if true, hide otherwise
  */
-window.showColGrouping = function (isShow) {
-  setData({
+globalThis.showColGrouping = function (isShow) {
+  globalThis.setData({
     groupedHeader: isShow,
   });
 };
@@ -28,7 +28,7 @@ window.showColGrouping = function (isShow) {
  * Set row size
  * @param {number} s - Row size
  */
-window.setRowSize = function (s) {
+globalThis.setRowSize = function (s) {
   const grid = document.querySelector('revo-grid');
   grid.rowSize = s;
 };
@@ -38,7 +38,7 @@ window.setRowSize = function (s) {
  * @param {number} rgRow - Row index
  * @param {string} prop - Column property
  */
-window.setEdit = function (rgRow, prop) {
+globalThis.setEdit = function (rgRow, prop) {
   const grid = document.querySelector('revo-grid');
   grid.setCellEdit(rgRow, prop);
 };
@@ -47,7 +47,7 @@ window.setEdit = function (rgRow, prop) {
  * Scroll to column
  * @param {number} [x=30] - Column index
  */
-window.scrollToCol = function (x = 30) {
+globalThis.scrollToCol = function (x = 30) {
   const grid = document.querySelector('revo-grid');
   grid.scrollToColumnProp(x);
 };
@@ -55,7 +55,7 @@ window.scrollToCol = function (x = 30) {
 /**
  * Clear grouping
  */
-window.clearGrouping = function () {
+globalThis.clearGrouping = function () {
   const grid = document.querySelector('revo-grid');
   grid.grouping = {};
 };
@@ -65,7 +65,7 @@ window.clearGrouping = function () {
  * @param {Array} props - Array of properties to group by
  * @param {boolean} expandedAll - Expand all groups if true, collapse otherwise
  */
-window.setGrouping = function (props = [], expandedAll = false) {
+globalThis.setGrouping = function (props = [], expandedAll = false) {
   const grid = document.querySelector('revo-grid');
   grid.grouping = {
     props,
@@ -82,7 +82,7 @@ window.setGrouping = function (props = [], expandedAll = false) {
  * Set trimmed rows
  * @param {Array} rows - Array of row indexes to trim
  */
-window.setTrimmed = function (rows = []) {
+globalThis.setTrimmed = function (rows = []) {
   const grid = document.querySelector('revo-grid');
   grid.trimmedRows = rows.reduce((r, v) => {
     r[v] = true;
@@ -94,7 +94,7 @@ window.setTrimmed = function (rows = []) {
  * Export grid
  * @param {string} [filename='new file'] - File name
  */
-window.exportGrid = function (filename = 'new file') {
+globalThis.exportGrid = function (filename = 'new file') {
   const grid = document.querySelector('revo-grid');
   grid.getPlugins().then(plugins => {
     plugins.forEach(p => {
@@ -140,7 +140,7 @@ function cancelDataGeneration() {
  * Set data
  * @param {Object} [config={}] - Data configuration
  */
-window.setData = async function (config = {}) {
+globalThis.setData = async function (config = {}) {
   defaultData = { ...defaultData, ...config };
   const generationId = ++dataGenerationId;
   const totalCells = defaultData.rows * defaultData.cols;
@@ -180,10 +180,10 @@ window.setData = async function (config = {}) {
   }
 };
 
-window.setRtl = function (checked) {
+globalThis.setRtl = function (checked) {
   const grid = document.querySelector('revo-grid');
   grid.rtl = checked;
-  window.document.dir = checked ? 'rtl' : 'ltr';
+  globalThis.document.dir = checked ? 'rtl' : 'ltr';
 };
 
 /**
@@ -191,7 +191,7 @@ window.setRtl = function (checked) {
  * @param {string} type - Type of pinned rows/columns
  * @param {boolean} checked - True if rows/columns are pinned, false otherwise
  */
-window.setPinned = function (type, checked) {
+globalThis.setPinned = function (type, checked) {
   const val = [];
   if (checked) {
     switch (type) {
@@ -209,7 +209,7 @@ window.setPinned = function (type, checked) {
         break;
     }
   }
-  setData({
+  globalThis.setData({
     [type]: val,
   });
 };
@@ -219,8 +219,8 @@ window.setPinned = function (type, checked) {
  * @param {string} name - Event name
  * @param {boolean} checked - True if event should be prevented, false otherwise
  */
-window.preventEvent = function (name, checked) {
-  eventsPrevented[name] = checked;
+globalThis.preventEvent = function (name, checked) {
+  globalThis.eventsPrevented[name] = checked;
 };
 
 let keys = 2;
@@ -230,7 +230,7 @@ let attrs = {};
  * Toggle visibility of grid
  * @param {boolean} checked - True if grid is visible, false otherwise
  */
-window.toggleVisibility = function (checked) {
+globalThis.toggleVisibility = function (checked) {
   if (!checked) {
     const grid = document.querySelector('revo-grid');
     attrs = {};
@@ -252,7 +252,7 @@ window.toggleVisibility = function (checked) {
     });
     grid.setAttribute('key', keys++);
     holder.appendChild(grid);
-    setData();
+    globalThis.setData();
   }
 };
 
@@ -263,7 +263,7 @@ let timerUpdateInterval;
  * @param {boolean} checked - True if timer should be updated, false otherwise
  * @param {number} [inteval=3] - Update interval in seconds
  */
-window.timerUpdate = function (checked, inteval = 3) {
+globalThis.timerUpdate = function (checked, inteval = 3) {
   clearInterval(timerUpdateInterval);
   if (checked) {
     timerUpdateInterval = setInterval(() => {
@@ -277,9 +277,9 @@ window.timerUpdate = function (checked, inteval = 3) {
  * Set theme
  * @param {string} theme - Theme name
  */
-window.theme = function (theme) {
+globalThis.theme = function (theme) {
   const grid = document.querySelector('revo-grid');
-  if (theme && theme.indexOf('dark') > -1) {
+  if (theme && theme.includes('dark')) {
     document.documentElement.setAttribute('data-bs-theme', 'dark');
   } else {
     document.documentElement.removeAttribute('data-bs-theme');
@@ -287,26 +287,26 @@ window.theme = function (theme) {
   grid.theme = theme || 'default';
 };
 
-window.onload = onLoad;
+globalThis.onload = onLoad;
 
-window.clearFilter = () => {
+globalThis.clearFilter = () => {
   const grid = document.querySelector('revo-grid');
   grid.filter = {};
 };
 
-window.sortColumn = (columnProp= 0, additive = false) => {
+globalThis.sortColumn = (columnProp= 0, additive = false) => {
   const grid = document.querySelector('revo-grid');
   grid.updateColumnSorting({
     prop: columnProp,
   }, 'asc', additive);
 };
 
-window.clearSorting = () => {
+globalThis.clearSorting = () => {
   const grid = document.querySelector('revo-grid');
   grid.clearSorting();
 };
 
-window.setFilter = () => {
+globalThis.setFilter = () => {
   const grid = document.querySelector('revo-grid');
   const filterFunc = (cellValue, extraValue) => {
     if (!cellValue) {
@@ -347,7 +347,7 @@ window.setFilter = () => {
  * Deep groups should align with a1/a2/a3/b1/b2/b3.
  * https://github.com/revolist/revogrid/issues/828
  */
-window.setColumnGroupOffsetBugDemo = () => {
+globalThis.setColumnGroupOffsetBugDemo = () => {
   cancelDataGeneration();
   const grid = document.querySelector('revo-grid');
 
@@ -434,7 +434,7 @@ function onLoad() {
   const events = ['aftercolumnresize'];
   events.forEach(e => {
     grid.addEventListener(e, $e => {
-      if (window.eventsPrevented[e]) {
+      if (globalThis.eventsPrevented[e]) {
         $e.preventDefault();
       }
       console.log(
