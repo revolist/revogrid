@@ -311,7 +311,19 @@ export class SortingPlugin extends BasePlugin {
   startSorting(
     order?: SortingOrder,
     sortingFunc?: SortingOrderFunction,
+    ignoreViewportUpdate?: boolean,
+  ): void;
+  startSorting(
+    order?: SortingOrder,
+    sortingFunc?: SortingOrderFunction,
     sortingColumns?: SortingColumnMap,
+    sortingOrder?: SortingColumnOrder,
+    ignoreViewportUpdate?: boolean,
+  ): void;
+  startSorting(
+    order?: SortingOrder,
+    sortingFunc?: SortingOrderFunction,
+    sortingColumns?: SortingColumnMap | boolean,
     sortingOrder?: SortingColumnOrder,
     ignoreViewportUpdate?: boolean,
   ) {
@@ -322,6 +334,10 @@ export class SortingPlugin extends BasePlugin {
           this.sortingPromise = resolve;
         }),
       );
+    }
+    if (typeof sortingColumns === 'boolean') {
+      this.postponeSort(order, sortingFunc, undefined, undefined, sortingColumns);
+      return;
     }
     this.postponeSort(order, sortingFunc, sortingColumns, sortingOrder, ignoreViewportUpdate);
   }
@@ -402,10 +418,28 @@ export class SortingPlugin extends BasePlugin {
   runSorting(
     order?: SortingOrder,
     comparison?: SortingOrderFunction,
+    ignoreViewportUpdate?: boolean,
+  ): void;
+  runSorting(
+    order?: SortingOrder,
+    comparison?: SortingOrderFunction,
     sortingColumns?: SortingColumnMap,
+    sortingOrder?: SortingColumnOrder,
+    ignoreViewportUpdate?: boolean,
+  ): void;
+  runSorting(
+    order?: SortingOrder,
+    comparison?: SortingOrderFunction,
+    sortingColumns?: SortingColumnMap | boolean,
     sortingOrder?: SortingColumnOrder,
     ignoreViewportUpdate?: boolean
   ) {
+    if (typeof sortingColumns === 'boolean') {
+      this.sort(order, comparison, undefined, undefined, undefined, sortingColumns);
+      this.sortingPromise?.();
+      this.sortingPromise = null;
+      return;
+    }
     this.sort(order, comparison, sortingColumns, sortingOrder, undefined, ignoreViewportUpdate);
     this.sortingPromise?.();
     this.sortingPromise = null;
@@ -427,14 +461,41 @@ export class SortingPlugin extends BasePlugin {
   sort(
     sorting?: SortingOrder,
     sortingFunc?: SortingOrderFunction,
+    types?: DimensionRows[],
+    ignoreViewportUpdate?: boolean,
+  ): void;
+  sort(
+    sorting?: SortingOrder,
+    sortingFunc?: SortingOrderFunction,
     sortingColumns?: SortingColumnMap,
     sortingOrder?: SortingColumnOrder,
+    types?: DimensionRows[],
+    ignoreViewportUpdate?: boolean,
+  ): void;
+  sort(
+    sorting?: SortingOrder,
+    sortingFunc?: SortingOrderFunction,
+    sortingColumns?: SortingColumnMap | DimensionRows[],
+    sortingOrder?: SortingColumnOrder | boolean,
     types: DimensionRows[] = rowTypes,
     ignoreViewportUpdate = false
   ) {
+    let activeSortingColumns: SortingColumnMap | undefined;
+    let activeSortingOrder: SortingColumnOrder | undefined;
+    let activeTypes = types;
+    let activeIgnoreViewportUpdate = ignoreViewportUpdate;
+
+    if (Array.isArray(sortingColumns)) {
+      activeTypes = sortingColumns;
+      activeIgnoreViewportUpdate = typeof sortingOrder === 'boolean' ? sortingOrder : false;
+    } else {
+      activeSortingColumns = sortingColumns;
+      activeSortingOrder = Array.isArray(sortingOrder) ? sortingOrder : undefined;
+    }
+
     // if no sorting - reset
     if (!Object.keys(sorting || {}).length) {
-      for (let type of types) {
+      for (let type of activeTypes) {
         const storeService = this.providers.data.stores[type];
         // row data
         const source = storeService.store.get('source');
@@ -446,7 +507,7 @@ export class SortingPlugin extends BasePlugin {
         storeService.setData({ proxyItems: newItemsOrder });
       }
     } else {
-      for (let type of types) {
+      for (let type of activeTypes) {
         const storeService = this.providers.data.stores[type];
         // row data
         const source = storeService.store.get('source');
@@ -459,8 +520,8 @@ export class SortingPlugin extends BasePlugin {
           source,
           sortingFunc,
           sorting,
-          sortingColumns,
-          sortingOrder,
+          activeSortingColumns,
+          activeSortingOrder,
         );
         const newItemsOrder = mergeSortedRowsWithGroups(proxyItems, source, sortedItems);
        
@@ -471,7 +532,7 @@ export class SortingPlugin extends BasePlugin {
         });
         // take currently visible row indexes
         const newItems = storeService.store.get('items');
-        if (!ignoreViewportUpdate) {
+        if (!activeIgnoreViewportUpdate) {
           this.providers.dimension
             .updateSizesPositionByNewDataIndexes(type, newItems, prevItems);
         }

@@ -130,6 +130,28 @@ describe('sortIndexByItems', () => {
     expect(result).toEqual([1, 2, 0]);
   });
 
+  it('precomputes default parsed values once per sorted row', () => {
+    const parsedSource = [
+      { name: 'Charlie' },
+      { name: 'Alice' },
+      { name: 'Bob' },
+    ];
+    const cellParser = jest.fn((row: any) => row.name);
+    const column = { prop: 'name', cellParser } as any;
+    const cmp = getComparer(column, 'asc');
+
+    const result = sortIndexByItems(
+      [0, 1, 2],
+      parsedSource,
+      { name: cmp },
+      { name: 'asc' },
+      { name: column },
+    );
+
+    expect(result).toEqual([1, 2, 0]);
+    expect(cellParser).toHaveBeenCalledTimes(parsedSource.length);
+  });
+
   it('sorts by multiple columns in entry order', () => {
     const multiSource = [
       { team: 'Core', priority: 2, name: 'B' },
@@ -698,6 +720,27 @@ describe('SortingPlugin regressions', () => {
       [0, 2],
     );
     expect(rowStore.state.source).toBe(source);
+  });
+
+  it('keeps the public sort(types, ignoreViewportUpdate) call shape compatible', () => {
+    const source = [{ name: 'A' }, { name: 'B' }];
+    const { plugin, providers, rowStore } = createPlugin(source);
+    const customDesc = jest.fn((prop: string, a: any, b: any) => {
+      return b[prop].localeCompare(a[prop]);
+    });
+
+    plugin.sort(
+      { name: 'asc' },
+      { name: customDesc },
+      ['rgRow'],
+      true,
+    );
+
+    expect(customDesc).toHaveBeenCalled();
+    expect(rowStore.setData).toHaveBeenCalledWith({ proxyItems: [1, 0] });
+    expect(providers.data.stores.rowPinStart.setData).not.toHaveBeenCalled();
+    expect(providers.data.stores.rowPinEnd.setData).not.toHaveBeenCalled();
+    expect(providers.dimension.updateSizesPositionByNewDataIndexes).not.toHaveBeenCalled();
   });
 });
 
