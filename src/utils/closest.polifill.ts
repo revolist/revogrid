@@ -1,20 +1,14 @@
-(function closest() {
-  if (!Element.prototype.matches) {
-    Element.prototype.matches =
-      ((Element.prototype as unknown) as { msMatchesSelector: (selectors: string) => boolean }).msMatchesSelector || Element.prototype.webkitMatchesSelector;
-  }
+export function closest(el: Element, s: string): Element | null {
+  const matches =
+    Element.prototype.matches ||
+    ((Element.prototype as unknown) as { msMatchesSelector: (selectors: string) => boolean }).msMatchesSelector ||
+    Element.prototype.webkitMatchesSelector;
 
-  if (!Element.prototype.closest) {
-    Element.prototype.closest = function (s: string) {
-      let el: HTMLElement | Element | (Node & ParentNode) | null = this;
-
-      do {
-        if (Element.prototype.matches.call(el, s)) {
-          return el;
-        }
-        el = el.parentElement || el.parentNode;
-      } while (el !== null && el.nodeType === 1);
-      return null;
-    };
-  }
-})();
+  do {
+    if (matches.call(el, s)) {
+      return el;
+    }
+    el = (el.parentElement || el.parentNode) as Element;
+  } while (el !== null && el.nodeType === 1);
+  return null;
+}
