@@ -1,4 +1,3 @@
-import size from 'lodash/size';
 import debounce from 'lodash/debounce';
 
 import { BasePlugin } from '../base.plugin';
@@ -8,10 +7,22 @@ import type {
   DimensionRows,
   PluginProviders,
 } from '@type';
-import type { SortingConfig, SortingOrder, SortingOrderFunction } from './sorting.types';
+import type {
+  SortingColumnMap,
+  SortingColumnOrder,
+  SortingConfig,
+  SortingOrder,
+  SortingOrderFunction,
+} from './sorting.types';
 import { getColumnByProp } from '../../utils/column.utils';
 import { columnTypes, rowTypes } from '@store';
-import { getComparer, getNextOrder, sortIndexByItems } from './sorting.func';
+import {
+  getComparer,
+  getNextOrder,
+  getSortingIndex,
+  hasActiveSorting,
+  sortIndexByItems,
+} from './sorting.func';
 
 export * from './sorting.types';
 export * from './sorting.func';
@@ -28,22 +39,53 @@ export * from './sorting.sign';
  */
 
 export class SortingPlugin extends BasePlugin {
-  // Current sorting order per column prop
+  /**
+   * Current sorting order per column property.
+   */
   sorting?: SortingOrder;
 
-  // Each column sorting function, multiple columns sorting supported
-  sortingFunc?: SortingOrderFunction;
   /**
-   * Delayed sorting promise
+   * Comparator functions indexed by column property.
+   *
+   * Multiple columns can be sorted at the same time.
+   */
+  sortingFunc?: SortingOrderFunction;
+
+  /**
+   * Column metadata for the current sorting state.
+   *
+   * Used internally to optimize default sorting without changing comparator
+   * functions or their public API contract.
+   */
+  private sortingColumns?: SortingColumnMap;
+
+  /**
+   * Active sorting priority in click/config insertion order.
+   *
+   * Required for numeric column props because object key iteration does not
+   * preserve insertion order for integer-like keys.
+   */
+  private sortingOrder?: SortingColumnOrder;
+
+  /**
+   * Delayed sorting promise registered in the grid render job queue.
    */
   sortingPromise: (() => void) | null = null;
 
   /**
-   * We need to sort only so often
+   * Debounced sorting entry point.
+   *
+   * Sorting can be requested by column changes, source changes, and header
+   * clicks in quick succession, so the actual sort is delayed and coalesced.
    */
   postponeSort = debounce(
-    (order?: SortingOrder, comparison?: SortingOrderFunction, ignoreViewportUpdate?: boolean) =>
-      this.runSorting(order, comparison, ignoreViewportUpdate),
+    (
+      order?: SortingOrder,
+      comparison?: SortingOrderFunction,
+      sortingColumns?: SortingColumnMap,
+      sortingOrder?: SortingColumnOrder,
+      ignoreViewportUpdate?: boolean,
+    ) => this.runSorting(order, comparison, sortingColumns, sortingOrder, ignoreViewportUpdate),
     50,
   );
 
@@ -54,29 +96,48 @@ export class SortingPlugin extends BasePlugin {
   ) {
     super(revogrid, providers);
 
+    /**
+     * Normalizes external sorting configuration into internal order,
+     * comparator, and column metadata maps.
+     */
     const setConfig = (cfg?: SortingConfig) => {
       if (cfg) {
-        const sortingFunc: SortingOrderFunction = {};
-        const order: SortingOrder = {};
+        const sortingFunc: SortingOrderFunction = cfg.additive
+          ? { ...this.sortingFunc }
+          : {};
+        const sortingColumns: SortingColumnMap = cfg.additive
+          ? { ...this.sortingColumns }
+          : {};
+        const sortingOrder: SortingColumnOrder = cfg.additive
+          ? [...(this.sortingOrder || [])]
+          : [];
+        const order: SortingOrder = cfg.additive
+          ? { ...this.sorting }
+          : {};
+
         cfg.columns?.forEach(col => {
-          sortingFunc[col.prop] = getComparer(col, col.order);
-          order[col.prop] = col.order;
+          if (col.order) {
+            sortingFunc[col.prop] = getComparer(col, col.order);
+            sortingColumns[col.prop] = col;
+            order[col.prop] = col.order;
+            if (!sortingOrder.some(prop => String(prop) === String(col.prop))) {
+              sortingOrder.push(col.prop);
+            }
+          } else {
+            delete sortingFunc[col.prop];
+            delete sortingColumns[col.prop];
+            delete order[col.prop];
+            const index = sortingOrder.findIndex(prop => String(prop) === String(col.prop));
+            if (index >= 0) {
+              sortingOrder.splice(index, 1);
+            }
+          }
         });
 
-        if (cfg.additive) {
-          this.sorting = {
-            ...this.sorting,
-            ...order,
-          };
-          this.sortingFunc = {
-            ...this.sortingFunc,
-            ...sortingFunc,
-          };
-        } else {
-          // // set sorting
-          this.sorting = order;
-          this.sortingFunc = sortingFunc;
-        }
+        this.sorting = hasActiveSorting(order) ? order : undefined;
+        this.sortingFunc = this.sorting ? sortingFunc : undefined;
+        this.sortingColumns = this.sorting ? sortingColumns : undefined;
+        this.sortingOrder = this.sorting ? sortingOrder : undefined;
       }
     }
 
@@ -85,7 +146,7 @@ export class SortingPlugin extends BasePlugin {
     this.addEventListener('sortingconfigchanged', ({ detail }) => {
       config = detail;
       setConfig(detail);
-      this.startSorting(this.sorting, this.sortingFunc);
+      this.startSorting(this.sorting, this.sortingFunc, this.sortingColumns, this.sortingOrder);
     });
 
     this.addEventListener('beforeheaderrender', ({
@@ -96,6 +157,7 @@ export class SortingPlugin extends BasePlugin {
         detail.data = {
           ...column,
           order: this.sorting?.[column.prop],
+          sortIndex: getSortingIndex(this.sorting, column.prop, this.sortingOrder),
         };
       }
     });
@@ -104,12 +166,12 @@ export class SortingPlugin extends BasePlugin {
       detail: { type },
     }) => {
       // if sorting was provided - sort data
-      if (!!this.sorting && this.sortingFunc) {
+      if (hasActiveSorting(this.sorting) && this.sortingFunc) {
         const event = this.emit('beforesourcesortingapply', { type, sorting: this.sorting });
         if (event.defaultPrevented) {
           return;
         }
-        this.startSorting(this.sorting, this.sortingFunc);
+        this.startSorting(this.sorting, this.sortingFunc, this.sortingColumns, this.sortingOrder);
       }
     });
     this.addEventListener('aftercolumnsset', ({
@@ -122,18 +184,29 @@ export class SortingPlugin extends BasePlugin {
 
       const columns = this.providers.column.getColumns();
       const sortingFunc: SortingOrderFunction = {};
+      const sortingColumns: SortingColumnMap = {};
+      const sortingOrder: SortingColumnOrder = [];
+      const sorting: SortingOrder = {};
 
       for (let prop in order) {
-        const cmp = getComparer(
-          getColumnByProp(columns, prop),
-          order[prop],
-        );
-        sortingFunc[prop] = cmp;
+        if (order[prop]) {
+          const column = getColumnByProp(columns, prop);
+          const cmp = getComparer(
+            column,
+            order[prop],
+          );
+          sorting[prop] = order[prop];
+          sortingFunc[prop] = cmp;
+          sortingColumns[prop] = column;
+          sortingOrder.push(prop);
+        }
       }
 
       // set sorting
-      this.sorting = order;
-      this.sortingFunc = order && sortingFunc;
+      this.sorting = hasActiveSorting(sorting) ? sorting : undefined;
+      this.sortingFunc = this.sorting ? sortingFunc : undefined;
+      this.sortingColumns = this.sorting ? sortingColumns : undefined;
+      this.sortingOrder = this.sorting ? sortingOrder : undefined;
     });
     this.addEventListener('beforeheaderclick', (e) => {
       if (e.defaultPrevented) {
@@ -152,9 +225,21 @@ export class SortingPlugin extends BasePlugin {
   }
 
   /**
-   * Entry point for sorting, waits for all delays, registers jobs
+   * Schedules sorting before the next render.
+   *
+   * @param order - Active sorting order by column property.
+   * @param sortingFunc - Comparator functions by column property.
+   * @param sortingColumns - Column metadata by property.
+   * @param sortingOrder - Active sorting priority in click/config insertion order.
+   * @param ignoreViewportUpdate - Skips dimension position recalculation when true.
    */
-  startSorting(order?: SortingOrder, sortingFunc?: SortingOrderFunction, ignoreViewportUpdate?: boolean) {
+  startSorting(
+    order?: SortingOrder,
+    sortingFunc?: SortingOrderFunction,
+    sortingColumns?: SortingColumnMap,
+    sortingOrder?: SortingColumnOrder,
+    ignoreViewportUpdate?: boolean,
+  ) {
     if (!this.sortingPromise) {
       // add job before render
       this.revogrid.jobsBeforeRender.push(
@@ -163,13 +248,15 @@ export class SortingPlugin extends BasePlugin {
         }),
       );
     }
-    this.postponeSort(order, sortingFunc, ignoreViewportUpdate);
+    this.postponeSort(order, sortingFunc, sortingColumns, sortingOrder, ignoreViewportUpdate);
   }
 
 
   /**
-   * Apply sorting to data on header click
-   * If additive - add to existing sorting, multiple columns can be sorted
+   * Applies sorting requested by a sortable header click.
+   *
+   * @param column - Column that initiated sorting.
+   * @param additive - If true, add/remove this column from the current multi-sort state.
    */
   headerclick(column: ColumnRegular, additive: boolean) {
     const columnProp = column.prop;
@@ -191,63 +278,90 @@ export class SortingPlugin extends BasePlugin {
     }
     const cmp = getComparer(beforeApplyEvent.detail.column, beforeApplyEvent.detail.order);
 
-    if (beforeApplyEvent.detail.additive && this.sorting) {
-      const sorting: SortingOrder = {};
-      const sortingFunc: SortingOrderFunction = {};
+    if (beforeApplyEvent.detail.additive) {
+      const sorting: SortingOrder = { ...this.sorting };
+      const sortingFunc: SortingOrderFunction = { ...this.sortingFunc };
+      const sortingColumns: SortingColumnMap = { ...this.sortingColumns };
+      const sortingOrder: SortingColumnOrder = [...(this.sortingOrder || [])];
 
-      if (columnProp in sorting && size(sorting) > 1 && order === undefined) {
-        delete sorting[columnProp];
-        delete sortingFunc[columnProp];
-      } else {
+      if (order) {
         sorting[columnProp] = order;
         sortingFunc[columnProp] = cmp;
-      }      
+        sortingColumns[columnProp] = beforeApplyEvent.detail.column;
+        if (!sortingOrder.some(prop => String(prop) === String(columnProp))) {
+          sortingOrder.push(columnProp);
+        }
+      } else {
+        delete sorting[columnProp];
+        delete sortingFunc[columnProp];
+        delete sortingColumns[columnProp];
+        const index = sortingOrder.findIndex(prop => String(prop) === String(columnProp));
+        if (index >= 0) {
+          sortingOrder.splice(index, 1);
+        }
+      }
 
-      this.sorting = {
-        ...this.sorting,
-        ...sorting,
-      };
-      
-      // extend sorting function with new sorting for multiple columns sorting
-      this.sortingFunc = {
-        ...this.sortingFunc,
-        ...sortingFunc,
-      };
+      this.sorting = hasActiveSorting(sorting) ? sorting : undefined;
+      this.sortingFunc = this.sorting ? sortingFunc : undefined;
+      this.sortingColumns = this.sorting ? sortingColumns : undefined;
+      this.sortingOrder = this.sorting ? sortingOrder : undefined;
     } else {
       if (order) {
         // reset sorting
         this.sorting = { [columnProp]: order };
         this.sortingFunc = { [columnProp]: cmp };
+        this.sortingColumns = { [columnProp]: beforeApplyEvent.detail.column };
+        this.sortingOrder = [columnProp];
       } else {
-        delete this.sorting?.[columnProp];
-        delete this.sortingFunc?.[columnProp];
+        this.sorting = undefined;
+        this.sortingFunc = undefined;
+        this.sortingColumns = undefined;
+        this.sortingOrder = undefined;
       }
     }
 
-    this.startSorting(this.sorting, this.sortingFunc);
+    this.startSorting(this.sorting, this.sortingFunc, this.sortingColumns, this.sortingOrder);
   }
 
+  /**
+   * Runs a scheduled sort and resolves the render-blocking sorting promise.
+   *
+   * @param order - Active sorting order by column property.
+   * @param comparison - Comparator functions by column property.
+   * @param sortingColumns - Column metadata by property.
+   * @param sortingOrder - Active sorting priority in click/config insertion order.
+   * @param ignoreViewportUpdate - Skips dimension position recalculation when true.
+   */
   runSorting(
     order?: SortingOrder,
     comparison?: SortingOrderFunction,
+    sortingColumns?: SortingColumnMap,
+    sortingOrder?: SortingColumnOrder,
     ignoreViewportUpdate?: boolean
   ) {
-    this.sort(order, comparison, undefined, ignoreViewportUpdate);
+    this.sort(order, comparison, sortingColumns, sortingOrder, undefined, ignoreViewportUpdate);
     this.sortingPromise?.();
     this.sortingPromise = null;
   }
 
   /**
-   * Sort items by sorting function
+   * Sorts row proxy indexes by sorting functions.
+   *
    * @requires proxyItems applied to row store
    * @requires source applied to row store
    *
    * @param sorting - per column sorting
-   * @param data - this.stores['rgRow'].store.get('source')
+   * @param sortingFunc - Comparator functions by column property.
+   * @param sortingColumns - Column metadata by property.
+   * @param sortingOrder - Active sorting priority in click/config insertion order.
+   * @param types - Row stores to sort.
+   * @param ignoreViewportUpdate - Skips dimension position recalculation when true.
    */
   sort(
     sorting?: SortingOrder,
     sortingFunc?: SortingOrderFunction,
+    sortingColumns?: SortingColumnMap,
+    sortingOrder?: SortingColumnOrder,
     types: DimensionRows[] = rowTypes,
     ignoreViewportUpdate = false
   ) {
@@ -262,7 +376,7 @@ export class SortingPlugin extends BasePlugin {
         // row indexes
         const newItemsOrder = Array.from({ length: source.length }, (_, i) => i); // recover indexes range(0, source.length)
         this.providers.dimension.updateSizesPositionByNewDataIndexes(type, newItemsOrder, proxyItems);
-        storeService.setData({ proxyItems: newItemsOrder, source: [...source], });
+        storeService.setData({ proxyItems: newItemsOrder });
       }
     } else {
       for (let type of types) {
@@ -276,13 +390,15 @@ export class SortingPlugin extends BasePlugin {
           [...proxyItems],
           source,
           sortingFunc,
+          sorting,
+          sortingColumns,
+          sortingOrder,
         );
        
         // take row indexes before trim applied and proxy items
         const prevItems = storeService.store.get('items');
         storeService.setData({
           proxyItems: newItemsOrder,
-          source: [...source],
         });
         // take currently visible row indexes
         const newItems = storeService.store.get('items');
@@ -299,5 +415,3 @@ export class SortingPlugin extends BasePlugin {
     this.emit('aftersortingapply');
   }
 }
-
-

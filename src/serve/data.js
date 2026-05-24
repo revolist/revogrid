@@ -76,7 +76,6 @@ function createColumn(rgCol, {
     column.pin = 'colPinEnd';
   }
   if (!rgCol) {
-    column.order = 'desc';
     column.sortable = true;
     column.cellProperties = ({ rowIndex }) => {
       return {

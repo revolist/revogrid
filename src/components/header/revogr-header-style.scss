@@ -37,22 +37,34 @@ revogr-header {
       cursor: pointer;
     }
 
-    i {
-      &.asc,
-      &.desc {
-        &:after {
-          font-size: 13px;
+    .sort-indicator {
+      display: inline-flex;
+      align-items: flex-start;
+      gap: 1px;
+
+      i {
+        &.asc,
+        &.desc {
+          &:after {
+            font-size: 13px;
+          }
+        }
+        &.asc {
+          &:after {
+            content: '↑';
+          }
+        }
+        &.desc {
+          &:after {
+            content: '↓';
+          }
         }
       }
-      &.asc {
-        &:after {
-          content: '↑';
-        }
-      }
-      &.desc {
-        &:after {
-          content: '↓';
-        }
+
+      .sort-order-index {
+        font-size: 10px;
+        line-height: 1;
+        top: 0;
       }
     }
     &.active {
