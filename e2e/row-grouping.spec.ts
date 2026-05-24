@@ -32,6 +32,10 @@ test.describe('row grouping', () => {
       grouping: {
         props: ['team'],
         expandedAll: true,
+        prevExpanded: {
+          North: true,
+          South: true,
+        },
       },
       rowHeaders: true,
     });
@@ -267,6 +271,54 @@ test.describe('row grouping', () => {
       'South',
       'North',
     ]);
+  });
+
+  test('does not reopen collapsed groups when sorting', async ({ page }) => {
+    const source = [
+      { id: 1, name: 'Charlie', role: 'Engineer', city: 'Lisbon', team: 'North' },
+      { id: 2, name: 'Alice', role: 'Designer', city: 'Porto', team: 'North' },
+      { id: 3, name: 'Dan', role: 'Analyst', city: 'Coimbra', team: 'South' },
+      { id: 4, name: 'Ben', role: 'Manager', city: 'Braga', team: 'South' },
+    ];
+
+    const columns = buildColumns([
+      { prop: 'id', name: 'ID' },
+      {
+        prop: 'name',
+        name: 'Name',
+        sortable: true,
+        ...withHeaderTestId('group-sort-preserve-collapse-name'),
+      },
+      { prop: 'role', name: 'Role' },
+      { prop: 'city', name: 'City' },
+    ]);
+
+    await mountGrid(page, {
+      columns,
+      source,
+      grouping: {
+        props: ['team'],
+        expandedAll: true,
+      },
+      rowHeaders: true,
+    });
+
+    const mainGroupRows = page.locator(`${SELECTORS.mainViewport} .groupingRow`);
+    await mainGroupRows
+      .filter({ hasText: 'North' })
+      .locator(SELECTORS.groupExpandButton)
+      .click();
+
+    await expectVisibleColumnValues(page, 1, ['Dan', 'Ben']);
+
+    await page.getByTestId('group-sort-preserve-collapse-name').click();
+
+    await expect(page.locator(`${SELECTORS.mainViewport} .groupingRow`)).toContainText([
+      'North',
+      'South',
+    ]);
+    await expect(mainGroupRows).toHaveCount(2);
+    await expectVisibleColumnValues(page, 1, ['Ben', 'Dan']);
   });
 
   test('allows row reordering inside a group and blocks dragging across groups', async ({ page }) => {

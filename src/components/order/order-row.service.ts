@@ -60,11 +60,12 @@ export default class RowOrderService {
   getRow(y: number, { el, rows }: EventData): PositionItem {
     const { top } = el.getBoundingClientRect();
     const topRelative = y - top;
-    const rgRow = getItemByPosition(rows, topRelative);
+    const rowOffset = rows.renderOffset || 0;
+    const rgRow = getItemByPosition(rows, topRelative + rowOffset);
     const absolutePosition = {
       itemIndex: rgRow.itemIndex,
-      start: rgRow.start + top,
-      end: rgRow.end + top,
+      start: rgRow.start - rowOffset + top,
+      end: rgRow.end - rowOffset + top,
     };
     return absolutePosition;
   }
@@ -74,8 +75,8 @@ export default class RowOrderService {
     const { top, left } = el.getBoundingClientRect();
     const topRelative = y - top;
     const leftRelative = x - left;
-    const rgRow = getItemByPosition(rows, topRelative);
-    const rgCol = getItemByPosition(cols, leftRelative);
+    const rgRow = getItemByPosition(rows, topRelative + (rows.renderOffset || 0));
+    const rgCol = getItemByPosition(cols, leftRelative + (cols.renderOffset || 0));
     return { x: rgCol.itemIndex, y: rgRow.itemIndex };
   }
 }

@@ -94,8 +94,8 @@ export function getCurrentCell(
   }
 
   // Get the row and column items based on the cell position
-  const rgRow = getItemByPosition(rows, cellY);
-  const rgCol = getItemByPosition(cols, cellX);
+  const rgRow = getItemByPosition(rows, cellY + (rows.renderOffset || 0));
+  const rgCol = getItemByPosition(cols, cellX + (cols.renderOffset || 0));
 
   // Set the row and column index to 0 if they are before the first item
   if (rgCol.itemIndex < 0) {
@@ -191,10 +191,12 @@ export function getCell(
     'indexToItem' | 'indexes' | 'originItemSize'
   >,
 ) {
-  const top = getItemByIndex(dimensionRow, y).start;
-  const left = getItemByIndex(dimensionCol, x).start;
-  const bottom = getItemByIndex(dimensionRow, y1).end;
-  const right = getItemByIndex(dimensionCol, x1).end;
+  const rowOffset = (dimensionRow as { renderOffset?: number }).renderOffset || 0;
+  const colOffset = (dimensionCol as { renderOffset?: number }).renderOffset || 0;
+  const top = getItemByIndex(dimensionRow, y).start - rowOffset;
+  const left = getItemByIndex(dimensionCol, x).start - colOffset;
+  const bottom = getItemByIndex(dimensionRow, y1).end - rowOffset;
+  const right = getItemByIndex(dimensionCol, x1).end - colOffset;
 
   return {
     left,

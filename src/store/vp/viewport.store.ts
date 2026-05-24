@@ -4,6 +4,8 @@ import {
   getFirstItem,
   getLastItem,
   getUpdatedItemsByPosition,
+  clampViewportCoordinate,
+  getViewportMaxCoordinate,
   isActiveRange,
   setItemSizes,
   updateMissingAndRange,
@@ -39,6 +41,9 @@ function initialState(): ViewportState {
 
     // size of viewport in px
     clientSize: 0,
+
+    // logical-to-physical render offset used when scroll space is compressed
+    renderOffset: 0,
   };
 }
 
@@ -84,21 +89,17 @@ export class ViewportStore {
     // math virtual size is based on visible area + 2 items outside of visible area
     const virtualSize = viewportSize + outsize;
 
-    // expected no scroll if real size less than virtual size, position is 0
-    let maxCoordinate = 0;
-    // if there is nodes outside of viewport, max coordinate has to be adjusted
-    if (dimension.realSize > viewportSize) {
-      // max coordinate is real size minus virtual/rendered space
-      maxCoordinate = dimension.realSize - viewportSize - singleOffsetInPx;
-    }
-
-    let pos = position;
-    // limit position to max and min coordinates
-    if (pos < 0) {
-      pos = 0;
-    } else if (pos > maxCoordinate) {
-      pos = maxCoordinate;
-    }
+    const maxCoordinate = getViewportMaxCoordinate(
+      dimension,
+      viewportSize,
+      frameOffset,
+    );
+    let pos = clampViewportCoordinate(
+      position,
+      dimension,
+      viewportSize,
+      frameOffset,
+    );
 
     // store last coordinate for further restore on redraw
     this.lastCoordinate = pos;

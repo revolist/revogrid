@@ -604,6 +604,13 @@ export interface ViewportState extends ViewportStateItems {
    * Until virtualization is not disabled.
    */
   clientSize: number;
+
+  /**
+   * Difference between logical coordinate and browser-safe rendered coordinate.
+   * Internal scroll virtualization offset used when content exceeds browser
+   * native scroll size limits.
+   */
+  renderOffset?: number;
 }
 
 /**
@@ -730,6 +737,12 @@ export interface DimensionSettingsState extends DimensionCalc {
    * Represents the origin item size of the dimension.
    */
   originItemSize: number;
+
+  /**
+   * Internal render offset applied when logical scroll space is compressed into
+   * a browser-safe physical scroll range.
+   */
+  renderOffset?: number;
 }
 
 /**

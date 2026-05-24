@@ -26,6 +26,7 @@ export type HeaderRenderProps = {
   range?: RangeArea | null;
   canResize?: boolean;
   canFilter?: boolean;
+  renderOffset?: number;
   onResize?(e: ResizeEvent): void;
   onClick?(data: InitialHeaderClick): void;
   onDblClick?(data: InitialHeaderClick): void;
@@ -53,7 +54,7 @@ const HeaderRenderer = (p: HeaderRenderProps): ReturnType<typeof h> => {
     class: cellClass,
     style: {
       width: `${p.column.size}px`,
-      transform: `translateX(${p.column.start}px)`,
+      transform: `translateX(${p.column.start - (p.renderOffset || 0)}px)`,
     },
     onResize: p.onResize,
     onDblClick(originalEvent: MouseEvent) {

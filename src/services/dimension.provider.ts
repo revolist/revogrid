@@ -11,6 +11,7 @@ import {
   DimensionStoreCollection,
   gatherTrimmedItems,
   Trimmed,
+  clampViewportCoordinate,
 } from '@store';
 import type {
   DimensionCols,
@@ -23,6 +24,7 @@ import type {
   ViewportState,
 } from '@type';
 import { getColumnSizes } from '../utils/column.utils';
+import { getScrollDimension } from './scroll.dimension.helpers';
 
 export type DimensionConfig = {
   realSizeChanged(k: MultiDimensionType): void;
@@ -211,6 +213,25 @@ export default class DimensionProvider {
     force?: boolean;
   }) {
     const dimension = this.stores[type].getCurrentState();
+    const viewport = this.viewports.stores[type].store;
+    const clientSize = viewport.get('clientSize');
+    const viewportSize = viewport.get('virtualSize');
+    const scrollDimension = getScrollDimension({
+      contentSize: dimension.realSize,
+      clientSize,
+      virtualSize: viewportSize,
+    });
+    const renderCoordinate = clampViewportCoordinate(
+      coordinate,
+      dimension,
+      viewportSize,
+    );
+    const renderOffset =
+      clientSize && viewportSize
+        ? scrollDimension.getRenderOffset(renderCoordinate)
+        : 0;
+    this.stores[type].setStore({ renderOffset });
+    this.viewports.stores[type].setViewport({ renderOffset });
     this.viewports.stores[type].setViewPortCoordinate(
       coordinate,
       dimension,

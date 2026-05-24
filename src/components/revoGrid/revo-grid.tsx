@@ -1547,7 +1547,7 @@ export class RevoGridComponent {
     if (Object.keys(this.trimmedRows ?? {}).length > 0) {
       this.trimmedRowsChanged(this.trimmedRows);
     }
-    this.rowDefChanged(this.rowDefinitions);
+    this.rowDefChanged(this.rowDefinitions, undefined, undefined, false);
 
     // init grouping
     if (this.grouping && Object.keys(this.grouping).length > 0) {

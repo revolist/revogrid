@@ -147,7 +147,7 @@ export class ColumnMovePlugin extends BasePlugin {
       event.x,
       gridRect.left,
       elRect.left - gridRect.left,
-    ));
+    ) + (cols.renderOffset || 0));
 
     this.staticDragData = {
       startPos: event.x,
@@ -182,7 +182,10 @@ export class ColumnMovePlugin extends BasePlugin {
         this.dragData.gridRect.left,
         this.dragData.scrollOffset,
       );
-      const rgCol = getItemByPosition(this.staticDragData.cols, x);
+      const rgCol = getItemByPosition(
+        this.staticDragData.cols,
+        x + (this.staticDragData.cols.renderOffset || 0),
+      );
       this.orderUi.autoscroll(x, dragData.elRect.width);
 
       // prevent position change if out of bounds
@@ -190,7 +193,7 @@ export class ColumnMovePlugin extends BasePlugin {
         return;
       }
       this.orderUi.showHandler(
-        rgCol.end + dragData.scrollOffset,
+        rgCol.end - (this.staticDragData.cols.renderOffset || 0) + dragData.scrollOffset,
         dragData.gridRect.width
       );
     }
@@ -215,7 +218,10 @@ export class ColumnMovePlugin extends BasePlugin {
       if (relativePos < 0) {
         relativePos = 0;
       }
-      const newPosition = getItemByPosition(this.staticDragData.cols, relativePos);
+      const newPosition = getItemByPosition(
+        this.staticDragData.cols,
+        relativePos + (this.staticDragData.cols.renderOffset || 0),
+      );
 
       const store = this.providers.column.stores[this.dragData.type].store;
       const source = store.get('source');

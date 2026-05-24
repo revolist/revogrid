@@ -3,6 +3,7 @@ import {
   getItemByPosition,
   getItemByIndex,
 } from '../src/store/dimension/dimension.helpers';
+import { DimensionStore } from '../src/store/dimension/dimension.store';
 
 const ITEM_SIZE = 30;
 
@@ -93,5 +94,48 @@ describe('getItemByIndex', () => {
 
   it('sizes={1:50}: index=2 → {start:80,end:110} (item1 ends at 80; item2 immediately follows with default size 30)', () => {
     expect(getItemByIndex(makeIdxDimension({ 1: 50 }), 2)).toEqual({ itemIndex: 2, start: 80, end: 110 });
+  });
+});
+
+describe('DimensionStore realSize recalculation', () => {
+  it('calculates large uniform dimensions without per-item size entries', () => {
+    const store = new DimensionStore('rgRow');
+
+    store.setStore({
+      originItemSize: ITEM_SIZE,
+      count: 1_000_000,
+    });
+
+    expect(store.store.get('realSize')).toBe(30_000_000);
+  });
+
+  it('applies custom-size deltas on top of uniform real size', () => {
+    const store = new DimensionStore('rgRow');
+    store.setStore({
+      originItemSize: ITEM_SIZE,
+      count: 1_000_000,
+    });
+
+    store.setDimensionSize({
+      2: 60,
+      999_999: 10,
+    });
+
+    expect(store.store.get('realSize')).toBe(30_000_010);
+  });
+
+  it('ignores stale custom-size entries outside the active item count', () => {
+    const store = new DimensionStore('rgRow');
+    store.setStore({
+      originItemSize: ITEM_SIZE,
+      count: 3,
+    });
+
+    store.setDimensionSize({
+      1: 50,
+      10: 100,
+    });
+
+    expect(store.store.get('realSize')).toBe(110);
   });
 });
