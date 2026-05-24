@@ -38,7 +38,7 @@ test.describe('editing', () => {
     await expect(dataCell(page, 1, 1)).toHaveText('Ben');
   });
 
-  test('does not start editing from browser shortcut keys', async ({ page, browserName }) => {
+  test('does not start editing from browser shortcut keys', async ({ page }) => {
     const source: SampleRow[] = [
       { id: 1, name: 'Alice', role: 'Engineer', city: 'Lisbon' },
       { id: 2, name: 'Ben', role: 'Designer', city: 'Porto' },
@@ -58,9 +58,7 @@ test.describe('editing', () => {
     await setCellsFocus(page, { x: 1, y: 0 });
 
     const shortcutModifier =
-      process.platform === 'darwin' && browserName === 'webkit'
-        ? 'Meta'
-        : 'Control';
+      process.platform === 'darwin' ? 'Meta' : 'Control';
 
     await page.keyboard.press(`${shortcutModifier}+F`);
     await page.waitForChanges();
