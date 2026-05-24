@@ -103,6 +103,59 @@ test.describe('editing', () => {
     await expect(page.locator(SELECTORS.editInput)).toHaveValue('Z');
   });
 
+  test('keeps rapid printable input while editor is mounting', async ({ page }) => {
+    const source: SampleRow[] = [
+      { id: 1, name: '', role: 'Engineer', city: 'Lisbon' },
+      { id: 2, name: '', role: 'Designer', city: 'Porto' },
+    ];
+
+    const columns = buildColumns([
+      { prop: 'id', name: 'ID' },
+      { prop: 'name', name: 'Name' },
+      { prop: 'role', name: 'Role' },
+    ]);
+
+    await mountGrid(page, {
+      columns,
+      source,
+    });
+
+    await setCellsFocus(page, { x: 1, y: 0 });
+
+    const barcode = 'CHNLB10022502988';
+    await page.evaluate((value) => {
+      for (const key of value) {
+        if (key >= 'A' && key <= 'Z') {
+          document.dispatchEvent(
+            new KeyboardEvent('keydown', {
+              bubbles: true,
+              cancelable: true,
+              key: 'Shift',
+              code: 'ShiftLeft',
+            }),
+          );
+        }
+
+        document.dispatchEvent(
+          new KeyboardEvent('keydown', {
+            bubbles: true,
+            cancelable: true,
+            key,
+            code: key >= 'A' && key <= 'Z' ? `Key${key}` : `Digit${key}`,
+          }),
+        );
+      }
+    }, barcode);
+    await page.waitForChanges();
+
+    await expect(page.locator(SELECTORS.editInput)).toBeVisible();
+    await expect(page.locator(SELECTORS.editInput)).toHaveValue(barcode);
+
+    await page.locator(SELECTORS.editInput).press('Enter');
+    await page.waitForChanges();
+    await expect(dataCell(page, 0, 1)).toHaveText(barcode);
+  });
+
   test('starts editing from AltGr printable characters', async ({ page }) => {
     const source: SampleRow[] = [
       { id: 1, name: 'Alice', role: 'Engineer', city: 'Lisbon' },
