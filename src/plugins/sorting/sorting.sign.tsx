@@ -10,11 +10,15 @@ type Props = {
  * Renders sorting direction and optional additive sorting rank.
  */
 export const SortingSign = ({ column }: Props) => {
+  const indicatorAttrs = { class: 'sort-indicator' };
+  const iconAttrs = { class: column?.order ?? 'sort-off' };
+  const orderIndexAttrs = { class: 'sort-order-index' };
+
   return (
-    <span class="sort-indicator">
-      <i class={column?.order ?? 'sort-off'} />
+    <span {...indicatorAttrs}>
+      <i {...iconAttrs} />
       {column?.sortIndex ? (
-        <sup class="sort-order-index">{column.sortIndex}</sup>
+        <sup {...orderIndexAttrs}>{column.sortIndex}</sup>
       ) : null}
     </span>
   );
