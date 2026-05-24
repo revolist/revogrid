@@ -215,12 +215,12 @@ export function sortIndexByItems(
     for (const [prop, cmp] of sortingEntries) {
       if (isGrouping(itemA)) {
         if (itemA['__rvgr-prop'] !== prop) {
-          return 0;
+          return a - b;
         }
       }
       if (isGrouping(itemB)) {
         if (itemB['__rvgr-prop'] !== prop) {
-          return 0;
+          return a - b;
         }
       }
       /**
