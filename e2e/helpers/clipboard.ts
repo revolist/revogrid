@@ -100,6 +100,19 @@ export async function getCopiedText(page: E2EPage): Promise<string> {
   return typeof copiedText === 'string' ? copiedText : '';
 }
 
+/**
+ * Dispatches a synthetic cut event and returns the text that RevoGrid writes to
+ * the event clipboard payload before the cut clear operation is applied.
+ */
+export async function getCutText(page: E2EPage): Promise<string> {
+  const cutText = await runClipboardAction(page, {
+    type: 'cut',
+    waitForWrite: true,
+  });
+  await page.waitForChanges();
+  return typeof cutText === 'string' ? cutText : '';
+}
+
 export async function getFirefoxCopiedText(page: E2EPage): Promise<string> {
   const copiedText = await runClipboardAction(page, {
     type: 'copy',

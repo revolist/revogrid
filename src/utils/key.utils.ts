@@ -99,6 +99,26 @@ export function isAll(event: KeyboardEvent): boolean {
   ); // Cmd + A on Mac
 }
 
+/**
+ * Returns true when a keyboard event represents a shortcut modifier that
+ * should not start cell editing from printable `event.key` input.
+ *
+ * AltGr is intentionally excluded because many Windows/Linux layouts expose
+ * printable AltGr characters as Ctrl+Alt key events.
+ */
 export function isShortcutModifier(event: KeyboardEvent): boolean {
+  if (event.getModifierState?.('AltGraph')) {
+    return false;
+  }
+
+  if (
+    event.ctrlKey &&
+    event.altKey &&
+    !event.metaKey &&
+    event.key.length === 1
+  ) {
+    return false;
+  }
+
   return event.ctrlKey || event.metaKey;
 }

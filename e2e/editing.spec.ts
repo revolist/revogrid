@@ -71,4 +71,76 @@ test.describe('editing', () => {
     await page.waitForChanges();
     await expect(page.locator(SELECTORS.editInput)).toHaveCount(0);
   });
+
+  test('starts editing from Enter and printable keyboard input', async ({ page }) => {
+    const source: SampleRow[] = [
+      { id: 1, name: 'Alice', role: 'Engineer', city: 'Lisbon' },
+      { id: 2, name: 'Ben', role: 'Designer', city: 'Porto' },
+    ];
+
+    const columns = buildColumns([
+      { prop: 'id', name: 'ID' },
+      { prop: 'name', name: 'Name' },
+      { prop: 'role', name: 'Role' },
+    ]);
+
+    await mountGrid(page, {
+      columns,
+      source,
+    });
+
+    await setCellsFocus(page, { x: 1, y: 0 });
+    await page.keyboard.press('Enter');
+    await page.waitForChanges();
+    await expect(page.locator(SELECTORS.editInput)).toBeVisible();
+    await expect(page.locator(SELECTORS.editInput)).toHaveValue('Alice');
+
+    await page.keyboard.press('Escape');
+    await page.waitForChanges();
+
+    await setCellsFocus(page, { x: 1, y: 1 });
+    await page.keyboard.press('Z');
+    await page.waitForChanges();
+    await expect(page.locator(SELECTORS.editInput)).toBeVisible();
+    await expect(page.locator(SELECTORS.editInput)).toHaveValue('Z');
+  });
+
+  test('starts editing from AltGr printable characters', async ({ page }) => {
+    const source: SampleRow[] = [
+      { id: 1, name: 'Alice', role: 'Engineer', city: 'Lisbon' },
+      { id: 2, name: 'Ben', role: 'Designer', city: 'Porto' },
+    ];
+
+    const columns = buildColumns([
+      { prop: 'id', name: 'ID' },
+      { prop: 'name', name: 'Name' },
+      { prop: 'role', name: 'Role' },
+    ]);
+
+    await mountGrid(page, {
+      columns,
+      source,
+    });
+
+    await setCellsFocus(page, { x: 1, y: 0 });
+
+    await page.evaluate(() => {
+      const event = new KeyboardEvent('keydown', {
+        bubbles: true,
+        cancelable: true,
+        key: '@',
+        code: 'KeyQ',
+        ctrlKey: true,
+        altKey: true,
+      });
+      Object.defineProperty(event, 'getModifierState', {
+        value: (key: string) => key === 'AltGraph',
+      });
+      document.dispatchEvent(event);
+    });
+    await page.waitForChanges();
+
+    await expect(page.locator(SELECTORS.editInput)).toBeVisible();
+    await expect(page.locator(SELECTORS.editInput)).toHaveValue('@');
+  });
 });

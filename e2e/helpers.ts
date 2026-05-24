@@ -42,6 +42,7 @@ export {
 export {
   dispatchClipboardEvent,
   getCopiedText,
+  getCutText,
   getFirefoxCopiedText,
 } from './helpers/clipboard';
 export { getExportCsv } from './helpers/export';
