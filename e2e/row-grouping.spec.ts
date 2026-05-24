@@ -317,8 +317,8 @@ test.describe('row grouping', () => {
       'North',
       'South',
     ]);
+    await expect(mainGroupRows).toHaveCount(2);
     await expectVisibleColumnValues(page, 1, ['Ben', 'Dan']);
-    await expect(mainDataRows(page)).toHaveCount(2);
   });
 
   test('allows row reordering inside a group and blocks dragging across groups', async ({ page }) => {

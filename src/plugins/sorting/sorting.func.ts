@@ -193,7 +193,7 @@ export function sortIndexByItems(
   // if no sorting - return unsorted indexes
   if (sortingEntries.length === 0) {
     // Unsorted indexes
-    return hasSortingKeys ? indexes : [...Array(indexes.length).keys()];
+    return hasSortingKeys ? indexes : [...new Array(indexes.length).keys()];
   }
   if (canUseDefaultCompareFastPath(sortingEntries, indexes, source, sorting, sortingColumns)) {
     return sortIndexByDefaultComparers(

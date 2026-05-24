@@ -2,6 +2,8 @@ import debounce from 'lodash/debounce';
 
 import { BasePlugin } from '../base.plugin';
 import type {
+  CellCompareFunc,
+  ColumnProp,
   Order,
   ColumnRegular,
   DimensionRows,
@@ -27,6 +29,13 @@ import {
 export * from './sorting.types';
 export * from './sorting.func';
 export * from './sorting.sign';
+
+type SortingState = {
+  sorting: SortingOrder;
+  sortingFunc: SortingOrderFunction;
+  sortingColumns: SortingColumnMap;
+  sortingOrder: SortingColumnOrder;
+};
 
 /**
  * Lifecycle
@@ -96,56 +105,11 @@ export class SortingPlugin extends BasePlugin {
   ) {
     super(revogrid, providers);
 
-    /**
-     * Normalizes external sorting configuration into internal order,
-     * comparator, and column metadata maps.
-     */
-    const setConfig = (cfg?: SortingConfig) => {
-      if (cfg) {
-        const sortingFunc: SortingOrderFunction = cfg.additive
-          ? { ...this.sortingFunc }
-          : {};
-        const sortingColumns: SortingColumnMap = cfg.additive
-          ? { ...this.sortingColumns }
-          : {};
-        const sortingOrder: SortingColumnOrder = cfg.additive
-          ? [...(this.sortingOrder || [])]
-          : [];
-        const order: SortingOrder = cfg.additive
-          ? { ...this.sorting }
-          : {};
-
-        cfg.columns?.forEach(col => {
-          if (col.order) {
-            sortingFunc[col.prop] = getComparer(col, col.order);
-            sortingColumns[col.prop] = col;
-            order[col.prop] = col.order;
-            if (!sortingOrder.some(prop => String(prop) === String(col.prop))) {
-              sortingOrder.push(col.prop);
-            }
-          } else {
-            delete sortingFunc[col.prop];
-            delete sortingColumns[col.prop];
-            delete order[col.prop];
-            const index = sortingOrder.findIndex(prop => String(prop) === String(col.prop));
-            if (index >= 0) {
-              sortingOrder.splice(index, 1);
-            }
-          }
-        });
-
-        this.sorting = hasActiveSorting(order) ? order : undefined;
-        this.sortingFunc = this.sorting ? sortingFunc : undefined;
-        this.sortingColumns = this.sorting ? sortingColumns : undefined;
-        this.sortingOrder = this.sorting ? sortingOrder : undefined;
-      }
-    }
-
-    setConfig(config);
+    this.applySortingConfig(config);
 
     this.addEventListener('sortingconfigchanged', ({ detail }) => {
       config = detail;
-      setConfig(detail);
+      this.applySortingConfig(detail);
       this.startSorting(this.sorting, this.sortingFunc, this.sortingColumns, this.sortingOrder);
     });
 
@@ -225,6 +189,90 @@ export class SortingPlugin extends BasePlugin {
   }
 
   /**
+   * Creates mutable sorting maps from current state when additive sorting is requested.
+   */
+  private createSortingState(additive?: boolean): SortingState {
+    return {
+      sorting: additive ? { ...this.sorting } : {},
+      sortingFunc: additive ? { ...this.sortingFunc } : {},
+      sortingColumns: additive ? { ...this.sortingColumns } : {},
+      sortingOrder: additive ? [...(this.sortingOrder ?? [])] : [],
+    };
+  }
+
+  /**
+   * Stores normalized sorting state, clearing inactive empty maps.
+   */
+  private setSortingState({
+    sorting,
+    sortingFunc,
+    sortingColumns,
+    sortingOrder,
+  }: SortingState) {
+    this.sorting = hasActiveSorting(sorting) ? sorting : undefined;
+    this.sortingFunc = this.sorting ? sortingFunc : undefined;
+    this.sortingColumns = this.sorting ? sortingColumns : undefined;
+    this.sortingOrder = this.sorting ? sortingOrder : undefined;
+  }
+
+  /**
+   * Adds or replaces a column in a sorting state.
+   */
+  private setColumnSorting(
+    state: SortingState,
+    prop: ColumnProp,
+    order: Order,
+    cmp: CellCompareFunc | undefined,
+    column: ColumnRegular | Partial<ColumnRegular> | undefined,
+  ) {
+    state.sorting[prop] = order;
+    state.sortingFunc[prop] = cmp;
+    state.sortingColumns[prop] = column;
+    if (!state.sortingOrder.some(sortingProp => String(sortingProp) === String(prop))) {
+      state.sortingOrder.push(prop);
+    }
+  }
+
+  /**
+   * Removes a column from a sorting state.
+   */
+  private clearColumnSorting(state: SortingState, prop: ColumnProp) {
+    delete state.sorting[prop];
+    delete state.sortingFunc[prop];
+    delete state.sortingColumns[prop];
+    const index = state.sortingOrder.findIndex(sortingProp => String(sortingProp) === String(prop));
+    if (index >= 0) {
+      state.sortingOrder.splice(index, 1);
+    }
+  }
+
+  /**
+   * Normalizes external sorting configuration into internal order,
+   * comparator, and column metadata maps.
+   */
+  private applySortingConfig(cfg?: SortingConfig) {
+    if (!cfg) {
+      return;
+    }
+    const state = this.createSortingState(cfg.additive);
+    cfg.columns?.forEach(col => {
+      if (col.order) {
+        this.setColumnSorting(
+          state,
+          col.prop,
+          col.order,
+          getComparer(col, col.order),
+          col,
+        );
+        return;
+      }
+      this.clearColumnSorting(state, col.prop);
+    });
+
+    this.setSortingState(state);
+  }
+
+  /**
    * Schedules sorting before the next render.
    *
    * @param order - Active sorting order by column property.
@@ -277,50 +325,42 @@ export class SortingPlugin extends BasePlugin {
       return;
     }
     const cmp = getComparer(beforeApplyEvent.detail.column, beforeApplyEvent.detail.order);
-
-    if (beforeApplyEvent.detail.additive) {
-      const sorting: SortingOrder = { ...this.sorting };
-      const sortingFunc: SortingOrderFunction = { ...this.sortingFunc };
-      const sortingColumns: SortingColumnMap = { ...this.sortingColumns };
-      const sortingOrder: SortingColumnOrder = [...(this.sortingOrder || [])];
-
-      if (order) {
-        sorting[columnProp] = order;
-        sortingFunc[columnProp] = cmp;
-        sortingColumns[columnProp] = beforeApplyEvent.detail.column;
-        if (!sortingOrder.some(prop => String(prop) === String(columnProp))) {
-          sortingOrder.push(columnProp);
-        }
-      } else {
-        delete sorting[columnProp];
-        delete sortingFunc[columnProp];
-        delete sortingColumns[columnProp];
-        const index = sortingOrder.findIndex(prop => String(prop) === String(columnProp));
-        if (index >= 0) {
-          sortingOrder.splice(index, 1);
-        }
-      }
-
-      this.sorting = hasActiveSorting(sorting) ? sorting : undefined;
-      this.sortingFunc = this.sorting ? sortingFunc : undefined;
-      this.sortingColumns = this.sorting ? sortingColumns : undefined;
-      this.sortingOrder = this.sorting ? sortingOrder : undefined;
-    } else {
-      if (order) {
-        // reset sorting
-        this.sorting = { [columnProp]: order };
-        this.sortingFunc = { [columnProp]: cmp };
-        this.sortingColumns = { [columnProp]: beforeApplyEvent.detail.column };
-        this.sortingOrder = [columnProp];
-      } else {
-        this.sorting = undefined;
-        this.sortingFunc = undefined;
-        this.sortingColumns = undefined;
-        this.sortingOrder = undefined;
-      }
-    }
+    this.applyHeaderSorting(
+      beforeApplyEvent.detail.column,
+      beforeApplyEvent.detail.additive,
+      order,
+      cmp,
+    );
 
     this.startSorting(this.sorting, this.sortingFunc, this.sortingColumns, this.sortingOrder);
+  }
+
+  /**
+   * Applies sorting state produced by a header click.
+   */
+  private applyHeaderSorting(
+    column: ColumnRegular,
+    additive: boolean,
+    order: Order,
+    cmp: CellCompareFunc | undefined,
+  ) {
+    if (!additive) {
+      this.setSortingState(order ? {
+        sorting: { [column.prop]: order },
+        sortingFunc: { [column.prop]: cmp },
+        sortingColumns: { [column.prop]: column },
+        sortingOrder: [column.prop],
+      } : this.createSortingState());
+      return;
+    }
+
+    const state = this.createSortingState(true);
+    if (order) {
+      this.setColumnSorting(state, column.prop, order, cmp, column);
+    } else {
+      this.clearColumnSorting(state, column.prop);
+    }
+    this.setSortingState(state);
   }
 
   /**

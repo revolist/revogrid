@@ -173,7 +173,7 @@ export class GroupingRowPlugin extends BasePlugin {
       expandedAll: _expandedAll,
       prevExpanded: _prevExpanded,
       ...options
-    } = this.options || {};
+    } = this.options ?? {};
     return options;
   }
 
