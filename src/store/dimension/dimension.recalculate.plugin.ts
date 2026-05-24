@@ -6,8 +6,18 @@ function calculateRealSize({
   originItemSize,
   sizes,
 }: Pick<DimensionSettingsState, 'count' | 'originItemSize' | 'sizes'>) {
-  let realSize = count * originItemSize;
+  const safeCount = Math.max(0, count);
+  let realSize = safeCount * originItemSize;
   for (let index in sizes) {
+    const itemIndex = Number(index);
+    if (
+      !Number.isInteger(itemIndex) ||
+      itemIndex < 0 ||
+      itemIndex >= safeCount ||
+      String(itemIndex) !== index
+    ) {
+      continue;
+    }
     realSize += sizes[index] - originItemSize;
   }
   return realSize;

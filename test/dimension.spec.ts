@@ -123,4 +123,19 @@ describe('DimensionStore realSize recalculation', () => {
 
     expect(store.store.get('realSize')).toBe(30_000_010);
   });
+
+  it('ignores stale custom-size entries outside the active item count', () => {
+    const store = new DimensionStore('rgRow');
+    store.setStore({
+      originItemSize: ITEM_SIZE,
+      count: 3,
+    });
+
+    store.setDimensionSize({
+      1: 50,
+      10: 100,
+    });
+
+    expect(store.store.get('realSize')).toBe(110);
+  });
 });
