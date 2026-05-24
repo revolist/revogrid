@@ -11,7 +11,7 @@ import {
 } from '@stencil/core';
 
 import GridResizeService from '../revoGrid/viewport.resize.service';
-import LocalScrollService from '../../services/local.scroll.service';
+import LocalScrollService, { getContentSize } from '../../services/local.scroll.service';
 import { LocalScrollTimer } from '../../services/local.scroll.timer';
 import {
   CONTENT_SLOT,
@@ -337,6 +337,14 @@ export class RevogrViewportScroll implements ElementScroll {
   }
 
   render() {
+    const physicalContentHeight = getContentSize(
+      this.contentHeight,
+      this.verticalScroll?.clientHeight ?? 0,
+    );
+    const physicalContentWidth = getContentSize(
+      this.contentWidth,
+      this.horizontalScroll?.clientWidth ?? 0,
+    );
     return (
       <Host
         onWheel={this.horizontalMouseWheel}
@@ -344,7 +352,7 @@ export class RevogrViewportScroll implements ElementScroll {
       >
         <div
           class="inner-content-table"
-          style={{ width: `${this.contentWidth}px` }}
+          style={{ width: `${physicalContentWidth}px` }}
         >
           <div class="header-wrapper" ref={e => (this.header = e)}>
             <slot name={HEADER_SLOT} />
@@ -357,7 +365,7 @@ export class RevogrViewportScroll implements ElementScroll {
           >
             <div
               class="content-wrapper"
-              style={{ height: `${this.contentHeight}px` }}
+              style={{ height: `${physicalContentHeight}px` }}
             >
               <slot name={CONTENT_SLOT} />
             </div>

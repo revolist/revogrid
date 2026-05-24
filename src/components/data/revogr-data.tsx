@@ -229,6 +229,8 @@ export class RevogrData {
     const depth = this.dataStore.get('groupingDepth');
     const groupingCustomRenderer = this.dataStore.get('groupingCustomRenderer');
     const groupDepth = this.columnService.hasGrouping ? depth : 0;
+    const rowRenderOffset = this.viewportRow.get('renderOffset') || 0;
+    const colRenderOffset = this.viewportCol.get('renderOffset') || 0;
     for (let rgRow of rows) {
       const dataItem = getSourceItem(this.dataStore, rgRow.itemIndex);
 
@@ -236,6 +238,7 @@ export class RevogrData {
       if (isGrouping(dataItem)) {
         const gmodel: RowGroupingProps = {
           ...rgRow,
+          start: rgRow.start - rowRenderOffset,
           index: rgRow.itemIndex,
           model: dataItem,
           groupingCustomRenderer,
@@ -277,7 +280,7 @@ export class RevogrData {
           [DATA_ROW]: rowProps.itemIndex,
           style: {
             width: `${columnProps.size}px`,
-            transform: `translateX(${columnProps.start}px)`,
+            transform: `translateX(${columnProps.start - colRenderOffset}px)`,
             height: rowProps.size ? `${rowProps.size}px` : undefined,
           },
         };
@@ -321,7 +324,7 @@ export class RevogrData {
           index={rgRow.itemIndex}
           rowClass={rowClass}
           size={rgRow.size}
-          start={rgRow.start}
+          start={rgRow.start - rowRenderOffset}
           groupingLevel={groupDepth || undefined}
         >
           {cells}

@@ -1,5 +1,5 @@
 import type { DimensionType, ViewPortScrollEvent } from '@type';
-import { scaleValue } from '../utils';
+import { getScrollDimension, type ScrollDimension } from './scroll.dimension.helpers';
 
 interface Config {
   skipAnimationFrame?: boolean;
@@ -17,6 +17,8 @@ type Params = {
   clientSize: number;
   virtualSize: number;
   maxSize?: number;
+  maxScrollSize?: number;
+  scrollDimension?: ScrollDimension;
 };
 
 const initialParams: Params = {
@@ -36,10 +38,11 @@ export function getContentSize(
   clientSize: number,
   virtualSize = 0,
 ): number {
-  if (virtualSize > contentSize) {
-    return 0;
-  }
-  return contentSize + (virtualSize ? clientSize - virtualSize : 0);
+  return getScrollDimension({
+    contentSize,
+    clientSize,
+    virtualSize,
+  }).physicalContentSize;
 }
 
 export default class LocalScrollService {
@@ -52,6 +55,10 @@ export default class LocalScrollService {
     rgRow: NO_COORDINATE,
     rgCol: NO_COORDINATE,
   };
+  private previousLogicalScroll: Record<DimensionType, number> = {
+    rgRow: 0,
+    rgCol: 0,
+  };
   private params: Record<DimensionType, Params> = {
     rgRow: { ...initialParams },
     rgCol: { ...initialParams },
@@ -60,15 +67,13 @@ export default class LocalScrollService {
   constructor(private cfg: Config) {}
 
   setParams(params: Params, dimension: DimensionType) {
-    const virtualContentSize = getContentSize(
-      params.contentSize,
-      params.clientSize,
-      params.virtualSize,
-    );
+    const scrollDimension = getScrollDimension(params);
+    const virtualContentSize = scrollDimension.physicalContentSize;
     this.params[dimension] = {
       ...params,
       maxSize: virtualContentSize - params.clientSize,
       virtualContentSize,
+      scrollDimension,
     };
   }
 
@@ -95,16 +100,13 @@ export default class LocalScrollService {
       await frameAnimation;
       const params = this.getParams(e.dimension);
       e.coordinate = Math.ceil(e.coordinate);
-      this.previousScroll[e.dimension] = this.wrapCoordinate(
-        e.coordinate,
-        params,
-      );
+      this.previousLogicalScroll[e.dimension] = this.wrapLogicalCoordinate(e.coordinate, params);
+      const physicalCoordinate = this.toPhysicalCoordinate(e.coordinate, params);
+      this.previousScroll[e.dimension] = this.wrapPhysicalCoordinate(physicalCoordinate, params);
       this.preventArtificialScroll[e.dimension] = null;
       this.cfg.applyScroll({
         ...e,
-        coordinate: params.virtualSize
-          ? this.convert(e.coordinate, params, false)
-          : e.coordinate,
+        coordinate: physicalCoordinate,
       });
     } catch (id) {
       window.cancelAnimationFrame(id);
@@ -131,15 +133,20 @@ export default class LocalScrollService {
     }
 
     const param = this.getParams(dimension);
+    const logicalCoordinate = this.toLogicalScrollCoordinate(
+      coordinate,
+      dimension,
+      param,
+      delta,
+    );
     // let component know about scroll event started
     this.cfg.runScroll({
       dimension: dimension,
-      coordinate: param.virtualSize
-        ? this.convert(coordinate, param)
-        : coordinate,
+      coordinate: logicalCoordinate,
       delta,
       outside,
     });
+    this.previousLogicalScroll[dimension] = logicalCoordinate;
   }
 
   private getParams(dimension: DimensionType): Params {
@@ -147,7 +154,7 @@ export default class LocalScrollService {
   }
 
   // check if scroll outside of region to avoid looping
-  private wrapCoordinate(c: number, param: Params): number {
+  private wrapPhysicalCoordinate(c: number, param: Params): number {
     if (c < 0) {
       return NO_COORDINATE;
     }
@@ -158,20 +165,41 @@ export default class LocalScrollService {
     return c;
   }
 
+  private wrapLogicalCoordinate(c: number, param: Params): number {
+    if (c < 0) {
+      return 0;
+    }
+    return Math.min(c, param.scrollDimension?.logicalScrollSize ?? c);
+  }
+
   // prevent already started scroll, performance optimization
   private cancelScroll(dimension: DimensionType) {
     this.preventArtificialScroll[dimension]?.();
     this.preventArtificialScroll[dimension] = null;
   }
 
-  /* convert virtual to real and back, scale range */
-  private convert(pos: number, param: Params, toReal = true): number {
-    const minRange = param.clientSize;
-    const from: [number, number] = [0, (param.virtualContentSize ?? minRange) - minRange];
-    const to: [number, number] = [0, param.contentSize - param.virtualSize];
-    if (toReal) {
-      return scaleValue(pos, from, to);
+  private toLogicalScrollCoordinate(
+    coordinate: number,
+    dimension: DimensionType,
+    param: Params,
+    delta?: number,
+  ): number {
+    const scrollDimension = param.scrollDimension;
+    if (!scrollDimension) {
+      return coordinate;
     }
-    return scaleValue(pos, to, from);
+    if (typeof delta === 'number' && scrollDimension.isCompressed) {
+      const base = this.previousScroll[dimension] === NO_COORDINATE
+        ? scrollDimension.toLogicalCoordinate(coordinate - delta)
+        : this.previousLogicalScroll[dimension];
+      return scrollDimension.toLogicalCoordinate(
+        scrollDimension.toPhysicalCoordinate(base + delta),
+      );
+    }
+    return scrollDimension.toLogicalCoordinate(coordinate);
+  }
+
+  private toPhysicalCoordinate(coordinate: number, param: Params): number {
+    return param.scrollDimension?.toPhysicalCoordinate(coordinate) ?? coordinate;
   }
 }

@@ -12,6 +12,7 @@ export type HeaderGroupRendererProps = {
   providers: ProvidersColumns;
   additionalData: any;
   canResize?: boolean;
+  renderOffset?: number;
   onResize?(e: ResizeEvent): void;
 } & Partial<Pick<ResizeProps, 'active'>>;
 
@@ -31,7 +32,7 @@ const HeaderGroupRenderer = (p: HeaderGroupRendererProps): ReturnType<typeof h> 
       [HEADER_CLASS]: true,
     },
     style: {
-      transform: `translateX(${p.start}px)`,
+      transform: `translateX(${p.start - (p.renderOffset || 0)}px)`,
       width: `${p.end - p.start}px`,
     },
     onResize: p.onResize,

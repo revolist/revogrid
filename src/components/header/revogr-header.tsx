@@ -194,6 +194,7 @@ export class RevogrHeaderComponent {
     range: RangeArea | null,
   ) {
     const columnsToRender: HeaderRenderProps[] = [];
+    const renderOffset = this.viewportCol.get('renderOffset') || 0;
     for (let rgCol of cols) {
       const colData = this.colData[rgCol.itemIndex];
       const props: HeaderRenderProps = {
@@ -206,6 +207,7 @@ export class RevogrHeaderComponent {
         },
         canFilter: !!this.columnFilter,
         canResize: this.canResize,
+        renderOffset,
         active: this.resizeHandler,
         additionalData: this.additionalData,
         onResize: e => this.onResize(e, rgCol.itemIndex),
@@ -285,6 +287,7 @@ export class RevogrHeaderComponent {
       start: groupStart,
       end: groupEnd,
       group,
+      renderOffset: this.viewportCol.get('renderOffset') || 0,
       active: this.resizeHandler,
       canResize: this.canResize,
       additionalData: this.additionalData,

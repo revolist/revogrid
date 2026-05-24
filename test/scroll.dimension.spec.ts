@@ -1,0 +1,262 @@
+import LocalScrollService from '../src/services/local.scroll.service';
+import { getScrollDimension } from '../src/services/scroll.dimension.helpers';
+import DimensionProvider from '../src/services/dimension.provider';
+import ViewportProvider from '../src/services/viewport.provider';
+
+describe('browser-limit-aware scroll dimensions', () => {
+  it('uses 1:1 coordinates while content fits the physical scroll range', () => {
+    const dimension = getScrollDimension({
+      contentSize: 1_000,
+      clientSize: 100,
+      virtualSize: 100,
+      maxScrollSize: 1_010_000,
+    });
+
+    expect(dimension.isCompressed).toBe(false);
+    expect(dimension.physicalContentSize).toBe(1_000);
+    expect(dimension.toLogicalCoordinate(450)).toBe(450);
+    expect(dimension.toPhysicalCoordinate(450)).toBe(450);
+    expect(dimension.getRenderOffset(450)).toBe(0);
+  });
+
+  it('maps normal scroll coordinates at start, middle, and end without compression', () => {
+    const dimension = getScrollDimension({
+      contentSize: 1_000,
+      clientSize: 100,
+      virtualSize: 100,
+      maxScrollSize: 1_010_000,
+    });
+
+    expect(dimension.toLogicalCoordinate(0)).toBe(0);
+    expect(dimension.toPhysicalCoordinate(0)).toBe(0);
+    expect(dimension.toLogicalCoordinate(450)).toBe(450);
+    expect(dimension.toPhysicalCoordinate(450)).toBe(450);
+    expect(dimension.toLogicalCoordinate(900)).toBe(900);
+    expect(dimension.toPhysicalCoordinate(900)).toBe(900);
+  });
+
+  it('maps compressed physical scroll coordinates to the full logical range', () => {
+    const dimension = getScrollDimension({
+      contentSize: 100_000,
+      clientSize: 100,
+      virtualSize: 100,
+      maxScrollSize: 1_001_000,
+    });
+
+    expect(dimension.isCompressed).toBe(true);
+    expect(dimension.physicalContentSize).toBe(1_000);
+    expect(dimension.physicalScrollSize).toBe(900);
+    expect(dimension.logicalScrollSize).toBe(99_900);
+    expect(dimension.toLogicalCoordinate(900)).toBe(99_900);
+    expect(dimension.toPhysicalCoordinate(99_900)).toBe(900);
+    expect(dimension.getRenderOffset(99_900)).toBe(99_000);
+  });
+
+  it('maps compressed scroll coordinates at start, middle, and end', () => {
+    const dimension = getScrollDimension({
+      contentSize: 100_000,
+      clientSize: 100,
+      virtualSize: 100,
+      maxScrollSize: 1_001_000,
+    });
+
+    expect(dimension.toLogicalCoordinate(0)).toBe(0);
+    expect(dimension.toPhysicalCoordinate(0)).toBe(0);
+    expect(dimension.toLogicalCoordinate(450)).toBe(49_950);
+    expect(dimension.toPhysicalCoordinate(49_950)).toBe(450);
+    expect(dimension.toLogicalCoordinate(900)).toBe(99_900);
+    expect(dimension.toPhysicalCoordinate(99_900)).toBe(900);
+  });
+
+  it('clamps logical and physical coordinates to their scroll ranges', () => {
+    const dimension = getScrollDimension({
+      contentSize: 100_000,
+      clientSize: 100,
+      virtualSize: 100,
+      maxScrollSize: 1_001_000,
+    });
+
+    expect(dimension.toLogicalCoordinate(-100)).toBe(0);
+    expect(dimension.toPhysicalCoordinate(-100)).toBe(0);
+    expect(dimension.toLogicalCoordinate(10_000)).toBe(99_900);
+    expect(dimension.toPhysicalCoordinate(1_000_000)).toBe(900);
+    expect(dimension.getRenderOffset(-100)).toBe(0);
+    expect(dimension.getRenderOffset(1_000_000)).toBe(99_000);
+  });
+
+  it('keeps render offset equal to logical coordinate minus mapped physical coordinate', () => {
+    const dimension = getScrollDimension({
+      contentSize: 100_000,
+      clientSize: 100,
+      virtualSize: 100,
+      maxScrollSize: 1_001_000,
+    });
+    const logicalCoordinate = 75_000;
+
+    expect(dimension.getRenderOffset(logicalCoordinate)).toBe(
+      logicalCoordinate - dimension.toPhysicalCoordinate(logicalCoordinate),
+    );
+  });
+
+  it('keeps wheel deltas in logical pixels when scroll space is compressed', () => {
+    const events: any[] = [];
+    const service = new LocalScrollService({
+      runScroll: e => events.push(e),
+      applyScroll: () => undefined,
+    });
+    service.setParams({
+      contentSize: 100_000,
+      clientSize: 100,
+      virtualSize: 100,
+      maxScrollSize: 1_001_000,
+    }, 'rgRow');
+
+    service.scroll(10, 'rgRow', false, 10);
+
+    expect(events).toHaveLength(1);
+    expect(events[0].coordinate).toBe(10);
+  });
+
+  it('does not emit a feedback scroll after applying a logical coordinate', async () => {
+    const events: any[] = [];
+    const service = new LocalScrollService({
+      skipAnimationFrame: true,
+      runScroll: e => events.push(e),
+      applyScroll: () => undefined,
+    });
+    service.setParams({
+      contentSize: 100_000,
+      clientSize: 100,
+      virtualSize: 100,
+      maxScrollSize: 1_001_000,
+    }, 'rgRow');
+
+    await service.setScroll({
+      dimension: 'rgRow',
+      coordinate: 99_900,
+    });
+    service.scroll(900, 'rgRow');
+
+    expect(events).toHaveLength(0);
+  });
+
+  it('applies logical scroll coordinates back to physical scrollbar positions', async () => {
+    const applied: any[] = [];
+    const requestAnimationFrame = jest
+      .spyOn(window, 'requestAnimationFrame')
+      .mockImplementation((cb: FrameRequestCallback) => {
+        cb(0);
+        return 1;
+      });
+    const cancelAnimationFrame = jest
+      .spyOn(window, 'cancelAnimationFrame')
+      .mockImplementation(() => undefined);
+    const service = new LocalScrollService({
+      runScroll: () => undefined,
+      applyScroll: e => applied.push(e),
+    });
+    service.setParams({
+      contentSize: 100_000,
+      clientSize: 100,
+      virtualSize: 100,
+      maxScrollSize: 1_001_000,
+    }, 'rgRow');
+
+    await service.setScroll({
+      dimension: 'rgRow',
+      coordinate: 99_900,
+    });
+
+    expect(applied).toHaveLength(1);
+    expect(applied[0].coordinate).toBe(900);
+
+    requestAnimationFrame.mockRestore();
+    cancelAnimationFrame.mockRestore();
+  });
+
+  it('stores render offset for large logical viewport coordinates', () => {
+    const viewports = new ViewportProvider();
+    const dimensions = new DimensionProvider(viewports, {
+      realSizeChanged: () => undefined,
+    });
+    const rowDimension = dimensions.stores.rgRow;
+    rowDimension.setStore({
+      count: 2_000_000,
+      originItemSize: 30,
+      realSize: 60_000_000,
+    });
+    viewports.stores.rgRow.setViewport({
+      clientSize: 600,
+      virtualSize: 600,
+      realCount: 2_000_000,
+    });
+
+    dimensions.setViewPortCoordinate({
+      type: 'rgRow',
+      coordinate: 30_000_000,
+    });
+
+    const renderOffset = viewports.stores.rgRow.store.get('renderOffset');
+    expect(renderOffset).toBeGreaterThan(0);
+    expect(rowDimension.store.get('renderOffset')).toBe(renderOffset);
+  });
+
+  it('recomputes render offset when viewport size changes', () => {
+    const viewports = new ViewportProvider();
+    const dimensions = new DimensionProvider(viewports, {
+      realSizeChanged: () => undefined,
+    });
+    const rowDimension = dimensions.stores.rgRow;
+    rowDimension.setStore({
+      count: 2_000_000,
+      originItemSize: 30,
+      realSize: 60_000_000,
+    });
+    viewports.stores.rgRow.setViewport({
+      clientSize: 600,
+      virtualSize: 600,
+      realCount: 2_000_000,
+    });
+
+    dimensions.setViewPortCoordinate({
+      type: 'rgRow',
+      coordinate: 30_000_000,
+    });
+    const firstRenderOffset = viewports.stores.rgRow.store.get('renderOffset');
+
+    viewports.stores.rgRow.setViewport({
+      clientSize: 1_200,
+      virtualSize: 1_200,
+    });
+    dimensions.setViewPortCoordinate({
+      type: 'rgRow',
+      coordinate: 30_000_000,
+    });
+    const resizedRenderOffset = viewports.stores.rgRow.store.get('renderOffset');
+
+    expect(resizedRenderOffset).toBeGreaterThan(0);
+    expect(resizedRenderOffset).not.toBe(firstRenderOffset);
+    expect(rowDimension.store.get('renderOffset')).toBe(resizedRenderOffset);
+  });
+
+  it('keeps render offset at zero until viewport sizes are initialized', () => {
+    const viewports = new ViewportProvider();
+    const dimensions = new DimensionProvider(viewports, {
+      realSizeChanged: () => undefined,
+    });
+    const rowDimension = dimensions.stores.rgRow;
+    rowDimension.setStore({
+      count: 2_000_000,
+      originItemSize: 30,
+      realSize: 60_000_000,
+    });
+
+    dimensions.setViewPortCoordinate({
+      type: 'rgRow',
+      coordinate: 30_000_000,
+    });
+
+    expect(viewports.stores.rgRow.store.get('renderOffset')).toBe(0);
+    expect(rowDimension.store.get('renderOffset')).toBe(0);
+  });
+});

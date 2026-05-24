@@ -1,4 +1,4 @@
-import { generateFakeDataObject } from './data.js';
+import { generateFakeDataObjectAsync } from './data.js';
 
 /**
  * Map of prevented events
@@ -116,25 +116,68 @@ let defaultData = {
   colPinStart: [],
 };
 
+let dataGenerationId = 0;
+
+function formatNumber(value) {
+  return new Intl.NumberFormat('en').format(value);
+}
+
+function setLoader(text, visible = true) {
+  const $loader = document.querySelector('.loader');
+  if (!$loader) {
+    return;
+  }
+  $loader.textContent = text;
+  $loader.style.display = visible ? 'block' : 'none';
+}
+
+function cancelDataGeneration() {
+  dataGenerationId++;
+  setLoader('', false);
+}
+
 /**
  * Set data
  * @param {Object} [config={}] - Data configuration
  */
-window.setData = function (config = {}) {
+window.setData = async function (config = {}) {
   defaultData = { ...defaultData, ...config };
-  const $loader = document.querySelector('.loader');
-  $loader.style.display = 'block';
-  setTimeout(() => {
+  const generationId = ++dataGenerationId;
+  const totalCells = defaultData.rows * defaultData.cols;
+  setLoader(`Preparing ${formatNumber(defaultData.rows)} rows x ${formatNumber(defaultData.cols)} columns...`);
+
+  try {
+    // Let the loader paint before data generation starts.
+    await new Promise(resolve => setTimeout(resolve, 0));
     const grid = document.querySelector('revo-grid');
-    const data = generateFakeDataObject(defaultData);
+    const data = await generateFakeDataObjectAsync(defaultData, {
+      isCanceled: () => generationId !== dataGenerationId,
+      onProgress: ({ rows, totalRows }) => {
+        if (generationId !== dataGenerationId) {
+          return;
+        }
+        setLoader(
+          `Generated ${formatNumber(rows)} / ${formatNumber(totalRows)} rows (${formatNumber(totalCells)} cells)...`,
+        );
+      },
+    });
+
+    if (generationId !== dataGenerationId || !data) {
+      return;
+    }
 
     grid.columns = data.headers;
     grid.source = data.rows;
 
     grid.pinnedTopSource = data.pinnedTopRows;
     grid.pinnedBottomSource = data.pinnedBottomRows;
-    $loader.style.display = 'none';
-  }, 0);
+    setLoader('', false);
+  } catch (error) {
+    if (generationId === dataGenerationId) {
+      setLoader(`Data generation failed: ${error?.message || error}`);
+      throw error;
+    }
+  }
 };
 
 window.setRtl = function (checked) {
@@ -305,6 +348,7 @@ window.setFilter = () => {
  * https://github.com/revolist/revogrid/issues/828
  */
 window.setColumnGroupOffsetBugDemo = () => {
+  cancelDataGeneration();
   const grid = document.querySelector('revo-grid');
 
   grid.columns = [

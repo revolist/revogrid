@@ -48,6 +48,9 @@ function initialState(): DimensionSettingsState {
 
     // initial item size if it wasn't changed
     originItemSize: 0,
+
+    // logical-to-physical render offset used when scroll space is compressed
+    renderOffset: 0,
   };
 }
 
@@ -88,7 +91,10 @@ export class DimensionStore {
   }
 
   drop() {
-    setStore(this.store, initialBase());
+    setStore(this.store, {
+      ...initialBase(),
+      renderOffset: 0,
+    });
   }
 
   /**
