@@ -68,6 +68,10 @@ export type RevogridEvents = 'contentsizechanged'|
   'beforeheaderrender'|
   'beforegroupheaderrender'|
   'afterheaderrender'|
+  'columndragstart'|
+  'columndragmousemove'|
+  'beforecolumndragend'|
+  'columndragend'|
   'rowdragstartinit'|
   'rowdragendinit'|
   'rowdragmoveinit'|
@@ -178,6 +182,10 @@ export const REVOGRID_EVENTS = new Map<RevogridEvents, RevogridEvents>([
   ['beforeheaderrender', 'beforeheaderrender'],
   ['beforegroupheaderrender', 'beforegroupheaderrender'],
   ['afterheaderrender', 'afterheaderrender'],
+  ['columndragstart', 'columndragstart'],
+  ['columndragmousemove', 'columndragmousemove'],
+  ['beforecolumndragend', 'beforecolumndragend'],
+  ['columndragend', 'columndragend'],
   ['rowdragstartinit', 'rowdragstartinit'],
   ['rowdragendinit', 'rowdragendinit'],
   ['rowdragmoveinit', 'rowdragmoveinit'],

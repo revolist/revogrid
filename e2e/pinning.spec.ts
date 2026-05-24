@@ -8,6 +8,8 @@ import {
   pinnedEndCell,
   pinnedStartCell,
   pinnedTopCell,
+  getSelectedRange,
+  setCellsFocus,
   scrollToCell,
   visibleColumnValues,
 } from './helpers';
@@ -51,5 +53,46 @@ test.describe('pinning', () => {
 
     const visibleMiddleValues = await visibleColumnValues(page, 1);
     expect(visibleMiddleValues.includes('Middle 21')).toBe(true);
+  });
+
+  test('distinguishes pinned start and regular selected ranges by column type', async ({ page }) => {
+    const source = buildRows(3, ['col1', 'col2', 'col3']).map((row, index) => ({
+      col1: `A${index + 1}`,
+      col2: `B${index + 1}`,
+      col3: `C${index + 1}`,
+    }));
+
+    await mountGrid(page, {
+      columns: [
+        { prop: 'col1', name: 'A', pin: 'colPinStart' as const, size: 130 },
+        { prop: 'col2', name: 'B', size: 130 },
+        { prop: 'col3', name: 'C', size: 130 },
+      ],
+      source,
+      width: 420,
+      height: 240,
+      range: true,
+      colSize: 130,
+    });
+
+    await setCellsFocus(page, { x: 0, y: 0 }, { x: 0, y: 0 }, 'colPinStart');
+    await expect.poll(() => getSelectedRange(page)).toMatchObject({
+      x: 0,
+      x1: 0,
+      y: 0,
+      y1: 0,
+      colType: 'colPinStart',
+      rowType: 'rgRow',
+    });
+
+    await setCellsFocus(page, { x: 0, y: 0 }, { x: 0, y: 0 }, 'rgCol');
+    await expect.poll(() => getSelectedRange(page)).toMatchObject({
+      x: 0,
+      x1: 0,
+      y: 0,
+      y1: 0,
+      colType: 'rgCol',
+      rowType: 'rgRow',
+    });
   });
 });
