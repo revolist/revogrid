@@ -164,11 +164,16 @@ export class GroupingRowPlugin extends BasePlugin {
   /**
    * Returns grouping options for regrouping that must preserve current UI state.
    *
-   * `expandedAll` is an initial/config instruction. Reusing it after sorting
-   * would reopen groups the user collapsed before sorting.
+   * `expandedAll` and config `prevExpanded` are initial/config instructions.
+   * Reusing them after sorting would reopen groups the user collapsed before
+   * sorting instead of using the current grouped source state.
    */
   private getCurrentExpandedOptions(): ExpandedOptions {
-    const { expandedAll: _expandedAll, ...options } = this.options || {};
+    const {
+      expandedAll: _expandedAll,
+      prevExpanded: _prevExpanded,
+      ...options
+    } = this.options || {};
     return options;
   }
 

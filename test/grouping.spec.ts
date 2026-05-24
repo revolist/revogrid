@@ -558,6 +558,10 @@ describe('row grouping', () => {
       plugin.setGrouping({
         props: ['team'],
         expandedAll: true,
+        prevExpanded: {
+          North: true,
+          South: true,
+        },
       });
 
       const { trimmed } = doCollapse(0, state.source);

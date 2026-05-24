@@ -32,6 +32,10 @@ test.describe('row grouping', () => {
       grouping: {
         props: ['team'],
         expandedAll: true,
+        prevExpanded: {
+          North: true,
+          South: true,
+        },
       },
       rowHeaders: true,
     });
