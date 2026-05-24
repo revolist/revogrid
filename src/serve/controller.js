@@ -34,6 +34,19 @@ globalThis.setRowSize = function (s) {
 };
 
 /**
+ * Apply several custom row sizes.
+ */
+globalThis.setCustomRowSizes = function () {
+  const grid = document.querySelector('revo-grid');
+  grid.rowDefinitions = [
+    { type: 'rgRow', index: 1, size: 64 },
+    { type: 'rgRow', index: 3, size: 96 },
+    { type: 'rgRow', index: 6, size: 48 },
+    { type: 'rgRow', index: 10, size: 120 },
+  ];
+};
+
+/**
  * Start editing cell
  * @param {number} rgRow - Row index
  * @param {string} prop - Column property
