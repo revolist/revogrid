@@ -4,6 +4,7 @@ import { BasePlugin } from '../base.plugin';
 import type {
   CellCompareFunc,
   ColumnProp,
+  DataType,
   Order,
   ColumnRegular,
   DimensionRows,
@@ -18,6 +19,7 @@ import type {
 } from './sorting.types';
 import { getColumnByProp } from '../../utils/column.utils';
 import { columnTypes, rowTypes } from '@store';
+import { isGrouping } from '../groupingRow/grouping.service';
 import {
   getComparer,
   getNextOrder,
@@ -36,6 +38,31 @@ type SortingState = {
   sortingColumns: SortingColumnMap;
   sortingOrder: SortingColumnOrder;
 };
+
+function getSortableRowIndexes(
+  indexes: number[],
+  source: DataType[],
+) {
+  return indexes.filter(index => !isGrouping(source[index]));
+}
+
+function mergeSortedRowsWithGroups(
+  indexes: number[],
+  source: DataType[],
+  sortedRows: number[],
+) {
+  if (sortedRows.length === indexes.length) {
+    return sortedRows;
+  }
+
+  let rowIndex = 0;
+  return indexes.map(index => {
+    if (isGrouping(source[index])) {
+      return index;
+    }
+    return sortedRows[rowIndex++];
+  });
+}
 
 /**
  * Lifecycle
@@ -425,15 +452,17 @@ export class SortingPlugin extends BasePlugin {
         const source = storeService.store.get('source');
         // row indexes
         const proxyItems = storeService.store.get('proxyItems');
+        const sortItems = getSortableRowIndexes(proxyItems, source);
 
-        const newItemsOrder = sortIndexByItems(
-          [...proxyItems],
+        const sortedItems = sortIndexByItems(
+          [...sortItems],
           source,
           sortingFunc,
           sorting,
           sortingColumns,
           sortingOrder,
         );
+        const newItemsOrder = mergeSortedRowsWithGroups(proxyItems, source, sortedItems);
        
         // take row indexes before trim applied and proxy items
         const prevItems = storeService.store.get('items');

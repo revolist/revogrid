@@ -638,6 +638,39 @@ describe('SortingPlugin regressions', () => {
     expect(rowStore.state.source).toBe(source);
   });
 
+  it('sorts data indexes when the current source contains grouping rows', () => {
+    const source = [
+      {
+        [PSEUDO_GROUP_ITEM]: 'group-b',
+        [GROUP_EXPANDED]: true,
+        [PSEUDO_GROUP_ITEM_VALUE]: 'group-b',
+        [GROUP_DEPTH]: 0,
+        [GROUP_COLUMN_PROP]: 'group',
+      },
+      { name: 'Alice' },
+      { name: 'Bob' },
+      {
+        [PSEUDO_GROUP_ITEM]: 'group-a',
+        [GROUP_EXPANDED]: true,
+        [PSEUDO_GROUP_ITEM_VALUE]: 'group-a',
+        [GROUP_DEPTH]: 0,
+        [GROUP_COLUMN_PROP]: 'group',
+      },
+      { name: 'Aaron' },
+    ];
+    const { plugin, rowStore } = createPlugin(source);
+
+    plugin.sort(
+      { name: 'asc' },
+      { name: getComparer({ prop: 'name' }, 'asc') },
+      { name: { prop: 'name' } },
+      ['name'],
+      ['rgRow'],
+    );
+
+    expect(rowStore.setData).toHaveBeenCalledWith({ proxyItems: [0, 4, 1, 3, 2] });
+  });
+
   it('sorts full proxy order while preserving filtered visible items', () => {
     const source = [
       { name: 'Zed', role: 'Admin' },

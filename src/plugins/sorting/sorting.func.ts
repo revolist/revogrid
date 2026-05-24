@@ -6,6 +6,7 @@ import type {
   SortingOrder,
   SortingOrderFunction,
 } from './sorting.types';
+import { GROUP_COLUMN_PROP } from '../groupingRow/grouping.const';
 import { isGrouping } from '../groupingRow/grouping.service';
 import { getCellRaw } from '../../utils/column.utils';
 
@@ -170,6 +171,22 @@ function canUseDefaultCompareFastPath(
 }
 
 /**
+ * Group placeholder rows are generated for their grouping column. If sorting is
+ * requested for another column, the grouped source must be unwrapped first.
+ */
+function hasGroupingRowsForOtherSorting(
+  entries: [ColumnProp, CellCompareFunc][],
+  indexes: number[],
+  source: DataType[],
+) {
+  return indexes.some(index => {
+    const item = source[index];
+    return isGrouping(item) && !entries.some(([prop]) =>
+      isSameColumnProp(item[GROUP_COLUMN_PROP], prop));
+  });
+}
+
+/**
  * Sorts row indexes against a source collection.
  *
  * @param indexes - Current proxy row indexes to sort.
@@ -195,6 +212,9 @@ export function sortIndexByItems(
     // Unsorted indexes
     return hasSortingKeys ? indexes : [...new Array(indexes.length).keys()];
   }
+  if (hasGroupingRowsForOtherSorting(sortingEntries, indexes, source)) {
+    return indexes;
+  }
   if (canUseDefaultCompareFastPath(sortingEntries, indexes, source, sorting, sortingColumns)) {
     return sortIndexByDefaultComparers(
       indexes,
@@ -214,12 +234,12 @@ export function sortIndexByItems(
     const itemB = source[b];
     for (const [prop, cmp] of sortingEntries) {
       if (isGrouping(itemA)) {
-        if (itemA['__rvgr-prop'] !== prop) {
+        if (!isSameColumnProp(itemA[GROUP_COLUMN_PROP], prop)) {
           return a - b;
         }
       }
       if (isGrouping(itemB)) {
-        if (itemB['__rvgr-prop'] !== prop) {
+        if (!isSameColumnProp(itemB[GROUP_COLUMN_PROP], prop)) {
           return a - b;
         }
       }
