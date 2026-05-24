@@ -148,8 +148,10 @@ export async function setCellsFocus(
   page: E2EPage,
   start: { x: number; y: number },
   end = start,
+  colType = 'rgCol',
+  rowType = 'rgRow',
 ): Promise<void> {
-  await callGridMethod(page, 'setCellsFocus', start, end);
+  await callGridMethod(page, 'setCellsFocus', start, end, colType, rowType);
   await page.waitForChanges();
 }
 

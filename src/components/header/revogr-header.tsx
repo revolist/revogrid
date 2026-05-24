@@ -7,7 +7,6 @@ import {
   Prop,
   type VNode,
 } from '@stencil/core';
-import keyBy from 'lodash/keyBy';
 
 import { getItemByIndex, Groups } from '@store';
 import { HEADER_ACTUAL_ROW_CLASS, HEADER_ROW_CLASS } from '../../utils/consts';
@@ -163,13 +162,10 @@ export class RevogrHeaderComponent {
     endIndex: number,
   ) {
     const sizes: ViewSettingSizeProp = {};
-    const cols = keyBy(this.viewportCol.get('items'), 'itemIndex');
     const change = changedX / (endIndex - startIndex + 1);
     for (let i = startIndex; i <= endIndex; i++) {
-      const item = cols[i];
-      if (item) {
-        sizes[i] = item.size + change;
-      }
+      const item = getItemByIndex(this.dimensionCol.state, i);
+      sizes[i] = item.end - item.start + change;
     }
     this.headerresize.emit(sizes);
   }
@@ -197,7 +193,7 @@ export class RevogrHeaderComponent {
     cols: VirtualPositionItem[],
     range: RangeArea | null,
   ) {
-    const cells: VNode[] = [];
+    const columnsToRender: HeaderRenderProps[] = [];
     for (let rgCol of cols) {
       const colData = this.colData[rgCol.itemIndex];
       const props: HeaderRenderProps = {
@@ -218,55 +214,149 @@ export class RevogrHeaderComponent {
       };
       const event = this.beforeHeaderRender.emit(props);
       if (!event.defaultPrevented) {
-        cells.push(<HeaderRenderer {...event.detail} />);
+        columnsToRender.push(event.detail);
       }
     }
+    const duplicateProps = this.getDuplicateHeaderProps(columnsToRender);
+    const cells = columnsToRender.map(detail =>
+      h(HeaderRenderer, {
+        key: this.getHeaderCellKey(detail.data, this.type, duplicateProps),
+        ...detail,
+      }),
+    );
     return { cells };
   }
 
   private renderGroupingColumns(): VNode[] {
-    const groupRow: VNode[] = [];
-    for (let i = 0; i < this.groupingDepth; i++) {
-      if (this.groups[i]) {
-        for (let group of this.groups[i]) {
-          const groupStartIndex = group.indexes[0] ?? -1;
-          if (groupStartIndex > -1) {
-            const groupEndIndex = groupStartIndex + group.indexes.length - 1;
+    const visibleGroupRange = this.getVisibleGroupRange();
+    return Array.from({ length: this.groupingDepth }, (_, level) =>
+      this.renderGroupRow(level, visibleGroupRange),
+    ).flat();
+  }
 
-            const groupStart = getItemByIndex(
-              this.dimensionCol.state,
-              groupStartIndex,
-            ).start;
-            const groupEnd = getItemByIndex(
-              this.dimensionCol.state,
-              groupEndIndex,
-            ).end;
+  private renderGroupRow(
+    level: number,
+    visibleGroupRange: { start: number; end: number } | undefined,
+  ) {
+    const groupCells = (this.groups[level] || [])
+      .map(group => this.renderGroupColumn(group, level, visibleGroupRange))
+      .filter((cell): cell is VNode => !!cell);
 
-            const props: HeaderGroupRendererProps = {
-              providers: this.providers,
-              start: groupStart,
-              end: groupEnd,
-              group,
-              active: this.resizeHandler,
-              canResize: this.canResize,
-              additionalData: this.additionalData,
-              onResize: e =>
-                this.onResizeGroup(
-                  e.changedX ?? 0,
-                  groupStartIndex,
-                  groupEndIndex,
-                ),
-            };
-            const event = this.beforeGroupHeaderRender.emit(props);
-            if (!event.defaultPrevented) {
-              groupRow.push(<GroupHeaderRenderer {...event.detail} />);
-            }
-          }
+    return [
+      ...groupCells,
+      h('div', {
+        key: `group-row-${level}`,
+        class: {
+          [HEADER_ROW_CLASS]: true,
+          group: true,
+        },
+      }),
+    ];
+  }
+
+  private renderGroupColumn(
+    group: Groups[number][number],
+    level: number,
+    visibleGroupRange: { start: number; end: number } | undefined,
+  ) {
+    const groupStartIndex = group.indexes[0] ?? -1;
+    if (groupStartIndex < 0) {
+      return;
+    }
+
+    const groupEndIndex = groupStartIndex + group.indexes.length - 1;
+    if (
+      !visibleGroupRange ||
+      !isGroupInVisibleRange(groupStartIndex, groupEndIndex, visibleGroupRange)
+    ) {
+      return;
+    }
+
+    const groupStart = getItemByIndex(
+      this.dimensionCol.state,
+      groupStartIndex,
+    ).start;
+    const groupEnd = getItemByIndex(
+      this.dimensionCol.state,
+      groupEndIndex,
+    ).end;
+    const props: HeaderGroupRendererProps = {
+      providers: this.providers,
+      start: groupStart,
+      end: groupEnd,
+      group,
+      active: this.resizeHandler,
+      canResize: this.canResize,
+      additionalData: this.additionalData,
+      onResize: e =>
+        this.onResizeGroup(
+          e.changedX ?? 0,
+          groupStartIndex,
+          groupEndIndex,
+        ),
+    };
+    const event = this.beforeGroupHeaderRender.emit(props);
+    if (event.defaultPrevented) {
+      return;
+    }
+    return h(GroupHeaderRenderer, {
+      key: this.getGroupHeaderCellKey(event.detail.group, level),
+      ...event.detail,
+    });
+  }
+
+  private getVisibleGroupRange() {
+    const visibleColumns = this.viewportCol.get('items');
+    if (!visibleColumns.length) {
+      return;
+    }
+    return visibleColumns.reduce(
+      (range, column) => ({
+        start: Math.min(range.start, column.itemIndex),
+        end: Math.max(range.end, column.itemIndex),
+      }),
+      {
+        start: visibleColumns[0].itemIndex,
+        end: visibleColumns[0].itemIndex,
+      },
+    );
+  }
+
+  private getHeaderCellKey(
+    column: ColumnRegular | undefined,
+    type: DimensionCols | 'rowHeaders',
+    duplicateProps: Set<string>,
+  ) {
+    if (column?.prop === undefined) {
+      return `${type}-${String(column?.index)}`;
+    }
+    const propKey = String(column.prop);
+    if (duplicateProps.has(propKey)) {
+      return `${type}-${propKey}-${String(column.index)}`;
+    }
+    return `${type}-${propKey}`;
+  }
+
+  private getDuplicateHeaderProps(columns: HeaderRenderProps[]) {
+    const seenProps = new Set<string>();
+    const duplicateProps = new Set<string>();
+
+    columns.forEach(({ data }) => {
+      if (data?.prop !== undefined) {
+        const propKey = String(data.prop);
+        if (seenProps.has(propKey)) {
+          duplicateProps.add(propKey);
+        } else {
+          seenProps.add(propKey);
         }
       }
-      groupRow.push(<div class={`${HEADER_ROW_CLASS} group`} />);
-    }
-    return groupRow;
+    });
+
+    return duplicateProps;
+  }
+
+  private getGroupHeaderCellKey(group: Groups[number][number], level: number) {
+    return `group-${level}-${group.name}-${group.indexes.join('-')}`;
   }
 
   get providers(): ProvidersColumns<DimensionCols | 'rowHeaders'> {
@@ -279,4 +369,15 @@ export class RevogrHeaderComponent {
       selection: this.selectionStore,
     };
   }
+}
+
+function isGroupInVisibleRange(
+  groupStartIndex: number,
+  groupEndIndex: number,
+  visibleRange: { start: number; end: number },
+) {
+  return (
+    groupStartIndex <= visibleRange.end &&
+    groupEndIndex >= visibleRange.start
+  );
 }

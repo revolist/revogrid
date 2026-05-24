@@ -5,6 +5,7 @@ type ClipboardAction = {
   text?: string;
   html?: string;
   waitForWrite?: boolean;
+  requirePreventDefaultBeforeWrite?: boolean;
 };
 
 async function runClipboardAction(
@@ -15,8 +16,18 @@ async function runClipboardAction(
     class DataTransferStub {
       data: Record<string, string> = {};
       types: string[] = [];
+      constructor(private readonly event: Event) {}
 
       setData(type: string, value: string) {
+        if (
+          currentAction.requirePreventDefaultBeforeWrite &&
+          !this.event.defaultPrevented
+        ) {
+          throw new DOMException(
+            'Modifications are not allowed for this document',
+            'NoModificationAllowedError',
+          );
+        }
         this.data[type] = value;
         if (type === 'text/plain') {
           this.data.text = value;
@@ -43,7 +54,11 @@ async function runClipboardAction(
       }
     }
 
-    const clipboardData = new DataTransferStub();
+    const event = new Event(currentAction.type, {
+      bubbles: true,
+      cancelable: true,
+    }) as Event & { clipboardData?: DataTransferStub };
+    const clipboardData = new DataTransferStub(event);
     if (currentAction.type === 'paste') {
       if (currentAction.text) {
         clipboardData.setData('text/plain', currentAction.text);
@@ -52,11 +67,6 @@ async function runClipboardAction(
         clipboardData.setData('text/html', currentAction.html);
       }
     }
-
-    const event = new Event(currentAction.type, {
-      bubbles: true,
-      cancelable: true,
-    }) as Event & { clipboardData?: DataTransferStub };
     Object.defineProperty(event, 'clipboardData', {
       value: clipboardData,
       configurable: true,
@@ -86,6 +96,28 @@ export async function getCopiedText(page: E2EPage): Promise<string> {
   const copiedText = await runClipboardAction(page, {
     type: 'copy',
     waitForWrite: true,
+  });
+  return typeof copiedText === 'string' ? copiedText : '';
+}
+
+/**
+ * Dispatches a synthetic cut event and returns the text that RevoGrid writes to
+ * the event clipboard payload before the cut clear operation is applied.
+ */
+export async function getCutText(page: E2EPage): Promise<string> {
+  const cutText = await runClipboardAction(page, {
+    type: 'cut',
+    waitForWrite: true,
+  });
+  await page.waitForChanges();
+  return typeof cutText === 'string' ? cutText : '';
+}
+
+export async function getFirefoxCopiedText(page: E2EPage): Promise<string> {
+  const copiedText = await runClipboardAction(page, {
+    type: 'copy',
+    waitForWrite: true,
+    requirePreventDefaultBeforeWrite: true,
   });
   return typeof copiedText === 'string' ? copiedText : '';
 }

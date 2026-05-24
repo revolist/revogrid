@@ -64,6 +64,19 @@ test.describe('reordering', () => {
     });
 
     const beforeHeaders = await visibleHeaderTexts(page);
+    await page.evaluate(() => {
+      const grid = document.querySelector('revo-grid');
+      if (!grid) {
+        throw new Error('Grid element was not found');
+      }
+      grid.addEventListener('columndragend', ((event: CustomEvent) => {
+        (window as any).__columnDragEnd = {
+          columns: event.detail.columns.map((column: any) => column.prop),
+          order: event.detail.order,
+          type: event.detail.type,
+        };
+      }) as EventListener);
+    });
     const from = page.locator('revo-grid revogr-header .header-rgRow.actual-rgRow .rgHeaderCell').nth(2);
     const to = page.locator('revo-grid revogr-header .header-rgRow.actual-rgRow .rgHeaderCell').first();
     const fromBox = await from.boundingBox();
@@ -82,5 +95,12 @@ test.describe('reordering', () => {
     await expect
       .poll(() => visibleHeaderTexts(page))
       .not.toEqual(beforeHeaders);
+    await expect
+      .poll(() => page.evaluate(() => (window as any).__columnDragEnd))
+      .toEqual({
+        columns: ['role', 'id', 'name'],
+        order: [2, 0, 1],
+        type: 'rgCol',
+      });
   });
 });
