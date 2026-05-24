@@ -86,7 +86,17 @@ test.describe('clipboard', () => {
     });
 
     await setCellsFocus(page, { x: 1, y: 0 }, { x: 2, y: 1 });
-    await page.keyboard.press('Control+X');
+    await page.evaluate(() => {
+      document.dispatchEvent(
+        new KeyboardEvent('keydown', {
+          bubbles: true,
+          cancelable: true,
+          code: 'KeyX',
+          key: 'x',
+          ctrlKey: true,
+        }),
+      );
+    });
     await page.waitForChanges();
     await expect(page.locator(SELECTORS.editInput)).toHaveCount(0);
 
