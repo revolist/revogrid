@@ -10,7 +10,6 @@ import {
   expectChildHeaderUnderGroup,
   mountGrid,
   scrollToCell,
-  SELECTORS,
   withHeaderTestId,
   type SampleRow,
 } from './helpers';
@@ -142,6 +141,8 @@ test.describe('column groups', () => {
 
     await firstCell.dblclick();
     await expect(page.locator(SELECTORS.editInput)).toBeVisible();
+  });
+
   test('virtualizes one-child group headers with the visible column window', async ({ page }) => {
     const groupCount = 120;
     const colSize = 90;
