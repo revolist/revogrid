@@ -28,36 +28,36 @@ export function getMaxScrollSize(doc: Document | undefined = typeof document !==
     return detectedMaxScrollSize;
   }
   const body = doc?.body;
-  if (!body) {
-    detectedMaxScrollSize = FALLBACK_MAX_SCROLL_SIZE;
-    return detectedMaxScrollSize;
+  if (body) {
+    const ownerDocument = body.ownerDocument;
+    const element = ownerDocument.createElement('div');
+    element.style.cssText = [
+      'height:1px',
+      'left:-10000px',
+      'overflow:scroll',
+      'position:absolute',
+      'top:-10000px',
+      'visibility:hidden',
+      'width:1px',
+    ].join(';');
+
+    const content = ownerDocument.createElement('div');
+    content.style.height = `${FALLBACK_MAX_SCROLL_SIZE * 4}px`;
+    element.appendChild(content);
+    body.appendChild(element);
+
+    detectedMaxScrollSize = Math.max(
+      0,
+      Math.min(element.scrollHeight, FALLBACK_MAX_SCROLL_SIZE * 4) - SCROLL_SIZE_GUARD,
+    );
+    element.remove();
+
+    if (detectedMaxScrollSize > SCROLL_SIZE_GUARD) {
+      return detectedMaxScrollSize;
+    }
   }
 
-  const element = doc.createElement('div');
-  element.style.cssText = [
-    'height:1px',
-    'left:-10000px',
-    'overflow:scroll',
-    'position:absolute',
-    'top:-10000px',
-    'visibility:hidden',
-    'width:1px',
-  ].join(';');
-
-  const content = doc.createElement('div');
-  content.style.height = `${FALLBACK_MAX_SCROLL_SIZE * 4}px`;
-  element.appendChild(content);
-  body.appendChild(element);
-
-  detectedMaxScrollSize = Math.max(
-    0,
-    Math.min(element.scrollHeight, FALLBACK_MAX_SCROLL_SIZE * 4) - SCROLL_SIZE_GUARD,
-  );
-  element.remove();
-
-  if (detectedMaxScrollSize <= SCROLL_SIZE_GUARD) {
-    detectedMaxScrollSize = FALLBACK_MAX_SCROLL_SIZE;
-  }
+  detectedMaxScrollSize = FALLBACK_MAX_SCROLL_SIZE;
   return detectedMaxScrollSize;
 }
 
