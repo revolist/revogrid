@@ -30,6 +30,7 @@ const supplementalEvents = [
       'Fired when the column drag operation completes. Includes reordered columns, physical order, and viewport type.',
   },
 ] as const;
+const unescapedMarkdownPipe = new RegExp(String.raw`(?<!\\)\|`, 'g');
 
 /**
  * Adds plugin-dispatched events that are not present in Stencil component
@@ -65,7 +66,7 @@ export const eventListOutputTarget = (outputTarget: {
         name: event.name,
         type: event.complexType.resolved,
         component: c.tagName,
-        description: event.docs.text.replace(/\n/g, ' '),
+        description: event.docs.text.replaceAll('\n', ' '),
       })),
     );
     const events = addSupplementalEventsAfterHeader(componentEvents);
@@ -84,7 +85,7 @@ ${json2md(
             headers: ['Name', 'Type', 'Component', 'Description'],
             rows: events.map(event => [
               event.name,
-              `\`${event.type.replace(/(?<!\\)\|/g, '\\|')}\``,
+              `\`${event.type.replaceAll(unescapedMarkdownPipe, String.raw`\|`)}\``,
               event.component,
               event.description,
             ]),
