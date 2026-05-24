@@ -20,6 +20,7 @@ import {
   isBeforeFirst,
 } from './selection.utils';
 import { Cell, Nullable, RangeArea, SelectionStoreState } from '@type';
+import { isEditInput } from '../editors/edit.utils';
 
 type Config = {
   selectionStore: Observable<SelectionStoreState>;
@@ -52,6 +53,31 @@ const DIRECTION_CODES: string[] = [
 export class KeyboardService {
   constructor(private sv: Config) {}
 
+  /**
+   * Appends printable key input that arrives after edit mode was requested
+   * but before the editor input has mounted or received focus.
+   */
+  private appendPendingEditValue(e: KeyboardEvent): boolean {
+    if (
+      isShortcutModifier(e) ||
+      e.key.length !== 1 ||
+      (e.target instanceof HTMLElement && isEditInput(e.target))
+    ) {
+      return false;
+    }
+
+    const editCell = this.sv.selectionStore.get('edit');
+    if (typeof editCell?.val !== 'string') {
+      return false;
+    }
+
+    this.sv.selectionStore.set('edit', {
+      ...editCell,
+      val: `${editCell.val}${e.key}`,
+    });
+    return true;
+  }
+
   async keyDown(
     e: KeyboardEvent,
     canRange: boolean,
@@ -60,6 +86,10 @@ export class KeyboardService {
   ) {
     // IF EDIT MODE
     if (isEditMode) {
+      if (this.appendPendingEditValue(e)) {
+        return;
+      }
+
       switch (e.code) {
         case codesLetter.ESCAPE:
           this.sv.cancel();
