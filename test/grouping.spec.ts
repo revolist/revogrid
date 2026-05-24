@@ -7,6 +7,7 @@ import {
   PSEUDO_GROUP_ITEM_VALUE,
 } from '../src/plugins/groupingRow/grouping.const';
 import { doCollapse, doExpand } from '../src/plugins/groupingRow/grouping.row.expand.service';
+import { GroupingRowPlugin } from '../src/plugins/groupingRow/grouping.row.plugin';
 import {
   gatherGrouping,
   getSource,
@@ -31,6 +32,70 @@ function groupRow(name: string, depth: number, expanded = false, path: string[] 
 }
 
 describe('row grouping', () => {
+  function createGroupingPlugin(source: DataType[]) {
+    const state = {
+      source,
+      proxyItems: source.map((_, index) => index),
+      items: source.map((_, index) => index),
+      trimmed: {} as Record<string, Record<number, boolean>>,
+      groupingDepth: 0,
+      groups: {},
+      groupingCustomRenderer: undefined,
+    };
+    const store = {
+      get: (key: keyof typeof state) => state[key],
+      set: (key: keyof typeof state, value: any) => {
+        (state as any)[key] = value;
+      },
+    };
+    const revogrid = Object.assign(document.createElement('revo-grid'), {
+      disableVirtualY: false,
+      grouping: {
+        props: ['team'],
+        expandedAll: true,
+      },
+      addTrimmed: jest.fn((trimmed: Record<number, boolean>, type: string) => {
+        state.trimmed = {
+          ...state.trimmed,
+          [type]: trimmed,
+        };
+        state.items = state.proxyItems.filter(index => {
+          return !Object.values(state.trimmed).some(trim => trim?.[index]);
+        });
+      }),
+      clearFocus: jest.fn(),
+    }) as unknown as HTMLRevoGridElement;
+    const providers = {
+      data: {
+        stores: {
+          rgRow: { store },
+        },
+        setData: jest.fn((nextSource: DataType[]) => {
+          state.source = nextSource;
+          state.proxyItems = nextSource.map((_, index) => index);
+          state.items = [...state.proxyItems];
+        }),
+        setGrouping: jest.fn(({ depth }: { depth: number }) => {
+          state.groupingDepth = depth;
+        }),
+      },
+      column: {
+        getColumns: jest.fn(() => [{ prop: 'name' }, { prop: 'team' }]),
+        refreshByType: jest.fn(),
+      },
+      plugins: {
+        getByClass: jest.fn(() => undefined),
+      },
+    };
+
+    return {
+      plugin: new GroupingRowPlugin(revogrid, providers as any),
+      providers,
+      revogrid,
+      state,
+    };
+  }
+
   describe('gatherGrouping', () => {
     it('creates collapsed groups and trims child data rows', () => {
       const { sourceWithGroups, trimmed, depth } = gatherGrouping(
@@ -479,6 +544,38 @@ describe('row grouping', () => {
       });
       expect(items).toEqual([0, 1, 2, 3, 4]);
       expect(sourceWithGroups[1][GROUP_EXPANDED]).toBe(true);
+    });
+  });
+
+  describe('sorting integration', () => {
+    it('does not reopen collapsed groups after sorting reapplies grouping', () => {
+      const { plugin, revogrid, state } = createGroupingPlugin([
+        { name: 'Charlie', team: 'North' },
+        { name: 'Alice', team: 'North' },
+        { name: 'Dan', team: 'South' },
+        { name: 'Ben', team: 'South' },
+      ]);
+      plugin.setGrouping({
+        props: ['team'],
+        expandedAll: true,
+      });
+
+      const { trimmed } = doCollapse(0, state.source);
+      state.trimmed = {
+        [TRIMMED_GROUPING]: trimmed,
+      };
+      state.items = state.proxyItems.filter(index => !trimmed[index]);
+
+      revogrid.dispatchEvent(new CustomEvent('aftersortingapply'));
+
+      const northGroup = state.source.find(row => row[PSEUDO_GROUP_ITEM] === 'North');
+      const southGroup = state.source.find(row => row[PSEUDO_GROUP_ITEM] === 'South');
+      expect(northGroup?.[GROUP_EXPANDED]).toBe(false);
+      expect(southGroup?.[GROUP_EXPANDED]).toBe(true);
+      expect(state.items.map(index => state.source[index].name).filter(Boolean)).toEqual([
+        'Dan',
+        'Ben',
+      ]);
     });
   });
 
