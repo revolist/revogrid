@@ -5,6 +5,7 @@ import beginsWith from '../src/plugins/filter/conditions/string/beginswith';
 import gtThan from '../src/plugins/filter/conditions/number/greaterThan';
 import lt from '../src/plugins/filter/conditions/number/lessThan';
 import { FilterPlugin } from '../src/plugins/filter/filter.plugin';
+import { DataStore } from '../src/store/dataSource/data.store';
 import type { ColumnRegular } from '../src';
 import type { FilterData } from '../src/plugins/filter/filter.types';
 
@@ -252,6 +253,48 @@ describe('FilterPlugin.getRowFilter', () => {
     expect(trimmed).toEqual({
       1: true,
       2: true,
+    });
+  });
+
+  it('applies filter trim maps to the visible row indexes', () => {
+    const store = new DataStore('rgRow');
+    store.updateData([
+      { name: 'Alice', role: 'Admin' },
+      { name: 'Ben', role: 'Engineer' },
+      { name: 'Cara', role: 'Admin' },
+    ]);
+
+    store.addTrimmed({
+      filter: {
+        1: true,
+      },
+    });
+
+    expect(store.store.get('proxyItems')).toEqual([0, 1, 2]);
+    expect(store.store.get('items')).toEqual([0, 2]);
+  });
+
+  it('ignores configured collection filters without a registered filter function', () => {
+    const plugin = createFilterPlugin();
+
+    plugin.initConfig({
+      collection: {
+        role: {
+          type: 'contains',
+          value: 'Admin',
+        },
+        name: {
+          type: 'missing-filter',
+          value: 'Alice',
+        },
+      },
+    });
+
+    expect(plugin.filterCollection).toEqual({
+      role: {
+        type: 'contains',
+        value: 'Admin',
+      },
     });
   });
 });

@@ -14,8 +14,7 @@ export function setStore<T extends Record<string, any>>(
   store: ObservableMap<T>,
   data: Partial<T>,
 ): void {
-  Object.entries(data).forEach(([key, value]) => {
-    store.set(key, value);
-  });
+  for (const key of Object.keys(data) as Array<keyof T & string>) {
+    store.set(key, data[key]!);
+  }
 }
-

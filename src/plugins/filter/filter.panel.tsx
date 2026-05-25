@@ -354,7 +354,8 @@ export class FilterPanel {
     const prop = this.changes.prop;
 
     const hidden = new Set<string>();
-    Object.entries(this.filterItems).forEach(([_, values]) => {
+    Object.keys(this.filterItems).forEach((prop) => {
+      const values = this.filterItems[prop];
       values.forEach((filter) => {
         if (filter.hidden) {
           hidden.add(filter.type);

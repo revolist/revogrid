@@ -230,7 +230,9 @@ export class SelectionStoreConnector {
 
     let nextStore: SelectionStore | undefined;
     if (nextItem) {
-      Object.entries(nextItem).forEach(([type, nextItemCoord]: [keyof Cell, number]) => {
+      Object.keys(nextItem).forEach((t) => {
+        const type = t as keyof Cell;
+        const nextItemCoord = nextItem[type] ?? 0;
         let stores;
         switch (type) {
           case 'x':
@@ -253,7 +255,7 @@ export class SelectionStoreConnector {
             nextItem[type] = nextLastCell[type] + nextItemCoord;
           }
         }
-    });
+      });
     }
     // if last cell is empty store is empty, no next store
     const lastCellNext = nextStore?.store.get('lastCell');

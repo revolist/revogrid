@@ -61,6 +61,17 @@ describe('defaultCellCompare', () => {
     const result = cmp('name', {}, { name: 'Alice' });
     expect(result).toBeLessThan(0);
   });
+
+  it('"Alice" vs undefined → positive (missing prop comparison is symmetric)', () => {
+    const result = cmp('name', { name: 'Alice' }, {});
+    expect(result).toBeGreaterThan(0);
+  });
+
+  it('treats undefined, null, and empty string as the same empty group', () => {
+    expect(cmp('name', {}, { name: null })).toBe(0);
+    expect(cmp('name', { name: '' }, {})).toBe(0);
+    expect(cmp('name', { name: null }, { name: '' })).toBe(0);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -150,6 +161,46 @@ describe('sortIndexByItems', () => {
 
     expect(result).toEqual([1, 2, 0]);
     expect(cellParser).toHaveBeenCalledTimes(parsedSource.length);
+  });
+
+  it('groups empty values first in ascending default sorting', () => {
+    const emptySource = [
+      { name: 'Charlie' },
+      {},
+      { name: 'Alice' },
+      { name: '' },
+      { name: null },
+      { name: 'Bob' },
+    ];
+    const result = sortIndexByItems(
+      [0, 1, 2, 3, 4, 5],
+      emptySource,
+      { name: getComparer({ prop: 'name' }, 'asc') },
+      { name: 'asc' },
+      { name: { prop: 'name' } },
+    );
+
+    expect(result).toEqual([1, 3, 4, 2, 5, 0]);
+  });
+
+  it('groups empty values last in descending default sorting', () => {
+    const emptySource = [
+      { name: 'Charlie' },
+      {},
+      { name: 'Alice' },
+      { name: '' },
+      { name: null },
+      { name: 'Bob' },
+    ];
+    const result = sortIndexByItems(
+      [0, 1, 2, 3, 4, 5],
+      emptySource,
+      { name: getComparer({ prop: 'name' }, 'desc') },
+      { name: 'desc' },
+      { name: { prop: 'name' } },
+    );
+
+    expect(result).toEqual([0, 5, 2, 1, 3, 4]);
   });
 
   it('sorts by multiple columns in entry order', () => {
