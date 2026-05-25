@@ -1,8 +1,11 @@
 import { expect } from '@playwright/test';
 import { test } from '@stencil/playwright';
 import {
+  SELECTORS,
   SAMPLE_ROWS,
   basicColumns,
+  buildRows,
+  callGridMethod,
   dataCell,
   dispatchClipboardEvent,
   expectSelectedRange,
@@ -27,5 +30,63 @@ test.describe('range selection', () => {
     await expect(dataCell(page, 0, 2)).toHaveText('Beta');
     await expect(dataCell(page, 1, 1)).toHaveText('Gamma');
     await expect(dataCell(page, 1, 2)).toHaveText('Delta');
+  });
+
+  test('keeps keyboard range selection inside the grid at the last row', async ({
+    page,
+  }) => {
+    const rows = buildRows(80);
+    const lastRowIndex = rows.length - 1;
+
+    await mountGrid(page, {
+      columns: basicColumns(),
+      source: rows,
+      range: true,
+      height: 260,
+    });
+
+    await callGridMethod(page, 'scrollToRow', lastRowIndex);
+    await expect(dataCell(page, lastRowIndex, 0)).toBeVisible();
+    await setCellsFocus(page, { x: 0, y: lastRowIndex });
+    await expectSelectedRange(page, {
+      x: 0,
+      y: lastRowIndex,
+      x1: 0,
+      y1: lastRowIndex,
+    });
+
+    await page.keyboard.press('Shift+ArrowDown');
+
+    await expectSelectedRange(page, {
+      x: 0,
+      y: lastRowIndex,
+      x1: 0,
+      y1: lastRowIndex,
+    });
+
+    const viewportBox = await page.locator(SELECTORS.mainViewport).boundingBox();
+    const rangeBox = await page.locator(SELECTORS.selectedRange).boundingBox();
+
+    expect(viewportBox).not.toBeNull();
+    expect(rangeBox).not.toBeNull();
+    expect(rangeBox!.y + rangeBox!.height).toBeLessThanOrEqual(
+      viewportBox!.y + viewportBox!.height,
+    );
+
+    await page.keyboard.press('Shift+ArrowUp');
+    await expectSelectedRange(page, {
+      x: 0,
+      y: lastRowIndex - 1,
+      x1: 0,
+      y1: lastRowIndex,
+    });
+
+    await page.keyboard.press('Shift+ArrowDown');
+    await expectSelectedRange(page, {
+      x: 0,
+      y: lastRowIndex,
+      x1: 0,
+      y1: lastRowIndex,
+    });
   });
 });

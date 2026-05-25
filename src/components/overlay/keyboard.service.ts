@@ -204,7 +204,10 @@ export class KeyboardService {
     }
     const eData: EventData = this.sv.getData();
     if (isMulti) {
-      if (isAfterLast(data.end, eData.lastCell) || isBeforeFirst(data.start)) {
+      const isOutOfBounds = [data.start, data.end].some(
+        cell => isAfterLast(cell, eData.lastCell) || isBeforeFirst(cell),
+      );
+      if (isOutOfBounds) {
         return false;
       }
       const range = getRange(data.start, data.end);
