@@ -45,6 +45,7 @@ import type {
   ExtraNodeFuncConfig,
   RowDragStartDetails,
   AdditionalData,
+  PendingColumnFocusRestore,
 } from '@type';
 
 import ColumnDataProvider from '../../services/column.data.provider';
@@ -88,7 +89,6 @@ import { ColumnFilterConfig, FilterCollectionItem } from '../../plugins/filter/f
 import { PluginService } from './plugin.service';
 import { SortingConfig, SortingOrder } from '../../plugins';
 import { RTLPlugin } from '../../plugins/rtl/rtl.plugin';
-
 
 /**
  * Revogrid - High-performance, customizable grid library for managing large datasets.
@@ -1126,6 +1126,7 @@ export class RevoGridComponent {
   orderService: OrdererService;
   selectionStoreConnector?: SelectionStoreConnector;
   scrollingService: GridScrollingService;
+  private pendingColumnFocusRestore?: PendingColumnFocusRestore;
 
   // #endregion
 
@@ -1144,6 +1145,7 @@ export class RevoGridComponent {
     if (!this.dimensionProvider || !this.columnProvider) {
       return;
     }
+    const focusToRestore = init ? undefined : this.getColumnFocusRestore();
     const beforeGatherEvent = this.beforecolumnsgather.emit({
       columns: [...newVal],
     });
@@ -1169,6 +1171,9 @@ export class RevoGridComponent {
       return;
     }
     const columns = this.columnProvider.setColumns(beforeApplyEvent.detail);
+    if (focusToRestore) {
+      this.pendingColumnFocusRestore = focusToRestore;
+    }
     const order: SortingOrder = {};
     for (const prop of Object.keys(beforeApplyEvent.detail.sort)) {
       order[prop] = beforeApplyEvent.detail.sort[prop].order;
@@ -1177,6 +1182,66 @@ export class RevoGridComponent {
       columns,
       order,
     });
+  }
+
+  /**
+   * Capture logical focus before columns are repartitioned by pin state.
+   * Regression case: selecting a regular cell, then pinning that column left,
+   * used to let the new pinned viewport reuse the old rgCol selection store.
+   */
+  private getColumnFocusRestore(): PendingColumnFocusRestore | undefined {
+    const focused = this.viewport?.getFocused();
+    const prevStoreX = this.selectionStoreConnector?.focusedStore?.position.x;
+    const prop = focused?.column?.prop;
+    if (!focused || prop === undefined || prevStoreX === undefined) {
+      return;
+    }
+    return {
+      prop,
+      colType: focused.colType,
+      colIndex: focused.cell.x,
+      prevStoreX,
+      rowType: focused.rowType,
+      rowIndex: focused.cell.y,
+    };
+  }
+
+  /**
+   * Reapply focus by column prop after render, once pinning has moved the
+   * column to its new viewport and virtual index.
+   */
+  private restoreColumnFocusAfterRender() {
+    const pending = this.pendingColumnFocusRestore;
+    if (!pending) {
+      return;
+    }
+    this.pendingColumnFocusRestore = undefined;
+    if (!this.viewport || !this.columnProvider) {
+      return;
+    }
+    const column = this.columnProvider.getColumnByProp(pending.prop)?.[0] ?? getColumnByProp(this.columns, pending.prop);
+    if (!column) {
+      return;
+    }
+    const colType: DimensionCols = column.pin || 'rgCol';
+    const columnIndex = this.columnProvider.getColumnIndexByProp(pending.prop, colType);
+    if (columnIndex < 0) {
+      return;
+    }
+    // Header-only column refreshes should not collapse an existing range.
+    // Replay focus only when pin/unpin or repartitioning moved the logical column.
+    if (
+      colType === pending.colType &&
+      columnIndex === pending.colIndex &&
+      pending.prevStoreX === this.selectionStoreConnector?.focusedStore?.position.x
+    ) {
+      return;
+    }
+    const cell = {
+      x: columnIndex,
+      y: pending.rowIndex,
+    };
+    this.viewport.setFocus(colType, pending.rowType, cell, cell);
   }
 
   @Watch('disableVirtualX') disableVirtualXChanged(
@@ -1580,6 +1645,7 @@ export class RevoGridComponent {
   }
 
   componentDidRender() {
+    this.restoreColumnFocusAfterRender();
     this.aftergridrender.emit();
   }
 

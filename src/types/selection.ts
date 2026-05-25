@@ -80,6 +80,20 @@ export type ChangedRange = {
 };
 
 /**
+ * Logical focus marker captured before column viewport ownership changes.
+ * Used when a selected column is pinned/unpinned so focus can be restored by
+ * column prop after the column moves between rgCol, colPinStart, or colPinEnd.
+ */
+export type PendingColumnFocusRestore = {
+  prop: ColumnProp;
+  colType: DimensionCols;
+  colIndex: ColIndex;
+  prevStoreX: ColIndex;
+  rowType: DimensionRows;
+  rowIndex: RowIndex;
+};
+
+/**
  * Cell coordinates
  */
 export interface Cell {
