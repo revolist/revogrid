@@ -103,7 +103,7 @@ function getDefaultCompareValue(
 }
 
 function isEmptyCompareValue(value: any) {
-  return value === '' || value === null || typeof value === 'undefined';
+  return value === '' || value === null || value === undefined;
 }
 
 /**
