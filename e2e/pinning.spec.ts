@@ -99,6 +99,153 @@ test.describe('pinning', () => {
     });
   });
 
+  test('keeps focused cell aligned when its column is pinned left', async ({ page }) => {
+    const source = buildRows(8, ['invoice', 'customer', 'status']).map((row, index) => ({
+      invoice: `invoice-${index + 1}`,
+      customer: `Customer ${index + 1}`,
+      status: `Status ${index + 1}`,
+    }));
+
+    await mountGrid(page, {
+      columns: [
+        { prop: 'invoice', name: 'Invoice', size: 150 },
+        { prop: 'customer', name: 'Customer', size: 180 },
+        { prop: 'status', name: 'Status', size: 150 },
+      ],
+      source,
+      width: 520,
+      height: 300,
+      range: true,
+      colSize: 150,
+    });
+
+    await setCellsFocus(page, { x: 1, y: 4 });
+    await expect.poll(() => getSelectedRange(page)).toMatchObject({
+      x: 1,
+      y: 4,
+      x1: 1,
+      y1: 4,
+      colType: 'rgCol',
+      rowType: 'rgRow',
+    });
+
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) {
+        throw new Error('Grid element was not found');
+      }
+      grid.columns = [
+        { prop: 'invoice', name: 'Invoice', size: 150 },
+        { prop: 'customer', name: 'Customer', size: 180, pin: 'colPinStart' },
+        { prop: 'status', name: 'Status', size: 150 },
+      ];
+    });
+    await page.waitForChanges();
+
+    await expect(pinnedStartCell(page, 4, 0)).toHaveText('Customer 5');
+    await expect(dataCell(page, 4, 0)).toHaveText('invoice-5');
+    await expect.poll(() => getSelectedRange(page)).toMatchObject({
+      x: 0,
+      y: 4,
+      x1: 0,
+      y1: 4,
+      colType: 'colPinStart',
+      rowType: 'rgRow',
+    });
+
+    const focusedBox = await page.locator(SELECTORS.focusedCell).boundingBox();
+    const pinnedCellBox = await pinnedStartCell(page, 4, 0).boundingBox();
+    expect(focusedBox).not.toBeNull();
+    expect(pinnedCellBox).not.toBeNull();
+    expect(Math.abs(focusedBox!.x - pinnedCellBox!.x)).toBeLessThanOrEqual(2);
+    expect(Math.abs(focusedBox!.y - pinnedCellBox!.y)).toBeLessThanOrEqual(2);
+
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) {
+        throw new Error('Grid element was not found');
+      }
+      grid.columns = [
+        { prop: 'invoice', name: 'Invoice', size: 150 },
+        { prop: 'customer', name: 'Customer', size: 180 },
+        { prop: 'status', name: 'Status', size: 150 },
+      ];
+    });
+    await page.waitForChanges();
+
+    await expect(dataCell(page, 4, 0)).toHaveText('invoice-5');
+    await expect(dataCell(page, 4, 1)).toHaveText('Customer 5');
+    await expect(pinnedStartCell(page, 4, 0)).toHaveCount(0);
+    await expect.poll(() => getSelectedRange(page)).toMatchObject({
+      x: 1,
+      y: 4,
+      x1: 1,
+      y1: 4,
+      colType: 'rgCol',
+      rowType: 'rgRow',
+    });
+
+    const unpinnedFocusedBox = await page.locator(SELECTORS.focusedCell).boundingBox();
+    const unpinnedCellBox = await dataCell(page, 4, 1).boundingBox();
+    expect(unpinnedFocusedBox).not.toBeNull();
+    expect(unpinnedCellBox).not.toBeNull();
+    expect(Math.abs(unpinnedFocusedBox!.x - unpinnedCellBox!.x)).toBeLessThanOrEqual(2);
+    expect(Math.abs(unpinnedFocusedBox!.y - unpinnedCellBox!.y)).toBeLessThanOrEqual(2);
+  });
+
+  test('keeps selected range when regular columns refresh without repartitioning', async ({ page }) => {
+    const source = buildRows(5, ['invoice', 'customer', 'status']).map((row, index) => ({
+      invoice: `invoice-${index + 1}`,
+      customer: `Customer ${index + 1}`,
+      status: `Status ${index + 1}`,
+    }));
+
+    await mountGrid(page, {
+      columns: [
+        { prop: 'invoice', name: 'Invoice', size: 150 },
+        { prop: 'customer', name: 'Customer', size: 180 },
+        { prop: 'status', name: 'Status', size: 150 },
+      ],
+      source,
+      width: 520,
+      height: 260,
+      range: true,
+      colSize: 150,
+    });
+
+    await setCellsFocus(page, { x: 0, y: 1 }, { x: 1, y: 3 });
+    await expect.poll(() => getSelectedRange(page)).toMatchObject({
+      x: 0,
+      y: 1,
+      x1: 1,
+      y1: 3,
+      colType: 'rgCol',
+      rowType: 'rgRow',
+    });
+
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) {
+        throw new Error('Grid element was not found');
+      }
+      grid.columns = [
+        { prop: 'invoice', name: 'Invoice #', size: 150 },
+        { prop: 'customer', name: 'Customer name', size: 180 },
+        { prop: 'status', name: 'Current status', size: 150 },
+      ];
+    });
+    await page.waitForChanges();
+
+    await expect.poll(() => getSelectedRange(page)).toMatchObject({
+      x: 0,
+      y: 1,
+      x1: 1,
+      y1: 3,
+      colType: 'rgCol',
+      rowType: 'rgRow',
+    });
+  });
+
   test('keeps pinned areas aligned after compressed deep row scroll', async ({ page }) => {
     const rowSize = 30;
     const rowCount = 1_200_000;

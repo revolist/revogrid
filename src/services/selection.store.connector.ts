@@ -62,13 +62,11 @@ export class SelectionStoreConnector {
   }
 
   registerColumn(x: number, type: DimensionCols): SelectionStore {
+    this.updateColumnTypeMapping(x, type);
     if (this.columnStores[x]) {
       return this.columnStores[x];
     }
     this.columnStores[x] = new SelectionStore();
-    // build cross-linking type to position
-    this.storesByType[type] = x;
-    this.storesXToType[x] = type;
     return this.columnStores[x];
   }
 
@@ -314,5 +312,33 @@ export class SelectionStoreConnector {
       stores[i] = this.stores[i][x];
     }
     return stores;
+  }
+
+  /**
+   * Keep column viewport positions and types in sync across pin/unpin rerenders.
+   * Regression case: when a selected rgCol cell was pinned left, colPinStart
+   * could take over x=0 and render the stale rgCol focus store in the pinned area.
+   */
+  private updateColumnTypeMapping(x: number, type: DimensionCols) {
+    const previousType = this.storesXToType[x];
+    const previousX = this.storesByType[type];
+    let shouldClearFocus = false;
+
+    this.storesByType[type] = x;
+    this.storesXToType[x] = type;
+
+    if (previousType && previousType !== type) {
+      shouldClearFocus = true;
+      if (this.storesByType[previousType] === x) {
+        delete this.storesByType[previousType];
+      }
+    }
+    if (typeof previousX === 'number' && previousX !== x && this.storesXToType[previousX] === type) {
+      delete this.storesXToType[previousX];
+      shouldClearFocus = true;
+    }
+    if (shouldClearFocus) {
+      this.clearAll();
+    }
   }
 }
