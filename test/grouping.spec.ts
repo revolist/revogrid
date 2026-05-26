@@ -204,6 +204,31 @@ describe('row grouping', () => {
         7: true,
       });
     });
+
+    it('skips unloaded nullish rows while grouping loaded rows', () => {
+      const { sourceWithGroups, oldNewIndexMap, depth } = gatherGrouping(
+        [
+          { name: 'Alice', team: 'North' },
+          undefined as unknown as DataType,
+          { name: 'Ben', team: 'South' },
+          null as unknown as DataType,
+        ],
+        ['team'],
+        { expandedAll: true },
+      );
+
+      expect(depth).toBe(1);
+      expect(sourceWithGroups.map(row => row[PSEUDO_GROUP_ITEM] ?? row.name)).toEqual([
+        'North',
+        'Alice',
+        'South',
+        'Ben',
+      ]);
+      expect(oldNewIndexMap).toEqual({
+        0: 1,
+        2: 3,
+      });
+    });
   });
 
   describe('getSource', () => {
@@ -248,6 +273,30 @@ describe('row grouping', () => {
       ]);
       expect(result.prevExpanded).toEqual({});
       expect(result.oldNewIndexes).toEqual({});
+    });
+
+    it('skips unloaded nullish rows when stripping grouping rows', () => {
+      const source = [
+        groupRow('North', 0, true),
+        { name: 'Alice' },
+        undefined as unknown as DataType,
+        { name: 'Ben' },
+        null as unknown as DataType,
+      ];
+
+      const result = getSource(source, [0, 1, 2, 3, 4], true);
+
+      expect(result.source).toEqual([
+        { name: 'Alice' },
+        { name: 'Ben' },
+      ]);
+      expect(result.prevExpanded).toEqual({
+        North: true,
+      });
+      expect(result.oldNewIndexes).toEqual({
+        1: 0,
+        3: 1,
+      });
     });
   });
 
