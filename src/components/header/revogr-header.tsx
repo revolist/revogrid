@@ -328,9 +328,10 @@ export class RevogrHeaderComponent {
     if (startIndex < 0) {
       return;
     }
+    const endIndex = group.indexes[group.indexes.length - 1];
     return {
       startIndex,
-      endIndex: startIndex + group.indexes.length - 1,
+      endIndex,
     };
   }
 
