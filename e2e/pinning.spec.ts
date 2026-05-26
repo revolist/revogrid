@@ -1,5 +1,6 @@
 import { expect } from '@playwright/test';
 import { test } from '@stencil/playwright';
+import type { E2EPage } from '@stencil/playwright';
 import {
   SELECTORS,
   buildRows,
@@ -16,6 +17,31 @@ import {
   scrollToCell,
   visibleColumnValues,
 } from './helpers';
+
+async function expectNoPinnedStartGap(page: E2EPage) {
+  const pinnedCells = page.locator(
+    `${SELECTORS.pinnedStartViewport} revogr-data[type="rgRow"] [data-rgRow="0"].rgCell`,
+  );
+  const regularCell = dataCell(page, 0, 0);
+
+  const pinnedCount = await pinnedCells.count();
+  expect(pinnedCount).toBeGreaterThan(0);
+  const pinnedCell = pinnedCells.nth(pinnedCount - 1);
+
+  await expect(pinnedCell).toBeVisible();
+  await expect(regularCell).toBeVisible();
+
+  await expect
+    .poll(async () => {
+      const pinnedBox = await pinnedCell.boundingBox();
+      const regularBox = await regularCell.boundingBox();
+      if (!pinnedBox || !regularBox) {
+        return Number.POSITIVE_INFINITY;
+      }
+      return Math.abs(regularBox.x - (pinnedBox.x + pinnedBox.width));
+    })
+    .toBeLessThanOrEqual(2);
+}
 
 test.describe('pinning', () => {
   test('keeps pinned rows and pinned columns visible while scrolling', async ({ page }) => {
@@ -56,6 +82,44 @@ test.describe('pinning', () => {
 
     const visibleMiddleValues = await visibleColumnValues(page, 1);
     expect(visibleMiddleValues.includes('Middle 21')).toBe(true);
+  });
+
+  test('shrinks pinned start viewport after removing a pinned column', async ({ page }) => {
+    const columns = [
+      { prop: 'index', name: 'Index', pin: 'colPinStart' as const, size: 100 },
+      { prop: 'name', name: 'Name', pin: 'colPinStart' as const, size: 100 },
+      { prop: 'age', name: 'Age', size: 100 },
+    ];
+
+    await mountGrid(page, {
+      columns,
+      source: [
+        { index: 1, name: 'John', age: 30 },
+        { index: 2, name: 'Jane', age: 25 },
+        { index: 3, name: 'Bob', age: 35 },
+      ],
+      width: 760,
+      height: 260,
+      colSize: 100,
+    });
+
+    await expect(pinnedStartCell(page, 0, 0)).toHaveText('1');
+    await expect(pinnedStartCell(page, 0, 1)).toHaveText('John');
+    await expect(dataCell(page, 0, 0)).toHaveText('30');
+    await expectNoPinnedStartGap(page);
+
+    await page.evaluate((nextColumns) => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) {
+        throw new Error('Grid was not created');
+      }
+      grid.columns = nextColumns;
+    }, columns.slice(1));
+    await page.waitForChanges();
+
+    await expect(pinnedStartCell(page, 0, 0)).toHaveText('John');
+    await expect(dataCell(page, 0, 0)).toHaveText('30');
+    await expectNoPinnedStartGap(page);
   });
 
   test('distinguishes pinned start and regular selected ranges by column type', async ({ page }) => {
