@@ -8,17 +8,21 @@ import {
   type VNode,
 } from '@stencil/core';
 
-import { getItemByIndex, Groups } from '@store';
+import {
+  getColumnGroupRenderIndexes,
+  getItemByIndex,
+  Groups,
+} from '@store';
 import { HEADER_ACTUAL_ROW_CLASS, HEADER_ROW_CLASS } from '../../utils/consts';
 import HeaderRenderer, { HeaderRenderProps } from './header-renderer';
 import { ResizeProps } from './resizable.directive';
 import type {
   ColumnRegular,
+  DimensionCols,
   DimensionSettingsState,
   InitialHeaderClick,
   ViewportState,
   ViewSettingSizeProp,
-  DimensionCols,
   SelectionStoreState,
   RangeArea,
   VirtualPositionItem,
@@ -71,6 +75,10 @@ export class RevogrHeaderComponent {
    * Columns - defines an array of grid columns.
    */
   @Prop() colData: ColumnRegular[];
+  /**
+   * Physical column indexes in their current visible order.
+   */
+  @Prop() colItems: number[] = [];
 
   /**
    * Column filter
@@ -261,12 +269,16 @@ export class RevogrHeaderComponent {
     level: number,
     visibleGroupRange: { start: number; end: number } | undefined,
   ) {
-    const groupStartIndex = group.indexes[0] ?? -1;
+    const groupIndexes = getColumnGroupRenderIndexes(
+      group.indexes,
+      this.colItems,
+    );
+    const groupStartIndex = groupIndexes[0] ?? -1;
     if (groupStartIndex < 0) {
       return;
     }
 
-    const groupEndIndex = groupStartIndex + group.indexes.length - 1;
+    const groupEndIndex = groupIndexes[groupIndexes.length - 1];
     if (
       !visibleGroupRange ||
       !isGroupInVisibleRange(groupStartIndex, groupEndIndex, visibleGroupRange)
@@ -282,11 +294,16 @@ export class RevogrHeaderComponent {
       this.dimensionCol.state,
       groupEndIndex,
     ).end;
+    const renderGroup = {
+      ...group,
+      allSourceIndexes: group.indexes,
+      indexes: groupIndexes,
+    };
     const props: HeaderGroupRendererProps = {
       providers: this.providers,
       start: groupStart,
       end: groupEnd,
-      group,
+      group: renderGroup,
       renderOffset: this.viewportCol.get('renderOffset') || 0,
       active: this.resizeHandler,
       canResize: this.canResize,

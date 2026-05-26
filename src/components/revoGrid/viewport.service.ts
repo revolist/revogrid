@@ -71,6 +71,7 @@ function gatherColumnData(data: ViewportColumn) {
 
   const headerProp: HeaderProperties = {
     colData: getVisibleSourceItem(data.colStore),
+    colItems: data.colStore.state.items,
     dimensionCol: colDimension,
     type: data.colType,
     groups: data.colStore.get('groups'),

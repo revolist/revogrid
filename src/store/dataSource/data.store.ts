@@ -20,8 +20,16 @@ import type {
 export interface Group extends ColumnProperties {
   name: string;
   children: (ColumnGrouping | ColumnRegular)[];
-  // physical indexes to start from
+  /**
+   * Physical indexes into the column source. Header rendering projects these
+   * to visible/render indexes without changing the source group membership.
+   */
   indexes: number[];
+  /**
+   * Preserved physical source indexes exposed when header rendering passes a
+   * projected group to plugins through `beforegroupheaderrender`.
+   */
+  allSourceIndexes?: number[];
 }
 export type Groups = Record<number, Group[]>;
 export type GDataType = DataType | ColumnRegular;
@@ -230,6 +238,48 @@ export function setItems<T extends GDataType>(
   items: number[],
 ) {
   store.set('items', items);
+}
+
+/**
+ * Return the full source indexes that define a column group.
+ *
+ * Plain groups keep source membership in `group.indexes`. Header-rendered
+ * groups can carry render indexes in `group.indexes`; when that happens the
+ * original source membership is preserved in `group.allSourceIndexes`.
+ */
+export function getColumnGroupSourceIndexes(group: Group): number[] {
+  return group.allSourceIndexes ?? group.indexes;
+}
+
+/**
+ * Check whether a group has explicit full source-index metadata.
+ *
+ * Plugins use this to distinguish a core-projected header group from a raw
+ * group definition before applying operations that must work in source space.
+ */
+export function hasColumnGroupSourceIndexes(group: Group): boolean {
+  return Array.isArray(group.allSourceIndexes);
+}
+
+/**
+ * Project physical source group indexes into the current render index space.
+ *
+ * `visibleItems` is the data-source `items` collection: render index -> physical
+ * source index. Header geometry, resizing and viewport range checks operate on
+ * render indexes, while group membership must remain source-index based.
+ */
+export function getColumnGroupRenderIndexes(
+  allSourceIndexes: number[],
+  visibleItems: number[],
+) {
+  const visibleByPhysical = new Map<number, number>();
+  visibleItems.forEach((physicalIndex, renderIndex) => {
+    visibleByPhysical.set(physicalIndex, renderIndex);
+  });
+  return allSourceIndexes
+    .map(index => visibleByPhysical.get(index))
+    .filter((index): index is number => index !== undefined)
+    .sort((a, b) => a - b);
 }
 
 export function getSourceItemVirtualIndexByProp(

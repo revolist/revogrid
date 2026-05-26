@@ -10,6 +10,7 @@ import {
   expectChildHeaderUnderGroup,
   mountGrid,
   scrollToCell,
+  visibleHeaderTexts,
   withHeaderTestId,
   type SampleRow,
 } from './helpers';
@@ -367,6 +368,256 @@ test.describe('column groups', () => {
     await expectCountLessThan(groupHeaderCells(page), 40);
   });
 
+  test('projects grouped header indexes after column trimming while preserving source membership', async ({ page }) => {
+    const colSize = 80;
+    const columns: ColumnData = [
+      {
+        name: 'Metrics',
+        children: [
+          { prop: 'metric_0', name: 'Metric 0', size: colSize },
+          { prop: 'metric_1', name: 'Metric 1', size: colSize },
+          { prop: 'metric_2', name: 'Metric 2', size: colSize },
+          { prop: 'metric_3', name: 'Metric 3', size: colSize },
+        ],
+      },
+      { prop: 'notes', name: 'Notes', size: colSize },
+    ];
+
+    await mountGrid(page, {
+      width: 420,
+      height: 260,
+      colSize,
+      columns,
+      source: buildRows(2, flattenLeafProps(columns)),
+    });
+
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) {
+        throw new Error('Grid was not created');
+      }
+      const state = globalThis as typeof globalThis & {
+        __groupProjectionEvents?: Array<{
+          name: string;
+          indexes: number[];
+          allSourceIndexes?: number[];
+          start: number;
+          end: number;
+        }>;
+      };
+      state.__groupProjectionEvents = [];
+      grid.addEventListener('beforegroupheaderrender', (event: Event) => {
+        const detail = (event as CustomEvent).detail;
+        state.__groupProjectionEvents?.push({
+          name: detail.group.name,
+          indexes: [...detail.group.indexes],
+          allSourceIndexes: detail.group.allSourceIndexes
+            ? [...detail.group.allSourceIndexes]
+            : undefined,
+          start: detail.start,
+          end: detail.end,
+        });
+      });
+    });
+
+    await applyColumnTrim(page, { 1: true, 3: true }, 'test-column-trim');
+
+    await expect(groupHeaderCells(page).filter({ hasText: 'Metrics' })).toHaveCount(1);
+    await expect(page.locator(SELECTORS.actualHeaderCells).filter({ hasText: 'Metric 0' })).toHaveCount(1);
+    await expect(page.locator(SELECTORS.actualHeaderCells).filter({ hasText: 'Metric 1' })).toHaveCount(0);
+    await expect(page.locator(SELECTORS.actualHeaderCells).filter({ hasText: 'Metric 2' })).toHaveCount(1);
+    await expect(page.locator(SELECTORS.actualHeaderCells).filter({ hasText: 'Metric 3' })).toHaveCount(0);
+
+    await expect
+      .poll(() =>
+        page.evaluate(() => {
+          const state = globalThis as typeof globalThis & {
+            __groupProjectionEvents?: Array<{
+              name: string;
+              indexes: number[];
+              allSourceIndexes?: number[];
+              start: number;
+              end: number;
+            }>;
+          };
+          return state.__groupProjectionEvents
+            ?.filter(event => event.name === 'Metrics')
+            .at(-1);
+        }),
+      )
+      .toMatchObject({
+        name: 'Metrics',
+        indexes: [0, 1],
+        allSourceIndexes: [0, 1, 2, 3],
+        start: 0,
+        end: colSize * 2,
+      });
+  });
+
+  test('projects multi-level grouped header indexes after trimming nested children', async ({ page }) => {
+    const colSize = 70;
+    const columns = buildNestedGroupColumns();
+
+    await mountGrid(page, {
+      width: 520,
+      height: 260,
+      colSize,
+      columns,
+      source: buildRows(2, flattenLeafProps(columns)),
+    });
+
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) {
+        throw new Error('Grid was not created');
+      }
+      const state = globalThis as typeof globalThis & {
+        __nestedGroupProjectionEvents?: Array<{
+          name: string;
+          indexes: number[];
+          allSourceIndexes?: number[];
+        }>;
+      };
+      state.__nestedGroupProjectionEvents = [];
+      grid.addEventListener('beforegroupheaderrender', (event: Event) => {
+        const detail = (event as CustomEvent).detail;
+        if (detail.group.name === 'Year 0' || detail.group.name === 'Month 00-01') {
+          state.__nestedGroupProjectionEvents?.push({
+            name: detail.group.name,
+            indexes: [...detail.group.indexes],
+            allSourceIndexes: detail.group.allSourceIndexes
+              ? [...detail.group.allSourceIndexes]
+              : undefined,
+          });
+        }
+      });
+    });
+
+    await applyColumnTrim(page, { 2: true, 5: true, 9: true }, 'test-nested-column-trim');
+
+    await expect(groupHeaderCells(page).filter({ hasText: 'Year 0' })).toHaveCount(1);
+    await expect(groupHeaderCells(page).filter({ hasText: 'Month 00-01' })).toHaveCount(1);
+
+    const projections = await page.evaluate(() => {
+      const state = globalThis as typeof globalThis & {
+        __nestedGroupProjectionEvents?: Array<{
+          name: string;
+          indexes: number[];
+          allSourceIndexes?: number[];
+        }>;
+      };
+      return state.__nestedGroupProjectionEvents ?? [];
+    });
+    const year0 = projections.filter(event => event.name === 'Year 0').at(-1);
+    const month01 = projections.filter(event => event.name === 'Month 00-01').at(-1);
+
+    expect(year0).toMatchObject({
+      name: 'Year 0',
+      indexes: Array.from({ length: 9 }, (_, index) => index),
+      allSourceIndexes: Array.from({ length: 12 }, (_, index) => index),
+    });
+    expect(month01).toMatchObject({
+      name: 'Month 00-01',
+      indexes: [2],
+      allSourceIndexes: [2, 3],
+    });
+  });
+
+  test('projects grouped header indexes after moving another column before the group', async ({ page }) => {
+    const colSize = 80;
+    const columns: ColumnData = [
+      {
+        name: 'Metrics',
+        children: [
+          { prop: 'metric_0', name: 'Metric 0', size: colSize },
+          { prop: 'metric_1', name: 'Metric 1', size: colSize },
+          { prop: 'metric_2', name: 'Metric 2', size: colSize },
+        ],
+      },
+      { prop: 'notes', name: 'Notes', size: colSize },
+    ];
+
+    await mountGrid(page, {
+      width: 420,
+      height: 260,
+      colSize,
+      columns,
+      source: buildRows(2, flattenLeafProps(columns)),
+      canMoveColumns: true,
+    });
+
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) {
+        throw new Error('Grid was not created');
+      }
+      const state = globalThis as typeof globalThis & {
+        __movedGroupProjectionEvents?: Array<{
+          name: string;
+          indexes: number[];
+          allSourceIndexes?: number[];
+        }>;
+      };
+      state.__movedGroupProjectionEvents = [];
+      grid.addEventListener('beforegroupheaderrender', (event: Event) => {
+        const detail = (event as CustomEvent).detail;
+        if (detail.group.name === 'Metrics') {
+          state.__movedGroupProjectionEvents?.push({
+            name: detail.group.name,
+            indexes: [...detail.group.indexes],
+            allSourceIndexes: detail.group.allSourceIndexes
+              ? [...detail.group.allSourceIndexes]
+              : undefined,
+          });
+        }
+      });
+    });
+
+    const headers = page.locator(SELECTORS.actualHeaderCells);
+    const from = headers.filter({ hasText: 'Notes' });
+    const to = headers.filter({ hasText: 'Metric 0' });
+    const fromBox = await from.boundingBox();
+    const toBox = await to.boundingBox();
+
+    expect(fromBox).not.toBeNull();
+    expect(toBox).not.toBeNull();
+
+    await page.mouse.move(fromBox!.x + fromBox!.width / 2, fromBox!.y + fromBox!.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(toBox!.x + 4, toBox!.y + toBox!.height / 2, {
+      steps: 14,
+    });
+    await page.mouse.up();
+    await page.waitForChanges();
+
+    await expect.poll(() => visibleHeaderTexts(page)).toEqual([
+      'Notes',
+      'Metric 0',
+      'Metric 1',
+      'Metric 2',
+    ]);
+    await expect
+      .poll(() =>
+        page.evaluate(() => {
+          const state = globalThis as typeof globalThis & {
+            __movedGroupProjectionEvents?: Array<{
+              name: string;
+              indexes: number[];
+              allSourceIndexes?: number[];
+            }>;
+          };
+          return state.__movedGroupProjectionEvents
+            ?.filter(event => event.name === 'Metrics')
+            .at(-1);
+        }),
+      )
+      .toMatchObject({
+        name: 'Metrics',
+        indexes: [1, 2, 3],
+        allSourceIndexes: [0, 1, 2],
+      });
+  });
+
   test('keeps large grouped timelines bounded to the visible group header DOM', async ({ page }) => {
     const days = 365 * 5;
     const metricsPerDay = 3;
@@ -444,6 +695,28 @@ async function getVisibleColumnItemIndexes(page: E2EPage): Promise<number[]> {
     cells.map(cell => Number((cell as HTMLElement).dataset.rgcol)),
   );
   return indexes.filter(Number.isFinite);
+}
+
+async function applyColumnTrim(
+  page: E2EPage,
+  trimmed: Record<number, boolean>,
+  trimmedType: string,
+) {
+  await page.evaluate(({ trimmed, trimmedType }) => {
+    const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+    if (!grid) {
+      throw new Error('Grid was not created');
+    }
+    return grid.getProviders().then((providers) => {
+      if (!providers) {
+        throw new Error('Grid providers were not created');
+      }
+      const trimLayer = { [trimmedType]: trimmed };
+      providers.column.stores.rgCol.addTrimmed(trimLayer);
+      providers.dimension.setTrimmed(trimLayer, 'rgCol');
+    });
+  }, { trimmed, trimmedType });
+  await page.waitForChanges();
 }
 
 function isContiguous(indexes: number[]) {

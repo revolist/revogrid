@@ -565,6 +565,11 @@ export namespace Components {
          */
         "colData": ColumnRegular[];
         /**
+          * Physical column indexes in their current visible order.
+          * @default []
+         */
+        "colItems": number[];
+        /**
           * Column filter
          */
         "columnFilter": boolean;
@@ -2061,6 +2066,11 @@ declare namespace LocalJSX {
           * Columns - defines an array of grid columns.
          */
         "colData"?: ColumnRegular[];
+        /**
+          * Physical column indexes in their current visible order.
+          * @default []
+         */
+        "colItems"?: number[];
         /**
           * Column filter
          */
