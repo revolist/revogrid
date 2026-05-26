@@ -6,6 +6,7 @@ import { HEADER_CLASS, MIN_COL_SIZE } from '../../utils/consts';
 import { HeaderCellRenderer } from './header-cell-renderer';
 
 export type HeaderGroupRendererProps = {
+  level: number;
   start: number;
   end: number;
   group: Group;

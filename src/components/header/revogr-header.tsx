@@ -261,28 +261,15 @@ export class RevogrHeaderComponent {
     level: number,
     visibleGroupRange: { start: number; end: number } | undefined,
   ) {
-    const groupStartIndex = group.indexes[0] ?? -1;
-    if (groupStartIndex < 0) {
-      return;
-    }
-
-    const groupEndIndex = groupStartIndex + group.indexes.length - 1;
-    if (
-      !visibleGroupRange ||
-      !isGroupInVisibleRange(groupStartIndex, groupEndIndex, visibleGroupRange)
-    ) {
-      return;
-    }
-
-    const groupStart = getItemByIndex(
-      this.dimensionCol.state,
-      groupStartIndex,
-    ).start;
-    const groupEnd = getItemByIndex(
-      this.dimensionCol.state,
-      groupEndIndex,
-    ).end;
+    const groupRange = this.getGroupIndexRange(group);
+    const groupStart = groupRange
+      ? getItemByIndex(this.dimensionCol.state, groupRange.startIndex).start
+      : 0;
+    const groupEnd = groupRange
+      ? getItemByIndex(this.dimensionCol.state, groupRange.endIndex).end
+      : 0;
     const props: HeaderGroupRendererProps = {
+      level,
       providers: this.providers,
       start: groupStart,
       end: groupEnd,
@@ -292,20 +279,56 @@ export class RevogrHeaderComponent {
       canResize: this.canResize,
       additionalData: this.additionalData,
       onResize: e =>
-        this.onResizeGroup(
-          e.changedX ?? 0,
-          groupStartIndex,
-          groupEndIndex,
-        ),
+        groupRange
+          ? this.onResizeGroup(
+              e.changedX ?? 0,
+              groupRange.startIndex,
+              groupRange.endIndex,
+            )
+          : undefined,
     };
     const event = this.beforeGroupHeaderRender.emit(props);
     if (event.defaultPrevented) {
       return;
     }
+
+    const renderRange = this.getGroupIndexRange(event.detail.group);
+    if (
+      !renderRange ||
+      !visibleGroupRange ||
+      !isGroupInVisibleRange(
+        renderRange.startIndex,
+        renderRange.endIndex,
+        visibleGroupRange,
+      )
+    ) {
+      return;
+    }
+
+    if (event.detail.onResize === props.onResize) {
+      event.detail.onResize = e =>
+        this.onResizeGroup(
+          e.changedX ?? 0,
+          renderRange.startIndex,
+          renderRange.endIndex,
+        );
+    }
+
     return h(GroupHeaderRenderer, {
       key: this.getGroupHeaderCellKey(event.detail.group, level),
       ...event.detail,
     });
+  }
+
+  private getGroupIndexRange(group: Groups[number][number]) {
+    const startIndex = group.indexes[0] ?? -1;
+    if (startIndex < 0) {
+      return;
+    }
+    return {
+      startIndex,
+      endIndex: startIndex + group.indexes.length - 1,
+    };
   }
 
   private getVisibleGroupRange() {
