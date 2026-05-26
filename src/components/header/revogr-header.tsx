@@ -262,17 +262,12 @@ export class RevogrHeaderComponent {
     visibleGroupRange: { start: number; end: number } | undefined,
   ) {
     const groupRange = this.getGroupIndexRange(group);
-    const groupStart = groupRange
-      ? getItemByIndex(this.dimensionCol.state, groupRange.startIndex).start
-      : 0;
-    const groupEnd = groupRange
-      ? getItemByIndex(this.dimensionCol.state, groupRange.endIndex).end
-      : 0;
+    const groupBounds = this.getGroupBounds(groupRange);
     const props: HeaderGroupRendererProps = {
       level,
       providers: this.providers,
-      start: groupStart,
-      end: groupEnd,
+      start: groupBounds.start,
+      end: groupBounds.end,
       group,
       renderOffset: this.viewportCol.get('renderOffset') || 0,
       active: this.resizeHandler,
@@ -314,6 +309,14 @@ export class RevogrHeaderComponent {
         );
     }
 
+    const renderBounds = this.getGroupBounds(renderRange);
+    if (event.detail.start === props.start) {
+      event.detail.start = renderBounds.start;
+    }
+    if (event.detail.end === props.end) {
+      event.detail.end = renderBounds.end;
+    }
+
     return h(GroupHeaderRenderer, {
       key: this.getGroupHeaderCellKey(event.detail.group, level),
       ...event.detail,
@@ -328,6 +331,18 @@ export class RevogrHeaderComponent {
     return {
       startIndex,
       endIndex: startIndex + group.indexes.length - 1,
+    };
+  }
+
+  private getGroupBounds(
+    range: { startIndex: number; endIndex: number } | undefined,
+  ) {
+    if (!range) {
+      return { start: 0, end: 0 };
+    }
+    return {
+      start: getItemByIndex(this.dimensionCol.state, range.startIndex).start,
+      end: getItemByIndex(this.dimensionCol.state, range.endIndex).end,
     };
   }
 
