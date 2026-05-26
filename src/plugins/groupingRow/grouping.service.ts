@@ -22,6 +22,10 @@ function getGroupValueDefault(item: DataType, prop: string | number) {
   return item[prop] || null;
 }
 
+function isDataRow(item: DataType | null | undefined): item is DataType {
+  return item != null;
+}
+
 // get source based on proxy item collection to preserve rgRow order
 export function getSource(
   source: DataType[],
@@ -47,6 +51,8 @@ export function getSource(
       if (getExpanded(model)) {
         result.prevExpanded[model[PSEUDO_GROUP_ITEM_VALUE]] = true;
       }
+    } else if (!isDataRow(model)) {
+      return;
     } else {
       result.source.push(model);
       result.oldNewIndexes[i] = index;
@@ -157,6 +163,10 @@ export function gatherGrouping(
   const groupedItems: GroupedData = new Map();
   
   array.forEach((item, originalIndex) => {
+    if (!isDataRow(item)) {
+      return;
+    }
+
     const groupLevelValues = columnProps.map(groupId => getGroupValue(item, groupId));
     const lastLevelValue = groupLevelValues.pop();
     let currentGroupLevel = groupedItems;
