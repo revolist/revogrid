@@ -345,13 +345,7 @@ export class RevogrViewportScroll implements ElementScroll {
       this.contentHeight,
       this.verticalScroll?.clientHeight ?? 0,
     );
-    const physicalContentWidth =
-      this.colType === 'colPinStart' || this.colType === 'colPinEnd'
-        ? this.contentWidth
-        : getContentSize(
-            this.contentWidth,
-            this.horizontalScroll?.clientWidth ?? 0,
-          );
+    const physicalContentWidth = getContentSize(this.contentWidth, 0);
     return (
       <Host
         onWheel={this.horizontalMouseWheel}
