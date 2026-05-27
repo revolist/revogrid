@@ -90,7 +90,7 @@ const HeaderRenderer = (p: HeaderRenderProps): ReturnType<typeof h> => {
       props={dataProps}
       additionalData={p.additionalData}
     >
-      {<SortingSign column={p.data} />}
+      {p.data?.sortable ? <SortingSign column={p.data} /> : null}
       {p.canFilter && p.data?.filter !== false ? (
         <FilterButton column={p.data} />
       ) : (
