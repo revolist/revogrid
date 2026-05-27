@@ -250,6 +250,10 @@ export class RevogrViewportScroll implements ElementScroll {
           scroll: this.horizontalScroll.scrollLeft,
           noScroll: this.colType !== 'rgCol',
         };
+        this.setScrollParams({
+          rgRow: calculatedHeight,
+          rgCol: calculatedWidth,
+        });
         // Process changes in order: width first, then height
         const dimensions: DimensionType[] = ['rgCol', 'rgRow'];
         for (const dimension of dimensions) {
@@ -311,23 +315,10 @@ export class RevogrViewportScroll implements ElementScroll {
   }
 
   async componentDidRender() {
-    this.localScrollService.setParams(
-      {
-        contentSize: this.contentHeight,
-        clientSize: this.verticalScroll?.clientHeight ?? 0,
-        virtualSize: 0,
-      },
-      'rgRow',
-    );
-
-    this.localScrollService.setParams(
-      {
-        contentSize: this.contentWidth,
-        clientSize: this.horizontalScroll.clientWidth,
-        virtualSize: 0,
-      },
-      'rgCol',
-    );
+    this.setScrollParams({
+      rgRow: this.verticalScroll?.clientHeight ?? 0,
+      rgCol: this.horizontalScroll.clientWidth,
+    });
     this.setScrollVisibility(
       'rgRow',
       this.verticalScroll?.clientHeight ?? 0,
@@ -337,6 +328,26 @@ export class RevogrViewportScroll implements ElementScroll {
       'rgCol',
       this.horizontalScroll.clientWidth,
       this.contentWidth,
+    );
+  }
+
+  private setScrollParams(clientSize: Record<DimensionType, number>) {
+    this.localScrollService.setParams(
+      {
+        contentSize: this.contentHeight,
+        clientSize: clientSize.rgRow,
+        virtualSize: 0,
+      },
+      'rgRow',
+    );
+
+    this.localScrollService.setParams(
+      {
+        contentSize: this.contentWidth,
+        clientSize: clientSize.rgCol,
+        virtualSize: 0,
+      },
+      'rgCol',
     );
   }
 
