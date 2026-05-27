@@ -32,7 +32,7 @@ describe('revo-grid-viewport', () => {
 
   it('Items are ready for recombination', () => expect(items).toBeDefined());
 
-  it('allows scrolling to the real bottom while rows overflow the viewport', () => {
+  it('keeps one row of render overscan before the real bottom', () => {
     expect(
       getViewportMaxCoordinate(
         {
@@ -41,7 +41,7 @@ describe('revo-grid-viewport', () => {
         },
         virtualSize,
       ),
-    ).toBe(realSize - virtualSize);
+    ).toBe(realSize - virtualSize - originItemSize);
   });
 
   it('keeps max coordinate at zero when rows fit inside the viewport', () => {

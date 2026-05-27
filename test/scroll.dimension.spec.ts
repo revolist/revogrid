@@ -270,6 +270,42 @@ describe('browser-limit-aware scroll dimensions', () => {
     expect(rowDimension.store.get('renderOffset')).toBe(renderOffset);
   });
 
+  it('computes render offset from the real logical scroll bottom', () => {
+    const viewports = new ViewportProvider();
+    const dimensions = new DimensionProvider(viewports, {
+      realSizeChanged: () => undefined,
+    });
+    const rowDimension = dimensions.stores.rgRow;
+    const contentSize = 60_000_000;
+    const clientSize = 600;
+    rowDimension.setStore({
+      count: 2_000_000,
+      originItemSize: 30,
+      realSize: contentSize,
+    });
+    viewports.stores.rgRow.setViewport({
+      clientSize,
+      virtualSize: clientSize,
+      realCount: 2_000_000,
+    });
+    const scrollDimension = getScrollDimension({
+      contentSize,
+      clientSize,
+      virtualSize: clientSize,
+    });
+
+    dimensions.setViewPortCoordinate({
+      type: 'rgRow',
+      coordinate: scrollDimension.logicalScrollSize,
+    });
+
+    const renderOffset = viewports.stores.rgRow.store.get('renderOffset');
+    expect(renderOffset).toBe(
+      scrollDimension.getRenderOffset(scrollDimension.logicalScrollSize),
+    );
+    expect(rowDimension.store.get('renderOffset')).toBe(renderOffset);
+  });
+
   it('recomputes render offset when viewport size changes', () => {
     const firstRenderOffset = getScrollDimension({
       contentSize: 60_000_000,

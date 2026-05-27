@@ -132,6 +132,50 @@ test.describe('virtualization', () => {
     );
   });
 
+  test('keeps the last row aligned in normal scroll mode', async ({ page }) => {
+    const rowSize = 30;
+    const rowCount = 100;
+    const lastRow = rowCount - 1;
+    const columns = Array.from({ length: 100 }, (_, index) => ({
+      prop: `c${index}`,
+      name: `C ${index}`,
+      size: 120,
+    }));
+    const source = Array.from({ length: rowCount }, (_, rowIndex) => {
+      const row: Record<string, string> = {};
+      for (let colIndex = 0; colIndex < columns.length; colIndex++) {
+        row[`c${colIndex}`] = `${rowIndex}:${colIndex}`;
+      }
+      return row;
+    });
+
+    await mountGrid(page, {
+      columns,
+      source,
+      width: 520,
+      height: 260,
+      rowSize,
+    });
+
+    await callGridMethod(page, 'scrollToRow', lastRow);
+    await page.waitForChanges();
+
+    const viewportBox = await page.locator(`${SELECTORS.mainViewport} .vertical-inner`).boundingBox();
+    const lastCell = dataCell(page, lastRow, 0);
+    await expect(lastCell).toHaveText(`${lastRow}:0`);
+    const lastCellBox = await lastCell.boundingBox();
+    expect(viewportBox).not.toBeNull();
+    expect(lastCellBox).not.toBeNull();
+    expect(lastCellBox!.y).toBeGreaterThanOrEqual(viewportBox!.y);
+    expect(lastCellBox!.y + lastCellBox!.height).toBeLessThanOrEqual(
+      viewportBox!.y + viewportBox!.height,
+    );
+    const renderedRowIndexes = await mainDataRows(page).evaluateAll(rows =>
+      rows.map(row => Number(row.getAttribute('data-rgrow'))),
+    );
+    expect(Math.max(...renderedRowIndexes)).toBe(lastRow);
+  });
+
   test('maps native physical scroll and wheel deltas to logical vertical coordinates', async ({ page }) => {
     const rowSize = 30;
     const rowCount = 1_200_000;

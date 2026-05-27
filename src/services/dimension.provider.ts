@@ -11,7 +11,6 @@ import {
   DimensionStoreCollection,
   gatherTrimmedItems,
   Trimmed,
-  clampViewportCoordinate,
 } from '@store';
 import type {
   DimensionCols,
@@ -221,10 +220,9 @@ export default class DimensionProvider {
       clientSize,
       virtualSize: viewportSize,
     });
-    const renderCoordinate = clampViewportCoordinate(
-      coordinate,
-      dimension,
-      viewportSize,
+    const renderCoordinate = Math.min(
+      Math.max(0, coordinate),
+      scrollDimension.logicalScrollSize,
     );
     const renderOffset =
       clientSize && viewportSize
