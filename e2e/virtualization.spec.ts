@@ -48,6 +48,71 @@ test.describe('virtualization', () => {
     expect(visibleNames.includes('Name 151')).toBe(true);
   });
 
+  test('keeps the last row visible with horizontal overflow after resize', async ({ page }) => {
+    const rowSize = 46;
+    const rowCount = 100;
+    const lastRow = rowCount - 1;
+    const columnProps = Array.from({ length: 12 }, (_, index) => `c${index}`);
+    const source = Array.from({ length: rowCount }, (_, rowIndex) =>
+      Object.fromEntries(
+        columnProps.map((prop, columnIndex) => [
+          prop,
+          `${rowIndex}:${columnIndex}`,
+        ]),
+      ),
+    );
+
+    await mountGrid(page, {
+      width: 760,
+      height: 360,
+      rowHeaders: true,
+      rowSize,
+      columns: columnProps.map((prop, index) => ({
+        prop,
+        name: String.fromCharCode(65 + index),
+        size: 170,
+      })),
+      source,
+    });
+
+    const assertLastRowInsideViewport = async () => {
+      await expect(dataCell(page, lastRow, 0)).toHaveText(`${lastRow}:0`);
+      const boxes = await page.evaluate(({ viewportSelector, cellSelector }) => {
+        const viewport = document.querySelector<HTMLElement>(viewportSelector);
+        const cell = document.querySelector<HTMLElement>(cellSelector);
+        if (!viewport || !cell) {
+          throw new Error('Expected viewport and last-row cell to be rendered');
+        }
+        const viewportBox = viewport.getBoundingClientRect();
+        const cellBox = cell.getBoundingClientRect();
+        return {
+          viewportBottom: viewportBox.bottom,
+          cellBottom: cellBox.bottom,
+        };
+      }, {
+        viewportSelector: `${SELECTORS.mainViewport} .vertical-inner`,
+        cellSelector: `${SELECTORS.mainViewport} revogr-data[type="rgRow"] [data-rgrow="${lastRow}"] [data-rgcol="0"]`,
+      });
+      expect(boxes.cellBottom).toBeLessThanOrEqual(boxes.viewportBottom + 1);
+    };
+
+    await scrollToCell(page, 0, lastRow * rowSize);
+    await assertLastRowInsideViewport();
+
+    await page.evaluate(() => {
+      const holder = document.querySelector<HTMLElement>('revo-grid')?.parentElement;
+      if (!holder) {
+        throw new Error('Grid holder was not found');
+      }
+      holder.style.width = '980px';
+      holder.style.height = '620px';
+    });
+    await page.waitForChanges();
+
+    await scrollToCell(page, 0, lastRow * rowSize);
+    await assertLastRowInsideViewport();
+  });
+
   test('scrolls to rows beyond browser-native scroll height limits', async ({ page }) => {
     const rowSize = 30;
     const rowCount = 1_200_000;

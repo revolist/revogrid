@@ -58,6 +58,7 @@ export default class GridResizeService {
   }
 
   destroy() {
+    this.apply.cancel();
     this.resizeObserver?.disconnect();
     this.resizeObserver = null;
   }
