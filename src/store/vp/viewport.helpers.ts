@@ -24,15 +24,12 @@ export type ItemsToUpdate = Pick<ViewportStateItems, 'items' | 'start' | 'end'>;
 export function getViewportMaxCoordinate(
   dimension: Pick<DimensionSettingsState, 'realSize' | 'originItemSize'>,
   viewportSize: number,
-  frameOffset = 1,
+  _frameOffset = 1,
 ): number {
   if (!viewportSize || dimension.realSize <= viewportSize) {
     return 0;
   }
-  return Math.max(
-    0,
-    dimension.realSize - viewportSize - dimension.originItemSize * frameOffset,
-  );
+  return Math.max(0, dimension.realSize - viewportSize);
 }
 
 export function clampViewportCoordinate(

@@ -94,6 +94,44 @@ test.describe('virtualization', () => {
     expect(Math.abs(cellBox!.y - focusBox!.y)).toBeLessThan(2);
   });
 
+  test('fully reveals the last row in million-row mode', async ({ page }) => {
+    const rowSize = 30;
+    const rowCount = 1_000_000;
+    const lastRow = rowCount - 1;
+
+    await page.setContent(`
+      <div style="width:520px; height:260px;">
+        <revo-grid style="display:block; width:100%; height:100%;"></revo-grid>
+      </div>
+    `);
+    await page.waitForSelector(SELECTORS.grid);
+    await page.evaluate(({ rowCount, rowSize }) => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) {
+        throw new Error('Grid element was not created');
+      }
+      grid.columns = [{ prop: 'id', name: 'ID', size: 120 }];
+      grid.source = Array.from({ length: rowCount }, (_, index) => ({ id: index + 1 }));
+      grid.rowSize = rowSize;
+    }, { rowCount, rowSize });
+    await page.waitForChanges();
+    await expect.poll(() => mainDataRows(page).count()).toBeGreaterThan(0);
+
+    await callGridMethod(page, 'scrollToRow', lastRow);
+    await page.waitForChanges();
+
+    const viewportBox = await page.locator(`${SELECTORS.mainViewport} .vertical-inner`).boundingBox();
+    const lastCell = dataCell(page, lastRow, 0);
+    await expect(lastCell).toHaveText(String(rowCount));
+    const lastCellBox = await lastCell.boundingBox();
+    expect(viewportBox).not.toBeNull();
+    expect(lastCellBox).not.toBeNull();
+    expect(lastCellBox!.y).toBeGreaterThanOrEqual(viewportBox!.y);
+    expect(lastCellBox!.y + lastCellBox!.height).toBeLessThanOrEqual(
+      viewportBox!.y + viewportBox!.height,
+    );
+  });
+
   test('maps native physical scroll and wheel deltas to logical vertical coordinates', async ({ page }) => {
     const rowSize = 30;
     const rowCount = 1_200_000;

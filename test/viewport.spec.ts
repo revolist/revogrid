@@ -1,5 +1,11 @@
 import { type VirtualPositionItem, type ViewportStateItems } from '../src';
-import { getFirstItem, getItems, getLastItem, recombineByOffset } from '../src/store/vp/viewport.helpers';
+import {
+  getFirstItem,
+  getItems,
+  getLastItem,
+  getViewportMaxCoordinate,
+  recombineByOffset,
+} from '../src/store/vp/viewport.helpers';
 
 type ItemsToUpdate = Pick<ViewportStateItems, 'items' | 'start' | 'end'>;
 
@@ -25,6 +31,30 @@ describe('revo-grid-viewport', () => {
   range.end = items.length - 1;
 
   it('Items are ready for recombination', () => expect(items).toBeDefined());
+
+  it('allows scrolling to the real bottom while rows overflow the viewport', () => {
+    expect(
+      getViewportMaxCoordinate(
+        {
+          realSize,
+          originItemSize,
+        },
+        virtualSize,
+      ),
+    ).toBe(realSize - virtualSize);
+  });
+
+  it('keeps max coordinate at zero when rows fit inside the viewport', () => {
+    expect(
+      getViewportMaxCoordinate(
+        {
+          realSize: 300,
+          originItemSize,
+        },
+        virtualSize,
+      ),
+    ).toBe(0);
+  });
 
   // repeat recombination several time same way as user scroll
   for (let i = 0; i < 120; i++) {
