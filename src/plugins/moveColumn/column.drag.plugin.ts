@@ -130,7 +130,9 @@ export class ColumnMovePlugin extends BasePlugin {
     mouseup.target.addEventListener('mouseup', mouseup.callback);
 
     const dataEl = (event.target as HTMLElement).closest('revogr-header');
-    const scrollEl = (event.target as HTMLElement).closest('revogr-viewport-scroll');
+    const scrollEl = (event.target as HTMLElement).closest(
+      'revogr-viewport-scroll',
+    );
     if (!dataEl || !scrollEl) {
       return;
     }
@@ -143,11 +145,11 @@ export class ColumnMovePlugin extends BasePlugin {
     const cols = this.getDimension(data.pin || 'rgCol');
     const gridRect = this.revogrid.getBoundingClientRect();
     const elRect = dataEl.getBoundingClientRect();
-    const startItem = getItemByPosition(cols, getLeftRelative(
-      event.x,
-      gridRect.left,
-      elRect.left - gridRect.left,
-    ) + (cols.renderOffset || 0));
+    const startItem = getItemByPosition(
+      cols,
+      getLeftRelative(event.x, gridRect.left, elRect.left - gridRect.left) +
+        (cols.renderOffset || 0),
+    );
 
     this.staticDragData = {
       startPos: event.x,
@@ -193,8 +195,13 @@ export class ColumnMovePlugin extends BasePlugin {
         return;
       }
       this.orderUi.showHandler(
-        rgCol.end - (this.staticDragData.cols.renderOffset || 0) + dragData.scrollOffset,
-        dragData.gridRect.width
+        getColumnDragPosition(
+          rgCol,
+          this.staticDragData.startItem,
+          this.staticDragData.cols.renderOffset || 0,
+          dragData.scrollOffset,
+        ),
+        dragData.gridRect.width,
       );
     }
   }
@@ -228,23 +235,31 @@ export class ColumnMovePlugin extends BasePlugin {
       const newItems = [...store.get('items')];
 
       // prevent position change if needed
-      const { defaultPrevented: stopDrag } = dispatch<BeforeColumnDragEndEventData>(
-        this.revogrid,
-        BEFORE_COLUMN_DRAG_END_EVENT,
-        {
-          ...this.staticDragData,
-          startPosition: this.staticDragData.startItem,
-          newPosition,
-          newItem: source[newItems[this.staticDragData.startItem.itemIndex]],
-        },
-      );
+      const { defaultPrevented: stopDrag } =
+        dispatch<BeforeColumnDragEndEventData>(
+          this.revogrid,
+          BEFORE_COLUMN_DRAG_END_EVENT,
+          {
+            ...this.staticDragData,
+            startPosition: this.staticDragData.startItem,
+            newPosition,
+            newItem: source[newItems[this.staticDragData.startItem.itemIndex]],
+          },
+        );
       if (!stopDrag) {
         const prevItems = [...newItems];
         // todo: if move item out of group remove item from group
-        const toMove = newItems.splice(this.staticDragData.startItem.itemIndex, 1);
+        const toMove = newItems.splice(
+          this.staticDragData.startItem.itemIndex,
+          1,
+        );
         newItems.splice(newPosition.itemIndex, 0, ...toMove);
         store.set('items', newItems);
-        this.providers.dimension.updateSizesPositionByNewDataIndexes(this.dragData.type, newItems, prevItems);
+        this.providers.dimension.updateSizesPositionByNewDataIndexes(
+          this.dragData.type,
+          newItems,
+          prevItems,
+        );
       }
       dispatch(
         this.revogrid,
@@ -256,7 +271,9 @@ export class ColumnMovePlugin extends BasePlugin {
   }
 
   protected clearLocalSubscriptions() {
-    each(this.localSubscriptions, ({ target, callback }, key) => target.removeEventListener(key, callback));
+    each(this.localSubscriptions, ({ target, callback }, key) =>
+      target.removeEventListener(key, callback),
+    );
   }
 
   clearOrder() {
@@ -298,7 +315,20 @@ export class ColumnMovePlugin extends BasePlugin {
 export function getLeftRelative(
   absoluteX: number,
   gridPos: number,
-  offset: number
+  offset: number,
 ): number {
   return absoluteX - gridPos - offset;
+}
+
+export function getColumnDragPosition(
+  targetItem: PositionItem,
+  startItem: PositionItem,
+  renderOffset: number,
+  scrollOffset: number,
+): number {
+  const insertionEdge =
+    startItem.itemIndex > targetItem.itemIndex
+      ? targetItem.start
+      : targetItem.end;
+  return insertionEdge - renderOffset + scrollOffset;
 }
