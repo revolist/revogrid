@@ -270,6 +270,113 @@ describe('browser-limit-aware scroll dimensions', () => {
     expect(rowDimension.store.get('renderOffset')).toBe(renderOffset);
   });
 
+  it('uses the actual logical bottom coordinate for compressed render offset', () => {
+    const viewports = new ViewportProvider();
+    const dimensions = new DimensionProvider(viewports, {
+      realSizeChanged: () => undefined,
+    });
+    const rowDimension = dimensions.stores.rgRow;
+    rowDimension.setStore({
+      count: 2_000_000,
+      originItemSize: 30,
+      realSize: 60_000_000,
+    });
+    viewports.stores.rgRow.setViewport({
+      clientSize: 600,
+      virtualSize: 600,
+      realCount: 2_000_000,
+    });
+    const scrollDimension = getScrollDimension({
+      contentSize: 60_000_000,
+      clientSize: 600,
+      virtualSize: 600,
+    });
+
+    dimensions.setViewPortCoordinate({
+      type: 'rgRow',
+      coordinate: scrollDimension.logicalScrollSize,
+    });
+
+    const renderOffset = viewports.stores.rgRow.store.get('renderOffset');
+    expect(renderOffset).toBe(
+      scrollDimension.getRenderOffset(scrollDimension.logicalScrollSize),
+    );
+    expect(rowDimension.store.get('renderOffset')).toBe(renderOffset);
+  });
+
+  it('uses the actual logical bottom coordinate with a custom-sized tail row', () => {
+    const viewports = new ViewportProvider();
+    const dimensions = new DimensionProvider(viewports, {
+      realSizeChanged: () => undefined,
+    });
+    const rowDimension = dimensions.stores.rgRow;
+    const rowCount = 2_000_000;
+    const lastRow = rowCount - 1;
+    rowDimension.setStore({
+      count: rowCount,
+      originItemSize: 30,
+    });
+    rowDimension.setDimensionSize({
+      [lastRow]: 80,
+    });
+    viewports.stores.rgRow.setViewport({
+      clientSize: 600,
+      virtualSize: 600,
+      realCount: rowCount,
+    });
+    const scrollDimension = getScrollDimension({
+      contentSize: rowDimension.store.get('realSize'),
+      clientSize: 600,
+      virtualSize: 600,
+    });
+
+    dimensions.setViewPortCoordinate({
+      type: 'rgRow',
+      coordinate: scrollDimension.logicalScrollSize,
+    });
+
+    const renderOffset = viewports.stores.rgRow.store.get('renderOffset');
+    expect(rowDimension.store.get('realSize')).toBe(60_000_050);
+    expect(renderOffset).toBe(
+      scrollDimension.getRenderOffset(scrollDimension.logicalScrollSize),
+    );
+    expect(rowDimension.store.get('renderOffset')).toBe(renderOffset);
+  });
+
+  it('uses the actual logical right edge coordinate for compressed column render offset', () => {
+    const viewports = new ViewportProvider();
+    const dimensions = new DimensionProvider(viewports, {
+      realSizeChanged: () => undefined,
+    });
+    const colDimension = dimensions.stores.rgCol;
+    colDimension.setStore({
+      count: 120_000,
+      originItemSize: 300,
+      realSize: 36_000_000,
+    });
+    viewports.stores.rgCol.setViewport({
+      clientSize: 780,
+      virtualSize: 780,
+      realCount: 120_000,
+    });
+    const scrollDimension = getScrollDimension({
+      contentSize: 36_000_000,
+      clientSize: 780,
+      virtualSize: 780,
+    });
+
+    dimensions.setViewPortCoordinate({
+      type: 'rgCol',
+      coordinate: scrollDimension.logicalScrollSize,
+    });
+
+    const renderOffset = viewports.stores.rgCol.store.get('renderOffset');
+    expect(renderOffset).toBe(
+      scrollDimension.getRenderOffset(scrollDimension.logicalScrollSize),
+    );
+    expect(colDimension.store.get('renderOffset')).toBe(renderOffset);
+  });
+
   it('recomputes render offset when viewport size changes', () => {
     const firstRenderOffset = getScrollDimension({
       contentSize: 60_000_000,

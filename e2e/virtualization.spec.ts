@@ -159,6 +159,164 @@ test.describe('virtualization', () => {
     expect(Math.abs(cellBox!.y - focusBox!.y)).toBeLessThan(2);
   });
 
+  test('keeps the final compressed-scroll row inside the viewport', async ({ page }) => {
+    const rowSize = 46;
+    const lastRowSize = 80;
+    const rowCount = 1_000_000;
+    const lastRow = rowCount - 1;
+
+    await page.setContent(`
+      <div style="width:760px; height:360px;">
+        <revo-grid style="display:block; width:100%; height:100%;"></revo-grid>
+      </div>
+    `);
+    await page.waitForSelector(SELECTORS.grid);
+    await page.evaluate(({ lastRowSize, rowCount, rowSize }) => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) {
+        throw new Error('Grid element was not created');
+      }
+      grid.columns = [
+        { prop: 'c0', name: 'A', size: 170 },
+        { prop: 'c1', name: 'B', size: 170 },
+      ];
+      grid.source = Array.from({ length: rowCount }, (_, rowIndex) => ({
+        c0: `${rowIndex}:0`,
+        c1: `${rowIndex}:1`,
+      }));
+      grid.rowHeaders = true;
+      grid.rowDefinitions = [{
+        type: 'rgRow',
+        index: rowCount - 1,
+        size: lastRowSize,
+      }];
+      grid.rowSize = rowSize;
+    }, { lastRowSize, rowCount, rowSize });
+    await page.waitForChanges();
+    await expect.poll(() => mainDataRows(page).count()).toBeGreaterThan(0);
+
+    const logicalContentSize = await callGridMethod<{ y: number }>(page, 'getContentSize');
+    const physicalScrollHeight = await page
+      .locator(`${SELECTORS.mainViewport} .vertical-inner`)
+      .evaluate((el: HTMLElement) => el.scrollHeight);
+    expect(physicalScrollHeight).toBeLessThan(logicalContentSize.y);
+
+    await callGridMethod(page, 'scrollToRow', lastRow);
+    await page.waitForChanges();
+    await expect(dataCell(page, lastRow, 0)).toHaveText(`${lastRow}:0`);
+
+    const boxes = await page.evaluate(({ viewportSelector, cellSelector }) => {
+      const viewport = document.querySelector<HTMLElement>(viewportSelector);
+      const cell = document.querySelector<HTMLElement>(cellSelector);
+      if (!viewport || !cell) {
+        throw new Error('Expected viewport and final-row cell to be rendered');
+      }
+      const viewportBox = viewport.getBoundingClientRect();
+      const cellBox = cell.getBoundingClientRect();
+      return {
+        viewportBottom: viewportBox.bottom,
+        cellBottom: cellBox.bottom,
+      };
+    }, {
+      viewportSelector: `${SELECTORS.mainViewport} .vertical-inner`,
+      cellSelector: `${SELECTORS.mainViewport} revogr-data[type="rgRow"] [data-rgrow="${lastRow}"] [data-rgcol="0"]`,
+    });
+    expect(boxes.cellBottom).toBeLessThanOrEqual(boxes.viewportBottom + 1);
+    const lastRowBox = await page
+      .locator(`${SELECTORS.mainViewport} revogr-data[type="rgRow"] .rgRow[data-rgrow="${lastRow}"]`)
+      .boundingBox();
+    expect(lastRowBox).not.toBeNull();
+    expect(lastRowBox!.height).toBe(lastRowSize);
+
+    await setCellsFocus(page, { x: 0, y: lastRow });
+    await expect.poll(() => getFocused(page)).toMatchObject({
+      cell: { x: 0, y: lastRow },
+    });
+    const cellBox = await dataCell(page, lastRow, 0).boundingBox();
+    const focusBox = await page.locator(SELECTORS.focusedCell).boundingBox();
+    expect(cellBox).not.toBeNull();
+    expect(focusBox).not.toBeNull();
+    expect(Math.abs(cellBox!.x - focusBox!.x)).toBeLessThanOrEqual(2);
+    expect(Math.abs(cellBox!.y - focusBox!.y)).toBeLessThanOrEqual(2);
+    expect(focusBox!.y + focusBox!.height).toBeLessThanOrEqual(boxes.viewportBottom + 1);
+  });
+
+  test('keeps the final compressed-scroll column inside the viewport', async ({ page }) => {
+    const colSize = 300;
+    const colCount = 120_000;
+    const lastColumn = colCount - 1;
+
+    await page.setContent(`
+      <div style="width:780px; height:260px;">
+        <revo-grid style="display:block; width:100%; height:100%;"></revo-grid>
+      </div>
+    `);
+    await page.waitForSelector(SELECTORS.grid);
+    await page.evaluate(({ colCount, colSize }) => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) {
+        throw new Error('Grid element was not created');
+      }
+      const cellParser = (model: Record<string, string | number>, column: { prop: string }) =>
+        model[column.prop] ?? `Row ${model.row} ${column.prop}`;
+      grid.columns = Array.from({ length: colCount }, (_, index) => ({
+        prop: `c${index}`,
+        name: `C ${index}`,
+        size: colSize,
+        cellParser,
+      }));
+      grid.source = [{ row: 1, [`c${colCount - 1}`]: `Row 1 c${colCount - 1}` }];
+      grid.colSize = colSize;
+    }, { colCount, colSize });
+    await page.waitForChanges();
+    await expect.poll(() => mainDataRows(page).count()).toBeGreaterThan(0);
+
+    const logicalContentSize = await callGridMethod<{ x: number }>(page, 'getContentSize');
+    const physicalScrollWidth = await page
+      .locator(SELECTORS.mainViewport)
+      .evaluate((el: HTMLElement) => el.scrollWidth);
+    expect(physicalScrollWidth).toBeLessThan(logicalContentSize.x);
+
+    await callGridMethod(page, 'scrollToColumnIndex', lastColumn);
+    await page.waitForChanges();
+    await expect(dataCell(page, 0, lastColumn)).toHaveText(`Row 1 c${lastColumn}`);
+
+    const boxes = await page.evaluate(({ viewportSelector, cellSelector }) => {
+      const viewport = document.querySelector<HTMLElement>(viewportSelector);
+      const cell = document.querySelector<HTMLElement>(cellSelector);
+      if (!viewport || !cell) {
+        throw new Error('Expected viewport and final-column cell to be rendered');
+      }
+      const viewportBox = viewport.getBoundingClientRect();
+      const cellBox = cell.getBoundingClientRect();
+      return {
+        viewportRight: viewportBox.right,
+        cellRight: cellBox.right,
+      };
+    }, {
+      viewportSelector: SELECTORS.mainViewport,
+      cellSelector: `${SELECTORS.mainViewport} revogr-data[type="rgRow"] [data-rgrow="0"] [data-rgcol="${lastColumn}"]`,
+    });
+    expect(boxes.cellRight).toBeLessThanOrEqual(boxes.viewportRight + 1);
+
+    const cell = dataCell(page, 0, lastColumn);
+    const cellBox = await cell.boundingBox();
+    expect(cellBox).not.toBeNull();
+    await page.mouse.click(
+      cellBox!.x + cellBox!.width / 2,
+      cellBox!.y + cellBox!.height / 2,
+    );
+    await page.waitForChanges();
+    await expect.poll(() => getFocused(page)).toMatchObject({
+      cell: { x: lastColumn, y: 0 },
+    });
+    const focusBox = await page.locator(SELECTORS.focusedCell).boundingBox();
+    expect(focusBox).not.toBeNull();
+    expect(Math.abs(cellBox!.x - focusBox!.x)).toBeLessThanOrEqual(2);
+    expect(Math.abs(cellBox!.y - focusBox!.y)).toBeLessThanOrEqual(2);
+    expect(focusBox!.x + focusBox!.width).toBeLessThanOrEqual(boxes.viewportRight + 1);
+  });
+
   test('maps native physical scroll and wheel deltas to logical vertical coordinates', async ({ page }) => {
     const rowSize = 30;
     const rowCount = 1_200_000;
