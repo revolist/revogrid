@@ -11,11 +11,30 @@ export type ScrollDimensionInput = {
 };
 
 export type ScrollDimension = {
+  /**
+   * Real logical grid content size
+   * e.g. 1_000_000 rows * 46px = 46_000_000px.
+   */
   contentSize: number;
+  /**
+   * Visible viewport size provided by the browser
+   * e.g. 600px height of the scrollable container.
+   */
   clientSize: number;
   viewportSize: number;
+  /**
+   * Fake DOM scrollable size that RevoGrid gives the browser scrollbar.
+   * Grid maps between physical scrollbar coordinates and logical grid coordinates so rows still represent the full dataset.
+   */
   physicalContentSize: number;
+  /**
+   * How far the grid should be scrollable logically.
+   * contentSize - viewportSize, meaning the largest valid logical scroll coordinate.
+   */
   logicalScrollSize: number;
+  /**
+   * How far the browser scrollbar can actually move.
+   */
   physicalScrollSize: number;
   isCompressed: boolean;
   toLogicalCoordinate(coordinate: number): number;

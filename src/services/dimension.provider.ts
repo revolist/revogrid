@@ -11,7 +11,6 @@ import {
   DimensionStoreCollection,
   gatherTrimmedItems,
   Trimmed,
-  clampViewportCoordinate,
 } from '@store';
 import type {
   DimensionCols,
@@ -221,11 +220,20 @@ export default class DimensionProvider {
       clientSize,
       virtualSize: viewportSize,
     });
-    const renderCoordinate = clampViewportCoordinate(
-      coordinate,
-      dimension,
-      viewportSize,
-    );
+    // Render offset must use the true logical scroll coordinate
+    // It is the logical scroll position that should be used for compressed-scroll offset math.
+    const renderCoordinate = Math.min(
+      Math.max(0, coordinate), // prevents negative scroll positions
+      scrollDimension.logicalScrollSize,
+    ); // prevents positions past the logical end
+
+
+    /**
+     * If viewport sizing is initialized (clientSize and viewportSize are truthy), calculate the offset needed for compressed scroll.
+     * Otherwise keep renderOffset at 0, because there is not enough measurement data yet.
+     * 
+     * In normal scrolling, logical and physical coordinates are the same, so offset is 0.
+     */
     const renderOffset =
       clientSize && viewportSize
         ? scrollDimension.getRenderOffset(renderCoordinate)
