@@ -35,6 +35,29 @@ export function getViewportMaxCoordinate(
   );
 }
 
+/**
+ * Clamp the viewport coordinate within the valid range.
+ * Given a scroll position, pick a safe starting point for rendering visible items.
+ * 
+ * Do not use it when you need the exact scroll position for positioning math.
+ * 
+ * It does two things:
+ * 1. If the coordinate is below 0, use 0.
+ * 2. If the coordinate is too close to the very end, pull it back a bit.
+ * 
+ * Example:
+ *
+ * content height: 1000px
+ * viewport height: 200px
+ * row height: 30px
+ * The real max scroll is:
+ *
+ * 1000 - 200 = 800
+ * But clampViewportCoordinate may clamp to:
+ *
+ * 1000 - 200 - 30 = 770
+ * Ask for 800 -> it returns 770.
+ */
 export function clampViewportCoordinate(
   coordinate: number,
   dimension: Pick<DimensionSettingsState, 'realSize' | 'originItemSize'>,
