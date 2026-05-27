@@ -37,6 +37,11 @@ type KeyedResizableElementHTMLAttributes = ResizableElementHTMLAttributes & {
 };
 
 const HeaderRenderer = (p: HeaderRenderProps): ReturnType<typeof h> => {
+  const hasSortingSign = !!(
+    p.data?.sortable ||
+    p.data?.order ||
+    p.data?.sortIndex
+  );
   const cellClass: { [key: string]: boolean } = {
     [HEADER_CLASS]: true,
     [HEADER_SORTABLE_CLASS]: !!p.data?.sortable,
@@ -90,7 +95,7 @@ const HeaderRenderer = (p: HeaderRenderProps): ReturnType<typeof h> => {
       props={dataProps}
       additionalData={p.additionalData}
     >
-      {p.data?.sortable ? <SortingSign column={p.data} /> : null}
+      {hasSortingSign ? <SortingSign column={p.data} /> : null}
       {p.canFilter && p.data?.filter !== false ? (
         <FilterButton column={p.data} />
       ) : (

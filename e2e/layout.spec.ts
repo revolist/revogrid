@@ -16,6 +16,12 @@ test.describe('layout', () => {
     const columns = [
       { prop: 'id', name: 'ID', ...withHeaderTestId('inactive-header-id') },
       { prop: 'name', name: 'Name', ...withHeaderTestId('inactive-header-name') },
+      {
+        prop: 'role',
+        name: 'Role',
+        order: 'asc',
+        ...withHeaderTestId('ordered-header-role'),
+      },
     ];
 
     await mountGrid(page, {
@@ -29,6 +35,12 @@ test.describe('layout', () => {
     await expect(inactiveHeader.locator('.sort-off')).toHaveCount(0);
     await expect(inactiveHeader.locator('.no-resize')).toHaveCount(0);
     await expect(inactiveHeader.locator('.resizable')).toHaveCount(0);
+
+    const orderedHeader = page.getByTestId('ordered-header-role');
+    await expect(orderedHeader.locator('.sort-indicator')).toHaveCount(1);
+    await expect(orderedHeader.locator('.sort-indicator .asc')).toHaveCount(1);
+    await expect(orderedHeader.locator('.sort-off')).toHaveCount(0);
+    await expect(orderedHeader.locator('.no-resize')).toHaveCount(0);
 
     await mountGrid(page, {
       columns: [
