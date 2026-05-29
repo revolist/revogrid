@@ -28,7 +28,7 @@ export class VNodeToHtml {
 
   componentDidRender() {
     this.html.emit({
-      html: this.el.innerHTML,
+      html: this.el.textContent ?? '',
       vnodes: this.vnodes,
     });
   }
