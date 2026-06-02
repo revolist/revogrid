@@ -352,10 +352,15 @@ export class RevogrViewportScroll implements ElementScroll {
   }
 
   render() {
-    const physicalContentHeight = getContentSize(
-      this.contentHeight,
-      this.verticalScroll?.clientHeight ?? 0,
-    );
+    const clientHeight = this.verticalScroll?.clientHeight ?? 0;
+    // When content fits in the viewport (no scroll needed), don't inflate content-wrapper
+    // to clientHeight — that would prevent inner-content-table from shrinking and push
+    // rowPinEnd (footer) to the bottom instead of letting it follow the data rows.
+    // For large/compressed grids (content > clientHeight), physicalContentHeight handles
+    // the browser scroll-size compression correctly.
+    const physicalContentHeight = this.contentHeight < clientHeight
+      ? Math.max(this.contentHeight, 0)
+      : getContentSize(this.contentHeight, clientHeight);
     const physicalContentWidth = getContentSize(this.contentWidth, 0);
     return (
       <Host
