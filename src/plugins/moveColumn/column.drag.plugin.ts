@@ -82,8 +82,17 @@ declare global {
 
 export class ColumnMovePlugin extends BasePlugin {
   protected moveFunc = debounce((e: MouseEvent) => this.doMove(e), 5);
+  protected preventHeaderClickAfterDrag = (event: Event) => {
+    if (!this.preventNextHeaderClick) {
+      return;
+    }
+    this.preventNextHeaderClick = false;
+    event.preventDefault();
+  };
   protected staticDragData: StaticData | null = null;
   protected dragData: ColumnDragEventData | null = null;
+  protected columnDragMoved = false;
+  protected preventNextHeaderClick = false;
   readonly orderUi: ColumnOrderHandler;
   readonly localSubscriptions: LocalSubscriptions = {};
 
@@ -109,12 +118,18 @@ export class ColumnMovePlugin extends BasePlugin {
     };
 
     this.addEventListener(COLUMN_CLICK, ({ detail }) => this.dragStart(detail));
+    this.revogrid.addEventListener(
+      'beforeheaderclick',
+      this.preventHeaderClickAfterDrag,
+      { capture: true },
+    );
   }
 
   dragStart({ event, data }: DragStartEventDetails) {
     if (event.defaultPrevented) {
       return;
     }
+    this.preventNextHeaderClick = false;
     const { defaultPrevented } = dispatch(
       this.revogrid,
       COLUMN_DRAG_START_EVENT,
@@ -207,6 +222,12 @@ export class ColumnMovePlugin extends BasePlugin {
   }
 
   move(e: MouseEvent) {
+    if (
+      this.staticDragData &&
+      Math.abs(this.staticDragData.startPos - e.x) > 10
+    ) {
+      this.columnDragMoved = true;
+    }
     dispatch(this.revogrid, COLUMN_DRAG_MOVE_EVENT, e);
     // then do move
     this.moveFunc(e);
@@ -215,6 +236,7 @@ export class ColumnMovePlugin extends BasePlugin {
     this.clearOrder();
   }
   onMouseUp(e: MouseEvent) {
+    const suppressClick = this.columnDragMoved;
     // apply new positions
     if (this.dragData && this.staticDragData) {
       let relativePos = getLeftRelative(
@@ -267,6 +289,11 @@ export class ColumnMovePlugin extends BasePlugin {
         this.getData(this.staticDragData, newItems, source),
       );
     }
+    if (suppressClick) {
+      this.preventNextHeaderClick = !!(e.target as HTMLElement).closest(
+        'revogr-header',
+      );
+    }
     this.clearOrder();
   }
 
@@ -279,6 +306,7 @@ export class ColumnMovePlugin extends BasePlugin {
   clearOrder() {
     this.staticDragData = null;
     this.dragData = null;
+    this.columnDragMoved = false;
     this.clearLocalSubscriptions();
     this.orderUi.stop(this.revogrid);
   }
@@ -288,6 +316,11 @@ export class ColumnMovePlugin extends BasePlugin {
   clearSubscriptions() {
     super.clearSubscriptions();
     this.clearLocalSubscriptions();
+    this.revogrid.removeEventListener(
+      'beforeheaderclick',
+      this.preventHeaderClickAfterDrag,
+      { capture: true },
+    );
   }
 
   protected getData(

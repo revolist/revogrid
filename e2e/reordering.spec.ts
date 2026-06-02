@@ -120,6 +120,59 @@ test.describe('reordering', () => {
       });
   });
 
+  test('does not sort when a sortable header drag drops on the same column', async ({
+    page,
+  }) => {
+    const source = [
+      { id: 1, name: 'Charlie', role: 'Engineer' },
+      { id: 2, name: 'Alice', role: 'Designer' },
+      { id: 3, name: 'Bob', role: 'Manager' },
+    ];
+
+    const columns = buildColumns([
+      { prop: 'id', name: 'ID', sortable: true },
+      { prop: 'name', name: 'Name', sortable: true },
+      { prop: 'role', name: 'Role', sortable: true },
+    ]);
+
+    await mountGrid(page, {
+      columns,
+      source,
+      canMoveColumns: true,
+    });
+
+    const headers = page.locator(
+      'revo-grid revogr-header .header-rgRow.actual-rgRow .rgHeaderCell',
+    );
+    const nameHeader = headers.nth(1);
+    const headerBox = await nameHeader.boundingBox();
+
+    expect(headerBox).not.toBeNull();
+
+    const centerX = headerBox!.x + headerBox!.width / 2;
+    const centerY = headerBox!.y + headerBox!.height / 2;
+
+    await page.mouse.move(centerX, centerY);
+    await page.mouse.down();
+    await page.mouse.move(centerX + 20, centerY, { steps: 6 });
+    await page.waitForTimeout(20);
+    await page.mouse.move(centerX, centerY, { steps: 6 });
+    await page.mouse.up();
+
+    await expect
+      .poll(() => visibleHeaderTexts(page))
+      .toEqual(['ID', 'Name', 'Role']);
+    await expect
+      .poll(() => visibleColumnValues(page, 1))
+      .toEqual(['Charlie', 'Alice', 'Bob']);
+
+    await nameHeader.click();
+
+    await expect
+      .poll(() => visibleColumnValues(page, 1))
+      .toEqual(['Alice', 'Bob', 'Charlie']);
+  });
+
   test('places right-to-left column drag indicator at the insertion edge', async ({
     page,
   }) => {
