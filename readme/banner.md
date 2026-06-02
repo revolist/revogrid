@@ -22,7 +22,7 @@
 
 <h3 align="center">{{description}}</h3>
 <p align="center">
-Support Millions of cells and thousands of columns easy and efficiently for fast data rendering. Easy to use.
+Render 1M+ rows, millions of cells, and thousands of columns efficiently with no hard row limit in the grid.
 </p>
 <p align="center">
 Used by some of the largest companies in Europe and the United States.
@@ -30,7 +30,7 @@ Used by some of the largest companies in Europe and the United States.
 
 <p align="center">
   <a href="https://rv-grid.com/demo/">Demo and API</a> •
-  <a href="#key-features">Key Features</a> •
+  <a href="#key-features">Key Features</a> •{{proFeaturesLink}}
   <a href="#basic-usage">How To Use</a> •
   <a href="#installation">Installation</a> •
   <a href="https://rv-grid.com/guide/">Docs</a> •

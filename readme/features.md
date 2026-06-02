@@ -1,6 +1,6 @@
 ## Key Features
 
-- **High Performance**: Handles millions of cells in the viewport with a powerful core built by default.
+- **High Performance**: Render 1M+ rows and millions of cells with no hard row limit in the grid. Virtualization keeps the DOM focused on the visible viewport.
 
 - **[Accessibility](https://rv-grid.com/guide/wcag)**: Follows WAI-ARIA best practices.
 
@@ -15,7 +15,7 @@
 
 - **[Intelligent Virtual DOM](https://rv-grid.com/guide/overview#VNode-Reactive-DOM)**: Smart row recombination to minimize redraws.
 
-- **[Virtual Scroll](https://rv-grid.com/guide/viewports)**: Handles large datasets with infinite scroll.
+- **[Virtual Scroll](https://rv-grid.com/guide/viewports)**: Handles large datasets without rendering every row or column into the DOM.
 
 - **[Drag and Drop](https://rv-grid.com/guide/row/order)**: Drag and drop in [rows](https://rv-grid.com/guide/row/order) and [columns](https://rv-grid.com/guide/column/order).
 
@@ -68,19 +68,13 @@
 
 - **[Plugin System](https://rv-grid.com/guide/plugin/)**: Create custom plugins or extend existing ones easily.
 
-- **[Formula Support](https://rv-grid.com/guide/cell/formula)**: Evaluate formulas in cell data with Excel-like syntax, including basic arithmetic, statistical functions, and cell references.
-- **[Pivot Table](https://rv-grid.com/demo/pivot)**: Transform and analyze data dynamically with drag-and-drop field arrangement, aggregation functions, and interactive filtering capabilities.
-
-- **[Master Detail/Subtables/Forms](https://rv-grid.com/guide/row/master.pro)**: Expand rows to reveal child data.
-- **[Cell/Column/Row Span/Merge](https://rv-grid.com/guide/cell/merge)**: Merge cells to form groups.
-- **Auto Merge**: Automatically merges cells with identical values in a column.
-- **Form editig**: Edit forms directly within the grid, featuring all necessary fields, including custom options and markdown support for a fast and enhanced data entry experience.
-
 - **Customizations**:
   - [Column header template](https://rv-grid.com/guide/column/header.template).
   - [Row header template](https://rv-grid.com/guide/row/headers).
   - [Cell properties](https://rv-grid.com/guide/cell/) (define custom properties for rendered cells).
-  - Nested grids: Build a grid inside a grid, showcasing advanced editing options and user interactions for a more dynamic data presentation.
-  - Context Menu: Build context menus for any grid element - from cells to headers. Cut, copy, paste, add rows, modify columns, and more. Fully customizable with your own actions and behaviors.
+  - [Cell template](https://rv-grid.com/guide/cell/renderer) (create your own cell views).
+  - [Cell editor](https://rv-grid.com/guide/cell/editor) (use predefined or apply your own custom editors and cell types).
 
 - **[AI Agents and MCP](https://rv-grid.com/guide/mcp)**: Connect Codex, Cursor, Claude Code, and VS Code to version-aware RevoGrid docs, examples, migrations, feature availability, and typed API context.
+
+- **Rich API & Additional Improvements**: Explore hundreds of other small customizations and improvements in [RevoGrid](https://rv-grid.com/).
