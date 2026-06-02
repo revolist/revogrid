@@ -84,6 +84,46 @@ test.describe('pinning', () => {
     expect(visibleMiddleValues.includes('Middle 21')).toBe(true);
   });
 
+  test('keeps pinned bottom rows directly after short body content', async ({ page }) => {
+    const rowSize = 30;
+    const source = buildRows(3, ['name', 'status']).map((row, index) => ({
+      name: `Name ${index + 1}`,
+      status: `Status ${index + 1}`,
+    }));
+
+    await mountGrid(page, {
+      columns: [
+        { prop: 'name', name: 'Name', size: 160 },
+        { prop: 'status', name: 'Status', size: 160 },
+      ],
+      source,
+      pinnedBottomSource: [{ name: 'Pinned Bottom', status: 'Summary' }],
+      width: 420,
+      height: 360,
+      rowSize,
+      colSize: 160,
+    });
+
+    await expect(dataCell(page, 2, 0)).toHaveText('Name 3');
+    await expect(pinnedBottomCell(page, 0, 0)).toHaveText('Pinned Bottom');
+
+    const verticalScroll = page.locator(`${SELECTORS.mainViewport} .vertical-inner`);
+    await expect
+      .poll(() =>
+        verticalScroll.evaluate((el: HTMLElement) => el.scrollHeight - el.clientHeight),
+      )
+      .toBeLessThanOrEqual(0);
+
+    const lastBodyBox = await dataCell(page, 2, 0).boundingBox();
+    const pinnedBottomBox = await pinnedBottomCell(page, 0, 0).boundingBox();
+    expect(lastBodyBox).not.toBeNull();
+    expect(pinnedBottomBox).not.toBeNull();
+
+    const gap = pinnedBottomBox!.y - (lastBodyBox!.y + lastBodyBox!.height);
+    expect(gap).toBeGreaterThanOrEqual(-1);
+    expect(gap).toBeLessThanOrEqual(2);
+  });
+
   test('shrinks pinned start viewport after removing a pinned column', async ({ page }) => {
     const columns = [
       { prop: 'index', name: 'Index', pin: 'colPinStart' as const, size: 100 },

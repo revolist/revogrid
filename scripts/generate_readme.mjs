@@ -19,7 +19,7 @@ async function generateReadme(files, output, variables, pkg) {
 
         // Replace variables in the content
         content = content.replace(/\{\{(\w+)\}\}/g, (_, variable) => {
-          return variables[variable] || `{{${variable}}}`; // Replace or keep the placeholder if not found
+          return Object.prototype.hasOwnProperty.call(variables, variable) ? variables[variable] : `{{${variable}}}`; // Replace or keep the placeholder if not found
         });
 
         await fs.appendFile(output, content + '\n\n'); // Add a newline for separation between sections
@@ -44,7 +44,8 @@ function main() {
   packages.forEach(pkg => {
     const variables = {
       logo: 'RevoGrid Data Grid',
-      description: `Powerful data grid component built with <a href="${stencilJSLink}" target="_blank">StencilJS</a>.`
+      description: `Powerful data grid component built with <a href="${stencilJSLink}" target="_blank">StencilJS</a>.`,
+      proFeaturesLink: ''
     };
     const files = ['banner.md', 'features.md'];
     let output = 'README.md';
@@ -82,7 +83,8 @@ function main() {
         output = `packages/${pkg}/${output}`;
         break;
       default:
-        files.push('framework.md', 'install.md', 'install.framework.md', 'usage.basic.md', 'js.usage.md');
+        variables.proFeaturesLink = '\n  <a href="#revogrid-pro-features">Pro Features</a> •';
+        files.push('pro.features.md', 'framework.md', 'install.md', 'install.framework.md', 'usage.basic.md', 'js.usage.md');
         break;
     }
 

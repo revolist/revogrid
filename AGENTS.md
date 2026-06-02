@@ -54,6 +54,9 @@ When behavior changes affect rendering, editing, selection, filtering, sorting, 
 - Import `test` from `@stencil/playwright`.
 - Import assertions from `@playwright/test`.
 - Reuse helpers from `e2e/helpers.ts`.
+- Before running E2E, check `node -v`. If Stencil's dev server fails before tests run with `ERR_SOCKET_BAD_PORT` and `Received type number (65536)`, do not repeatedly retry the same Playwright command. This is a dev-server startup/environment failure, not a test failure.
+- For a fast E2E preflight, first run `./node_modules/.bin/playwright test <spec> --grep "<test name>" --list` to confirm the test is discoverable, then run `./node_modules/.bin/stencil build --dev --serve --no-open` to catch compile errors without watch mode.
+- If the full E2E command fails during web server startup, report the startup error separately from test results and mention that no browser assertions executed. Prefer one targeted retry after checking for an existing `localhost:3333` server; avoid burning time on repeated full-suite attempts.
 
 ## Response style for AI agents
 
