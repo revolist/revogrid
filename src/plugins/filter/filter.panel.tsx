@@ -510,6 +510,7 @@ export class FilterPanel {
         )}
 
         <slot />
+        { this.changes.extraBottomContent?.(this.changes) || '' }
         <div class="filter-actions">
           {this.disableDynamicFiltering && [
             <button
