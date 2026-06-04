@@ -170,4 +170,6 @@ export interface ShowData extends FilterItem, Omit<ColumnRegular, 'filter'> {
   hideDefaultFilters?: boolean;
   // pass vnodes from plugins
   extraContent?: (data: ShowData) => any;
+  // pass vnodes from plugins before action buttons
+  extraBottomContent?: (data: ShowData) => any;
 }
