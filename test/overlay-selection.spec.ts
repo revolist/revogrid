@@ -9,8 +9,8 @@ describe('OverlaySelection clipboard range fill detection', () => {
     expect(normalize([['Alpha'], ['']])).toEqual([['Alpha']]);
   });
 
-  it('treats trailing column delimiters as a single clipboard cell', () => {
-    expect(normalize([['Alpha', '']])).toEqual([['Alpha']]);
+  it('preserves trailing empty cells as real clipboard data', () => {
+    expect(normalize([['Alpha', '']])).toBeNull();
   });
 
   it('keeps real multi-cell clipboard data out of range fill mode', () => {

@@ -8,7 +8,7 @@ export function getRangeFillClipboardData(
     return null;
   }
 
-  const normalized = trimTrailingEmptyClipboardCells(data);
+  const normalized = trimTrailingEmptyClipboardRows(data);
   return normalized.length === 1 && normalized[0]?.length === 1
     ? normalized
     : null;
@@ -22,19 +22,12 @@ export function isClipboardRangeFillEnabled(
   );
 }
 
-function trimTrailingEmptyClipboardCells(data: string[][]): string[][] {
+function trimTrailingEmptyClipboardRows(data: string[][]): string[][] {
   const rows = [...data];
   while (rows.length > 1 && isEmptyClipboardRow(rows[rows.length - 1])) {
     rows.pop();
   }
-
-  return rows.map(row => {
-    const cells = [...row];
-    while (cells.length > 1 && cells[cells.length - 1] === '') {
-      cells.pop();
-    }
-    return cells;
-  });
+  return rows;
 }
 
 function isEmptyClipboardRow(row: string[] | undefined): boolean {

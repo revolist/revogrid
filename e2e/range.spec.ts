@@ -53,7 +53,7 @@ test.describe('range selection', () => {
     await expect(dataCell(page, 1, 2)).toHaveText('Alpha');
   });
 
-  test('fills the selected range when a single pasted value has trailing delimiters', async ({
+  test('fills the selected range when a single pasted value has a trailing row delimiter', async ({
     page,
   }) => {
     await mountGrid(page, {
@@ -70,14 +70,25 @@ test.describe('range selection', () => {
     await expect(dataCell(page, 0, 2)).toHaveText('Alpha');
     await expect(dataCell(page, 1, 1)).toHaveText('Alpha');
     await expect(dataCell(page, 1, 2)).toHaveText('Alpha');
+  });
+
+  test('preserves trailing empty pasted cells when range fill is enabled', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: basicColumns(),
+      source: SAMPLE_ROWS.trio,
+      range: true,
+      useClipboard: { rangeFill: true },
+    });
 
     await setCellsFocus(page, { x: 1, y: 0 }, { x: 2, y: 1 });
     await dispatchClipboardEvent(page, 'paste', 'Beta\t');
 
     await expect(dataCell(page, 0, 1)).toHaveText('Beta');
-    await expect(dataCell(page, 0, 2)).toHaveText('Beta');
-    await expect(dataCell(page, 1, 1)).toHaveText('Beta');
-    await expect(dataCell(page, 1, 2)).toHaveText('Beta');
+    await expect(dataCell(page, 0, 2)).toHaveText('');
+    await expect(dataCell(page, 1, 1)).toHaveText('Ben');
+    await expect(dataCell(page, 1, 2)).toHaveText('Designer');
   });
 
   test('keeps single pasted values focused-cell only by default', async ({
