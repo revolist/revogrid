@@ -32,6 +32,47 @@ test.describe('range selection', () => {
     await expect(dataCell(page, 1, 2)).toHaveText('Delta');
   });
 
+  test('fills the selected range with a single pasted value when enabled', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: basicColumns(),
+      source: SAMPLE_ROWS.trio,
+      range: true,
+      useClipboard: { rangeFill: true },
+    });
+
+    await setCellsFocus(page, { x: 1, y: 0 }, { x: 2, y: 1 });
+    await expectSelectedRange(page, { x: 1, y: 0, x1: 2, y1: 1 });
+
+    await dispatchClipboardEvent(page, 'paste', 'Alpha');
+
+    await expect(dataCell(page, 0, 1)).toHaveText('Alpha');
+    await expect(dataCell(page, 0, 2)).toHaveText('Alpha');
+    await expect(dataCell(page, 1, 1)).toHaveText('Alpha');
+    await expect(dataCell(page, 1, 2)).toHaveText('Alpha');
+  });
+
+  test('keeps single pasted values focused-cell only by default', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: basicColumns(),
+      source: SAMPLE_ROWS.trio,
+      range: true,
+    });
+
+    await setCellsFocus(page, { x: 1, y: 0 }, { x: 2, y: 1 });
+    await expectSelectedRange(page, { x: 1, y: 0, x1: 2, y1: 1 });
+
+    await dispatchClipboardEvent(page, 'paste', 'Alpha');
+
+    await expect(dataCell(page, 0, 1)).toHaveText('Alpha');
+    await expect(dataCell(page, 0, 2)).toHaveText('Engineer');
+    await expect(dataCell(page, 1, 1)).toHaveText('Ben');
+    await expect(dataCell(page, 1, 2)).toHaveText('Designer');
+  });
+
   test('keeps keyboard range selection inside the grid at the last row', async ({
     page,
   }) => {

@@ -39,6 +39,12 @@ export type RowStores = {
   [T in DimensionRows]: Observable<DSourceState<DataType, DimensionRows>>;
 };
 
+type DataToApplyOptions = {
+  start: Cell;
+  data: DataFormat[][];
+  targetRange?: RangeArea | null;
+};
+
 export function getCellEditor(
   column: Pick<ColumnRegular, 'editor'> | undefined,
   editors: Editors = {},
@@ -232,37 +238,59 @@ export default class ColumnService {
     };
   }
 
-  getTransformedDataToApply(
-    start: Cell,
-    data: DataFormat[][],
-  ): {
+  getTransformedDataToApply({
+    start,
+    data,
+    targetRange,
+  }: DataToApplyOptions): {
     changed: DataLookup;
     range: RangeArea | null;
   } {
     const changed: DataLookup = {};
     const copyRowLength = data.length;
+    if (!copyRowLength) {
+      return {
+        changed,
+        range: null,
+      };
+    }
+
     const colLength = this.columns.length;
     const rowLength = this.dataStore.get('items').length;
+    const startRow = targetRange?.y ?? start.y;
+    const startCol = targetRange?.x ?? start.x;
+    const endRow = Math.min(
+      rowLength - 1,
+      targetRange?.y1 ?? start.y + copyRowLength - 1,
+    );
+    if (endRow < startRow || startCol >= colLength) {
+      return {
+        changed,
+        range: null,
+      };
+    }
+
+    let maxCol = startCol - 1;
+    let lastRow = startRow - 1;
+
     // rows
-    let rowIndex = start.y;
-    let maxCol = 0;
-    for (
-      let i = 0;
-      rowIndex < rowLength && i < copyRowLength;
-      rowIndex++, i++
-    ) {
+    for (let rowIndex = startRow, i = 0; rowIndex <= endRow; rowIndex++, i++) {
       // copy original data link
       const copyRow = data[i % copyRowLength];
       const copyColLength = copyRow?.length || 0;
+      if (!copyColLength) {
+        continue;
+      }
+
+      const endCol = Math.min(
+        colLength - 1,
+        targetRange?.x1 ?? start.x + copyColLength - 1,
+      );
       // columns
-      let colIndex = start.x;
-      for (
-        let j = 0;
-        colIndex < colLength && j < copyColLength;
-        colIndex++, j++
-      ) {
+      let colIndex = startCol;
+      for (let j = 0; colIndex <= endCol; colIndex++, j++) {
         const p = this.columns[colIndex].prop;
-        const currentCol = j % colLength;
+        const currentCol = j % copyColLength;
 
         /** if can write */
         if (!this.isReadOnly(rowIndex, colIndex)) {
@@ -274,11 +302,18 @@ export default class ColumnService {
         }
       }
       maxCol = Math.max(maxCol, colIndex - 1);
+      lastRow = rowIndex;
     }
-    const range = getRange(start, {
-      y: rowIndex - 1,
-      x: maxCol,
-    });
+    const range =
+      lastRow >= startRow && maxCol >= startCol
+        ? getRange(
+            { x: startCol, y: startRow },
+            {
+              y: lastRow,
+              x: maxCol,
+            },
+          )
+        : null;
     return {
       changed,
       range,

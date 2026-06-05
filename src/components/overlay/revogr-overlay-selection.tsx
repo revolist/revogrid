@@ -53,6 +53,7 @@ import type {
   BeforeRangeSaveDataDetails,
   SaveDataDetails,
   EditCellStore,
+  ClipboardConfig,
 } from '@type';
 
 /**
@@ -80,9 +81,9 @@ export class OverlaySelection {
 
   /**
    * Enable revogr-clipboard component (read more in revogr-clipboard component).
-   * Allows copy/paste.
+   * Allows copy/paste. Can be boolean or clipboard config.
    */
-  @Prop() useClipboard: boolean;
+  @Prop() useClipboard: boolean | ClipboardConfig;
 
   /** Stores */
   /** Selection, range, focus. */
@@ -844,10 +845,12 @@ export class OverlaySelection {
     if (!focus || isEditing) {
       return;
     }
-    let { changed, range } = this.columnService.getTransformedDataToApply(
-      focus,
+    const targetRange = this.getClipboardPasteTargetRange(data);
+    let { changed, range } = this.columnService.getTransformedDataToApply({
+      start: focus,
       data,
-    );
+      targetRange,
+    });
     const { defaultPrevented: canPaste } = this.rangeClipboardPaste.emit({
       data: changed,
       models: collectModelsOfRange(changed, this.dataStore),
@@ -859,6 +862,26 @@ export class OverlaySelection {
       return;
     }
     this.autoFillService?.onRangeApply(changed, range, range);
+  }
+
+  private getClipboardPasteTargetRange(data: string[][]): RangeArea | null {
+    if (
+      !this.isClipboardRangeFillEnabled() ||
+      data.length !== 1 ||
+      data[0]?.length !== 1
+    ) {
+      return null;
+    }
+
+    const range = this.selectionStore.get('range');
+    return range && !isRangeSingleCell(range) ? range : null;
+  }
+
+  private isClipboardRangeFillEnabled(): boolean {
+    return (
+      typeof this.useClipboard === 'object' &&
+      this.useClipboard.rangeFill === true
+    );
   }
 
   private async focusNext() {

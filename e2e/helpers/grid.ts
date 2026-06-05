@@ -59,6 +59,7 @@ export async function mountGrid(page: E2EPage, options: GridSetupOptions) {
       pinnedTopSource,
       pinnedBottomSource,
       range,
+      useClipboard,
       resize,
       readonly,
       canMoveColumns,
@@ -88,6 +89,7 @@ export async function mountGrid(page: E2EPage, options: GridSetupOptions) {
     grid.pinnedTopSource = pinnedTopSource ?? [];
     grid.pinnedBottomSource = pinnedBottomSource ?? [];
     grid.range = range ?? false;
+    grid.useClipboard = useClipboard ?? true;
     grid.resize = resize ?? false;
     grid.readonly = readonly ?? false;
     grid.canMoveColumns = canMoveColumns ?? false;
