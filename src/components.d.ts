@@ -673,7 +673,7 @@ export namespace Components {
          */
         "lastCell": Cell;
         /**
-          * Range selection allowed. Required for range-based clipboard fill.
+          * Range selection allowed.
          */
         "range": boolean;
         /**
@@ -2331,7 +2331,7 @@ declare namespace LocalJSX {
          */
         "onSettemprange"?: (event: RevogrOverlaySelectionCustomEvent<Nullable<TempRange> | null>) => void;
         /**
-          * Range selection allowed. Required for range-based clipboard fill.
+          * Range selection allowed.
          */
         "range"?: boolean;
         /**

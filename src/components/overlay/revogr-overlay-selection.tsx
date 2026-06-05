@@ -24,6 +24,7 @@ import {
 import { isEditInput } from '../editors/edit.utils';
 import { KeyboardService } from './keyboard.service';
 import { AutoFillService } from './autofill.service';
+import { getRangeFillClipboardData } from './clipboard.utils';
 import { verifyTouchTarget } from '../../utils/events';
 import { getCellData, type Observable } from '../../utils';
 
@@ -845,10 +846,13 @@ export class OverlaySelection {
     if (!focus || isEditing) {
       return;
     }
-    const targetRange = this.getClipboardPasteTargetRange(data);
+    const rangeFillData = getRangeFillClipboardData(data, this.useClipboard);
+    const targetRange = rangeFillData
+      ? this.getClipboardPasteTargetRange()
+      : null;
     let { changed, range } = this.columnService.getTransformedDataToApply({
       start: focus,
-      data,
+      data: rangeFillData || data,
       targetRange,
     });
     const { defaultPrevented: canPaste } = this.rangeClipboardPaste.emit({
@@ -864,24 +868,9 @@ export class OverlaySelection {
     this.autoFillService?.onRangeApply(changed, range, range);
   }
 
-  private getClipboardPasteTargetRange(data: string[][]): RangeArea | null {
-    if (
-      !this.isClipboardRangeFillEnabled() ||
-      data.length !== 1 ||
-      data[0]?.length !== 1
-    ) {
-      return null;
-    }
-
+  private getClipboardPasteTargetRange(): RangeArea | null {
     const range = this.selectionStore.get('range');
     return range && !isRangeSingleCell(range) ? range : null;
-  }
-
-  private isClipboardRangeFillEnabled(): boolean {
-    return (
-      typeof this.useClipboard === 'object' &&
-      this.useClipboard.rangeFill === true
-    );
   }
 
   private async focusNext() {
