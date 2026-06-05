@@ -45,6 +45,22 @@ type DataToApplyOptions = {
   targetRange?: RangeArea | null;
 };
 
+type DataApplyBounds = {
+  startRow: number;
+  startCol: number;
+  endRow: number;
+  colLength: number;
+};
+
+type ClipboardRowApplyOptions = {
+  bounds: DataApplyBounds;
+  copyColLength: number;
+  copyRow: DataFormat[];
+  rowIndex: number;
+  start: Cell;
+  targetRange?: RangeArea | null;
+};
+
 export function getCellEditor(
   column: Pick<ColumnRegular, 'editor'> | undefined,
   editors: Editors = {},
@@ -257,19 +273,21 @@ export default class ColumnService {
 
     const colLength = this.columns.length;
     const rowLength = this.dataStore.get('items').length;
-    const startRow = targetRange?.y ?? start.y;
-    const startCol = targetRange?.x ?? start.x;
-    const endRow = Math.min(
-      rowLength - 1,
-      targetRange?.y1 ?? start.y + copyRowLength - 1,
+    const bounds = this.getDataApplyBounds(
+      start,
+      targetRange,
+      copyRowLength,
+      rowLength,
+      colLength,
     );
-    if (endRow < startRow || startCol >= colLength) {
+    if (!bounds) {
       return {
         changed,
         range: null,
       };
     }
 
+    const { startRow, startCol, endRow } = bounds;
     let maxCol = startCol - 1;
     let lastRow = startRow - 1;
 
@@ -282,42 +300,90 @@ export default class ColumnService {
         continue;
       }
 
-      const endCol = Math.min(
-        colLength - 1,
-        targetRange?.x1 ?? start.x + copyColLength - 1,
+      maxCol = Math.max(
+        maxCol,
+        this.applyClipboardRow(changed, {
+          bounds,
+          copyColLength,
+          copyRow,
+          rowIndex,
+          start,
+          targetRange,
+        }),
       );
-      // columns
-      let colIndex = startCol;
-      for (let j = 0; colIndex <= endCol; colIndex++, j++) {
-        const p = this.columns[colIndex].prop;
-        const currentCol = j % copyColLength;
-
-        /** if can write */
-        if (!this.isReadOnly(rowIndex, colIndex)) {
-          /** to show before save */
-          if (!changed[rowIndex]) {
-            changed[rowIndex] = {};
-          }
-          changed[rowIndex][p] = copyRow[currentCol];
-        }
-      }
-      maxCol = Math.max(maxCol, colIndex - 1);
       lastRow = rowIndex;
     }
-    const range =
-      lastRow >= startRow && maxCol >= startCol
-        ? getRange(
-            { x: startCol, y: startRow },
-            {
-              y: lastRow,
-              x: maxCol,
-            },
-          )
-        : null;
     return {
       changed,
-      range,
+      range: this.getAppliedRange(bounds, lastRow, maxCol),
     };
+  }
+
+  private getDataApplyBounds(
+    start: Cell,
+    targetRange: RangeArea | null | undefined,
+    copyRowLength: number,
+    rowLength: number,
+    colLength: number,
+  ): DataApplyBounds | null {
+    const startRow = targetRange?.y ?? start.y;
+    const startCol = targetRange?.x ?? start.x;
+    const endRow = Math.min(
+      rowLength - 1,
+      targetRange?.y1 ?? start.y + copyRowLength - 1,
+    );
+    if (endRow < startRow || startCol >= colLength) {
+      return null;
+    }
+    return { startRow, startCol, endRow, colLength };
+  }
+
+  private applyClipboardRow(
+    changed: DataLookup,
+    {
+      bounds,
+      copyColLength,
+      copyRow,
+      rowIndex,
+      start,
+      targetRange,
+    }: ClipboardRowApplyOptions,
+  ): number {
+    const endCol = Math.min(
+      bounds.colLength - 1,
+      targetRange?.x1 ?? start.x + copyColLength - 1,
+    );
+
+    for (
+      let colIndex = bounds.startCol, j = 0;
+      colIndex <= endCol;
+      colIndex++, j++
+    ) {
+      if (this.isReadOnly(rowIndex, colIndex)) {
+        continue;
+      }
+      const prop = this.columns[colIndex].prop;
+      changed[rowIndex] = changed[rowIndex] || {};
+      changed[rowIndex][prop] = copyRow[j % copyColLength];
+    }
+    return endCol;
+  }
+
+  private getAppliedRange(
+    { startRow, startCol }: DataApplyBounds,
+    lastRow: number,
+    maxCol: number,
+  ): RangeArea | null {
+    if (lastRow < startRow || maxCol < startCol) {
+      return null;
+    }
+    return getRange(
+      { x: startCol, y: startRow },
+      {
+        y: lastRow,
+        x: maxCol,
+      },
+    );
   }
 
   getRangeStaticData(d: RangeArea, value: DataFormat): DataLookup {
