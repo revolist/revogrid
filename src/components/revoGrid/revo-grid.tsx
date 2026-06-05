@@ -140,7 +140,7 @@ export class RevoGridComponent {
   /** Indicates default column size. */
   @Prop() colSize = 100;
 
-  /** When true, user can range selection. */
+  /** When true, user can select a cell range. Required for range-based clipboard fill. */
   @Prop() range = false;
 
   /** When true, grid in read only mode. */

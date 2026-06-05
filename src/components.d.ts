@@ -225,7 +225,7 @@ export namespace Components {
          */
         "plugins": GridPlugin[];
         /**
-          * When true, user can range selection.
+          * When true, user can select a cell range. Required for range-based clipboard fill.
           * @default false
          */
         "range": boolean;
@@ -673,7 +673,7 @@ export namespace Components {
          */
         "lastCell": Cell;
         /**
-          * Range selection allowed.
+          * Range selection allowed. Required for range-based clipboard fill.
          */
         "range": boolean;
         /**
@@ -1687,7 +1687,7 @@ declare namespace LocalJSX {
          */
         "plugins"?: GridPlugin[];
         /**
-          * When true, user can range selection.
+          * When true, user can select a cell range. Required for range-based clipboard fill.
           * @default false
          */
         "range"?: boolean;
@@ -2331,7 +2331,7 @@ declare namespace LocalJSX {
          */
         "onSettemprange"?: (event: RevogrOverlaySelectionCustomEvent<Nullable<TempRange> | null>) => void;
         /**
-          * Range selection allowed.
+          * Range selection allowed. Required for range-based clipboard fill.
          */
         "range"?: boolean;
         /**

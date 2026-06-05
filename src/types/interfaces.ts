@@ -916,9 +916,11 @@ export interface RangeClipboardCopyEventProps<T = any> extends AllDimensionType 
   mapping: OldNewRangeMapping;
 }
 
+/** Clipboard behavior configuration. */
 export interface ClipboardConfig {
   /**
    * When true, pasting a single clipboard cell fills the selected range.
+   * Requires range selection to be enabled on the grid.
    */
   rangeFill?: boolean;
 }
