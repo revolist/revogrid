@@ -46,6 +46,7 @@ import type {
   RowDragStartDetails,
   AdditionalData,
   PendingColumnFocusRestore,
+  ClipboardConfig,
 } from '@type';
 
 import ColumnDataProvider from '../../services/column.data.provider';
@@ -139,7 +140,7 @@ export class RevoGridComponent {
   /** Indicates default column size. */
   @Prop() colSize = 100;
 
-  /** When true, user can range selection. */
+  /** When true, user can select a cell range. Required for range-based clipboard fill. */
   @Prop() range = false;
 
   /** When true, grid in read only mode. */
@@ -156,8 +157,8 @@ export class RevoGridComponent {
   /** When true cell focus appear. */
   @Prop() canFocus = true;
 
-  /** When true enable clipboard. */
-  @Prop() useClipboard = true;
+  /** When true enable clipboard. Can be boolean or clipboard config. */
+  @Prop() useClipboard: boolean | ClipboardConfig = true;
 
   /**
    * Columns - defines an array of grid columns.

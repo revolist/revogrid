@@ -5,7 +5,7 @@
  * It contains typing information for all components that exist in this project.
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
-import { AdditionalData, AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, CellTemplateProp, ChangedRange, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, ExtraNodeFuncConfig, FocusAfterRenderEvent, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, Nullable, PluginBaseComponent, PluginProviders, PositionItem, ProvidersColumns, RangeArea, RangeClipboardCopyEventProps, RangeClipboardPasteEvent, RowDefinition, RowDragStartDetails, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
+import { AdditionalData, AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, CellTemplateProp, ChangedRange, ClipboardConfig, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, ExtraNodeFuncConfig, FocusAfterRenderEvent, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, Nullable, PluginBaseComponent, PluginProviders, PositionItem, ProvidersColumns, RangeArea, RangeClipboardCopyEventProps, RangeClipboardPasteEvent, RowDefinition, RowDragStartDetails, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
 import { GridPlugin } from "./plugins/base.plugin";
 import { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
 import { ColumnFilterConfig, FilterCaptions, FilterCollectionItem, LogicFunction, MultiFilterItem, ShowData } from "./plugins/filter/filter.types";
@@ -21,7 +21,7 @@ import { ResizeProps } from "./components/header/resizable.directive";
 import { HeaderRenderProps } from "./components/header/header-renderer";
 import { HeaderGroupRendererProps } from "./components/header/header-group-renderer";
 import { EventData } from "./components/overlay/selection.utils";
-export { AdditionalData, AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, CellTemplateProp, ChangedRange, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, ExtraNodeFuncConfig, FocusAfterRenderEvent, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, Nullable, PluginBaseComponent, PluginProviders, PositionItem, ProvidersColumns, RangeArea, RangeClipboardCopyEventProps, RangeClipboardPasteEvent, RowDefinition, RowDragStartDetails, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
+export { AdditionalData, AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, CellTemplateProp, ChangedRange, ClipboardConfig, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, ExtraNodeFuncConfig, FocusAfterRenderEvent, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, Nullable, PluginBaseComponent, PluginProviders, PositionItem, ProvidersColumns, RangeArea, RangeClipboardCopyEventProps, RangeClipboardPasteEvent, RowDefinition, RowDragStartDetails, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, Theme, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
 export { GridPlugin } from "./plugins/base.plugin";
 export { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
 export { ColumnFilterConfig, FilterCaptions, FilterCollectionItem, LogicFunction, MultiFilterItem, ShowData } from "./plugins/filter/filter.types";
@@ -225,7 +225,7 @@ export namespace Components {
          */
         "plugins": GridPlugin[];
         /**
-          * When true, user can range selection.
+          * When true, user can select a cell range. Required for range-based clipboard fill.
           * @default false
          */
         "range": boolean;
@@ -344,10 +344,10 @@ export namespace Components {
          */
         "updateColumns": (cols: ColumnRegular[]) => Promise<void>;
         /**
-          * When true enable clipboard.
+          * When true enable clipboard. Can be boolean or clipboard config.
           * @default true
          */
-        "useClipboard": boolean;
+        "useClipboard": boolean | ClipboardConfig;
     }
     interface RevogrAttribution {
     }
@@ -685,9 +685,9 @@ export namespace Components {
          */
         "selectionStore": Observable<SelectionStoreState>;
         /**
-          * Enable revogr-clipboard component (read more in revogr-clipboard component). Allows copy/paste.
+          * Enable revogr-clipboard component (read more in revogr-clipboard component). Allows copy/paste. Can be boolean or clipboard config.
          */
-        "useClipboard": boolean;
+        "useClipboard": boolean | ClipboardConfig;
     }
     /**
      * Row headers component
@@ -1687,7 +1687,7 @@ declare namespace LocalJSX {
          */
         "plugins"?: GridPlugin[];
         /**
-          * When true, user can range selection.
+          * When true, user can select a cell range. Required for range-based clipboard fill.
           * @default false
          */
         "range"?: boolean;
@@ -1758,10 +1758,10 @@ declare namespace LocalJSX {
          */
         "trimmedRows"?: Record<number, boolean>;
         /**
-          * When true enable clipboard.
+          * When true enable clipboard. Can be boolean or clipboard config.
           * @default true
          */
-        "useClipboard"?: boolean;
+        "useClipboard"?: boolean | ClipboardConfig;
     }
     interface RevogrAttribution {
     }
@@ -2343,9 +2343,9 @@ declare namespace LocalJSX {
          */
         "selectionStore": Observable<SelectionStoreState>;
         /**
-          * Enable revogr-clipboard component (read more in revogr-clipboard component). Allows copy/paste.
+          * Enable revogr-clipboard component (read more in revogr-clipboard component). Allows copy/paste. Can be boolean or clipboard config.
          */
-        "useClipboard"?: boolean;
+        "useClipboard"?: boolean | ClipboardConfig;
     }
     /**
      * Row headers component
@@ -2498,7 +2498,7 @@ declare namespace LocalJSX {
         "resize": boolean;
         "noHorizontalScrollTransfer": boolean;
         "canFocus": boolean;
-        "useClipboard": boolean;
+        "useClipboard": boolean | ClipboardConfig;
         "applyOnClose": boolean;
         "theme": Theme;
         "rowClass": string;
@@ -2552,7 +2552,7 @@ declare namespace LocalJSX {
         "readonly": boolean;
         "range": boolean;
         "canDrag": boolean;
-        "useClipboard": boolean;
+        "useClipboard": boolean | ClipboardConfig;
         "applyChangesOnClose": boolean;
         "additionalData": string;
         "isMobileDevice": boolean;
