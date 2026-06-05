@@ -13,6 +13,9 @@
 [submodule "packages/svelte"]
 	path = packages/svelte
 	url = https://github.com/revolist/svelte-datagrid.git
+[submodule "packages/pdf"]
+	path = packages/pdf
+	url = https://github.com/revolist/revogrid-pdf-export.git
 [submodule "formats/date"]
 	path = formats/date
 	url = https://github.com/revolist/revogrid-column-date.git
