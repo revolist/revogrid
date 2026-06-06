@@ -78,6 +78,57 @@ test.describe('filtering', () => {
     await expect(filterPanel).not.toBeVisible();
   });
 
+  test('renders filter condition actions outside select input on the same row', async ({ page }) => {
+    const source: SampleRow[] = [
+      { id: 501, name: 'Alice', role: 'Admin', city: 'Lisbon' },
+      { id: 502, name: 'Ben', role: 'Engineer', city: 'Porto' },
+    ];
+
+    const columns = buildColumns([
+      { prop: 'id', name: 'ID' },
+      { prop: 'name', name: 'Name' },
+      { prop: 'role', name: 'Role', filter: true, ...withHeaderTestId('layout-filter-role') },
+      { prop: 'city', name: 'City' },
+    ]);
+
+    await mountGrid(page, { columns, source, filter: true });
+
+    await page
+      .getByTestId('layout-filter-role')
+      .locator(SELECTORS.filterButton)
+      .click();
+
+    const filterPanel = page.locator(SELECTORS.filterPanel);
+    await expect(filterPanel).toBeVisible();
+    await filterPanel.getByRole('combobox').selectOption({ label: 'Contains' });
+    await filterPanel.locator('#add-filter').selectOption({ label: 'Equal' });
+
+    const row = filterPanel.locator('.multi-filter-list-row').first();
+    await expect(row).toBeVisible();
+    await expect(row.locator(':scope > .select-input')).toHaveCount(1);
+    await expect(row.locator(':scope > .multi-filter-list-action')).toHaveCount(1);
+    await expect(row.locator('.select-input .multi-filter-list-action')).toHaveCount(0);
+    await expect(row.locator('.select-input .trash-button')).toHaveCount(0);
+    await expect(row.locator(':scope > .multi-filter-list-action .trash-button')).toHaveCount(1);
+    await expect(row.locator(':scope > .multi-filter-list-action .and-or-button')).toHaveCount(1);
+
+    const isSingleRow = await row.evaluate((element) => {
+      const editableControls = element.querySelector('.select-input');
+      const actions = element.querySelector('.multi-filter-list-action');
+      if (!editableControls || !actions) {
+        return false;
+      }
+      const editableBox = editableControls.getBoundingClientRect();
+      const actionsBox = actions.getBoundingClientRect();
+      return (
+        Math.abs(editableBox.top - actionsBox.top) <= 1 &&
+        Math.abs(editableBox.height - actionsBox.height) <= 8 &&
+        actionsBox.left >= editableBox.right
+      );
+    });
+    expect(isSingleRow).toBe(true);
+  });
+
   test('reapplies active filters after source replacement', async ({ page }) => {
     const source: SampleRow[] = [
       { id: 501, name: 'Alice', role: 'Admin', city: 'Lisbon' },

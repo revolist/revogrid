@@ -160,24 +160,30 @@ export class FilterPanel {
             );
           }
 
+          const extra = this.renderExtra(prop, index);
+
           return (
             <div key={filter.id} class={FILTER_LIST_CLASS}>
-              <div class={{ 'select-input': true }}>
-                <select
-                  class="select-css select-filter"
-                  onChange={e => this.onFilterTypeChange(e, prop, index)}
-                >
-                  {this.renderSelectOptions(
-                    this.filterItems[prop][index].type,
-                    true,
-                  )}
-                </select>
-                <div class={FILTER_LIST_CLASS_ACTION}>{andOrButton}</div>
-                <div onClick={() => this.onRemoveFilter(filter.id)}>
-                  <TrashButton />
+              <div class="multi-filter-list-row">
+                <div class={{ 'select-input': true }}>
+                  <select
+                    class="select-css select-filter"
+                    onChange={e => this.onFilterTypeChange(e, prop, index)}
+                  >
+                    {this.renderSelectOptions(
+                      this.filterItems[prop][index].type,
+                      true,
+                    )}
+                  </select>
+                  {extra ? <div class="filter-extra">{extra}</div> : ''}
+                </div>
+                <div class={FILTER_LIST_CLASS_ACTION}>
+                  {andOrButton}
+                  <div onClick={() => this.onRemoveFilter(filter.id)}>
+                    <TrashButton />
+                  </div>
                 </div>
               </div>
-              <div>{this.renderExtra(prop, index)}</div>
             </div>
           );
         })}
