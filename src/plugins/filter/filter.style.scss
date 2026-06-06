@@ -212,6 +212,32 @@ revogr-filter-panel {
       width: 1em;
     }
   }
+
+  .reorder-button {
+    border: 0;
+    background: transparent;
+    color: var(--revo-grid-filter-panel-reorder-color, #6b7280);
+    cursor: grab;
+    font-family: monospace;
+    font-size: 12px;
+    letter-spacing: 0;
+    line-height: 1;
+    padding: 6px 2px;
+    transform: scaleX(0.8);
+    width: 16px;
+
+    &.filter-row-dragging {
+      opacity: 0.55;
+    }
+
+    &.filter-row-drag-over {
+      color: var(--revo-grid-filter-panel-reorder-accent, #007cb2);
+    }
+
+    &:active {
+      cursor: grabbing;
+    }
+  }
 }
 
 .add-filter-divider {
