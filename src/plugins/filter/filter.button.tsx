@@ -7,6 +7,7 @@ export const FILTER_BUTTON_ACTIVE = 'active';
 export const FILTER_PROP = 'hasFilter';
 export const AND_OR_BUTTON = 'and-or-button';
 export const TRASH_BUTTON = 'trash-button';
+export const REORDER_BUTTON = 'reorder-button';
 
 type Props = {
   column: ColumnRegular;
@@ -41,6 +42,54 @@ export const TrashButton = () => {
 };
 export const AndOrButton = ({ text }: any) => {
   return <button class={{ [AND_OR_BUTTON]: true, 'light revo-button': true }}>{text}</button>;
+};
+
+type ReorderButtonProps = {
+  dragging?: boolean;
+  dragOver?: boolean;
+  onDragStart?: (event: DragEvent) => void;
+  onDragEnd?: (event: DragEvent) => void;
+  onDragOver?: (event: DragEvent) => void;
+  onDragLeave?: (event: DragEvent) => void;
+  onDrop?: (event: DragEvent) => void;
+};
+
+export const ReorderButton = ({
+  dragging,
+  dragOver,
+  onDragStart,
+  onDragEnd,
+  onDragOver,
+  onDragLeave,
+  onDrop,
+}: ReorderButtonProps) => {
+  const applyClass = (el?: HTMLButtonElement) => {
+    if (!el) {
+      return;
+    }
+    el.className = [
+      REORDER_BUTTON,
+      dragging ? 'filter-row-dragging' : '',
+      dragOver ? 'filter-row-drag-over' : '',
+    ].filter(Boolean).join(' ');
+  };
+
+  return (
+    <button
+      type="button"
+      ref={applyClass}
+      draggable={true}
+      title="Reorder filter"
+      aria-label="reorder filter"
+      onDragStart={onDragStart}
+      onDragEnd={onDragEnd}
+      onDragOver={onDragOver}
+      onDragLeave={onDragLeave}
+      onDrop={onDrop}
+    >
+      ::
+    </button>
+  );
 };
 
 export function isFilterBtn(e: HTMLElement) {

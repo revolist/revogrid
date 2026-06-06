@@ -5,6 +5,7 @@ import beginsWith from '../src/plugins/filter/conditions/string/beginswith';
 import gtThan from '../src/plugins/filter/conditions/number/greaterThan';
 import lt from '../src/plugins/filter/conditions/number/lessThan';
 import { FilterPlugin } from '../src/plugins/filter/filter.plugin';
+import { getFilterReorderId, moveFilterItem } from '../src/plugins/filter/filter.reorder';
 import { DataStore } from '../src/store/dataSource/data.store';
 import type { ColumnRegular } from '../src';
 import type { FilterData } from '../src/plugins/filter/filter.types';
@@ -52,6 +53,115 @@ describe('notEq', () => {
   it('notEq("Hello", "world") → true, notEq("Hello", "hello") → false (strict inverse of eq)', () => {
     expect(notEq('Hello', 'world')).toBe(true);
     expect(notEq('Hello', 'hello')).toBe(false);
+  });
+});
+
+describe('filter reorder helpers', () => {
+  function createDataTransfer(payloads: Record<string, string>): DataTransfer {
+    return {
+      getData: (type: string) => payloads[type] ?? '',
+    } as DataTransfer;
+  }
+
+  function createFilters(): FilterData[] {
+    return [
+      { id: 1, type: 'contains', value: 'Admin', relation: 'and' },
+      { id: 2, type: 'eq', value: 'Engineer', relation: 'or' },
+      { id: 3, type: 'notEq', value: 'Designer', relation: 'and' },
+    ];
+  }
+
+  describe('getFilterReorderId', () => {
+    it('returns no reorder id for empty drag payloads', () => {
+      expect(getFilterReorderId(createDataTransfer({}))).toBeUndefined();
+      expect(getFilterReorderId(createDataTransfer({ 'text/plain': '   ' }))).toBeUndefined();
+    });
+
+    it('parses a finite reorder id from non-empty drag payloads', () => {
+      expect(getFilterReorderId(createDataTransfer({ 'text/plain': ' 7 ' }))).toBe(7);
+      expect(getFilterReorderId(createDataTransfer({ 'text/revogrid-filter-id': '8', 'text/plain': '7' }))).toBe(8);
+      expect(getFilterReorderId(createDataTransfer({ 'text/plain': 'abc' }))).toBeUndefined();
+    });
+
+    it('keeps finite parsing explicit for special numeric strings', () => {
+      expect(getFilterReorderId(createDataTransfer({ 'text/plain': 'NaN' }))).toBeUndefined();
+      expect(getFilterReorderId(createDataTransfer({ 'text/plain': 'Infinity' }))).toBeUndefined();
+      expect(getFilterReorderId(createDataTransfer({ 'text/plain': '-Infinity' }))).toBeUndefined();
+      expect(getFilterReorderId(createDataTransfer({ 'text/plain': '-3' }))).toBe(-3);
+      expect(getFilterReorderId(createDataTransfer({ 'text/plain': '0' }))).toBe(0);
+      expect(getFilterReorderId(createDataTransfer({ 'text/plain': ' 0 ' }))).toBe(0);
+    });
+  });
+
+  describe('moveFilterItem', () => {
+    it('moves a filter item before an earlier target and preserves condition data', () => {
+      const filters = createFilters();
+
+      expect(moveFilterItem(filters, 3, 1)).toBe(true);
+
+      expect(filters.map(filter => filter.id)).toEqual([3, 1, 2]);
+      expect(filters[0]).toMatchObject({
+        id: 3,
+        type: 'notEq',
+        value: 'Designer',
+      });
+    });
+
+    it('moves a filter item after a later target when dragging downward', () => {
+      const filters = createFilters();
+
+      expect(moveFilterItem(filters, 1, 3)).toBe(true);
+
+      expect(filters.map(filter => filter.id)).toEqual([2, 3, 1]);
+    });
+
+    it('keeps relation connectors assigned by row position after reorder', () => {
+      const filters: FilterData[] = [
+        { id: 1, type: 'contains', value: 'Admin', relation: 'or' },
+        { id: 2, type: 'contains', value: 'Engineer', relation: 'and' },
+      ];
+
+      expect(moveFilterItem(filters, 1, 2)).toBe(true);
+
+      expect(filters).toEqual([
+        { id: 2, type: 'contains', value: 'Engineer', relation: 'or' },
+        { id: 1, type: 'contains', value: 'Admin', relation: 'and' },
+      ]);
+    });
+
+    it('defaults missing relation connectors to and after reorder', () => {
+      const filters: FilterData[] = [
+        { id: 1, type: 'contains', value: 'Admin' },
+        { id: 2, type: 'contains', value: 'Engineer', relation: 'or' },
+        { id: 3, type: 'contains', value: 'Designer', relation: undefined },
+      ];
+
+      expect(moveFilterItem(filters, 3, 1)).toBe(true);
+
+      expect(filters.map(filter => filter.relation)).toEqual(['and', 'or', 'and']);
+    });
+
+    it('normalizes the last hidden relation after reorder', () => {
+      const filters: FilterData[] = [
+        { id: 1, type: 'contains', value: 'Admin', relation: 'and' },
+        { id: 2, type: 'contains', value: 'Engineer', relation: 'or' },
+        { id: 3, type: 'contains', value: 'Designer', relation: 'or' },
+      ];
+
+      expect(moveFilterItem(filters, 3, 1)).toBe(true);
+
+      expect(filters.map(filter => filter.relation)).toEqual(['and', 'or', 'and']);
+    });
+
+    it('keeps filter order unchanged when source or target is invalid', () => {
+      const filters = createFilters();
+
+      expect(moveFilterItem(filters, 1, 1)).toBe(false);
+      expect(moveFilterItem(filters, 99, 1)).toBe(false);
+      expect(moveFilterItem(filters, 1, 99)).toBe(false);
+
+      expect(filters.map(filter => filter.id)).toEqual([1, 2, 3]);
+    });
   });
 });
 
