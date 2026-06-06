@@ -181,10 +181,16 @@ revogr-filter-panel {
     white-space: nowrap;
   }
 
+  .multi-filter-list-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
   .multi-filter-list-action {
     display: flex;
-
-    justify-content: space-between;
+    flex: 0 0 auto;
+    justify-content: flex-end;
     align-items: center;
   }
 
@@ -218,6 +224,27 @@ revogr-filter-panel {
 
 .select-input {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  flex: 1 1 auto;
+  gap: 6px;
+  min-width: 0;
+
+  .select-filter,
+  .filter-extra {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .filter-extra {
+    display: flex;
+
+    > * {
+      width: 100%;
+    }
+  }
+
+  input[type='text'],
+  input[type='date'] {
+    margin: 0;
+  }
 }
