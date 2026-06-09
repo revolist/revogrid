@@ -14,6 +14,16 @@ import {
 } from './helpers';
 
 test.describe('range selection', () => {
+  test('selects a range by default', async ({ page }) => {
+    await mountGrid(page, {
+      columns: basicColumns(),
+      source: SAMPLE_ROWS.trio,
+    });
+
+    await setCellsFocus(page, { x: 1, y: 0 }, { x: 2, y: 1 });
+    await expectSelectedRange(page, { x: 1, y: 0, x1: 2, y1: 1 });
+  });
+
   test('applies pasted values across the selected range', async ({ page }) => {
     await mountGrid(page, {
       columns: basicColumns(),

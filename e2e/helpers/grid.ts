@@ -85,19 +85,27 @@ export async function mountGrid(page: E2EPage, options: GridSetupOptions) {
 
     grid.columns = columns.map(applyColumn);
     grid.source = source;
-    grid.filter = filter ?? false;
+    if (filter !== undefined) {
+      grid.filter = filter;
+    }
     grid.pinnedTopSource = pinnedTopSource ?? [];
     grid.pinnedBottomSource = pinnedBottomSource ?? [];
-    grid.range = range ?? false;
+    if (range !== undefined) {
+      grid.range = range;
+    }
     grid.useClipboard = useClipboard ?? true;
-    grid.resize = resize ?? false;
+    if (resize !== undefined) {
+      grid.resize = resize;
+    }
     grid.readonly = readonly ?? false;
     grid.canMoveColumns = canMoveColumns ?? false;
     grid.grouping = grouping as any;
     grid.trimmedRows = trimmedRows ?? {};
     grid.rtl = rtl ?? false;
     grid.theme = (theme as any) ?? 'default';
-    grid.exporting = exporting ?? false;
+    if (exporting !== undefined) {
+      grid.exporting = exporting;
+    }
     grid.rowSize = rowSize ?? 0;
     grid.colSize = colSize ?? 100;
     if (rowHeaders && typeof rowHeaders === 'object') {
