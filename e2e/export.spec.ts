@@ -12,7 +12,6 @@ test.describe('export', () => {
     await mountGrid(page, {
       columns: basicColumns(),
       source: SAMPLE_ROWS.pair,
-      exporting: true,
     });
 
     const csv = await getExportCsv(page);

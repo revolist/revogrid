@@ -130,7 +130,7 @@ export namespace Components {
         "editors": Editors;
         /**
           * Enable export plugin.
-          * @default false
+          * @default true
          */
         "exporting": boolean;
         /**
@@ -226,7 +226,7 @@ export namespace Components {
         "plugins": GridPlugin[];
         /**
           * When true, user can select a cell range. Required for range-based clipboard fill.
-          * @default false
+          * @default true
          */
         "range": boolean;
         /**
@@ -252,7 +252,7 @@ export namespace Components {
   )[];
         /**
           * When true, columns are resizable.
-          * @default false
+          * @default true
          */
         "resize": boolean;
         /**
@@ -1434,7 +1434,7 @@ declare namespace LocalJSX {
         "editors"?: Editors;
         /**
           * Enable export plugin.
-          * @default false
+          * @default true
          */
         "exporting"?: boolean;
         /**
@@ -1688,7 +1688,7 @@ declare namespace LocalJSX {
         "plugins"?: GridPlugin[];
         /**
           * When true, user can select a cell range. Required for range-based clipboard fill.
-          * @default false
+          * @default true
          */
         "range"?: boolean;
         /**
@@ -1706,7 +1706,7 @@ declare namespace LocalJSX {
   )[];
         /**
           * When true, columns are resizable.
-          * @default false
+          * @default true
          */
         "resize"?: boolean;
         /**

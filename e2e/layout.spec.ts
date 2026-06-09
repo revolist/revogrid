@@ -52,7 +52,6 @@ test.describe('layout', () => {
         },
       ],
       source: SAMPLE_ROWS.pair,
-      resize: true,
     });
 
     const activeHeader = page.getByTestId('active-header-id');
@@ -72,7 +71,6 @@ test.describe('layout', () => {
     await mountGrid(page, {
       columns,
       source: SAMPLE_ROWS.pair,
-      resize: true,
     });
 
     const header = page.getByTestId('resize-name');

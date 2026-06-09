@@ -141,13 +141,13 @@ export class RevoGridComponent {
   @Prop() colSize = 100;
 
   /** When true, user can select a cell range. Required for range-based clipboard fill. */
-  @Prop() range = false;
+  @Prop() range = true;
 
   /** When true, grid in read only mode. */
   @Prop() readonly = false;
 
   /** When true, columns are resizable. */
-  @Prop() resize = false;
+  @Prop() resize = true;
 
   /**
    * Prevents horizontal scroll state from being mirrored across viewport sections.
@@ -262,7 +262,7 @@ export class RevoGridComponent {
   /**
    * Enable export plugin.
    */
-  @Prop() exporting = false;
+  @Prop() exporting = true;
 
   /**
    * Group rows based on this property.
