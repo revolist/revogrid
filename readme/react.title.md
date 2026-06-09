@@ -1,1 +1,1 @@
-# React Data Grid minimalist adapter
+# React Data Grid

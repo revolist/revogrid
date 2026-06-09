@@ -39,6 +39,7 @@ test.describe('filtering', () => {
     const filterPanel = page.locator(SELECTORS.filterPanel);
     await expect(filterPanel).toBeVisible();
     await filterPanel.getByRole('combobox').selectOption({ label: 'Contains' });
+    await expect(filterPanel.locator('.reorder-button')).toHaveCount(0);
     await page.locator(SELECTORS.filterInput).fill('Admin');
 
     await expectVisibleColumnValues(page, 1, ['Alice', 'Cara']);
@@ -133,6 +134,126 @@ test.describe('filtering', () => {
     expect(panelLeft).toBeCloseTo(buttonLeft, 0);
     expect(panelTop).toBeCloseTo(buttonBottom, 0);
     expect(panelBottom).toBeGreaterThan(wrapperBottom);
+  });
+
+  test('renders filter condition actions outside select input on the same row', async ({ page }) => {
+    const source: SampleRow[] = [
+      { id: 501, name: 'Alice', role: 'Admin', city: 'Lisbon' },
+      { id: 502, name: 'Ben', role: 'Engineer', city: 'Porto' },
+    ];
+
+    const columns = buildColumns([
+      { prop: 'id', name: 'ID' },
+      { prop: 'name', name: 'Name' },
+      { prop: 'role', name: 'Role', filter: true, ...withHeaderTestId('layout-filter-role') },
+      { prop: 'city', name: 'City' },
+    ]);
+
+    await mountGrid(page, { columns, source, filter: true });
+
+    await page
+      .getByTestId('layout-filter-role')
+      .locator(SELECTORS.filterButton)
+      .click();
+
+    const filterPanel = page.locator(SELECTORS.filterPanel);
+    await expect(filterPanel).toBeVisible();
+    await filterPanel.getByRole('combobox').selectOption({ label: 'Contains' });
+    await filterPanel.locator('#add-filter').selectOption({ label: 'Equal' });
+
+    const row = filterPanel.locator('.multi-filter-list-row').first();
+    await expect(row).toBeVisible();
+    await expect(row.locator(':scope > .reorder-button')).toHaveCount(1);
+    await expect(row.locator(':scope > .select-input')).toHaveCount(1);
+    await expect(row.locator(':scope > .multi-filter-list-action')).toHaveCount(1);
+    await expect(row.locator('.select-input .multi-filter-list-action')).toHaveCount(0);
+    await expect(row.locator('.select-input .trash-button')).toHaveCount(0);
+    await expect(row.locator(':scope > .multi-filter-list-action .trash-button')).toHaveCount(1);
+    await expect(row.locator(':scope > .multi-filter-list-action .and-or-button')).toHaveCount(1);
+
+    const isSingleRow = await row.evaluate((element) => {
+      const editableControls = element.querySelector('.select-input');
+      const actions = element.querySelector('.multi-filter-list-action');
+      if (!editableControls || !actions) {
+        return false;
+      }
+      const editableBox = editableControls.getBoundingClientRect();
+      const actionsBox = actions.getBoundingClientRect();
+      return (
+        Math.abs(editableBox.top - actionsBox.top) <= 1 &&
+        Math.abs(editableBox.height - actionsBox.height) <= 8 &&
+        actionsBox.left >= editableBox.right
+      );
+    });
+    expect(isSingleRow).toBe(true);
+  });
+
+  test('reorders filter conditions with the drag handle', async ({ page }) => {
+    const source: SampleRow[] = [
+      { id: 501, name: 'Alice', role: 'Admin', city: 'Lisbon' },
+      { id: 502, name: 'Ben', role: 'Engineer', city: 'Porto' },
+    ];
+
+    const columns = buildColumns([
+      { prop: 'id', name: 'ID' },
+      { prop: 'name', name: 'Name' },
+      { prop: 'role', name: 'Role', filter: true, ...withHeaderTestId('reorder-filter-role') },
+      { prop: 'city', name: 'City' },
+    ]);
+
+    await mountGrid(page, { columns, source, filter: true });
+
+    await page
+      .getByTestId('reorder-filter-role')
+      .locator(SELECTORS.filterButton)
+      .click();
+
+    const filterPanel = page.locator(SELECTORS.filterPanel);
+    const filterInputs = page.locator(SELECTORS.filterInput);
+    await expect(filterPanel).toBeVisible();
+    await filterPanel.getByRole('combobox').selectOption({ label: 'Contains' });
+    await filterInputs.fill('Admin');
+    await filterPanel.locator('#add-filter').selectOption({ label: 'Equal' });
+    await filterInputs.nth(1).fill('Engineer');
+
+    await expect(filterPanel.locator('.multi-filter-list-row')).toHaveCount(2);
+    await expect(filterPanel.locator('.select-filter').nth(0)).toHaveValue('contains');
+    await expect(filterPanel.locator('.select-filter').nth(1)).toHaveValue('eq');
+
+    await filterPanel.evaluate((panel) => {
+      const rows = Array.from(panel.querySelectorAll('.multi-filter-list-row'));
+      const sourceHandle = rows[1].querySelector('.reorder-button');
+      const targetHandle = rows[0].querySelector('.reorder-button');
+      if (!sourceHandle || !targetHandle) {
+        throw new Error('Filter reorder controls were not found');
+      }
+      const dataTransfer = new DataTransfer();
+      sourceHandle.dispatchEvent(new DragEvent('dragstart', {
+        bubbles: true,
+        cancelable: true,
+        dataTransfer,
+      }));
+      targetHandle.dispatchEvent(new DragEvent('dragover', {
+        bubbles: true,
+        cancelable: true,
+        dataTransfer,
+      }));
+      targetHandle.dispatchEvent(new DragEvent('drop', {
+        bubbles: true,
+        cancelable: true,
+        dataTransfer,
+      }));
+      sourceHandle.dispatchEvent(new DragEvent('dragend', {
+        bubbles: true,
+        cancelable: true,
+        dataTransfer,
+      }));
+    });
+
+    await expect(filterPanel.locator('.select-filter').nth(0)).toHaveValue('eq');
+    await expect(filterPanel.locator('.select-filter').nth(1)).toHaveValue('contains');
+    await expect(filterInputs.nth(0)).toHaveValue('Engineer');
+    await expect(filterInputs.nth(1)).toHaveValue('Admin');
   });
 
   test('reapplies active filters after source replacement', async ({ page }) => {

@@ -15,7 +15,7 @@ import {
 } from '@stencil/core';
 import debounce from 'lodash/debounce';
 
-import { AndOrButton, isFilterBtn, TrashButton } from './filter.button';
+import { AndOrButton, isFilterBtn, ReorderButton, TrashButton } from './filter.button';
 import '../../utils/closest.polifill';
 import {
   FilterCaptions,
@@ -25,6 +25,11 @@ import {
 } from './filter.types';
 import type { ColumnProp } from '@type';
 import { FilterType } from './filter.indexed';
+import {
+  getFilterReorderId,
+  moveFilterItem,
+  setFilterReorderData,
+} from './filter.reorder';
 
 const defaultType: FilterType = 'none';
 
@@ -64,6 +69,8 @@ export class FilterPanel {
   @State() currentFilterType: FilterType = defaultType;
   @State() changes: ShowData | undefined;
   @State() filterItems: MultiFilterItem = {};
+  @State() draggedFilterId: number | undefined;
+  @State() dragOverFilterId: number | undefined;
   @Prop() filterNames: Record<string, string> = {};
   @Prop() filterEntities: Record<string, LogicFunction> = {};
   @Prop() filterCaptions: Partial<FilterCaptions> | undefined;
@@ -138,6 +145,7 @@ export class FilterPanel {
     if (typeof prop === 'undefined') return '';
 
     const propFilters = this.filterItems[prop] ?? [];
+    const visibleFilterCount = propFilters.filter(filter => !filter.hidden).length;
     const capts = Object.assign(
       this.filterCaptionsInternal,
       this.filterCaptions,
@@ -161,24 +169,41 @@ export class FilterPanel {
             );
           }
 
+          const extra = this.renderExtra(prop, index);
+
           return (
             <div key={filter.id} class={FILTER_LIST_CLASS}>
-              <div class={{ 'select-input': true }}>
-                <select
-                  class="select-css select-filter"
-                  onChange={e => this.onFilterTypeChange(e, prop, index)}
-                >
-                  {this.renderSelectOptions(
-                    this.filterItems[prop][index].type,
-                    true,
-                  )}
-                </select>
-                <div class={FILTER_LIST_CLASS_ACTION}>{andOrButton}</div>
-                <div onClick={() => this.onRemoveFilter(filter.id)}>
-                  <TrashButton />
+              <div ref={el => el?.classList.add('multi-filter-list-row')}>
+                {visibleFilterCount > 1 ? (
+                  <ReorderButton
+                    dragging={this.draggedFilterId === filter.id}
+                    dragOver={this.dragOverFilterId === filter.id && this.draggedFilterId !== filter.id}
+                    onDragStart={e => this.onFilterDragStart(e, filter.id)}
+                    onDragEnd={() => this.onFilterDragEnd()}
+                    onDragOver={e => this.onFilterDragOver(e, filter.id)}
+                    onDragLeave={() => this.onFilterDragLeave(filter.id)}
+                    onDrop={e => this.onFilterDrop(e, prop, filter.id)}
+                  />
+                ) : ''}
+                <div class={{ 'select-input': true }}>
+                  <select
+                    class="select-css select-filter"
+                    onChange={e => this.onFilterTypeChange(e, prop, index)}
+                  >
+                    {this.renderSelectOptions(
+                      this.filterItems[prop][index].type,
+                      true,
+                    )}
+                  </select>
+                  {extra ? <div class="filter-extra">{extra}</div> : ''}
+                </div>
+                <div class={FILTER_LIST_CLASS_ACTION}>
+                  {andOrButton}
+                  <div onClick={() => this.onRemoveFilter(filter.id)}>
+                    <TrashButton />
+                  </div>
                 </div>
               </div>
-              <div>{this.renderExtra(prop, index)}</div>
             </div>
           );
         })}
@@ -364,6 +389,58 @@ export class FilterPanel {
     if (!this.disableDynamicFiltering) {
       this.debouncedApplyFilter();
     }
+  }
+
+  private onFilterDragStart(e: DragEvent, id: number) {
+    this.draggedFilterId = id;
+    setFilterReorderData(e.dataTransfer, id);
+  }
+
+  private onFilterDragOver(e: DragEvent, id: number) {
+    if (this.draggedFilterId === undefined || this.draggedFilterId === id) {
+      return;
+    }
+    e.preventDefault();
+    if (e.dataTransfer) {
+      e.dataTransfer.dropEffect = 'move';
+    }
+    this.dragOverFilterId = id;
+  }
+
+  private onFilterDragLeave(id: number) {
+    if (this.dragOverFilterId === id) {
+      this.dragOverFilterId = undefined;
+    }
+  }
+
+  private onFilterDrop(e: DragEvent, prop: ColumnProp, targetId: number) {
+    e.preventDefault();
+    const sourceId = this.draggedFilterId ?? getFilterReorderId(e.dataTransfer);
+    this.onFilterDragEnd();
+
+    if (sourceId === undefined) {
+      return;
+    }
+
+    const items = this.filterItems[prop];
+    if (!items) {
+      return;
+    }
+
+    if (!moveFilterItem(items, sourceId, targetId)) {
+      return;
+    }
+
+    this.filterId++;
+
+    if (!this.disableDynamicFiltering) {
+      this.debouncedApplyFilter();
+    }
+  }
+
+  private onFilterDragEnd() {
+    this.draggedFilterId = undefined;
+    this.dragOverFilterId = undefined;
   }
 
   private toggleFilterAndOr(id: number) {
@@ -556,6 +633,7 @@ export class FilterPanel {
             ],
 
             <slot />,
+            this.changes.extraBottomContent?.(this.changes) || '',
             <div class="filter-actions">
               {this.disableDynamicFiltering && [
                 <button

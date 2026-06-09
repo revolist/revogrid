@@ -1,4 +1,9 @@
-import type { ColumnData, ColumnFilterConfig, RowHeaders } from '../../src';
+import type {
+  ClipboardConfig,
+  ColumnData,
+  ColumnFilterConfig,
+  RowHeaders,
+} from '../../src';
 
 export type SampleRow = {
   id: number;
@@ -15,6 +20,7 @@ export type GridSetupOptions = {
   pinnedTopSource?: Record<string, unknown>[];
   pinnedBottomSource?: Record<string, unknown>[];
   range?: boolean;
+  useClipboard?: boolean | ClipboardConfig;
   resize?: boolean;
   readonly?: boolean;
   canMoveColumns?: boolean;

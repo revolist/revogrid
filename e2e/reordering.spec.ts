@@ -23,7 +23,9 @@ test.describe('reordering', () => {
 
     await mountGrid(page, { columns, source });
 
-    const dragHandle = mainDataRows(page).first().locator('[data-rgCol="0"] .revo-draggable');
+    const dragHandle = mainDataRows(page)
+      .first()
+      .locator('[data-rgCol="0"] .revo-draggable');
     const targetRow = mainDataRows(page).nth(2);
     const handleBox = await dragHandle.boundingBox();
     const targetBox = await targetRow.boundingBox();
@@ -31,7 +33,10 @@ test.describe('reordering', () => {
     expect(handleBox).not.toBeNull();
     expect(targetBox).not.toBeNull();
 
-    await page.mouse.move(handleBox!.x + handleBox!.width / 2, handleBox!.y + handleBox!.height / 2);
+    await page.mouse.move(
+      handleBox!.x + handleBox!.width / 2,
+      handleBox!.y + handleBox!.height / 2,
+    );
     await page.mouse.down();
     await page.mouse.move(
       targetBox!.x + targetBox!.width / 2,
@@ -77,15 +82,26 @@ test.describe('reordering', () => {
         };
       }) as EventListener);
     });
-    const from = page.locator('revo-grid revogr-header .header-rgRow.actual-rgRow .rgHeaderCell').nth(2);
-    const to = page.locator('revo-grid revogr-header .header-rgRow.actual-rgRow .rgHeaderCell').first();
+    const from = page
+      .locator(
+        'revo-grid revogr-header .header-rgRow.actual-rgRow .rgHeaderCell',
+      )
+      .nth(2);
+    const to = page
+      .locator(
+        'revo-grid revogr-header .header-rgRow.actual-rgRow .rgHeaderCell',
+      )
+      .first();
     const fromBox = await from.boundingBox();
     const toBox = await to.boundingBox();
 
     expect(fromBox).not.toBeNull();
     expect(toBox).not.toBeNull();
 
-    await page.mouse.move(fromBox!.x + fromBox!.width / 2, fromBox!.y + fromBox!.height / 2);
+    await page.mouse.move(
+      fromBox!.x + fromBox!.width / 2,
+      fromBox!.y + fromBox!.height / 2,
+    );
     await page.mouse.down();
     await page.mouse.move(toBox!.x + 4, toBox!.y + toBox!.height / 2, {
       steps: 14,
@@ -102,5 +118,116 @@ test.describe('reordering', () => {
         order: [2, 0, 1],
         type: 'rgCol',
       });
+  });
+
+  test('does not sort when a sortable header drag drops on the same column', async ({
+    page,
+  }) => {
+    const source = [
+      { id: 1, name: 'Charlie', role: 'Engineer' },
+      { id: 2, name: 'Alice', role: 'Designer' },
+      { id: 3, name: 'Bob', role: 'Manager' },
+    ];
+
+    const columns = buildColumns([
+      { prop: 'id', name: 'ID', sortable: true },
+      { prop: 'name', name: 'Name', sortable: true },
+      { prop: 'role', name: 'Role', sortable: true },
+    ]);
+
+    await mountGrid(page, {
+      columns,
+      source,
+      canMoveColumns: true,
+    });
+
+    const headers = page.locator(
+      'revo-grid revogr-header .header-rgRow.actual-rgRow .rgHeaderCell',
+    );
+    const nameHeader = headers.nth(1);
+    const headerBox = await nameHeader.boundingBox();
+
+    expect(headerBox).not.toBeNull();
+
+    const centerX = headerBox!.x + headerBox!.width / 2;
+    const centerY = headerBox!.y + headerBox!.height / 2;
+
+    await page.mouse.move(centerX, centerY);
+    await page.mouse.down();
+    await page.mouse.move(centerX + 20, centerY, { steps: 6 });
+    await page.waitForTimeout(20);
+    await page.mouse.move(centerX, centerY, { steps: 6 });
+    await page.mouse.up();
+
+    await expect
+      .poll(() => visibleHeaderTexts(page))
+      .toEqual(['ID', 'Name', 'Role']);
+    await expect
+      .poll(() => visibleColumnValues(page, 1))
+      .toEqual(['Charlie', 'Alice', 'Bob']);
+
+    await nameHeader.click();
+
+    await expect
+      .poll(() => visibleColumnValues(page, 1))
+      .toEqual(['Alice', 'Bob', 'Charlie']);
+  });
+
+  test('places right-to-left column drag indicator at the insertion edge', async ({
+    page,
+  }) => {
+    const source = [{ a: 'a1', b: 'b1', c: 'c1', d: 'd1' }];
+
+    const columns = buildColumns([
+      { prop: 'a', name: 'A' },
+      { prop: 'b', name: 'B' },
+      { prop: 'c', name: 'C' },
+      { prop: 'd', name: 'D' },
+    ]);
+
+    await mountGrid(page, {
+      columns,
+      source,
+      canMoveColumns: true,
+      colSize: 100,
+    });
+
+    const headers = page.locator(
+      'revo-grid revogr-header .header-rgRow.actual-rgRow .rgHeaderCell',
+    );
+    const from = headers.nth(3);
+    const to = headers.nth(1);
+    const fromBox = await from.boundingBox();
+    const toBox = await to.boundingBox();
+
+    expect(fromBox).not.toBeNull();
+    expect(toBox).not.toBeNull();
+
+    await page.mouse.move(
+      fromBox!.x + fromBox!.width / 2,
+      fromBox!.y + fromBox!.height / 2,
+    );
+    await page.mouse.down();
+    await page.mouse.move(
+      toBox!.x + toBox!.width / 2,
+      toBox!.y + toBox!.height / 2,
+      {
+        steps: 20,
+      },
+    );
+
+    const indicator = page.locator('revo-grid > .drag-position-y');
+    await expect
+      .poll(async () => {
+        const box = await indicator.boundingBox();
+        return Math.abs((box?.x ?? Number.POSITIVE_INFINITY) - toBox!.x);
+      })
+      .toBeLessThanOrEqual(1);
+
+    await page.mouse.up();
+
+    await expect
+      .poll(() => visibleHeaderTexts(page))
+      .toEqual(['A', 'D', 'B', 'C']);
   });
 });

@@ -428,6 +428,7 @@ function onLoad() {
 
   grid.readonly = false;
   grid.range = true;
+  grid.useClipboard = { rangeFill: true };
   grid.resize = true;
   grid.filter = true;
 

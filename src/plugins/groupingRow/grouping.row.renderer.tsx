@@ -31,10 +31,15 @@ export const GroupingRowRenderer = (props: RowGroupingProps) => {
   const name = model[PSEUDO_GROUP_ITEM];
   const expanded = model[GROUP_EXPANDED];
   const depth = parseInt(model[GROUP_DEPTH], 10) || 0;
+  const groupRowAttrs = {
+    rowClass: 'groupingRow',
+    depth,
+    expanded,
+  };
 
   if (groupingCustomRenderer) {
     return (
-      <RowRenderer {...props} rowClass="groupingRow" depth={depth}>
+      <RowRenderer {...props} {...groupRowAttrs}>
         <div onClick={e => expandEvent(e, model, itemIndex)}>
           {groupingCustomRenderer(h, {
             ...props,
@@ -49,7 +54,7 @@ export const GroupingRowRenderer = (props: RowGroupingProps) => {
   }
 
   return (
-    <RowRenderer {...props} rowClass="groupingRow" depth={depth}>
+    <RowRenderer {...props} {...groupRowAttrs}>
       {hasExpand && [
         <button
           class={{ [GROUP_EXPAND_BTN]: true }}

@@ -79,6 +79,7 @@ export class FilterPlugin extends BasePlugin {
   filterProp = FILTER_PROP;
 
   extraHyperContent?: (data: ShowData) => VNode | VNode[];
+  extraBottomHyperContent?: (data: ShowData) => VNode | VNode[];
 
   constructor(
     public revogrid: HTMLRevoGridElement,
@@ -273,6 +274,7 @@ export class FilterPlugin extends BasePlugin {
       filterTypes: this.getColumnFilter(e.detail.filter),
       filterItems: this.multiFilterItems,
       extraContent: this.extraHyperContent,
+      extraBottomContent: this.extraBottomHyperContent,
     };
     this.beforeshow?.(data);
     this.pop.show(data);

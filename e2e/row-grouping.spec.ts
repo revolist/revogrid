@@ -47,12 +47,15 @@ test.describe('row grouping', () => {
 
     await expect(mainGroupRows).toContainText(['North', 'South']);
     await expect(mainGroupRows).toHaveCount(2);
+    await expect(mainGroupRows.filter({ hasText: 'North' })).toHaveAttribute('expanded', /^(|true)$/);
     await expectVisibleColumnValues(page, 1, ['Alice', 'Ben', 'Cara', 'Dan']);
 
     await northGroupToggle.click();
+    await expect(mainGroupRows.filter({ hasText: 'North' })).not.toHaveAttribute('expanded', /^(|true)$/);
     await expectVisibleColumnValues(page, 1, ['Cara', 'Dan']);
 
     await northGroupToggle.click();
+    await expect(mainGroupRows.filter({ hasText: 'North' })).toHaveAttribute('expanded', /^(|true)$/);
     await expectVisibleColumnValues(page, 1, ['Alice', 'Ben', 'Cara', 'Dan']);
   });
 

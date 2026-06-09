@@ -21,7 +21,6 @@ revogr-filter-panel .filter-panel-dialog {
   padding: 10px;
   border-radius: 8px;
   margin: 0;
-
   min-width: 220px;
   text-align: left;
   animation: revogr-filter-panel-open 140ms cubic-bezier(0.2, 0, 0, 1);
@@ -189,10 +188,17 @@ revogr-filter-panel .filter-panel-dialog {
     white-space: nowrap;
   }
 
+  .multi-filter-list-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
   .multi-filter-list-action {
     display: flex;
-
-    justify-content: space-between;
+    align-self: stretch;
+    flex: 0 0 auto;
+    justify-content: flex-end;
     align-items: center;
   }
 
@@ -214,6 +220,32 @@ revogr-filter-panel .filter-panel-dialog {
       width: 1em;
     }
   }
+
+  .reorder-button {
+    border: 0;
+    background: transparent;
+    color: var(--revo-grid-filter-panel-reorder-color, #6b7280);
+    cursor: grab;
+    font-family: monospace;
+    font-size: 12px;
+    letter-spacing: 0;
+    line-height: 1;
+    padding: 6px 2px;
+    transform: scaleX(0.8);
+    width: 16px;
+
+    &.filter-row-dragging {
+      opacity: 0.55;
+    }
+
+    &.filter-row-drag-over {
+      color: var(--revo-grid-filter-panel-reorder-accent, #007cb2);
+    }
+
+    &:active {
+      cursor: grabbing;
+    }
+  }
 }
 
 .add-filter-divider {
@@ -226,6 +258,31 @@ revogr-filter-panel .filter-panel-dialog {
 
 .select-input {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  flex: 1 1 auto;
+  gap: 6px;
+  min-width: 0;
+
+  .select-filter,
+  .filter-extra {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+
+  .select-filter {
+    width: auto;
+  }
+
+  .filter-extra {
+    display: flex;
+
+    > * {
+      width: 100%;
+    }
+  }
+
+  input[type='text'],
+  input[type='date'] {
+    margin: 0;
+  }
 }

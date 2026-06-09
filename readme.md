@@ -76,7 +76,10 @@ Used by some of the largest companies in Europe and the United States.
   - Header filtering.
   - Custom filters to extend system filters with your own set.
 
-- **[Export](https://rv-grid.com/guide/export.plugin)**: Export data to file.
+- **[Export](https://rv-grid.com/guide/export.plugin)**:
+  - **[CSV](https://rv-grid.com/guide/export.plugin)**: Built-in file export for core RevoGrid data workflows.
+  - **[PDF](https://rv-grid.com/guide/pdf-export)**: Browser-side PDF export with the lightweight [`@revolist/revogrid-pdf-export`](https://www.npmjs.com/package/@revolist/revogrid-pdf-export) plugin.
+  - **[Excel (Pro)](https://rv-grid.com/guide/data-grid-export-excel)**: Workbook export for RevoGrid Pro with layout, styles, frozen panes, merged cells, and formulas.
 
 - **Custom Sizes**: Define custom sizes for [columns](https://rv-grid.com/guide/column/#Column-Size) and [rows](https://rv-grid.com/guide/row/height). Automatic sizing based on content.
 
@@ -427,6 +430,22 @@ npm run test:e2e
 ```
 
 Test files live in `e2e/` and share helpers from `e2e/helpers.ts`:
+
+### Local startup troubleshooting
+
+For targeted local work, confirm a new or changed test is discoverable before starting the dev server:
+
+```bash
+./node_modules/.bin/playwright test e2e/pinning.spec.ts --grep "test name" --list
+```
+
+Then run a non-watch Stencil build to catch compile errors without invoking the Playwright web-server lifecycle:
+
+```bash
+./node_modules/.bin/stencil build --dev --serve --no-open
+```
+
+If Playwright fails before any tests run with a Stencil dev-server startup error such as `ERR_SOCKET_BAD_PORT` and port `65536`, treat it as an environment/startup issue rather than an e2e assertion failure. Check `node -v` and whether another local server is already using `localhost:3333`, then retry only after changing that environment state.
 
 
 ## Contributing

@@ -24,6 +24,7 @@ import {
 import { isEditInput } from '../editors/edit.utils';
 import { KeyboardService } from './keyboard.service';
 import { AutoFillService } from './autofill.service';
+import { getRangeFillClipboardData } from './clipboard.utils';
 import { verifyTouchTarget } from '../../utils/events';
 import { getCellData, type Observable } from '../../utils';
 
@@ -53,6 +54,7 @@ import type {
   BeforeRangeSaveDataDetails,
   SaveDataDetails,
   EditCellStore,
+  ClipboardConfig,
 } from '@type';
 
 /**
@@ -80,9 +82,9 @@ export class OverlaySelection {
 
   /**
    * Enable revogr-clipboard component (read more in revogr-clipboard component).
-   * Allows copy/paste.
+   * Allows copy/paste. Can be boolean or clipboard config.
    */
-  @Prop() useClipboard: boolean;
+  @Prop() useClipboard: boolean | ClipboardConfig;
 
   /** Stores */
   /** Selection, range, focus. */
@@ -844,10 +846,15 @@ export class OverlaySelection {
     if (!focus || isEditing) {
       return;
     }
-    let { changed, range } = this.columnService.getTransformedDataToApply(
-      focus,
-      data,
-    );
+    const rangeFillData = getRangeFillClipboardData(data, this.useClipboard);
+    const targetRange = rangeFillData
+      ? this.getClipboardPasteTargetRange()
+      : null;
+    let { changed, range } = this.columnService.getTransformedDataToApply({
+      start: focus,
+      data: rangeFillData || data,
+      targetRange,
+    });
     const { defaultPrevented: canPaste } = this.rangeClipboardPaste.emit({
       data: changed,
       models: collectModelsOfRange(changed, this.dataStore),
@@ -859,6 +866,11 @@ export class OverlaySelection {
       return;
     }
     this.autoFillService?.onRangeApply(changed, range, range);
+  }
+
+  private getClipboardPasteTargetRange(): RangeArea | null {
+    const range = this.selectionStore.get('range');
+    return range && !isRangeSingleCell(range) ? range : null;
   }
 
   private async focusNext() {
