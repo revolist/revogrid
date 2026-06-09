@@ -43,6 +43,7 @@ const FILTER_ID = 'add-filter';
   styleUrl: 'filter.style.scss',
 })
 export class FilterPanel {
+  private dialog?: HTMLDialogElement;
   private filterCaptionsInternal: FilterCaptions = {
     title: 'Filter by',
     ok: 'Close',
@@ -187,22 +188,67 @@ export class FilterPanel {
     );
   }
 
+  componentDidRender() {
+    this.syncDialog();
+  }
+
+  private syncDialog() {
+    if (!this.dialog) {
+      return;
+    }
+
+    if (!this.changes) {
+      if (this.dialog.open) {
+        this.dialog.close();
+      }
+      return;
+    }
+
+    if (!this.dialog.open) {
+      this.dialog.show();
+    }
+
+    if (this.changes.autoCorrect !== false) {
+      requestAnimationFrame(() => this.autoCorrect(this.dialog));
+    }
+  }
+
   private autoCorrect(el?: HTMLElement | null) {
     if (!el) {
       return;
     }
 
-    const revoGrid = el.closest('revo-grid');
-    if (!revoGrid) {
+    const pos = el.getBoundingClientRect();
+    const maxLeft = Math.max(0, window.innerWidth - pos.width);
+    const maxTop = Math.max(0, window.innerHeight - pos.height);
+
+    if (pos.left > maxLeft) {
+      el.style.left = `${maxLeft}px`;
+    }
+
+    if (pos.top > maxTop) {
+      el.style.top = `${maxTop}px`;
+    }
+  }
+
+  private onDialogMouseDown(e: MouseEvent) {
+    if (
+      !this.closeOnOutsideClick ||
+      e.target !== this.dialog ||
+      !this.dialog
+    ) {
       return;
     }
 
-    const pos = el.getBoundingClientRect();
-    const gridPos = revoGrid.getBoundingClientRect();
-    const maxLeft = gridPos.right - pos.width;
+    const rect = this.dialog.getBoundingClientRect();
+    const isInside =
+      e.clientX >= rect.left &&
+      e.clientX <= rect.right &&
+      e.clientY >= rect.top &&
+      e.clientY <= rect.bottom;
 
-    if (pos.left > maxLeft && el.offsetLeft) {
-      el.style.left = `${maxLeft - (el.parentElement?.getBoundingClientRect().left ?? 0)}px`;
+    if (!isInside) {
+      this.onCancel();
     }
   }
 
@@ -469,13 +515,9 @@ export class FilterPanel {
   }
 
   render() {
-    if (!this.changes) {
-      return <Host style={{ display: 'none' }}></Host>;
-    }
     const style = {
-      display: 'block',
-      left: `${this.changes.x}px`,
-      top: `${this.changes.y}px`,
+      left: `${this.changes?.x ?? 0}px`,
+      top: `${this.changes?.y ?? 0}px`,
     };
 
     const capts = Object.assign(
@@ -484,72 +526,78 @@ export class FilterPanel {
     );
 
     return (
-      <Host
-        style={style}
-        ref={el => {
-          this.changes?.autoCorrect !== false && this.autoCorrect(el);
-        }}
-      >
-        <slot slot="header" />
-        { this.changes.extraContent?.(this.changes) || '' }
+      <Host>
+        <dialog
+          class="filter-panel-dialog"
+          style={style}
+          ref={el => (this.dialog = el)}
+          onCancel={e => {
+            e.preventDefault();
+            this.onCancel();
+          }}
+          onMouseDown={e => this.onDialogMouseDown(e)}
+        >
+          {this.changes && [
+            <slot slot="header" />,
+            this.changes.extraContent?.(this.changes) || '',
 
-        { this.changes?.hideDefaultFilters !== true && (
-          [
-            <label>{capts.title}</label>,
-            <div class="filter-holder">{this.getFilterItemsList()}</div>,
-            <div class="add-filter">
-              <select
-                id={FILTER_ID}
-                class="select-css"
-                onChange={e => this.onAddNewFilter(e)}
-              >
-                {this.renderSelectOptions(this.currentFilterType)}
-              </select>
-            </div>
-          ]
-        )}
+            this.changes?.hideDefaultFilters !== true && [
+              <label>{capts.title}</label>,
+              <div class="filter-holder">{this.getFilterItemsList()}</div>,
+              <div class="add-filter">
+                <select
+                  id={FILTER_ID}
+                  class="select-css"
+                  onChange={e => this.onAddNewFilter(e)}
+                >
+                  {this.renderSelectOptions(this.currentFilterType)}
+                </select>
+              </div>,
+            ],
 
-        <slot />
-        <div class="filter-actions">
-          {this.disableDynamicFiltering && [
-            <button
-              id="revo-button-save"
-              aria-label="save"
-              class="revo-button green"
-              onClick={() => this.onSave()}
-            >
-              {capts.save}
-            </button>,
-            <button
-              id="revo-button-ok"
-              aria-label="ok"
-              class="revo-button green"
-              onClick={() => this.onCancel()}
-            >
-              {capts.cancel}
-            </button>,
+            <slot />,
+            <div class="filter-actions">
+              {this.disableDynamicFiltering && [
+                <button
+                  id="revo-button-save"
+                  aria-label="save"
+                  class="revo-button green"
+                  onClick={() => this.onSave()}
+                >
+                  {capts.save}
+                </button>,
+                <button
+                  id="revo-button-ok"
+                  aria-label="ok"
+                  class="revo-button green"
+                  onClick={() => this.onCancel()}
+                >
+                  {capts.cancel}
+                </button>,
+              ]}
+              {!this.disableDynamicFiltering && [
+                <button
+                  id="revo-button-ok"
+                  aria-label="ok"
+                  class="revo-button green"
+                  onClick={() => this.onCancel()}
+                >
+                  {capts.ok}
+                </button>,
+
+                <button
+                  id="revo-button-reset"
+                  aria-label="reset"
+                  class="revo-button outline"
+                  onClick={() => this.onReset()}
+                >
+                  {capts.reset}
+                </button>,
+              ]}
+            </div>,
+            <slot slot="footer" />,
           ]}
-          {!this.disableDynamicFiltering && [
-            <button
-              id="revo-button-ok"
-              aria-label="ok"
-              class="revo-button green"
-              onClick={() => this.onCancel()}
-            >
-              {capts.ok}
-            </button>,
-
-            <button
-              id="revo-button-reset"
-              aria-label="reset"
-              class="revo-button outline"
-              onClick={() => this.onReset()}
-            >
-              {capts.reset}
-            </button>,
-          ]}
-        </div>
-        <slot slot="footer" />
+        </dialog>
       </Host>
     );
   }

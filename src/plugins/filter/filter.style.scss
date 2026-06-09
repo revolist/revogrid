@@ -1,12 +1,15 @@
 @use '../../global/_buttons.scss' as *;
 
 revogr-filter-panel {
-  position: absolute;
   display: block;
+}
+
+revogr-filter-panel .filter-panel-dialog {
+  position: fixed;
   top: 0;
   left: 0;
   z-index: 100;
-  max-height: calc(100% - 80px);
+  max-height: calc(100vh - 16px);
   overflow: auto;
 
   opacity: 1;
@@ -17,10 +20,15 @@ revogr-filter-panel {
   box-shadow: 0 5px 18px -2px var(--revo-grid-filter-panel-shadow, rgba(0, 0, 0, 0.15));
   padding: 10px;
   border-radius: 8px;
+  margin: 0;
 
   min-width: 220px;
   text-align: left;
   animation: revogr-filter-panel-open 140ms cubic-bezier(0.2, 0, 0, 1);
+
+  &::backdrop {
+    background: transparent;
+  }
 
   .filter-holder > div {
     display: flex;
@@ -72,7 +80,7 @@ revogr-filter-panel {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  revogr-filter-panel {
+  revogr-filter-panel .filter-panel-dialog {
     animation: none;
   }
 }

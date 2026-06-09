@@ -78,6 +78,63 @@ test.describe('filtering', () => {
     await expect(filterPanel).not.toBeVisible();
   });
 
+  test('renders filter panel as a native dialog outside overflow clipping', async ({ page }) => {
+    const source: SampleRow[] = [
+      { id: 501, name: 'Alice', role: 'Admin', city: 'Lisbon' },
+      { id: 502, name: 'Ben', role: 'Engineer', city: 'Porto' },
+    ];
+
+    const columns = buildColumns([
+      { prop: 'id', name: 'ID' },
+      { prop: 'name', name: 'Name' },
+      { prop: 'role', name: 'Role', filter: true, ...withHeaderTestId('dialog-filter-role') },
+      { prop: 'city', name: 'City' },
+    ]);
+
+    await mountGrid(page, { columns, source, filter: true, height: 72 });
+    await page.locator('revo-grid').evaluate(grid => {
+      const wrapper = grid.parentElement;
+      if (!wrapper) {
+        throw new Error('Grid wrapper was not found');
+      }
+      wrapper.style.overflow = 'hidden';
+    });
+
+    await page
+      .getByTestId('dialog-filter-role')
+      .locator(SELECTORS.filterButton)
+      .click();
+
+    const filterPanel = page.locator(SELECTORS.filterPanel);
+    await expect(filterPanel).toBeVisible();
+    await expect(filterPanel).toHaveJSProperty('open', true);
+
+    const { buttonBottom, buttonLeft, panelBottom, panelLeft, panelTop, wrapperBottom } = await page.evaluate(() => {
+      const dialog = document.querySelector('revogr-filter-panel dialog');
+      const button = document
+        .querySelector('[data-testid="dialog-filter-role"]')
+        ?.querySelector('.rv-filter');
+      const wrapper = document.querySelector('revo-grid')?.parentElement;
+      if (!button || !dialog || !wrapper) {
+        throw new Error('Filter button, dialog, or grid wrapper was not found');
+      }
+      const buttonRect = button.getBoundingClientRect();
+      const panelRect = dialog.getBoundingClientRect();
+      return {
+        buttonBottom: buttonRect.bottom,
+        buttonLeft: buttonRect.left,
+        panelBottom: panelRect.bottom,
+        panelLeft: panelRect.left,
+        panelTop: panelRect.top,
+        wrapperBottom: wrapper.getBoundingClientRect().bottom,
+      };
+    });
+
+    expect(panelLeft).toBeCloseTo(buttonLeft, 0);
+    expect(panelTop).toBeCloseTo(buttonBottom, 0);
+    expect(panelBottom).toBeGreaterThan(wrapperBottom);
+  });
+
   test('reapplies active filters after source replacement', async ({ page }) => {
     const source: SampleRow[] = [
       { id: 501, name: 'Alice', role: 'Admin', city: 'Lisbon' },
