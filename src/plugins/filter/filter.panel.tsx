@@ -36,6 +36,7 @@ const defaultType: FilterType = 'none';
 const FILTER_LIST_CLASS = 'multi-filter-list';
 const FILTER_LIST_CLASS_ACTION = 'multi-filter-list-action';
 const FILTER_ID = 'add-filter';
+const VIEWPORT_PADDING = 8;
 
 /**
  * Filter panel for editing filters
@@ -170,19 +171,27 @@ export class FilterPanel {
           }
 
           const extra = this.renderExtra(prop, index);
+          const isDragging = this.draggedFilterId === filter.id;
+          const isDragOver = this.dragOverFilterId === filter.id && !isDragging;
 
           return (
             <div key={filter.id} class={FILTER_LIST_CLASS}>
-              <div ref={el => el?.classList.add('multi-filter-list-row')}>
+              <div
+                class={{
+                  'multi-filter-list-row': true,
+                  'filter-row-dragging': isDragging,
+                  'filter-row-drag-over': isDragOver,
+                }}
+                onDragOver={e => this.onFilterDragOver(e, filter.id)}
+                onDragLeave={() => this.onFilterDragLeave(filter.id)}
+                onDrop={e => this.onFilterDrop(e, prop, filter.id)}
+              >
                 {visibleFilterCount > 1 ? (
                   <ReorderButton
-                    dragging={this.draggedFilterId === filter.id}
-                    dragOver={this.dragOverFilterId === filter.id && this.draggedFilterId !== filter.id}
+                    dragging={isDragging}
+                    dragOver={isDragOver}
                     onDragStart={e => this.onFilterDragStart(e, filter.id)}
                     onDragEnd={() => this.onFilterDragEnd()}
-                    onDragOver={e => this.onFilterDragOver(e, filter.id)}
-                    onDragLeave={() => this.onFilterDragLeave(filter.id)}
-                    onDrop={e => this.onFilterDrop(e, prop, filter.id)}
                   />
                 ) : ''}
                 <div class={{ 'select-input': true }}>
@@ -234,26 +243,49 @@ export class FilterPanel {
     }
 
     if (this.changes.autoCorrect !== false) {
+      this.autoCorrect(this.dialog);
       requestAnimationFrame(() => this.autoCorrect(this.dialog));
     }
   }
 
   private autoCorrect(el?: HTMLElement | null) {
-    if (!el) {
+    if (!el || !this.changes) {
       return;
     }
 
+    el.style.maxHeight = '';
+    el.style.left = `${this.changes.x}px`;
+    el.style.top = `${this.changes.y}px`;
+
     const pos = el.getBoundingClientRect();
-    const maxLeft = Math.max(0, window.innerWidth - pos.width);
-    const maxTop = Math.max(0, window.innerHeight - pos.height);
+    const anchorTop = this.changes.anchorY ?? this.changes.y;
+    const anchorBottom = this.changes.y;
+    const spaceAbove = Math.max(0, anchorTop - VIEWPORT_PADDING);
+    const spaceBelow = Math.max(0, window.innerHeight - anchorBottom - VIEWPORT_PADDING);
+    const openAbove = pos.height > spaceBelow && spaceAbove > spaceBelow;
+    const availableHeight = Math.max(
+      VIEWPORT_PADDING,
+      openAbove ? spaceAbove : spaceBelow,
+    );
 
-    if (pos.left > maxLeft) {
-      el.style.left = `${maxLeft}px`;
-    }
+    el.style.maxHeight = `${availableHeight}px`;
 
-    if (pos.top > maxTop) {
-      el.style.top = `${maxTop}px`;
-    }
+    const adjustedPos = el.getBoundingClientRect();
+    const maxLeft = Math.max(
+      VIEWPORT_PADDING,
+      window.innerWidth - adjustedPos.width - VIEWPORT_PADDING,
+    );
+    const maxTop = Math.max(
+      VIEWPORT_PADDING,
+      window.innerHeight - adjustedPos.height - VIEWPORT_PADDING,
+    );
+    const left = Math.min(Math.max(VIEWPORT_PADDING, this.changes.x), maxLeft);
+    const top = openAbove
+      ? Math.min(Math.max(VIEWPORT_PADDING, anchorTop - adjustedPos.height), maxTop)
+      : Math.min(Math.max(VIEWPORT_PADDING, anchorBottom), maxTop);
+
+    el.style.left = `${left}px`;
+    el.style.top = `${top}px`;
   }
 
   private onDialogMouseDown(e: MouseEvent) {

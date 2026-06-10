@@ -161,6 +161,10 @@ export interface ShowData extends FilterItem, Omit<ColumnRegular, 'filter'> {
   x: number;
   y: number;
   /**
+   * Top viewport coordinate of the element the filter panel is anchored to.
+   */
+  anchorY?: number;
+  /**
    * Auto correct position if it is out of document bounds
    */
   autoCorrect?: boolean;

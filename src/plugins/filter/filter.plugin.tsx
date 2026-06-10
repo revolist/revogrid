@@ -270,6 +270,7 @@ export class FilterPlugin extends BasePlugin {
       ...this.filterCollection[prop],
       x: buttonPos.x,
       y: buttonPos.y + buttonPos.height,
+      anchorY: buttonPos.y,
       autoCorrect: true,
       filterTypes: this.getColumnFilter(e.detail.filter),
       filterItems: this.multiFilterItems,

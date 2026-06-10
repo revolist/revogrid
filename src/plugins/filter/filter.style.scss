@@ -18,6 +18,7 @@ revogr-filter-panel .filter-panel-dialog {
   border: 1px solid var(--revo-grid-filter-panel-border, #cecece);
   transform-origin: 62px 0px;
   box-shadow: 0 5px 18px -2px var(--revo-grid-filter-panel-shadow, rgba(0, 0, 0, 0.15));
+  box-sizing: border-box;
   padding: 10px;
   border-radius: 8px;
   margin: 0;
@@ -56,8 +57,16 @@ revogr-filter-panel .filter-panel-dialog {
   }
 
   .filter-actions {
+    position: sticky;
+    right: 0;
+    bottom: -10px;
+    left: 0;
+    z-index: 1;
     text-align: right;
-    margin-right: -5px;
+    margin: 10px -10px -10px;
+    padding: 0 5px 10px 10px;
+    background: var(--revo-grid-filter-panel-bg, #fff);
+    border-top: 1px solid var(--revo-grid-filter-panel-divider, #d9d9d9);
 
     button {
       margin-top: 10px;
@@ -192,6 +201,23 @@ revogr-filter-panel .filter-panel-dialog {
     display: flex;
     align-items: center;
     gap: 6px;
+    position: relative;
+
+    &.filter-row-dragging {
+      opacity: 0.65;
+    }
+
+    &.filter-row-drag-over::before {
+      content: '';
+      position: absolute;
+      top: -4px;
+      right: 0;
+      left: 0;
+      height: 2px;
+      background: var(--revo-grid-filter-panel-reorder-accent, #007cb2);
+      border-radius: 999px;
+      box-shadow: 0 0 0 2px var(--revo-grid-filter-panel-bg, #fff);
+    }
   }
 
   .multi-filter-list-action {
@@ -233,10 +259,6 @@ revogr-filter-panel .filter-panel-dialog {
     padding: 6px 2px;
     transform: scaleX(0.8);
     width: 16px;
-
-    &.filter-row-dragging {
-      opacity: 0.55;
-    }
 
     &.filter-row-drag-over {
       color: var(--revo-grid-filter-panel-reorder-accent, #007cb2);
