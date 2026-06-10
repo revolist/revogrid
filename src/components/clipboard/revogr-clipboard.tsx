@@ -229,7 +229,7 @@ export class Clipboard {
   private getData(e: ClipboardEvent) {
     return (
       e.clipboardData ||
-      (window as unknown as { clipboardData: DataTransfer | null })
+      (globalThis as unknown as { clipboardData: DataTransfer | null })
         ?.clipboardData
     );
   }

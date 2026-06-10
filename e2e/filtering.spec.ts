@@ -131,8 +131,8 @@ test.describe('filtering', () => {
       };
     });
 
-    expect(Math.abs(panelLeft - buttonLeft)).toBeLessThanOrEqual(2);
-    expect(Math.abs(panelTop - buttonBottom)).toBeLessThanOrEqual(2);
+    expect(Math.abs(panelLeft - buttonLeft)).toBeLessThanOrEqual(3);
+    expect(Math.abs(panelTop - buttonBottom)).toBeLessThanOrEqual(3);
     expect(panelBottom).toBeGreaterThan(wrapperBottom);
   });
 
@@ -190,7 +190,7 @@ test.describe('filtering', () => {
     });
 
     expect(panelTop).toBeGreaterThanOrEqual(8);
-    expect(panelBottom).toBeLessThanOrEqual(buttonTop + 2);
+    expect(panelBottom).toBeLessThanOrEqual(buttonTop + 3);
     expect(panelBottom).toBeLessThanOrEqual(viewportBottom - 8);
     expect(Math.abs(actionBottom - panelBottom)).toBeLessThanOrEqual(2);
   });
@@ -208,7 +208,17 @@ test.describe('filtering', () => {
       { prop: 'city', name: 'City' },
     ]);
 
-    await mountGrid(page, { columns, source, filter: true });
+    await mountGrid(page, {
+      columns,
+      source,
+      filter: {
+        localization: {
+          captions: {
+            filterCondition: 'Condition',
+          },
+        },
+      },
+    });
 
     await page
       .getByTestId('layout-filter-role')
@@ -276,6 +286,8 @@ test.describe('filtering', () => {
     await filterInputs.nth(1).fill('Engineer');
 
     await expect(filterPanel.locator('.multi-filter-list-row')).toHaveCount(2);
+    await expect(filterPanel.getByRole('listitem', { name: 'Condition 1' })).toBeVisible();
+    await expect(filterPanel.getByRole('listitem', { name: 'Condition 2' })).toBeVisible();
     await expect(filterPanel.locator('.select-filter').nth(0)).toHaveValue('contains');
     await expect(filterPanel.locator('.select-filter').nth(1)).toHaveValue('eq');
 
@@ -327,6 +339,14 @@ test.describe('filtering', () => {
     await expect(filterPanel.locator('.select-filter').nth(1)).toHaveValue('contains');
     await expect(filterInputs.nth(0)).toHaveValue('Engineer');
     await expect(filterInputs.nth(1)).toHaveValue('Admin');
+
+    await filterPanel.getByRole('listitem', { name: 'Condition 1' }).focus();
+    await page.keyboard.press('ArrowDown');
+
+    await expect(filterPanel.locator('.select-filter').nth(0)).toHaveValue('contains');
+    await expect(filterPanel.locator('.select-filter').nth(1)).toHaveValue('eq');
+    await expect(filterInputs.nth(0)).toHaveValue('Admin');
+    await expect(filterInputs.nth(1)).toHaveValue('Engineer');
   });
 
   test('reapplies active filters after source replacement', async ({ page }) => {

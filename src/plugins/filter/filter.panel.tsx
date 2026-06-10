@@ -61,6 +61,7 @@ export class FilterPanel {
     placeholder: 'Enter value...',
     and: 'and',
     or: 'or',
+    filterCondition: 'Filter condition',
   };
 
   @Element() element!: HTMLElement;
@@ -152,7 +153,7 @@ export class FilterPanel {
       this.filterCaptions,
     );
     return (
-      <div key={this.filterId}>
+      <div key={this.filterId} role="list">
         {propFilters.map((filter, index) => {
           let andOrButton;
           if (filter.hidden) {
@@ -185,6 +186,10 @@ export class FilterPanel {
                 onDragOver={e => this.onFilterDragOver(e, filter.id)}
                 onDragLeave={() => this.onFilterDragLeave(filter.id)}
                 onDrop={e => this.onFilterDrop(e, prop, filter.id)}
+                onKeyDown={e => this.onFilterRowKeyDown(e, prop, filter.id)}
+                role="listitem"
+                tabIndex={visibleFilterCount > 1 ? 0 : undefined}
+                aria-label={`${capts.filterCondition} ${index + 1}`}
               >
                 {visibleFilterCount > 1 ? (
                   <ReorderButton
@@ -473,6 +478,37 @@ export class FilterPanel {
   private onFilterDragEnd() {
     this.draggedFilterId = undefined;
     this.dragOverFilterId = undefined;
+  }
+
+  private onFilterRowKeyDown(e: KeyboardEvent, prop: ColumnProp, sourceId: number) {
+    if (e.target !== e.currentTarget) {
+      return;
+    }
+
+    const direction = e.key === 'ArrowUp' ? -1 : e.key === 'ArrowDown' ? 1 : 0;
+    if (!direction) {
+      return;
+    }
+
+    const items = this.filterItems[prop];
+    if (!items) {
+      return;
+    }
+
+    const visibleItems = items.filter(item => !item.hidden);
+    const sourceIndex = visibleItems.findIndex(item => item.id === sourceId);
+    const target = visibleItems[sourceIndex + direction];
+    if (!target || !moveFilterItem(items, sourceId, target.id)) {
+      return;
+    }
+
+    e.preventDefault();
+    e.stopPropagation();
+    this.filterId++;
+
+    if (!this.disableDynamicFiltering) {
+      this.debouncedApplyFilter();
+    }
   }
 
   private toggleFilterAndOr(id: number) {

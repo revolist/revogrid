@@ -72,6 +72,7 @@ export interface FilterCaptions {
   placeholder: string;
   and: string;
   or: string;
+  filterCondition: string;
 };
 
 export interface FilterLocalization {
