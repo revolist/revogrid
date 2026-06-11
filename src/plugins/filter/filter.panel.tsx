@@ -155,84 +155,88 @@ export class FilterPanel {
       this.filterCaptions,
     );
     return (
-      <div key={this.filterId} role="list">
-        {propFilters.map((filter, index) => {
-          let andOrButton;
-          if (filter.hidden) {
-            return;
-          }
+      <div key={this.filterId}>
+        <ul class="multi-filter-list-container">
+          {propFilters.map((filter, index) => {
+            let andOrButton;
+            if (filter.hidden) {
+              return;
+            }
 
-          // hide toggle button if there is only one filter and the last one
-          if (index !== this.filterItems[prop].length - 1) {
-            andOrButton = (
-              <AndOrButton
-                text={filter.relation === 'and' ? capts.and : capts.or}
-                onClick={() => this.toggleFilterAndOr(filter.id)}
-              />
-            );
-          }
+            // hide toggle button if there is only one filter and the last one
+            if (index !== this.filterItems[prop].length - 1) {
+              andOrButton = (
+                <AndOrButton
+                  text={filter.relation === 'and' ? capts.and : capts.or}
+                  onClick={() => this.toggleFilterAndOr(filter.id)}
+                />
+              );
+            }
 
-          const extra = this.renderExtra(prop, index);
-          const isDragging = this.draggedFilterId === filter.id;
-          const isDragOver = this.dragOverFilterId === filter.id && !isDragging;
-          const canReorder = visibleFilterCount > 1;
+            const extra = this.renderExtra(prop, index);
+            const isDragging = this.draggedFilterId === filter.id;
+            const isDragOver = this.dragOverFilterId === filter.id && !isDragging;
+            const canReorder = visibleFilterCount > 1;
 
-          return (
-            <div key={filter.id} class={FILTER_LIST_CLASS}>
-              <div
-                class={{
-                  'multi-filter-list-row': true,
-                  'filter-row-drop-active': this.draggedFilterId !== undefined && !isDragging,
-                  'filter-row-dragging': isDragging,
-                  'filter-row-drag-over': isDragOver,
-                }}
-                role="listitem"
+            return (
+              <li
+                key={filter.id}
+                class={FILTER_LIST_CLASS}
                 aria-label={`${capts.filterCondition} ${index + 1}`}
               >
-                {canReorder ? (
-                  <button
-                    type="button"
-                    class="filter-row-drop-target"
-                    tabIndex={-1}
-                    aria-label={`${capts.filterCondition} ${index + 1}`}
-                    onDragOver={e => this.onFilterDragOver(e, filter.id)}
-                    onDragLeave={() => this.onFilterDragLeave(filter.id)}
-                    onDrop={e => this.onFilterDrop(e, prop, filter.id)}
-                  />
-                ) : ''}
-                {canReorder ? (
-                  <ReorderButton
-                    ariaLabel={capts.reorderFilter}
-                    dragging={isDragging}
-                    dragOver={isDragOver}
-                    onDragStart={e => this.onFilterDragStart(e, filter.id)}
-                    onDragEnd={() => this.onFilterDragEnd()}
-                    onKeyDown={e => this.onFilterReorderKeyDown(e, prop, filter.id)}
-                  />
-                ) : ''}
-                <div class={{ 'select-input': true }}>
-                  <select
-                    class="select-css select-filter"
-                    onChange={e => this.onFilterTypeChange(e, prop, index)}
-                  >
-                    {this.renderSelectOptions(
-                      this.filterItems[prop][index].type,
-                      true,
-                    )}
-                  </select>
-                  {extra ? <div class="filter-extra">{extra}</div> : ''}
+                <div
+                  class={{
+                    'multi-filter-list-row': true,
+                    'filter-row-drop-active': this.draggedFilterId !== undefined && !isDragging,
+                    'filter-row-dragging': isDragging,
+                    'filter-row-drag-over': isDragOver,
+                  }}
+                >
+                  {canReorder ? (
+                    <button
+                      type="button"
+                      class="filter-row-drop-target"
+                      tabIndex={-1}
+                      aria-label={`${capts.filterCondition} ${index + 1}`}
+                      onDragOver={e => this.onFilterDragOver(e, filter.id)}
+                      onDragLeave={() => this.onFilterDragLeave(filter.id)}
+                      onDrop={e => this.onFilterDrop(e, prop, filter.id)}
+                    />
+                  ) : ''}
+                  {canReorder ? (
+                    <ReorderButton
+                      ariaLabel={capts.reorderFilter}
+                      dragging={isDragging}
+                      dragOver={isDragOver}
+                      onDragStart={e => this.onFilterDragStart(e, filter.id)}
+                      onDragEnd={() => this.onFilterDragEnd()}
+                      onKeyDown={e => this.onFilterReorderKeyDown(e, prop, filter.id)}
+                    />
+                  ) : ''}
+                  <div class={{ 'select-input': true }}>
+                    <select
+                      class="select-css select-filter"
+                      onChange={e => this.onFilterTypeChange(e, prop, index)}
+                    >
+                      {this.renderSelectOptions(
+                        this.filterItems[prop][index].type,
+                        true,
+                      )}
+                    </select>
+                    {extra ? <div class="filter-extra">{extra}</div> : ''}
+                  </div>
+                  <div class={FILTER_LIST_CLASS_ACTION}>
+                    {andOrButton}
+                    <TrashButton
+                      ariaLabel={capts.removeFilter}
+                      onClick={() => this.onRemoveFilter(filter.id)}
+                    />
+                  </div>
                 </div>
-                <div class={FILTER_LIST_CLASS_ACTION}>
-                  {andOrButton}
-                  <TrashButton
-                    ariaLabel={capts.removeFilter}
-                    onClick={() => this.onRemoveFilter(filter.id)}
-                  />
-                </div>
-              </div>
-            </div>
-          );
-        })}
+              </li>
+            );
+          })}
+        </ul>
 
         {propFilters.filter(f => !f.hidden).length > 0 ? <div class="add-filter-divider" /> : ''}
       </div>
@@ -303,27 +307,6 @@ export class FilterPanel {
 
     el.style.left = `${left}px`;
     el.style.top = `${top}px`;
-  }
-
-  private onDialogMouseDown(e: MouseEvent) {
-    if (
-      !this.closeOnOutsideClick ||
-      e.target !== this.dialog ||
-      !this.dialog
-    ) {
-      return;
-    }
-
-    const rect = this.dialog.getBoundingClientRect();
-    const isInside =
-      e.clientX >= rect.left &&
-      e.clientX <= rect.right &&
-      e.clientY >= rect.top &&
-      e.clientY <= rect.bottom;
-
-    if (!isInside) {
-      this.onCancel();
-    }
   }
 
   private onFilterTypeChange(e: Event, prop: ColumnProp, index: number) {
@@ -493,10 +476,16 @@ export class FilterPanel {
   }
 
   private onFilterReorderKeyDown(e: KeyboardEvent, prop: ColumnProp, sourceId: number) {
-    const direction = e.key === 'ArrowUp' ? -1 : e.key === 'ArrowDown' ? 1 : 0;
-    if (!direction) {
+    let direction = 0;
+    if (e.key === 'ArrowUp') {
+      direction = -1;
+    } else if (e.key === 'ArrowDown') {
+      direction = 1;
+    } else {
       return;
     }
+    e.preventDefault();
+    e.stopPropagation();
 
     const items = this.filterItems[prop];
     if (!items) {
@@ -510,8 +499,6 @@ export class FilterPanel {
       return;
     }
 
-    e.preventDefault();
-    e.stopPropagation();
     this.filterId++;
 
     if (!this.disableDynamicFiltering) {
@@ -688,7 +675,6 @@ export class FilterPanel {
             e.preventDefault();
             this.onCancel();
           }}
-          onMouseDown={e => this.onDialogMouseDown(e)}
         >
           {this.changes && [
             <slot key="header-slot" slot="header" />,

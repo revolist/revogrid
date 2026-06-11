@@ -31,15 +31,12 @@ export const FilterButton = ({ column }: Props) => {
   );
 };
 
-type ButtonActionProps = {
+type TrashButtonProps = {
+  ariaLabel: string;
   onClick?: (event: MouseEvent) => void;
 };
 
-type LabeledButtonActionProps = ButtonActionProps & {
-  ariaLabel: string;
-};
-
-export const TrashButton = ({ ariaLabel, onClick }: LabeledButtonActionProps) => {
+export const TrashButton = ({ ariaLabel, onClick }: TrashButtonProps) => {
   return (
     <button
       type="button"
@@ -53,11 +50,17 @@ export const TrashButton = ({ ariaLabel, onClick }: LabeledButtonActionProps) =>
     </button>
   );
 };
-export const AndOrButton = ({ text, onClick }: { text: string } & ButtonActionProps) => {
+type AndOrButtonProps = {
+  text: string;
+  onClick?: (event: MouseEvent) => void;
+};
+
+export const AndOrButton = ({ text, onClick }: AndOrButtonProps) => {
   return <button type="button" class={{ [AND_OR_BUTTON]: true, 'light revo-button': true }} onClick={onClick}>{text}</button>;
 };
 
-type ReorderButtonProps = LabeledButtonActionProps & {
+type ReorderButtonProps = {
+  ariaLabel: string;
   dragging?: boolean;
   dragOver?: boolean;
   onDragStart?: (event: DragEvent) => void;
