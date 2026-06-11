@@ -79,6 +79,71 @@ test.describe('filtering', () => {
     await expect(filterPanel).not.toBeVisible();
   });
 
+  test('closes an open filter panel when opening another grid filter panel', async ({ page }) => {
+    await page.setContent(`
+      <div style="display: grid; gap: 24px; width: 900px;">
+        <div style="height: 180px;">
+          <revo-grid filter style="display:block; width:100%; height:100%;"></revo-grid>
+        </div>
+        <div style="height: 180px;">
+          <revo-grid filter style="display:block; width:100%; height:100%;"></revo-grid>
+        </div>
+      </div>
+    `);
+    await page.waitForSelector(SELECTORS.grid);
+
+    await page.evaluate(() => {
+      const grids = Array.from(document.querySelectorAll<HTMLRevoGridElement>('revo-grid'));
+      if (grids.length !== 2) {
+        throw new Error('Two grid instances were not created');
+      }
+
+      const source = [
+        { id: 501, name: 'Alice', role: 'Admin', city: 'Lisbon' },
+        { id: 502, name: 'Ben', role: 'Engineer', city: 'Porto' },
+      ];
+
+      grids.forEach((grid, index) => {
+        const prefix = index === 0 ? 'first' : 'second';
+        grid.columns = [
+          { prop: 'id', name: 'ID' },
+          { prop: 'name', name: 'Name' },
+          {
+            prop: 'role',
+            name: 'Role',
+            filter: true,
+            columnProperties: () => ({ 'data-testid': `${prefix}-filter-role` }),
+          },
+          { prop: 'city', name: 'City' },
+        ];
+        grid.source = source;
+        grid.filter = true;
+      });
+    });
+    await page.waitForChanges();
+
+    const openFilterPanels = page.locator(`${SELECTORS.filterPanel}[open]`);
+
+    await page
+      .getByTestId('first-filter-role')
+      .locator(SELECTORS.filterButton)
+      .click();
+    await expect(openFilterPanels).toHaveCount(1);
+
+    await page
+      .getByTestId('second-filter-role')
+      .locator(SELECTORS.filterButton)
+      .click();
+    await expect(openFilterPanels).toHaveCount(1);
+
+    await expect(
+      page.locator('revo-grid').nth(0).locator(`${SELECTORS.filterPanel}[open]`),
+    ).toHaveCount(0);
+    await expect(
+      page.locator('revo-grid').nth(1).locator(`${SELECTORS.filterPanel}[open]`),
+    ).toHaveCount(1);
+  });
+
   test('renders filter panel as a native dialog outside overflow clipping', async ({ page }) => {
     const source: SampleRow[] = [
       { id: 501, name: 'Alice', role: 'Admin', city: 'Lisbon' },
