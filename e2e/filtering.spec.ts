@@ -101,7 +101,14 @@ test.describe('filtering', () => {
       );
     });
     await page.setContent('<shadow-grid-host></shadow-grid-host>');
-    await page.waitForSelector('shadow-grid-host revo-grid');
+    await page.waitForFunction(() => {
+      return (
+        document
+          .querySelector('shadow-grid-host')
+          ?.shadowRoot
+          ?.querySelectorAll('revo-grid').length === 2
+      );
+    });
 
     await page.evaluate(() => {
       const grids = Array.from(
