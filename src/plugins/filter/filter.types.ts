@@ -73,6 +73,8 @@ export interface FilterCaptions {
   and: string;
   or: string;
   filterCondition: string;
+  removeFilter: string;
+  reorderFilter: string;
 };
 
 export interface FilterLocalization {

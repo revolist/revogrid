@@ -31,20 +31,33 @@ export const FilterButton = ({ column }: Props) => {
   );
 };
 
-export const TrashButton = () => {
+type ButtonActionProps = {
+  onClick?: (event: MouseEvent) => void;
+};
+
+type LabeledButtonActionProps = ButtonActionProps & {
+  ariaLabel: string;
+};
+
+export const TrashButton = ({ ariaLabel, onClick }: LabeledButtonActionProps) => {
   return (
-    <div class={{ [TRASH_BUTTON]: true }}>
+    <button
+      type="button"
+      class={{ [TRASH_BUTTON]: true }}
+      aria-label={ariaLabel}
+      onClick={onClick}
+    >
       <svg class="trash-img" viewBox="0 0 24 24">
         <path fill="currentColor" d="M9,3V4H4V6H5V19A2,2 0 0,0 7,21H17A2,2 0 0,0 19,19V6H20V4H15V3H9M7,6H17V19H7V6M9,8V17H11V8H9M13,8V17H15V8H13Z" />
       </svg>
-    </div>
+    </button>
   );
 };
-export const AndOrButton = ({ text }: any) => {
-  return <button class={{ [AND_OR_BUTTON]: true, 'light revo-button': true }}>{text}</button>;
+export const AndOrButton = ({ text, onClick }: { text: string } & ButtonActionProps) => {
+  return <button type="button" class={{ [AND_OR_BUTTON]: true, 'light revo-button': true }} onClick={onClick}>{text}</button>;
 };
 
-type ReorderButtonProps = {
+type ReorderButtonProps = LabeledButtonActionProps & {
   dragging?: boolean;
   dragOver?: boolean;
   onDragStart?: (event: DragEvent) => void;
@@ -52,9 +65,11 @@ type ReorderButtonProps = {
   onDragOver?: (event: DragEvent) => void;
   onDragLeave?: (event: DragEvent) => void;
   onDrop?: (event: DragEvent) => void;
+  onKeyDown?: (event: KeyboardEvent) => void;
 };
 
 export const ReorderButton = ({
+  ariaLabel,
   dragging,
   dragOver,
   onDragStart,
@@ -62,6 +77,7 @@ export const ReorderButton = ({
   onDragOver,
   onDragLeave,
   onDrop,
+  onKeyDown,
 }: ReorderButtonProps) => {
   const applyClass = (el?: HTMLButtonElement) => {
     if (!el) {
@@ -79,13 +95,14 @@ export const ReorderButton = ({
       type="button"
       ref={applyClass}
       draggable={true}
-      title="Reorder filter"
-      aria-label="reorder filter"
+      title={ariaLabel}
+      aria-label={ariaLabel}
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
       onDragOver={onDragOver}
       onDragLeave={onDragLeave}
       onDrop={onDrop}
+      onKeyDown={onKeyDown}
     >
       ::
     </button>

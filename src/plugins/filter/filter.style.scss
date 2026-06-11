@@ -213,11 +213,26 @@ revogr-filter-panel .filter-panel-dialog {
       top: -4px;
       right: 0;
       left: 0;
+      z-index: 2;
       height: 2px;
       background: var(--revo-grid-filter-panel-reorder-accent, #007cb2);
       border-radius: 999px;
       box-shadow: 0 0 0 2px var(--revo-grid-filter-panel-bg, #fff);
     }
+
+    &.filter-row-drop-active .filter-row-drop-target {
+      pointer-events: auto;
+    }
+  }
+
+  .filter-row-drop-target {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    padding: 0;
+    pointer-events: none;
+    background: transparent;
+    border: 0;
   }
 
   .multi-filter-list-action {
@@ -236,6 +251,10 @@ revogr-filter-panel .filter-panel-dialog {
   .trash-button {
     $btn-remove-size: 22px;
     margin: 0 0 -2px 6px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
     cursor: pointer;
 
     width: $btn-remove-size;

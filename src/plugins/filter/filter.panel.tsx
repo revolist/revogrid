@@ -62,6 +62,8 @@ export class FilterPanel {
     and: 'and',
     or: 'or',
     filterCondition: 'Filter condition',
+    removeFilter: 'Remove filter',
+    reorderFilter: 'Reorder filter',
   };
 
   @Element() element!: HTMLElement;
@@ -163,40 +165,49 @@ export class FilterPanel {
           // hide toggle button if there is only one filter and the last one
           if (index !== this.filterItems[prop].length - 1) {
             andOrButton = (
-              <div onClick={() => this.toggleFilterAndOr(filter.id)}>
-                <AndOrButton
-                  text={filter.relation === 'and' ? capts.and : capts.or}
-                />
-              </div>
+              <AndOrButton
+                text={filter.relation === 'and' ? capts.and : capts.or}
+                onClick={() => this.toggleFilterAndOr(filter.id)}
+              />
             );
           }
 
           const extra = this.renderExtra(prop, index);
           const isDragging = this.draggedFilterId === filter.id;
           const isDragOver = this.dragOverFilterId === filter.id && !isDragging;
+          const canReorder = visibleFilterCount > 1;
 
           return (
             <div key={filter.id} class={FILTER_LIST_CLASS}>
               <div
                 class={{
                   'multi-filter-list-row': true,
+                  'filter-row-drop-active': this.draggedFilterId !== undefined && !isDragging,
                   'filter-row-dragging': isDragging,
                   'filter-row-drag-over': isDragOver,
                 }}
-                onDragOver={e => this.onFilterDragOver(e, filter.id)}
-                onDragLeave={() => this.onFilterDragLeave(filter.id)}
-                onDrop={e => this.onFilterDrop(e, prop, filter.id)}
-                onKeyDown={e => this.onFilterRowKeyDown(e, prop, filter.id)}
                 role="listitem"
-                tabIndex={visibleFilterCount > 1 ? 0 : undefined}
                 aria-label={`${capts.filterCondition} ${index + 1}`}
               >
-                {visibleFilterCount > 1 ? (
+                {canReorder ? (
+                  <button
+                    type="button"
+                    class="filter-row-drop-target"
+                    tabIndex={-1}
+                    aria-label={`${capts.filterCondition} ${index + 1}`}
+                    onDragOver={e => this.onFilterDragOver(e, filter.id)}
+                    onDragLeave={() => this.onFilterDragLeave(filter.id)}
+                    onDrop={e => this.onFilterDrop(e, prop, filter.id)}
+                  />
+                ) : ''}
+                {canReorder ? (
                   <ReorderButton
+                    ariaLabel={capts.reorderFilter}
                     dragging={isDragging}
                     dragOver={isDragOver}
                     onDragStart={e => this.onFilterDragStart(e, filter.id)}
                     onDragEnd={() => this.onFilterDragEnd()}
+                    onKeyDown={e => this.onFilterReorderKeyDown(e, prop, filter.id)}
                   />
                 ) : ''}
                 <div class={{ 'select-input': true }}>
@@ -213,9 +224,10 @@ export class FilterPanel {
                 </div>
                 <div class={FILTER_LIST_CLASS_ACTION}>
                   {andOrButton}
-                  <div onClick={() => this.onRemoveFilter(filter.id)}>
-                    <TrashButton />
-                  </div>
+                  <TrashButton
+                    ariaLabel={capts.removeFilter}
+                    onClick={() => this.onRemoveFilter(filter.id)}
+                  />
                 </div>
               </div>
             </div>
@@ -480,11 +492,7 @@ export class FilterPanel {
     this.dragOverFilterId = undefined;
   }
 
-  private onFilterRowKeyDown(e: KeyboardEvent, prop: ColumnProp, sourceId: number) {
-    if (e.target !== e.currentTarget) {
-      return;
-    }
-
+  private onFilterReorderKeyDown(e: KeyboardEvent, prop: ColumnProp, sourceId: number) {
     const direction = e.key === 'ArrowUp' ? -1 : e.key === 'ArrowDown' ? 1 : 0;
     if (!direction) {
       return;
@@ -683,13 +691,13 @@ export class FilterPanel {
           onMouseDown={e => this.onDialogMouseDown(e)}
         >
           {this.changes && [
-            <slot slot="header" />,
+            <slot key="header-slot" slot="header" />,
             this.changes.extraContent?.(this.changes) || '',
 
             this.changes?.hideDefaultFilters !== true && [
-              <label>{capts.title}</label>,
-              <div class="filter-holder">{this.getFilterItemsList()}</div>,
-              <div class="add-filter">
+              <label key="filter-title">{capts.title}</label>,
+              <div key="filter-holder" class="filter-holder">{this.getFilterItemsList()}</div>,
+              <div key="add-filter" class="add-filter">
                 <select
                   id={FILTER_ID}
                   class="select-css"
@@ -700,11 +708,12 @@ export class FilterPanel {
               </div>,
             ],
 
-            <slot />,
+            <slot key="default-slot" />,
             this.changes.extraBottomContent?.(this.changes) || '',
-            <div class="filter-actions">
+            <div key="filter-actions" class="filter-actions">
               {this.disableDynamicFiltering && [
                 <button
+                  key="save"
                   id="revo-button-save"
                   aria-label="save"
                   class="revo-button green"
@@ -713,6 +722,7 @@ export class FilterPanel {
                   {capts.save}
                 </button>,
                 <button
+                  key="cancel"
                   id="revo-button-ok"
                   aria-label="ok"
                   class="revo-button green"
@@ -723,6 +733,7 @@ export class FilterPanel {
               ]}
               {!this.disableDynamicFiltering && [
                 <button
+                  key="ok"
                   id="revo-button-ok"
                   aria-label="ok"
                   class="revo-button green"
@@ -732,6 +743,7 @@ export class FilterPanel {
                 </button>,
 
                 <button
+                  key="reset"
                   id="revo-button-reset"
                   aria-label="reset"
                   class="revo-button outline"
@@ -741,7 +753,7 @@ export class FilterPanel {
                 </button>,
               ]}
             </div>,
-            <slot slot="footer" />,
+            <slot key="footer-slot" slot="footer" />,
           ]}
         </dialog>
       </Host>

@@ -294,8 +294,8 @@ test.describe('filtering', () => {
     await filterPanel.evaluate((panel) => {
       const rows = Array.from(panel.querySelectorAll('.multi-filter-list-row'));
       const sourceHandle = rows[1].querySelector('.reorder-button');
-      const targetRow = rows[0];
-      if (!sourceHandle || !targetRow) {
+      const targetDrop = rows[0].querySelector('.filter-row-drop-target');
+      if (!sourceHandle || !targetDrop) {
         throw new Error('Filter reorder controls were not found');
       }
       const dataTransfer = new DataTransfer();
@@ -304,7 +304,7 @@ test.describe('filtering', () => {
         cancelable: true,
         dataTransfer,
       }));
-      targetRow.dispatchEvent(new DragEvent('dragover', {
+      targetDrop.dispatchEvent(new DragEvent('dragover', {
         bubbles: true,
         cancelable: true,
         dataTransfer,
@@ -316,13 +316,13 @@ test.describe('filtering', () => {
     await filterPanel.evaluate((panel) => {
       const rows = Array.from(panel.querySelectorAll('.multi-filter-list-row'));
       const sourceHandle = rows[1].querySelector('.reorder-button');
-      const targetRow = rows[0];
-      if (!sourceHandle || !targetRow) {
+      const targetDrop = rows[0].querySelector('.filter-row-drop-target');
+      if (!sourceHandle || !targetDrop) {
         throw new Error('Filter reorder controls were not found');
       }
       const dataTransfer = new DataTransfer();
       dataTransfer.setData('text/plain', '2');
-      targetRow.dispatchEvent(new DragEvent('drop', {
+      targetDrop.dispatchEvent(new DragEvent('drop', {
         bubbles: true,
         cancelable: true,
         dataTransfer,
@@ -340,7 +340,7 @@ test.describe('filtering', () => {
     await expect(filterInputs.nth(0)).toHaveValue('Engineer');
     await expect(filterInputs.nth(1)).toHaveValue('Admin');
 
-    await filterPanel.getByRole('listitem', { name: 'Condition 1' }).focus();
+    await filterPanel.locator('.reorder-button').first().focus();
     await page.keyboard.press('ArrowDown');
 
     await expect(filterPanel.locator('.select-filter').nth(0)).toHaveValue('contains');
