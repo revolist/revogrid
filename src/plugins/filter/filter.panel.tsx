@@ -11,7 +11,7 @@ import {
   Prop,
   State,
   type VNode,
-  Element,
+  Element as StencilElement,
 } from '@stencil/core';
 import debounce from 'lodash/debounce';
 
@@ -66,7 +66,7 @@ export class FilterPanel {
     reorderFilter: 'Reorder filter',
   };
 
-  @Element() element!: HTMLElement;
+  @StencilElement() element!: HTMLElement;
   @State() isFilterIdSet = false;
   @State() filterId = 0;
   @State() currentFilterId = -1;
@@ -112,9 +112,8 @@ export class FilterPanel {
     const isOutside = !path.includes(this.element);
 
     if (
-      e.target instanceof HTMLElement &&
       isOutside &&
-      !this.isOwnFilterButton(e.target, path) &&
+      !this.isOwnFilterButton(e.target) &&
       this.closeOnOutsideClick
     ) {
       this.changes = undefined;
@@ -661,18 +660,34 @@ export class FilterPanel {
     return this.element.querySelector<HTMLSelectElement>(`#${FILTER_ID}`);
   }
 
-  private isOwnFilterButton(target: HTMLElement, path: EventTarget[]) {
-    if (!isFilterBtn(target)) {
+  private isOwnFilterButton(target: EventTarget | null) {
+    if (!(target instanceof Element)) {
       return false;
     }
 
-    const root = this.element.getRootNode();
-    if (root instanceof ShadowRoot) {
-      return path.includes(root.host);
+    const element = target as Element;
+
+    if (!isFilterBtn(element)) {
+      return false;
     }
 
-    const grid = this.element.closest('revo-grid');
-    return !!grid && path.includes(grid);
+    const panelGrid = this.getOwningGrid(this.element);
+    const targetGrid = this.getOwningGrid(element);
+
+    return !!panelGrid && panelGrid === targetGrid;
+  }
+
+  private getOwningGrid(element: Element): Element | undefined {
+    const grid = element.closest('revo-grid');
+    if (grid) {
+      return grid;
+    }
+
+    const root = element.getRootNode();
+    if (root instanceof ShadowRoot && root.host.localName === 'revo-grid') {
+      return root.host;
+    }
+    return undefined;
   }
 
   render() {

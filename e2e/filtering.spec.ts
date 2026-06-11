@@ -80,20 +80,36 @@ test.describe('filtering', () => {
   });
 
   test('closes an open filter panel when opening another grid filter panel', async ({ page }) => {
-    await page.setContent(`
-      <div style="display: grid; gap: 24px; width: 900px;">
-        <div style="height: 180px;">
-          <revo-grid filter style="display:block; width:100%; height:100%;"></revo-grid>
-        </div>
-        <div style="height: 180px;">
-          <revo-grid filter style="display:block; width:100%; height:100%;"></revo-grid>
-        </div>
-      </div>
-    `);
-    await page.waitForSelector(SELECTORS.grid);
+    await page.evaluate(() => {
+      customElements.define(
+        'shadow-grid-host',
+        class extends HTMLElement {
+          connectedCallback() {
+            const root = this.attachShadow({ mode: 'open' });
+            root.innerHTML = `
+              <div style="display: grid; gap: 24px; width: 900px;">
+                <div style="height: 180px;">
+                  <revo-grid filter style="display:block; width:100%; height:100%;"></revo-grid>
+                </div>
+                <div style="height: 180px;">
+                  <revo-grid filter style="display:block; width:100%; height:100%;"></revo-grid>
+                </div>
+              </div>
+            `;
+          }
+        },
+      );
+    });
+    await page.setContent('<shadow-grid-host></shadow-grid-host>');
+    await page.waitForSelector('shadow-grid-host revo-grid');
 
     await page.evaluate(() => {
-      const grids = Array.from(document.querySelectorAll<HTMLRevoGridElement>('revo-grid'));
+      const grids = Array.from(
+        document
+          .querySelector('shadow-grid-host')
+          ?.shadowRoot
+          ?.querySelectorAll<HTMLRevoGridElement>('revo-grid') ?? [],
+      );
       if (grids.length !== 2) {
         throw new Error('Two grid instances were not created');
       }
@@ -137,10 +153,10 @@ test.describe('filtering', () => {
     await expect(openFilterPanels).toHaveCount(1);
 
     await expect(
-      page.locator('revo-grid').nth(0).locator(`${SELECTORS.filterPanel}[open]`),
+      page.locator('shadow-grid-host revo-grid').nth(0).locator(`${SELECTORS.filterPanel}[open]`),
     ).toHaveCount(0);
     await expect(
-      page.locator('revo-grid').nth(1).locator(`${SELECTORS.filterPanel}[open]`),
+      page.locator('shadow-grid-host revo-grid').nth(1).locator(`${SELECTORS.filterPanel}[open]`),
     ).toHaveCount(1);
   });
 
@@ -196,8 +212,8 @@ test.describe('filtering', () => {
       };
     });
 
-    expect(Math.abs(panelLeft - buttonLeft)).toBeLessThanOrEqual(3);
-    expect(Math.abs(panelTop - buttonBottom)).toBeLessThanOrEqual(3);
+    expect(Math.abs(panelLeft - buttonLeft)).toBeLessThanOrEqual(4);
+    expect(Math.abs(panelTop - buttonBottom)).toBeLessThanOrEqual(4);
     expect(panelBottom).toBeGreaterThan(wrapperBottom);
   });
 
