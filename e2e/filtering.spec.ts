@@ -80,31 +80,28 @@ test.describe('filtering', () => {
   });
 
   test('closes an open filter panel when opening another grid filter panel', async ({ page }) => {
+    await page.setContent('<div id="shadow-grid-host"></div>');
     await page.evaluate(() => {
-      customElements.define(
-        'shadow-grid-host',
-        class extends HTMLElement {
-          connectedCallback() {
-            const root = this.attachShadow({ mode: 'open' });
-            root.innerHTML = `
-              <div style="display: grid; gap: 24px; width: 900px;">
-                <div style="height: 180px;">
-                  <revo-grid filter style="display:block; width:100%; height:100%;"></revo-grid>
-                </div>
-                <div style="height: 180px;">
-                  <revo-grid filter style="display:block; width:100%; height:100%;"></revo-grid>
-                </div>
-              </div>
-            `;
-          }
-        },
-      );
+      const host = document.querySelector('#shadow-grid-host');
+      if (!host) {
+        throw new Error('Shadow host was not created');
+      }
+      const root = host.attachShadow({ mode: 'open' });
+      root.innerHTML = `
+        <div style="display: grid; gap: 24px; width: 900px;">
+          <div style="height: 180px;">
+            <revo-grid filter style="display:block; width:100%; height:100%;"></revo-grid>
+          </div>
+          <div style="height: 180px;">
+            <revo-grid filter style="display:block; width:100%; height:100%;"></revo-grid>
+          </div>
+        </div>
+      `;
     });
-    await page.setContent('<shadow-grid-host></shadow-grid-host>');
     await page.waitForFunction(() => {
       return (
         document
-          .querySelector('shadow-grid-host')
+          .querySelector('#shadow-grid-host')
           ?.shadowRoot
           ?.querySelectorAll('revo-grid').length === 2
       );
@@ -113,7 +110,7 @@ test.describe('filtering', () => {
     await page.evaluate(() => {
       const grids = Array.from(
         document
-          .querySelector('shadow-grid-host')
+          .querySelector('#shadow-grid-host')
           ?.shadowRoot
           ?.querySelectorAll<HTMLRevoGridElement>('revo-grid') ?? [],
       );
@@ -160,10 +157,10 @@ test.describe('filtering', () => {
     await expect(openFilterPanels).toHaveCount(1);
 
     await expect(
-      page.locator('shadow-grid-host revo-grid').nth(0).locator(`${SELECTORS.filterPanel}[open]`),
+      page.locator('#shadow-grid-host revo-grid').nth(0).locator(`${SELECTORS.filterPanel}[open]`),
     ).toHaveCount(0);
     await expect(
-      page.locator('shadow-grid-host revo-grid').nth(1).locator(`${SELECTORS.filterPanel}[open]`),
+      page.locator('#shadow-grid-host revo-grid').nth(1).locator(`${SELECTORS.filterPanel}[open]`),
     ).toHaveCount(1);
   });
 
