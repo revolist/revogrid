@@ -665,14 +665,12 @@ export class FilterPanel {
       return false;
     }
 
-    const element = target as Element;
-
-    if (!isFilterBtn(element)) {
+    if (!isFilterBtn(target)) {
       return false;
     }
 
     const panelGrid = this.getOwningGrid(this.element);
-    const targetGrid = this.getOwningGrid(element);
+    const targetGrid = this.getOwningGrid(target);
 
     return !!panelGrid && panelGrid === targetGrid;
   }
