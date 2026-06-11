@@ -150,10 +150,10 @@ export class FilterPanel {
 
     const propFilters = this.filterItems[prop] ?? [];
     const visibleFilterCount = propFilters.filter(filter => !filter.hidden).length;
-    const capts = Object.assign(
-      this.filterCaptionsInternal,
-      this.filterCaptions,
-    );
+    const capts = {
+      ...this.filterCaptionsInternal,
+      ...(this.filterCaptions ?? {}),
+    };
     return (
       <div key={this.filterId}>
         <ul class="multi-filter-list-container">
@@ -484,9 +484,6 @@ export class FilterPanel {
     } else {
       return;
     }
-    e.preventDefault();
-    e.stopPropagation();
-
     const items = this.filterItems[prop];
     if (!items) {
       return;
@@ -494,6 +491,12 @@ export class FilterPanel {
 
     const visibleItems = items.filter(item => !item.hidden);
     const sourceIndex = visibleItems.findIndex(item => item.id === sourceId);
+    if (sourceIndex === -1) {
+      return;
+    }
+    e.preventDefault();
+    e.stopPropagation();
+
     const target = visibleItems[sourceIndex + direction];
     if (!target || !moveFilterItem(items, sourceId, target.id)) {
       return;
@@ -550,10 +553,10 @@ export class FilterPanel {
     });
 
     if (!isDefaultTypeRemoved) {
-      const capts = Object.assign(
-        this.filterCaptionsInternal,
-        this.filterCaptions,
-      );
+      const capts = {
+        ...this.filterCaptionsInternal,
+        ...(this.filterCaptions ?? {}),
+      };
 
       options.push(
         <option
@@ -605,10 +608,10 @@ export class FilterPanel {
       }
     };
 
-    const capts = Object.assign(
-      this.filterCaptionsInternal,
-      this.filterCaptions,
-    );
+    const capts = {
+      ...this.filterCaptionsInternal,
+      ...(this.filterCaptions ?? {}),
+    };
     const extra = this.filterEntities[currentFilter[index].type].extra;
     if (typeof extra === 'function') {
       return extra(h, {
@@ -660,10 +663,10 @@ export class FilterPanel {
       top: `${this.changes?.y ?? 0}px`,
     };
 
-    const capts = Object.assign(
-      this.filterCaptionsInternal,
-      this.filterCaptions,
-    );
+    const capts = {
+      ...this.filterCaptionsInternal,
+      ...(this.filterCaptions ?? {}),
+    };
 
     return (
       <Host>

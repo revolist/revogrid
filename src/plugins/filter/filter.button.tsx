@@ -82,21 +82,14 @@ export const ReorderButton = ({
   onDrop,
   onKeyDown,
 }: ReorderButtonProps) => {
-  const applyClass = (el?: HTMLButtonElement) => {
-    if (!el) {
-      return;
-    }
-    el.className = [
-      REORDER_BUTTON,
-      dragging ? 'filter-row-dragging' : '',
-      dragOver ? 'filter-row-drag-over' : '',
-    ].filter(Boolean).join(' ');
-  };
-
   return (
     <button
       type="button"
-      ref={applyClass}
+      class={{
+        [REORDER_BUTTON]: true,
+        'filter-row-dragging': !!dragging,
+        'filter-row-drag-over': !!dragOver,
+      }}
       draggable={true}
       title={ariaLabel}
       aria-label={ariaLabel}
