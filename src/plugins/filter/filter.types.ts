@@ -72,6 +72,9 @@ export interface FilterCaptions {
   placeholder: string;
   and: string;
   or: string;
+  filterCondition: string;
+  removeFilter: string;
+  reorderFilter: string;
 };
 
 export interface FilterLocalization {
@@ -160,6 +163,10 @@ export interface MultiFilterItem {
 export interface ShowData extends FilterItem, Omit<ColumnRegular, 'filter'> {
   x: number;
   y: number;
+  /**
+   * Top viewport coordinate of the element the filter panel is anchored to.
+   */
+  anchorY?: number;
   /**
    * Auto correct position if it is out of document bounds
    */

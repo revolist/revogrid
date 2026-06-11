@@ -244,7 +244,8 @@ export class FilterPlugin extends BasePlugin {
 
   async headerclick(e: CustomEvent<ColumnRegular>) {
     const el = e.detail.originalEvent?.target as HTMLElement;
-    if (!isFilterBtn(el)) {
+    const filterButton = isFilterBtn(el);
+    if (!filterButton) {
       return;
     }
     e.preventDefault();
@@ -260,14 +261,16 @@ export class FilterPlugin extends BasePlugin {
     }
 
     // filter button clicked, open filter dialog
-    const gridPos = this.revogrid.getBoundingClientRect();
-    const buttonPos = el.getBoundingClientRect();
+    const buttonPos = (
+      filterButton instanceof HTMLElement ? filterButton : el
+    ).getBoundingClientRect();
 
     const data: ShowData = {
       ...e.detail,
       ...this.filterCollection[prop],
-      x: buttonPos.x - gridPos.x,
-      y: buttonPos.y - gridPos.y + buttonPos.height,
+      x: buttonPos.x,
+      y: buttonPos.y + buttonPos.height,
+      anchorY: buttonPos.y,
       autoCorrect: true,
       filterTypes: this.getColumnFilter(e.detail.filter),
       filterItems: this.multiFilterItems,

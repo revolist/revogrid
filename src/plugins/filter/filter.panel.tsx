@@ -36,6 +36,7 @@ const defaultType: FilterType = 'none';
 const FILTER_LIST_CLASS = 'multi-filter-list';
 const FILTER_LIST_CLASS_ACTION = 'multi-filter-list-action';
 const FILTER_ID = 'add-filter';
+const VIEWPORT_PADDING = 8;
 
 /**
  * Filter panel for editing filters
@@ -48,6 +49,7 @@ const FILTER_ID = 'add-filter';
   styleUrl: 'filter.style.scss',
 })
 export class FilterPanel {
+  private dialog?: HTMLDialogElement;
   private filterCaptionsInternal: FilterCaptions = {
     title: 'Filter by',
     ok: 'Close',
@@ -59,6 +61,9 @@ export class FilterPanel {
     placeholder: 'Enter value...',
     and: 'and',
     or: 'or',
+    filterCondition: 'Filter condition',
+    removeFilter: 'Remove filter',
+    reorderFilter: 'Reorder filter',
   };
 
   @Element() element!: HTMLElement;
@@ -145,90 +150,163 @@ export class FilterPanel {
 
     const propFilters = this.filterItems[prop] ?? [];
     const visibleFilterCount = propFilters.filter(filter => !filter.hidden).length;
-    const capts = Object.assign(
-      this.filterCaptionsInternal,
-      this.filterCaptions,
-    );
+    const capts = {
+      ...this.filterCaptionsInternal,
+      ...this.filterCaptions,
+    };
     return (
       <div key={this.filterId}>
-        {propFilters.map((filter, index) => {
-          let andOrButton;
-          if (filter.hidden) {
-            return;
-          }
+        <ul class="multi-filter-list-container">
+          {propFilters.map((filter, index) => {
+            let andOrButton;
+            if (filter.hidden) {
+              return;
+            }
 
-          // hide toggle button if there is only one filter and the last one
-          if (index !== this.filterItems[prop].length - 1) {
-            andOrButton = (
-              <div onClick={() => this.toggleFilterAndOr(filter.id)}>
+            // hide toggle button if there is only one filter and the last one
+            if (index !== this.filterItems[prop].length - 1) {
+              andOrButton = (
                 <AndOrButton
                   text={filter.relation === 'and' ? capts.and : capts.or}
+                  onClick={() => this.toggleFilterAndOr(filter.id)}
                 />
-              </div>
-            );
-          }
+              );
+            }
 
-          const extra = this.renderExtra(prop, index);
+            const extra = this.renderExtra(prop, index);
+            const isDragging = this.draggedFilterId === filter.id;
+            const isDragOver = this.dragOverFilterId === filter.id && !isDragging;
+            const canReorder = visibleFilterCount > 1;
 
-          return (
-            <div key={filter.id} class={FILTER_LIST_CLASS}>
-              <div ref={el => el?.classList.add('multi-filter-list-row')}>
-                {visibleFilterCount > 1 ? (
-                  <ReorderButton
-                    dragging={this.draggedFilterId === filter.id}
-                    dragOver={this.dragOverFilterId === filter.id && this.draggedFilterId !== filter.id}
-                    onDragStart={e => this.onFilterDragStart(e, filter.id)}
-                    onDragEnd={() => this.onFilterDragEnd()}
-                    onDragOver={e => this.onFilterDragOver(e, filter.id)}
-                    onDragLeave={() => this.onFilterDragLeave(filter.id)}
-                    onDrop={e => this.onFilterDrop(e, prop, filter.id)}
-                  />
-                ) : ''}
-                <div class={{ 'select-input': true }}>
-                  <select
-                    class="select-css select-filter"
-                    onChange={e => this.onFilterTypeChange(e, prop, index)}
-                  >
-                    {this.renderSelectOptions(
-                      this.filterItems[prop][index].type,
-                      true,
-                    )}
-                  </select>
-                  {extra ? <div class="filter-extra">{extra}</div> : ''}
-                </div>
-                <div class={FILTER_LIST_CLASS_ACTION}>
-                  {andOrButton}
-                  <div onClick={() => this.onRemoveFilter(filter.id)}>
-                    <TrashButton />
+            return (
+              <li
+                key={filter.id}
+                class={FILTER_LIST_CLASS}
+                aria-label={`${capts.filterCondition} ${index + 1}`}
+              >
+                <div
+                  class={{
+                    'multi-filter-list-row': true,
+                    'filter-row-drop-active': this.draggedFilterId !== undefined && !isDragging,
+                    'filter-row-dragging': isDragging,
+                    'filter-row-drag-over': isDragOver,
+                  }}
+                >
+                  {canReorder ? (
+                    <button
+                      type="button"
+                      class="filter-row-drop-target"
+                      tabIndex={-1}
+                      aria-label={`${capts.filterCondition} ${index + 1}`}
+                      onDragOver={e => this.onFilterDragOver(e, filter.id)}
+                      onDragLeave={() => this.onFilterDragLeave(filter.id)}
+                      onDrop={e => this.onFilterDrop(e, prop, filter.id)}
+                    />
+                  ) : ''}
+                  {canReorder ? (
+                    <ReorderButton
+                      ariaLabel={capts.reorderFilter}
+                      dragging={isDragging}
+                      dragOver={isDragOver}
+                      onDragStart={e => this.onFilterDragStart(e, filter.id)}
+                      onDragEnd={() => this.onFilterDragEnd()}
+                      onKeyDown={e => this.onFilterReorderKeyDown(e, prop, filter.id)}
+                    />
+                  ) : ''}
+                  <div class={{ 'select-input': true }}>
+                    <select
+                      class="select-css select-filter"
+                      onChange={e => this.onFilterTypeChange(e, prop, index)}
+                    >
+                      {this.renderSelectOptions(
+                        this.filterItems[prop][index].type,
+                        true,
+                      )}
+                    </select>
+                    {extra ? <div class="filter-extra">{extra}</div> : ''}
+                  </div>
+                  <div class={FILTER_LIST_CLASS_ACTION}>
+                    {andOrButton}
+                    <TrashButton
+                      ariaLabel={capts.removeFilter}
+                      onClick={() => this.onRemoveFilter(filter.id)}
+                    />
                   </div>
                 </div>
-              </div>
-            </div>
-          );
-        })}
+              </li>
+            );
+          })}
+        </ul>
 
         {propFilters.filter(f => !f.hidden).length > 0 ? <div class="add-filter-divider" /> : ''}
       </div>
     );
   }
 
-  private autoCorrect(el?: HTMLElement | null) {
-    if (!el) {
+  componentDidRender() {
+    this.syncDialog();
+  }
+
+  private syncDialog() {
+    if (!this.dialog) {
       return;
     }
 
-    const revoGrid = el.closest('revo-grid');
-    if (!revoGrid) {
+    if (!this.changes) {
+      if (this.dialog.open) {
+        this.dialog.close();
+      }
       return;
     }
+
+    if (!this.dialog.open) {
+      this.dialog.show();
+    }
+
+    if (this.changes.autoCorrect !== false) {
+      this.autoCorrect(this.dialog);
+      requestAnimationFrame(() => this.autoCorrect(this.dialog));
+    }
+  }
+
+  private autoCorrect(el?: HTMLElement | null) {
+    if (!el || !this.changes) {
+      return;
+    }
+
+    el.style.maxHeight = '';
+    el.style.left = `${this.changes.x}px`;
+    el.style.top = `${this.changes.y}px`;
 
     const pos = el.getBoundingClientRect();
-    const gridPos = revoGrid.getBoundingClientRect();
-    const maxLeft = gridPos.right - pos.width;
+    const anchorTop = this.changes.anchorY ?? this.changes.y;
+    const anchorBottom = this.changes.y;
+    const spaceAbove = Math.max(0, anchorTop - VIEWPORT_PADDING);
+    const spaceBelow = Math.max(0, window.innerHeight - anchorBottom - VIEWPORT_PADDING);
+    const openAbove = pos.height > spaceBelow && spaceAbove > spaceBelow;
+    const availableHeight = Math.max(
+      VIEWPORT_PADDING,
+      openAbove ? spaceAbove : spaceBelow,
+    );
 
-    if (pos.left > maxLeft && el.offsetLeft) {
-      el.style.left = `${maxLeft - (el.parentElement?.getBoundingClientRect().left ?? 0)}px`;
-    }
+    el.style.maxHeight = `${availableHeight}px`;
+
+    const adjustedPos = el.getBoundingClientRect();
+    const maxLeft = Math.max(
+      VIEWPORT_PADDING,
+      window.innerWidth - adjustedPos.width - VIEWPORT_PADDING,
+    );
+    const maxTop = Math.max(
+      VIEWPORT_PADDING,
+      window.innerHeight - adjustedPos.height - VIEWPORT_PADDING,
+    );
+    const left = Math.min(Math.max(VIEWPORT_PADDING, this.changes.x), maxLeft);
+    const top = openAbove
+      ? Math.min(Math.max(VIEWPORT_PADDING, anchorTop - adjustedPos.height), maxTop)
+      : Math.min(Math.max(VIEWPORT_PADDING, anchorBottom), maxTop);
+
+    el.style.left = `${left}px`;
+    el.style.top = `${top}px`;
   }
 
   private onFilterTypeChange(e: Event, prop: ColumnProp, index: number) {
@@ -397,6 +475,40 @@ export class FilterPanel {
     this.dragOverFilterId = undefined;
   }
 
+  private onFilterReorderKeyDown(e: KeyboardEvent, prop: ColumnProp, sourceId: number) {
+    let direction = 0;
+    if (e.key === 'ArrowUp') {
+      direction = -1;
+    } else if (e.key === 'ArrowDown') {
+      direction = 1;
+    } else {
+      return;
+    }
+    const items = this.filterItems[prop];
+    if (!items) {
+      return;
+    }
+
+    const visibleItems = items.filter(item => !item.hidden);
+    const sourceIndex = visibleItems.findIndex(item => item.id === sourceId);
+    if (sourceIndex === -1) {
+      return;
+    }
+    e.preventDefault();
+    e.stopPropagation();
+
+    const target = visibleItems[sourceIndex + direction];
+    if (!target || !moveFilterItem(items, sourceId, target.id)) {
+      return;
+    }
+
+    this.filterId++;
+
+    if (!this.disableDynamicFiltering) {
+      this.debouncedApplyFilter();
+    }
+  }
+
   private toggleFilterAndOr(id: number) {
     this.assertChanges();
 
@@ -441,10 +553,10 @@ export class FilterPanel {
     });
 
     if (!isDefaultTypeRemoved) {
-      const capts = Object.assign(
-        this.filterCaptionsInternal,
-        this.filterCaptions,
-      );
+      const capts = {
+        ...this.filterCaptionsInternal,
+        ...this.filterCaptions,
+      };
 
       options.push(
         <option
@@ -496,10 +608,10 @@ export class FilterPanel {
       }
     };
 
-    const capts = Object.assign(
-      this.filterCaptionsInternal,
-      this.filterCaptions,
-    );
+    const capts = {
+      ...this.filterCaptionsInternal,
+      ...this.filterCaptions,
+    };
     const extra = this.filterEntities[currentFilter[index].type].extra;
     if (typeof extra === 'function') {
       return extra(h, {
@@ -546,88 +658,93 @@ export class FilterPanel {
   }
 
   render() {
-    if (!this.changes) {
-      return <Host style={{ display: 'none' }}></Host>;
-    }
     const style = {
-      display: 'block',
-      left: `${this.changes.x}px`,
-      top: `${this.changes.y}px`,
+      left: `${this.changes?.x ?? 0}px`,
+      top: `${this.changes?.y ?? 0}px`,
     };
 
-    const capts = Object.assign(
-      this.filterCaptionsInternal,
-      this.filterCaptions,
-    );
+    const capts = {
+      ...this.filterCaptionsInternal,
+      ...this.filterCaptions,
+    };
 
     return (
-      <Host
-        style={style}
-        ref={el => {
-          this.changes?.autoCorrect !== false && this.autoCorrect(el);
-        }}
-      >
-        <slot slot="header" />
-        { this.changes.extraContent?.(this.changes) || '' }
+      <Host>
+        <dialog
+          class="filter-panel-dialog"
+          style={style}
+          ref={el => (this.dialog = el)}
+          onCancel={e => {
+            e.preventDefault();
+            this.onCancel();
+          }}
+        >
+          {this.changes && [
+            <slot key="header-slot" slot="header" />,
+            this.changes.extraContent?.(this.changes) || '',
 
-        { this.changes?.hideDefaultFilters !== true && (
-          [
-            <label>{capts.title}</label>,
-            <div class="filter-holder">{this.getFilterItemsList()}</div>,
-            <div class="add-filter">
-              <select
-                id={FILTER_ID}
-                class="select-css"
-                onChange={e => this.onAddNewFilter(e)}
-              >
-                {this.renderSelectOptions(this.currentFilterType)}
-              </select>
-            </div>
-          ]
-        )}
+            this.changes?.hideDefaultFilters !== true && [
+              <label key="filter-title">{capts.title}</label>,
+              <div key="filter-holder" class="filter-holder">{this.getFilterItemsList()}</div>,
+              <div key="add-filter" class="add-filter">
+                <select
+                  id={FILTER_ID}
+                  class="select-css"
+                  onChange={e => this.onAddNewFilter(e)}
+                >
+                  {this.renderSelectOptions(this.currentFilterType)}
+                </select>
+              </div>,
+            ],
 
-        <slot />
-        { this.changes.extraBottomContent?.(this.changes) || '' }
-        <div class="filter-actions">
-          {this.disableDynamicFiltering && [
-            <button
-              id="revo-button-save"
-              aria-label="save"
-              class="revo-button green"
-              onClick={() => this.onSave()}
-            >
-              {capts.save}
-            </button>,
-            <button
-              id="revo-button-ok"
-              aria-label="ok"
-              class="revo-button green"
-              onClick={() => this.onCancel()}
-            >
-              {capts.cancel}
-            </button>,
+            <slot key="default-slot" />,
+            this.changes.extraBottomContent?.(this.changes) || '',
+            <div key="filter-actions" class="filter-actions">
+              {this.disableDynamicFiltering && [
+                <button
+                  key="save"
+                  id="revo-button-save"
+                  aria-label="save"
+                  class="revo-button green"
+                  onClick={() => this.onSave()}
+                >
+                  {capts.save}
+                </button>,
+                <button
+                  key="cancel"
+                  id="revo-button-ok"
+                  aria-label="ok"
+                  class="revo-button green"
+                  onClick={() => this.onCancel()}
+                >
+                  {capts.cancel}
+                </button>,
+              ]}
+              {!this.disableDynamicFiltering && [
+                <button
+                  key="ok"
+                  id="revo-button-ok"
+                  aria-label="ok"
+                  class="revo-button green"
+                  onClick={() => this.onCancel()}
+                >
+                  {capts.ok}
+                </button>,
+
+                <button
+                  key="reset"
+                  id="revo-button-reset"
+                  aria-label="reset"
+                  class="revo-button outline"
+                  onClick={() => this.onReset()}
+                >
+                  {capts.reset}
+                </button>,
+              ]}
+            </div>,
+            <slot key="footer-slot" slot="footer" />,
           ]}
-          {!this.disableDynamicFiltering && [
-            <button
-              id="revo-button-ok"
-              aria-label="ok"
-              class="revo-button green"
-              onClick={() => this.onCancel()}
-            >
-              {capts.ok}
-            </button>,
-
-            <button
-              id="revo-button-reset"
-              aria-label="reset"
-              class="revo-button outline"
-              onClick={() => this.onReset()}
-            >
-              {capts.reset}
-            </button>,
-          ]}
-        </div>
-        <slot slot="footer" />
+        </dialog>
       </Host>
     );
   }

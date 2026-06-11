@@ -79,6 +79,122 @@ test.describe('filtering', () => {
     await expect(filterPanel).not.toBeVisible();
   });
 
+  test('renders filter panel as a native dialog outside overflow clipping', async ({ page }) => {
+    const source: SampleRow[] = [
+      { id: 501, name: 'Alice', role: 'Admin', city: 'Lisbon' },
+      { id: 502, name: 'Ben', role: 'Engineer', city: 'Porto' },
+    ];
+
+    const columns = buildColumns([
+      { prop: 'id', name: 'ID' },
+      { prop: 'name', name: 'Name' },
+      { prop: 'role', name: 'Role', filter: true, ...withHeaderTestId('dialog-filter-role') },
+      { prop: 'city', name: 'City' },
+    ]);
+
+    await mountGrid(page, { columns, source, filter: true, height: 72 });
+    await page.locator('revo-grid').evaluate(grid => {
+      const wrapper = grid.parentElement;
+      if (!wrapper) {
+        throw new Error('Grid wrapper was not found');
+      }
+      wrapper.style.overflow = 'hidden';
+    });
+
+    await page
+      .getByTestId('dialog-filter-role')
+      .locator(SELECTORS.filterButton)
+      .click();
+
+    const filterPanel = page.locator(SELECTORS.filterPanel);
+    await expect(filterPanel).toBeVisible();
+    await expect(filterPanel).toHaveJSProperty('open', true);
+
+    const { buttonBottom, buttonLeft, panelBottom, panelLeft, panelTop, wrapperBottom } = await page.evaluate(() => {
+      const dialog = document.querySelector('revogr-filter-panel dialog');
+      const button = document
+        .querySelector('[data-testid="dialog-filter-role"]')
+        ?.querySelector('.rv-filter');
+      const wrapper = document.querySelector('revo-grid')?.parentElement;
+      if (!button || !dialog || !wrapper) {
+        throw new Error('Filter button, dialog, or grid wrapper was not found');
+      }
+      const buttonRect = button.getBoundingClientRect();
+      const panelRect = dialog.getBoundingClientRect();
+      return {
+        buttonBottom: buttonRect.bottom,
+        buttonLeft: buttonRect.left,
+        panelBottom: panelRect.bottom,
+        panelLeft: panelRect.left,
+        panelTop: panelRect.top,
+        wrapperBottom: wrapper.getBoundingClientRect().bottom,
+      };
+    });
+
+    expect(Math.abs(panelLeft - buttonLeft)).toBeLessThanOrEqual(3);
+    expect(Math.abs(panelTop - buttonBottom)).toBeLessThanOrEqual(3);
+    expect(panelBottom).toBeGreaterThan(wrapperBottom);
+  });
+
+  test('flips filter dialog above the button near the viewport bottom', async ({ page }) => {
+    await page.setViewportSize({ width: 900, height: 260 });
+
+    const source: SampleRow[] = [
+      { id: 501, name: 'Alice', role: 'Admin', city: 'Lisbon' },
+      { id: 502, name: 'Ben', role: 'Engineer', city: 'Porto' },
+    ];
+
+    const columns = buildColumns([
+      { prop: 'id', name: 'ID' },
+      { prop: 'name', name: 'Name' },
+      { prop: 'role', name: 'Role', filter: true, ...withHeaderTestId('bottom-filter-role') },
+      { prop: 'city', name: 'City' },
+    ]);
+
+    await mountGrid(page, { columns, source, filter: true, height: 160 });
+    await page.locator('revo-grid').evaluate(grid => {
+      const wrapper = grid.parentElement;
+      if (!wrapper) {
+        throw new Error('Grid wrapper was not found');
+      }
+      wrapper.style.marginTop = '160px';
+    });
+
+    await page
+      .getByTestId('bottom-filter-role')
+      .locator(SELECTORS.filterButton)
+      .click();
+
+    const filterPanel = page.locator(SELECTORS.filterPanel);
+    await expect(filterPanel).toBeVisible();
+
+    const { actionBottom, buttonTop, panelBottom, panelTop, viewportBottom } = await page.evaluate(() => {
+      const dialog = document.querySelector('revogr-filter-panel dialog');
+      const button = document
+        .querySelector('[data-testid="bottom-filter-role"]')
+        ?.querySelector('.rv-filter');
+      const actions = dialog?.querySelector('.filter-actions');
+      if (!button || !dialog || !actions) {
+        throw new Error('Filter button, dialog, or filter actions were not found');
+      }
+      const buttonRect = button.getBoundingClientRect();
+      const panelRect = dialog.getBoundingClientRect();
+      const actionRect = actions.getBoundingClientRect();
+      return {
+        actionBottom: actionRect.bottom,
+        buttonTop: buttonRect.top,
+        panelBottom: panelRect.bottom,
+        panelTop: panelRect.top,
+        viewportBottom: window.innerHeight,
+      };
+    });
+
+    expect(panelTop).toBeGreaterThanOrEqual(8);
+    expect(panelBottom).toBeLessThanOrEqual(buttonTop + 3);
+    expect(panelBottom).toBeLessThanOrEqual(viewportBottom - 8);
+    expect(Math.abs(actionBottom - panelBottom)).toBeLessThanOrEqual(2);
+  });
+
   test('renders filter condition actions outside select input on the same row', async ({ page }) => {
     const source: SampleRow[] = [
       { id: 501, name: 'Alice', role: 'Admin', city: 'Lisbon' },
@@ -92,7 +208,17 @@ test.describe('filtering', () => {
       { prop: 'city', name: 'City' },
     ]);
 
-    await mountGrid(page, { columns, source, filter: true });
+    await mountGrid(page, {
+      columns,
+      source,
+      filter: {
+        localization: {
+          captions: {
+            filterCondition: 'Condition',
+          },
+        },
+      },
+    });
 
     await page
       .getByTestId('layout-filter-role')
@@ -160,14 +286,16 @@ test.describe('filtering', () => {
     await filterInputs.nth(1).fill('Engineer');
 
     await expect(filterPanel.locator('.multi-filter-list-row')).toHaveCount(2);
+    await expect(filterPanel.getByRole('listitem', { name: 'Condition 1' })).toBeVisible();
+    await expect(filterPanel.getByRole('listitem', { name: 'Condition 2' })).toBeVisible();
     await expect(filterPanel.locator('.select-filter').nth(0)).toHaveValue('contains');
     await expect(filterPanel.locator('.select-filter').nth(1)).toHaveValue('eq');
 
     await filterPanel.evaluate((panel) => {
       const rows = Array.from(panel.querySelectorAll('.multi-filter-list-row'));
       const sourceHandle = rows[1].querySelector('.reorder-button');
-      const targetHandle = rows[0].querySelector('.reorder-button');
-      if (!sourceHandle || !targetHandle) {
+      const targetDrop = rows[0].querySelector('.filter-row-drop-target');
+      if (!sourceHandle || !targetDrop) {
         throw new Error('Filter reorder controls were not found');
       }
       const dataTransfer = new DataTransfer();
@@ -176,12 +304,25 @@ test.describe('filtering', () => {
         cancelable: true,
         dataTransfer,
       }));
-      targetHandle.dispatchEvent(new DragEvent('dragover', {
+      targetDrop.dispatchEvent(new DragEvent('dragover', {
         bubbles: true,
         cancelable: true,
         dataTransfer,
       }));
-      targetHandle.dispatchEvent(new DragEvent('drop', {
+    });
+
+    await expect(filterPanel.locator('.multi-filter-list-row').nth(0)).toHaveClass(/filter-row-drag-over/);
+
+    await filterPanel.evaluate((panel) => {
+      const rows = Array.from(panel.querySelectorAll('.multi-filter-list-row'));
+      const sourceHandle = rows[1].querySelector('.reorder-button');
+      const targetDrop = rows[0].querySelector('.filter-row-drop-target');
+      if (!sourceHandle || !targetDrop) {
+        throw new Error('Filter reorder controls were not found');
+      }
+      const dataTransfer = new DataTransfer();
+      dataTransfer.setData('text/plain', '2');
+      targetDrop.dispatchEvent(new DragEvent('drop', {
         bubbles: true,
         cancelable: true,
         dataTransfer,
@@ -193,10 +334,19 @@ test.describe('filtering', () => {
       }));
     });
 
+    await expect(filterPanel.locator('.filter-row-drag-over')).toHaveCount(0);
     await expect(filterPanel.locator('.select-filter').nth(0)).toHaveValue('eq');
     await expect(filterPanel.locator('.select-filter').nth(1)).toHaveValue('contains');
     await expect(filterInputs.nth(0)).toHaveValue('Engineer');
     await expect(filterInputs.nth(1)).toHaveValue('Admin');
+
+    await filterPanel.locator('.reorder-button').first().focus();
+    await page.keyboard.press('ArrowDown');
+
+    await expect(filterPanel.locator('.select-filter').nth(0)).toHaveValue('contains');
+    await expect(filterPanel.locator('.select-filter').nth(1)).toHaveValue('eq');
+    await expect(filterInputs.nth(0)).toHaveValue('Admin');
+    await expect(filterInputs.nth(1)).toHaveValue('Engineer');
   });
 
   test('reapplies active filters after source replacement', async ({ page }) => {
