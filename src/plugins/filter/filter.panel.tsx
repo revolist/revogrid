@@ -152,7 +152,7 @@ export class FilterPanel {
     const visibleFilterCount = propFilters.filter(filter => !filter.hidden).length;
     const capts = {
       ...this.filterCaptionsInternal,
-      ...(this.filterCaptions ?? {}),
+      ...this.filterCaptions,
     };
     return (
       <div key={this.filterId}>
@@ -555,7 +555,7 @@ export class FilterPanel {
     if (!isDefaultTypeRemoved) {
       const capts = {
         ...this.filterCaptionsInternal,
-        ...(this.filterCaptions ?? {}),
+        ...this.filterCaptions,
       };
 
       options.push(
@@ -610,7 +610,7 @@ export class FilterPanel {
 
     const capts = {
       ...this.filterCaptionsInternal,
-      ...(this.filterCaptions ?? {}),
+      ...this.filterCaptions,
     };
     const extra = this.filterEntities[currentFilter[index].type].extra;
     if (typeof extra === 'function') {
@@ -665,7 +665,7 @@ export class FilterPanel {
 
     const capts = {
       ...this.filterCaptionsInternal,
-      ...(this.filterCaptions ?? {}),
+      ...this.filterCaptions,
     };
 
     return (
