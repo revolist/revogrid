@@ -2,6 +2,7 @@ import { expect } from '@playwright/test';
 import { test } from '@stencil/playwright';
 import {
   buildColumns,
+  getVisibleSource,
   mainDataRows,
   mountGrid,
   visibleHeaderTexts,
@@ -48,6 +49,216 @@ test.describe('reordering', () => {
     await expect
       .poll(() => visibleColumnValues(page, 0))
       .not.toEqual(['Alice', 'Ben', 'Cara']);
+  });
+
+  test('keeps row in place when dropping on its original upper boundary', async ({
+    page,
+  }) => {
+    const source = Array.from({ length: 20 }, (_, index) => ({
+      a: `${index}:0`,
+      b: `${index}:1`,
+    }));
+
+    const columns = buildColumns([
+      { prop: 'a', name: 'A', rowDrag: true },
+      { prop: 'b', name: 'B' },
+    ]);
+
+    await mountGrid(page, { columns, source });
+    await page.evaluate(() => {
+      const grid = document.querySelector('revo-grid');
+      if (!grid) {
+        throw new Error('Grid element was not found');
+      }
+      grid.addEventListener('roworderchanged', ((event: CustomEvent) => {
+        (window as any).__rowOrderChanged = event.detail;
+      }) as EventListener);
+    });
+
+    const dragHandle = mainDataRows(page)
+      .nth(5)
+      .locator('[data-rgCol="0"] .revo-draggable');
+    const targetRow = mainDataRows(page).nth(4);
+    const handleBox = await dragHandle.boundingBox();
+    const targetBox = await targetRow.boundingBox();
+
+    expect(handleBox).not.toBeNull();
+    expect(targetBox).not.toBeNull();
+
+    await page.mouse.move(
+      handleBox!.x + handleBox!.width / 2,
+      handleBox!.y + handleBox!.height / 2,
+    );
+    await page.mouse.down();
+    await page.mouse.move(
+      targetBox!.x + targetBox!.width / 2,
+      targetBox!.y + targetBox!.height / 2,
+      { steps: 12 },
+    );
+    await page.mouse.up();
+
+    await expect
+      .poll(async () => {
+        const rows = await getVisibleSource<{ a: string }>(page);
+        return rows.map(row => row.a);
+      })
+      .toEqual([
+        '0:0',
+        '1:0',
+        '2:0',
+        '3:0',
+        '4:0',
+        '5:0',
+        '6:0',
+        '7:0',
+        '8:0',
+        '9:0',
+        '10:0',
+        '11:0',
+        '12:0',
+        '13:0',
+        '14:0',
+        '15:0',
+        '16:0',
+        '17:0',
+        '18:0',
+        '19:0',
+      ]);
+    await expect
+      .poll(() => page.evaluate(() => (window as any).__rowOrderChanged))
+      .toBeUndefined();
+  });
+
+  test('inserts an upward-dragged row after the ghost line', async ({
+    page,
+  }) => {
+    const source = Array.from({ length: 20 }, (_, index) => ({
+      a: `${index}:0`,
+      b: `${index}:1`,
+    }));
+
+    const columns = buildColumns([
+      { prop: 'a', name: 'A', rowDrag: true },
+      { prop: 'b', name: 'B' },
+    ]);
+
+    await mountGrid(page, { columns, source });
+
+    const dragHandle = mainDataRows(page)
+      .nth(5)
+      .locator('[data-rgCol="0"] .revo-draggable');
+    const targetRow = mainDataRows(page).nth(3);
+    const handleBox = await dragHandle.boundingBox();
+    const targetBox = await targetRow.boundingBox();
+
+    expect(handleBox).not.toBeNull();
+    expect(targetBox).not.toBeNull();
+
+    await page.mouse.move(
+      handleBox!.x + handleBox!.width / 2,
+      handleBox!.y + handleBox!.height / 2,
+    );
+    await page.mouse.down();
+    await page.mouse.move(
+      targetBox!.x + targetBox!.width / 2,
+      targetBox!.y + targetBox!.height / 2,
+      { steps: 12 },
+    );
+    await page.mouse.up();
+
+    await expect
+      .poll(async () => {
+        const rows = await getVisibleSource<{ a: string }>(page);
+        return rows.map(row => row.a);
+      })
+      .toEqual([
+        '0:0',
+        '1:0',
+        '2:0',
+        '3:0',
+        '5:0',
+        '4:0',
+        '6:0',
+        '7:0',
+        '8:0',
+        '9:0',
+        '10:0',
+        '11:0',
+        '12:0',
+        '13:0',
+        '14:0',
+        '15:0',
+        '16:0',
+        '17:0',
+        '18:0',
+        '19:0',
+      ]);
+  });
+
+  test('moves a row down by one position after the ghost line', async ({
+    page,
+  }) => {
+    const source = Array.from({ length: 20 }, (_, index) => ({
+      a: `${index}:0`,
+      b: `${index}:1`,
+    }));
+
+    const columns = buildColumns([
+      { prop: 'a', name: 'A', rowDrag: true },
+      { prop: 'b', name: 'B' },
+    ]);
+
+    await mountGrid(page, { columns, source });
+
+    const dragHandle = mainDataRows(page)
+      .nth(4)
+      .locator('[data-rgCol="0"] .revo-draggable');
+    const targetRow = mainDataRows(page).nth(5);
+    const handleBox = await dragHandle.boundingBox();
+    const targetBox = await targetRow.boundingBox();
+
+    expect(handleBox).not.toBeNull();
+    expect(targetBox).not.toBeNull();
+
+    await page.mouse.move(
+      handleBox!.x + handleBox!.width / 2,
+      handleBox!.y + handleBox!.height / 2,
+    );
+    await page.mouse.down();
+    await page.mouse.move(
+      targetBox!.x + targetBox!.width / 2,
+      targetBox!.y + targetBox!.height / 2,
+      { steps: 12 },
+    );
+    await page.mouse.up();
+
+    await expect
+      .poll(async () => {
+        const rows = await getVisibleSource<{ a: string }>(page);
+        return rows.map(row => row.a);
+      })
+      .toEqual([
+        '0:0',
+        '1:0',
+        '2:0',
+        '3:0',
+        '5:0',
+        '4:0',
+        '6:0',
+        '7:0',
+        '8:0',
+        '9:0',
+        '10:0',
+        '11:0',
+        '12:0',
+        '13:0',
+        '14:0',
+        '15:0',
+        '16:0',
+        '17:0',
+        '18:0',
+        '19:0',
+      ]);
   });
 
   test('reorders columns by dragging the header', async ({ page }) => {
