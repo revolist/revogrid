@@ -19,16 +19,17 @@ export default class RowOrderService {
     }
     const newRow = this.getCell(e, data);
 
+    // rgRow dragged out table
+    if (newRow.y < 0) {
+      newRow.y = 0;
+    }
+    // rgRow dragged to the top
+    else if (newRow.y < this.currentCell.y) {
+      newRow.y++;
+    }
+
     // if position changed
     if (newRow.y !== this.currentCell.y) {
-      // rgRow dragged out table
-      if (newRow.y < 0) {
-        newRow.y = 0;
-      }
-      // rgRow dragged to the top
-      else if (newRow.y < this.currentCell.y) {
-        newRow.y++;
-      }
       this.config.positionChanged(this.currentCell.y, newRow.y);
     }
     this.clear();

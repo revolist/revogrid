@@ -105,7 +105,7 @@ export const ReorderButton = ({
   );
 };
 
-export function isFilterBtn(e: HTMLElement) {
+export function isFilterBtn(e: Element) {
   if (e.classList.contains(FILTER_BUTTON_CLASS)) {
     return true;
   }

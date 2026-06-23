@@ -94,9 +94,13 @@ export class DataProvider {
       newItemsOrder.indexOf(prevItems[from]), // get index in proxy
       1
     );
+    const targetItem = prevItems[from < to ? to + 1 : to];
+    const targetIndex = targetItem === undefined
+      ? newItemsOrder.length
+      : newItemsOrder.indexOf(targetItem);
     // insert before
     newItemsOrder.splice(
-      newItemsOrder.indexOf(prevItems[to]),  // get index in proxy
+      targetIndex,
       0,
       ...toMove
     );

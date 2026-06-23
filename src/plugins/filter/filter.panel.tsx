@@ -11,7 +11,7 @@ import {
   Prop,
   State,
   type VNode,
-  Element,
+  Element as StencilElement,
 } from '@stencil/core';
 import debounce from 'lodash/debounce';
 
@@ -66,7 +66,7 @@ export class FilterPanel {
     reorderFilter: 'Reorder filter',
   };
 
-  @Element() element!: HTMLElement;
+  @StencilElement() element!: HTMLElement;
   @State() isFilterIdSet = false;
   @State() filterId = 0;
   @State() currentFilterId = -1;
@@ -95,7 +95,7 @@ export class FilterPanel {
       return;
     }
     const path = e.composedPath();
-    const select = document.getElementById(FILTER_ID);
+    const select = this.getAddFilterSelect();
     if (select instanceof HTMLSelectElement) {
       // click on select should be skipped
       if (path.includes(select)) {
@@ -112,9 +112,8 @@ export class FilterPanel {
     const isOutside = !path.includes(this.element);
 
     if (
-      e.target instanceof HTMLElement &&
       isOutside &&
-      !isFilterBtn(e.target) &&
+      !this.isOwnFilterButton(e.target) &&
       this.closeOnOutsideClick
     ) {
       this.changes = undefined;
@@ -343,7 +342,7 @@ export class FilterPanel {
     this.addNewFilterToProp();
 
     // reset value after adding new filter
-    const select = document.getElementById('add-filter') as HTMLSelectElement;
+    const select = this.getAddFilterSelect();
     if (select) {
       select.value = defaultType;
       this.currentFilterType = defaultType;
@@ -599,7 +598,7 @@ export class FilterPanel {
     };
 
     const focusNext = () => {
-      const select = document.getElementById('add-filter') as HTMLSelectElement;
+      const select = this.getAddFilterSelect();
       if (select) {
         select.value = defaultType;
         this.currentFilterType = defaultType;
@@ -644,7 +643,7 @@ export class FilterPanel {
         }}
         onKeyDown={e => {
           if (e.key.toLowerCase() === 'enter') {
-            const select = document.getElementById('add-filter') as HTMLSelectElement;
+            const select = this.getAddFilterSelect();
             if (select) {
               focusNext();
             }
@@ -655,6 +654,38 @@ export class FilterPanel {
         }}
       />
     );
+  }
+
+  private getAddFilterSelect() {
+    return this.element.querySelector<HTMLSelectElement>(`#${FILTER_ID}`);
+  }
+
+  private isOwnFilterButton(target: EventTarget | null) {
+    if (!(target instanceof Element)) {
+      return false;
+    }
+
+    if (!isFilterBtn(target)) {
+      return false;
+    }
+
+    const panelGrid = this.getOwningGrid(this.element);
+    const targetGrid = this.getOwningGrid(target);
+
+    return !!panelGrid && panelGrid === targetGrid;
+  }
+
+  private getOwningGrid(element: Element): Element | undefined {
+    const grid = element.closest('revo-grid');
+    if (grid) {
+      return grid;
+    }
+
+    const root = element.getRootNode();
+    if (root instanceof ShadowRoot && root.host.localName === 'revo-grid') {
+      return root.host;
+    }
+    return undefined;
   }
 
   render() {
