@@ -22,6 +22,11 @@ export class LocalScrollTimer {
     this.lastKnownScrollCoordinate[e.dimension] = e.coordinate;
   }
 
+  setCoordinateFromScroll(e: { dimension: DimensionType; coordinate: number }) {
+    this.setCoordinate(e);
+    this.mouseWheelScrollTimestamp[e.dimension] = 0;
+  }
+
   /**
    * Remember last mw event time
    */

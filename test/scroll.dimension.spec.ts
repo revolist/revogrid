@@ -1,4 +1,5 @@
 import LocalScrollService from '../src/services/local.scroll.service';
+import { LocalScrollTimer } from '../src/services/local.scroll.timer';
 import { getScrollDimension } from '../src/services/scroll.dimension.helpers';
 import DimensionProvider from '../src/services/dimension.provider';
 import ViewportProvider from '../src/services/viewport.provider';
@@ -178,6 +179,25 @@ describe('browser-limit-aware scroll dimensions', () => {
     service.scroll(900, 'rgRow');
 
     expect(events).toHaveLength(0);
+  });
+
+  it('allows rapid return to a coordinate after an intermediate native scroll was accepted', () => {
+    jest.useFakeTimers().setSystemTime(1_000);
+    try {
+      const timer = new LocalScrollTimer(10);
+
+      timer.latestScrollUpdate('rgCol');
+      timer.setCoordinate({ dimension: 'rgCol', coordinate: 0 });
+
+      jest.setSystemTime(1_020);
+      expect(timer.isReady('rgCol', 520)).toBe(true);
+      timer.setCoordinateFromScroll({ dimension: 'rgCol', coordinate: 520 });
+
+      jest.setSystemTime(1_020);
+      expect(timer.isReady('rgCol', 0)).toBe(true);
+    } finally {
+      jest.useRealTimers();
+    }
   });
 
   it('keeps delta-based setScroll updates in logical pixels under compression', async () => {

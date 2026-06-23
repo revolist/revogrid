@@ -436,6 +436,7 @@ export class RevogrViewportScroll implements ElementScroll {
         undefined,
         outside,
       );
+      this.localScrollTimer.setCoordinateFromScroll({ dimension: type, coordinate });
     };
     // apply after throttling
     if (this.localScrollTimer.isReady(type, coordinate)) {
