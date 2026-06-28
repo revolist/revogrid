@@ -639,10 +639,18 @@ export class OverlaySelection {
   /**
    * Executes the focus operation on the specified range of cells.
    */
-  private doFocus(focus: Cell, end: Cell, changes?: Partial<Cell>) {
+  private doFocus(
+    focus: Cell,
+    end: Cell,
+    changes?: Partial<Cell>,
+    originalEvent?: MouseEvent | TouchEvent | KeyboardEvent,
+  ) {
     // 1. Trigger beforeFocus event
     const { defaultPrevented } = this.beforeFocusCell.emit(
-      this.columnService.getSaveData(focus.y, focus.x),
+      {
+        ...this.columnService.getSaveData(focus.y, focus.x),
+        originalEvent,
+      },
     );
     if (defaultPrevented) {
       return false;
@@ -657,6 +665,7 @@ export class OverlaySelection {
       ...this.types,
       rowDimension: { ...this.dimensionRow.state },
       colDimension: { ...this.dimensionCol.state },
+      originalEvent,
     };
 
     // 2. Trigger apply focus event
@@ -680,7 +689,10 @@ export class OverlaySelection {
     }).defaultPrevented;
   }
 
-  private triggerRangeEvent(range: RangeArea) {
+  private triggerRangeEvent(
+    range: RangeArea,
+    originalEvent?: MouseEvent | TouchEvent | KeyboardEvent,
+  ) {
     const type = this.types.rowType;
     // 1. Apply range
     const applyEvent = this.beforeApplyRange.emit({
@@ -688,6 +700,7 @@ export class OverlaySelection {
       ...this.types,
       rowDimension: { ...this.dimensionRow.state },
       colDimension: { ...this.dimensionCol.state },
+      originalEvent,
     });
     if (applyEvent.defaultPrevented) {
       return false;
@@ -746,7 +759,7 @@ export class OverlaySelection {
     }
 
     // Set focus on the current cell
-    this.focus(focusCell, this.range && e.shiftKey);
+    this.focus(focusCell, this.range && e.shiftKey, e);
 
     // Initiate autofill selection
     if (this.range) {
@@ -930,7 +943,11 @@ export class OverlaySelection {
   /**
    * Sets the focus on a cell and optionally edits a range.
    */
-  focus(cell?: Cell, isRangeEdit = false) {
+  focus(
+    cell?: Cell,
+    isRangeEdit = false,
+    originalEvent?: MouseEvent | TouchEvent | KeyboardEvent,
+  ) {
     if (!cell) return false;
 
     const end = cell;
@@ -939,11 +956,11 @@ export class OverlaySelection {
     if (isRangeEdit && start) {
       const range = getRange(start, end);
       if (range) {
-        return this.triggerRangeEvent(range);
+        return this.triggerRangeEvent(range, originalEvent);
       }
     }
 
-    return this.doFocus(cell, end);
+    return this.doFocus(cell, end, undefined, originalEvent);
   }
 
   get types(): AllDimensionType {

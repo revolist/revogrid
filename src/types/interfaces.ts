@@ -869,6 +869,11 @@ export interface FocusRenderEvent extends AllDimensionType {
    * Changes for the next cell to focus. @example { y: -1 }
    */
   next?: Partial<Cell>;
+
+  /**
+   * Original user input event that initiated the focus/range change, when available.
+   */
+  originalEvent?: MouseEvent | TouchEvent | KeyboardEvent;
 }
 
 export interface FocusAfterRenderEvent<TModel extends DataType = DataType> extends AllDimensionType {

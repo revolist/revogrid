@@ -139,6 +139,10 @@ export interface BeforeSaveDataDetails<
    * Value from editor to save, not part of the model value yet
    */
   val?: any;
+  /**
+   * Original user input event that initiated the save/focus flow, when available.
+   */
+  originalEvent?: MouseEvent | TouchEvent | KeyboardEvent;
 }
 
 export type BeforeRangeSaveDataDetails<TModel extends DataType = DataType> = {
