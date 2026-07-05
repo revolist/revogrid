@@ -300,6 +300,56 @@ export class SortingPlugin extends BasePlugin {
     this.setSortingState(state);
   }
 
+  private resetSortingForStore(type: DimensionRows) {
+    const storeService = this.providers.data.stores[type];
+    // row data
+    const source = storeService.store.get('source');
+    // row indexes
+    const proxyItems = storeService.store.get('proxyItems');
+    // row indexes
+    const newItemsOrder = Array.from({ length: source.length }, (_, i) => i); // recover indexes range(0, source.length)
+    this.providers.dimension.updateSizesPositionByNewDataIndexes(type, newItemsOrder, proxyItems);
+    storeService.setData({ proxyItems: newItemsOrder });
+  }
+
+  private applySortingForStore(
+    type: DimensionRows,
+    sorting: SortingOrder | undefined,
+    sortingFunc: SortingOrderFunction | undefined,
+    sortingColumns: SortingColumnMap | undefined,
+    sortingOrder: SortingColumnOrder | undefined,
+    ignoreViewportUpdate: boolean,
+  ) {
+    const storeService = this.providers.data.stores[type];
+    // row data
+    const source = storeService.store.get('source');
+    // row indexes
+    const proxyItems = storeService.store.get('proxyItems');
+    const sortItems = getSortableRowIndexes(proxyItems, source);
+
+    const sortedItems = sortIndexByItems(
+      [...sortItems],
+      source,
+      sortingFunc,
+      sorting,
+      sortingColumns,
+      sortingOrder,
+    );
+    const newItemsOrder = mergeSortedRowsWithGroups(proxyItems, source, sortedItems);
+
+    // take row indexes before trim applied and proxy items
+    const prevItems = storeService.store.get('items');
+    storeService.setData({
+      proxyItems: newItemsOrder,
+    });
+    // take currently visible row indexes
+    const newItems = storeService.store.get('items');
+    if (!ignoreViewportUpdate) {
+      this.providers.dimension
+        .updateSizesPositionByNewDataIndexes(type, newItems, prevItems);
+    }
+  }
+
   /**
    * Schedules sorting before the next render.
    *
@@ -497,46 +547,18 @@ export class SortingPlugin extends BasePlugin {
     // if no sorting - reset
     if (!Object.keys(sorting || {}).length) {
       for (let type of activeTypes) {
-        const storeService = this.providers.data.stores[type];
-        // row data
-        const source = storeService.store.get('source');
-        // row indexes
-        const proxyItems = storeService.store.get('proxyItems');
-        // row indexes
-        const newItemsOrder = Array.from({ length: source.length }, (_, i) => i); // recover indexes range(0, source.length)
-        this.providers.dimension.updateSizesPositionByNewDataIndexes(type, newItemsOrder, proxyItems);
-        storeService.setData({ proxyItems: newItemsOrder });
+        this.resetSortingForStore(type);
       }
     } else {
       for (let type of activeTypes) {
-        const storeService = this.providers.data.stores[type];
-        // row data
-        const source = storeService.store.get('source');
-        // row indexes
-        const proxyItems = storeService.store.get('proxyItems');
-        const sortItems = getSortableRowIndexes(proxyItems, source);
-
-        const sortedItems = sortIndexByItems(
-          [...sortItems],
-          source,
-          sortingFunc,
+        this.applySortingForStore(
+          type,
           sorting,
+          sortingFunc,
           activeSortingColumns,
           activeSortingOrder,
+          activeIgnoreViewportUpdate,
         );
-        const newItemsOrder = mergeSortedRowsWithGroups(proxyItems, source, sortedItems);
-       
-        // take row indexes before trim applied and proxy items
-        const prevItems = storeService.store.get('items');
-        storeService.setData({
-          proxyItems: newItemsOrder,
-        });
-        // take currently visible row indexes
-        const newItems = storeService.store.get('items');
-        if (!activeIgnoreViewportUpdate) {
-          this.providers.dimension
-            .updateSizesPositionByNewDataIndexes(type, newItems, prevItems);
-        }
       }
     }
     // refresh columns to redraw column headers and show correct icon
