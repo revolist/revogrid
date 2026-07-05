@@ -88,7 +88,7 @@ import { ColumnCollection, getColumnByProp, getColumns } from '../../utils/colum
 import { WCAGPlugin } from '../../plugins/wcag';
 import { ColumnFilterConfig, FilterCollectionItem } from '../../plugins/filter/filter.types';
 import { PluginService } from './plugin.service';
-import { SortingConfig, SortingOrder } from '../../plugins';
+import { AfterSortingApplyEvent, SortingConfig, SortingOrder } from '../../plugins';
 import { RTLPlugin } from '../../plugins/rtl/rtl.plugin';
 
 /**
@@ -423,6 +423,13 @@ export class RevoGridComponent {
     order: 'desc' | 'asc';
     additive: boolean;
   }>;
+
+  /**
+   * By `SortingPlugin`
+   * <br>Triggered after sorting has been applied and completed.
+   * <br>Provides final sorting state and sorting column metadata when available.
+   */
+  @Event() aftersortingapply: EventEmitter<AfterSortingApplyEvent>;
 
   /**
    * This event is triggered when the row order change is started.

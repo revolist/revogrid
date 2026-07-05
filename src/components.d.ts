@@ -9,7 +9,7 @@ import { AdditionalData, AfterEditEvent, AllDimensionType, ApplyFocusEvent, Befo
 import { GridPlugin } from "./plugins/base.plugin";
 import { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
 import { ColumnFilterConfig, FilterCaptions, FilterCollectionItem, LogicFunction, MultiFilterItem, ShowData } from "./plugins/filter/filter.types";
-import { SortingConfig, SortingOrder } from "./plugins";
+import { AfterSortingApplyEvent, SortingConfig, SortingOrder } from "./plugins";
 import { GroupingOptions } from "./plugins/groupingRow/grouping.row.types";
 import { VNode } from "@stencil/core";
 import { FocusedData } from "./components/revoGrid/viewport.service";
@@ -25,7 +25,7 @@ export { AdditionalData, AfterEditEvent, AllDimensionType, ApplyFocusEvent, Befo
 export { GridPlugin } from "./plugins/base.plugin";
 export { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
 export { ColumnFilterConfig, FilterCaptions, FilterCollectionItem, LogicFunction, MultiFilterItem, ShowData } from "./plugins/filter/filter.types";
-export { SortingConfig, SortingOrder } from "./plugins";
+export { AfterSortingApplyEvent, SortingConfig, SortingOrder } from "./plugins";
 export { GroupingOptions } from "./plugins/groupingRow/grouping.row.types";
 export { VNode } from "@stencil/core";
 export { FocusedData } from "./components/revoGrid/viewport.service";
@@ -889,6 +889,7 @@ declare global {
     order: 'desc' | 'asc';
     additive: boolean;
   };
+        "aftersortingapply": AfterSortingApplyEvent;
         "rowdragstart": RowDragStartDetails;
         "headerclick": ColumnRegular;
         "beforecellfocus": BeforeSaveDataDetails;
@@ -1510,6 +1511,10 @@ declare namespace LocalJSX {
           * Emmited after the grid is rendered.
          */
         "onAftergridrender"?: (event: RevoGridCustomEvent<any>) => void;
+        /**
+          * By `SortingPlugin` <br>Triggered after sorting has been applied and completed. <br>Provides final sorting state and sorting column metadata when available.
+         */
+        "onAftersortingapply"?: (event: RevoGridCustomEvent<AfterSortingApplyEvent>) => void;
         /**
           * After main source/rows updated
          */
