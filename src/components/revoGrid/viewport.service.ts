@@ -53,6 +53,13 @@ export type FocusedData = {
   column?: ColumnRegular;
 };
 
+export function getViewportResizeDimension(
+  colType: DimensionCols,
+  dimension: ViewPortResizeEvent['dimension'],
+) {
+  return dimension === 'rgCol' ? colType : dimension;
+}
+
 /** Collect Column data */
 function gatherColumnData(data: ViewportColumn) {
   const colDimension = data.dimensions[data.colType].store;
@@ -126,7 +133,7 @@ export default class ViewportService {
         const vpState: Partial<ViewportState> = {
           clientSize: e.detail.size,
         };
-        const dimension = e.detail.dimension;
+        const dimension = getViewportResizeDimension(val, e.detail.dimension);
         const isVirtualColumn = columnTypes.includes(dimension as DimensionCols)
           && isVirtualXDimension(
             dimension as DimensionCols,
