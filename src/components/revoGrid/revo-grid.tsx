@@ -1261,24 +1261,25 @@ export class RevoGridComponent {
     this.viewport.setFocus(colType, pending.rowType, cell, cell);
   }
 
-  @Watch('disableVirtualX') disableVirtualXChanged(
-    newVal = false,
-    prevVal = false,
-  ) {
+  private refreshColumnsOnConfigChange<T>(newVal: T, prevVal: T) {
     if (newVal === prevVal) {
       return;
     }
     this.columnChanged(this.columns);
   }
 
+  @Watch('disableVirtualX') disableVirtualXChanged(
+    newVal = false,
+    prevVal = false,
+  ) {
+    this.refreshColumnsOnConfigChange(newVal, prevVal);
+  }
+
   @Watch('virtualX') virtualXChanged(
     newVal: DimensionCols[] = ['rgCol'],
     prevVal: DimensionCols[] = ['rgCol'],
   ) {
-    if (newVal === prevVal) {
-      return;
-    }
-    this.columnChanged(this.columns);
+    this.refreshColumnsOnConfigChange(newVal, prevVal);
   }
 
   @Watch('rowSize') rowSizeChanged(s: number) {

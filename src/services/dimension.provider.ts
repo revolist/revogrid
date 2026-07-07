@@ -1,4 +1,3 @@
-import reduce from 'lodash/reduce';
 import debounce from 'lodash/debounce';
 import ViewportProvider from './viewport.provider';
 import { RESIZE_INTERVAL } from '../utils/consts';
@@ -55,8 +54,7 @@ export default class DimensionProvider {
       (k: MultiDimensionType) => config.realSizeChanged(k),
       RESIZE_INTERVAL,
     );
-    this.stores = reduce(
-      [...rowTypes, ...columnTypes],
+    this.stores = [...rowTypes, ...columnTypes].reduce(
       (sources: Partial<DimensionStoreCollection>, t: MultiDimensionType) => {
         sources[t] = new DimensionStore(t);
         sources[t].store.onChange('realSize', () => sizeChanged(t));
