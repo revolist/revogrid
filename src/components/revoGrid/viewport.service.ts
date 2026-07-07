@@ -1,4 +1,4 @@
-import DimensionProvider from '../../services/dimension.provider';
+import DimensionProvider, { isVirtualXDimension } from '../../services/dimension.provider';
 import { type SelectionStoreConnector } from '../../services/selection.store.connector';
 import ViewportProvider from '../../services/viewport.provider';
 import { columnTypes, DSourceState, getSourceItem, getVisibleSourceItem, rowTypes } from '@store';
@@ -39,6 +39,7 @@ type Config = {
   noHorizontalScrollTransfer?: boolean;
 
   disableVirtualX?: boolean;
+  virtualX?: DimensionCols[];
   disableVirtualY?: boolean;
 
   resize(r: ResizeDetails): void;
@@ -121,20 +122,24 @@ export default class ViewportService {
         colStore,
         onHeaderresize: e => this.onColumnResize(val, e, colStore),
       };
-      if (val === 'rgCol') {
-        column.onResizeviewport = (e: CustomEvent<ViewPortResizeEvent>) => {
-          const vpState: Partial<ViewportState> = {
-            clientSize: e.detail.size,
-          };
-
-          // virtual size will be handled by dimension provider if disabled
-          if ((e.detail.dimension === 'rgRow' && !config.disableVirtualY)
-              || (e.detail.dimension === 'rgCol' && !config.disableVirtualX)) {
-                vpState.virtualSize = e.detail.size;
-          }
-          config.viewportProvider?.setViewport(e.detail.dimension, vpState);
+      column.onResizeviewport = (e: CustomEvent<ViewPortResizeEvent>) => {
+        const vpState: Partial<ViewportState> = {
+          clientSize: e.detail.size,
         };
-      }
+        const dimension = e.detail.dimension;
+        const isVirtualColumn = columnTypes.includes(dimension as DimensionCols)
+          && isVirtualXDimension(
+            dimension as DimensionCols,
+            config.disableVirtualX,
+            config.virtualX,
+          );
+
+        // Keep virtual dimensions in sync with their viewport size.
+        if ((dimension === 'rgRow' && !config.disableVirtualY) || isVirtualColumn) {
+          vpState.virtualSize = e.detail.size;
+        }
+        config.viewportProvider?.setViewport(dimension, vpState);
+      };
       const colData = gatherColumnData(column);
       const columnSelectionStore = this.registerCol(colData.position.x, val);
 

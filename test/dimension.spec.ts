@@ -4,8 +4,23 @@ import {
   getItemByIndex,
 } from '../src/store/dimension/dimension.helpers';
 import { DimensionStore } from '../src/store/dimension/dimension.store';
+import { isVirtualXDimension } from '../src/services/dimension.provider';
 
 const ITEM_SIZE = 30;
+
+describe('isVirtualXDimension', () => {
+  it('keeps regular columns virtual by default and requires pinned columns to opt in', () => {
+    expect(isVirtualXDimension('rgCol')).toBe(true);
+    expect(isVirtualXDimension('colPinStart')).toBe(false);
+    expect(isVirtualXDimension('colPinEnd')).toBe(false);
+    expect(isVirtualXDimension('colPinEnd', false, ['rgCol', 'colPinEnd'])).toBe(true);
+  });
+
+  it('lets disableVirtualX override configured virtual column dimensions', () => {
+    expect(isVirtualXDimension('rgCol', true, ['rgCol', 'colPinEnd'])).toBe(false);
+    expect(isVirtualXDimension('colPinEnd', true, ['rgCol', 'colPinEnd'])).toBe(false);
+  });
+});
 
 /** Build a position-lookup dimension from a custom-sizes map. */
 function makePosDimension(sizes: Record<number, number>) {
