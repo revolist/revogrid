@@ -11,6 +11,7 @@ import type {
   PluginProviders,
 } from '@type';
 import type {
+  AfterSortingApplyEvent,
   SortingColumnMap,
   SortingColumnOrder,
   SortingConfig,
@@ -69,7 +70,7 @@ function mergeSortedRowsWithGroups(
  * 1. @event `beforesorting` - Triggered when sorting just starts. Nothing has happened yet. This can be triggered from a column or from the source. If the type is from rows, the column will be undefined.
  * 2. @event `beforesourcesortingapply` - Triggered before the sorting data is applied to the data source. You can prevent this event, and the data will not be sorted.
  * 3. @event `beforesortingapply` - Triggered before the sorting data is applied to the data source. You can prevent this event, and the data will not be sorted. This event is only called from a column sorting click.
- * 4. @event `aftersortingapply` - Triggered after sorting has been applied and completed. This event occurs for both row and column sorting.
+ * 4. @event `aftersortingapply` - Triggered after sorting has been applied and completed. The event detail includes the final sorting state and sorting column metadata when available.
  *
  * Note: If you prevent an event, it will not proceed to the subsequent steps.
  */
@@ -299,6 +300,56 @@ export class SortingPlugin extends BasePlugin {
     this.setSortingState(state);
   }
 
+  private resetSortingForStore(type: DimensionRows) {
+    const storeService = this.providers.data.stores[type];
+    // row data
+    const source = storeService.store.get('source');
+    // row indexes
+    const proxyItems = storeService.store.get('proxyItems');
+    // row indexes
+    const newItemsOrder = Array.from({ length: source.length }, (_, i) => i); // recover indexes range(0, source.length)
+    this.providers.dimension.updateSizesPositionByNewDataIndexes(type, newItemsOrder, proxyItems);
+    storeService.setData({ proxyItems: newItemsOrder });
+  }
+
+  private applySortingForStore(
+    type: DimensionRows,
+    sorting: SortingOrder | undefined,
+    sortingFunc: SortingOrderFunction | undefined,
+    sortingColumns: SortingColumnMap | undefined,
+    sortingOrder: SortingColumnOrder | undefined,
+    ignoreViewportUpdate: boolean,
+  ) {
+    const storeService = this.providers.data.stores[type];
+    // row data
+    const source = storeService.store.get('source');
+    // row indexes
+    const proxyItems = storeService.store.get('proxyItems');
+    const sortItems = getSortableRowIndexes(proxyItems, source);
+
+    const sortedItems = sortIndexByItems(
+      [...sortItems],
+      source,
+      sortingFunc,
+      sorting,
+      sortingColumns,
+      sortingOrder,
+    );
+    const newItemsOrder = mergeSortedRowsWithGroups(proxyItems, source, sortedItems);
+
+    // take row indexes before trim applied and proxy items
+    const prevItems = storeService.store.get('items');
+    storeService.setData({
+      proxyItems: newItemsOrder,
+    });
+    // take currently visible row indexes
+    const newItems = storeService.store.get('items');
+    if (!ignoreViewportUpdate) {
+      this.providers.dimension
+        .updateSizesPositionByNewDataIndexes(type, newItems, prevItems);
+    }
+  }
+
   /**
    * Schedules sorting before the next render.
    *
@@ -496,52 +547,30 @@ export class SortingPlugin extends BasePlugin {
     // if no sorting - reset
     if (!Object.keys(sorting || {}).length) {
       for (let type of activeTypes) {
-        const storeService = this.providers.data.stores[type];
-        // row data
-        const source = storeService.store.get('source');
-        // row indexes
-        const proxyItems = storeService.store.get('proxyItems');
-        // row indexes
-        const newItemsOrder = Array.from({ length: source.length }, (_, i) => i); // recover indexes range(0, source.length)
-        this.providers.dimension.updateSizesPositionByNewDataIndexes(type, newItemsOrder, proxyItems);
-        storeService.setData({ proxyItems: newItemsOrder });
+        this.resetSortingForStore(type);
       }
     } else {
       for (let type of activeTypes) {
-        const storeService = this.providers.data.stores[type];
-        // row data
-        const source = storeService.store.get('source');
-        // row indexes
-        const proxyItems = storeService.store.get('proxyItems');
-        const sortItems = getSortableRowIndexes(proxyItems, source);
-
-        const sortedItems = sortIndexByItems(
-          [...sortItems],
-          source,
-          sortingFunc,
+        this.applySortingForStore(
+          type,
           sorting,
+          sortingFunc,
           activeSortingColumns,
           activeSortingOrder,
+          activeIgnoreViewportUpdate,
         );
-        const newItemsOrder = mergeSortedRowsWithGroups(proxyItems, source, sortedItems);
-       
-        // take row indexes before trim applied and proxy items
-        const prevItems = storeService.store.get('items');
-        storeService.setData({
-          proxyItems: newItemsOrder,
-        });
-        // take currently visible row indexes
-        const newItems = storeService.store.get('items');
-        if (!activeIgnoreViewportUpdate) {
-          this.providers.dimension
-            .updateSizesPositionByNewDataIndexes(type, newItems, prevItems);
-        }
       }
     }
     // refresh columns to redraw column headers and show correct icon
     columnTypes.forEach((type) => {
       this.providers.column.dataSources[type].refresh();
     });
-    this.emit('aftersortingapply');
+    const afterSortingDetail: AfterSortingApplyEvent = {
+      sorting: hasActiveSorting(sorting) ? sorting : undefined,
+      sortingColumns: activeSortingColumns,
+      sortingOrder: activeSortingOrder,
+      types: activeTypes,
+    };
+    this.emit('aftersortingapply', afterSortingDetail);
   }
 }

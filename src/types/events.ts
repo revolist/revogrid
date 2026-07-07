@@ -10,6 +10,7 @@ export type RevogridEvents = 'contentsizechanged'|
   'beforesorting'|
   'beforesourcesortingapply'|
   'beforesortingapply'|
+  'aftersortingapply'|
   'rowdragstart'|
   'headerclick'|
   'beforecellfocus'|
@@ -124,6 +125,7 @@ export const REVOGRID_EVENTS = new Map<RevogridEvents, RevogridEvents>([
   ['beforesorting', 'beforesorting'],
   ['beforesourcesortingapply', 'beforesourcesortingapply'],
   ['beforesortingapply', 'beforesortingapply'],
+  ['aftersortingapply', 'aftersortingapply'],
   ['rowdragstart', 'rowdragstart'],
   ['headerclick', 'headerclick'],
   ['beforecellfocus', 'beforecellfocus'],

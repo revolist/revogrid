@@ -1,12 +1,13 @@
 revogr-edit {
   display: block;
   position: absolute;
-  background-color: #fff;
+  background-color: var(--revo-grid-background, #fff);
 
   input {
     height: 100%;
     width: 100%;
     box-sizing: border-box;
+    background-color: var(--revo-grid-background, transparent);
   }
 
   revo-dropdown {

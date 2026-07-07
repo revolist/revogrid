@@ -1,4 +1,4 @@
-import type { CellCompareFunc, ColumnProp, ColumnRegular, Order } from '@type';
+import type { CellCompareFunc, ColumnProp, ColumnRegular, DimensionRows, Order } from '@type';
 
 /**
  * Current sorting order per column property.
@@ -43,6 +43,28 @@ export type SortingColumnRender = {
    * One-based additive sorting rank.
    */
   sortIndex?: number;
+};
+
+/**
+ * Sorting information emitted after sorting is applied.
+ */
+export type AfterSortingApplyEvent = {
+  /**
+   * Final active sorting order per column property.
+   */
+  sorting?: SortingOrder;
+  /**
+   * Column metadata indexed by sorted column property.
+   */
+  sortingColumns?: SortingColumnMap;
+  /**
+   * Active sorting priority in click/config insertion order.
+   */
+  sortingOrder?: SortingColumnOrder;
+  /**
+   * Row stores affected by the sorting run.
+   */
+  types: DimensionRows[];
 };
 
 /**
