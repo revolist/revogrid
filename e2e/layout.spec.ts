@@ -12,6 +12,32 @@ import {
 } from './helpers';
 
 test.describe('layout', () => {
+  test('reverses columns when rtl is enabled before initial connection', async ({
+    page,
+  }) => {
+    await page.setContent(
+      '<div id="grid-host" style="width:900px;height:360px"></div>',
+    );
+    await page.evaluate(() => {
+      const grid = document.createElement('revo-grid');
+      grid.rtl = true;
+      grid.columns = [
+        { prop: 'a', name: 'A (first)' },
+        { prop: 'b', name: 'B' },
+        { prop: 'c', name: 'C (last)' },
+      ];
+      grid.source = [{ a: 1, b: 2, c: 3 }];
+      grid.style.cssText = 'display:block;width:100%;height:100%';
+      document.querySelector('#grid-host')!.append(grid);
+    });
+    await page.waitForChanges();
+
+    const headers = page.locator(SELECTORS.actualHeaderCells);
+    await expect(headers).toHaveCount(3);
+    await expect(headers).toHaveText(['C (last)', 'B', 'A (first)']);
+    await expect(page.locator(SELECTORS.grid)).toHaveAttribute('dir', 'rtl');
+  });
+
   test('does not render inactive header sort or resize affordances', async ({ page }) => {
     const columns = [
       { prop: 'id', name: 'ID', ...withHeaderTestId('inactive-header-id') },

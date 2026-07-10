@@ -61,7 +61,7 @@ export class BasePlugin implements PluginBaseComponent {
       },
     });
     if (immediate) {
-      callback(nativeValueDesc?.value);
+      callback(nativeValueDesc?.get ? nativeValueDesc.get.call(this.revogrid) : nativeValueDesc?.value);
     }
   }
 
