@@ -119,11 +119,6 @@ export namespace Components {
          */
         "disableVirtualX": boolean;
         /**
-          * Column dimensions that use X axis virtual rendering. Defaults to regular columns only to preserve pinned column behavior. Set to `['rgCol', 'colPinStart', 'colPinEnd']` to virtualize all column areas.
-          * @default ['rgCol']
-         */
-        "virtualX": DimensionCols[];
-        /**
           * Disable lazy rendering mode for the `Y axis`. Use when not many rows present and you don't need rerenader cells during scroll. Can be used for initial rendering performance improvement.
           * @default false
          */
@@ -353,6 +348,11 @@ export namespace Components {
           * @default true
          */
         "useClipboard": boolean | ClipboardConfig;
+        /**
+          * Column dimensions that use X axis virtual rendering. Defaults to regular columns only to preserve pinned column behavior. Set to `['rgCol', 'colPinStart', 'colPinEnd']` to virtualize all column areas.
+          * @default ['rgCol']
+         */
+        "virtualX": DimensionCols[];
     }
     interface RevogrAttribution {
     }
@@ -1429,11 +1429,6 @@ declare namespace LocalJSX {
          */
         "disableVirtualX"?: boolean;
         /**
-          * Column dimensions that use X axis virtual rendering. Defaults to regular columns only to preserve pinned column behavior. Set to `['rgCol', 'colPinStart', 'colPinEnd']` to virtualize all column areas.
-          * @default ['rgCol']
-         */
-        "virtualX"?: DimensionCols[];
-        /**
           * Disable lazy rendering mode for the `Y axis`. Use when not many rows present and you don't need rerenader cells during scroll. Can be used for initial rendering performance improvement.
           * @default false
          */
@@ -1777,6 +1772,11 @@ declare namespace LocalJSX {
           * @default true
          */
         "useClipboard"?: boolean | ClipboardConfig;
+        /**
+          * Column dimensions that use X axis virtual rendering. Defaults to regular columns only to preserve pinned column behavior. Set to `['rgCol', 'colPinStart', 'colPinEnd']` to virtualize all column areas.
+          * @default ['rgCol']
+         */
+        "virtualX"?: DimensionCols[];
     }
     interface RevogrAttribution {
     }
@@ -2523,7 +2523,6 @@ declare namespace LocalJSX {
         "exporting": boolean;
         "stretch": string;
         "disableVirtualX": boolean;
-        "virtualX": DimensionCols[];
         "disableVirtualY": boolean;
         "hideAttribution": boolean;
         "accessible": boolean;
