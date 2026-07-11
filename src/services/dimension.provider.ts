@@ -1,4 +1,3 @@
-import reduce from 'lodash/reduce';
 import debounce from 'lodash/debounce';
 import ViewportProvider from './viewport.provider';
 import { RESIZE_INTERVAL } from '../utils/consts';
@@ -28,6 +27,17 @@ import { getScrollDimension } from './scroll.dimension.helpers';
 export type DimensionConfig = {
   realSizeChanged(k: MultiDimensionType): void;
 };
+
+export const DEFAULT_VIRTUAL_X: readonly DimensionCols[] = ['rgCol'];
+
+export function isVirtualXDimension(
+  type: DimensionCols,
+  disableVirtualX = false,
+  virtualX: readonly DimensionCols[] = DEFAULT_VIRTUAL_X,
+): boolean {
+  return !disableVirtualX && virtualX.includes(type);
+}
+
 /**
  * Dimension provider
  * Stores dimension information and custom sizes
@@ -44,8 +54,7 @@ export default class DimensionProvider {
       (k: MultiDimensionType) => config.realSizeChanged(k),
       RESIZE_INTERVAL,
     );
-    this.stores = reduce(
-      [...rowTypes, ...columnTypes],
+    this.stores = [...rowTypes, ...columnTypes].reduce(
       (sources: Partial<DimensionStoreCollection>, t: MultiDimensionType) => {
         sources[t] = new DimensionStore(t);
         sources[t].store.onChange('realSize', () => sizeChanged(t));
@@ -140,11 +149,13 @@ export default class DimensionProvider {
    * Applies new columns to the dimension provider
    * @param columns - new columns data
    * @param disableVirtualX - disable virtual data for X axis
+   * @param virtualX - column dimensions that should use virtual data
    */
   applyNewColumns(
     columns: Record<DimensionCols, ColumnRegular[]>,
     disableVirtualX: boolean,
     keepOld = false,
+    virtualX: readonly DimensionCols[] = DEFAULT_VIRTUAL_X,
   ) {
     // Apply new columns to dimension provider
     for (let type of columnTypes) {
@@ -157,7 +168,7 @@ export default class DimensionProvider {
       const items = columns[type];
 
       // Determine if virtual data should be disabled for the current type
-      const noVirtual = type !== 'rgCol' || disableVirtualX;
+      const noVirtual = !isVirtualXDimension(type, disableVirtualX, virtualX);
 
       // Set the items count in the dimension provider
       this.stores[type].setStore({ count: items.length });

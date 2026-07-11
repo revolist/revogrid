@@ -288,6 +288,14 @@ export class RevoGridComponent {
    * Can be used for initial rendering performance improvement.
    */
   @Prop() disableVirtualX = false;
+
+  /**
+   * Column dimensions that use X axis virtual rendering.
+   * Defaults to regular columns only to preserve pinned column behavior.
+   * Set to `['rgCol', 'colPinStart', 'colPinEnd']` to virtualize all column areas.
+   */
+  @Prop() virtualX: DimensionCols[] = ['rgCol'];
+
   /**
    * Disable lazy rendering mode for the `Y axis`.
    * Use when not many rows present and you don't need rerenader cells during scroll.
@@ -1173,6 +1181,7 @@ export class RevoGridComponent {
       beforeSetEvent.detail.columns,
       this.disableVirtualX,
       init,
+      this.virtualX,
     );
     const beforeApplyEvent = this.beforecolumnapplied.emit(columnGather);
     if (beforeApplyEvent.defaultPrevented) {
@@ -1252,14 +1261,25 @@ export class RevoGridComponent {
     this.viewport.setFocus(colType, pending.rowType, cell, cell);
   }
 
-  @Watch('disableVirtualX') disableVirtualXChanged(
-    newVal = false,
-    prevVal = false,
-  ) {
+  private refreshColumnsOnConfigChange<T>(newVal: T, prevVal: T) {
     if (newVal === prevVal) {
       return;
     }
     this.columnChanged(this.columns);
+  }
+
+  @Watch('disableVirtualX') disableVirtualXChanged(
+    newVal = false,
+    prevVal = false,
+  ) {
+    this.refreshColumnsOnConfigChange(newVal, prevVal);
+  }
+
+  @Watch('virtualX') virtualXChanged(
+    newVal: DimensionCols[] = ['rgCol'],
+    prevVal: DimensionCols[] = ['rgCol'],
+  ) {
+    this.refreshColumnsOnConfigChange(newVal, prevVal);
   }
 
   @Watch('rowSize') rowSizeChanged(s: number) {
@@ -1676,6 +1696,7 @@ export class RevoGridComponent {
         selectionStoreConnector: this.selectionStoreConnector,
         noHorizontalScrollTransfer: this.noHorizontalScrollTransfer,
         disableVirtualX: this.disableVirtualX,
+        virtualX: this.virtualX,
         disableVirtualY: this.disableVirtualY,
         resize: c => this.aftercolumnresize.emit(c),
       },

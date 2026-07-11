@@ -3,6 +3,7 @@ import { LocalScrollTimer } from '../src/services/local.scroll.timer';
 import { getScrollDimension } from '../src/services/scroll.dimension.helpers';
 import DimensionProvider from '../src/services/dimension.provider';
 import ViewportProvider from '../src/services/viewport.provider';
+import { getViewportResizeDimension } from '../src/components/revoGrid/viewport.service';
 
 function createScrollDetectionDocument(scrollHeight: number): Document {
   const element = {
@@ -33,6 +34,16 @@ function createScrollDetectionDocument(scrollHeight: number): Document {
 }
 
 describe('browser-limit-aware scroll dimensions', () => {
+  it('maps horizontal viewport resize events to the owning column section', () => {
+    expect(getViewportResizeDimension('colPinStart', 'rgCol')).toBe('colPinStart');
+    expect(getViewportResizeDimension('rgCol', 'rgCol')).toBe('rgCol');
+    expect(getViewportResizeDimension('colPinEnd', 'rgCol')).toBe('colPinEnd');
+  });
+
+  it('keeps vertical viewport resize events on the row dimension', () => {
+    expect(getViewportResizeDimension('colPinStart', 'rgRow')).toBe('rgRow');
+  });
+
   it('uses 1:1 coordinates while content fits the physical scroll range', () => {
     const dimension = getScrollDimension({
       contentSize: 1_000,
