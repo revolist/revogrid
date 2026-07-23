@@ -26,7 +26,7 @@ type Config = {
   selectionStore: Observable<SelectionStoreState>;
 
   // Apply changes from edit.
-  change(val?: any): void;
+  change(val?: any): boolean;
   // Cancels edit. Escape changes.
   cancel(): void;
 
@@ -51,7 +51,7 @@ const DIRECTION_CODES: string[] = [
   codesLetter.ARROW_RIGHT,
 ];
 export class KeyboardService {
-  constructor(private sv: Config) {}
+  constructor(private readonly sv: Config) {}
 
   /**
    * Appends printable key input that arrives after edit mode was requested
@@ -153,8 +153,9 @@ export class KeyboardService {
 
     // pressed letter key
     if (!isShortcutModifier(e) && e.key.length === 1) {
-      e.preventDefault();
-      this.sv.change(e.key);
+      if (this.sv.change(e.key)) {
+        e.preventDefault();
+      }
       return;
     }
 

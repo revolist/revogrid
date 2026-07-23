@@ -394,12 +394,7 @@ export class OverlaySelection {
           return this.doFocus(f, f, changes);
         }
       },
-      change: val => {
-        if (this.readonly) {
-          return;
-        }
-        this.doEdit(val);
-      },
+      change: val => this.doEdit(val),
       cancel: async () => {
         await this.revogrEdit?.cancelChanges();
         this.closeEdit();
@@ -783,18 +778,20 @@ export class OverlaySelection {
   /**
    * Start cell editing
    */
-  protected doEdit(val = '') {
-    if (this.canEdit()) {
-      const focus = this.selectionStore.get('focus');
-      if (!focus) {
-        return;
-      }
-      const data = this.columnService.getSaveData(focus.y, focus.x);
-      this.setEdit?.emit({
-        ...data,
-        val,
-      });
+  protected doEdit(val = ''): boolean {
+    if (!this.canEdit()) {
+      return false;
     }
+    const focus = this.selectionStore.get('focus');
+    if (!focus) {
+      return false;
+    }
+    const data = this.columnService.getSaveData(focus.y, focus.x);
+    this.setEdit?.emit({
+      ...data,
+      val,
+    });
+    return true;
   }
 
   /**

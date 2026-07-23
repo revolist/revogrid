@@ -138,6 +138,58 @@ test.describe('editing', () => {
     await expect(verticalViewport).toHaveJSProperty('scrollTop', 0);
   });
 
+  test('preserves Space scrolling when editing is readonly', async ({ page }) => {
+    const source: SampleRow[] = Array.from({ length: 40 }, (_, index) => ({
+      id: index + 1,
+      name: `Person ${index + 1}`,
+      role: 'Engineer',
+      city: 'Lisbon',
+    }));
+
+    for (const readonlyMode of ['grid', 'column'] as const) {
+      const columns = buildColumns([
+        { prop: 'id', name: 'ID' },
+        {
+          prop: 'name',
+          name: 'Name',
+          readonly: readonlyMode === 'column',
+        },
+        { prop: 'role', name: 'Role' },
+      ]);
+
+      await mountGrid(page, {
+        columns,
+        source,
+        height: 240,
+        readonly: readonlyMode === 'grid',
+      });
+
+      await setCellsFocus(page, { x: 1, y: 0 });
+
+      const verticalViewport = page.locator(
+        `${SELECTORS.mainViewport} .vertical-inner`,
+      );
+      await verticalViewport.evaluate((element: HTMLElement) => {
+        element.scrollTop = 0;
+        element.dispatchEvent(new Event('scroll', { bubbles: true }));
+      });
+      await page.waitForChanges();
+      await expect(verticalViewport).toHaveJSProperty('scrollTop', 0);
+
+      await page.keyboard.press('Space');
+      await page.waitForChanges();
+
+      await expect(page.locator(SELECTORS.editInput)).toHaveCount(0);
+      await expect
+        .poll(() =>
+          verticalViewport.evaluate(
+            (element: HTMLElement) => element.scrollTop,
+          ),
+        )
+        .toBeGreaterThan(0);
+    }
+  });
+
   test('keeps rapid printable input while editor is mounting', async ({ page }) => {
     const source: SampleRow[] = [
       { id: 1, name: '', role: 'Engineer', city: 'Lisbon' },
