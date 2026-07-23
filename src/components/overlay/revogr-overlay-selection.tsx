@@ -301,7 +301,7 @@ export class OverlaySelection {
   private autoFillService: AutoFillService | null = null;
   private orderEditor?: HTMLRevogrOrderEditorElement;
   private revogrEdit?: HTMLRevogrEditElement;
-  private unsubscribeSelectionStore: { (): void }[] = [];
+  private readonly unsubscribeSelectionStore: { (): void }[] = [];
   // #endregion
 
   // #region Listeners
