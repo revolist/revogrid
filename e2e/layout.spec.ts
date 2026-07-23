@@ -4,6 +4,8 @@ import {
   SAMPLE_ROWS,
   SELECTORS,
   basicColumns,
+  buildColumns,
+  buildRows,
   dataCell,
   expectFocusedCell,
   mountGrid,
@@ -12,6 +14,27 @@ import {
 } from './helpers';
 
 test.describe('layout', () => {
+  test('contains horizontal overscroll within the grid viewport', async ({ page }) => {
+    await mountGrid(page, {
+      columns: buildColumns(
+        Array.from({ length: 10 }, (_, index) => ({
+          prop: `col${index}`,
+          size: 120,
+        })),
+      ),
+      source: buildRows(2, Array.from({ length: 10 }, (_, index) => `col${index}`)),
+      width: 420,
+      height: 240,
+      colSize: 120,
+    });
+
+    const overscrollBehaviorX = await page
+      .locator(SELECTORS.mainViewport)
+      .evaluate(element => getComputedStyle(element).overscrollBehaviorX);
+
+    expect(overscrollBehaviorX).toBe('contain');
+  });
+
   test('reverses columns when rtl is enabled before initial connection', async ({
     page,
   }) => {

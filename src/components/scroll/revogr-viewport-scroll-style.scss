@@ -30,6 +30,7 @@ revogr-viewport-scroll {
 
   overflow-x: auto;
   overflow-y: hidden;
+  overscroll-behavior-x: contain;
   position: relative;
   z-index: 1;
   height: 100%;
