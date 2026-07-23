@@ -69,7 +69,7 @@ export class OverlaySelection {
   /**
    * Readonly mode.
    */
-  @Prop() readonly: boolean;
+  @Prop() readonly readonly: boolean;
   /**
    * Range selection allowed.
    */
@@ -169,7 +169,8 @@ export class OverlaySelection {
   /**
    * Set edit cell.
    */
-  @Event({ eventName: 'setedit' }) setEdit: EventEmitter<BeforeEdit>;
+  @Event({ eventName: 'setedit', cancelable: true })
+  setEdit: EventEmitter<BeforeEdit>;
 
   /**
    * Before range applied.
@@ -787,11 +788,11 @@ export class OverlaySelection {
       return false;
     }
     const data = this.columnService.getSaveData(focus.y, focus.x);
-    this.setEdit?.emit({
+    const event = this.setEdit.emit({
       ...data,
       val,
     });
-    return true;
+    return !event.defaultPrevented;
   }
 
   /**
