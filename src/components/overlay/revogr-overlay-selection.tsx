@@ -69,7 +69,7 @@ export class OverlaySelection {
   /**
    * Readonly mode.
    */
-  @Prop() readonly: boolean;
+  @Prop() readonly readonly: boolean;
   /**
    * Range selection allowed.
    */
@@ -169,7 +169,8 @@ export class OverlaySelection {
   /**
    * Set edit cell.
    */
-  @Event({ eventName: 'setedit' }) setEdit: EventEmitter<BeforeEdit>;
+  @Event({ eventName: 'setedit', cancelable: true })
+  setEdit: EventEmitter<BeforeEdit>;
 
   /**
    * Before range applied.
@@ -300,7 +301,7 @@ export class OverlaySelection {
   private autoFillService: AutoFillService | null = null;
   private orderEditor?: HTMLRevogrOrderEditorElement;
   private revogrEdit?: HTMLRevogrEditElement;
-  private unsubscribeSelectionStore: { (): void }[] = [];
+  private readonly unsubscribeSelectionStore: Array<() => void> = [];
   // #endregion
 
   // #region Listeners
@@ -394,12 +395,7 @@ export class OverlaySelection {
           return this.doFocus(f, f, changes);
         }
       },
-      change: val => {
-        if (this.readonly) {
-          return;
-        }
-        this.doEdit(val);
-      },
+      change: val => this.doEdit(val),
       cancel: async () => {
         await this.revogrEdit?.cancelChanges();
         this.closeEdit();
@@ -783,18 +779,20 @@ export class OverlaySelection {
   /**
    * Start cell editing
    */
-  protected doEdit(val = '') {
-    if (this.canEdit()) {
-      const focus = this.selectionStore.get('focus');
-      if (!focus) {
-        return;
-      }
-      const data = this.columnService.getSaveData(focus.y, focus.x);
-      this.setEdit?.emit({
-        ...data,
-        val,
-      });
+  protected doEdit(val = ''): boolean {
+    if (!this.canEdit()) {
+      return false;
     }
+    const focus = this.selectionStore.get('focus');
+    if (!focus) {
+      return false;
+    }
+    const data = this.columnService.getSaveData(focus.y, focus.x);
+    const event = this.setEdit.emit({
+      ...data,
+      val,
+    });
+    return !event.defaultPrevented;
   }
 
   /**

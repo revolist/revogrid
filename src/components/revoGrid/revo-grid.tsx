@@ -1777,10 +1777,12 @@ export class RevoGridComponent {
             slot={data.slot}
             onBeforenextvpfocus={(e) => this.selectionStoreConnector?.beforeNextFocusCell(e.detail)}
             onCanceledit={() => this.selectionStoreConnector?.setEdit(false)}
-            onSetedit={({ detail }) => {
-              const event = this.beforeeditstart.emit(detail);
-              if (!event.defaultPrevented) {
-                this.selectionStoreConnector?.setEdit(detail.val);
+            onSetedit={e => {
+              const event = this.beforeeditstart.emit(e.detail);
+              if (event.defaultPrevented) {
+                e.preventDefault();
+              } else {
+                this.selectionStoreConnector?.setEdit(e.detail.val);
               }
             }}
           >
