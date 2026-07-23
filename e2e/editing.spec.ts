@@ -103,6 +103,41 @@ test.describe('editing', () => {
     await expect(page.locator(SELECTORS.editInput)).toHaveValue('Z');
   });
 
+  test('does not scroll the grid when Space starts editing', async ({ page }) => {
+    const source: SampleRow[] = Array.from({ length: 40 }, (_, index) => ({
+      id: index + 1,
+      name: `Person ${index + 1}`,
+      role: 'Engineer',
+      city: 'Lisbon',
+    }));
+
+    const columns = buildColumns([
+      { prop: 'id', name: 'ID' },
+      { prop: 'name', name: 'Name' },
+      { prop: 'role', name: 'Role' },
+    ]);
+
+    await mountGrid(page, {
+      columns,
+      source,
+      height: 240,
+    });
+
+    await setCellsFocus(page, { x: 1, y: 0 });
+
+    const verticalViewport = page.locator(
+      `${SELECTORS.mainViewport} .vertical-inner`,
+    );
+    await expect(verticalViewport).toHaveJSProperty('scrollTop', 0);
+
+    await page.keyboard.press('Space');
+    await page.waitForChanges();
+
+    await expect(page.locator(SELECTORS.editInput)).toBeVisible();
+    await expect(page.locator(SELECTORS.editInput)).toHaveValue(' ');
+    await expect(verticalViewport).toHaveJSProperty('scrollTop', 0);
+  });
+
   test('keeps rapid printable input while editor is mounting', async ({ page }) => {
     const source: SampleRow[] = [
       { id: 1, name: '', role: 'Engineer', city: 'Lisbon' },

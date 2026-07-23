@@ -71,6 +71,7 @@ export class KeyboardService {
       return false;
     }
 
+    e.preventDefault();
     this.sv.selectionStore.set('edit', {
       ...editCell,
       val: `${editCell.val}${e.key}`,
@@ -152,6 +153,7 @@ export class KeyboardService {
 
     // pressed letter key
     if (!isShortcutModifier(e) && e.key.length === 1) {
+      e.preventDefault();
       this.sv.change(e.key);
       return;
     }
