@@ -1,3 +1,5 @@
+[![MCP Toplist](https://mcptoplist.com/badge/io.github.revolist%2Frevogrid-mcp-pro.svg)](https://mcptoplist.com/server/io.github.revolist%2Frevogrid-mcp-pro)
+
 <p align="center">
   <a href="https://rv-grid.com">
     <img src="./assets/logo.svg" alt="RevoGrid Data Grid" height="150" />
