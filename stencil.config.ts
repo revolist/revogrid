@@ -5,6 +5,7 @@ import { reactOutputTarget } from '@stencil/react-output-target';
 import { vueOutputTarget } from '@stencil/vue-output-target';
 import { svelteOutputTarget } from '@revolist/svelte-output-target';
 import { vueOutputTarget as vue2OutputTarget } from '@revolist/stencil-vue2-output-target';
+import { dashOutputTarget } from '@revolist/stencil-dash-output-target';
 import { eventListOutputTarget } from './scripts/event-list.plugin';
 
 const componentCorePackage = '@revolist/revogrid';
@@ -105,6 +106,38 @@ export const config: Config = {
       includeDefineCustomElements: true,
       legacy: false,
       excludeComponents,
+    }),
+    // #endregion
+
+    // #region Dash
+    dashOutputTarget({
+      outputDir: './packages/dash/src/lib/components',
+      components: ['revo-grid'],
+      componentNames: {
+        'revo-grid': 'RevoGrid',
+      },
+      customElements: {
+        'revo-grid': {
+          importPath: '../define-custom-elements.js',
+          defineCustomElement: 'defineCustomElement',
+        },
+      },
+      excludeProperties: [
+        'editors',
+        'focusTemplate',
+        'jobsBeforeRender',
+        'plugins',
+        'registerVNode',
+      ],
+      eventMappings: {
+        afteredit: 'afteredit',
+        afterfocus: 'afterfocus',
+        headerclick: 'headerclick',
+        roworderchanged: 'roworderchanged',
+        aftersortingapply: 'aftersortingapply',
+        beforefilterapply: 'beforefilterapply',
+        aftercolumnresize: 'aftercolumnresize',
+      },
     }),
     // #endregion
 

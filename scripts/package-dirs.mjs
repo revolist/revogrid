@@ -4,5 +4,6 @@ export const packageDirs = [
   'packages/react',
   'packages/svelte',
   'packages/vue2',
+  'packages/dash',
   'docs',
 ];

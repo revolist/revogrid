@@ -28,3 +28,6 @@
 [submodule "docs"]
 	path = docs
 	url = https://github.com/revolist/revogrid-docs.git
+[submodule "packages/dash"]
+	path = packages/dash
+	url = https://github.com/revolist/dash-datagrid.git
