@@ -413,8 +413,8 @@ Thank you for supporting RevoGrid! 🙏
 
 ## Testing
 
-[![Unit Tests](https://github.com/revolist/revogrid/actions/workflows/ci-unit.yml/badge.svg?branch=main)](https://github.com/revolist/revogrid/actions/workflows/ci-unit.yml)
-[![E2E Tests](https://github.com/revolist/revogrid/actions/workflows/ci-e2e.yml/badge.svg?branch=main)](https://github.com/revolist/revogrid/actions/workflows/ci-e2e.yml)
+[![Unit Tests](https://github.com/revolist/revogrid/actions/workflows/unit.yml/badge.svg?branch=main)](https://github.com/revolist/revogrid/actions/workflows/unit.yml)
+[![E2E Tests](https://github.com/revolist/revogrid/actions/workflows/e2e.yml/badge.svg?branch=main)](https://github.com/revolist/revogrid/actions/workflows/e2e.yml)
 
 RevoGrid is thoroughly tested to ensure reliability and stability.
 
