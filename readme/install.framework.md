@@ -2,4 +2,5 @@
 - [![React](./assets/react.svg) React](https://rv-grid.com/guide/react/)
 - [![Angular](./assets/angular.svg) Angular](https://rv-grid.com/guide/angular/)
 - [![Svelte](./assets/svelte.svg) Svelte](https://rv-grid.com/guide/svelte/)
+- [Dash / Python](https://rv-grid.com/guide/dash/)
 - [![JavaScript](./assets/js.svg) JavaScript](https://rv-grid.com/guide/)
