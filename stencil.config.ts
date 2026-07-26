@@ -129,15 +129,15 @@ export const config: Config = {
         'plugins',
         'registerVNode',
       ],
-      eventMappings: {
-        afteredit: 'afteredit',
-        afterfocus: 'afterfocus',
-        headerclick: 'headerclick',
-        roworderchanged: 'roworderchanged',
-        aftersortingapply: 'aftersortingapply',
-        beforefilterapply: 'beforefilterapply',
-        aftercolumnresize: 'aftercolumnresize',
-      },
+      defaultEvents: [
+        'afteredit',
+        'afterfocus',
+        'headerclick',
+        'roworderchanged',
+        'aftersortingapply',
+        'beforefilterapply',
+        'aftercolumnresize',
+      ],
     }),
     // #endregion
 

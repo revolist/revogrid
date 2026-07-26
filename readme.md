@@ -288,7 +288,7 @@ yarn add @revolist/revogrid;
 
 ## Framework
 
-In `<revo-grid />` we have developed a sophisticated Continuous Delivery (CD) system powered by GitHub Actions. This advanced system automatically builds and delivers grid versions across multiple frameworks, including React, Angular, Svelte, Vue 2, and Vue 3, with full type support. This ensures continuous version delivery, providing the latest grid enhancements and upgrades across all supported frameworks ✨. In the future (version 5), we are planning to switch to monorepo based development.
+In `<revo-grid />` we have developed a sophisticated Continuous Delivery (CD) system powered by GitHub Actions. This advanced system automatically builds and delivers grid versions across multiple frameworks, including React, Angular, Svelte, Vue 2, Vue 3, and Plotly Dash for Python, with full type support. This ensures continuous version delivery, providing the latest grid enhancements and upgrades across all supported frameworks ✨. In the future (version 5), we are planning to switch to monorepo based development.
 
 
 
@@ -296,6 +296,7 @@ In `<revo-grid />` we have developed a sophisticated Continuous Delivery (CD) sy
 - [![React](./assets/react.svg) React](https://rv-grid.com/guide/react/)
 - [![Angular](./assets/angular.svg) Angular](https://rv-grid.com/guide/angular/)
 - [![Svelte](./assets/svelte.svg) Svelte](https://rv-grid.com/guide/svelte/)
+- [Dash / Python](https://rv-grid.com/guide/dash/)
 - [![JavaScript](./assets/js.svg) JavaScript](https://rv-grid.com/guide/)
 
 ## Basic Usage
@@ -351,6 +352,7 @@ grid.source = [{ name: 'New Item' }];
 - [![React](./assets/react.svg) React](https://rv-grid.com/guide/react/)
 - [![Angular](./assets/angular.svg) Angular](https://rv-grid.com/guide/angular/)
 - [![Svelte](./assets/svelte.svg) Svelte](https://rv-grid.com/guide/svelte/)
+- [Dash / Python](https://rv-grid.com/guide/dash/)
 - [![JavaScript](./assets/js.svg) JavaScript](https://rv-grid.com/guide/)
 
 ## Versions
@@ -464,4 +466,3 @@ By getting involved, you'll have the opportunity to enhance your skills, gain va
 MIT
 
 ---
-
