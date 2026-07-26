@@ -24,4 +24,4 @@ yarn add @revolist/revogrid;
 
 ## Framework
 
-In `<revo-grid />` we have developed a sophisticated Continuous Delivery (CD) system powered by GitHub Actions. This advanced system automatically builds and delivers grid versions across multiple frameworks, including React, Angular, Svelte, Vue 2, Vue 3, and Plotly Dash for Python, with full type support. This ensures continuous version delivery, providing the latest grid enhancements and upgrades across all supported frameworks ✨. In the future (version 5), we are planning to switch to monorepo based development.
+In `<revo-grid />` we have developed a sophisticated Continuous Delivery (CD) system powered by GitHub Actions. This advanced system automatically builds and delivers grid versions across multiple frameworks, including React, Angular, Svelte, Vue 2, Vue 3, and Plotly Dash for Python, with full type support. This ensures continuous version delivery, providing the latest grid enhancements and upgrades across all supported frameworks ✨. In the future (version 5), we are planning to switch to monorepo-based development.
