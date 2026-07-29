@@ -5,7 +5,10 @@ import { createStore } from '@stencil/store';
 import { gatherTrimmedItems, Trimmed, trimmedPlugin } from './trimmed.plugin';
 import { setStore, Observable } from '../../utils';
 import { proxyPlugin } from './data.proxy';
-import type { GroupLabelTemplateFunc } from '../../plugins/groupingRow/grouping.row.types';
+import type {
+  GroupCellTemplateFunc,
+  GroupLabelTemplateFunc,
+} from '../../plugins/groupingRow/grouping.row.types';
 import type {
   DimensionRows,
   DimensionCols,
@@ -31,6 +34,7 @@ export type DSourceState<
   T2 extends GDimension,
 > = DataSourceState<T1, T2> & {
   groupingCustomRenderer?: GroupLabelTemplateFunc | null;
+  groupingCellRenderer?: GroupCellTemplateFunc | null;
 };
 
 /**
@@ -52,6 +56,7 @@ export class DataStore<T extends GDataType, ST extends GDimension> {
       type,
       trimmed: {},
       groupingCustomRenderer: undefined,
+      groupingCellRenderer: undefined,
       ...storeData,
     }));
     store.use(proxyPlugin(store));
@@ -73,6 +78,8 @@ export class DataStore<T extends GDataType, ST extends GDimension> {
       groups?: Groups;
       // custom renderer for group label, if not provided default will be used
       customRenderer?: GroupLabelTemplateFunc;
+      // custom renderer for horizontally virtualized group cells
+      cellRenderer?: GroupCellTemplateFunc;
     },
     // if true, store will be updated without resetting trimmed state
     silent = false,
@@ -108,6 +115,7 @@ export class DataStore<T extends GDataType, ST extends GDimension> {
         // if groups are not provided, we will consider that there is only one group with all items
         groups: grouping.groups,
         groupingCustomRenderer: grouping.customRenderer,
+        groupingCellRenderer: grouping.cellRenderer,
       });
     }
   }

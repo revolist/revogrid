@@ -59,6 +59,253 @@ test.describe('row grouping', () => {
     await expectVisibleColumnValues(page, 1, ['Alice', 'Ben', 'Cara', 'Dan']);
   });
 
+  test('renders boolean false distinctly from an empty group value', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: buildColumns([{ prop: 'name', name: 'Name' }]),
+      source: [
+        { name: 'Boolean group', group: false },
+        { name: 'Empty group', group: null },
+      ],
+      grouping: {
+        props: ['group'],
+        expandedAll: true,
+        emptyGroupValue: '(empty)',
+      },
+    });
+
+    const mainGroupRows = page.locator(
+      `${SELECTORS.mainViewport} .groupingRow`,
+    );
+    await expect(mainGroupRows).toHaveCount(2);
+    expect(
+      (await mainGroupRows.allTextContents()).map(label => label.trim()),
+    ).toEqual(['false', '(empty)']);
+  });
+
+  test('keeps the legacy full-row group label template unchanged', async ({ page }) => {
+    await mountGrid(page, {
+      columns: buildColumns([
+        { prop: 'name', name: 'Name' },
+        { prop: 'role', name: 'Role' },
+      ]),
+      source: [
+        { name: 'Alice', role: 'Engineer', team: 'North' },
+        { name: 'Ben', role: 'Designer', team: 'South' },
+      ],
+    });
+
+    await page.evaluate(() => {
+      const grid = document.querySelector('revo-grid') as HTMLRevoGridElement | null;
+      if (!grid) {
+        throw new Error('Grid was not found');
+      }
+      grid.grouping = {
+        props: ['team'],
+        expandedAll: true,
+        groupLabelTemplate(createElement: any, { name }: any) {
+          return createElement(
+            'span',
+            { 'data-testid': 'legacy-group-label' },
+            `legacy:${name}`,
+          );
+        },
+      };
+    });
+    await page.waitForChanges();
+
+    const mainGroupRows = page.locator(`${SELECTORS.mainViewport} .groupingRow`);
+    await expect(mainGroupRows.getByTestId('legacy-group-label')).toHaveCount(2);
+    await expect(mainGroupRows.getByTestId('legacy-group-label')).toContainText([
+      'legacy:North',
+      'legacy:South',
+    ]);
+    await expect(mainGroupRows.locator('.groupingCell')).toHaveCount(0);
+  });
+
+  test('renders the configured value for missing nested group keys', async ({ page }) => {
+    await mountGrid(page, {
+      columns: buildColumns([
+        { prop: 'a', name: 'A' },
+        { prop: 'b', name: 'B' },
+      ]),
+      source: [
+        { a: '1', b: '1', key: 'b' },
+        { a: '2', b: '2', key: 'b', key2: 'c' },
+        { a: '3', b: '3', key: 'b', key2: 'd' },
+        { a: '4', b: '4', key: 'a', key2: 'c' },
+      ],
+    });
+
+    await page.evaluate(() => {
+      const grid = document.querySelector('revo-grid') as HTMLRevoGridElement | null;
+      if (!grid) {
+        throw new Error('Grid was not found');
+      }
+      const props = ['key', 'key2'];
+      grid.grouping = {
+        props,
+        expandedAll: true,
+        emptyGroupValue: '(empty)',
+        groupLabelTemplate(createElement: any, { name, depth }: any) {
+          return createElement(
+            'span',
+            { 'data-testid': 'nullish-group-label' },
+            `${props[depth]}: ${name}`,
+          );
+        },
+      };
+    });
+    await page.waitForChanges();
+
+    const labels = page.locator(
+      `${SELECTORS.mainViewport} [data-testid="nullish-group-label"]`,
+    );
+    await expect(labels).toHaveCount(6);
+    await expect(labels).toContainText([
+      'key: b',
+      'key2: (empty)',
+      'key2: c',
+      'key2: d',
+      'key: a',
+      'key2: c',
+    ]);
+    expect(
+      (await labels.allTextContents()).some(label => label.includes('null')),
+    ).toBe(false);
+  });
+
+  test('renders custom group cells from the horizontal virtual viewport', async ({ page }) => {
+    const metricColumns = Array.from({ length: 40 }, (_, index) => ({
+      prop: `metric${index}`,
+      name: `Metric ${index}`,
+      size: 100,
+    }));
+    const metricValues = Object.fromEntries(
+      metricColumns.map(({ prop }, index) => [prop, index]),
+    );
+
+    await mountGrid(page, {
+      width: 340,
+      columns: buildColumns([
+        { prop: 'name', name: 'Group', size: 100 },
+        ...metricColumns,
+      ]),
+      source: [
+        { name: 'Alice', team: 'North', ...metricValues },
+        { name: 'Ben', team: 'North', ...metricValues },
+        { name: 'Cara', team: 'South', ...metricValues },
+        { name: 'Dan', team: 'South', ...metricValues },
+      ],
+    });
+
+    await page.evaluate(() => {
+      const grid = document.querySelector('revo-grid') as HTMLRevoGridElement | null;
+      if (!grid) {
+        throw new Error('Grid was not found');
+      }
+      grid.grouping = {
+        props: ['team'],
+        expandedAll: true,
+        groupLabelTemplate(createElement: any) {
+          return createElement(
+            'span',
+            { 'data-testid': 'unused-legacy-group-label' },
+            'legacy',
+          );
+        },
+        groupCellTemplate(createElement: any, props: any) {
+          const content = props.group.isLabelColumn
+            ? `group:${props.group.name}`
+            : `${String(props.column.prop)}:${String(props.value ?? '')}`;
+          if (props.group.isLabelColumn) {
+            return createElement(
+              'button',
+              {
+                'data-testid': `virtual-group-toggle-${props.group.name}`,
+                onClick: props.group.onExpand,
+              },
+              content,
+            );
+          }
+          return createElement(
+            'span',
+            {
+              'data-testid': 'virtual-group-value',
+              'data-prop': String(props.column.prop),
+            },
+            content,
+          );
+        },
+      };
+    });
+    await page.waitForChanges();
+
+    await page.evaluate(async () => {
+      const grid = document.querySelector('revo-grid') as HTMLRevoGridElement | null;
+      if (!grid) {
+        throw new Error('Grid was not found');
+      }
+      const store = await grid.getSourceStore();
+      const groupedSource = store.get('source').map((row: Record<string, any>) => {
+        const groupName = row['__rvgr-name'];
+        if (typeof groupName === 'undefined') {
+          return row;
+        }
+        const groupRow = { ...row };
+        for (let index = 0; index < 40; index++) {
+          groupRow[`metric${index}`] = `${groupName}-${index}`;
+        }
+        return groupRow;
+      });
+      store.set('source', groupedSource);
+    });
+    await page.waitForChanges();
+
+    const mainGroupRows = page.locator(`${SELECTORS.mainViewport} .groupingRow`);
+    const groupCells = mainGroupRows.locator('.groupingCell');
+
+    await expect(mainGroupRows.getByTestId('unused-legacy-group-label')).toHaveCount(0);
+    await expect(mainGroupRows.getByTestId('virtual-group-toggle-North')).toHaveCount(1);
+    await expect(
+      mainGroupRows
+        .filter({ hasText: 'group:North' })
+        .locator('[data-testid="virtual-group-value"][data-prop="metric0"]'),
+    ).toContainText('metric0:North-0');
+    expect(await groupCells.count()).toBeLessThan(20);
+
+    await mainGroupRows.getByTestId('virtual-group-toggle-North').click();
+    await expect(
+      page.locator(`${SELECTORS.mainViewport} ${SELECTORS.renderedRows}:not(.groupingRow)`),
+    ).toHaveCount(2);
+
+    const initialColumnIndexes = await groupCells.evaluateAll(cells =>
+      [...new Set(cells.map(cell => Number(cell.getAttribute('data-rgCol'))))],
+    );
+    expect(initialColumnIndexes).toContain(0);
+
+    await page.evaluate(async () => {
+      const grid = document.querySelector('revo-grid') as HTMLRevoGridElement | null;
+      if (!grid) {
+        throw new Error('Grid was not found');
+      }
+      await grid.scrollToColumnIndex(25);
+    });
+    await page.waitForChanges();
+
+    await expect
+      .poll(() =>
+        groupCells
+          .evaluateAll(cells =>
+            [...new Set(cells.map(cell => Number(cell.getAttribute('data-rgCol'))))],
+          )
+          .then(indexes => indexes.length > 0 && indexes.every(index => index > 10)),
+      )
+      .toBe(true);
+    expect(await groupCells.count()).toBeLessThan(20);
+  });
+
   test('filters collapsed grouped rows and keeps only matching branches visible', async ({ page }) => {
     const source = [
       { id: 1, name: 'Alice', role: 'Engineer', city: 'Lisbon', team: 'North' },

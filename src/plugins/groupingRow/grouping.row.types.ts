@@ -8,6 +8,7 @@ import type {
   VirtualPositionItem,
   PositionItem,
   DimensionCols,
+  CellTemplateProp,
 } from '@type';
 import type { RowProps } from '../../components/data/row-renderer';
 import { GROUP_EXPAND_EVENT } from './grouping.const';
@@ -58,12 +59,49 @@ export interface GroupRowPros extends RowProps {
   hasExpand: boolean;
   providers: Providers;
   groupingCustomRenderer?: GroupLabelTemplateFunc | null;
+  groupingCellRenderer?: GroupCellTemplateFunc | null;
+  additionalData?: any;
 }
 
 export type GroupLabelTemplateFunc = (
   createElement: HyperFunc<VNode>,
   props: GroupTemplateProp & RowGroupingProps,
   ...args: any[]
+) => any;
+
+export interface GroupCellTemplateProp
+  extends Omit<CellTemplateProp, 'colType'> {
+  /**
+   * Column viewport type that owns the cell.
+   */
+  colType: DimensionCols | 'rowHeaders';
+  /**
+   * Current virtual column position. Only columns rendered by the viewport are
+   * passed to the group cell template.
+   */
+  columnItem: VirtualPositionItem;
+  /**
+   * Current virtual row position.
+   */
+  rowItem: VirtualPositionItem;
+  /**
+   * Semantic information about the synthetic group row.
+   */
+  group: {
+    name: string;
+    depth: number;
+    expanded: boolean;
+    prop: ColumnProp;
+    isLabelColumn: boolean;
+    canExpand: boolean;
+    onExpand(event: MouseEvent): void;
+  };
+}
+
+export type GroupCellTemplateFunc = (
+  createElement: HyperFunc<VNode>,
+  props: GroupCellTemplateProp,
+  additionalData?: any,
 ) => any;
 
 export type GroupingOptions = {
@@ -81,6 +119,12 @@ export type GroupingOptions = {
    * Custom group label template
    */
   groupLabelTemplate?: GroupLabelTemplateFunc;
+  /**
+   * Custom template for cells in synthetic group rows.
+   * When provided, group rows render only the columns in the current horizontal
+   * viewport and this template takes precedence over `groupLabelTemplate`.
+   */
+  groupCellTemplate?: GroupCellTemplateFunc;
 } & ExpandedOptions;
 
 export type BeforeSourceSetEvent = {
@@ -109,9 +153,19 @@ export type ExpandedOptions = {
    */
   getGroupValue?(item: DataType, prop: string | number): any;
   /**
+   * Replacement group value for `null` and `undefined` keys.
+   * Used by the default group value resolver.
+   * @default ''
+   */
+  emptyGroupValue?: any;
+  /**
    * Custom group label template
    */
   groupLabelTemplate?: GroupLabelTemplateFunc;
+  /**
+   * Custom template for virtualized cells in synthetic group rows.
+   */
+  groupCellTemplate?: GroupCellTemplateFunc;
 };
 
 declare global {

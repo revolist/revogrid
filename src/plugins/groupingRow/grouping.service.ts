@@ -18,8 +18,12 @@ type SourceGather = {
   oldNewIndexes?: Record<number, number>;
 };
 
-function getGroupValueDefault(item: DataType, prop: string | number) {
-  return item[prop] || null;
+function getGroupValueDefault(
+  item: DataType,
+  prop: string | number,
+  emptyGroupValue: any,
+) {
+  return item[prop] ?? emptyGroupValue;
 }
 
 function isDataRow(item: DataType | null | undefined): item is DataType {
@@ -157,7 +161,8 @@ export function gatherGrouping(
   {
     prevExpanded = {},
     expandedAll = false,
-    getGroupValue = getGroupValueDefault,
+    getGroupValue,
+    emptyGroupValue = '',
   }: ExpandedOptions,
 ) {
   const groupedItems: GroupedData = new Map();
@@ -167,7 +172,11 @@ export function gatherGrouping(
       return;
     }
 
-    const groupLevelValues = columnProps.map(groupId => getGroupValue(item, groupId));
+    const groupLevelValues = columnProps.map(groupId =>
+      getGroupValue
+        ? getGroupValue(item, groupId)
+        : getGroupValueDefault(item, groupId, emptyGroupValue),
+    );
     const lastLevelValue = groupLevelValues.pop();
     let currentGroupLevel = groupedItems;
     groupLevelValues.forEach(value => {
