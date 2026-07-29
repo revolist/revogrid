@@ -59,6 +59,31 @@ test.describe('row grouping', () => {
     await expectVisibleColumnValues(page, 1, ['Alice', 'Ben', 'Cara', 'Dan']);
   });
 
+  test('renders boolean false distinctly from an empty group value', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: buildColumns([{ prop: 'name', name: 'Name' }]),
+      source: [
+        { name: 'Boolean group', group: false },
+        { name: 'Empty group', group: null },
+      ],
+      grouping: {
+        props: ['group'],
+        expandedAll: true,
+        emptyGroupValue: '(empty)',
+      },
+    });
+
+    const mainGroupRows = page.locator(
+      `${SELECTORS.mainViewport} .groupingRow`,
+    );
+    await expect(mainGroupRows).toHaveCount(2);
+    expect(
+      (await mainGroupRows.allTextContents()).map(label => label.trim()),
+    ).toEqual(['false', '(empty)']);
+  });
+
   test('keeps the legacy full-row group label template unchanged', async ({ page }) => {
     await mountGrid(page, {
       columns: buildColumns([

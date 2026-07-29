@@ -175,7 +175,7 @@ export const GroupingRowRenderer = (props: RowGroupingProps) => {
         >
           {expandSvgIconVNode(expanded)}
         </button>,
-        name,
+        String(name),
       ]}
     </RowRenderer>
   );
