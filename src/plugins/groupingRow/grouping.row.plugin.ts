@@ -205,7 +205,7 @@ export class GroupingRowPlugin extends BasePlugin {
       depth,
       trimmed,
       oldNewIndexMap,
-    } = gatherGrouping(source, this.options?.props || [], expanded);
+    } = gatherGrouping(source, this.options?.props ?? [], expanded);
 
     const customRenderer = options?.groupLabelTemplate;
     const cellRenderer = options?.groupCellTemplate;
@@ -243,7 +243,7 @@ export class GroupingRowPlugin extends BasePlugin {
     }
     const source = data.source.filter(s => !isGrouping(s));
     const options: ExpandedOptions = {
-      ...(this.options || {}),
+      ...this.options,
       prevExpanded: preservedExpanded,
     };
     const {
@@ -251,7 +251,7 @@ export class GroupingRowPlugin extends BasePlugin {
       depth,
       trimmed,
       oldNewIndexMap,
-    } = gatherGrouping(source, this.options?.props || [], options);
+    } = gatherGrouping(source, this.options?.props ?? [], options);
     data.source = sourceWithGroups;
     this.providers.data.setGrouping({
       depth,
