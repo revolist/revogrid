@@ -10,7 +10,10 @@ import {
   Trimmed,
 } from '@store';
 import DimensionProvider from './dimension.provider';
-import type { GroupLabelTemplateFunc } from '../plugins/groupingRow/grouping.row.types';
+import type {
+  GroupCellTemplateFunc,
+  GroupLabelTemplateFunc,
+} from '../plugins/groupingRow/grouping.row.types';
 import type {
   DataLookup,
   DimensionRows,
@@ -63,6 +66,7 @@ export class DataProvider {
       depth: number;
       groups?: Groups;
       customRenderer?: GroupLabelTemplateFunc;
+      cellRenderer?: GroupCellTemplateFunc;
     },
     // if true, store will be updated without resetting trimmed state
     silent = false,
@@ -155,8 +159,23 @@ export class DataProvider {
     this.stores[type].setData({ items: [...items] });
   }
 
-  setGrouping({ depth }: { depth: number }, type: DimensionRows = 'rgRow') {
-    this.stores[type].setData({ groupingDepth: depth });
+  setGrouping(
+    {
+      depth,
+      customRenderer,
+      cellRenderer,
+    }: {
+      depth: number;
+      customRenderer?: GroupLabelTemplateFunc;
+      cellRenderer?: GroupCellTemplateFunc;
+    },
+    type: DimensionRows = 'rgRow',
+  ) {
+    this.stores[type].setData({
+      groupingDepth: depth,
+      groupingCustomRenderer: customRenderer,
+      groupingCellRenderer: cellRenderer,
+    });
   }
 
   setTrimmed(trimmed: Trimmed, type: DimensionRows = 'rgRow') {

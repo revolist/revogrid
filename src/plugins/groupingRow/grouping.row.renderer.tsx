@@ -6,9 +6,16 @@ import {
   GROUP_EXPAND_BTN,
   PSEUDO_GROUP_ITEM,
   GROUP_EXPAND_EVENT,
+  GROUP_COLUMN_PROP,
 } from './grouping.const';
-import type { RowGroupingProps } from './grouping.row.types';
-import type { DataType } from '@type';
+import type {
+  GroupCellTemplateProp,
+  RowGroupingProps,
+} from './grouping.row.types';
+import type { DataType, VNodeResponse } from '@type';
+import { getSourceItem } from '@store';
+import { CELL_CLASS, DATA_COL, DATA_ROW, getCellRaw } from '../../utils';
+import { isGroupingColumn } from './grouping.service';
 
 export function expandEvent(
   e: MouseEvent,
@@ -26,8 +33,101 @@ export function expandEvent(
   e.target?.dispatchEvent(event);
 }
 
+export function renderGroupCells(
+  props: RowGroupingProps,
+  {
+    name,
+    expanded,
+    depth,
+  }: {
+    name: string;
+    expanded: boolean;
+    depth: number;
+  },
+): VNodeResponse[] {
+  const {
+    additionalData,
+    columnItems,
+    groupingCellRenderer,
+    hasExpand,
+    itemIndex,
+    model,
+    providers,
+    size,
+    start,
+    end,
+  } = props;
+  if (!groupingCellRenderer) {
+    return [];
+  }
+
+  const renderOffset = providers.viewport.get('renderOffset') || 0;
+  const data = providers.data.get('source');
+  const rowItem = { itemIndex, size, start, end };
+  const onExpand = (event: MouseEvent) => expandEvent(event, model, itemIndex);
+
+  return columnItems.map(columnItem => {
+    const column = getSourceItem(providers.columns, columnItem.itemIndex);
+    if (!column) {
+      return null;
+    }
+    const isLabelColumn = isGroupingColumn(column);
+    const templateProps: GroupCellTemplateProp = {
+      prop: column.prop,
+      model,
+      data,
+      column,
+      rowIndex: itemIndex,
+      colIndex: columnItem.itemIndex,
+      colType: providers.colType,
+      type: providers.type,
+      value: getCellRaw(model, column),
+      providers,
+      columnItem,
+      rowItem,
+      group: {
+        name,
+        depth,
+        expanded,
+        prop: model[GROUP_COLUMN_PROP],
+        isLabelColumn,
+        canExpand: hasExpand,
+        onExpand,
+      },
+    };
+
+    return (
+      <div
+        key={columnItem.itemIndex}
+        class={{
+          [CELL_CLASS]: true,
+          groupingCell: true,
+          groupingLabelCell: isLabelColumn,
+        }}
+        {...{
+          [DATA_COL]: columnItem.itemIndex,
+          [DATA_ROW]: itemIndex,
+        }}
+        style={{
+          width: `${columnItem.size}px`,
+          transform: `translateX(${columnItem.start - renderOffset}px)`,
+          height: size ? `${size}px` : undefined,
+        }}
+      >
+        {groupingCellRenderer(h, templateProps, additionalData)}
+      </div>
+    );
+  });
+}
+
 export const GroupingRowRenderer = (props: RowGroupingProps) => {
-  const { model, itemIndex, hasExpand, groupingCustomRenderer } = props;
+  const {
+    model,
+    itemIndex,
+    hasExpand,
+    groupingCustomRenderer,
+    groupingCellRenderer,
+  } = props;
   const name = model[PSEUDO_GROUP_ITEM];
   const expanded = model[GROUP_EXPANDED];
   const depth = parseInt(model[GROUP_DEPTH], 10) || 0;
@@ -36,6 +136,19 @@ export const GroupingRowRenderer = (props: RowGroupingProps) => {
     depth,
     expanded,
   };
+
+  if (groupingCellRenderer) {
+    return (
+      <RowRenderer
+        index={props.index}
+        size={props.size}
+        start={props.start}
+        {...groupRowAttrs}
+      >
+        {renderGroupCells(props, { name, expanded, depth })}
+      </RowRenderer>
+    );
+  }
 
   if (groupingCustomRenderer) {
     return (

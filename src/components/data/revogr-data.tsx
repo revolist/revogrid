@@ -228,6 +228,7 @@ export class RevogrData {
     const rowsEls: VNode[] = [];
     const depth = this.dataStore.get('groupingDepth');
     const groupingCustomRenderer = this.dataStore.get('groupingCustomRenderer');
+    const groupingCellRenderer = this.dataStore.get('groupingCellRenderer');
     const groupDepth = this.columnService.hasGrouping ? depth : 0;
     const rowRenderOffset = this.viewportRow.get('renderOffset') || 0;
     const colRenderOffset = this.viewportCol.get('renderOffset') || 0;
@@ -242,6 +243,8 @@ export class RevogrData {
           index: rgRow.itemIndex,
           model: dataItem,
           groupingCustomRenderer,
+          groupingCellRenderer,
+          additionalData: this.additionalData,
           // Only show expand button if grouping is enabled and not in row headers
           hasExpand: this.columnService.hasGrouping && this.colType !== 'rowHeaders',
           columnItems: cols,

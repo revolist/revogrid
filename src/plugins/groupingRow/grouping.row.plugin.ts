@@ -208,13 +208,14 @@ export class GroupingRowPlugin extends BasePlugin {
     } = gatherGrouping(source, this.options?.props || [], expanded);
 
     const customRenderer = options?.groupLabelTemplate;
+    const cellRenderer = options?.groupCellTemplate;
 
     // setup source
     this.providers.data.setData(
       sourceWithGroups,
       GROUPING_ROW_TYPE,
       this.revogrid.disableVirtualY,
-      { depth, customRenderer },
+      { depth, customRenderer, cellRenderer },
       true,
     );
     this.updateTrimmed(
@@ -242,7 +243,7 @@ export class GroupingRowPlugin extends BasePlugin {
     }
     const source = data.source.filter(s => !isGrouping(s));
     const options: ExpandedOptions = {
-      ...(this.revogrid.grouping || {}),
+      ...(this.options || {}),
       prevExpanded: preservedExpanded,
     };
     const {
@@ -252,7 +253,11 @@ export class GroupingRowPlugin extends BasePlugin {
       oldNewIndexMap,
     } = gatherGrouping(source, this.options?.props || [], options);
     data.source = sourceWithGroups;
-    this.providers.data.setGrouping({ depth });
+    this.providers.data.setGrouping({
+      depth,
+      customRenderer: options.groupLabelTemplate,
+      cellRenderer: options.groupCellTemplate,
+    });
     this.updateTrimmed(trimmed, oldNewIndexMap, undefined, sourceWithGroups);
   }
 

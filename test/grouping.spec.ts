@@ -41,6 +41,7 @@ describe('row grouping', () => {
       groupingDepth: 0,
       groups: {},
       groupingCustomRenderer: undefined,
+      groupingCellRenderer: undefined,
     };
     const store = {
       get: (key: keyof typeof state) => state[key],
@@ -75,8 +76,18 @@ describe('row grouping', () => {
           state.proxyItems = nextSource.map((_, index) => index);
           state.items = [...state.proxyItems];
         }),
-        setGrouping: jest.fn(({ depth }: { depth: number }) => {
+        setGrouping: jest.fn(({
+          depth,
+          customRenderer,
+          cellRenderer,
+        }: {
+          depth: number;
+          customRenderer?: (...args: any[]) => any;
+          cellRenderer?: (...args: any[]) => any;
+        }) => {
           state.groupingDepth = depth;
+          state.groupingCustomRenderer = customRenderer;
+          state.groupingCellRenderer = cellRenderer;
         }),
       },
       column: {
@@ -97,6 +108,67 @@ describe('row grouping', () => {
   }
 
   describe('gatherGrouping', () => {
+    it('keeps defined falsy group keys and renders nullish keys as empty labels', () => {
+      const { sourceWithGroups } = gatherGrouping(
+        [
+          { id: 1 },
+          { id: 2, key: null },
+          { id: 3, key: 0 },
+          { id: 4, key: false },
+        ],
+        ['key'],
+        { expandedAll: true },
+      );
+      const groupRows = sourceWithGroups.filter(isGrouping);
+
+      expect(groupRows.map(row => row[PSEUDO_GROUP_ITEM])).toEqual([
+        '',
+        0,
+        false,
+      ]);
+      expect(groupRows.map(row => row.key)).toEqual(['', 0, false]);
+    });
+
+    it('uses the configured empty group value for nullish keys', () => {
+      const { sourceWithGroups } = gatherGrouping(
+        [
+          { id: 1 },
+          { id: 2, key: null },
+          { id: 3, key: 0 },
+          { id: 4, key: false },
+        ],
+        ['key'],
+        {
+          expandedAll: true,
+          emptyGroupValue: '(empty)',
+        },
+      );
+      const groupRows = sourceWithGroups.filter(isGrouping);
+
+      expect(groupRows.map(row => row[PSEUDO_GROUP_ITEM])).toEqual([
+        '(empty)',
+        0,
+        false,
+      ]);
+      expect(groupRows.map(row => row.key)).toEqual(['(empty)', 0, false]);
+    });
+
+    it('keeps custom group value resolution ahead of the empty value fallback', () => {
+      const { sourceWithGroups } = gatherGrouping(
+        [{ id: 1 }],
+        ['key'],
+        {
+          expandedAll: true,
+          emptyGroupValue: '(empty)',
+          getGroupValue: () => 'custom',
+        },
+      );
+      const groupRows = sourceWithGroups.filter(isGrouping);
+
+      expect(groupRows.map(row => row[PSEUDO_GROUP_ITEM])).toEqual(['custom']);
+      expect(groupRows.map(row => row.key)).toEqual(['custom']);
+    });
+
     it('creates collapsed groups and trims child data rows', () => {
       const { sourceWithGroups, trimmed, depth } = gatherGrouping(
         [
@@ -629,6 +701,65 @@ describe('row grouping', () => {
         'Dan',
         'Ben',
       ]);
+    });
+  });
+
+  describe('group renderers', () => {
+    it('stores both legacy row and virtual cell renderers during initial source grouping', () => {
+      const { plugin, providers, revogrid, state } = createGroupingPlugin([]);
+      const groupLabelTemplate = jest.fn();
+      const groupCellTemplate = jest.fn();
+
+      plugin.setGrouping({
+        props: ['team'],
+        groupLabelTemplate,
+        groupCellTemplate,
+      });
+      revogrid.dispatchEvent(
+        new CustomEvent('beforesourceset', {
+          detail: {
+            type: 'rgRow',
+            source: [
+              { name: 'Alice', team: 'North' },
+              { name: 'Ben', team: 'South' },
+            ],
+          },
+        }),
+      );
+
+      expect(providers.data.setGrouping).toHaveBeenCalledWith({
+        depth: 1,
+        customRenderer: groupLabelTemplate,
+        cellRenderer: groupCellTemplate,
+      });
+      expect(state.groupingCustomRenderer).toBe(groupLabelTemplate);
+      expect(state.groupingCellRenderer).toBe(groupCellTemplate);
+    });
+
+    it('passes both renderers through regrouping metadata', () => {
+      const { plugin, providers } = createGroupingPlugin([
+        { name: 'Alice', team: 'North' },
+      ]);
+      const groupLabelTemplate = jest.fn();
+      const groupCellTemplate = jest.fn();
+
+      plugin.setGrouping({
+        props: ['team'],
+        groupLabelTemplate,
+        groupCellTemplate,
+      });
+
+      expect(providers.data.setData).toHaveBeenCalledWith(
+        expect.any(Array),
+        'rgRow',
+        false,
+        {
+          depth: 1,
+          customRenderer: groupLabelTemplate,
+          cellRenderer: groupCellTemplate,
+        },
+        true,
+      );
     });
   });
 
