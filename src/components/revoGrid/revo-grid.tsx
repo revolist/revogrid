@@ -38,6 +38,8 @@ import type {
   RangeArea,
   AfterEditEvent,
   Theme,
+  ThemeDefinition,
+  ThemeTokenName,
   PluginBaseComponent,
   HeaderProperties,
   PluginProviders,
@@ -54,7 +56,8 @@ import { DataProvider } from '../../services/data.provider';
 import { DSourceState, getVisibleSourceItem, rowTypes } from '@store';
 import DimensionProvider from '../../services/dimension.provider';
 import ViewportProvider from '../../services/viewport.provider';
-import ThemeService from '../../themeManager/theme.service';
+import ThemeService, { getTheme } from '../../themeManager/theme.service';
+import { themeTokenCssVariables } from '../../types/theme';
 import { timeout } from '../../utils';
 import {
   AutoSizeColumnPlugin,
@@ -90,6 +93,12 @@ import { ColumnFilterConfig, FilterCollectionItem } from '../../plugins/filter/f
 import { PluginService } from './plugin.service';
 import { AfterSortingApplyEvent, SortingConfig, SortingOrder } from '../../plugins';
 import { RTLPlugin } from '../../plugins/rtl/rtl.plugin';
+
+const DEFAULT_COLUMN_SIZE = 100;
+
+function getColumnSize(size: number): number {
+  return Number.isFinite(size) && size > 0 ? size : DEFAULT_COLUMN_SIZE;
+}
 
 /**
  * Revogrid - High-performance, customizable grid library for managing large datasets.
@@ -209,6 +218,12 @@ export class RevoGridComponent {
 
   /** Theme name. */
   @Prop({ reflect: true, mutable: true }) theme: Theme = 'default';
+
+  /**
+   * Per-grid custom theme definitions.
+   * Assign as a JavaScript property; complex values cannot be serialized as HTML attributes.
+   */
+  @Prop() themeDefinitions: ThemeDefinition[] = [];
 
   /**
    * Row class property mapping.
@@ -1143,6 +1158,9 @@ export class RevoGridComponent {
   selectionStoreConnector?: SelectionStoreConnector;
   scrollingService: GridScrollingService;
   private pendingColumnFocusRestore?: PendingColumnFocusRestore;
+  private appliedThemeRowSize?: number;
+  private pendingNormalizedTheme?: Theme;
+  private themeStyles: Record<string, string> = {};
 
   // #endregion
 
@@ -1283,12 +1301,22 @@ export class RevoGridComponent {
   }
 
   @Watch('rowSize') rowSizeChanged(s: number) {
-    if (!this.dimensionProvider) {
+    if (!this.themeService || !this.dimensionProvider) {
       return;
     }
-    // clear existing data
-    this.dimensionProvider.setSettings({ originItemSize: s }, 'rgRow');
-    this.rowDefChanged(this.rowDefinitions, this.rowDefinitions, 'rowSize', true);
+    this.themeService.rowSize = s;
+    this.applyTheme(this.theme, false, false, 'rowSize');
+  }
+
+  @Watch('colSize') colSizeChanged(s: number) {
+    if (!this.dimensionProvider || !this.columnProvider) {
+      return;
+    }
+    this.dimensionProvider.setSettings(
+      { originItemSize: getColumnSize(s) },
+      'rgCol',
+    );
+    this.columnChanged(this.columns);
   }
 
   @Watch('theme') themeChanged(
@@ -1297,34 +1325,76 @@ export class RevoGridComponent {
     __ = 'theme',
     init = false,
   ) {
-    if (!this.dimensionProvider) {
+    if (!this.themeService || !this.dimensionProvider) {
       return;
     }
-    this.themeService.register(t);
-    this.dimensionProvider.setSettings(
-      { originItemSize: this.themeService.rowSize },
-      'rgRow',
-    );
-    this.dimensionProvider.setSettings(
-      { originItemSize: this.colSize },
-      'rgCol',
-    );
-    // if theme change we need to reapply row size and reset viewport
-    if (!init) {
-      // clear existing data
-      this.dimensionProvider.setSettings(
-        { originItemSize: this.themeService.rowSize },
-        'rgRow',
-      );
-      this.rowDefChanged(
-        // for cases when some custom size present and not
-        this.rowDefinitions,
-        this.rowDefinitions,
-        'theme',
-        true,
-      );
+
+    if (this.pendingNormalizedTheme === t) {
+      this.pendingNormalizedTheme = undefined;
+      return;
     }
-    this.afterthemechanged.emit(t);
+
+    const normalizedTheme = getTheme(t);
+    if (normalizedTheme !== t) {
+      this.pendingNormalizedTheme = normalizedTheme;
+      this.theme = normalizedTheme;
+    }
+    this.applyTheme(normalizedTheme, init, true, 'theme');
+  }
+
+  @Watch('themeDefinitions') themeDefinitionsChanged(
+    definitions: ThemeDefinition[] = [],
+  ) {
+    if (!this.themeService || !this.dimensionProvider) {
+      return;
+    }
+    this.themeService.setDefinitions(definitions);
+    this.applyTheme(this.theme, false, true, 'themeDefinitions');
+  }
+
+  private applyTheme(
+    theme: Theme,
+    init: boolean,
+    emitEvent: boolean,
+    reason: 'theme' | 'themeDefinitions' | 'rowSize',
+  ) {
+    const resolvedTheme = this.themeService.register(theme);
+    const rowSize = this.themeService.rowSize;
+    const densityChanged = this.appliedThemeRowSize !== rowSize;
+    const hadAppliedTheme = this.appliedThemeRowSize !== undefined;
+    this.appliedThemeRowSize = rowSize;
+    this.themeStyles = this.getThemeStyles();
+
+    if (densityChanged) {
+      this.dimensionProvider?.setSettings({ originItemSize: rowSize }, 'rgRow');
+      if (!init && hadAppliedTheme) {
+        this.rowDefChanged(
+          this.rowDefinitions,
+          this.rowDefinitions,
+          reason,
+          true,
+        );
+      }
+    }
+
+    if (emitEvent) {
+      this.afterthemechanged.emit(resolvedTheme.name);
+    }
+  }
+
+  private getThemeStyles(): Record<string, string> {
+    const styles: Record<string, string> = {
+      '--rg-theme-row-size': `${this.themeService.rowSize}px`,
+    };
+    for (const [name, value] of Object.entries(
+      this.themeService.theme.tokens,
+    )) {
+      const cssVariable = themeTokenCssVariables[name as ThemeTokenName];
+      if (cssVariable && value) {
+        styles[cssVariable] = value;
+      }
+    }
+    return styles;
   }
 
   @Watch('source')
@@ -1613,10 +1683,15 @@ export class RevoGridComponent {
     this.themeService = new ThemeService({
       rowSize: this.rowSize,
     });
+    this.themeService.setDefinitions(this.themeDefinitions);
     this.dimensionProvider = new DimensionProvider(this.viewportProvider, {
       realSizeChanged: (k: MultiDimensionType) =>
         this.contentsizechanged.emit(k),
     });
+    this.dimensionProvider.setSettings(
+      { originItemSize: getColumnSize(this.colSize) },
+      'rgCol',
+    );
     this.columnProvider = new ColumnDataProvider();
     this.selectionStoreConnector = new SelectionStoreConnector();
     this.dataProvider = new DataProvider(this.dimensionProvider);
@@ -1880,7 +1955,12 @@ export class RevoGridComponent {
     );
 
     return (
-      <Host dir={this.rtl ? 'rtl' : 'ltr'}>
+      <Host
+        dir={this.rtl ? 'rtl' : 'ltr'}
+        data-rg-theme-base={this.themeService.theme.base}
+        data-rg-theme-scheme={this.themeService.theme.colorScheme}
+        style={this.themeStyles}
+      >
         {this.hideAttribution ? null : (
           <revogr-attribution class="attribution" />
         )}

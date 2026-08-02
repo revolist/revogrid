@@ -14,6 +14,32 @@ import {
 } from './helpers';
 
 test.describe('layout', () => {
+  test('initializes the regular viewport when every column has an explicit size', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: buildColumns([
+        { prop: 'account', size: 138 },
+        { prop: 'region', size: 92 },
+        { prop: 'revenue', size: 112 },
+        { prop: 'growth', size: 90 },
+      ]),
+      source: [
+        {
+          account: 'Northstar Labs',
+          region: 'EMEA',
+          revenue: '$184,200',
+          growth: '+18.4%',
+        },
+      ],
+      width: 440,
+      colSize: 100,
+    });
+
+    await expect(page.locator(SELECTORS.actualHeaderCells)).toHaveCount(4);
+    await expect(dataCell(page, 0, 0)).toHaveText('Northstar Labs');
+  });
+
   test('contains horizontal overscroll within the grid viewport', async ({ page }) => {
     await mountGrid(page, {
       columns: buildColumns(

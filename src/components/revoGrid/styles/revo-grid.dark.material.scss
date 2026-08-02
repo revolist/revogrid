@@ -1,8 +1,0 @@
-@use './revo-grid.common-material.scss' as *;
-
-revo-grid[theme='darkMaterial'] {
-  $header-height: 50px;
-  $default-rows-size: 42px;
-
-  @include revoGrid($header-height, $default-rows-size);
-}

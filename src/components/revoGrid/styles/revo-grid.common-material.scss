@@ -1,12 +1,14 @@
 @mixin revoGrid($header-height, $default-rows-size) {
-  font-family: Nunito, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol';
+  font-family: var(--rg-theme-font-family);
   revogr-header {
+    color: var(--rg-theme-header-color);
+    background-color: var(--rg-theme-header-bg);
     line-height: $header-height;
-    font-weight: 600;
-    text-align: left;
+    font-weight: var(--rg-theme-header-font-weight);
+    text-align: var(--rg-theme-header-text-align);
 
     .rgHeaderCell {
-      padding: 0 15px;
+      padding: var(--rg-theme-header-padding);
       text-overflow: ellipsis;
     }
 
@@ -15,15 +17,20 @@
     }
   }
 
+  .rowHeaders {
+    color: var(--rg-theme-row-headers-color);
+    background-color: var(--rg-theme-row-headers-bg);
+  }
+
   revogr-data {
-    text-align: left;
+    text-align: var(--rg-theme-cell-text-align);
 
     .rgRow {
       line-height: $default-rows-size;
     }
 
     .rgCell {
-      padding: 0 15px;
+      padding: var(--rg-theme-cell-padding);
     }
   }
 }

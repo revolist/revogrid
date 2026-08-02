@@ -14,10 +14,11 @@ revogr-filter-panel .filter-panel-dialog {
 
   opacity: 1;
   transform: none;
-  background-color: var(--revo-grid-filter-panel-bg, #fff);
-  border: 1px solid var(--revo-grid-filter-panel-border, #cecece);
+  color: var(--rg-theme-filter-panel-text);
+  background-color: var(--rg-theme-filter-panel-bg);
+  border: 1px solid var(--rg-theme-filter-panel-border);
   transform-origin: 62px 0px;
-  box-shadow: 0 5px 18px -2px var(--revo-grid-filter-panel-shadow, rgba(0, 0, 0, 0.15));
+  box-shadow: 0 5px 18px -2px var(--rg-theme-filter-panel-shadow);
   box-sizing: border-box;
   padding: 10px;
   border-radius: 8px;
@@ -45,7 +46,8 @@ revogr-filter-panel .filter-panel-dialog {
     border: 0;
     min-height: 34px;
     margin: 5px 0;
-    background: var(--revo-grid-filter-panel-input-bg, #f3f3f3);
+    color: var(--rg-theme-filter-panel-text);
+    background: var(--rg-theme-filter-panel-input-bg);
     border-radius: 5px;
     padding: 0 10px;
     box-sizing: border-box;
@@ -61,8 +63,8 @@ revogr-filter-panel .filter-panel-dialog {
     text-align: right;
     margin: 10px -10px -10px;
     padding: 0 5px 10px 10px;
-    background: var(--revo-grid-filter-panel-bg, #fff);
-    border-top: 1px solid var(--revo-grid-filter-panel-divider, #d9d9d9);
+    background: var(--rg-theme-filter-panel-bg);
+    border-top: 1px solid var(--rg-theme-filter-panel-divider);
 
     button {
       margin-top: 10px;
@@ -112,12 +114,12 @@ revogr-filter-panel .filter-panel-dialog {
     border-radius: 4px;
 
     &.active {
-      color: #10224a;
+      color: var(--rg-theme-filter-panel-icon-active);
     }
 
     .filter-img {
       $img-size: 11px;
-      color: gray;
+      color: var(--rg-theme-filter-panel-icon);
       width: $img-size;
     }
   }
@@ -125,6 +127,7 @@ revogr-filter-panel .filter-panel-dialog {
 
 .select-css {
   $gradient: 'data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23007CB2%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E';
+  $disabled-gradient: 'data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22graytext%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E';
 
   display: block;
   font-family: sans-serif;
@@ -134,12 +137,13 @@ revogr-filter-panel .filter-panel-dialog {
   max-width: 100%; /* useful when width is set to anything other than 100% */
   box-sizing: border-box;
   margin: 0;
-  border: 1px solid var(--revo-grid-filter-panel-select-border, #d9d9d9);
+  color: var(--rg-theme-filter-panel-text);
+  border: 1px solid var(--rg-theme-filter-panel-select-border);
   box-shadow: transparent;
   border-radius: 0.5em;
   appearance: none;
-  background-color: var(--revo-grid-filter-panel-input-bg, #f3f3f3);
-  background-image: url($gradient);
+  background-color: var(--rg-theme-filter-panel-input-bg);
+  background-image: var(--revo-grid-filter-panel-select-arrow, url($gradient));
   background-repeat: no-repeat, repeat;
   /* arrow icon position (1em from the right, 50% vertical) , then gradient position*/
   background-position:
@@ -156,13 +160,12 @@ revogr-filter-panel .filter-panel-dialog {
   }
   /* Hover style */
   &:hover {
-    border-color: var(--revo-grid-filter-panel-select-border, #d9d9d9);
+    border-color: var(--rg-theme-filter-panel-select-border);
   }
   /* Focus style */
   &:focus {
-    border-color: var(--revo-grid-filter-panel-select-border-hover, #d9d9d9);
-    box-shadow: 0 0 1px 3px rgba(59, 153, 252, 0.7);
-    box-shadow: 0 0 0 3px -moz-mac-focusring;
+    border-color: var(--rg-theme-filter-panel-select-border-hover);
+    box-shadow: var(--rg-theme-filter-panel-focus-ring);
     outline: none;
   }
 
@@ -174,14 +177,16 @@ revogr-filter-panel .filter-panel-dialog {
   /* Disabled styles */
   &:disabled,
   &[aria-disabled='true'] {
-    color: gray;
-    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22graytext%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'),
-      linear-gradient(to bottom, #ffffff 0%, #ffffff 100%);
+    color: var(--rg-theme-filter-panel-muted-text);
+    background-image: var(
+      --revo-grid-filter-panel-select-arrow-disabled,
+      url($disabled-gradient)
+    );
   }
 
   &:disabled:hover,
   &[aria-disabled='true'] {
-    border-color: var(--revo-grid-filter-panel-select-border, #d9d9d9);
+    border-color: var(--rg-theme-filter-panel-select-border);
   }
 }
 
@@ -211,9 +216,9 @@ revogr-filter-panel .filter-panel-dialog {
       left: 0;
       z-index: 2;
       height: 2px;
-      background: var(--revo-grid-filter-panel-reorder-accent, #007cb2);
+      background: var(--rg-theme-filter-panel-reorder-accent);
       border-radius: 999px;
-      box-shadow: 0 0 0 2px var(--revo-grid-filter-panel-bg, #fff);
+      box-shadow: 0 0 0 2px var(--rg-theme-filter-panel-bg);
     }
 
     &.filter-row-drop-active .filter-row-drop-target {
@@ -265,7 +270,7 @@ revogr-filter-panel .filter-panel-dialog {
   .reorder-button {
     border: 0;
     background: transparent;
-    color: var(--revo-grid-filter-panel-reorder-color, #6b7280);
+    color: var(--rg-theme-filter-panel-reorder-color);
     cursor: grab;
     font-family: monospace;
     font-size: 12px;
@@ -276,7 +281,7 @@ revogr-filter-panel .filter-panel-dialog {
     width: 16px;
 
     &.filter-row-drag-over {
-      color: var(--revo-grid-filter-panel-reorder-accent, #007cb2);
+      color: var(--rg-theme-filter-panel-reorder-accent);
     }
 
     &:active {
@@ -295,7 +300,7 @@ revogr-filter-panel .filter-panel-dialog {
   display: block;
   margin: 0 -10px 10px -10px;
 
-  border-bottom: 1px solid var(--revo-grid-filter-panel-divider, #d9d9d9);
+  border-bottom: 1px solid var(--rg-theme-filter-panel-divider);
   height: 10px;
 }
 

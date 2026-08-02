@@ -1,4 +1,5 @@
 import { generateFakeDataObjectAsync } from './data.js';
+import { modernThemeDefinitions } from '/build/index.esm.js';
 
 /**
  * Map of prevented events
@@ -296,12 +297,16 @@ globalThis.timerUpdate = function (checked, inteval = 3) {
  */
 globalThis.theme = function (theme) {
   const grid = document.querySelector('revo-grid');
-  if (theme?.includes('dark')) {
+  const selectedTheme = theme || 'default';
+  const definition = modernThemeDefinitions.find(
+    item => item.name === selectedTheme,
+  );
+  if (definition?.colorScheme === 'dark' || selectedTheme.includes('dark')) {
     document.documentElement.setAttribute('data-bs-theme', 'dark');
   } else {
     document.documentElement.removeAttribute('data-bs-theme');
   }
-  grid.theme = theme || 'default';
+  grid.theme = selectedTheme;
 };
 
 globalThis.onload = onLoad;
@@ -426,6 +431,7 @@ globalThis.setColumnGroupOffsetBugDemo = () => {
 function onLoad() {
   const grid = document.querySelector('revo-grid');
 
+  grid.themeDefinitions = modernThemeDefinitions;
   grid.readonly = false;
   grid.range = true;
   grid.useClipboard = { rangeFill: true };
@@ -434,6 +440,16 @@ function onLoad() {
 
   grid.exporting = true;
   grid.rowHeaders = true;
+  const initialTheme = new URLSearchParams(location.search).get('theme');
+  if (initialTheme) {
+    globalThis.theme(initialTheme);
+    const themeOption = Array.from(
+      document.querySelectorAll('input[name="theme"]'),
+    ).find(option => option.value === initialTheme);
+    if (themeOption) {
+      themeOption.checked = true;
+    }
+  }
   // grid.rowDefinitions = [{
   //   size: 200,
   //   type: 'rgRow',

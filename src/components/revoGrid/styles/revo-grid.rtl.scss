@@ -76,13 +76,13 @@ revo-grid[dir='rtl'] {
 
   // Adjust focus indicators for RTL
   .focused-cell {
-    border-right: 2px solid var(--revo-grid-primary);
+    border-right: 2px solid var(--rg-theme-primary);
     border-left: none;
   }
 
   // Adjust selection indicators for RTL
   .selection-range {
-    border-right: 2px solid var(--revo-grid-primary);
+    border-right: 2px solid var(--rg-theme-primary);
     border-left: none;
   }
 
@@ -128,8 +128,7 @@ revo-grid[dir='rtl'] {
   }
 
   // Adjust material theme specific RTL styles
-  &[theme='material'],
-  &[theme='darkMaterial'] {
+  &[data-rg-theme-base='material'] {
     revogr-header {
       text-align: right;
     }
@@ -140,36 +139,35 @@ revo-grid[dir='rtl'] {
   }
 
   // Adjust default theme specific RTL styles
-  &[theme='default'],
-  &:not([theme]) {
+  &[data-rg-theme-base='default'] {
     .rowHeaders {
-        background-color: var(--revo-grid-header-bg);
+      background-color: var(--rg-theme-row-headers-bg);
 
-        $cell-shadow-bottom: 0 -1px 0 0 var(--revo-grid-header-border) inset;
-        $cell-shadow-left: 1px 0 0 0 var(--revo-grid-header-border) inset;
-        $cell-shadow-right: 1px 0 0 0 var(--revo-grid-header-border) inset;
-    
-        revogr-data {
-          .rgCell {
-            color: var(--revo-grid-header-color);
-    
-            &:first-child {
-              box-shadow: $cell-shadow-bottom;
-            }
-            &:not(:first-child) {
-              box-shadow: $cell-shadow-bottom, $cell-shadow-left;
-            }
-            &:last-child {
-              border-left: 1px solid var(--revo-grid-header-border);
-              border-right: none;
-            }
-          }
-    
-          revogr-header {
+      $cell-shadow-bottom: 0 -1px 0 0 var(--rg-theme-header-border) inset;
+      $cell-shadow-left: 1px 0 0 0 var(--rg-theme-header-border) inset;
+      $cell-shadow-right: 1px 0 0 0 var(--rg-theme-header-border) inset;
+
+      revogr-data {
+        .rgCell {
+          color: var(--rg-theme-row-headers-color);
+
+          &:first-child {
             box-shadow: $cell-shadow-bottom;
           }
+          &:not(:first-child) {
+            box-shadow: $cell-shadow-bottom, $cell-shadow-left;
+          }
+          &:last-child {
+            border-left: 1px solid var(--rg-theme-header-border);
+            border-right: none;
+          }
+        }
+
+        revogr-header {
+          box-shadow: $cell-shadow-bottom;
         }
       }
+    }
     revogr-header {
       text-align: right;
     }
@@ -180,8 +178,7 @@ revo-grid[dir='rtl'] {
   }
 
   // Adjust compact theme specific RTL styles
-  &[theme='compact'],
-  &[theme='darkCompact'] {
+  &[data-rg-theme-base='compact'] {
     revogr-header {
       text-align: right;
     }

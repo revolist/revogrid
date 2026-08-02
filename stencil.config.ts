@@ -58,7 +58,6 @@ export const config: Config = {
 
   namespace: 'revo-grid',
   taskQueue: 'async',
-  globalScript: './src/global/global.ts',
   validatePrimaryPackageOutputTarget: true,
   plugins: [
     sass(),
