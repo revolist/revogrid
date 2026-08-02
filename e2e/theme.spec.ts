@@ -489,29 +489,36 @@ test('switches between the modern presets with complete visual metadata', async 
   }
 });
 
-test('renders vertical cell separators in the high contrast dark preset', async ({
+test('renders vertical cell separators in both high contrast presets', async ({
   page,
 }) => {
   await mountGrid(page, {
     columns,
     source: [{ id: 1, name: 'Ada' }],
-    theme: 'highContrastDark',
+    theme: 'highContrast',
     themeDefinitions: modernThemeDefinitions,
   });
 
+  const grid = page.locator(SELECTORS.grid);
   const firstCell = dataCell(page, 0, 0);
   const secondCell = dataCell(page, 0, 1);
+  const cases = [
+    ['highContrast', 'rgb(107, 114, 128)'],
+    ['highContrastDark', 'rgb(115, 123, 135)'],
+  ] as const;
 
-  await expect
-    .poll(() =>
-      firstCell.evaluate(element => getComputedStyle(element).boxShadow),
-    )
-    .toContain('rgb(115, 123, 135)');
-  await expect
-    .poll(() =>
-      firstCell.evaluate(element => getComputedStyle(element).boxShadow),
-    )
-    .toContain('inset');
+  for (const [theme, color] of cases) {
+    await grid.evaluate((element, nextTheme) => {
+      element.theme = nextTheme;
+    }, theme);
+    await page.waitForChanges();
+
+    const shadow = await firstCell.evaluate(
+      element => getComputedStyle(element).boxShadow,
+    );
+    expect(shadow).toContain(color);
+    expect(shadow).toContain('inset');
+  }
 
   const firstBox = await firstCell.boundingBox();
   const secondBox = await secondCell.boundingBox();

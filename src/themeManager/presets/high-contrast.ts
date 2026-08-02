@@ -18,7 +18,7 @@ const highContrastGrid: PresetTokenGroups['grid'] = [
   '#003eaa',
   '#1f2937',
   '#6b7280',
-  null,
+  '#6b7280',
   '#d6e9ff',
   '#e8f2ff',
   '#e5e7eb',

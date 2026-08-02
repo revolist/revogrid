@@ -284,7 +284,7 @@ describe('ThemeService', () => {
       highContrastTheme,
       highContrastDarkTheme,
     ]);
-    expect(highContrastTheme.tokens.cellVerticalBorder).toBeUndefined();
+    expect(highContrastTheme.tokens.cellVerticalBorder).toBe('#6b7280');
     expect(highContrastDarkTheme.tokens.cellVerticalBorder).toBe('#737b87');
     expect(new Set(modernThemeDefinitions.map(theme => theme.name)).size).toBe(
       modernThemeDefinitions.length,
