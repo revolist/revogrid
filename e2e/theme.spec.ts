@@ -488,3 +488,34 @@ test('switches between the modern presets with complete visual metadata', async 
     ).toHaveCSS('background-color', focusedHeaderBackground);
   }
 });
+
+test('renders vertical cell separators in the high contrast dark preset', async ({
+  page,
+}) => {
+  await mountGrid(page, {
+    columns,
+    source: [{ id: 1, name: 'Ada' }],
+    theme: 'highContrastDark',
+    themeDefinitions: modernThemeDefinitions,
+  });
+
+  const firstCell = dataCell(page, 0, 0);
+  const secondCell = dataCell(page, 0, 1);
+
+  await expect
+    .poll(() =>
+      firstCell.evaluate(element => getComputedStyle(element).boxShadow),
+    )
+    .toContain('rgb(115, 123, 135)');
+  await expect
+    .poll(() =>
+      firstCell.evaluate(element => getComputedStyle(element).boxShadow),
+    )
+    .toContain('inset');
+
+  const firstBox = await firstCell.boundingBox();
+  const secondBox = await secondCell.boundingBox();
+  expect(firstBox && secondBox && firstBox.x + firstBox.width).toBe(
+    secondBox?.x,
+  );
+});

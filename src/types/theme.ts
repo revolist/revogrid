@@ -38,6 +38,7 @@ export const themeTokenCssVariables = {
   headerFocusedBg: '--revo-grid-header-focused-bg',
   headerHoverBg: '--revo-grid-header-hover-bg',
   cellBorder: '--revo-grid-cell-border',
+  cellVerticalBorder: '--revo-grid-cell-vertical-border',
   focusedBg: '--revo-grid-focused-bg',
   rowHover: '--revo-grid-row-hover',
   rowHeadersBg: '--revo-grid-row-headers-bg',

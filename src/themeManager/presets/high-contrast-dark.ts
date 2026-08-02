@@ -22,6 +22,7 @@ export const highContrastDarkTheme = defineTheme({
     headerFocusedBg: '#005f73',
     headerHoverBg: '#303030',
     cellBorder: '#737b87',
+    cellVerticalBorder: '#737b87',
     focusedBg: '#182c3f',
     rowHover: '#202a33',
     rowHeadersBg: '#222222',

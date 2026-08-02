@@ -31,6 +31,10 @@ revo-grid {
     var(--rg-theme-row-hover)
   );
   --rg-theme-cell-border: var(--revo-grid-cell-border, #e2e3e3);
+  --rg-theme-cell-vertical-border: var(
+    --revo-grid-cell-vertical-border,
+    transparent
+  );
   --rg-theme-focused-bg: var(--revo-grid-focused-bg, rgba(233, 234, 237, 0.5));
   --rg-theme-row-hover: var(--revo-grid-row-hover, #f1f1f1);
   --rg-theme-row-headers-bg: var(

@@ -31,6 +31,7 @@
 
     .rgCell {
       padding: var(--rg-theme-cell-padding);
+      box-shadow: -1px 0 0 0 var(--rg-theme-cell-vertical-border) inset;
     }
   }
 }
