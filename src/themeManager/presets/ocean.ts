@@ -1,15 +1,7 @@
 import { defineTheme } from '../../types/theme';
-import {
-  createPresetTokens,
-  type ButtonTokens,
-  type FilterPanelTokens,
-  type FoundationTokens,
-  type GridStateTokens,
-  type SelectionTokens,
-  type TypographyTokens,
-} from './shared';
+import { createPresetTokens, type PresetTokenGroups } from './shared';
 
-const oceanFoundation: FoundationTokens = [
+const oceanFoundation: PresetTokenGroups['foundation'] = [
   '#2563eb',
   'rgba(37, 99, 235, 0.88)',
   '#f8fafc',
@@ -19,7 +11,7 @@ const oceanFoundation: FoundationTokens = [
   '#334155',
   '#d8e2ee',
 ];
-const oceanGrid: GridStateTokens = [
+const oceanGrid: PresetTokenGroups['grid'] = [
   '#eef4fb',
   '#0f172a',
   '#d7e2ee',
@@ -33,7 +25,7 @@ const oceanGrid: GridStateTokens = [
   '#475569',
   '#f1f5f9',
 ];
-const oceanFilterPanel: FilterPanelTokens = [
+const oceanFilterPanel: PresetTokenGroups['filterPanel'] = [
   '#ffffff',
   '#dbe4ef',
   'rgba(15, 23, 42, 0.18)',
@@ -49,7 +41,7 @@ const oceanFilterPanel: FilterPanelTokens = [
   '#64748b',
   '#2563eb',
 ];
-const oceanTypography: TypographyTokens = [
+const oceanTypography: PresetTokenGroups['typography'] = [
   '13px',
   '44px',
   '12px',
@@ -60,7 +52,7 @@ const oceanTypography: TypographyTokens = [
   '0 14px',
   '0 14px',
 ];
-const oceanSelection: SelectionTokens = [
+const oceanSelection: PresetTokenGroups['selection'] = [
   '#2563eb',
   'rgba(37, 99, 235, 0.1)',
   '#2563eb',
@@ -70,7 +62,7 @@ const oceanSelection: SelectionTokens = [
   '#64748b',
   '#3b82f6',
 ];
-const oceanButtons: ButtonTokens = [
+const oceanButtons: PresetTokenGroups['buttons'] = [
   '#ffffff',
   '#2563eb',
   '#059669',

@@ -1,15 +1,7 @@
 import { defineTheme } from '../../types/theme';
-import {
-  createPresetTokens,
-  type ButtonTokens,
-  type FilterPanelTokens,
-  type FoundationTokens,
-  type GridStateTokens,
-  type SelectionTokens,
-  type TypographyTokens,
-} from './shared';
+import { createPresetTokens, type PresetTokenGroups } from './shared';
 
-const highContrastFoundation: FoundationTokens = [
+const highContrastFoundation: PresetTokenGroups['foundation'] = [
   '#003eaa',
   'rgba(0, 62, 170, 0.92)',
   '#ffffff',
@@ -19,7 +11,7 @@ const highContrastFoundation: FoundationTokens = [
   '#111827',
   '#374151',
 ];
-const highContrastGrid: GridStateTokens = [
+const highContrastGrid: PresetTokenGroups['grid'] = [
   '#111827',
   '#ffffff',
   '#ffffff',
@@ -33,7 +25,7 @@ const highContrastGrid: GridStateTokens = [
   '#000000',
   '#d1d5db',
 ];
-const highContrastFilterPanel: FilterPanelTokens = [
+const highContrastFilterPanel: PresetTokenGroups['filterPanel'] = [
   '#ffffff',
   '#111827',
   'rgba(0, 0, 0, 0.4)',
@@ -49,7 +41,7 @@ const highContrastFilterPanel: FilterPanelTokens = [
   '#111827',
   '#003eaa',
 ];
-const highContrastTypography: TypographyTokens = [
+const highContrastTypography: PresetTokenGroups['typography'] = [
   '14px',
   '48px',
   '13px',
@@ -60,7 +52,7 @@ const highContrastTypography: TypographyTokens = [
   '0 14px',
   '0 14px',
 ];
-const highContrastSelection: SelectionTokens = [
+const highContrastSelection: PresetTokenGroups['selection'] = [
   '#003eaa',
   'rgba(0, 95, 204, 0.2)',
   '#003eaa',
@@ -70,7 +62,7 @@ const highContrastSelection: SelectionTokens = [
   '#5b21b6',
   '#ffbf00',
 ];
-const highContrastButtons: ButtonTokens = [
+const highContrastButtons: PresetTokenGroups['buttons'] = [
   '#ffffff',
   '#003eaa',
   '#006b3c',

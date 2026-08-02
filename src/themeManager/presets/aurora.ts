@@ -1,15 +1,7 @@
 import { defineTheme } from '../../types/theme';
-import {
-  createPresetTokens,
-  type ButtonTokens,
-  type FilterPanelTokens,
-  type FoundationTokens,
-  type GridStateTokens,
-  type SelectionTokens,
-  type TypographyTokens,
-} from './shared';
+import { createPresetTokens, type PresetTokenGroups } from './shared';
 
-const auroraFoundation: FoundationTokens = [
+const auroraFoundation: PresetTokenGroups['foundation'] = [
   '#34d399',
   'rgba(52, 211, 153, 0.88)',
   '#071714',
@@ -19,7 +11,7 @@ const auroraFoundation: FoundationTokens = [
   '#d1fae5',
   '#1c3d36',
 ];
-const auroraGrid: GridStateTokens = [
+const auroraGrid: PresetTokenGroups['grid'] = [
   '#0c2420',
   '#ecfdf5',
   '#245047',
@@ -33,7 +25,7 @@ const auroraGrid: GridStateTokens = [
   '#86cbb8',
   'rgba(110, 231, 183, 0.08)',
 ];
-const auroraFilterPanel: FilterPanelTokens = [
+const auroraFilterPanel: PresetTokenGroups['filterPanel'] = [
   '#0b201c',
   '#285047',
   'rgba(0, 0, 0, 0.52)',
@@ -49,7 +41,7 @@ const auroraFilterPanel: FilterPanelTokens = [
   '#86a89f',
   '#5eead4',
 ];
-const auroraTypography: TypographyTokens = [
+const auroraTypography: PresetTokenGroups['typography'] = [
   '12px',
   '42px',
   '11px',
@@ -60,7 +52,7 @@ const auroraTypography: TypographyTokens = [
   '0 12px',
   '0 12px',
 ];
-const auroraSelection: SelectionTokens = [
+const auroraSelection: PresetTokenGroups['selection'] = [
   '#34d399',
   'rgba(52, 211, 153, 0.12)',
   '#34d399',
@@ -70,7 +62,7 @@ const auroraSelection: SelectionTokens = [
   '#5eead4',
   '#2dd4bf',
 ];
-const auroraButtons: ButtonTokens = [
+const auroraButtons: PresetTokenGroups['buttons'] = [
   '#052e27',
   '#34d399',
   '#10b981',

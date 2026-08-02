@@ -1,15 +1,7 @@
 import { defineTheme } from '../../types/theme';
-import {
-  createPresetTokens,
-  type ButtonTokens,
-  type FilterPanelTokens,
-  type FoundationTokens,
-  type GridStateTokens,
-  type SelectionTokens,
-  type TypographyTokens,
-} from './shared';
+import { createPresetTokens, type PresetTokenGroups } from './shared';
 
-const midnightFoundation: FoundationTokens = [
+const midnightFoundation: PresetTokenGroups['foundation'] = [
   '#8b5cf6',
   'rgba(139, 92, 246, 0.9)',
   '#0b1020',
@@ -19,7 +11,7 @@ const midnightFoundation: FoundationTokens = [
   '#dbeafe',
   '#25324d',
 ];
-const midnightGrid: GridStateTokens = [
+const midnightGrid: PresetTokenGroups['grid'] = [
   '#121a2f',
   '#e2e8f0',
   '#2a3855',
@@ -33,7 +25,7 @@ const midnightGrid: GridStateTokens = [
   '#94a3b8',
   'rgba(100, 116, 139, 0.12)',
 ];
-const midnightFilterPanel: FilterPanelTokens = [
+const midnightFilterPanel: PresetTokenGroups['filterPanel'] = [
   '#111827',
   '#334155',
   'rgba(0, 0, 0, 0.55)',
@@ -49,7 +41,7 @@ const midnightFilterPanel: FilterPanelTokens = [
   '#94a3b8',
   '#22d3ee',
 ];
-const midnightTypography: TypographyTokens = [
+const midnightTypography: PresetTokenGroups['typography'] = [
   '13px',
   '46px',
   '12px',
@@ -60,7 +52,7 @@ const midnightTypography: TypographyTokens = [
   '0 14px',
   '0 14px',
 ];
-const midnightSelection: SelectionTokens = [
+const midnightSelection: PresetTokenGroups['selection'] = [
   '#22d3ee',
   'rgba(34, 211, 238, 0.12)',
   '#22d3ee',
@@ -70,7 +62,7 @@ const midnightSelection: SelectionTokens = [
   '#a78bfa',
   '#22d3ee',
 ];
-const midnightButtons: ButtonTokens = [
+const midnightButtons: PresetTokenGroups['buttons'] = [
   '#ffffff',
   '#7c3aed',
   '#059669',
