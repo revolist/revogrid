@@ -97,6 +97,7 @@ test.describe('filtering', () => {
     await initialFilterPanel.locator('#add-filter').selectOption('contains');
     await initialFilterPanel.locator(SELECTORS.filterInput).fill('Admin');
     await initialFilterPanel.getByRole('button', { name: 'ok' }).click();
+    await page.waitForTimeout(500);
 
     await page.evaluate(() => {
       const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
@@ -109,7 +110,6 @@ test.describe('filtering', () => {
     const filterPanel = page.locator(SELECTORS.filterPanel);
     await expect(filterPanel.locator('.select-filter').first()).toHaveValue('contains');
     await expect(filterPanel.locator(SELECTORS.filterInput).first()).toHaveValue('Admin');
-    await filterPanel.locator('#add-filter').selectOption('contains');
     await expect(filterPanel.locator('#add-filter option[value="contains"]')).toHaveCount(0);
 
     await page.getByTestId('runtime-filter-role').locator(SELECTORS.filterButton).click();
