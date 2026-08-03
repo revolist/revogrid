@@ -98,8 +98,8 @@ test.describe('filtering', () => {
     await page.getByTestId('runtime-filter-role').locator(SELECTORS.filterButton).click();
     const initialFilterPanel = page.locator(SELECTORS.filterPanel);
     await initialFilterPanel.locator('#add-filter').selectOption('contains');
-    await expect(initialFilterPanel.locator(SELECTORS.filterInput).first()).toBeVisible();
-    await initialFilterPanel.locator(SELECTORS.filterInput).first().fill('Admin');
+    await expect(initialFilterPanel.locator('input[placeholder="Enter value..."]').first()).toBeVisible();
+    await initialFilterPanel.locator('input[placeholder="Enter value..."]').first().fill('Admin');
     await initialFilterPanel.getByRole('button', { name: 'ok' }).click();
     await page.waitForTimeout(500);
 
@@ -113,7 +113,7 @@ test.describe('filtering', () => {
 
     const filterPanel = page.locator(SELECTORS.filterPanel);
     await expect(filterPanel.locator('.select-filter').first()).toHaveValue('contains');
-    await expect(filterPanel.locator(SELECTORS.filterInput).first()).toHaveValue('Admin');
+    await expect(filterPanel.locator('input[placeholder="Enter value..."]').first()).toHaveValue('Admin');
     await expect(filterPanel.locator('#add-filter option[value="contains"]')).toHaveCount(0);
 
     await page.getByTestId('runtime-filter-role').locator(SELECTORS.filterButton).click();
