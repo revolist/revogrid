@@ -119,6 +119,7 @@ revogr-filter-panel .filter-panel-dialog {
 
     .filter-img {
       $img-size: 11px;
+
       color: var(--rg-theme-filter-panel-icon);
       width: $img-size;
     }
@@ -299,7 +300,6 @@ revogr-filter-panel .filter-panel-dialog {
 .add-filter-divider {
   display: block;
   margin: 0 -10px 10px -10px;
-
   border-bottom: 1px solid var(--rg-theme-filter-panel-divider);
   height: 10px;
 }

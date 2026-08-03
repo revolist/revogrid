@@ -62,6 +62,35 @@ test.describe('custom themes', () => {
       });
   });
 
+  test('keeps default column and row header background tokens distinct', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns,
+      source: [{ id: 1, name: 'Ada' }],
+      rowHeaders: true,
+      theme: 'split-headers',
+      themeDefinitions: [
+        {
+          name: 'split-headers',
+          extends: 'default',
+          tokens: {
+            headerBg: 'rgb(10, 20, 30)',
+            rowHeadersBg: 'rgb(40, 50, 60)',
+          },
+        },
+      ],
+    });
+
+    await expect(
+      page.locator(`${SELECTORS.mainViewport} revogr-header`),
+    ).toHaveCSS('background-color', 'rgb(10, 20, 30)');
+    await expect(page.locator(`${SELECTORS.grid} .rowHeaders`)).toHaveCSS(
+      'background-color',
+      'rgb(40, 50, 60)',
+    );
+  });
+
   test('applies typed structure, density, and interaction state tokens', async ({
     page,
   }) => {
@@ -74,6 +103,7 @@ test.describe('custom themes', () => {
       filter: true,
       range: true,
       rtl: true,
+      rowHeaders: { __cellTestIds: true },
       theme: 'midnightBrand',
       themeDefinitions: [
         {
@@ -84,6 +114,9 @@ test.describe('custom themes', () => {
             background: 'rgb(10, 20, 30)',
             text: 'rgb(220, 221, 222)',
             headerBg: 'rgb(30, 40, 50)',
+            headerFontSize: '17px',
+            headerTextTransform: 'uppercase',
+            rowHeadersColor: 'rgb(210, 120, 30)',
             selectionBorder: 'rgb(1, 2, 3)',
             selectionBg: 'rgba(1, 2, 3, 0.25)',
             filterPanelBg: 'rgb(40, 50, 60)',
@@ -97,6 +130,19 @@ test.describe('custom themes', () => {
     await expect(grid).toHaveAttribute('data-rg-theme-base', 'material');
     await expect(grid).toHaveAttribute('data-rg-theme-scheme', 'dark');
     await expect(grid).toHaveAttribute('dir', 'rtl');
+    await expect(page.getByTestId('theme-header-id')).toHaveCSS(
+      'font-size',
+      '17px',
+    );
+    await expect(page.getByTestId('theme-header-id')).toHaveCSS(
+      'text-transform',
+      'uppercase',
+    );
+    await expect(page.getByTestId('row-header-0')).toHaveCSS(
+      'color',
+      'rgb(210, 120, 30)',
+    );
+    await expect(dataCell(page, 0, 0)).toHaveCSS('color', 'rgb(220, 221, 222)');
 
     const headerBox = await page.getByTestId('theme-header-id').boundingBox();
     const cellBox = await dataCell(page, 0, 0).boundingBox();
@@ -516,13 +562,12 @@ test('renders vertical cell separators in both high contrast presets', async ({
     const shadow = await firstCell.evaluate(
       element => getComputedStyle(element).boxShadow,
     );
-    expect(shadow).toContain(color);
-    expect(shadow).toContain('inset');
+    expect(shadow).toBe(`${color} -1px 0px 0px 0px inset`);
   }
 
   const firstBox = await firstCell.boundingBox();
   const secondBox = await secondCell.boundingBox();
-  expect(firstBox && secondBox && firstBox.x + firstBox.width).toBe(
-    secondBox?.x,
-  );
+  expect(firstBox).not.toBeNull();
+  expect(secondBox).not.toBeNull();
+  expect(firstBox!.x + firstBox!.width).toBeCloseTo(secondBox!.x, 2);
 });

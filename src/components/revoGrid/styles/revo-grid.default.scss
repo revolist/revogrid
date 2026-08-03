@@ -21,12 +21,13 @@ revo-grid[data-rg-theme-base='default'] {
   --rg-theme-cell-text-align: var(--revo-grid-cell-text-align, center);
   --rg-theme-header-padding: var(--revo-grid-header-padding, 0);
   --rg-theme-cell-padding: var(--revo-grid-cell-padding, 0);
-  border: 1px solid var(--rg-theme-header-border);
 
+  border: 1px solid var(--rg-theme-header-border);
   font-size: var(--rg-theme-font-size);
 
   .rowHeaders revogr-header {
     $shadow-right: -1px 0 0 0 var(--rg-theme-header-border) inset;
+
     box-shadow: $shadow-right;
   }
 
@@ -38,7 +39,7 @@ revo-grid[data-rg-theme-base='default'] {
 
     text-align: var(--rg-theme-header-text-align);
     line-height: var(--rg-theme-header-height);
-    background-color: var(--rg-theme-row-headers-bg);
+    background-color: var(--rg-theme-header-bg);
 
     .group-rgRow {
       box-shadow: none;
@@ -65,12 +66,11 @@ revo-grid[data-rg-theme-base='default'] {
   }
 
   .rowHeaders {
-    background-color: var(--rg-theme-header-bg);
+    background-color: var(--rg-theme-row-headers-bg);
 
     $cell-shadow-right: -1px 0 0 0 var(--rg-theme-header-border) inset;
     $cell-shadow-bottom: 0 -1px 0 0 var(--rg-theme-header-border) inset;
     $cell-shadow-left: 1px 0 0 0 var(--rg-theme-header-border) inset;
-    $cell-shadow-right: 1px 0 0 0 var(--rg-theme-header-border) inset;
 
     revogr-data {
       .rgCell {
@@ -99,12 +99,14 @@ revo-grid[data-rg-theme-base='default'] {
         $cell-shadow-cell:
           0 -1px 0 0 var(--rg-theme-cell-border) inset,
           -1px 0 0 0 var(--rg-theme-header-border) inset;
+
         box-shadow: $cell-shadow-cell;
       }
       .footer-wrapper revogr-data .rgRow:first-child .rgCell {
         $cell-shadow-cell:
           0 1px 0 0 var(--rg-theme-header-border) inset,
           -1px 0 0 0 var(--rg-theme-header-border) inset;
+
         box-shadow: $cell-shadow-cell;
       }
     }
@@ -121,12 +123,14 @@ revo-grid[data-rg-theme-base='default'] {
     $cell-shadow-top: 0 1px 0 0 var(--rg-theme-cell-border) inset;
     $cell-shadow-right: -1px 0 0 0 var(--rg-theme-cell-border) inset;
     $cell-shadow-bottom: 0 -1px 0 0 var(--rg-theme-cell-border) inset;
+
     box-shadow: $cell-shadow-top, $cell-shadow-right, $cell-shadow-bottom;
   }
 
   revogr-data {
     $cell-shadow-bottom: 0 -1px 0 0 var(--rg-theme-cell-border) inset;
     $cell-shadow-right: -1px 0 0 0 var(--rg-theme-cell-border) inset;
+
     text-align: var(--rg-theme-cell-text-align);
 
     .revo-draggable {

@@ -1,5 +1,5 @@
 import { generateFakeDataObjectAsync } from './data.js';
-import { modernThemeDefinitions } from '/build/index.esm.js';
+import { modernThemeDefinitions } from './build/index.esm.js';
 
 /**
  * Map of prevented events

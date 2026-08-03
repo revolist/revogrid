@@ -6,12 +6,14 @@
     .header-rgRow {
       &.group {
         $shadow-bottom: 0 -1px 0 0 var(--rg-theme-header-border) inset;
+
         box-shadow: $shadow-bottom;
       }
 
       &:not(.group) {
         $shadow-bottom: 0 -1px 0 0 var(--rg-theme-header-border) inset;
         $shadow-top: 0 -1px 0 0 var(--rg-theme-header-border);
+
         box-shadow: $shadow-top, $shadow-bottom;
       }
     }

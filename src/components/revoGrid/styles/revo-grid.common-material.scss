@@ -4,7 +4,9 @@
     color: var(--rg-theme-header-color);
     background-color: var(--rg-theme-header-bg);
     line-height: $header-height;
+    font-size: var(--rg-theme-header-font-size);
     font-weight: var(--rg-theme-header-font-weight);
+    text-transform: var(--rg-theme-header-text-transform);
     text-align: var(--rg-theme-header-text-align);
 
     .rgHeaderCell {
@@ -20,6 +22,10 @@
   .rowHeaders {
     color: var(--rg-theme-row-headers-color);
     background-color: var(--rg-theme-row-headers-bg);
+
+    revogr-data .rgCell {
+      color: var(--rg-theme-row-headers-color);
+    }
   }
 
   revogr-data {

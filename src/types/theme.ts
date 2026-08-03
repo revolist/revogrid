@@ -13,7 +13,7 @@ export type BuiltInTheme =
   | 'darkMaterial'
   | 'darkCompact';
 
-export type Theme = BuiltInTheme | string;
+export type Theme = string;
 
 export type ThemeBase = 'default' | 'material' | 'compact';
 

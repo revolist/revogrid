@@ -88,7 +88,7 @@ function getThemeTokens(tokens: unknown): ThemeTokens {
   const result: ThemeTokens = {};
   for (const [name, value] of Object.entries(tokens)) {
     if (
-      Object.prototype.hasOwnProperty.call(themeTokenCssVariables, name) &&
+      Object.hasOwn(themeTokenCssVariables, name) &&
       typeof value === 'string' &&
       value.trim()
     ) {
@@ -190,7 +190,10 @@ export default class ThemeService {
         : builtInThemes.default),
       tokens: {},
     };
-    const definitions = validChain ? chain.reverse() : chain.slice(0, 1);
+    if (validChain) {
+      chain.reverse();
+    }
+    const definitions = validChain ? chain : chain.slice(0, 1);
 
     for (const definition of definitions) {
       resolved = {
