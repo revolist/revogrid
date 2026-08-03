@@ -2,7 +2,6 @@ import {
   themeTokenCssVariables,
   type BuiltInTheme,
   type ResolvedTheme,
-  type Theme,
   type ThemeColorScheme,
   type ThemeConfig,
   type ThemeDefinition,
@@ -65,7 +64,7 @@ const builtInThemes: Readonly<Record<BuiltInTheme, ResolvedTheme>> =
     }),
   });
 
-function isBuiltInTheme(theme: Theme): theme is BuiltInTheme {
+function isBuiltInTheme(theme: string): theme is BuiltInTheme {
   return builtInThemeNames.has(theme as BuiltInTheme);
 }
 
@@ -140,7 +139,7 @@ export default class ThemeService {
     this.customThemes = customThemes;
   }
 
-  register(theme: Theme): ResolvedTheme {
+  register(theme: string): ResolvedTheme {
     const name = getTheme(theme);
     if (isBuiltInTheme(name)) {
       this.currentTheme = { ...builtInThemes[name], tokens: {} };
@@ -165,7 +164,7 @@ export default class ThemeService {
   private resolveDefinition(name: string): ResolvedTheme {
     const chain: ThemeDefinition[] = [];
     const visited = new Set<string>();
-    let parentName: Theme = name;
+    let parentName: string = name;
     let validChain = true;
 
     while (!isBuiltInTheme(parentName)) {
@@ -218,7 +217,7 @@ export default class ThemeService {
   }
 }
 
-export function getTheme(theme?: string | null): Theme {
+export function getTheme(theme?: string | null): string {
   const normalizedTheme = typeof theme === 'string' ? theme.trim() : '';
   return normalizedTheme || DEFAULT_THEME;
 }

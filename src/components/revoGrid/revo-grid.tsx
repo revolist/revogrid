@@ -37,7 +37,6 @@ import type {
   ChangedRange,
   RangeArea,
   AfterEditEvent,
-  Theme,
   ThemeDefinition,
   ThemeTokenName,
   PluginBaseComponent,
@@ -217,7 +216,7 @@ export class RevoGridComponent {
   @Prop() columnTypes: { [name: string]: ColumnType } = {};
 
   /** Theme name. */
-  @Prop({ reflect: true, mutable: true }) theme: Theme = 'default';
+  @Prop({ reflect: true, mutable: true }) theme: string = 'default';
 
   /**
    * Per-grid custom theme definitions.
@@ -647,7 +646,7 @@ export class RevoGridComponent {
   /**
    * Emmited after the theme is changed
    */
-  @Event() afterthemechanged: EventEmitter<Theme>;
+  @Event() afterthemechanged: EventEmitter<string>;
 
 
   /**
@@ -1159,7 +1158,7 @@ export class RevoGridComponent {
   scrollingService: GridScrollingService;
   private pendingColumnFocusRestore?: PendingColumnFocusRestore;
   private appliedThemeRowSize?: number;
-  private pendingNormalizedTheme?: Theme;
+  private pendingNormalizedTheme?: string;
   private themeStyles: Record<string, string> = {};
 
   // #endregion
@@ -1320,8 +1319,8 @@ export class RevoGridComponent {
   }
 
   @Watch('theme') themeChanged(
-    t: Theme,
-    _?: Theme,
+    t: string,
+    _?: string,
     __ = 'theme',
     init = false,
   ) {
@@ -1353,7 +1352,7 @@ export class RevoGridComponent {
   }
 
   private applyTheme(
-    theme: Theme,
+    theme: string,
     init: boolean,
     emitEvent: boolean,
     reason: 'theme' | 'themeDefinitions' | 'rowSize',

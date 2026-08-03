@@ -13,8 +13,6 @@ export type BuiltInTheme =
   | 'darkMaterial'
   | 'darkCompact';
 
-export type Theme = string;
-
 export type ThemeBase = 'default' | 'material' | 'compact';
 
 export type ThemeColorScheme = 'light' | 'dark';
@@ -94,14 +92,14 @@ export type ThemeTokens = Partial<Record<ThemeTokenName, string>>;
 export interface ThemeDefinition {
   name: string;
   /** Built-in or registered custom theme to inherit from. */
-  extends?: Theme;
+  extends?: string;
   colorScheme?: ThemeColorScheme;
   defaultRowSize?: number;
   tokens?: ThemeTokens;
 }
 
 export interface ResolvedTheme extends ThemePackage {
-  name: Theme;
+  name: string;
   base: ThemeBase;
   colorScheme: ThemeColorScheme;
   tokens: ThemeTokens;
