@@ -28,7 +28,8 @@ test.describe('filtering', () => {
     await filterPanel.locator('#add-filter').selectOption('contains');
 
     await expect(filterPanel.locator('.select-filter')).toHaveCount(2);
-    await expect(filterPanel.locator('.select-filter')).toHaveValues(['contains', 'contains']);
+    await expect(filterPanel.locator('.select-filter').nth(0)).toHaveValue('contains');
+    await expect(filterPanel.locator('.select-filter').nth(1)).toHaveValue('contains');
   });
 
   test('can make operators mutually exclusive per column', async ({ page }) => {
@@ -79,11 +80,13 @@ test.describe('filtering', () => {
 
     const filterPanel = page.locator(SELECTORS.filterPanel);
     await expect(filterPanel.locator('.select-filter')).toHaveCount(2);
-    await expect(filterPanel.locator('.select-filter')).toHaveValues(['contains', 'contains']);
+    await expect(filterPanel.locator('.select-filter').nth(0)).toHaveValue('contains');
+    await expect(filterPanel.locator('.select-filter').nth(1)).toHaveValue('contains');
     await expect(filterPanel.locator('#add-filter option[value="contains"]')).toHaveCount(0);
 
     await filterPanel.locator('.select-filter').nth(1).selectOption('eq');
-    await expect(filterPanel.locator('.select-filter')).toHaveValues(['contains', 'eq']);
+    await expect(filterPanel.locator('.select-filter').nth(0)).toHaveValue('contains');
+    await expect(filterPanel.locator('.select-filter').nth(1)).toHaveValue('eq');
   });
 
   test('updates duplicate operator behavior when filter config changes at runtime', async ({ page }) => {
@@ -95,7 +98,8 @@ test.describe('filtering', () => {
     await page.getByTestId('runtime-filter-role').locator(SELECTORS.filterButton).click();
     const initialFilterPanel = page.locator(SELECTORS.filterPanel);
     await initialFilterPanel.locator('#add-filter').selectOption('contains');
-    await initialFilterPanel.locator(SELECTORS.filterInput).fill('Admin');
+    await expect(initialFilterPanel.locator(SELECTORS.filterInput).first()).toBeVisible();
+    await initialFilterPanel.locator(SELECTORS.filterInput).first().fill('Admin');
     await initialFilterPanel.getByRole('button', { name: 'ok' }).click();
     await page.waitForTimeout(500);
 
