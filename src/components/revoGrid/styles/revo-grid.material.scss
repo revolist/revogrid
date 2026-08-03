@@ -1,8 +1,37 @@
 @use './revo-grid.common-material.scss' as *;
 
-revo-grid[theme='material'] {
-  $header-height: 50px;
-  $default-rows-size: 42px;
+revo-grid[data-rg-theme-base='material'] {
+  --rg-theme-font-family: var(
+    --revo-grid-font-family,
+    Nunito,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Segoe UI',
+    Roboto,
+    'Helvetica Neue',
+    Arial,
+    sans-serif,
+    'Apple Color Emoji',
+    'Segoe UI Emoji',
+    'Segoe UI Symbol'
+  );
+  --rg-theme-header-height: var(--revo-grid-header-height, 50px);
+  --rg-theme-header-font-size: var(
+    --revo-grid-header-font-size,
+    var(--rg-theme-font-size)
+  );
+  --rg-theme-header-font-weight: var(--revo-grid-header-font-weight, 600);
+  --rg-theme-header-text-transform: var(
+    --revo-grid-header-text-transform,
+    none
+  );
+  --rg-theme-header-text-align: var(--revo-grid-header-text-align, left);
+  --rg-theme-cell-text-align: var(--revo-grid-cell-text-align, left);
+  --rg-theme-header-padding: var(--revo-grid-header-padding, 0 15px);
+  --rg-theme-cell-padding: var(--revo-grid-cell-padding, 0 15px);
 
-  @include revoGrid($header-height, $default-rows-size);
+  @include revoGrid(
+    var(--rg-theme-header-height),
+    var(--rg-theme-row-size, 42px)
+  );
 }

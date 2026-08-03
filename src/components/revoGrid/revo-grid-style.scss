@@ -2,70 +2,205 @@
 @use './styles/revo-grid.common.scss' as *;
 @use './styles/revo-grid.default.scss' as *;
 @use './styles/revo-grid.material.scss' as *;
-@use './styles/revo-grid.dark.material.scss' as *;
-@use './styles/revo-grid.dark.compact.scss' as *;
 @use './styles/revo-grid.compact.scss' as *;
 @use './styles/revo-grid.rtl.scss' as *;
 @use '../../global/_icons.scss' as *;
 
 revo-grid {
-  /* Base theme variables */
-  --revo-grid-primary: #266ae8;
-  --revo-grid-primary-transparent: rgba(38, 106, 232, 0.9);
-  --revo-grid-background: #fff;
-  --revo-grid-foreground: black;
-  --revo-grid-divider: gray;
-  --revo-grid-shadow: rgba(0, 0, 0, 0.15);
-  --revo-grid-text: black;
-  --revo-grid-border: rgba(0, 0, 0, 0.2);
-  
-  /* Filter panel variables */
-  --revo-grid-filter-panel-bg: #fff;
-  --revo-grid-filter-panel-border: #d9d9d9;
-  --revo-grid-filter-panel-shadow: rgba(0, 0, 0, 0.15);
-  --revo-grid-filter-panel-input-bg: #eaeaeb;
-  --revo-grid-filter-panel-divider: #d9d9d9;
-  --revo-grid-filter-panel-select-border: transparent;
-  --revo-grid-filter-panel-select-border-hover: transparent;
+  /* Internal fallbacks keep public --revo-grid-* variables inheritable. */
+  --rg-theme-primary: var(--revo-grid-primary, #266ae8);
+  --rg-theme-primary-transparent: var(
+    --revo-grid-primary-transparent,
+    rgba(38, 106, 232, 0.9)
+  );
+  --rg-theme-background: var(--revo-grid-background, #fff);
+  --rg-theme-foreground: var(--revo-grid-foreground, black);
+  --rg-theme-divider: var(--revo-grid-divider, gray);
+  --rg-theme-shadow: var(--revo-grid-shadow, rgba(0, 0, 0, 0.15));
+  --rg-theme-text: var(--revo-grid-text, black);
+  --rg-theme-border: var(--revo-grid-border, rgba(0, 0, 0, 0.2));
+  --rg-theme-header-bg: var(--revo-grid-header-bg, #f8f9fa);
+  --rg-theme-header-color: var(--revo-grid-header-color, #000);
+  --rg-theme-header-border: var(--revo-grid-header-border, #cecece);
+  --rg-theme-header-focused-bg: var(
+    --revo-grid-header-focused-bg,
+    var(--rg-theme-focused-bg)
+  );
+  --rg-theme-header-hover-bg: var(
+    --revo-grid-header-hover-bg,
+    var(--rg-theme-row-hover)
+  );
+  --rg-theme-cell-border: var(--revo-grid-cell-border, #e2e3e3);
+  --rg-theme-cell-vertical-border: var(
+    --revo-grid-cell-vertical-border,
+    transparent
+  );
+  --rg-theme-focused-bg: var(--revo-grid-focused-bg, rgba(233, 234, 237, 0.5));
+  --rg-theme-row-hover: var(--revo-grid-row-hover, #f1f1f1);
+  --rg-theme-row-headers-bg: var(
+    --revo-grid-row-headers-bg,
+    var(--rg-theme-header-bg)
+  );
+  --rg-theme-row-headers-color: var(
+    --revo-grid-row-headers-color,
+    var(--rg-theme-header-color)
+  );
+  --rg-theme-cell-disabled-bg: var(
+    --revo-grid-cell-disabled-bg,
+    rgba(0, 0, 0, 0.07)
+  );
+  --rg-theme-filter-panel-bg: var(--revo-grid-filter-panel-bg, #fff);
+  --rg-theme-filter-panel-border: var(--revo-grid-filter-panel-border, #d9d9d9);
+  --rg-theme-filter-panel-shadow: var(
+    --revo-grid-filter-panel-shadow,
+    rgba(0, 0, 0, 0.15)
+  );
+  --rg-theme-filter-panel-input-bg: var(
+    --revo-grid-filter-panel-input-bg,
+    #eaeaeb
+  );
+  --rg-theme-filter-panel-divider: var(
+    --revo-grid-filter-panel-divider,
+    #d9d9d9
+  );
+  --rg-theme-filter-panel-select-border: var(
+    --revo-grid-filter-panel-select-border,
+    transparent
+  );
+  --rg-theme-filter-panel-select-border-hover: var(
+    --revo-grid-filter-panel-select-border-hover,
+    transparent
+  );
+  --rg-theme-filter-panel-reorder-accent: var(
+    --revo-grid-filter-panel-reorder-accent,
+    #007cb2
+  );
+  --rg-theme-filter-panel-reorder-color: var(
+    --revo-grid-filter-panel-reorder-color,
+    #6b7280
+  );
+  --rg-theme-filter-panel-text: var(
+    --revo-grid-filter-panel-text,
+    var(--rg-theme-text)
+  );
+  --rg-theme-filter-panel-muted-text: var(
+    --revo-grid-filter-panel-muted-text,
+    gray
+  );
+  --rg-theme-filter-panel-focus-ring: var(
+    --revo-grid-filter-panel-focus-ring,
+    0 0 1px 3px rgba(59, 153, 252, 0.7)
+  );
+  --rg-theme-filter-panel-icon: var(--revo-grid-filter-panel-icon, gray);
+  --rg-theme-filter-panel-icon-active: var(
+    --revo-grid-filter-panel-icon-active,
+    #10224a
+  );
+  --rg-theme-font-family: var(
+    --revo-grid-font-family,
+    Helvetica,
+    Arial,
+    Sans-Serif,
+    serif
+  );
+  --rg-theme-font-size: var(--revo-grid-font-size, 14px);
+  --rg-theme-header-height: var(--revo-grid-header-height, 30px);
+  --rg-theme-header-font-size: var(--revo-grid-header-font-size, 12px);
+  --rg-theme-header-font-weight: var(--revo-grid-header-font-weight, normal);
+  --rg-theme-header-text-transform: var(
+    --revo-grid-header-text-transform,
+    uppercase
+  );
+  --rg-theme-header-text-align: var(--revo-grid-header-text-align, center);
+  --rg-theme-cell-text-align: var(--revo-grid-cell-text-align, center);
+  --rg-theme-header-padding: var(--revo-grid-header-padding, 0);
+  --rg-theme-cell-padding: var(--revo-grid-cell-padding, 0);
+  --rg-theme-selection-border: var(--revo-grid-selection-border, #0d63e8);
+  --rg-theme-selection-bg: var(--revo-grid-selection-bg, transparent);
+  --rg-theme-autofill-handle-bg: var(
+    --revo-grid-autofill-handle-bg,
+    var(--rg-theme-selection-border)
+  );
+  --rg-theme-autofill-handle-border: var(
+    --revo-grid-autofill-handle-border,
+    white
+  );
+  --rg-theme-range-handle-bg: var(
+    --revo-grid-range-handle-bg,
+    rgba(0, 0, 0, 0.2)
+  );
+  --rg-theme-temporary-range-border: var(
+    --revo-grid-temporary-range-border,
+    rgb(255, 94, 0)
+  );
+  --rg-theme-temporary-selection-border: var(
+    --revo-grid-temporary-selection-border,
+    gray
+  );
+  --rg-theme-header-resize-hover: var(
+    --revo-grid-header-resize-hover,
+    deepskyblue
+  );
+  --rg-theme-button-text: var(--revo-grid-button-text, #fff);
+  --rg-theme-button-bg: var(--revo-grid-button-bg, #4545ff);
+  --rg-theme-button-success-bg: var(--revo-grid-button-success-bg, #009037);
+  --rg-theme-button-danger-bg: var(--revo-grid-button-danger-bg, #e0662e);
+  --rg-theme-button-outline-border: var(
+    --revo-grid-button-outline-border,
+    #dbdbdb
+  );
+  --rg-theme-button-outline-text: var(--revo-grid-button-outline-text, #000);
 
-  /* Grid specific variables */
-  --revo-grid-header-bg: #f8f9fa;
-  --revo-grid-header-color: #000;
-  --revo-grid-header-border: #cecece;
-  --revo-grid-cell-border: #e2e3e3;
-  --revo-grid-focused-bg: rgba(233, 234, 237, 0.5);
-  --revo-grid-row-hover: #f1f1f1;
-  --revo-grid-row-headers-bg: #f7faff;
-  --revo-grid-row-headers-color: #757a82;
-  --revo-grid-cell-disabled-bg: rgba(0, 0, 0, 0.07);
-  
-  /* Dark theme overrides - applied when theme contains 'dark' */
-  &[theme*='dark'] {
-    --revo-grid-background: #212529;
-    --revo-grid-foreground: #fff;
-    --revo-grid-text: rgba(255, 255, 255, 0.9);
-    --revo-grid-divider: #505050;
-    --revo-grid-border: rgba(255, 255, 255, 0.2);
-
-    /* Filter panel variables */
-    --revo-grid-filter-panel-bg: #212529;
-    --revo-grid-filter-panel-border: #505050;
-    --revo-grid-filter-panel-input-bg: #343a40;
-    --revo-grid-filter-panel-divider: #505050;
-
-    --revo-grid-header-bg: #343a40;
-    --revo-grid-header-color: #fff;
-    --revo-grid-header-border: #505050;
-    --revo-grid-cell-border: #424242;
-    --revo-grid-focused-bg: rgba(52, 58, 64, 0.5);
-    --revo-grid-row-hover: rgba(80, 80, 80, 0.5);
-    --revo-grid-row-headers-bg: rgba(52, 58, 64, 0.8);
-    --revo-grid-row-headers-color: rgba(255, 255, 255, 0.8);
-    --revo-grid-cell-disabled-bg: rgba(255, 255, 255, 0.07);
+  &[data-rg-theme-scheme='dark'] {
+    color-scheme: dark;
+    --rg-theme-background: var(--revo-grid-background, #212529);
+    --rg-theme-foreground: var(--revo-grid-foreground, #fff);
+    --rg-theme-text: var(--revo-grid-text, rgba(255, 255, 255, 0.9));
+    --rg-theme-divider: var(--revo-grid-divider, #505050);
+    --rg-theme-border: var(--revo-grid-border, rgba(255, 255, 255, 0.2));
+    --rg-theme-filter-panel-bg: var(--revo-grid-filter-panel-bg, #212529);
+    --rg-theme-filter-panel-border: var(
+      --revo-grid-filter-panel-border,
+      #505050
+    );
+    --rg-theme-filter-panel-input-bg: var(
+      --revo-grid-filter-panel-input-bg,
+      #343a40
+    );
+    --rg-theme-filter-panel-divider: var(
+      --revo-grid-filter-panel-divider,
+      #505050
+    );
+    --rg-theme-filter-panel-icon-active: var(
+      --revo-grid-filter-panel-icon-active,
+      #fff
+    );
+    --rg-theme-header-bg: var(--revo-grid-header-bg, #343a40);
+    --rg-theme-header-color: var(--revo-grid-header-color, #fff);
+    --rg-theme-header-border: var(--revo-grid-header-border, #505050);
+    --rg-theme-cell-border: var(--revo-grid-cell-border, #424242);
+    --rg-theme-focused-bg: var(--revo-grid-focused-bg, rgba(52, 58, 64, 0.5));
+    --rg-theme-row-hover: var(--revo-grid-row-hover, rgba(80, 80, 80, 0.5));
+    --rg-theme-cell-disabled-bg: var(
+      --revo-grid-cell-disabled-bg,
+      rgba(255, 255, 255, 0.07)
+    );
+    --rg-theme-button-outline-border: var(
+      --revo-grid-button-outline-border,
+      #404040
+    );
+    --rg-theme-button-outline-text: var(
+      --revo-grid-button-outline-text,
+      #d8d8d8
+    );
   }
-  
+
+  &[data-rg-theme-scheme='light'] {
+    color-scheme: light;
+  }
+
   @include revoGridCommon;
-  
+
   /*
   * Grid required to have a flex property to be able to stretch
   */
@@ -76,16 +211,17 @@ revo-grid {
   * so setting up the grid  height works
   */
   min-height: 300px;
-  font-family: Helvetica, Arial, Sans-Serif, serif;
-  font-size: 14px;
+  background-color: var(--rg-theme-background);
+  font-family: var(--rg-theme-font-family);
+  font-size: var(--rg-theme-font-size);
   position: relative;
-  color: var(--revo-grid-text);
+  color: var(--rg-theme-text);
 
   @include noSelect;
 
   .attribution {
     $size: 4px;
-    $color: var(--revo-grid-primary-transparent);
+    $color: var(--rg-theme-primary-transparent);
 
     position: absolute;
     bottom: 0;
@@ -104,19 +240,21 @@ revo-grid {
       position: absolute;
       bottom: 0;
       left: 0;
-      background-color: var(--revo-grid-background);
+      background-color: var(--rg-theme-background);
       padding: 4px;
       border-radius: 4px;
-      box-shadow: 0 1px 10px var(--revo-grid-border);
+      box-shadow: 0 1px 10px var(--rg-theme-border);
       white-space: nowrap;
       text-decoration: none;
-      color: var(--revo-grid-text);
+      color: var(--rg-theme-text);
       letter-spacing: 0.3px;
       font-size: 11px;
       opacity: 0;
       width: $size;
       overflow: hidden;
-      transition: opacity 0.5s ease-in-out, width 0.3s ease-in-out;
+      transition:
+        opacity 0.5s ease-in-out,
+        width 0.3s ease-in-out;
     }
 
     &:hover {
@@ -128,7 +266,8 @@ revo-grid {
   }
 
   &.column-draggable.column-drag-start {
-    &, * {
+    &,
+    * {
       &:hover {
         cursor: grabbing;
       }
@@ -182,13 +321,13 @@ revo-grid {
     position: fixed;
     height: $s;
     line-height: $s;
-    background: var(--revo-grid-background);
+    background: var(--rg-theme-background);
     border-radius: 3px;
     display: block;
     z-index: 100;
     margin-top: 5px;
     margin-right: -20px;
-    box-shadow: 0 4px 20px 0 var(--revo-grid-shadow);
+    box-shadow: 0 4px 20px 0 var(--rg-theme-shadow);
     padding-left: 20px;
     padding-right: 5px;
 
@@ -197,7 +336,7 @@ revo-grid {
     }
 
     .revo-alt-icon {
-      $alt-icon-color: var(--revo-grid-foreground);
+      $alt-icon-color: var(--rg-theme-foreground);
       background-color: $alt-icon-color;
       position: absolute;
       left: 5px;
@@ -217,7 +356,7 @@ revo-grid {
     right: 0;
     height: 1px;
     z-index: 2;
-    background: var(--revo-grid-divider);
+    background: var(--rg-theme-divider);
     pointer-events: none;
   }
 
@@ -228,7 +367,7 @@ revo-grid {
     bottom: 0;
     width: 1px;
     z-index: 2;
-    background: var(--revo-grid-divider);
+    background: var(--rg-theme-divider);
     pointer-events: none;
   }
 

@@ -2,7 +2,9 @@ import type {
   ClipboardConfig,
   ColumnData,
   ColumnFilterConfig,
+  RowDefinition,
   RowHeaders,
+  ThemeDefinition,
 } from '../../src';
 
 export type SampleRow = {
@@ -28,8 +30,10 @@ export type GridSetupOptions = {
   trimmedRows?: Record<number, boolean>;
   rtl?: boolean;
   theme?: string;
+  themeDefinitions?: ThemeDefinition[];
   exporting?: boolean;
   rowSize?: number;
+  rowDefinitions?: RowDefinition[];
   colSize?: number;
   width?: number;
   height?: number;

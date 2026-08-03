@@ -1,5 +1,4 @@
 @use '../../global/_mixins.scss' as *;
-@use '../../global/_colors.scss' as *;
 
 @mixin autofill-handle($handler-size: 14px, $icon-size: 10px) {
   .autofill-handle {
@@ -18,8 +17,8 @@
       bottom: 0;
       width: $icon-size;
       height: $icon-size;
-      background: $selection-border;
-      border: 1px solid white;
+      background: var(--rg-theme-autofill-handle-bg);
+      border: 1px solid var(--rg-theme-autofill-handle-border);
       box-sizing: border-box;
     }
   }
@@ -41,6 +40,7 @@ revogr-overlay-selection {
     position: absolute;
     pointer-events: none;
     z-index: 9;
+    background-color: var(--rg-theme-selection-bg);
 
     .range-handlers {
       height: 100%;
@@ -72,7 +72,7 @@ revogr-overlay-selection {
           height: $handler-h;
           left: 50%;
           transform: translateX(-50%);
-          background-color: rgba(black, 20%);
+          background-color: var(--rg-theme-range-handle-bg);
         }
         &:first-child {
           top: -($handler-h + 2px);

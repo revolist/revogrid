@@ -3,11 +3,11 @@
   position: absolute;
   pointer-events: none;
   z-index: 9;
-  border: 1px solid rgb(255, 94, 0);
+  border: 1px solid var(--rg-theme-temporary-range-border);
   box-sizing: border-box;
 
   &.Selection {
-    border: 1px dashed gray;
+    border: 1px dashed var(--rg-theme-temporary-selection-border);
   }
 
   > div {

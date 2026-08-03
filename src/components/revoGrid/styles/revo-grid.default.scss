@@ -1,28 +1,45 @@
 @use './revo-grid.mixin.scss' as *;
 @use './revo-grid.common.scss' as *;
 
-revo-grid[theme='default'],
-revo-grid:not([theme]) {
-  $header-size: 30px;
-  $default-rows-size: 27px;
-  border: 1px solid var(--revo-grid-header-border);
+revo-grid[data-rg-theme-base='default'] {
+  --rg-theme-font-family: var(
+    --revo-grid-font-family,
+    Helvetica,
+    Arial,
+    Sans-Serif,
+    serif
+  );
+  --rg-theme-font-size: var(--revo-grid-font-size, 12px);
+  --rg-theme-header-height: var(--revo-grid-header-height, 30px);
+  --rg-theme-header-font-size: var(--revo-grid-header-font-size, 12px);
+  --rg-theme-header-font-weight: var(--revo-grid-header-font-weight, normal);
+  --rg-theme-header-text-transform: var(
+    --revo-grid-header-text-transform,
+    uppercase
+  );
+  --rg-theme-header-text-align: var(--revo-grid-header-text-align, center);
+  --rg-theme-cell-text-align: var(--revo-grid-cell-text-align, center);
+  --rg-theme-header-padding: var(--revo-grid-header-padding, 0);
+  --rg-theme-cell-padding: var(--revo-grid-cell-padding, 0);
 
-  font-size: 12px;
+  border: 1px solid var(--rg-theme-header-border);
+  font-size: var(--rg-theme-font-size);
 
   .rowHeaders revogr-header {
-    $shadow-right: -1px 0 0 0 var(--revo-grid-header-border) inset;
+    $shadow-right: -1px 0 0 0 var(--rg-theme-header-border) inset;
+
     box-shadow: $shadow-right;
   }
 
   revogr-header {
-    $shadow-left: -1px 0 0 0 var(--revo-grid-header-border);
-    $shadow-right: -1px 0 0 0 var(--revo-grid-header-border) inset;
-    $shadow-bottom: 0 -1px 0 0 var(--revo-grid-header-border) inset;
-    $shadow-top: 0 -1px 0 0 var(--revo-grid-header-border);
+    $shadow-left: -1px 0 0 0 var(--rg-theme-header-border);
+    $shadow-right: -1px 0 0 0 var(--rg-theme-header-border) inset;
+    $shadow-bottom: 0 -1px 0 0 var(--rg-theme-header-border) inset;
+    $shadow-top: 0 -1px 0 0 var(--rg-theme-header-border);
 
-    text-align: center;
-    line-height: $header-size;
-    background-color: var(--revo-grid-header-bg);
+    text-align: var(--rg-theme-header-text-align);
+    line-height: var(--rg-theme-header-height);
+    background-color: var(--rg-theme-header-bg);
 
     .group-rgRow {
       box-shadow: none;
@@ -33,12 +50,13 @@ revo-grid:not([theme]) {
     }
     .header-rgRow,
     .group-rgRow {
-      text-transform: uppercase;
-      font-size: 12px;
-      color: var(--revo-grid-header-color);
+      text-transform: var(--rg-theme-header-text-transform);
+      font-size: var(--rg-theme-header-font-size);
+      font-weight: var(--rg-theme-header-font-weight);
+      color: var(--rg-theme-header-color);
     }
     .header-rgRow {
-      height: $header-size;
+      height: var(--rg-theme-header-height);
       box-shadow: $shadow-bottom;
     }
 
@@ -48,16 +66,15 @@ revo-grid:not([theme]) {
   }
 
   .rowHeaders {
-    background-color: var(--revo-grid-header-bg);
+    background-color: var(--rg-theme-row-headers-bg);
 
-    $cell-shadow-right: -1px 0 0 0 var(--revo-grid-header-border) inset;
-    $cell-shadow-bottom: 0 -1px 0 0 var(--revo-grid-header-border) inset;
-    $cell-shadow-left: 1px 0 0 0 var(--revo-grid-header-border) inset;
-    $cell-shadow-right: 1px 0 0 0 var(--revo-grid-header-border) inset;
+    $cell-shadow-right: -1px 0 0 0 var(--rg-theme-header-border) inset;
+    $cell-shadow-bottom: 0 -1px 0 0 var(--rg-theme-header-border) inset;
+    $cell-shadow-left: 1px 0 0 0 var(--rg-theme-header-border) inset;
 
     revogr-data {
       .rgCell {
-        color: var(--revo-grid-header-color);
+        color: var(--rg-theme-row-headers-color);
 
         &:first-child {
           box-shadow: $cell-shadow-bottom;
@@ -66,7 +83,7 @@ revo-grid:not([theme]) {
           box-shadow: $cell-shadow-bottom, $cell-shadow-right;
         }
         &:last-child {
-          border-right: 1px solid var(--revo-grid-header-border);
+          border-right: 1px solid var(--rg-theme-header-border);
         }
       }
 
@@ -80,14 +97,16 @@ revo-grid:not([theme]) {
     &.colPinStart {
       revogr-data .rgRow .rgCell:last-child {
         $cell-shadow-cell:
-          0 -1px 0 0 var(--revo-grid-cell-border) inset,
-          -1px 0 0 0 var(--revo-grid-header-border) inset;
+          0 -1px 0 0 var(--rg-theme-cell-border) inset,
+          -1px 0 0 0 var(--rg-theme-header-border) inset;
+
         box-shadow: $cell-shadow-cell;
       }
       .footer-wrapper revogr-data .rgRow:first-child .rgCell {
         $cell-shadow-cell:
-          0 1px 0 0 var(--revo-grid-header-border) inset,
-          -1px 0 0 0 var(--revo-grid-header-border) inset;
+          0 1px 0 0 var(--rg-theme-header-border) inset,
+          -1px 0 0 0 var(--rg-theme-header-border) inset;
+
         box-shadow: $cell-shadow-cell;
       }
     }
@@ -95,31 +114,34 @@ revo-grid:not([theme]) {
     &.colPinEnd {
       &,
       revogr-header {
-        box-shadow: 1px 0 0 var(--revo-grid-header-border) inset;
+        box-shadow: 1px 0 0 var(--rg-theme-header-border) inset;
       }
     }
   }
 
   .footer-wrapper revogr-data .rgRow:first-child .rgCell {
-    $cell-shadow-top: 0 1px 0 0 var(--revo-grid-cell-border) inset;
-    $cell-shadow-right: -1px 0 0 0 var(--revo-grid-cell-border) inset;
-    $cell-shadow-bottom: 0 -1px 0 0 var(--revo-grid-cell-border) inset;
+    $cell-shadow-top: 0 1px 0 0 var(--rg-theme-cell-border) inset;
+    $cell-shadow-right: -1px 0 0 0 var(--rg-theme-cell-border) inset;
+    $cell-shadow-bottom: 0 -1px 0 0 var(--rg-theme-cell-border) inset;
+
     box-shadow: $cell-shadow-top, $cell-shadow-right, $cell-shadow-bottom;
   }
 
   revogr-data {
-    $cell-shadow-bottom: 0 -1px 0 0 var(--revo-grid-cell-border) inset;
-    $cell-shadow-right: -1px 0 0 0 var(--revo-grid-cell-border) inset;
-    text-align: center;
+    $cell-shadow-bottom: 0 -1px 0 0 var(--rg-theme-cell-border) inset;
+    $cell-shadow-right: -1px 0 0 0 var(--rg-theme-cell-border) inset;
+
+    text-align: var(--rg-theme-cell-text-align);
 
     .revo-draggable {
       float: left;
     }
 
     .rgRow {
-      line-height: $default-rows-size;
+      line-height: var(--rg-theme-row-size, 27px);
     }
     .rgCell {
+      padding: var(--rg-theme-cell-padding);
       box-shadow: $cell-shadow-bottom, $cell-shadow-right;
     }
   }

@@ -1,14 +1,10 @@
-@use './_colors.scss' as *;
-@use './_colors.dark.scss' as *;
-
-
 .revo-button {
   $h: 32px;
 
   position: relative;
   overflow: hidden;
-  color: #fff;
-  background-color: #4545ff;
+  color: var(--rg-theme-button-text);
+  background-color: var(--rg-theme-button-bg);
   height: $h;
   line-height: $h;
   padding: 0 15px;
@@ -19,13 +15,11 @@
   cursor: pointer;
 
   &.green {
-    $bg: #009037;
-    background-color: $bg;
+    background-color: var(--rg-theme-button-success-bg);
   }
 
   &.red {
-    $bg: #E0662E;
-    background-color: $bg;
+    background-color: var(--rg-theme-button-danger-bg);
   }
 
   &:disabled,
@@ -35,21 +29,10 @@
   }
 
   &.outline {
-    $br-color: #dbdbdb;
-    $color: #000;
-    border: 1px solid $br-color;
+    border: 1px solid var(--rg-theme-button-outline-border);
     line-height: $h - 2;
     background: none;
-    color: $color;
+    color: var(--rg-theme-button-outline-text);
     box-shadow: none;
-  }
-}
-
-revo-grid[theme^='dark'] {
-  .revo-button {
-    &.outline {
-      border: 1px solid $cell-border-color-dark;
-      color: $font-color-dark;
-    }
   }
 }

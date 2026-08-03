@@ -67,8 +67,10 @@ export async function mountGrid(page: E2EPage, options: GridSetupOptions) {
       trimmedRows,
       rtl,
       theme,
+      themeDefinitions,
       exporting,
       rowSize,
+      rowDefinitions,
       colSize,
     } = config;
 
@@ -96,9 +98,11 @@ export async function mountGrid(page: E2EPage, options: GridSetupOptions) {
     grid.grouping = grouping as any;
     grid.trimmedRows = trimmedRows ?? {};
     grid.rtl = rtl ?? false;
-    grid.theme = (theme as any) ?? 'default';
+    grid.themeDefinitions = themeDefinitions ?? [];
     grid.exporting = exporting ?? false;
     grid.rowSize = rowSize ?? 0;
+    grid.rowDefinitions = rowDefinitions ?? [];
+    grid.theme = (theme as any) ?? 'default';
     grid.colSize = colSize ?? 100;
     if (rowHeaders && typeof rowHeaders === 'object') {
       const { __cellTestIds, ...rowHeaderConfig } = rowHeaders;

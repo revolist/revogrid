@@ -1,4 +1,5 @@
 export * from './types';
+export * from './themeManager/presets';
 export * from './store';
 export * from './plugins';
 export * from './components';
