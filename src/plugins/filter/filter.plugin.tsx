@@ -145,9 +145,10 @@ export class FilterPlugin extends BasePlugin {
           return;
         }
         if (typeof detail === 'object') {
+          const detailKeys = Object.keys(detail);
           const preserveCurrentFilters =
-            !Object.prototype.hasOwnProperty.call(detail, 'multiFilterItems') &&
-            Object.prototype.hasOwnProperty.call(detail, 'allowDuplicateOperators');
+            !detailKeys.includes('multiFilterItems') &&
+            detailKeys.includes('allowDuplicateOperators');
           this.initConfig(
             preserveCurrentFilters
               ? { ...detail, multiFilterItems: this.multiFilterItems }

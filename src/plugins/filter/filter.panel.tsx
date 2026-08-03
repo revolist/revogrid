@@ -544,7 +544,7 @@ export class FilterPanel {
     }
     const options: VNode[] = [];
     const prop = this.changes.prop;
-    if (typeof prop === 'undefined') {
+    if (prop === undefined) {
       return;
     }
 
