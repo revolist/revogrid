@@ -77,6 +77,7 @@ export class FilterPlugin extends BasePlugin {
   };
 
   filterProp = FILTER_PROP;
+  private allowDuplicateOperators = true;
 
   extraHyperContent?: (data: ShowData) => VNode | VNode[];
   extraBottomHyperContent?: (data: ShowData) => VNode | VNode[];
@@ -104,6 +105,7 @@ export class FilterPlugin extends BasePlugin {
         onResetChange={e => this.onFilterReset(e.detail)}
         disableDynamicFiltering={config?.disableDynamicFiltering}
         closeOnOutsideClick={config?.closeFilterPanelOnOutsideClick}
+        allowDuplicateOperators={this.allowDuplicateOperators}
         ref={e => (this.pop = e)}
       >
         {' '}
@@ -138,17 +140,28 @@ export class FilterPlugin extends BasePlugin {
     this.addEventListener(
       FILTER_CONFIG_CHANGED_EVENT,
       ({ detail }: CustomEvent<ColumnFilterConfig | boolean>) => {
-        if (
-          !detail ||
-          (typeof detail === 'object' &&
-            (!detail.multiFilterItems ||
-              !Object.keys(detail.multiFilterItems).length))
-        ) {
+        if (!detail) {
           this.clearFiltering();
           return;
         }
         if (typeof detail === 'object') {
-          this.initConfig(detail);
+          const detailKeys = Object.keys(detail);
+          const preserveCurrentFilters =
+            !detailKeys.includes('multiFilterItems') &&
+            detailKeys.includes('allowDuplicateOperators');
+          this.initConfig(
+            preserveCurrentFilters
+              ? { ...detail, multiFilterItems: this.multiFilterItems }
+              : detail,
+          );
+          if (!detail.multiFilterItems || !Object.keys(detail.multiFilterItems).length) {
+            if (preserveCurrentFilters) {
+              aftersourceset();
+              return;
+            }
+            this.clearFiltering();
+            return;
+          }
         }
         aftersourceset();
       },
@@ -168,6 +181,10 @@ export class FilterPlugin extends BasePlugin {
   }
 
   initConfig(config: ColumnFilterConfig) {
+    this.allowDuplicateOperators = config.allowDuplicateOperators ?? true;
+    if (this.pop) {
+      this.pop.allowDuplicateOperators = this.allowDuplicateOperators;
+    }
     if (config.multiFilterItems) {
       this.multiFilterItems = { ...config.multiFilterItems };
     } else {

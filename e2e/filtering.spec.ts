@@ -12,6 +12,122 @@ import {
 } from './helpers';
 
 test.describe('filtering', () => {
+  test('allows duplicate operators by default', async ({ page }) => {
+    const columns = buildColumns([
+      { prop: 'role', name: 'Role', filter: true, ...withHeaderTestId('duplicate-default-role') },
+    ]);
+
+    await mountGrid(page, { columns, source: [{ id: 1, role: 'Admin' }], filter: true });
+    await page
+      .getByTestId('duplicate-default-role')
+      .locator(SELECTORS.filterButton)
+      .click();
+
+    const filterPanel = page.locator(SELECTORS.filterPanel);
+    await filterPanel.locator('#add-filter').selectOption('contains');
+    await filterPanel.locator('#add-filter').selectOption('contains');
+
+    await expect(filterPanel.locator('.select-filter')).toHaveCount(2);
+    await expect(filterPanel.locator('.select-filter').nth(0)).toHaveValue('contains');
+    await expect(filterPanel.locator('.select-filter').nth(1)).toHaveValue('contains');
+  });
+
+  test('can make operators mutually exclusive per column', async ({ page }) => {
+    const columns = buildColumns([
+      { prop: 'role', name: 'Role', filter: true, ...withHeaderTestId('exclusive-role') },
+      { prop: 'city', name: 'City', filter: true, ...withHeaderTestId('exclusive-city') },
+    ]);
+
+    await mountGrid(page, {
+      columns,
+      source: [{ id: 1, role: 'Admin', city: 'Lisbon' }],
+      filter: { allowDuplicateOperators: false },
+    });
+    await page.getByTestId('exclusive-role').locator(SELECTORS.filterButton).click();
+
+    const filterPanel = page.locator(SELECTORS.filterPanel);
+    await filterPanel.locator('#add-filter').selectOption('contains');
+    await expect(filterPanel.locator('.select-filter').first()).toHaveValue('contains');
+    await expect(filterPanel.locator('#add-filter option[value="contains"]')).toHaveCount(0);
+
+    await filterPanel.locator('#add-filter').selectOption('eq');
+    await expect(filterPanel.locator('.select-filter').nth(1)).toHaveValue('eq');
+    await expect(filterPanel.locator('.select-filter').nth(1).locator('option[value="contains"]')).toHaveCount(0);
+
+    await page.getByTestId('exclusive-city').locator(SELECTORS.filterButton).click();
+    await expect(filterPanel.locator('#add-filter option[value="contains"]')).toHaveCount(1);
+  });
+
+  test('keeps preloaded duplicate operators editable in exclusive mode', async ({ page }) => {
+    const columns = buildColumns([
+      { prop: 'role', name: 'Role', filter: true, ...withHeaderTestId('preloaded-exclusive-role') },
+    ]);
+
+    await mountGrid(page, {
+      columns,
+      source: [{ id: 1, role: 'Admin' }],
+      filter: {
+        allowDuplicateOperators: false,
+        multiFilterItems: {
+          role: [
+            { id: 0, type: 'contains', value: 'Admin', relation: 'or' },
+            { id: 1, type: 'contains', value: 'Admin', relation: 'or' },
+          ],
+        },
+      },
+    });
+    await page.getByTestId('preloaded-exclusive-role').locator(SELECTORS.filterButton).click();
+
+    const filterPanel = page.locator(SELECTORS.filterPanel);
+    await expect(filterPanel.locator('.select-filter')).toHaveCount(2);
+    await expect(filterPanel.locator('.select-filter').nth(0)).toHaveValue('contains');
+    await expect(filterPanel.locator('.select-filter').nth(1)).toHaveValue('contains');
+    await expect(filterPanel.locator('#add-filter option[value="contains"]')).toHaveCount(0);
+
+    await filterPanel.locator('.select-filter').nth(1).selectOption('eq');
+    await expect(filterPanel.locator('.select-filter').nth(0)).toHaveValue('contains');
+    await expect(filterPanel.locator('.select-filter').nth(1)).toHaveValue('eq');
+  });
+
+  test('updates duplicate operator behavior when filter config changes at runtime', async ({ page }) => {
+    const columns = buildColumns([
+      { prop: 'role', name: 'Role', filter: true, ...withHeaderTestId('runtime-filter-role') },
+    ]);
+
+    await mountGrid(page, { columns, source: [{ id: 1, role: 'Admin' }], filter: true });
+    await page.getByTestId('runtime-filter-role').locator(SELECTORS.filterButton).click();
+    const initialFilterPanel = page.locator(SELECTORS.filterPanel);
+    await initialFilterPanel.locator('#add-filter').selectOption('contains');
+    await expect(initialFilterPanel.locator('input[placeholder="Enter value..."]').first()).toBeVisible();
+    await initialFilterPanel.locator('input[placeholder="Enter value..."]').first().fill('Admin');
+    await initialFilterPanel.getByRole('button', { name: 'ok' }).click();
+    await page.waitForTimeout(500);
+
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) throw new Error('Grid not found');
+      grid.filter = { allowDuplicateOperators: false };
+    });
+    await page.waitForChanges();
+    await page.getByTestId('runtime-filter-role').locator(SELECTORS.filterButton).click();
+
+    const filterPanel = page.locator(SELECTORS.filterPanel);
+    await expect(filterPanel.locator('.select-filter').first()).toHaveValue('contains');
+    await expect(filterPanel.locator('input[placeholder="Enter value..."]').first()).toHaveValue('Admin');
+    await expect(filterPanel.locator('#add-filter option[value="contains"]')).toHaveCount(0);
+
+    await page.getByTestId('runtime-filter-role').locator(SELECTORS.filterButton).click();
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) throw new Error('Grid not found');
+      grid.filter = { allowDuplicateOperators: true };
+    });
+    await page.waitForChanges();
+    await page.getByTestId('runtime-filter-role').locator(SELECTORS.filterButton).click();
+    await expect(page.locator(`${SELECTORS.filterPanel} .select-filter`).first()).toHaveValue('contains');
+    await expect(page.locator(`${SELECTORS.filterPanel} #add-filter option[value="contains"]`)).toHaveCount(1);
+  });
+
   test('filters rows correctly', async ({ page }) => {
     const source: SampleRow[] = [
       { id: 501, name: 'Alice', role: 'Admin', city: 'Lisbon' },

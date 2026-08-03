@@ -119,6 +119,12 @@ export interface ColumnFilterConfig {
    * Whether or not to close the filter panel when clicking outside
    */
   closeFilterPanelOnOutsideClick?: boolean;
+
+  /**
+   * Whether the filter panel allows the same operator more than once per column.
+   * Defaults to true to preserve support for repeated conditions in multi-filter expressions.
+   */
+  allowDuplicateOperators?: boolean;
 }
 
 export type FilterCollectionItem = {

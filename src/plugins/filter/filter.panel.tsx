@@ -86,6 +86,10 @@ export class FilterPanel {
    * If true, closes the filter panel when clicking outside
    */
   @Prop() closeOnOutsideClick = true;
+  /**
+   * Whether the filter panel allows the same operator more than once per column.
+   */
+  @Prop() allowDuplicateOperators = true;
   @Event() filterChange: EventEmitter<MultiFilterItem>;
   @Event() resetChange: EventEmitter<ColumnProp>;
 
@@ -540,6 +544,9 @@ export class FilterPanel {
     }
     const options: VNode[] = [];
     const prop = this.changes.prop;
+    if (prop === undefined) {
+      return;
+    }
 
     const hidden = new Set<string>();
     Object.keys(this.filterItems).forEach((prop) => {
@@ -550,6 +557,12 @@ export class FilterPanel {
         }
       })
     });
+
+    const selectedTypes = new Set<string>(
+      (this.filterItems[prop] ?? [])
+        .filter(filter => !filter.hidden)
+        .map(filter => filter.type),
+    );
 
     if (!isDefaultTypeRemoved) {
       const capts = {
@@ -570,7 +583,13 @@ export class FilterPanel {
     }
 
     for (let gIndex in this.changes.filterTypes) {
-      const group = this.changes.filterTypes[gIndex].filter(k => !hidden.has(k));
+      const group = this.changes.filterTypes[gIndex].filter(k =>
+        !hidden.has(k) && (
+          this.allowDuplicateOperators ||
+          !selectedTypes.has(k) ||
+          (isDefaultTypeRemoved && type === k)
+        ),
+      );
       if (group.length) {
         options.push(
           ...group.map(k => (

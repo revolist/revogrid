@@ -495,6 +495,11 @@ export namespace Components {
     }
     interface RevogrFilterPanel {
         /**
+          * Whether the filter panel allows the same operator more than once per column.
+          * @default true
+         */
+        "allowDuplicateOperators": boolean;
+        /**
           * If true, closes the filter panel when clicking outside
           * @default true
          */
@@ -1990,6 +1995,11 @@ declare namespace LocalJSX {
     }
     interface RevogrFilterPanel {
         /**
+          * Whether the filter panel allows the same operator more than once per column.
+          * @default true
+         */
+        "allowDuplicateOperators"?: boolean;
+        /**
           * If true, closes the filter panel when clicking outside
           * @default true
          */
@@ -2547,6 +2557,7 @@ declare namespace LocalJSX {
     interface RevogrFilterPanelAttributes {
         "disableDynamicFiltering": boolean;
         "closeOnOutsideClick": boolean;
+        "allowDuplicateOperators": boolean;
     }
     interface RevogrFocusAttributes {
         "colType": DimensionCols;
