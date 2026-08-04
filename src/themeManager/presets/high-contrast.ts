@@ -74,7 +74,6 @@ const highContrastButtons: PresetTokenGroups['buttons'] = [
 /** High-contrast light preset with dark structure and vivid blue focus states. */
 export const highContrastTheme = defineTheme({
   name: 'highContrast',
-  extends: 'material',
   colorScheme: 'light',
   defaultRowSize: 40,
   tokens: createPresetTokens({

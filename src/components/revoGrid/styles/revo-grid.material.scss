@@ -1,6 +1,16 @@
 @use './revo-grid.common-material.scss' as *;
 
-revo-grid[data-rg-theme-base='material'] {
+/*
+ * Material built-ins and standalone custom themes share the common tokenized
+ * structure. A custom theme remains identified only by its own `theme` value.
+ */
+revo-grid:is([theme='material'], [theme='darkMaterial']),
+revo-grid[theme]:not(
+    [theme='default'],
+    [theme='dark'],
+    [theme='compact'],
+    [theme='darkCompact']
+  ) {
   --rg-theme-font-family: var(
     --revo-grid-font-family,
     Nunito,

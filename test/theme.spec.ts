@@ -33,25 +33,38 @@ describe('ThemeService', () => {
     expect(getTheme('brand')).toBe('brand');
   });
 
+  it.each(['dark', 'brand-dark', 'mydarkTheme'])(
+    'preserves the legacy dark color scheme for CSS-only theme %s',
+    name => {
+      const service = new ThemeService({ rowSize: 0 });
+
+      expect(service.register(name)).toMatchObject({
+        name,
+        colorScheme: 'dark',
+        defaultRowSize: 27,
+        custom: true,
+      });
+    },
+  );
+
   it('normalizes blank names to default and trims valid names', () => {
     expect(getTheme('  ')).toBe('default');
     expect(getTheme('  brand  ')).toBe('brand');
   });
 
   it.each([
-    ['default', 'default', 'light', 27],
-    ['material', 'material', 'light', 42],
-    ['compact', 'compact', 'light', 32],
-    ['darkMaterial', 'material', 'dark', 42],
-    ['darkCompact', 'compact', 'dark', 32],
+    ['default', 'light', 27],
+    ['material', 'light', 42],
+    ['compact', 'light', 32],
+    ['darkMaterial', 'dark', 42],
+    ['darkCompact', 'dark', 32],
   ] as const)(
     'resolves the %s built-in theme',
-    (name, base, colorScheme, rowSize) => {
+    (name, colorScheme, rowSize) => {
       const service = new ThemeService({ rowSize: 0 });
 
       expect(service.register(name)).toMatchObject({
         name,
-        base,
         colorScheme,
         defaultRowSize: rowSize,
         custom: false,
@@ -80,13 +93,28 @@ describe('ThemeService', () => {
 
     expect(service.register('brand')).toEqual({
       name: 'brand',
-      base: 'compact',
       colorScheme: 'light',
       defaultRowSize: 30,
       tokens: { primary: 'blue', headerBg: '#eee' },
       custom: true,
     });
     expect(service.rowSize).toBe(30);
+  });
+
+  it('lets registered definitions override legacy dark-name inference', () => {
+    const service = new ThemeService({ rowSize: 0 });
+    service.setDefinitions([
+      defineTheme({
+        name: 'darkBrand',
+        extends: 'material',
+        colorScheme: 'light',
+      }),
+    ]);
+
+    expect(service.register('darkBrand')).toMatchObject({
+      colorScheme: 'light',
+      custom: true,
+    });
   });
 
   it('inherits custom definitions recursively and merges child overrides', () => {
@@ -114,7 +142,6 @@ describe('ThemeService', () => {
 
     expect(service.register('child')).toEqual({
       name: 'child',
-      base: 'compact',
       colorScheme: 'light',
       defaultRowSize: 39,
       tokens: {
@@ -137,7 +164,6 @@ describe('ThemeService', () => {
     service.setDefinitions([brandedOcean, oceanTheme]);
 
     expect(service.register(brandedOcean.name)).toMatchObject({
-      base: 'material',
       colorScheme: 'light',
       defaultRowSize: 38,
       tokens: {
@@ -171,13 +197,11 @@ describe('ThemeService', () => {
     ]);
 
     expect(service.register('selfReference')).toMatchObject({
-      base: 'default',
       colorScheme: 'dark',
       defaultRowSize: 29,
       tokens: { primary: 'purple' },
     });
     expect(service.register('cycleA')).toMatchObject({
-      base: 'default',
       colorScheme: 'light',
       defaultRowSize: 27,
       tokens: { primary: 'red' },
@@ -198,13 +222,11 @@ describe('ThemeService', () => {
     ]);
 
     expect(service.register('material')).toMatchObject({
-      base: 'material',
       defaultRowSize: 42,
       custom: false,
     });
     expect(service.register('css-only')).toMatchObject({
       name: 'css-only',
-      base: 'default',
       colorScheme: 'light',
       defaultRowSize: 27,
       custom: true,
@@ -229,7 +251,6 @@ describe('ThemeService', () => {
 
     expect(service.register('brand')).toEqual({
       name: 'brand',
-      base: 'default',
       colorScheme: 'light',
       defaultRowSize: 27,
       tokens: { headerBg: '#eee' },
@@ -293,6 +314,7 @@ describe('ThemeService', () => {
     const tokenNames = new Set(Object.keys(themeTokenCssVariables));
     for (const definition of modernThemeDefinitions) {
       expect(definition.name).toMatch(/^[a-z][a-zA-Z0-9-]*$/);
+      expect(definition.extends).toBeUndefined();
       expect(definition.defaultRowSize).toBeGreaterThan(0);
       expect(
         Object.keys(definition.tokens || {}).every(name =>
@@ -304,38 +326,32 @@ describe('ThemeService', () => {
     const service = new ThemeService({ rowSize: 0 });
     expect(service.register(oceanTheme.name)).toMatchObject({
       name: 'ocean',
-      base: 'default',
       custom: true,
       tokens: {},
     });
 
     service.setDefinitions(modernThemeDefinitions);
     expect(service.register(oceanTheme.name)).toMatchObject({
-      base: 'material',
       colorScheme: 'light',
       defaultRowSize: 38,
       tokens: oceanTheme.tokens,
     });
     expect(service.register(midnightTheme.name)).toMatchObject({
-      base: 'material',
       colorScheme: 'dark',
       defaultRowSize: 40,
       tokens: midnightTheme.tokens,
     });
     expect(service.register(auroraTheme.name)).toMatchObject({
-      base: 'compact',
       colorScheme: 'dark',
       defaultRowSize: 34,
       tokens: auroraTheme.tokens,
     });
     expect(service.register(highContrastTheme.name)).toMatchObject({
-      base: 'material',
       colorScheme: 'light',
       defaultRowSize: 40,
       tokens: highContrastTheme.tokens,
     });
     expect(service.register(highContrastDarkTheme.name)).toMatchObject({
-      base: 'material',
       colorScheme: 'dark',
       defaultRowSize: 40,
       tokens: highContrastDarkTheme.tokens,

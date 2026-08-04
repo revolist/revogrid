@@ -1956,7 +1956,6 @@ export class RevoGridComponent {
     return (
       <Host
         dir={this.rtl ? 'rtl' : 'ltr'}
-        data-rg-theme-base={this.themeService.theme.base}
         data-rg-theme-scheme={this.themeService.theme.colorScheme}
         style={this.themeStyles}
       >

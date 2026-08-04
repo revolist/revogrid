@@ -74,7 +74,6 @@ const midnightButtons: PresetTokenGroups['buttons'] = [
 /** Deep navy preset with cyan selection and violet action accents. */
 export const midnightTheme = defineTheme({
   name: 'midnight',
-  extends: 'darkMaterial',
   colorScheme: 'dark',
   defaultRowSize: 40,
   tokens: createPresetTokens({

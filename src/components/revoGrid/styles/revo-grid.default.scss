@@ -1,7 +1,8 @@
 @use './revo-grid.mixin.scss' as *;
 @use './revo-grid.common.scss' as *;
 
-revo-grid[data-rg-theme-base='default'] {
+revo-grid:is([theme='default'], [theme='dark']),
+revo-grid:not([theme]) {
   --rg-theme-font-family: var(
     --revo-grid-font-family,
     Helvetica,

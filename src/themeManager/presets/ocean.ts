@@ -74,7 +74,6 @@ const oceanButtons: PresetTokenGroups['buttons'] = [
 /** Bright blue and slate preset for data-heavy daytime interfaces. */
 export const oceanTheme = defineTheme({
   name: 'ocean',
-  extends: 'material',
   colorScheme: 'light',
   defaultRowSize: 38,
   tokens: createPresetTokens({
