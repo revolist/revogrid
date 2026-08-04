@@ -74,7 +74,6 @@ const highContrastDarkButtons: PresetTokenGroups['buttons'] = [
 /** High-contrast dark preset with luminous yellow and cyan interaction states. */
 export const highContrastDarkTheme = defineTheme({
   name: 'highContrastDark',
-  extends: 'darkMaterial',
   colorScheme: 'dark',
   defaultRowSize: 40,
   tokens: createPresetTokens({

@@ -127,19 +127,14 @@ revo-grid[dir='rtl'] {
     direction: rtl;
   }
 
-  // Adjust material theme specific RTL styles
-  &[data-rg-theme-base='material'] {
-    revogr-header {
-      text-align: right;
-    }
-
-    revogr-data {
-      text-align: right;
-    }
+  revogr-header,
+  revogr-data {
+    text-align: right;
   }
 
   // Adjust default theme specific RTL styles
-  &[data-rg-theme-base='default'] {
+  &:is([theme='default'], [theme='dark']),
+  &:not([theme]) {
     .rowHeaders {
       background-color: var(--rg-theme-row-headers-bg);
 
@@ -177,14 +172,4 @@ revo-grid[dir='rtl'] {
     }
   }
 
-  // Adjust compact theme specific RTL styles
-  &[data-rg-theme-base='compact'] {
-    revogr-header {
-      text-align: right;
-    }
-
-    revogr-data {
-      text-align: right;
-    }
-  }
 }

@@ -24,7 +24,6 @@ const builtInThemes: Readonly<Record<BuiltInTheme, ResolvedTheme>> =
   Object.freeze({
     default: Object.freeze({
       name: 'default',
-      base: 'default',
       colorScheme: 'light',
       defaultRowSize: 27,
       tokens: Object.freeze({}),
@@ -32,7 +31,6 @@ const builtInThemes: Readonly<Record<BuiltInTheme, ResolvedTheme>> =
     }),
     material: Object.freeze({
       name: 'material',
-      base: 'material',
       colorScheme: 'light',
       defaultRowSize: 42,
       tokens: Object.freeze({}),
@@ -40,7 +38,6 @@ const builtInThemes: Readonly<Record<BuiltInTheme, ResolvedTheme>> =
     }),
     compact: Object.freeze({
       name: 'compact',
-      base: 'compact',
       colorScheme: 'light',
       defaultRowSize: 32,
       tokens: Object.freeze({}),
@@ -48,7 +45,6 @@ const builtInThemes: Readonly<Record<BuiltInTheme, ResolvedTheme>> =
     }),
     darkMaterial: Object.freeze({
       name: 'darkMaterial',
-      base: 'material',
       colorScheme: 'dark',
       defaultRowSize: 42,
       tokens: Object.freeze({}),
@@ -56,7 +52,6 @@ const builtInThemes: Readonly<Record<BuiltInTheme, ResolvedTheme>> =
     }),
     darkCompact: Object.freeze({
       name: 'darkCompact',
-      base: 'compact',
       colorScheme: 'dark',
       defaultRowSize: 32,
       tokens: Object.freeze({}),
@@ -204,7 +199,6 @@ export default class ThemeService {
     for (const definition of definitions) {
       resolved = {
         name: definition.name,
-        base: resolved.base,
         colorScheme: getColorScheme(
           definition.colorScheme,
           resolved.colorScheme,

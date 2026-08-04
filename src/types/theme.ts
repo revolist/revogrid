@@ -13,8 +13,6 @@ export type BuiltInTheme =
   | 'darkMaterial'
   | 'darkCompact';
 
-export type ThemeBase = 'default' | 'material' | 'compact';
-
 export type ThemeColorScheme = 'light' | 'dark';
 
 /**
@@ -100,7 +98,6 @@ export interface ThemeDefinition {
 
 export interface ResolvedTheme extends ThemePackage {
   name: string;
-  base: ThemeBase;
   colorScheme: ThemeColorScheme;
   tokens: ThemeTokens;
   custom: boolean;

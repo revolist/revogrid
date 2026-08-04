@@ -1,6 +1,6 @@
 @use './revo-grid.common-material.scss' as *;
 
-revo-grid[data-rg-theme-base='compact'] {
+revo-grid:is([theme='compact'], [theme='darkCompact']) {
   --rg-theme-font-family: var(
     --revo-grid-font-family,
     Nunito,

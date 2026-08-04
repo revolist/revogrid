@@ -7,7 +7,7 @@
 @use '../../global/_icons.scss' as *;
 
 /* Built-in Material and Compact themes historically inherited their surfaces. */
-revo-grid:is(
+revo-grid[theme]:is(
   [theme='compact'],
   [theme='darkCompact'],
   [theme='material'],

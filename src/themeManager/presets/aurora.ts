@@ -74,7 +74,6 @@ const auroraButtons: PresetTokenGroups['buttons'] = [
 /** Compact graphite and evergreen preset with luminous emerald states. */
 export const auroraTheme = defineTheme({
   name: 'aurora',
-  extends: 'darkCompact',
   colorScheme: 'dark',
   defaultRowSize: 34,
   tokens: createPresetTokens({

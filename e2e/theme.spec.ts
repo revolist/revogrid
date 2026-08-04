@@ -33,7 +33,7 @@ test.describe('custom themes', () => {
 
     const grid = page.locator(SELECTORS.grid);
     await expect(grid).toHaveAttribute('theme', 'dark');
-    await expect(grid).toHaveAttribute('data-rg-theme-base', 'default');
+    await expect(grid).not.toHaveAttribute('data-rg-theme-base');
     await expect(grid).toHaveAttribute('data-rg-theme-scheme', 'dark');
     await expect(grid).toHaveCSS('background-color', 'rgb(33, 37, 41)');
     await expect(dataCell(page, 0, 0)).toHaveCSS(
@@ -84,7 +84,7 @@ test.describe('custom themes', () => {
 
     const grid = page.locator(SELECTORS.grid);
     await expect(grid).toHaveAttribute('theme', 'brand-css');
-    await expect(grid).toHaveAttribute('data-rg-theme-base', 'default');
+    await expect(grid).not.toHaveAttribute('data-rg-theme-base');
     await expect(grid).toHaveAttribute('data-rg-theme-scheme', 'light');
     await expect
       .poll(() =>
@@ -167,7 +167,7 @@ test.describe('custom themes', () => {
     });
 
     const grid = page.locator(SELECTORS.grid);
-    await expect(grid).toHaveAttribute('data-rg-theme-base', 'material');
+    await expect(grid).not.toHaveAttribute('data-rg-theme-base');
     await expect(grid).toHaveAttribute('data-rg-theme-scheme', 'dark');
     await expect(grid).toHaveAttribute('dir', 'rtl');
     await expect(page.getByTestId('theme-header-id')).toHaveCSS(
@@ -250,7 +250,7 @@ test.describe('custom themes', () => {
     });
 
     const grid = page.locator(SELECTORS.grid);
-    await expect(grid).toHaveAttribute('data-rg-theme-base', 'compact');
+    await expect(grid).not.toHaveAttribute('data-rg-theme-base');
     await expect(grid).toHaveAttribute('data-rg-theme-scheme', 'dark');
     expect((await dataCell(page, 0, 0).boundingBox())?.height).toBe(35);
     await expect(page.locator('revogr-header').first()).toHaveCSS(
@@ -428,23 +428,22 @@ test('keeps built-in layout metadata and dimensions compatible', async ({
   });
 
   const cases = [
-    ['default', 'default', 'light', 27, 30],
-    ['material', 'material', 'light', 42, 50],
-    ['compact', 'compact', 'light', 32, 45],
-    ['darkMaterial', 'material', 'dark', 42, 50],
-    ['darkCompact', 'compact', 'dark', 32, 45],
+    ['default', 'light', 27, 30],
+    ['material', 'light', 42, 50],
+    ['compact', 'light', 32, 45],
+    ['darkMaterial', 'dark', 42, 50],
+    ['darkCompact', 'dark', 32, 45],
   ] as const;
 
-  for (const [theme, base, scheme, rowHeight, headerHeight] of cases) {
+  for (const [theme, scheme, rowHeight, headerHeight] of cases) {
     await page.locator(SELECTORS.grid).evaluate((grid, nextTheme) => {
       grid.theme = nextTheme;
     }, theme);
     await page.waitForChanges();
 
     await expect(page.locator(SELECTORS.grid)).toHaveAttribute('theme', theme);
-    await expect(page.locator(SELECTORS.grid)).toHaveAttribute(
+    await expect(page.locator(SELECTORS.grid)).not.toHaveAttribute(
       'data-rg-theme-base',
-      base,
     );
     await expect(page.locator(SELECTORS.grid)).toHaveAttribute(
       'data-rg-theme-scheme',
@@ -502,11 +501,11 @@ test('switches between the modern presets with complete visual metadata', async 
   });
 
   const grid = page.locator(SELECTORS.grid);
+  await expect(grid).not.toHaveAttribute('data-rg-theme-base');
   await setCellsFocus(page, { x: 0, y: 0 }, { x: 1, y: 0 });
   const cases = [
     [
       'ocean',
-      'material',
       'light',
       38,
       '#f8fafc',
@@ -517,7 +516,6 @@ test('switches between the modern presets with complete visual metadata', async 
     ],
     [
       'midnight',
-      'material',
       'dark',
       40,
       '#0b1020',
@@ -528,7 +526,6 @@ test('switches between the modern presets with complete visual metadata', async 
     ],
     [
       'aurora',
-      'compact',
       'dark',
       34,
       '#071714',
@@ -539,7 +536,6 @@ test('switches between the modern presets with complete visual metadata', async 
     ],
     [
       'highContrast',
-      'material',
       'light',
       40,
       '#ffffff',
@@ -550,7 +546,6 @@ test('switches between the modern presets with complete visual metadata', async 
     ],
     [
       'highContrastDark',
-      'material',
       'dark',
       40,
       '#050505',
@@ -563,7 +558,6 @@ test('switches between the modern presets with complete visual metadata', async 
 
   for (const [
     theme,
-    base,
     scheme,
     rowHeight,
     background,
@@ -578,7 +572,7 @@ test('switches between the modern presets with complete visual metadata', async 
     await page.waitForChanges();
 
     await expect(grid).toHaveAttribute('theme', theme);
-    await expect(grid).toHaveAttribute('data-rg-theme-base', base);
+    await expect(grid).not.toHaveAttribute('data-rg-theme-base');
     await expect(grid).toHaveAttribute('data-rg-theme-scheme', scheme);
     expect((await dataCell(page, 0, 0).boundingBox())?.height).toBe(rowHeight);
     await expect(page.locator('revogr-header').first()).toHaveCSS(
