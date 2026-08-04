@@ -46,6 +46,56 @@ test.describe('custom themes', () => {
           const style = getComputedStyle(element);
           return {
             background: style
+              .getPropertyValue('--rg-theme-background')
+              .trim(),
+            border: style.getPropertyValue('--rg-theme-border').trim(),
+            cellBorder: style
+              .getPropertyValue('--rg-theme-cell-border')
+              .trim(),
+            focused: style.getPropertyValue('--rg-theme-focused-bg').trim(),
+          };
+        }),
+      )
+      .toEqual({
+        background: '#212529',
+        border: 'rgba(255, 255, 255, 0.2)',
+        cellBorder: '#424242',
+        focused: 'rgba(52, 58, 64, 0.5)',
+      });
+  });
+
+  test('keeps resolved dark defaults available to legacy descendants', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns,
+      source: [{ id: 1, name: 'Ada' }],
+      theme: 'dark',
+    });
+    await page.addStyleTag({
+      content: `
+        .legacy-theme-consumer {
+          background-color: var(--revo-grid-background, #fff) !important;
+          color: var(--revo-grid-text, #000) !important;
+          outline: 1px solid var(--revo-grid-cell-border) !important;
+        }
+      `,
+    });
+
+    const cell = dataCell(page, 0, 0);
+    await cell.evaluate(element => {
+      element.classList.add('legacy-theme-consumer');
+    });
+
+    await expect(cell).toHaveCSS('background-color', 'rgb(33, 37, 41)');
+    await expect(cell).toHaveCSS('color', 'rgba(255, 255, 255, 0.9)');
+    await expect(cell).toHaveCSS('outline-color', 'rgb(66, 66, 66)');
+    await expect
+      .poll(() =>
+        cell.evaluate(element => {
+          const style = getComputedStyle(element);
+          return {
+            background: style
               .getPropertyValue('--revo-grid-background')
               .trim(),
             border: style.getPropertyValue('--revo-grid-border').trim(),
@@ -61,6 +111,52 @@ test.describe('custom themes', () => {
         border: 'rgba(255, 255, 255, 0.2)',
         cellBorder: '#424242',
         focused: 'rgba(52, 58, 64, 0.5)',
+      });
+  });
+
+  test('inherits legacy dark custom properties from its wrapper', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns,
+      source: [{ id: 1, name: 'Ada' }],
+      theme: 'dark',
+    });
+    await page.addStyleTag({
+      content: `
+        .dark-brand-shell {
+          --revo-grid-background: rgb(10, 20, 30);
+          --revo-grid-text: rgb(210, 220, 230);
+          --revo-grid-cell-border: rgb(40, 50, 60);
+          --revo-grid-focused-bg: rgba(70, 80, 90, 0.5);
+        }
+      `,
+    });
+    await page.locator(SELECTORS.grid).evaluate(grid => {
+      grid.parentElement?.classList.add('dark-brand-shell');
+    });
+
+    const grid = page.locator(SELECTORS.grid);
+    await expect(grid).toHaveCSS('background-color', 'rgb(10, 20, 30)');
+    await expect(dataCell(page, 0, 0)).toHaveCSS(
+      'color',
+      'rgb(210, 220, 230)',
+    );
+    await expect
+      .poll(() =>
+        grid.evaluate(element => {
+          const style = getComputedStyle(element);
+          return {
+            cellBorder: style
+              .getPropertyValue('--rg-theme-cell-border')
+              .trim(),
+            focused: style.getPropertyValue('--rg-theme-focused-bg').trim(),
+          };
+        }),
+      )
+      .toEqual({
+        cellBorder: 'rgb(40, 50, 60)',
+        focused: 'rgba(70, 80, 90, 0.5)',
       });
   });
 

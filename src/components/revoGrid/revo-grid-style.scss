@@ -6,6 +6,66 @@
 @use './styles/revo-grid.rtl.scss' as *;
 @use '../../global/_icons.scss' as *;
 
+$legacy-theme-token-suffixes:
+  primary,
+  primary-transparent,
+  background,
+  foreground,
+  divider,
+  shadow,
+  text,
+  border,
+  header-bg,
+  header-color,
+  header-border,
+  header-focused-bg,
+  header-hover-bg,
+  cell-border,
+  cell-vertical-border,
+  focused-bg,
+  row-hover,
+  row-headers-bg,
+  row-headers-color,
+  cell-disabled-bg,
+  filter-panel-bg,
+  filter-panel-border,
+  filter-panel-shadow,
+  filter-panel-input-bg,
+  filter-panel-divider,
+  filter-panel-select-border,
+  filter-panel-select-border-hover,
+  filter-panel-reorder-accent,
+  filter-panel-reorder-color,
+  filter-panel-text,
+  filter-panel-muted-text,
+  filter-panel-focus-ring,
+  filter-panel-icon,
+  filter-panel-icon-active,
+  font-family,
+  font-size,
+  header-height,
+  header-font-size,
+  header-font-weight,
+  header-text-transform,
+  header-text-align,
+  cell-text-align,
+  header-padding,
+  cell-padding,
+  selection-border,
+  selection-bg,
+  autofill-handle-bg,
+  autofill-handle-border,
+  range-handle-bg,
+  temporary-range-border,
+  temporary-selection-border,
+  header-resize-hover,
+  button-text,
+  button-bg,
+  button-success-bg,
+  button-danger-bg,
+  button-outline-border,
+  button-outline-text;
+
 /* Built-in Material and Compact themes historically inherited their surfaces. */
 revo-grid[theme]:is(
   [theme='compact'],
@@ -173,28 +233,55 @@ revo-grid {
 
   &[data-rg-theme-scheme='dark'] {
     color-scheme: dark;
-    --revo-grid-background: #212529;
-    --revo-grid-foreground: #fff;
-    --revo-grid-text: rgba(255, 255, 255, 0.9);
-    --revo-grid-divider: #505050;
-    --revo-grid-border: rgba(255, 255, 255, 0.2);
-    --revo-grid-filter-panel-bg: #212529;
-    --revo-grid-filter-panel-border: #505050;
-    --revo-grid-filter-panel-input-bg: #343a40;
-    --revo-grid-filter-panel-divider: #505050;
+    --rg-theme-background: var(--revo-grid-background, #212529);
+    --rg-theme-foreground: var(--revo-grid-foreground, #fff);
+    --rg-theme-text: var(--revo-grid-text, rgba(255, 255, 255, 0.9));
+    --rg-theme-divider: var(--revo-grid-divider, #505050);
+    --rg-theme-border: var(
+      --revo-grid-border,
+      rgba(255, 255, 255, 0.2)
+    );
+    --rg-theme-filter-panel-bg: var(--revo-grid-filter-panel-bg, #212529);
+    --rg-theme-filter-panel-border: var(
+      --revo-grid-filter-panel-border,
+      #505050
+    );
+    --rg-theme-filter-panel-input-bg: var(
+      --revo-grid-filter-panel-input-bg,
+      #343a40
+    );
+    --rg-theme-filter-panel-divider: var(
+      --revo-grid-filter-panel-divider,
+      #505050
+    );
     --rg-theme-filter-panel-icon-active: var(
       --revo-grid-filter-panel-icon-active,
       #fff
     );
-    --revo-grid-header-bg: #343a40;
-    --revo-grid-header-color: #fff;
-    --revo-grid-header-border: #505050;
-    --revo-grid-cell-border: #424242;
-    --revo-grid-focused-bg: rgba(52, 58, 64, 0.5);
-    --revo-grid-row-hover: rgba(80, 80, 80, 0.5);
-    --revo-grid-row-headers-bg: rgba(52, 58, 64, 0.8);
-    --revo-grid-row-headers-color: rgba(255, 255, 255, 0.8);
-    --revo-grid-cell-disabled-bg: rgba(255, 255, 255, 0.07);
+    --rg-theme-header-bg: var(--revo-grid-header-bg, #343a40);
+    --rg-theme-header-color: var(--revo-grid-header-color, #fff);
+    --rg-theme-header-border: var(--revo-grid-header-border, #505050);
+    --rg-theme-cell-border: var(--revo-grid-cell-border, #424242);
+    --rg-theme-focused-bg: var(
+      --revo-grid-focused-bg,
+      rgba(52, 58, 64, 0.5)
+    );
+    --rg-theme-row-hover: var(
+      --revo-grid-row-hover,
+      rgba(80, 80, 80, 0.5)
+    );
+    --rg-theme-row-headers-bg: var(
+      --revo-grid-row-headers-bg,
+      rgba(52, 58, 64, 0.8)
+    );
+    --rg-theme-row-headers-color: var(
+      --revo-grid-row-headers-color,
+      rgba(255, 255, 255, 0.8)
+    );
+    --rg-theme-cell-disabled-bg: var(
+      --revo-grid-cell-disabled-bg,
+      rgba(255, 255, 255, 0.07)
+    );
     --rg-theme-button-outline-border: var(
       --revo-grid-button-outline-border,
       #404040
@@ -207,6 +294,13 @@ revo-grid {
 
   &[data-rg-theme-scheme='light'] {
     color-scheme: light;
+  }
+
+  /* Keep existing descendant integrations on the legacy public contract. */
+  > * {
+    @each $token in $legacy-theme-token-suffixes {
+      --revo-grid-#{$token}: var(--rg-theme-#{$token});
+    }
   }
 
   @include revoGridCommon;
