@@ -64,7 +64,7 @@ test.describe('custom themes', () => {
       });
   });
 
-  test('keeps an arbitrary CSS-only theme reflected and customizable', async ({
+  test('keeps an arbitrary CSS-only theme reflected and inheritable', async ({
     page,
   }) => {
     await mountGrid(page, {
@@ -74,12 +74,12 @@ test.describe('custom themes', () => {
     });
     await page.addStyleTag({
       content: `
-        revo-grid.brand-shell { --revo-grid-text: rgb(12, 34, 56); }
+        .brand-shell { --revo-grid-text: rgb(12, 34, 56); }
         revo-grid[theme='brand-css'] { --revo-grid-background: rgb(240, 241, 242); }
       `,
     });
     await page.locator(SELECTORS.grid).evaluate(grid => {
-      grid.classList.add('brand-shell');
+      grid.parentElement?.classList.add('brand-shell');
     });
 
     const grid = page.locator(SELECTORS.grid);
@@ -455,6 +455,31 @@ test('keeps built-in layout metadata and dimensions compatible', async ({
       (await page.getByTestId('theme-header-id').boundingBox())?.height,
     ).toBe(headerHeight);
   }
+});
+
+test('keeps the built-in compact theme surfaces transparent', async ({
+  page,
+}) => {
+  await mountGrid(page, {
+    columns,
+    source: [{ id: 1, name: 'Ada' }],
+    rowHeaders: true,
+    theme: 'compact',
+  });
+
+  const transparent = 'rgba(0, 0, 0, 0)';
+  await expect(page.locator(SELECTORS.grid)).toHaveCSS(
+    'background-color',
+    transparent,
+  );
+  await expect(page.locator('revogr-header').first()).toHaveCSS(
+    'background-color',
+    transparent,
+  );
+  await expect(page.locator(`${SELECTORS.grid} .rowHeaders`)).toHaveCSS(
+    'background-color',
+    transparent,
+  );
 });
 
 test('switches between the modern presets with complete visual metadata', async ({

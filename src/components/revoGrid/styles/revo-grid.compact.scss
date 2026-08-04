@@ -40,3 +40,13 @@ revo-grid[data-rg-theme-base='compact'] {
     }
   }
 }
+
+/* Preserve the unpainted surfaces of the original built-in Compact theme. */
+revo-grid[theme='compact'] {
+  background-color: transparent;
+
+  revogr-header,
+  .rowHeaders {
+    background-color: transparent;
+  }
+}

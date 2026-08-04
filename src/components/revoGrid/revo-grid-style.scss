@@ -7,33 +7,7 @@
 @use '../../global/_icons.scss' as *;
 
 revo-grid {
-  /* Legacy public theme variables remain the stable integration contract. */
-  --revo-grid-primary: #266ae8;
-  --revo-grid-primary-transparent: rgba(38, 106, 232, 0.9);
-  --revo-grid-background: #fff;
-  --revo-grid-foreground: black;
-  --revo-grid-divider: gray;
-  --revo-grid-shadow: rgba(0, 0, 0, 0.15);
-  --revo-grid-text: black;
-  --revo-grid-border: rgba(0, 0, 0, 0.2);
-  --revo-grid-filter-panel-bg: #fff;
-  --revo-grid-filter-panel-border: #d9d9d9;
-  --revo-grid-filter-panel-shadow: rgba(0, 0, 0, 0.15);
-  --revo-grid-filter-panel-input-bg: #eaeaeb;
-  --revo-grid-filter-panel-divider: #d9d9d9;
-  --revo-grid-filter-panel-select-border: transparent;
-  --revo-grid-filter-panel-select-border-hover: transparent;
-  --revo-grid-header-bg: #f8f9fa;
-  --revo-grid-header-color: #000;
-  --revo-grid-header-border: #cecece;
-  --revo-grid-cell-border: #e2e3e3;
-  --revo-grid-focused-bg: rgba(233, 234, 237, 0.5);
-  --revo-grid-row-hover: #f1f1f1;
-  --revo-grid-row-headers-bg: #f7faff;
-  --revo-grid-row-headers-color: #757a82;
-  --revo-grid-cell-disabled-bg: rgba(0, 0, 0, 0.07);
-
-  /* New internal variables consume the legacy public values. */
+  /* Internal defaults preserve inherited legacy public values. */
   --rg-theme-primary: var(--revo-grid-primary, #266ae8);
   --rg-theme-primary-transparent: var(
     --revo-grid-primary-transparent,
