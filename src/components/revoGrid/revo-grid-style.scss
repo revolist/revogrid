@@ -6,6 +6,26 @@
 @use './styles/revo-grid.rtl.scss' as *;
 @use '../../global/_icons.scss' as *;
 
+/* Built-in Material and Compact themes historically inherited their surfaces. */
+revo-grid:is(
+  [theme='compact'],
+  [theme='darkCompact'],
+  [theme='material'],
+  [theme='darkMaterial']
+) {
+  background-color: transparent;
+
+  revogr-header,
+  .rowHeaders {
+    background-color: transparent;
+    color: inherit;
+  }
+
+  .rowHeaders revogr-data .rgCell {
+    color: inherit;
+  }
+}
+
 revo-grid {
   /* Internal defaults preserve inherited legacy public values. */
   --rg-theme-primary: var(--revo-grid-primary, #266ae8);

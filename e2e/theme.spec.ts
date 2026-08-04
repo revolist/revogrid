@@ -457,30 +457,39 @@ test('keeps built-in layout metadata and dimensions compatible', async ({
   }
 });
 
-test('keeps the built-in compact theme surfaces transparent', async ({
-  page,
-}) => {
-  await mountGrid(page, {
-    columns,
-    source: [{ id: 1, name: 'Ada' }],
-    rowHeaders: true,
-    theme: 'compact',
-  });
+for (const theme of [
+  'compact',
+  'darkCompact',
+  'material',
+  'darkMaterial',
+] as const) {
+  test(`keeps the built-in ${theme} theme surfaces and colors inherited`, async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns,
+      source: [{ id: 1, name: 'Ada' }],
+      rowHeaders: true,
+      theme,
+    });
 
-  const transparent = 'rgba(0, 0, 0, 0)';
-  await expect(page.locator(SELECTORS.grid)).toHaveCSS(
-    'background-color',
-    transparent,
-  );
-  await expect(page.locator('revogr-header').first()).toHaveCSS(
-    'background-color',
-    transparent,
-  );
-  await expect(page.locator(`${SELECTORS.grid} .rowHeaders`)).toHaveCSS(
-    'background-color',
-    transparent,
-  );
-});
+    const grid = page.locator(SELECTORS.grid);
+    const header = page.locator('revogr-header').first();
+    const rowHeaders = page.locator(`${SELECTORS.grid} .rowHeaders`);
+    const rowHeaderCell = rowHeaders.locator('.rgCell').first();
+    const transparent = 'rgba(0, 0, 0, 0)';
+    const inheritedColor = await grid.evaluate(
+      element => getComputedStyle(element).color,
+    );
+
+    await expect(grid).toHaveCSS('background-color', transparent);
+    await expect(header).toHaveCSS('background-color', transparent);
+    await expect(rowHeaders).toHaveCSS('background-color', transparent);
+    await expect(header).toHaveCSS('color', inheritedColor);
+    await expect(rowHeaders).toHaveCSS('color', inheritedColor);
+    await expect(rowHeaderCell).toHaveCSS('color', inheritedColor);
+  });
+}
 
 test('switches between the modern presets with complete visual metadata', async ({
   page,
