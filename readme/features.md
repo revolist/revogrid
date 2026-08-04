@@ -11,7 +11,7 @@
   - Seamless copy/paste from Excel, Google Sheets, or any other sheet format.
 
 
-- **Lightweight**: Minimal initial bundle size ![Min size](https://badgen.net/bundlephobia/min/@revolist/revogrid@latest). Can be imported with polyfills or as a module for modern browsers.
+- **Lightweight**: Minimal initial bundle size. Can be imported with polyfills or as a module for modern browsers.
 
 - **[Intelligent Virtual DOM](https://rv-grid.com/guide/overview#VNode-Reactive-DOM)**: Smart row recombination to minimize redraws.
 

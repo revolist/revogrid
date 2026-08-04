@@ -7,9 +7,7 @@
 <p align="center">
   <a href="https://www.npmjs.com/package/@revolist/revogrid"><img src="https://img.shields.io/npm/v/@revolist/revogrid" alt="Latest Version on NPM"/></a>
   <a href="https://github.com/revolist/revogrid/blob/master/LICENSE"><img src="https://img.shields.io/npm/l/@revolist/revogrid" alt="Software License"/></a>
-  <img src="https://badgen.net/bundlephobia/dependency-count/@revolist/revogrid" alt="Dependency count"/>
-  <img src="https://badgen.net/bundlephobia/tree-shaking/@revolist/revogrid" alt="Tree shaking"/>
-  <img src="https://img.shields.io/bundlephobia/min/@revolist/revogrid" alt="Bundle size"/>
+  <a href="https://www.npmjs.com/package/@revolist/revogrid"><img src="https://img.shields.io/npm/dm/@revolist/revogrid" alt="NPM downloads per month"/></a>
   <img src="https://sonarcloud.io/api/project_badges/measure?project=revolist_revogrid&metric=alert_status" alt="Sonar Quality Gate"/>
   <a href="https://github.com/revolist/revogrid/actions/workflows/unit.yml">
         <img src="https://github.com/revolist/revogrid/actions/workflows/unit.yml/badge.svg" alt="Workflow status badge" loading="lazy" height="20">
@@ -56,7 +54,7 @@ Used by some of the largest companies in Europe and the United States.
   - Seamless copy/paste from Excel, Google Sheets, or any other sheet format.
 
 
-- **Lightweight**: Minimal initial bundle size ![Min size](https://badgen.net/bundlephobia/min/@revolist/revogrid@latest). Can be imported with polyfills or as a module for modern browsers.
+- **Lightweight**: Minimal initial bundle size. Can be imported with polyfills or as a module for modern browsers.
 
 - **[Intelligent Virtual DOM](https://rv-grid.com/guide/overview#VNode-Reactive-DOM)**: Smart row recombination to minimize redraws.
 
