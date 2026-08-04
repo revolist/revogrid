@@ -33,6 +33,21 @@ describe('ThemeService', () => {
     expect(getTheme('brand')).toBe('brand');
   });
 
+  it.each(['dark', 'brand-dark', 'mydarkTheme'])(
+    'preserves the legacy dark color scheme for CSS-only theme %s',
+    name => {
+      const service = new ThemeService({ rowSize: 0 });
+
+      expect(service.register(name)).toMatchObject({
+        name,
+        base: 'default',
+        colorScheme: 'dark',
+        defaultRowSize: 27,
+        custom: true,
+      });
+    },
+  );
+
   it('normalizes blank names to default and trims valid names', () => {
     expect(getTheme('  ')).toBe('default');
     expect(getTheme('  brand  ')).toBe('brand');
@@ -87,6 +102,23 @@ describe('ThemeService', () => {
       custom: true,
     });
     expect(service.rowSize).toBe(30);
+  });
+
+  it('lets registered definitions override legacy dark-name inference', () => {
+    const service = new ThemeService({ rowSize: 0 });
+    service.setDefinitions([
+      defineTheme({
+        name: 'darkBrand',
+        extends: 'material',
+        colorScheme: 'light',
+      }),
+    ]);
+
+    expect(service.register('darkBrand')).toMatchObject({
+      base: 'material',
+      colorScheme: 'light',
+      custom: true,
+    });
   });
 
   it('inherits custom definitions recursively and merges child overrides', () => {

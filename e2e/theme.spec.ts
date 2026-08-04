@@ -24,7 +24,47 @@ const columns = buildColumns([
 ]);
 
 test.describe('custom themes', () => {
-  test('keeps an arbitrary CSS-only theme reflected and inheritable', async ({
+  test('keeps the legacy CSS-only dark theme palette', async ({ page }) => {
+    await mountGrid(page, {
+      columns,
+      source: [{ id: 1, name: 'Ada' }],
+      theme: 'dark',
+    });
+
+    const grid = page.locator(SELECTORS.grid);
+    await expect(grid).toHaveAttribute('theme', 'dark');
+    await expect(grid).toHaveAttribute('data-rg-theme-base', 'default');
+    await expect(grid).toHaveAttribute('data-rg-theme-scheme', 'dark');
+    await expect(grid).toHaveCSS('background-color', 'rgb(33, 37, 41)');
+    await expect(dataCell(page, 0, 0)).toHaveCSS(
+      'color',
+      'rgba(255, 255, 255, 0.9)',
+    );
+    await expect
+      .poll(() =>
+        grid.evaluate(element => {
+          const style = getComputedStyle(element);
+          return {
+            background: style
+              .getPropertyValue('--revo-grid-background')
+              .trim(),
+            border: style.getPropertyValue('--revo-grid-border').trim(),
+            cellBorder: style
+              .getPropertyValue('--revo-grid-cell-border')
+              .trim(),
+            focused: style.getPropertyValue('--revo-grid-focused-bg').trim(),
+          };
+        }),
+      )
+      .toEqual({
+        background: '#212529',
+        border: 'rgba(255, 255, 255, 0.2)',
+        cellBorder: '#424242',
+        focused: 'rgba(52, 58, 64, 0.5)',
+      });
+  });
+
+  test('keeps an arbitrary CSS-only theme reflected and customizable', async ({
     page,
   }) => {
     await mountGrid(page, {
@@ -34,12 +74,12 @@ test.describe('custom themes', () => {
     });
     await page.addStyleTag({
       content: `
-        .brand-shell { --revo-grid-text: rgb(12, 34, 56); }
+        revo-grid.brand-shell { --revo-grid-text: rgb(12, 34, 56); }
         revo-grid[theme='brand-css'] { --revo-grid-background: rgb(240, 241, 242); }
       `,
     });
     await page.locator(SELECTORS.grid).evaluate(grid => {
-      grid.parentElement?.classList.add('brand-shell');
+      grid.classList.add('brand-shell');
     });
 
     const grid = page.locator(SELECTORS.grid);

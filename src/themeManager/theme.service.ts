@@ -79,6 +79,12 @@ function getColorScheme(
   return scheme === 'light' || scheme === 'dark' ? scheme : fallback;
 }
 
+function getCssOnlyThemeColorScheme(theme: string): ThemeColorScheme {
+  // Before resolved theme metadata existed, the dark defaults were selected by
+  // the case-sensitive CSS selector `[theme*='dark']`.
+  return theme.includes('dark') ? 'dark' : 'light';
+}
+
 function getThemeTokens(tokens: unknown): ThemeTokens {
   if (!tokens || typeof tokens !== 'object') {
     return {};
@@ -151,6 +157,7 @@ export default class ThemeService {
       this.currentTheme = {
         ...builtInThemes.default,
         name,
+        colorScheme: getCssOnlyThemeColorScheme(name),
         tokens: {},
         custom: true,
       };

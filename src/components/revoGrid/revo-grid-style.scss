@@ -7,7 +7,33 @@
 @use '../../global/_icons.scss' as *;
 
 revo-grid {
-  /* Internal fallbacks keep public --revo-grid-* variables inheritable. */
+  /* Legacy public theme variables remain the stable integration contract. */
+  --revo-grid-primary: #266ae8;
+  --revo-grid-primary-transparent: rgba(38, 106, 232, 0.9);
+  --revo-grid-background: #fff;
+  --revo-grid-foreground: black;
+  --revo-grid-divider: gray;
+  --revo-grid-shadow: rgba(0, 0, 0, 0.15);
+  --revo-grid-text: black;
+  --revo-grid-border: rgba(0, 0, 0, 0.2);
+  --revo-grid-filter-panel-bg: #fff;
+  --revo-grid-filter-panel-border: #d9d9d9;
+  --revo-grid-filter-panel-shadow: rgba(0, 0, 0, 0.15);
+  --revo-grid-filter-panel-input-bg: #eaeaeb;
+  --revo-grid-filter-panel-divider: #d9d9d9;
+  --revo-grid-filter-panel-select-border: transparent;
+  --revo-grid-filter-panel-select-border-hover: transparent;
+  --revo-grid-header-bg: #f8f9fa;
+  --revo-grid-header-color: #000;
+  --revo-grid-header-border: #cecece;
+  --revo-grid-cell-border: #e2e3e3;
+  --revo-grid-focused-bg: rgba(233, 234, 237, 0.5);
+  --revo-grid-row-hover: #f1f1f1;
+  --revo-grid-row-headers-bg: #f7faff;
+  --revo-grid-row-headers-color: #757a82;
+  --revo-grid-cell-disabled-bg: rgba(0, 0, 0, 0.07);
+
+  /* New internal variables consume the legacy public values. */
   --rg-theme-primary: var(--revo-grid-primary, #266ae8);
   --rg-theme-primary-transparent: var(
     --revo-grid-primary-transparent,
@@ -153,38 +179,28 @@ revo-grid {
 
   &[data-rg-theme-scheme='dark'] {
     color-scheme: dark;
-    --rg-theme-background: var(--revo-grid-background, #212529);
-    --rg-theme-foreground: var(--revo-grid-foreground, #fff);
-    --rg-theme-text: var(--revo-grid-text, rgba(255, 255, 255, 0.9));
-    --rg-theme-divider: var(--revo-grid-divider, #505050);
-    --rg-theme-border: var(--revo-grid-border, rgba(255, 255, 255, 0.2));
-    --rg-theme-filter-panel-bg: var(--revo-grid-filter-panel-bg, #212529);
-    --rg-theme-filter-panel-border: var(
-      --revo-grid-filter-panel-border,
-      #505050
-    );
-    --rg-theme-filter-panel-input-bg: var(
-      --revo-grid-filter-panel-input-bg,
-      #343a40
-    );
-    --rg-theme-filter-panel-divider: var(
-      --revo-grid-filter-panel-divider,
-      #505050
-    );
+    --revo-grid-background: #212529;
+    --revo-grid-foreground: #fff;
+    --revo-grid-text: rgba(255, 255, 255, 0.9);
+    --revo-grid-divider: #505050;
+    --revo-grid-border: rgba(255, 255, 255, 0.2);
+    --revo-grid-filter-panel-bg: #212529;
+    --revo-grid-filter-panel-border: #505050;
+    --revo-grid-filter-panel-input-bg: #343a40;
+    --revo-grid-filter-panel-divider: #505050;
     --rg-theme-filter-panel-icon-active: var(
       --revo-grid-filter-panel-icon-active,
       #fff
     );
-    --rg-theme-header-bg: var(--revo-grid-header-bg, #343a40);
-    --rg-theme-header-color: var(--revo-grid-header-color, #fff);
-    --rg-theme-header-border: var(--revo-grid-header-border, #505050);
-    --rg-theme-cell-border: var(--revo-grid-cell-border, #424242);
-    --rg-theme-focused-bg: var(--revo-grid-focused-bg, rgba(52, 58, 64, 0.5));
-    --rg-theme-row-hover: var(--revo-grid-row-hover, rgba(80, 80, 80, 0.5));
-    --rg-theme-cell-disabled-bg: var(
-      --revo-grid-cell-disabled-bg,
-      rgba(255, 255, 255, 0.07)
-    );
+    --revo-grid-header-bg: #343a40;
+    --revo-grid-header-color: #fff;
+    --revo-grid-header-border: #505050;
+    --revo-grid-cell-border: #424242;
+    --revo-grid-focused-bg: rgba(52, 58, 64, 0.5);
+    --revo-grid-row-hover: rgba(80, 80, 80, 0.5);
+    --revo-grid-row-headers-bg: rgba(52, 58, 64, 0.8);
+    --revo-grid-row-headers-color: rgba(255, 255, 255, 0.8);
+    --revo-grid-cell-disabled-bg: rgba(255, 255, 255, 0.07);
     --rg-theme-button-outline-border: var(
       --revo-grid-button-outline-border,
       #404040
