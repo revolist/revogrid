@@ -32,12 +32,14 @@ export const filterCoreFunctionsIndexedByType: Record<FilterType, LogicFunction>
 export const filterTypes: Record<string, FilterType[]> = {
   string: ['notEmpty', 'empty', 'eq', 'notEq', 'begins', 'contains', 'notContains'],
   number: ['notEmpty', 'empty', 'eqN', 'neqN', 'gt', 'gte', 'lt', 'lte'],
+  boolean: ['notEmpty', 'empty'],
+  array: ['notEmpty', 'empty'],
 };
 
 export const filterNames = {
   none: 'None',
-  empty: 'Not set',
-  notEmpty: 'Set',
+  empty: 'Is blank',
+  notEmpty: 'Is not blank',
 
   eq: 'Equal',
   notEq: 'Not equal',

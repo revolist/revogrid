@@ -74,6 +74,40 @@ Used by some of the largest companies in Europe and the United States.
   - Header filtering.
   - Custom filters to extend system filters with your own set.
 
+  Blank filters preserve source-value identity and own-property presence. By default,
+  `null`, owned `undefined`, exactly `""`, and missing own properties are blank;
+  whitespace-only strings, `false`, `0`, `NaN`, arrays, and objects are not. The
+  policy can be configured at grid level and overridden field-by-field per column
+  with `blankSemantics`. Existing saved `empty` and `notEmpty` operator IDs remain
+  compatible and are labeled “Is blank” and “Is not blank.”
+
+  ```ts
+  const filter = {
+    blankSemantics: {
+      whitespaceOnlyString: true,
+      emptyArray: true,
+      isBlank(value, context, fallbackResult) {
+        return value === 'N/A' || fallbackResult;
+      },
+    },
+  };
+
+  const columns = [{
+    prop: 'tags',
+    filter: 'array',
+    // Partial column policy; other fields inherit the grid policy.
+    blankSemantics: { emptyArray: false },
+  }];
+  ```
+
+  An inherited property counts as missing. A `cellParser` supplies the value for
+  ordinary comparisons but does not replace the raw value used for blank checks.
+  The callback receives the source value, row model, column, property, parsed
+  value, own-property status, effective policy, and fallback result. “Is not
+  blank” is the exact inverse of the resolved blank predicate. Typed operators
+  remain strict; blank configuration never normalizes `false`, `0`, or arrays
+  into another source value.
+
 - **[Export](https://rv-grid.com/guide/export.plugin)**:
   - **[CSV](https://rv-grid.com/guide/export.plugin)**: Built-in file export for core RevoGrid data workflows.
   - **[PDF](https://rv-grid.com/guide/pdf-export)**: Browser-side PDF export with the lightweight [`@revolist/revogrid-pdf-export`](https://www.npmjs.com/package/@revolist/revogrid-pdf-export) plugin.

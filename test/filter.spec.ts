@@ -8,14 +8,19 @@ import { FilterPlugin } from '../src/plugins/filter/filter.plugin';
 import { getFilterReorderId, moveFilterItem } from '../src/plugins/filter/filter.reorder';
 import { DataStore } from '../src/store/dataSource/data.store';
 import type { ColumnRegular } from '../src';
-import type { FilterData } from '../src/plugins/filter/filter.types';
+import { filterNames, filterTypes } from '../src/plugins/filter/filter.indexed';
+import type {
+  ColumnFilterConfig,
+  FilterData,
+  FilterEvaluationContext,
+} from '../src/plugins/filter/filter.types';
 
-function createFilterPlugin() {
+function createFilterPlugin(config: ColumnFilterConfig = {}) {
   const revogrid = Object.assign(new EventTarget(), {
     registerVNode: [],
   }) as unknown as HTMLRevoGridElement;
 
-  return new FilterPlugin(revogrid, {} as any);
+  return new FilterPlugin(revogrid, {} as any, config);
 }
 
 // ---------------------------------------------------------------------------
@@ -179,6 +184,165 @@ describe('set (is set)', () => {
     expect(set('')).toBe(false);
     expect(set(null)).toBe(false);
     expect(set(undefined)).toBe(false);
+  });
+});
+
+describe('configurable blank semantics', () => {
+  const column = { prop: 'value', filter: 'string' } as ColumnRegular;
+  const columnsByProp = { value: column };
+
+  function blankTrimmed(
+    rows: Record<string, any>[],
+    type: 'empty' | 'notEmpty' = 'empty',
+    config: ColumnFilterConfig = {},
+    targetColumn: ColumnRegular = column,
+  ) {
+    return createFilterPlugin(config).getRowFilter(
+      rows,
+      { value: [{ id: 1, type, relation: 'and' }] },
+      { value: targetColumn },
+    );
+  }
+
+  it('applies the default source-value matrix without normalizing identities', () => {
+    const rows = [
+      { value: null },
+      { value: undefined },
+      { value: '' },
+      { value: '   ' },
+      { value: false },
+      { value: 0 },
+      { value: Number.NaN },
+      { value: [] },
+      { value: ['item'] },
+      { value: {} },
+      {},
+    ];
+
+    expect(blankTrimmed(rows)).toEqual({
+      3: true,
+      4: true,
+      5: true,
+      6: true,
+      7: true,
+      8: true,
+      9: true,
+    });
+    expect(blankTrimmed(rows, 'notEmpty')).toEqual({
+      0: true,
+      1: true,
+      2: true,
+      10: true,
+    });
+  });
+
+  it('merges a partial column policy field-by-field over the grid policy', () => {
+    const configuredColumn = {
+      ...column,
+      blankSemantics: { emptyArray: false, whitespaceOnlyString: true },
+    } as ColumnRegular;
+    const rows = [{ value: [] }, { value: '  ' }, { value: null }];
+
+    expect(blankTrimmed(
+      rows,
+      'empty',
+      { blankSemantics: { emptyArray: true, null: false } },
+      configuredColumn,
+    )).toEqual({ 0: true, 2: true });
+  });
+
+  it('uses the final predicate override and keeps not-blank as its exact inverse', () => {
+    const seen: [any, boolean][] = [];
+    const config: ColumnFilterConfig = {
+      blankSemantics: {
+        isBlank: (value, _context, fallback) => {
+          seen.push([value, fallback]);
+          return value === 0 ? true : fallback;
+        },
+      },
+    };
+    const rows = [{ value: 0 }, { value: false }, { value: null }];
+
+    expect(blankTrimmed(rows, 'empty', config)).toEqual({ 1: true });
+    expect(blankTrimmed(rows, 'notEmpty', config)).toEqual({ 0: true, 2: true });
+    expect(seen).toContainEqual([0, false]);
+  });
+
+  it('treats inherited properties as missing instead of as present values', () => {
+    const inherited = Object.create({ value: 'inherited' });
+    const config = { blankSemantics: { missingProperty: false } };
+
+    expect(blankTrimmed([inherited])).toEqual({});
+    expect(blankTrimmed([inherited], 'empty', config)).toEqual({ 0: true });
+  });
+
+  it('preserves the source value before cellParser while ordinary filters use the parsed value', () => {
+    const contexts: FilterEvaluationContext[] = [];
+    const parsedColumn = {
+      prop: 'value',
+      filter: 'string',
+      cellParser: () => 'parsed',
+    } as ColumnRegular;
+    const plugin = createFilterPlugin({
+      customFilters: {
+        capturesContext: {
+          columnFilterType: 'string',
+          name: 'Captures context',
+          func: (value, _extra, context) => {
+            contexts.push(context!);
+            return value === 'parsed';
+          },
+        },
+      },
+    });
+    const rows = [{ value: false }];
+
+    expect(plugin.getRowFilter(
+      rows,
+      { value: [{ id: 1, type: 'empty', relation: 'and' }] },
+      { value: parsedColumn },
+    )).toEqual({ 0: true });
+    expect(plugin.getRowFilter(
+      rows,
+      { value: [{ id: 1, type: 'capturesContext', relation: 'and' }] },
+      { value: parsedColumn },
+    )).toEqual({});
+    expect(contexts[0]).toMatchObject({
+      model: rows[0],
+      column: parsedColumn,
+      property: 'value',
+      sourceValue: false,
+      parsedValue: 'parsed',
+      hasOwnProperty: true,
+    });
+  });
+
+  it('delivers evaluation context to built-in blank callbacks', () => {
+    let context: FilterEvaluationContext | undefined;
+    blankTrimmed([{ value: null }], 'empty', {
+      blankSemantics: {
+        isBlank: (_value, evaluationContext, fallback) => {
+          context = evaluationContext;
+          return fallback;
+        },
+      },
+    });
+
+    expect(context).toMatchObject({
+      property: 'value',
+      sourceValue: null,
+      parsedValue: null,
+      hasOwnProperty: true,
+    });
+  });
+
+  it('keeps saved operator IDs and registers blank filters for typed families', () => {
+    expect(filterNames.empty).toBe('Is blank');
+    expect(filterNames.notEmpty).toBe('Is not blank');
+    expect(filterTypes.boolean).toEqual(['notEmpty', 'empty']);
+    expect(filterTypes.array).toEqual(['notEmpty', 'empty']);
+    expect(blankTrimmed([{ value: null }], 'empty')).toEqual({});
+    expect(blankTrimmed([{ value: null }], 'notEmpty')).toEqual({ 0: true });
   });
 });
 

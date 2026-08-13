@@ -24,11 +24,13 @@ import type {
   ShowData,
 } from './filter.types';
 
-import { getCellDataParsed, timeout } from '../../utils';
+import { timeout } from '../../utils';
 import { TrimmedEntity } from '@store';
+import { resolveBlankSemantics } from './filter.blank';
 
 export * from './filter.types';
 export * from './filter.indexed';
+export * from './filter.blank';
 export * from './filter.button';
 
 export const FILTER_TRIMMED_TYPE = 'filter';
@@ -181,6 +183,7 @@ export class FilterPlugin extends BasePlugin {
   }
 
   initConfig(config: ColumnFilterConfig) {
+    this.config = config;
     this.allowDuplicateOperators = config.allowDuplicateOperators ?? true;
     if (this.pop) {
       this.pop.allowDuplicateOperators = this.allowDuplicateOperators;
@@ -496,13 +499,29 @@ export class FilterPlugin extends BasePlugin {
 
       // THE MAGIC OF FILTERING IS HERE
       // If there is no column but user wants to filter by a property
-      const value = column ? getCellDataParsed(model, column) : model[prop];
+      const hasOwnProperty = Object.prototype.hasOwnProperty.call(model, prop);
+      const sourceValue = model[prop];
+      const parsedValue = column?.cellParser
+        ? column.cellParser(model, column)
+        : sourceValue;
+      const context = {
+        model,
+        column,
+        property: prop,
+        sourceValue,
+        parsedValue,
+        hasOwnProperty,
+        blankSemantics: resolveBlankSemantics(
+          this.config?.blankSemantics,
+          column?.blankSemantics,
+        ),
+      };
       // OR relation
       if (filterData.relation === 'or') {
         // reset the array of last filter results
         lastFilterResults = [];
         // if the filter is satisfied, continue to the next filter
-        if (filterFunc(value, filterData.value)) {
+        if (filterFunc(parsedValue, filterData.value, context)) {
           continue;
         }
         // if the filter is not satisfied, count it
@@ -512,7 +531,7 @@ export class FilterPlugin extends BasePlugin {
       } else {
         // 'and' relation will need to know the next filter
         // so we save this current filter to include it in the next filter
-        lastFilterResults.push(!filterFunc(value, filterData.value));
+        lastFilterResults.push(!filterFunc(parsedValue, filterData.value, context));
 
         if (isFinalAndFilter(filterIndex, propFilters)) {
           // let's just continue since for sure propFilterSatisfiedCount cannot be satisfied
