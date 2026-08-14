@@ -16,6 +16,7 @@ import {
 } from './filter.indexed';
 
 import type {
+  BlankSemantics,
   ColumnFilterConfig,
   FilterCollectionItem,
   FilterData,
@@ -458,6 +459,13 @@ export class FilterPlugin extends BasePlugin {
     columnByProp: Record<string, ColumnRegular>,
   ): TrimmedEntity {
     const propKeys = Object.keys(filterItems);
+    const blankSemanticsByProp: Record<string, BlankSemantics> = {};
+    for (const prop of propKeys) {
+      blankSemanticsByProp[prop] = resolveBlankSemantics(
+        this.config?.blankSemantics,
+        columnByProp[prop]?.blankSemantics,
+      );
+    }
 
     const trimmed: TrimmedEntity = {};
 
@@ -470,6 +478,7 @@ export class FilterPlugin extends BasePlugin {
           this.shouldTrimRow(
             filterItems[prop],
             prop,
+            blankSemanticsByProp[prop],
             columnByProp[prop],
             rows[rowIndex],
           )
@@ -484,6 +493,7 @@ export class FilterPlugin extends BasePlugin {
   private shouldTrimRow(
     propFilters: FilterData[],
     prop: ColumnProp,
+    blankSemantics: BlankSemantics,
     column?: ColumnRegular,
     model: DataType = {},
   ) {
@@ -492,30 +502,27 @@ export class FilterPlugin extends BasePlugin {
     // reset the array of last filter results
     let lastFilterResults: boolean[] = [];
 
+    // THE MAGIC OF FILTERING IS HERE
+    // If there is no column but user wants to filter by a property
+    const hasOwnProperty = Object.hasOwn(model, prop);
+    const sourceValue = model[prop];
+    const parsedValue = column?.cellParser
+      ? column.cellParser(model, column)
+      : sourceValue;
+    const context = {
+      model,
+      column,
+      property: prop,
+      sourceValue,
+      parsedValue,
+      hasOwnProperty,
+      blankSemantics,
+    };
+
     // testing each filter for a prop
     for (const [filterIndex, filterData] of propFilters.entries()) {
       // the filter LogicFunction based on the type
       const filterFunc = this.filterFunctionsIndexedByType[filterData.type];
-
-      // THE MAGIC OF FILTERING IS HERE
-      // If there is no column but user wants to filter by a property
-      const hasOwnProperty = Object.prototype.hasOwnProperty.call(model, prop);
-      const sourceValue = model[prop];
-      const parsedValue = column?.cellParser
-        ? column.cellParser(model, column)
-        : sourceValue;
-      const context = {
-        model,
-        column,
-        property: prop,
-        sourceValue,
-        parsedValue,
-        hasOwnProperty,
-        blankSemantics: resolveBlankSemantics(
-          this.config?.blankSemantics,
-          column?.blankSemantics,
-        ),
-      };
       // OR relation
       if (filterData.relation === 'or') {
         // reset the array of last filter results

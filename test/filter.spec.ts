@@ -554,6 +554,40 @@ describe('FilterPlugin.getRowFilter', () => {
     });
   });
 
+  it('resolves each column and parses each row once for multiple filters', () => {
+    const rows = [
+      { name: 'Alice', role: 'Senior Admin' },
+      { name: 'Ben', role: 'Senior Engineer' },
+    ];
+    const cellParser = jest.fn((model: Record<string, string>) => model.role);
+    const getBlankSemantics = jest.fn(() => ({ whitespaceOnlyString: true }));
+    const column = {
+      ...roleColumn,
+      cellParser,
+      get blankSemantics() {
+        return getBlankSemantics();
+      },
+    } as ColumnRegular;
+
+    const trimmed = createFilterPlugin().getRowFilter(
+      rows,
+      {
+        role: [
+          containsRole('Senior'),
+          containsRole('Admin', 'and', 1),
+        ],
+      },
+      { role: column },
+    );
+
+    expect(trimmed).toEqual({ 1: true });
+    expect(getBlankSemantics).toHaveBeenCalledTimes(1);
+    expect(cellParser.mock.calls).toEqual([
+      [rows[0], column],
+      [rows[1], column],
+    ]);
+  });
+
   it('applies filter trim maps to the visible row indexes', () => {
     const store = new DataStore('rgRow');
     store.updateData([
