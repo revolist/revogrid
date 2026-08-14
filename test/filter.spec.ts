@@ -317,6 +317,30 @@ describe('configurable blank semantics', () => {
     });
   });
 
+  it('keeps nullish and missing source identity when a parser returns a nonblank value', () => {
+    const seen: Array<{ value: any; hasOwnProperty: boolean }> = [];
+    const parsedColumn = {
+      prop: 'value',
+      filter: 'string',
+      cellParser: () => 'parsed',
+    } as ColumnRegular;
+    const rows = [{ value: null }, { value: undefined }, {}];
+
+    expect(blankTrimmed(rows, 'empty', {
+      blankSemantics: {
+        isBlank: (value, context, fallback) => {
+          seen.push({ value, hasOwnProperty: context.hasOwnProperty });
+          return fallback;
+        },
+      },
+    }, parsedColumn)).toEqual({});
+    expect(seen).toEqual([
+      { value: null, hasOwnProperty: true },
+      { value: undefined, hasOwnProperty: true },
+      { value: undefined, hasOwnProperty: false },
+    ]);
+  });
+
   it('delivers evaluation context to built-in blank callbacks', () => {
     let context: FilterEvaluationContext | undefined;
     blankTrimmed([{ value: null }], 'empty', {

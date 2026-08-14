@@ -20,7 +20,7 @@ function blankContext(
 }
 
 export const notSet: LogicFunction = (value, _extra, context) =>
-  isBlankValue(context?.sourceValue ?? value, blankContext(value, context));
+  isBlankValue(context ? context.sourceValue : value, blankContext(value, context));
 
 const set: LogicFunction = (value, _extra, context) =>
   !notSet(value, _extra, context);
