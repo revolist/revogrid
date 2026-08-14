@@ -9,6 +9,11 @@ import {
   oceanTheme,
 } from '../src/themeManager/presets';
 import { defineTheme, themeTokenCssVariables } from '../src/types/theme';
+import { BasePlugin } from '../src/plugins/base.plugin';
+
+class ParentThemePlugin extends BasePlugin {}
+class SharedThemePlugin extends BasePlugin {}
+class ChildThemePlugin extends BasePlugin {}
 
 function relativeLuminance(hex: string): number {
   const channels = hex
@@ -81,6 +86,7 @@ describe('ThemeService', () => {
         extends: 'material',
         defaultRowSize: 36,
         tokens: { primary: 'red' },
+        plugins: [ParentThemePlugin],
       }),
       defineTheme({
         name: 'brand',
@@ -88,6 +94,7 @@ describe('ThemeService', () => {
         colorScheme: 'light',
         defaultRowSize: 30,
         tokens: { primary: 'blue', headerBg: '#eee' },
+        plugins: [ChildThemePlugin],
       }),
     ]);
 
@@ -96,6 +103,7 @@ describe('ThemeService', () => {
       colorScheme: 'light',
       defaultRowSize: 30,
       tokens: { primary: 'blue', headerBg: '#eee' },
+      plugins: [ChildThemePlugin],
       custom: true,
     });
     expect(service.rowSize).toBe(30);
@@ -150,8 +158,47 @@ describe('ThemeService', () => {
         text: '#eee',
         headerBg: '#fff',
       },
+      plugins: [],
       custom: true,
     });
+  });
+
+  it('inherits valid plugins additively and deduplicates constructors', () => {
+    const service = new ThemeService({ rowSize: 0 });
+    service.setDefinitions([
+      defineTheme({
+        name: 'childPlugins',
+        extends: 'parentPlugins',
+        plugins: [SharedThemePlugin, ChildThemePlugin, SharedThemePlugin],
+      }),
+      defineTheme({
+        name: 'parentPlugins',
+        extends: 'material',
+        plugins: [ParentThemePlugin, SharedThemePlugin],
+      }),
+    ]);
+
+    expect(service.register('childPlugins').plugins).toEqual([
+      ParentThemePlugin,
+      SharedThemePlugin,
+      ChildThemePlugin,
+    ]);
+  });
+
+  it('ignores invalid plugin entries and keeps only the affected child on an invalid chain', () => {
+    const service = new ThemeService({ rowSize: 0 });
+    service.setDefinitions([
+      {
+        name: 'invalidPlugins',
+        extends: 'missingParent',
+        plugins: [null, 'invalid', () => undefined, ChildThemePlugin],
+      } as never,
+    ]);
+
+    expect(service.register('invalidPlugins').plugins).toEqual([
+      ChildThemePlugin,
+    ]);
+    expect(service.register('default').plugins).toEqual([]);
   });
 
   it('allows a custom definition to extend a registered curated preset', () => {
@@ -183,16 +230,19 @@ describe('ThemeService', () => {
         colorScheme: 'dark',
         defaultRowSize: 29,
         tokens: { primary: 'purple' },
+        plugins: [ParentThemePlugin],
       }),
       defineTheme({
         name: 'cycleA',
         extends: 'cycleB',
         tokens: { primary: 'red' },
+        plugins: [SharedThemePlugin],
       }),
       defineTheme({
         name: 'cycleB',
         extends: 'cycleA',
         tokens: { background: 'black' },
+        plugins: [ChildThemePlugin],
       }),
     ]);
 
@@ -200,14 +250,17 @@ describe('ThemeService', () => {
       colorScheme: 'dark',
       defaultRowSize: 29,
       tokens: { primary: 'purple' },
+      plugins: [ParentThemePlugin],
     });
     expect(service.register('cycleA')).toMatchObject({
       colorScheme: 'light',
       defaultRowSize: 27,
       tokens: { primary: 'red' },
+      plugins: [SharedThemePlugin],
     });
     expect(service.register('cycleB')).toMatchObject({
       tokens: { background: 'black' },
+      plugins: [ChildThemePlugin],
     });
   });
 
@@ -218,11 +271,13 @@ describe('ThemeService', () => {
         name: 'material',
         extends: 'compact',
         defaultRowSize: 10,
+        plugins: [ParentThemePlugin],
       },
     ]);
 
     expect(service.register('material')).toMatchObject({
       defaultRowSize: 42,
+      plugins: [],
       custom: false,
     });
     expect(service.register('css-only')).toMatchObject({
@@ -254,6 +309,7 @@ describe('ThemeService', () => {
       colorScheme: 'light',
       defaultRowSize: 27,
       tokens: { headerBg: '#eee' },
+      plugins: [],
       custom: true,
     });
   });

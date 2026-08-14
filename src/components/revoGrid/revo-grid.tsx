@@ -1364,6 +1364,10 @@ export class RevoGridComponent {
     this.appliedThemeRowSize = rowSize;
     this.themeStyles = this.getThemeStyles();
 
+    if (reason !== 'rowSize') {
+      this.syncConfiguredPlugins();
+    }
+
     if (densityChanged) {
       this.dimensionProvider?.setSettings({ originItemSize: rowSize }, 'rgRow');
       if (!init && hadAppliedTheme) {
@@ -1573,8 +1577,8 @@ export class RevoGridComponent {
   /**
    * User can add plugins via plugins property
    */
-  @Watch('plugins') pluginsChanged(plugins: GridPlugin[] = [], prevPlugins?: GridPlugin[]) {
-    this.pluginService.addUserPluginsAndCreate(this.element, plugins, prevPlugins, this.getPluginData());
+  @Watch('plugins') pluginsChanged() {
+    this.syncConfiguredPlugins();
   }
   // #endregion
 
@@ -1590,10 +1594,22 @@ export class RevoGridComponent {
 
     // register system plugins
     this.setCorePlugins(pluginData);
-    // register user plugins
-    this.pluginsChanged(this.plugins);
+    // register grid-level and active theme plugins
+    this.syncConfiguredPlugins();
   }
-  
+
+  private syncConfiguredPlugins() {
+    const plugins = [
+      ...(Array.isArray(this.plugins) ? this.plugins : []),
+      ...(this.themeService?.theme.plugins || []),
+    ];
+    this.pluginService.syncPlugins(
+      this.element,
+      [...new Set(plugins)],
+      this.getPluginData(),
+    );
+  }
+
   private setCorePlugins(pluginData: PluginProviders) {
     if (this.accessible) {
       this.pluginService.add(new WCAGPlugin(this.element, pluginData));

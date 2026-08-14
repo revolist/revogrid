@@ -1,72 +1,79 @@
 import { PluginBaseComponent, PluginProviders, PluginServiceBase } from '@type';
-import { GridPlugin } from 'src/plugins';
+import type { GridPlugin } from 'src/plugins';
+import { isGridPlugin } from '../../plugins/plugin.utils';
+
+type PluginSource = 'persistent' | 'synchronized';
+
+interface PluginRegistration {
+  instance: PluginBaseComponent;
+  source: PluginSource;
+}
 
 /**
  * Plugin service
  * Manages plugins
  */
 export class PluginService implements PluginServiceBase {
-  /**
-   * Plugins
-   * Define plugins collection
-   */
-  internalPlugins: PluginBaseComponent[] = [];
+  plugins = new Map<GridPlugin, PluginRegistration>();
 
   /**
    * Get all plugins
    */
   get() {
-    return [...this.internalPlugins];
+    return [...this.plugins.values()].map(({ instance }) => instance);
   }
 
   /**
    * Add plugin to collection
    */
   add(plugin: PluginBaseComponent) {
-    this.internalPlugins.push(plugin);
+    this.register(plugin, 'persistent');
   }
 
   /**
-   * Add user plugins and create
+   * Synchronize the combined grid and active-theme plugin constructors.
    */
-  addUserPluginsAndCreate(
+  syncPlugins(
     element: HTMLRevoGridElement,
     plugins: GridPlugin[] = [],
-    prevPlugins?: GridPlugin[],
     pluginData?: PluginProviders,
   ) {
     if (!pluginData) {
       return;
     }
 
-    // Step 1: Identify plugins to remove, compare new and old plugins
-    const pluginsToRemove =
-      prevPlugins?.filter(
-        prevPlugin => !plugins.some(userPlugin => userPlugin === prevPlugin),
-      ) || [];
+    const requestedPlugins = new Set(plugins.filter(isGridPlugin));
 
-    // Step 2: Remove old plugins
-    pluginsToRemove.forEach(plugin => {
-      const index = this.internalPlugins.findIndex(
-        createdPlugin => createdPlugin instanceof plugin,
-      );
-      if (index !== -1) {
-        this.internalPlugins[index].destroy?.();
-        this.internalPlugins.splice(index, 1); // Remove the plugin
+    for (const [plugin, registration] of this.plugins) {
+      if (
+        registration.source === 'synchronized' &&
+        !requestedPlugins.has(plugin)
+      ) {
+        this.remove(registration.instance);
       }
-    });
+    }
 
-    // Step 3: Register user plugins
-    plugins?.forEach(userPlugin => {
-      // check if plugin already exists, if so, skip
-      const existingPlugin = this.internalPlugins.find(
-        createdPlugin => createdPlugin instanceof userPlugin,
-      );
-      if (existingPlugin) {
-        return;
+    for (const plugin of requestedPlugins) {
+      if (this.plugins.has(plugin)) {
+        continue;
       }
-      this.add(new userPlugin(element, pluginData));
-    });
+      this.register(new plugin(element, pluginData), 'synchronized');
+    }
+  }
+
+  private register(plugin: PluginBaseComponent, source: PluginSource) {
+    const pluginType = plugin.constructor as GridPlugin;
+    const existing = this.plugins.get(pluginType);
+    if (existing) {
+      if (existing.instance !== plugin) {
+        plugin.destroy?.();
+      }
+      if (source === 'persistent') {
+        existing.source = source;
+      }
+      return;
+    }
+    this.plugins.set(pluginType, { instance: plugin, source });
   }
 
   /**
@@ -75,19 +82,18 @@ export class PluginService implements PluginServiceBase {
   getByClass<T extends PluginBaseComponent>(
     pluginClass: new (...args: any[]) => T,
   ): T | undefined {
-    return this.internalPlugins.find(p => p instanceof pluginClass) as
-      | T
-      | undefined;
+    return this.get().find(p => p instanceof pluginClass) as T | undefined;
   }
 
   /**
    * Remove plugin
    */
   remove(plugin: PluginBaseComponent) {
-    const index = this.internalPlugins.indexOf(plugin);
-    if (index > -1) {
-      this.internalPlugins[index].destroy?.();
-      this.internalPlugins.splice(index, 1);
+    const pluginType = plugin.constructor as GridPlugin;
+    const registration = this.plugins.get(pluginType);
+    if (registration?.instance === plugin) {
+      registration.instance.destroy?.();
+      this.plugins.delete(pluginType);
     }
   }
 
@@ -96,7 +102,7 @@ export class PluginService implements PluginServiceBase {
    */
 
   destroy() {
-    this.internalPlugins.forEach(p => p.destroy?.());
-    this.internalPlugins = [];
+    this.plugins.forEach(({ instance }) => instance.destroy?.());
+    this.plugins.clear();
   }
 }

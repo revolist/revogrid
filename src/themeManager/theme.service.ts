@@ -7,6 +7,8 @@ import {
   type ThemeDefinition,
   type ThemeTokens,
 } from '../types/theme';
+import type { GridPlugin } from '../plugins/base.plugin';
+import { isGridPlugin } from '../plugins/plugin.utils';
 
 export const DEFAULT_THEME: BuiltInTheme = 'default';
 
@@ -27,6 +29,7 @@ const builtInThemes: Readonly<Record<BuiltInTheme, ResolvedTheme>> =
       colorScheme: 'light',
       defaultRowSize: 27,
       tokens: Object.freeze({}),
+      plugins: Object.freeze([]),
       custom: false,
     }),
     material: Object.freeze({
@@ -34,6 +37,7 @@ const builtInThemes: Readonly<Record<BuiltInTheme, ResolvedTheme>> =
       colorScheme: 'light',
       defaultRowSize: 42,
       tokens: Object.freeze({}),
+      plugins: Object.freeze([]),
       custom: false,
     }),
     compact: Object.freeze({
@@ -41,6 +45,7 @@ const builtInThemes: Readonly<Record<BuiltInTheme, ResolvedTheme>> =
       colorScheme: 'light',
       defaultRowSize: 32,
       tokens: Object.freeze({}),
+      plugins: Object.freeze([]),
       custom: false,
     }),
     darkMaterial: Object.freeze({
@@ -48,6 +53,7 @@ const builtInThemes: Readonly<Record<BuiltInTheme, ResolvedTheme>> =
       colorScheme: 'dark',
       defaultRowSize: 42,
       tokens: Object.freeze({}),
+      plugins: Object.freeze([]),
       custom: false,
     }),
     darkCompact: Object.freeze({
@@ -55,6 +61,7 @@ const builtInThemes: Readonly<Record<BuiltInTheme, ResolvedTheme>> =
       colorScheme: 'dark',
       defaultRowSize: 32,
       tokens: Object.freeze({}),
+      plugins: Object.freeze([]),
       custom: false,
     }),
   });
@@ -96,6 +103,20 @@ function getThemeTokens(tokens: unknown): ThemeTokens {
     }
   }
   return result;
+}
+
+function getThemePlugins(plugins: unknown): GridPlugin[] {
+  if (!Array.isArray(plugins)) {
+    return [];
+  }
+  return plugins.filter(isGridPlugin);
+}
+
+function mergeThemePlugins(
+  inherited: readonly GridPlugin[],
+  plugins: unknown,
+): GridPlugin[] {
+  return [...new Set([...inherited, ...getThemePlugins(plugins)])];
 }
 
 export default class ThemeService {
@@ -143,7 +164,7 @@ export default class ThemeService {
   register(theme: string): ResolvedTheme {
     const name = getTheme(theme);
     if (isBuiltInTheme(name)) {
-      this.currentTheme = { ...builtInThemes[name], tokens: {} };
+      this.currentTheme = { ...builtInThemes[name], tokens: {}, plugins: [] };
       return this.currentTheme;
     }
 
@@ -154,6 +175,7 @@ export default class ThemeService {
         name,
         colorScheme: getCssOnlyThemeColorScheme(name),
         tokens: {},
+        plugins: [],
         custom: true,
       };
       return this.currentTheme;
@@ -190,6 +212,7 @@ export default class ThemeService {
         ? builtInThemes[parentName]
         : builtInThemes.default),
       tokens: {},
+      plugins: [],
     };
     if (validChain) {
       chain.reverse();
@@ -210,6 +233,7 @@ export default class ThemeService {
           ...resolved.tokens,
           ...getThemeTokens(definition.tokens),
         },
+        plugins: mergeThemePlugins(resolved.plugins, definition.plugins),
         custom: true,
       };
     }

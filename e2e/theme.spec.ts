@@ -24,6 +24,216 @@ const columns = buildColumns([
 ]);
 
 test.describe('custom themes', () => {
+  test('owns inherited theme plugins across switching and definition updates', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns,
+      source: [{ id: 1, name: 'Ada' }],
+    });
+
+    await page.locator(SELECTORS.grid).evaluate((grid: any) => {
+      const state = {
+        created: { parent: 0, shared: 0, child: 0 },
+        destroyed: { parent: 0, shared: 0, child: 0 },
+        events: [] as Array<{ detail: string; plugins: string[] }>,
+      };
+      const createPlugin = (name: 'parent' | 'shared' | 'child') =>
+        class {
+          readonly themePluginName = name;
+          constructor() {
+            state.created[name]++;
+          }
+          destroy() {
+            state.destroyed[name]++;
+          }
+        };
+      const ParentPlugin = createPlugin('parent');
+      const SharedPlugin = createPlugin('shared');
+      const ChildPlugin = createPlugin('child');
+      const definitions = [
+        {
+          name: 'pluginParent',
+          extends: 'material',
+          plugins: [ParentPlugin, SharedPlugin],
+        },
+        {
+          name: 'pluginChild',
+          extends: 'pluginParent',
+          plugins: [SharedPlugin, ChildPlugin],
+        },
+      ];
+
+      grid.addEventListener('afterthemechanged', async (event: CustomEvent) => {
+        const plugins = await grid.getPlugins();
+        state.events.push({
+          detail: event.detail,
+          plugins: plugins
+            .map(
+              (plugin: { themePluginName?: string }) => plugin.themePluginName,
+            )
+            .filter(Boolean),
+        });
+      });
+      grid.plugins = [SharedPlugin];
+      grid.themeDefinitions = definitions;
+      grid.theme = 'pluginChild';
+      (globalThis as any).__themePluginTest = {
+        state,
+        ParentPlugin,
+        SharedPlugin,
+        definitions,
+      };
+    });
+    await page.waitForChanges();
+
+    await expect
+      .poll(() =>
+        page.evaluate(() => (globalThis as any).__themePluginTest.state),
+      )
+      .toMatchObject({
+        created: { parent: 1, shared: 1, child: 1 },
+        destroyed: { parent: 0, shared: 0, child: 0 },
+        events: expect.arrayContaining([
+          {
+            detail: 'pluginChild',
+            plugins: expect.arrayContaining(['parent', 'shared', 'child']),
+          },
+        ]),
+      });
+
+    await page.locator(SELECTORS.grid).evaluate((grid: any) => {
+      const testState = (globalThis as any).__themePluginTest;
+      grid.themeDefinitions = [
+        testState.definitions[0],
+        {
+          name: 'pluginChild',
+          extends: 'pluginParent',
+          plugins: [testState.SharedPlugin],
+        },
+      ];
+    });
+    await page.waitForChanges();
+
+    await expect
+      .poll(() =>
+        page.evaluate(() => {
+          const state = (globalThis as any).__themePluginTest.state;
+          return {
+            ...state,
+            lastEvent: state.events[state.events.length - 1],
+          };
+        }),
+      )
+      .toMatchObject({
+        created: { parent: 1, shared: 1, child: 1 },
+        destroyed: { parent: 0, shared: 0, child: 1 },
+        lastEvent: {
+          detail: 'pluginChild',
+          plugins: ['shared', 'parent'],
+        },
+      });
+
+    await page.locator(SELECTORS.grid).evaluate((grid: any) => {
+      grid.rowSize = 41;
+      grid.theme = 'default';
+    });
+    await page.waitForChanges();
+
+    await expect
+      .poll(() =>
+        page.evaluate(() => (globalThis as any).__themePluginTest.state),
+      )
+      .toMatchObject({
+        created: { parent: 1, shared: 1, child: 1 },
+        destroyed: { parent: 1, shared: 0, child: 1 },
+      });
+
+    await page.locator(SELECTORS.grid).evaluate((grid: any) => {
+      grid.plugins = [];
+    });
+    await page.waitForChanges();
+
+    await expect
+      .poll(() =>
+        page.evaluate(() => (globalThis as any).__themePluginTest.state),
+      )
+      .toMatchObject({
+        destroyed: { parent: 1, shared: 1, child: 1 },
+      });
+  });
+
+  test('isolates theme plugin instances per grid and restores them on reconnect', async ({
+    page,
+  }) => {
+    await page.setContent(`
+      <div id="first"><revo-grid></revo-grid></div>
+      <div id="second"><revo-grid></revo-grid></div>
+    `);
+    await page.waitForSelector('revo-grid');
+
+    await page.evaluate(() => {
+      const state = { created: 0, destroyed: 0 };
+      class ScopedPlugin {
+        constructor() {
+          state.created++;
+        }
+        destroy() {
+          state.destroyed++;
+        }
+      }
+      const definition = {
+        name: 'scopedPlugins',
+        extends: 'compact',
+        plugins: [ScopedPlugin],
+      };
+      for (const grid of document.querySelectorAll<any>('revo-grid')) {
+        grid.themeDefinitions = [definition];
+        grid.theme = definition.name;
+      }
+      (globalThis as any).__scopedPluginTest = state;
+    });
+    await page.waitForChanges();
+
+    await expect
+      .poll(() => page.evaluate(() => (globalThis as any).__scopedPluginTest))
+      .toEqual({ created: 2, destroyed: 0 });
+
+    await page.evaluate(() => {
+      const grids = document.querySelectorAll<any>('revo-grid');
+      grids[0].theme = 'default';
+    });
+    await page.waitForChanges();
+    await expect
+      .poll(() => page.evaluate(() => (globalThis as any).__scopedPluginTest))
+      .toEqual({ created: 2, destroyed: 1 });
+
+    await page.evaluate(() => {
+      const grid = document.querySelectorAll<any>('revo-grid')[1];
+      const parent = grid.parentElement;
+      grid.remove();
+      parent.append(grid);
+    });
+    await page.waitForChanges();
+
+    await expect
+      .poll(() => page.evaluate(() => (globalThis as any).__scopedPluginTest))
+      .toEqual({ created: 3, destroyed: 2 });
+    await expect
+      .poll(() =>
+        page
+          .locator('revo-grid')
+          .nth(1)
+          .evaluate(async (grid: any) => {
+            const plugins = await grid.getPlugins();
+            return plugins.filter(
+              (plugin: object) => plugin.constructor.name === 'ScopedPlugin',
+            ).length;
+          }),
+      )
+      .toBe(1);
+  });
+
   test('keeps the legacy CSS-only dark theme palette', async ({ page }) => {
     await mountGrid(page, {
       columns,
@@ -45,13 +255,9 @@ test.describe('custom themes', () => {
         grid.evaluate(element => {
           const style = getComputedStyle(element);
           return {
-            background: style
-              .getPropertyValue('--rg-theme-background')
-              .trim(),
+            background: style.getPropertyValue('--rg-theme-background').trim(),
             border: style.getPropertyValue('--rg-theme-border').trim(),
-            cellBorder: style
-              .getPropertyValue('--rg-theme-cell-border')
-              .trim(),
+            cellBorder: style.getPropertyValue('--rg-theme-cell-border').trim(),
             focused: style.getPropertyValue('--rg-theme-focused-bg').trim(),
           };
         }),
@@ -95,9 +301,7 @@ test.describe('custom themes', () => {
         cell.evaluate(element => {
           const style = getComputedStyle(element);
           return {
-            background: style
-              .getPropertyValue('--revo-grid-background')
-              .trim(),
+            background: style.getPropertyValue('--revo-grid-background').trim(),
             border: style.getPropertyValue('--revo-grid-border').trim(),
             cellBorder: style
               .getPropertyValue('--revo-grid-cell-border')
@@ -138,18 +342,13 @@ test.describe('custom themes', () => {
 
     const grid = page.locator(SELECTORS.grid);
     await expect(grid).toHaveCSS('background-color', 'rgb(10, 20, 30)');
-    await expect(dataCell(page, 0, 0)).toHaveCSS(
-      'color',
-      'rgb(210, 220, 230)',
-    );
+    await expect(dataCell(page, 0, 0)).toHaveCSS('color', 'rgb(210, 220, 230)');
     await expect
       .poll(() =>
         grid.evaluate(element => {
           const style = getComputedStyle(element);
           return {
-            cellBorder: style
-              .getPropertyValue('--rg-theme-cell-border')
-              .trim(),
+            cellBorder: style.getPropertyValue('--rg-theme-cell-border').trim(),
             focused: style.getPropertyValue('--rg-theme-focused-bg').trim(),
           };
         }),

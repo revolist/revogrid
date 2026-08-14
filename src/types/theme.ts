@@ -1,3 +1,5 @@
+import type { GridPlugin } from '../plugins/base.plugin';
+
 export interface ThemePackage {
   defaultRowSize: number;
 }
@@ -94,12 +96,19 @@ export interface ThemeDefinition {
   colorScheme?: ThemeColorScheme;
   defaultRowSize?: number;
   tokens?: ThemeTokens;
+  /**
+   * Plugin constructors active while this theme or a descendant is selected.
+   * Assign this JavaScript-only value as a property; it cannot be serialized
+   * through an HTML attribute or JSON-only bindings.
+   */
+  plugins?: GridPlugin[];
 }
 
 export interface ResolvedTheme extends ThemePackage {
   name: string;
   colorScheme: ThemeColorScheme;
   tokens: ThemeTokens;
+  plugins: readonly GridPlugin[];
   custom: boolean;
 }
 
