@@ -73,6 +73,10 @@ export type RevogridEvents = 'contentsizechanged'|
   'columndragmousemove'|
   'beforecolumndragend'|
   'columndragend'|
+  'beforerowresize'|
+  'rowresize'|
+  'afterrowresize'|
+  'rowresizecancel'|
   'rowdragstartinit'|
   'rowdragendinit'|
   'rowdragmoveinit'|
@@ -188,6 +192,10 @@ export const REVOGRID_EVENTS = new Map<RevogridEvents, RevogridEvents>([
   ['columndragmousemove', 'columndragmousemove'],
   ['beforecolumndragend', 'beforecolumndragend'],
   ['columndragend', 'columndragend'],
+  ['beforerowresize', 'beforerowresize'],
+  ['rowresize', 'rowresize'],
+  ['afterrowresize', 'afterrowresize'],
+  ['rowresizecancel', 'rowresizecancel'],
   ['rowdragstartinit', 'rowdragstartinit'],
   ['rowdragendinit', 'rowdragendinit'],
   ['rowdragmoveinit', 'rowdragmoveinit'],

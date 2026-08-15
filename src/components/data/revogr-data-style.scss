@@ -10,6 +10,18 @@ revogr-data {
     width: 100%;
     left: 0;
 
+    > .row-resize-handle {
+      position: absolute;
+      z-index: 2;
+      right: 0;
+      bottom: -3px;
+      left: 0;
+      height: 7px;
+      cursor: row-resize;
+      touch-action: none;
+      user-select: none;
+    }
+
     &.groupingRow {
       font-weight: 600;
       text-align: left;

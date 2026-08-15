@@ -250,7 +250,10 @@ export class RevogrData {
           columnItems: cols,
           providers: this.providers,
         };
-        rowsEls.push(<GroupingRowRenderer {...gmodel} />);
+        const row = <GroupingRowRenderer {...gmodel} />;
+        this.triggerBeforeRowRender(row, rgRow, dataItem);
+        rowsEls.push(row);
+        this.renderedRows.set(rgRow.itemIndex, row);
         continue;
       }
       // #endregion
@@ -333,13 +336,7 @@ export class RevogrData {
           {cells}
         </RowRenderer>
       );
-      this.beforerowrender.emit({
-        node: row,
-        item: rgRow,
-        model: dataItem,
-        colType: this.columnService.type,
-        rowType: this.type,
-      });
+      this.triggerBeforeRowRender(row, rgRow, dataItem);
       rowsEls.push(row);
       this.renderedRows.set(rgRow.itemIndex, row);
       // #endregion
@@ -350,6 +347,20 @@ export class RevogrData {
         {rowsEls}
       </Host>
     );
+  }
+
+  private triggerBeforeRowRender(
+    node: VNode,
+    item: VirtualPositionItem,
+    model: DataType,
+  ) {
+    this.beforerowrender.emit({
+      node,
+      item,
+      model,
+      colType: this.colType,
+      rowType: this.type,
+    });
   }
 
   triggerBeforeCellRender(

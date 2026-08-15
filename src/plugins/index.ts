@@ -6,6 +6,7 @@ export * from './export/export.plugin';
 export * from './filter/filter.plugin';
 export * from './groupingRow/grouping.row.plugin';
 export * from './moveColumn/column.drag.plugin';
+export * from './row-resize';
 export * from './sorting/sorting.plugin';
 export * from './sorting/sorting.sign';
 export * from './add-rows-on-paste.plugin';
