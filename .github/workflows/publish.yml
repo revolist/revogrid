@@ -36,6 +36,145 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: release-assets/*.tgz
+  release_notes:
+    name: Generate release highlights
+    needs: publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    outputs:
+      summary: ${{ steps.codex.outputs.final-message }}
+      previous_tag: ${{ steps.context.outputs.previous_tag }}
+    env:
+      RELEASE_TAG: ${{ github.event.release.tag_name }}
+      RELEASE_IS_PRERELEASE: ${{ github.event.release.prerelease }}
+    steps:
+      - name: Checkout release source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.release.tag_name }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Prepare release context
+        id: context
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          mkdir -p .codex-release
+
+          if previous_tag="$(git describe --tags --abbrev=0 "${RELEASE_TAG}^" 2>/dev/null)"; then
+            comparison_range="${previous_tag}..${RELEASE_TAG}"
+          else
+            previous_tag=""
+            root_commit="$(git rev-list --max-parents=0 "$RELEASE_TAG" | tail -n 1)"
+            comparison_range="${root_commit}..${RELEASE_TAG}"
+          fi
+
+          gh release view "$RELEASE_TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --json body \
+            --jq '.body // ""' > .codex-release/current-body.md
+
+          awk '
+            /<!-- codex-release-summary:start -->/ { in_summary = 1; next }
+            /<!-- codex-release-summary:end -->/ { in_summary = 0; next }
+            !in_summary { print }
+          ' .codex-release/current-body.md > .codex-release/baseline-notes.md
+
+          jq -n \
+            --arg tag "$RELEASE_TAG" \
+            --arg previousTag "$previous_tag" \
+            --arg comparisonRange "$comparison_range" \
+            --argjson prerelease "$RELEASE_IS_PRERELEASE" \
+            '{
+              tag: $tag,
+              previousTag: $previousTag,
+              comparisonRange: $comparisonRange,
+              prerelease: $prerelease
+            }' > .codex-release/release-context.json
+
+          git log \
+            --date=short \
+            --pretty=format:'%H%x09%ad%x09%an%x09%s' \
+            "$comparison_range" > .codex-release/commits.tsv
+          git diff --stat "$comparison_range" > .codex-release/diff-stat.txt
+          printf 'previous_tag=%s\n' "$previous_tag" >> "$GITHUB_OUTPUT"
+
+      - name: Generate release highlights with Codex
+        id: codex
+        uses: openai/codex-action@v1
+        with:
+          openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          prompt-file: .github/codex/prompts/release-notes.md
+          output-file: .codex-release/generated-summary.md
+          codex-args: '["--ephemeral"]'
+          sandbox: read-only
+          safety-strategy: drop-sudo
+
+  update_release_notes:
+    name: Update GitHub release notes
+    needs: release_notes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    env:
+      RELEASE_TAG: ${{ github.event.release.tag_name }}
+      PREVIOUS_TAG: ${{ needs.release_notes.outputs.previous_tag }}
+      CODEX_SUMMARY: ${{ needs.release_notes.outputs.summary }}
+    steps:
+      - name: Publish polished release notes
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          if [[ ! "$CODEX_SUMMARY" =~ [^[:space:]] ]]; then
+            echo "Codex returned an empty release summary." >&2
+            exit 1
+          fi
+
+          mkdir -p .codex-release
+
+          gh release view "$RELEASE_TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --json body \
+            --jq '.body // ""' > .codex-release/current-body.md
+
+          awk '
+            /<!-- codex-release-summary:start -->/ { in_summary = 1; next }
+            /<!-- codex-release-summary:end -->/ { in_summary = 0; next }
+            !in_summary { print }
+          ' .codex-release/current-body.md > .codex-release/baseline-notes.md
+
+          if ! grep -q '[^[:space:]]' .codex-release/baseline-notes.md; then
+            generate_notes_args=(
+              --method POST
+              "repos/${GITHUB_REPOSITORY}/releases/generate-notes"
+              --raw-field "tag_name=${RELEASE_TAG}"
+            )
+            if [[ -n "$PREVIOUS_TAG" ]]; then
+              generate_notes_args+=(--raw-field "previous_tag_name=${PREVIOUS_TAG}")
+            fi
+
+            gh api "${generate_notes_args[@]}" \
+              --jq '.body // ""' > .codex-release/baseline-notes.md
+          fi
+
+          {
+            printf '%s\n' '<!-- codex-release-summary:start -->'
+            printf '%s\n' "$CODEX_SUMMARY"
+            printf '%s\n\n' '<!-- codex-release-summary:end -->'
+            cat .codex-release/baseline-notes.md
+          } > .codex-release/final-notes.md
+
+          gh release edit "$RELEASE_TAG" \
+            --repo "$GITHUB_REPOSITORY" \
+            --notes-file .codex-release/final-notes.md
   sbom:
     needs: publish
     runs-on: ubuntu-latest
@@ -71,4 +210,3 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           repo_token: ${{ secrets.REPO_TOKEN }}
-      
