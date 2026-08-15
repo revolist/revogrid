@@ -18,6 +18,7 @@ import type {
 } from './selection';
 import type { Observable } from '../utils';
 import type { JSXBase } from '@stencil/core/internal';
+import type { BlankSemantics } from '../plugins/filter/filter.types';
 
 export type Nullable<T> = {
   [P in keyof T]: T[P] | null;
@@ -240,6 +241,8 @@ export interface ColumnRegular<P extends ColumnProp = ColumnProp, TModel extends
    * Filter. Require filter plugin to be installed and activated through grid config filter.
    */
   filter?: boolean | string | string[];
+  /** Partial column override for the grid-level blank filtering policy. */
+  blankSemantics?: BlankSemantics;
   /**
    * Is column can be sorted, check cellCompare function for custom sorting.
    */

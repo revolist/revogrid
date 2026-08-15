@@ -1,6 +1,6 @@
 // filter.types.ts
 
-import type { ColumnProp, ColumnRegular, HyperFunc } from '@type';
+import type { ColumnProp, ColumnRegular, DataType, HyperFunc } from '@type';
 import type { FilterType } from './filter.indexed';
 import type { VNode } from '@stencil/core';
 
@@ -42,8 +42,46 @@ export type LogicFunctionExtraParam =
   | string
   | string[]
   | number[];
+
+/** Source-aware context supplied while a filter predicate is evaluated. */
+export interface FilterEvaluationContext<
+  TModel extends DataType = DataType,
+  TColumn extends ColumnRegular = ColumnRegular,
+> {
+  /** Row model being evaluated. */
+  model: TModel;
+  /** Column associated with the filter, when one is available. */
+  column?: TColumn;
+  /** Property the filter is evaluating. */
+  property: ColumnProp;
+  /** Unparsed value read from the row model. */
+  sourceValue: any;
+  /** Value after the column cell parser, when configured. */
+  parsedValue: any;
+  /** Whether the property exists directly on the row model. */
+  hasOwnProperty: boolean;
+  /** Effective blank policy after grid and column settings are merged. */
+  blankSemantics: BlankSemantics;
+}
+
+/** Configures which source values are treated as blank by blank operators. */
+export interface BlankSemantics {
+  null?: boolean;
+  undefined?: boolean;
+  emptyString?: boolean;
+  whitespaceOnlyString?: boolean;
+  emptyArray?: boolean;
+  missingProperty?: boolean;
+  /** Final application override, evaluated after the configured fallback. */
+  isBlank?: (
+    value: any,
+    context: FilterEvaluationContext,
+    fallbackResult: boolean,
+  ) => boolean;
+}
+
 export interface LogicFunction<T1 = LogicFunctionParam, T2 = LogicFunctionExtraParam> {
-  (value: T1, extra?: T2): boolean;
+  (value: T1, extra?: T2, context?: FilterEvaluationContext): boolean;
   extra?: ExtraField;
 }
 
@@ -85,6 +123,8 @@ export interface FilterLocalization {
  * Filter configuration for a column. This is the type of the `filter` property on a column.
  */
 export interface ColumnFilterConfig {
+  /** Grid-level blank policy. Individual columns can override fields. */
+  blankSemantics?: BlankSemantics;
   /**
    * The collection of filters to be applied to the column.
    */
