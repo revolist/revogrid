@@ -805,7 +805,10 @@ export interface BeforeCellRenderEvent<T = any> extends AllDimensionType {
  * Represents the event object that is emitted before row rendering.
  * It includes information about the dimension type, data item, item, and node.
  */
-export interface BeforeRowRenderEvent<T = any> extends AllDimensionType {
+export interface BeforeRowRenderEvent<T = any>
+  extends Pick<AllDimensionType, 'rowType'> {
+  /** Column viewport rendering the row, including the row-header viewport. */
+  colType: DimensionCols | 'rowHeaders';
   /**
    * Represents the data item being rendered.
    */

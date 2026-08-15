@@ -1,0 +1,91 @@
+import {
+  clampRowResizeHeight,
+  createRowResizePatch,
+  DEFAULT_MIN_ROW_HEIGHT,
+  getRowResizeIndexes,
+  resolveRowResizeConfig,
+} from '../src/plugins/row-resize';
+
+describe('row resize utilities', () => {
+  it('normalizes minimum and maximum heights', () => {
+    expect(resolveRowResizeConfig()).toEqual({
+      minHeight: DEFAULT_MIN_ROW_HEIGHT,
+      maxHeight: undefined,
+    });
+    expect(resolveRowResizeConfig({ minHeight: 0, maxHeight: 5.6 })).toEqual({
+      minHeight: 1,
+      maxHeight: 6,
+    });
+    expect(resolveRowResizeConfig({ minHeight: 30, maxHeight: 10 })).toEqual({
+      minHeight: 30,
+      maxHeight: 30,
+    });
+    expect(
+      resolveRowResizeConfig({ minHeight: Number.NaN, maxHeight: Infinity }),
+    ).toEqual({
+      minHeight: DEFAULT_MIN_ROW_HEIGHT,
+      maxHeight: undefined,
+    });
+  });
+
+  it('rounds and clamps live pointer heights', () => {
+    const config = resolveRowResizeConfig({ minHeight: 20, maxHeight: 80 });
+    expect(clampRowResizeHeight(51.6, config)).toBe(52);
+    expect(clampRowResizeHeight(-100, config)).toBe(20);
+    expect(clampRowResizeHeight(100, config)).toBe(80);
+    expect(clampRowResizeHeight(Number.NaN, config)).toBe(20);
+  });
+
+  it('targets the grabbed row when it is outside the active range', () => {
+    expect(
+      getRowResizeIndexes({
+        rowType: 'rgRow',
+        rowIndex: 7,
+        rowCount: 10,
+        selectedRange: { x: 0, x1: 2, y: 2, y1: 4 },
+        selectedRowType: 'rgRow',
+      }),
+    ).toEqual([7]);
+  });
+
+  it('targets an inclusive selected range in the same row dimension', () => {
+    expect(
+      getRowResizeIndexes({
+        rowType: 'rgRow',
+        rowIndex: 3,
+        rowCount: 10,
+        selectedRange: { x: 0, x1: 2, y: 4, y1: 2 },
+        selectedRowType: 'rgRow',
+      }),
+    ).toEqual([2, 3, 4]);
+  });
+
+  it('isolates selections in another pinned row dimension and clamps bounds', () => {
+    expect(
+      getRowResizeIndexes({
+        rowType: 'rowPinStart',
+        rowIndex: 1,
+        rowCount: 3,
+        selectedRange: { x: 0, x1: 2, y: -2, y1: 10 },
+        selectedRowType: 'rgRow',
+      }),
+    ).toEqual([1]);
+    expect(
+      getRowResizeIndexes({
+        rowType: 'rgRow',
+        rowIndex: 1,
+        rowCount: 3,
+        selectedRange: { x: 0, x1: 2, y: -2, y1: 10 },
+        selectedRowType: 'rgRow',
+      }),
+    ).toEqual([0, 1, 2]);
+  });
+
+  it('builds one absolute height patch for all selected rows', () => {
+    expect(createRowResizePatch([2, 3, 4], 57)).toEqual({
+      2: 57,
+      3: 57,
+      4: 57,
+    });
+  });
+});
