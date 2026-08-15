@@ -24,6 +24,260 @@ const columns = buildColumns([
 ]);
 
 test.describe('custom themes', () => {
+  test('keeps user plugins working across plugin-free set changes', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns,
+      source: [{ id: 1, name: 'Ada' }],
+    });
+
+    await page.locator(SELECTORS.grid).evaluate((grid: any) => {
+      const state = {
+        created: { a: 0, b: 0 },
+        destroyed: { a: 0, b: 0 },
+        handled: { a: 0, b: 0 },
+      };
+      const createPlugin = (name: 'a' | 'b') =>
+        class {
+          readonly lifecyclePluginName = name;
+          private readonly listener = () => state.handled[name]++;
+
+          constructor(private readonly grid: HTMLElement) {
+            state.created[name]++;
+            grid.addEventListener('themepluginprobe', this.listener);
+          }
+
+          destroy() {
+            state.destroyed[name]++;
+            this.grid.removeEventListener('themepluginprobe', this.listener);
+          }
+        };
+      const PluginA = createPlugin('a');
+      const PluginB = createPlugin('b');
+      (globalThis as any).__userPluginLifecycle = {
+        state,
+        PluginA,
+        PluginB,
+      };
+    });
+
+    await expect
+      .poll(() =>
+        page.locator(SELECTORS.grid).evaluate(async (grid: any) => {
+          const plugins = await grid.getPlugins();
+          return {
+            state: (globalThis as any).__userPluginLifecycle.state,
+            active: plugins.filter(
+              (plugin: { lifecyclePluginName?: string }) =>
+                plugin.lifecyclePluginName,
+            ).length,
+          };
+        }),
+      )
+      .toEqual({
+        state: {
+          created: { a: 0, b: 0 },
+          destroyed: { a: 0, b: 0 },
+          handled: { a: 0, b: 0 },
+        },
+        active: 0,
+      });
+
+    const updatePlugins = async (plugins: Array<'a' | 'b'>) => {
+      await page.locator(SELECTORS.grid).evaluate((grid: any, names) => {
+        const testState = (globalThis as any).__userPluginLifecycle;
+        grid.plugins = names.map((name: 'a' | 'b') =>
+          name === 'a' ? testState.PluginA : testState.PluginB,
+        );
+      }, plugins);
+      await page.waitForChanges();
+      await page.locator(SELECTORS.grid).dispatchEvent('themepluginprobe');
+    };
+
+    await updatePlugins(['a']);
+    await expect
+      .poll(() =>
+        page.evaluate(() => (globalThis as any).__userPluginLifecycle.state),
+      )
+      .toEqual({
+        created: { a: 1, b: 0 },
+        destroyed: { a: 0, b: 0 },
+        handled: { a: 1, b: 0 },
+      });
+
+    await updatePlugins(['a', 'b']);
+    await updatePlugins(['b', 'a']);
+    await expect
+      .poll(() =>
+        page.evaluate(() => (globalThis as any).__userPluginLifecycle.state),
+      )
+      .toEqual({
+        created: { a: 1, b: 1 },
+        destroyed: { a: 0, b: 0 },
+        handled: { a: 3, b: 2 },
+      });
+
+    await updatePlugins(['b']);
+    await updatePlugins([]);
+    await expect
+      .poll(() =>
+        page.evaluate(() => (globalThis as any).__userPluginLifecycle.state),
+      )
+      .toEqual({
+        created: { a: 1, b: 1 },
+        destroyed: { a: 1, b: 1 },
+        handled: { a: 3, b: 3 },
+      });
+  });
+
+  test('keeps shared plugins until both user and theme owners release them', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns,
+      source: [{ id: 1, name: 'Ada' }],
+    });
+
+    await page.locator(SELECTORS.grid).evaluate((grid: any) => {
+      type Name = 'a' | 'b' | 'c' | 'd';
+      const state = {
+        created: { a: 0, b: 0, c: 0, d: 0 },
+        destroyed: { a: 0, b: 0, c: 0, d: 0 },
+        handled: { a: 0, b: 0, c: 0, d: 0 },
+      };
+      const createPlugin = (name: Name) =>
+        class {
+          readonly lifecyclePluginName = name;
+          private readonly listener = () => state.handled[name]++;
+
+          constructor(private readonly grid: HTMLElement) {
+            state.created[name]++;
+            grid.addEventListener('themepluginprobe', this.listener);
+          }
+
+          destroy() {
+            state.destroyed[name]++;
+            this.grid.removeEventListener('themepluginprobe', this.listener);
+          }
+        };
+      const PluginA = createPlugin('a');
+      const PluginB = createPlugin('b');
+      const PluginC = createPlugin('c');
+      const PluginD = createPlugin('d');
+      grid.themeDefinitions = [
+        {
+          name: 'pluginAlpha',
+          extends: 'material',
+          plugins: [PluginA, PluginB],
+        },
+        {
+          name: 'pluginBeta',
+          extends: 'compact',
+          plugins: [PluginB, PluginD],
+        },
+      ];
+      grid.plugins = [PluginB, PluginC];
+      (globalThis as any).__sharedPluginLifecycle = {
+        state,
+        PluginA,
+        PluginB,
+        PluginC,
+        PluginD,
+      };
+    });
+    await page.waitForChanges();
+
+    const applyChange = async (
+      change:
+        | 'alpha'
+        | 'default'
+        | 'alphaWithoutB'
+        | 'beta'
+        | 'userAD'
+        | 'clear',
+    ) => {
+      await page.locator(SELECTORS.grid).evaluate((grid: any, action) => {
+        const testState = (globalThis as any).__sharedPluginLifecycle;
+        if (action === 'alpha') {
+          grid.theme = 'pluginAlpha';
+        } else if (action === 'default') {
+          grid.theme = 'default';
+        } else if (action === 'alphaWithoutB') {
+          grid.plugins = [testState.PluginC];
+        } else if (action === 'beta') {
+          grid.theme = 'pluginBeta';
+        } else if (action === 'userAD') {
+          grid.plugins = [testState.PluginA, testState.PluginD];
+        } else {
+          grid.plugins = [];
+        }
+      }, change);
+      await page.waitForChanges();
+      await page.locator(SELECTORS.grid).dispatchEvent('themepluginprobe');
+    };
+
+    await applyChange('alpha');
+    await expect
+      .poll(() =>
+        page.evaluate(() => (globalThis as any).__sharedPluginLifecycle.state),
+      )
+      .toEqual({
+        created: { a: 1, b: 1, c: 1, d: 0 },
+        destroyed: { a: 0, b: 0, c: 0, d: 0 },
+        handled: { a: 1, b: 1, c: 1, d: 0 },
+      });
+
+    await applyChange('default');
+    await applyChange('alpha');
+    await applyChange('alphaWithoutB');
+    await expect
+      .poll(() =>
+        page.evaluate(() => (globalThis as any).__sharedPluginLifecycle.state),
+      )
+      .toEqual({
+        created: { a: 2, b: 1, c: 1, d: 0 },
+        destroyed: { a: 1, b: 0, c: 0, d: 0 },
+        handled: { a: 3, b: 4, c: 4, d: 0 },
+      });
+
+    await applyChange('beta');
+    await applyChange('userAD');
+    await applyChange('default');
+    await expect
+      .poll(() =>
+        page.evaluate(() => (globalThis as any).__sharedPluginLifecycle.state),
+      )
+      .toEqual({
+        created: { a: 3, b: 1, c: 1, d: 1 },
+        destroyed: { a: 2, b: 1, c: 1, d: 0 },
+        handled: { a: 5, b: 6, c: 5, d: 3 },
+      });
+
+    await applyChange('clear');
+    await expect
+      .poll(() =>
+        page.evaluate(() => (globalThis as any).__sharedPluginLifecycle.state),
+      )
+      .toEqual({
+        created: { a: 3, b: 1, c: 1, d: 1 },
+        destroyed: { a: 3, b: 1, c: 1, d: 1 },
+        handled: { a: 5, b: 6, c: 5, d: 3 },
+      });
+
+    await expect
+      .poll(() =>
+        page.locator(SELECTORS.grid).evaluate(async (grid: any) => {
+          const plugins = await grid.getPlugins();
+          return plugins.filter(
+            (plugin: { lifecyclePluginName?: string }) =>
+              plugin.lifecyclePluginName,
+          ).length;
+        }),
+      )
+      .toBe(0);
+  });
+
   test('owns inherited theme plugins across switching and definition updates', async ({
     page,
   }) => {

@@ -17,6 +17,7 @@ class TrackedPlugin extends BasePlugin {
 }
 
 class SecondPlugin extends BasePlugin {}
+class ThirdPlugin extends BasePlugin {}
 
 describe('PluginService plugin ownership', () => {
   let service: PluginService;
@@ -42,6 +43,37 @@ describe('PluginService plugin ownership', () => {
     expect(service.get()).toEqual(instances);
     expect(TrackedPlugin.created).toBe(1);
     expect(TrackedPlugin.destroyed).toBe(0);
+  });
+
+  it('keeps existing instances stable when the requested set is reordered', () => {
+    service.syncPlugins(grid, [TrackedPlugin, SecondPlugin], {} as never);
+    const instances = service.get();
+    const secondDestroy = jest.spyOn(instances[1], 'destroy');
+
+    service.syncPlugins(grid, [SecondPlugin, TrackedPlugin], {} as never);
+
+    expect(service.get()).toEqual(instances);
+    expect(TrackedPlugin.created).toBe(1);
+    expect(TrackedPlugin.destroyed).toBe(0);
+    expect(secondDestroy).not.toHaveBeenCalled();
+  });
+
+  it('releases only constructors missing from the next requested set', () => {
+    service.syncPlugins(
+      grid,
+      [TrackedPlugin, SecondPlugin, ThirdPlugin],
+      {} as never,
+    );
+    const [, second, third] = service.get();
+    const secondDestroy = jest.spyOn(second, 'destroy');
+    const thirdDestroy = jest.spyOn(third, 'destroy');
+
+    service.syncPlugins(grid, [SecondPlugin, ThirdPlugin], {} as never);
+
+    expect(service.get()).toEqual([second, third]);
+    expect(TrackedPlugin.destroyed).toBe(1);
+    expect(secondDestroy).not.toHaveBeenCalled();
+    expect(thirdDestroy).not.toHaveBeenCalled();
   });
 
   it('destroys a synchronized plugin only after it is no longer requested', () => {
