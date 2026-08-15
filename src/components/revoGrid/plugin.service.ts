@@ -7,6 +7,7 @@ type PluginSource = 'persistent' | 'synchronized';
 interface PluginRegistration {
   instance: PluginBaseComponent;
   source: PluginSource;
+  pluginType?: GridPlugin;
 }
 
 /**
@@ -14,20 +15,37 @@ interface PluginRegistration {
  * Manages plugins
  */
 export class PluginService implements PluginServiceBase {
-  plugins = new Map<GridPlugin, PluginRegistration>();
+  // Public add() accepts structural plugin objects, so distinct instances must
+  // remain ordered here instead of being collapsed by their shared constructor.
+  private registrations: PluginRegistration[] = [];
+
+  // Only grid/theme-synchronized plugins are constructor-indexed. This enables
+  // constructor deduplication and removal without affecting persistent instances.
+  private synchronizedPlugins = new Map<GridPlugin, PluginRegistration>();
 
   /**
    * Get all plugins
    */
   get() {
-    return [...this.plugins.values()].map(({ instance }) => instance);
+    return this.registrations.map(({ instance }) => instance);
   }
 
   /**
    * Add plugin to collection
    */
   add(plugin: PluginBaseComponent) {
-    this.register(plugin, 'persistent');
+    const existing = this.registrations.find(
+      registration => registration.instance === plugin,
+    );
+    if (existing) {
+      if (existing.source === 'synchronized' && existing.pluginType) {
+        this.synchronizedPlugins.delete(existing.pluginType);
+        existing.source = 'persistent';
+        existing.pluginType = undefined;
+      }
+      return;
+    }
+    this.registrations.push({ instance: plugin, source: 'persistent' });
   }
 
   /**
@@ -44,36 +62,27 @@ export class PluginService implements PluginServiceBase {
 
     const requestedPlugins = new Set(plugins.filter(isGridPlugin));
 
-    for (const [plugin, registration] of this.plugins) {
-      if (
-        registration.source === 'synchronized' &&
-        !requestedPlugins.has(plugin)
-      ) {
+    for (const [plugin, registration] of this.synchronizedPlugins) {
+      if (!requestedPlugins.has(plugin)) {
         this.remove(registration.instance);
       }
     }
 
     for (const plugin of requestedPlugins) {
-      if (this.plugins.has(plugin)) {
+      const existing = this.registrations.some(
+        registration => registration.instance.constructor === plugin,
+      );
+      if (existing) {
         continue;
       }
-      this.register(new plugin(element, pluginData), 'synchronized');
+      const registration: PluginRegistration = {
+        instance: new plugin(element, pluginData),
+        source: 'synchronized',
+        pluginType: plugin,
+      };
+      this.registrations.push(registration);
+      this.synchronizedPlugins.set(plugin, registration);
     }
-  }
-
-  private register(plugin: PluginBaseComponent, source: PluginSource) {
-    const pluginType = plugin.constructor as GridPlugin;
-    const existing = this.plugins.get(pluginType);
-    if (existing) {
-      if (existing.instance !== plugin) {
-        plugin.destroy?.();
-      }
-      if (source === 'persistent') {
-        existing.source = source;
-      }
-      return;
-    }
-    this.plugins.set(pluginType, { instance: plugin, source });
   }
 
   /**
@@ -89,11 +98,15 @@ export class PluginService implements PluginServiceBase {
    * Remove plugin
    */
   remove(plugin: PluginBaseComponent) {
-    const pluginType = plugin.constructor as GridPlugin;
-    const registration = this.plugins.get(pluginType);
-    if (registration?.instance === plugin) {
+    const index = this.registrations.findIndex(
+      registration => registration.instance === plugin,
+    );
+    if (index !== -1) {
+      const [registration] = this.registrations.splice(index, 1);
+      if (registration.source === 'synchronized' && registration.pluginType) {
+        this.synchronizedPlugins.delete(registration.pluginType);
+      }
       registration.instance.destroy?.();
-      this.plugins.delete(pluginType);
     }
   }
 
@@ -102,7 +115,8 @@ export class PluginService implements PluginServiceBase {
    */
 
   destroy() {
-    this.plugins.forEach(({ instance }) => instance.destroy?.());
-    this.plugins.clear();
+    this.registrations.forEach(({ instance }) => instance.destroy?.());
+    this.registrations = [];
+    this.synchronizedPlugins.clear();
   }
 }

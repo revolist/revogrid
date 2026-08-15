@@ -86,16 +86,24 @@ describe('PluginService plugin ownership', () => {
     expect(TrackedPlugin.destroyed).toBe(1);
   });
 
-  it('keeps one registered instance per exact constructor', () => {
-    const first = new TrackedPlugin(grid, {} as never);
-    const duplicate = new TrackedPlugin(grid, {} as never);
+  it('preserves distinct persistent structural plugins sharing a constructor', () => {
+    const first = { destroy: jest.fn() };
+    const second = { destroy: jest.fn() };
 
     service.add(first);
-    service.add(duplicate);
+    service.add(second);
 
-    expect(service.get()).toEqual([first]);
-    expect(TrackedPlugin.created).toBe(2);
-    expect(TrackedPlugin.destroyed).toBe(1);
+    expect(service.get()).toEqual([first, second]);
+    expect(first.destroy).not.toHaveBeenCalled();
+    expect(second.destroy).not.toHaveBeenCalled();
+
+    service.remove(first);
+    expect(service.get()).toEqual([second]);
+    expect(first.destroy).toHaveBeenCalledTimes(1);
+    expect(second.destroy).not.toHaveBeenCalled();
+
+    service.destroy();
+    expect(second.destroy).toHaveBeenCalledTimes(1);
   });
 
   it('can promote a synchronized instance to persistent ownership', () => {
