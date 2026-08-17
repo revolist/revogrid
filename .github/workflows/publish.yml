@@ -109,6 +109,8 @@ jobs:
         uses: openai/codex-action@v1
         with:
           openai-api-key: ${{ secrets.OPENAI_API_KEY }}
+          model: gpt-5.6-luna
+          effort: low
           prompt-file: .github/codex/prompts/release-notes.md
           output-file: .codex-release/generated-summary.md
           codex-args: '["--ephemeral"]'
