@@ -23,6 +23,44 @@ const columns = buildColumns([
   },
 ]);
 
+test.describe('default theme', () => {
+  test('centers headers and pads left-aligned cells and editors', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns,
+      source: [{ id: 1, name: 'Ada' }],
+      filter: true,
+    });
+
+    const header = page.getByTestId('theme-header-name');
+    await expect(header).toHaveCSS('text-align', 'center');
+    const headerContent = header.locator('.header-content');
+    await expect(headerContent).toHaveCSS('text-align', 'center');
+    const horizontalCenterOffset = await header.evaluate(element => {
+      const headerBox = element.getBoundingClientRect();
+      const contentBox = element
+        .querySelector('.header-content')!
+        .getBoundingClientRect();
+      return (
+        contentBox.left +
+        contentBox.width / 2 -
+        (headerBox.left + headerBox.width / 2)
+      );
+    });
+    expect(Math.abs(horizontalCenterOffset)).toBeLessThan(0.5);
+    const cell = dataCell(page, 0, 0);
+    await expect(cell).toHaveCSS('text-align', 'left');
+    await expect(cell).toHaveCSS('padding-left', '4px');
+    await expect(cell).toHaveCSS('padding-right', '4px');
+
+    await setCellEdit(page, 0, 'id');
+    const editor = page.locator(SELECTORS.editInput);
+    await expect(editor).toHaveCSS('padding-left', '4px');
+    await expect(editor).toHaveCSS('padding-right', '4px');
+  });
+});
+
 test.describe('custom themes', () => {
   test('keeps the legacy CSS-only dark theme palette', async ({ page }) => {
     await mountGrid(page, {

@@ -21,7 +21,7 @@ revo-grid:not([theme]) {
   --rg-theme-header-text-align: var(--revo-grid-header-text-align, center);
   --rg-theme-cell-text-align: var(--revo-grid-cell-text-align, left);
   --rg-theme-header-padding: var(--revo-grid-header-padding, 0);
-  --rg-theme-cell-padding: var(--revo-grid-cell-padding, 0);
+  --rg-theme-cell-padding: var(--revo-grid-cell-padding, 0 4px);
 
   border: 1px solid var(--rg-theme-header-border);
   font-size: var(--rg-theme-font-size);

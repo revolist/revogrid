@@ -23,6 +23,7 @@ revogr-header {
     height: 100%;
     z-index: 1;
     display: flex;
+    text-align: var(--rg-theme-header-text-align, center);
 
     &.align-center {
       text-align: center;
@@ -75,10 +76,19 @@ revogr-header {
       }
     }
     .header-content {
+      position: absolute;
+      inset: 0;
+      box-sizing: border-box;
+      padding: inherit;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
       flex-grow: 1;
+    }
+    > span:first-of-type {
+      position: relative;
+      z-index: 1;
+      margin-left: auto;
     }
     .resizable {
       display: block;
