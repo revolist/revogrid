@@ -51,6 +51,9 @@ const DIRECTION_CODES: string[] = [
   codesLetter.ARROW_RIGHT,
 ];
 export class KeyboardService {
+  /** Keep focus transitions in keydown order so rendering can scroll each cell into view. */
+  private keyChangeQueue: Promise<boolean> = Promise.resolve(false);
+
   constructor(private readonly sv: Config) {}
 
   /**
@@ -187,9 +190,18 @@ export class KeyboardService {
     // at this case to avoid screen jump we use this interval
     await timeout(RESIZE_INTERVAL + 30);
 
-    const range = this.sv.selectionStore.get('range');
-    const focus = this.sv.selectionStore.get('focus');
-    return this.keyPositionChange(data.changes, range, focus, data.isMulti);
+    const applyKeyChange = async () => {
+      const range = this.sv.selectionStore.get('range');
+      const focus = this.sv.selectionStore.get('focus');
+      const changed = this.keyPositionChange(data.changes, range, focus, data.isMulti);
+      await new Promise<void>(resolve => requestAnimationFrame(() => {
+        requestAnimationFrame(() => resolve());
+      }));
+      return changed;
+    };
+    const queuedChange = this.keyChangeQueue.then(applyKeyChange, applyKeyChange);
+    this.keyChangeQueue = queuedChange.catch(() => false);
+    return queuedChange;
   }
 
   keyPositionChange(

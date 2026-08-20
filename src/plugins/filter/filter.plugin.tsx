@@ -25,7 +25,6 @@ import type {
   ShowData,
 } from './filter.types';
 
-import { timeout } from '../../utils';
 import { TrimmedEntity } from '@store';
 import { resolveBlankSemantics } from './filter.blank';
 
@@ -136,7 +135,9 @@ export class FilterPlugin extends BasePlugin {
       if (Object.keys(this.multiFilterItems).length === 0) {
         return;
       }
-      await timeout();
+      // Let synchronous source/grouping listeners finish without yielding to a
+      // browser task where the reset trimmed state could be painted.
+      await Promise.resolve();
       await this.runFiltering(this.multiFilterItems);
     };
     this.addEventListener('headerclick', e => this.headerclick(e));
