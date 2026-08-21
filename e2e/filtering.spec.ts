@@ -80,6 +80,49 @@ test.describe('filtering', () => {
     ).toEqual([]);
   });
 
+  test('reapplies active filters before later aftersourceset listeners run', async ({ page }) => {
+    await mountGrid(page, {
+      columns: [
+        { name: 'Name', prop: 'name', size: 160 },
+        { name: 'Status', prop: 'status', size: 160, filter: true },
+      ],
+      source: [
+        { name: 'Alice', status: 'Active' },
+        { name: 'Bob', status: 'Inactive' },
+      ],
+      filter: {
+        multiFilterItems: {
+          status: [{ id: 0, type: 'eq', value: 'Active', relation: 'and' }],
+        },
+      },
+    });
+
+    const lifecycle = await page.evaluate(async () => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) {
+        throw new Error('Grid was not found');
+      }
+      const events: string[] = [];
+      grid.addEventListener('beforefilterapply', () => events.push('beforefilterapply'));
+      grid.addEventListener('afterfilterapply', () => events.push('afterfilterapply'));
+      grid.addEventListener('aftersourceset', () => events.push('aftersourceset'));
+
+      grid.source = [
+        { name: 'Cara', status: 'Inactive' },
+        { name: 'Dan', status: 'Active' },
+      ];
+      await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
+      return events;
+    });
+
+    expect(lifecycle).toEqual([
+      'beforefilterapply',
+      'afterfilterapply',
+      'aftersourceset',
+    ]);
+    await expectVisibleColumnValues(page, 0, ['Dan']);
+  });
+
   test('allows duplicate operators by default', async ({ page }) => {
     const columns = buildColumns([
       { prop: 'role', name: 'Role', filter: true, ...withHeaderTestId('duplicate-default-role') },
