@@ -51,7 +51,19 @@ const DIRECTION_CODES: string[] = [
   codesLetter.ARROW_RIGHT,
 ];
 export class KeyboardService {
+  /** Keep focus transitions in keydown order so rendering can scroll each cell into view. */
+  private keyChangeQueue: Promise<boolean> = Promise.resolve(false);
+  private keyChangeGeneration = 0;
+  private applyingKeyChange = false;
+
   constructor(private readonly sv: Config) {}
+
+  /** Cancel delayed directional input after focus or edit context changes externally. */
+  invalidatePendingChanges() {
+    if (!this.applyingKeyChange) {
+      this.keyChangeGeneration += 1;
+    }
+  }
 
   /**
    * Appends printable key input that arrives after edit mode was requested
@@ -181,15 +193,34 @@ export class KeyboardService {
     if (!data) {
       return false;
     }
+    const keyChangeGeneration = this.keyChangeGeneration;
 
     // this interval needed for several cases
     // grid could be resized before next click
     // at this case to avoid screen jump we use this interval
     await timeout(RESIZE_INTERVAL + 30);
 
-    const range = this.sv.selectionStore.get('range');
-    const focus = this.sv.selectionStore.get('focus');
-    return this.keyPositionChange(data.changes, range, focus, data.isMulti);
+    const applyKeyChange = async () => {
+      if (keyChangeGeneration !== this.keyChangeGeneration) {
+        return false;
+      }
+      const range = this.sv.selectionStore.get('range');
+      const focus = this.sv.selectionStore.get('focus');
+      this.applyingKeyChange = true;
+      let changed: boolean;
+      try {
+        changed = this.keyPositionChange(data.changes, range, focus, data.isMulti);
+      } finally {
+        this.applyingKeyChange = false;
+      }
+      await new Promise<void>(resolve => requestAnimationFrame(() => {
+        requestAnimationFrame(() => resolve());
+      }));
+      return changed;
+    };
+    const queuedChange = this.keyChangeQueue.then(applyKeyChange, applyKeyChange);
+    this.keyChangeQueue = queuedChange.catch(() => false);
+    return queuedChange;
   }
 
   keyPositionChange(

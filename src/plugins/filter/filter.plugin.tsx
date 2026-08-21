@@ -25,7 +25,6 @@ import type {
   ShowData,
 } from './filter.types';
 
-import { timeout } from '../../utils';
 import { TrimmedEntity } from '@store';
 import { resolveBlankSemantics } from './filter.blank';
 
@@ -116,7 +115,7 @@ export class FilterPlugin extends BasePlugin {
       </revogr-filter-panel>,
     ];
 
-    const aftersourceset = async () => {
+    const aftersourceset = () => {
       const filterCollectionProps = Object.keys(this.filterCollection);
       if (filterCollectionProps.length > 0) {
         // handle old way of filtering by reworking FilterCollection to new MultiFilterItem
@@ -136,8 +135,9 @@ export class FilterPlugin extends BasePlugin {
       if (Object.keys(this.multiFilterItems).length === 0) {
         return;
       }
-      await timeout();
-      await this.runFiltering(this.multiFilterItems);
+      // Restore active trimming before event dispatch advances to later
+      // aftersourceset listeners or the browser can paint the reset state.
+      this.runFiltering(this.multiFilterItems);
     };
     this.addEventListener('headerclick', e => this.headerclick(e));
     this.addEventListener(

@@ -258,7 +258,13 @@ export class GroupingRowPlugin extends BasePlugin {
       customRenderer: options.groupLabelTemplate,
       cellRenderer: options.groupCellTemplate,
     });
-    this.updateTrimmed(trimmed, oldNewIndexMap, undefined, sourceWithGroups);
+    this.updateTrimmed(
+      trimmed,
+      oldNewIndexMap,
+      undefined,
+      sourceWithGroups,
+      { filterTrimmedMode: 'recompute-after-source-set' },
+    );
   }
 
   /**
@@ -384,6 +390,11 @@ export class GroupingRowPlugin extends BasePlugin {
     firstLevelMap: Record<number, number> = {},
     secondLevelMap?: Record<number, number>,
     source: DataType[] = this.getStore().get('source'),
+    {
+      filterTrimmedMode = 'remap',
+    }: {
+      filterTrimmedMode?: 'remap' | 'recompute-after-source-set';
+    } = {},
   ) {
     // map previously trimmed data
     const trimemedOptionsToUpgrade = processDoubleConversionTrimmed(
@@ -392,6 +403,15 @@ export class GroupingRowPlugin extends BasePlugin {
       secondLevelMap,
     );
     for (let type in trimemedOptionsToUpgrade) {
+      if (
+        filterTrimmedMode === 'recompute-after-source-set' &&
+        type === FILTER_TRIMMED_TYPE
+      ) {
+        // The filter plugin recalculates this trim against the installed source
+        // during aftersourceset. Reapplying remapped old indexes afterwards
+        // would overwrite that fresh result.
+        continue;
+      }
       if (type === FILTER_TRIMMED_TYPE) {
         /** Regrouping changes physical indexes, so filter trim needs fresh group-header state. */
         trimemedOptionsToUpgrade[type] = filterOutEmptyGroupRows(
