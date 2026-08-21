@@ -77,6 +77,7 @@ revogr-header {
     }
     .header-content {
       position: absolute;
+      z-index: 0;
       inset: 0;
       box-sizing: border-box;
       padding: inherit;

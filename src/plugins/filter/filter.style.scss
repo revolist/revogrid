@@ -112,6 +112,8 @@ revogr-filter-panel .filter-panel-dialog {
     visibility: visible;
     cursor: pointer;
     border-radius: 4px;
+    position: relative;
+    z-index: 1;
 
     &.active {
       color: var(--rg-theme-filter-panel-icon-active);

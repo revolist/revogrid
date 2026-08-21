@@ -53,8 +53,17 @@ const DIRECTION_CODES: string[] = [
 export class KeyboardService {
   /** Keep focus transitions in keydown order so rendering can scroll each cell into view. */
   private keyChangeQueue: Promise<boolean> = Promise.resolve(false);
+  private keyChangeGeneration = 0;
+  private applyingKeyChange = false;
 
   constructor(private readonly sv: Config) {}
+
+  /** Cancel delayed directional input after focus or edit context changes externally. */
+  invalidatePendingChanges() {
+    if (!this.applyingKeyChange) {
+      this.keyChangeGeneration += 1;
+    }
+  }
 
   /**
    * Appends printable key input that arrives after edit mode was requested
@@ -184,6 +193,7 @@ export class KeyboardService {
     if (!data) {
       return false;
     }
+    const keyChangeGeneration = this.keyChangeGeneration;
 
     // this interval needed for several cases
     // grid could be resized before next click
@@ -191,9 +201,18 @@ export class KeyboardService {
     await timeout(RESIZE_INTERVAL + 30);
 
     const applyKeyChange = async () => {
+      if (keyChangeGeneration !== this.keyChangeGeneration) {
+        return false;
+      }
       const range = this.sv.selectionStore.get('range');
       const focus = this.sv.selectionStore.get('focus');
-      const changed = this.keyPositionChange(data.changes, range, focus, data.isMulti);
+      this.applyingKeyChange = true;
+      let changed: boolean;
+      try {
+        changed = this.keyPositionChange(data.changes, range, focus, data.isMulti);
+      } finally {
+        this.applyingKeyChange = false;
+      }
       await new Promise<void>(resolve => requestAnimationFrame(() => {
         requestAnimationFrame(() => resolve());
       }));

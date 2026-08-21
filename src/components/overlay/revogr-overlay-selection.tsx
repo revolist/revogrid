@@ -377,6 +377,7 @@ export class OverlaySelection {
   @Watch('selectionStore') selectionServiceSet(
     selectionStore: Observable<SelectionStoreState>,
   ) {
+    this.keyboardService?.invalidatePendingChanges();
     // clear subscriptions
     this.unsubscribeSelectionStore.forEach(v => v());
     this.unsubscribeSelectionStore.length = 0;
@@ -405,6 +406,14 @@ export class OverlaySelection {
       getData: () => this.getData(),
       selectAll: () => this.selectAll.emit(),
     });
+    this.unsubscribeSelectionStore.push(
+      selectionStore.onChange('focus', () =>
+        this.keyboardService?.invalidatePendingChanges(),
+      ),
+      selectionStore.onChange('edit', () =>
+        this.keyboardService?.invalidatePendingChanges(),
+      ),
+    );
     this.createAutoFillService();
   }
   /** Autofill */
@@ -461,6 +470,7 @@ export class OverlaySelection {
 
   disconnectedCallback() {
     // clear subscriptions
+    this.keyboardService?.invalidatePendingChanges();
     this.unsubscribeSelectionStore.forEach(v => v());
     this.unsubscribeSelectionStore.length = 0;
     this.columnService?.destroy();
