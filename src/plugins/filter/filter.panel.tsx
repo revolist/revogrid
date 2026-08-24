@@ -149,7 +149,7 @@ export class FilterPanel {
 
   getFilterItemsList() {
     const prop = this.changes?.prop;
-    if (typeof prop === 'undefined') return '';
+    if (prop === undefined) return '';
 
     const propFilters = this.filterItems[prop] ?? [];
     const visibleFilterCount = propFilters.filter(filter => !filter.hidden).length;
@@ -241,7 +241,7 @@ export class FilterPanel {
           })}
         </ul>
 
-        {propFilters.filter(f => !f.hidden).length > 0 ? <div class="add-filter-divider" /> : ''}
+        {propFilters.some(f => !f.hidden) ? <div class="add-filter-divider" /> : ''}
       </div>
     );
   }
@@ -753,6 +753,7 @@ export class FilterPanel {
               {this.disableDynamicFiltering && [
                 <button
                   key="save"
+                  type="button"
                   id="revo-button-save"
                   aria-label="save"
                   class="revo-button green"
@@ -762,6 +763,7 @@ export class FilterPanel {
                 </button>,
                 <button
                   key="cancel"
+                  type="button"
                   id="revo-button-ok"
                   aria-label="ok"
                   class="revo-button green"
@@ -773,6 +775,7 @@ export class FilterPanel {
               {!this.disableDynamicFiltering && [
                 <button
                   key="ok"
+                  type="button"
                   id="revo-button-ok"
                   aria-label="ok"
                   class="revo-button green"
@@ -783,6 +786,7 @@ export class FilterPanel {
 
                 <button
                   key="reset"
+                  type="button"
                   id="revo-button-reset"
                   aria-label="reset"
                   class="revo-button outline"

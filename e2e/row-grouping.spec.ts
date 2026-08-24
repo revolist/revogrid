@@ -364,6 +364,57 @@ test.describe('row grouping', () => {
     await expect(mainDataRows(page)).toHaveCount(2);
   });
 
+  test('keeps matching groups collapsed when filtered source is replaced', async ({ page }) => {
+    const columns = buildColumns([
+      { prop: 'id', name: 'ID' },
+      { prop: 'name', name: 'Name' },
+      { prop: 'role', name: 'Role', filter: true },
+    ]);
+
+    await mountGrid(page, {
+      columns,
+      source: [
+        { id: 1, name: 'Alice', role: 'Engineer', team: 'North' },
+        { id: 2, name: 'Cara', role: 'Manager', team: 'South' },
+      ],
+      filter: {
+        multiFilterItems: {
+          role: [{ id: 0, type: 'eq', value: 'Manager', relation: 'and' }],
+        },
+      },
+      grouping: {
+        props: ['team'],
+        expandedAll: false,
+      },
+      rowHeaders: true,
+    });
+
+    const mainGroupRows = page.locator(`${SELECTORS.mainViewport} .groupingRow`);
+    await expect(mainGroupRows).toHaveCount(1);
+    await expect(mainGroupRows).toContainText(['South']);
+    await expect(mainDataRows(page)).toHaveCount(1);
+
+    await page.evaluate(() => {
+      const grid = document.querySelector('revo-grid') as HTMLRevoGridElement | null;
+      if (!grid) {
+        throw new Error('Grid was not found');
+      }
+      grid.source = [
+        { id: 3, name: 'Eve', role: 'Manager', team: 'West' },
+        { id: 4, name: 'Finn', role: 'Designer', team: 'West' },
+      ];
+    });
+    await page.waitForChanges();
+
+    await expect(mainGroupRows).toHaveCount(1);
+    await expect(mainGroupRows).toContainText(['West']);
+    await expect(mainDataRows(page)).toHaveCount(1);
+
+    await mainGroupRows.locator(SELECTORS.groupExpandButton).click();
+    await expectVisibleColumnValues(page, 1, ['Eve']);
+    await expect(mainDataRows(page)).toHaveCount(2);
+  });
+
   test('keeps filter trims mapped when grouping is cleared', async ({ page }) => {
     const source = [
       { id: 1, name: 'Alice', role: 'Engineer', city: 'Lisbon', team: 'North' },

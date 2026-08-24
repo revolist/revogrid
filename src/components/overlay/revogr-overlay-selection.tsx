@@ -57,6 +57,8 @@ import type {
   ClipboardConfig,
 } from '@type';
 
+type CellInteractionEvent = MouseEvent | TouchEvent | KeyboardEvent;
+
 /**
  * Component for overlaying the grid with the selection.
  */
@@ -377,6 +379,7 @@ export class OverlaySelection {
   @Watch('selectionStore') selectionServiceSet(
     selectionStore: Observable<SelectionStoreState>,
   ) {
+    this.keyboardService?.invalidatePendingChanges();
     // clear subscriptions
     this.unsubscribeSelectionStore.forEach(v => v());
     this.unsubscribeSelectionStore.length = 0;
@@ -405,6 +408,14 @@ export class OverlaySelection {
       getData: () => this.getData(),
       selectAll: () => this.selectAll.emit(),
     });
+    this.unsubscribeSelectionStore.push(
+      selectionStore.onChange('focus', () =>
+        this.keyboardService?.invalidatePendingChanges(),
+      ),
+      selectionStore.onChange('edit', () =>
+        this.keyboardService?.invalidatePendingChanges(),
+      ),
+    );
     this.createAutoFillService();
   }
   /** Autofill */
@@ -461,6 +472,7 @@ export class OverlaySelection {
 
   disconnectedCallback() {
     // clear subscriptions
+    this.keyboardService?.invalidatePendingChanges();
     this.unsubscribeSelectionStore.forEach(v => v());
     this.unsubscribeSelectionStore.length = 0;
     this.columnService?.destroy();
@@ -480,7 +492,7 @@ export class OverlaySelection {
       this.dimensionCol.state,
     );
     const styles = styleByCellProps(cell);
-    return [
+    return (
       <div class={SELECTION_BORDER_CLASS} style={styles}>
         {this.isMobileDevice && (
           <div class="range-handlers">
@@ -488,8 +500,8 @@ export class OverlaySelection {
             <span class={MOBILE_CLASS}></span>
           </div>
         )}
-      </div>,
-    ];
+      </div>
+    );
   }
 
   private renderEditor() {
@@ -594,7 +606,7 @@ export class OverlaySelection {
 
       // Range
       if (range) {
-        nodes.push(...this.renderRange(range));
+        nodes.push(this.renderRange(range));
       }
       // Autofill
       if (focus && !this.readonly && this.range) {
@@ -639,7 +651,7 @@ export class OverlaySelection {
     focus: Cell,
     end: Cell,
     changes?: Partial<Cell>,
-    originalEvent?: MouseEvent | TouchEvent | KeyboardEvent,
+    originalEvent?: CellInteractionEvent,
   ) {
     // 1. Trigger beforeFocus event
     const { defaultPrevented } = this.beforeFocusCell.emit(
@@ -687,7 +699,7 @@ export class OverlaySelection {
 
   private triggerRangeEvent(
     range: RangeArea,
-    originalEvent?: MouseEvent | TouchEvent | KeyboardEvent,
+    originalEvent?: CellInteractionEvent,
   ) {
     const type = this.types.rowType;
     // 1. Apply range
@@ -944,7 +956,7 @@ export class OverlaySelection {
   focus(
     cell?: Cell,
     isRangeEdit = false,
-    originalEvent?: MouseEvent | TouchEvent | KeyboardEvent,
+    originalEvent?: CellInteractionEvent,
   ) {
     if (!cell) return false;
 

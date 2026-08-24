@@ -42,7 +42,7 @@ export class PluginService implements PluginServiceBase {
     // Step 1: Identify plugins to remove, compare new and old plugins
     const pluginsToRemove =
       prevPlugins?.filter(
-        prevPlugin => !plugins.some(userPlugin => userPlugin === prevPlugin),
+        prevPlugin => !plugins.includes(prevPlugin),
       ) || [];
 
     // Step 2: Remove old plugins
@@ -59,7 +59,7 @@ export class PluginService implements PluginServiceBase {
     // Step 3: Register user plugins
     plugins?.forEach(userPlugin => {
       // check if plugin already exists, if so, skip
-      const existingPlugin = this.internalPlugins.find(
+      const existingPlugin = this.internalPlugins.some(
         createdPlugin => createdPlugin instanceof userPlugin,
       );
       if (existingPlugin) {

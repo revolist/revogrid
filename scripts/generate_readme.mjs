@@ -19,7 +19,7 @@ async function generateReadme(files, output, variables, pkg) {
 
         // Replace variables in the content
         content = content.replace(/\{\{(\w+)\}\}/g, (_, variable) => {
-          return Object.prototype.hasOwnProperty.call(variables, variable) ? variables[variable] : `{{${variable}}}`; // Replace or keep the placeholder if not found
+          return Object.hasOwn(variables, variable) ? variables[variable] : `{{${variable}}}`; // Replace or keep the placeholder if not found
         });
 
         await fs.appendFile(output, content + '\n\n'); // Add a newline for separation between sections

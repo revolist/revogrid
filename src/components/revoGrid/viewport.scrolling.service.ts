@@ -9,29 +9,27 @@ import {
 
 export default class GridScrollingService {
   private elements: ElementsScroll = {};
-  constructor(private setViewport: (e: ViewPortScrollEvent<MultiDimensionType>) => void) {}
+  constructor(private readonly setViewport: (e: ViewPortScrollEvent<MultiDimensionType>) => void) {}
 
   async proxyScroll(e: ViewPortScrollEvent, key?: DimensionColPin | string, skipEvent?: boolean) {
     let newEventPromise: Promise<ViewPortScrollEvent | undefined> | undefined;
     let event = e;
-    for (let elKey in (skipEvent ? {} : this.elements)) {
+    for (const elKey in (skipEvent ? {} : this.elements)) {
       // skip
       if (e.dimension === 'rgCol' && elKey === 'headerRow') {
         continue;
         // pinned column only
-      } else if (this.isPinnedColumn(key) && e.dimension === 'rgCol') {
+      }
+      if (this.isPinnedColumn(key) && e.dimension === 'rgCol') {
         if (elKey === key || !e.delta) {
           continue;
         }
-        for (let el of this.elements[elKey]) {
-          if (el.changeScroll) {
-            newEventPromise = el.changeScroll(e);
-          }
+        const changedEvent = this.changeScroll(this.elements[elKey], e);
+        if (changedEvent) {
+          newEventPromise = changedEvent;
         }
       } else {
-        for (let el of this.elements[elKey]) {
-          await el.setScroll?.(e);
-        }
+        await this.setScroll(this.elements[elKey], e);
       }
     }
     const newEvent = await newEventPromise;
@@ -45,6 +43,22 @@ export default class GridScrollingService {
     );
   }
 
+  private changeScroll(elements: ElementScroll[], e: ViewPortScrollEvent) {
+    let changedEvent: Promise<ViewPortScrollEvent | undefined> | undefined;
+    for (const element of elements) {
+      if (element.changeScroll) {
+        changedEvent = element.changeScroll(e);
+      }
+    }
+    return changedEvent;
+  }
+
+  private async setScroll(elements: ElementScroll[], e: ViewPortScrollEvent) {
+    for (const element of elements) {
+      await element.setScroll?.(e);
+    }
+  }
+
   /**
    * Silent scroll update for mobile devices when we have negative scroll top
    */
@@ -52,7 +66,7 @@ export default class GridScrollingService {
     e: ViewPortScrollEvent,
     key?: DimensionColPin | string,
   ) {
-    for (let elKey in this.elements) {
+    for (const elKey in this.elements) {
       // skip same element update
       if (elKey === key) {
         continue;
@@ -62,7 +76,7 @@ export default class GridScrollingService {
         (elKey === 'headerRow' ||
           columnTypes.includes(elKey as DimensionColPin))
       ) {
-        for (let el of this.elements[elKey]) {
+        for (const el of this.elements[elKey]) {
           await el.changeScroll?.(e, true);
         }
         continue;
@@ -73,7 +87,7 @@ export default class GridScrollingService {
   private isPinnedColumn(
     key?: DimensionColPin | string,
   ): key is DimensionColPin {
-    return !!key && ['colPinStart', 'colPinEnd'].indexOf(key) > -1;
+    return !!key && ['colPinStart', 'colPinEnd'].includes(key);
   }
 
   registerElements(els: ElementsScroll) {

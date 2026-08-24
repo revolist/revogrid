@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test';
-import { test } from '@stencil/playwright';
+import { test, type E2EPage } from '@stencil/playwright';
 import {
   SELECTORS,
   buildColumns,
@@ -10,8 +10,188 @@ import {
   withHeaderTestId,
   type SampleRow,
 } from './helpers';
+import { ASYNC_FILTER_ROW_THRESHOLD } from '../src/plugins/filter/filter.constants';
+
+async function nextAnimationFrames(page: E2EPage, count = 2) {
+  await page.evaluate(async (frameCount) => {
+    for (let frame = 0; frame < frameCount; frame += 1) {
+      await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
+    }
+  }, count);
+}
 
 test.describe('filtering', () => {
+  test('never exposes unfiltered rows while equivalent reactive sources refresh', async ({ page }) => {
+    await mountGrid(page, {
+      columns: [
+        { name: 'Name', prop: 'name', size: 160 },
+        { name: 'Status', prop: 'status', size: 160, filter: true },
+      ],
+      source: [
+        { name: 'Alice', status: 'Active' },
+        { name: 'Bob', status: 'Inactive' },
+        { name: 'Cara', status: 'Active' },
+        { name: 'Dan', status: 'Inactive' },
+      ],
+      filter: {
+        multiFilterItems: {
+          status: [{ id: 0, type: 'eq', value: 'Active', relation: 'and' }],
+        },
+      },
+    });
+
+    await expect(mainDataRows(page)).toHaveCount(2);
+    await expect(page.locator(SELECTORS.mainViewport)).not.toContainText('Inactive');
+
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) {
+        throw new Error('Grid was not found');
+      }
+      (window as any).__unfilteredSourceSnapshots = [];
+      grid.addEventListener('aftersourceset', async () => {
+        const visibleSource = await grid.getVisibleSource() as Array<{
+          name: string;
+          status: string;
+        }>;
+        if (visibleSource.some(row => row.status === 'Inactive')) {
+          (window as any).__unfilteredSourceSnapshots.push(
+            visibleSource.map(row => `${row.name}:${row.status}`),
+          );
+        }
+      });
+    });
+
+    await page.evaluate(async () => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) {
+        throw new Error('Grid was not found');
+      }
+      for (let refresh = 0; refresh < 12; refresh += 1) {
+        grid.source = (grid.source ?? []).map(row => ({ ...row }));
+        await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
+      }
+    });
+    await nextAnimationFrames(page, 3);
+
+    await expect(mainDataRows(page)).toHaveCount(2);
+    await expect(page.locator(SELECTORS.mainViewport)).not.toContainText('Inactive');
+    expect(
+      await page.evaluate(() => (window as any).__unfilteredSourceSnapshots),
+    ).toEqual([]);
+  });
+
+  test('reapplies active filters before later aftersourceset listeners run', async ({ page }) => {
+    await mountGrid(page, {
+      columns: [
+        { name: 'Name', prop: 'name', size: 160 },
+        { name: 'Status', prop: 'status', size: 160, filter: true },
+      ],
+      source: [
+        { name: 'Alice', status: 'Active' },
+        { name: 'Bob', status: 'Inactive' },
+      ],
+      filter: {
+        multiFilterItems: {
+          status: [{ id: 0, type: 'eq', value: 'Active', relation: 'and' }],
+        },
+      },
+    });
+
+    const lifecycle = await page.evaluate(async () => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) {
+        throw new Error('Grid was not found');
+      }
+      const events: string[] = [];
+      grid.addEventListener('beforefilterapply', () => events.push('beforefilterapply'));
+      grid.addEventListener('afterfilterapply', () => events.push('afterfilterapply'));
+      grid.addEventListener('aftersourceset', () => events.push('aftersourceset'));
+
+      grid.source = [
+        { name: 'Cara', status: 'Inactive' },
+        { name: 'Dan', status: 'Active' },
+      ];
+      await new Promise<void>(resolve => requestAnimationFrame(() => resolve()));
+      return events;
+    });
+
+    expect(lifecycle).toEqual([
+      'beforefilterapply',
+      'afterfilterapply',
+      'aftersourceset',
+    ]);
+    await expectVisibleColumnValues(page, 0, ['Dan']);
+  });
+
+  test('hides a large replacement source while active filters run asynchronously', async ({ page }) => {
+    await mountGrid(page, {
+      columns: [
+        { name: 'Name', prop: 'name', size: 160 },
+        { name: 'Status', prop: 'status', size: 160, filter: true },
+      ],
+      source: [
+        { name: 'Alice', status: 'Active' },
+        { name: 'Bob', status: 'Inactive' },
+      ],
+      filter: {
+        multiFilterItems: {
+          status: [{ id: 0, type: 'eq', value: 'Active', relation: 'and' }],
+        },
+      },
+    });
+
+    const result = await page.evaluate(async (asyncFilterRowThreshold) => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) {
+        throw new Error('Grid was not found');
+      }
+
+      return new Promise<{
+        visibleAtAfterSource: string[];
+        finalVisible: string[];
+        browserTaskRanBeforeFilteringCompleted: boolean;
+      }>((resolve) => {
+        let visibleAtAfterSource: string[] = [];
+        let browserTaskRan = false;
+        setTimeout(() => {
+          browserTaskRan = true;
+        });
+
+        grid.addEventListener('aftersourceset', async () => {
+          const rows = await grid.getVisibleSource() as Array<{ name: string }>;
+          visibleAtAfterSource = rows.map(row => row.name);
+        }, { once: true });
+        grid.addEventListener('afterfilterapply', async () => {
+          const rows = await grid.getVisibleSource() as Array<{ name: string }>;
+          resolve({
+            visibleAtAfterSource,
+            finalVisible: rows.map(row => row.name),
+            browserTaskRanBeforeFilteringCompleted: browserTaskRan,
+          });
+        }, { once: true });
+
+        grid.source = Array.from(
+          { length: asyncFilterRowThreshold },
+          (_, index) => ({
+            name: `Row ${index}`,
+            status:
+              index === asyncFilterRowThreshold - 1 ? 'Active' : 'Inactive',
+          }),
+        );
+      });
+    }, ASYNC_FILTER_ROW_THRESHOLD);
+
+    expect(result).toEqual({
+      visibleAtAfterSource: [],
+      finalVisible: [`Row ${ASYNC_FILTER_ROW_THRESHOLD - 1}`],
+      browserTaskRanBeforeFilteringCompleted: true,
+    });
+    await expectVisibleColumnValues(page, 0, [
+      `Row ${ASYNC_FILTER_ROW_THRESHOLD - 1}`,
+    ]);
+  });
+
   test('allows duplicate operators by default', async ({ page }) => {
     const columns = buildColumns([
       { prop: 'role', name: 'Role', filter: true, ...withHeaderTestId('duplicate-default-role') },
