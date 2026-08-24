@@ -149,17 +149,17 @@ export class RowResizePlugin extends BasePlugin {
   }
 
   private syncGridProperty(refresh = true) {
-    const configuredPlugin = this.gridPlugins.find(
+    const hasConfiguredPlugin = this.gridPlugins.some(
       plugin =>
         plugin !== RowResizePlugin &&
         plugin.prototype instanceof RowResizePlugin,
     );
     const explicitlyEnabled = this.gridPlugins.includes(RowResizePlugin);
-    const enabled = configuredPlugin
+    const enabled = hasConfiguredPlugin
       ? false
       : explicitlyEnabled || !!this.gridResizeRow;
     const config = resolveRowResizeConfig(
-      !configuredPlugin &&
+      !hasConfiguredPlugin &&
         !explicitlyEnabled &&
         typeof this.gridResizeRow === 'object'
         ? this.gridResizeRow
