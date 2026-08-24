@@ -26,27 +26,16 @@ async function enableRowResize(
   page: E2EPage,
   config?: { minHeight?: number; maxHeight?: number },
 ) {
-  await page.evaluate(async pluginConfig => {
-    const loadModule = Function(
-      'return import("/build/index.esm.js")',
-    ) as () => Promise<{
-      RowResizePlugin: new (...args: any[]) => any;
-      createRowResizePlugin: (config?: {
-        minHeight?: number;
-        maxHeight?: number;
-      }) => new (...args: any[]) => any;
-    }>;
-    const { RowResizePlugin, createRowResizePlugin } = await loadModule();
+  await page.evaluate(pluginConfig => {
     const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
     if (!grid) throw new Error('Grid was not found');
-    grid.plugins = [
-      pluginConfig ? createRowResizePlugin(pluginConfig) : RowResizePlugin,
-    ];
+    grid.resizeRow = pluginConfig ?? true;
+  }, config);
+  await page.evaluate(async () => {
     await new Promise<void>(resolve =>
       requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
     );
-    await grid.refresh();
-  }, config);
+  });
   await page.waitForChanges();
 }
 
@@ -54,6 +43,14 @@ function resizeHandle(page: E2EPage, rowIndex: number, rowType = 'rgRow') {
   return page.locator(
     `${SELECTORS.rowHeaderViewport} revogr-data[type="${rowType}"][col-type="rowHeaders"] .rgRow[data-rgrow="${rowIndex}"] > .row-resize-handle`,
   );
+}
+
+function dataResizeHandle(page: E2EPage, rowIndex: number) {
+  return page
+    .locator(
+      `revogr-data[type="rgRow"][col-type="rgCol"] .rgRow[data-rgrow="${rowIndex}"] > .row-resize-handle`,
+    )
+    .first();
 }
 
 async function dragHandle(
@@ -141,6 +138,110 @@ async function rowHeightsByText(page: E2EPage, text: string) {
 }
 
 test.describe('row resize plugin', () => {
+  test('stays registered and activates in place from resize-row', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: buildColumns([{ prop: 'name', name: 'Name' }]),
+      source: [{ name: 'Alice' }],
+      rowHeaders: true,
+    });
+
+    const registration = await page.evaluate(async () => {
+      const loadModule = Function(
+        'return import("/build/index.esm.js")',
+      ) as () => Promise<{
+        RowResizePlugin: new (...args: any[]) => any;
+      }>;
+      const { RowResizePlugin } = await loadModule();
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) throw new Error('Grid was not found');
+      const before = (await grid.getPlugins()).find(
+        plugin => plugin instanceof RowResizePlugin,
+      );
+      grid.resizeRow = true;
+      await new Promise<void>(resolve =>
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+      );
+      const after = (await grid.getPlugins()).filter(
+        plugin => plugin instanceof RowResizePlugin,
+      );
+      return {
+        registeredWhileDisabled: !!before,
+        sameInstance: after.length === 1 && after[0] === before,
+      };
+    });
+    await page.waitForChanges();
+
+    expect(registration).toEqual({
+      registeredWhileDisabled: true,
+      sameInstance: true,
+    });
+    await expect(resizeHandle(page, 0)).toBeVisible();
+  });
+
+  test('yields activation to an explicitly configured row-resize plugin', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: buildColumns([{ prop: 'name', name: 'Name' }]),
+      source: [{ name: 'Alice' }],
+      rowHeaders: true,
+      rowSize: 36,
+    });
+
+    await page.evaluate(async () => {
+      const loadModule = Function(
+        'return import("/build/index.esm.js")',
+      ) as () => Promise<{
+        createRowResizePlugin: (config: { minHeight: number }) => new (
+          ...args: any[]
+        ) => any;
+      }>;
+      const { createRowResizePlugin } = await loadModule();
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) throw new Error('Grid was not found');
+      grid.plugins = [createRowResizePlugin({ minHeight: 28 })];
+      await new Promise<void>(resolve =>
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+      );
+    });
+    await page.waitForChanges();
+
+    await expect(resizeHandle(page, 0)).toHaveCount(1);
+    await dragHandle(page, resizeHandle(page, 0), -100);
+    const resized = await dataCell(page, 0, 0).boundingBox();
+    expect(resized!.height).toBeCloseTo(28, 0);
+  });
+
+  test('resizes from the full row edge when enabled in resize-row config', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: buildColumns([{ prop: 'name', name: 'Name' }]),
+      source: [{ name: 'Alice' }],
+      rowHeaders: false,
+      rowSize: 36,
+      resizeRow: { fullRow: true },
+    });
+
+    await expect(page.locator(SELECTORS.rowHeaderViewport)).toHaveCount(0);
+    const handle = dataResizeHandle(page, 0);
+    await expect(handle).toBeVisible();
+    const before = await dataCell(page, 0, 0).boundingBox();
+    await dragHandle(page, handle, 24);
+    const after = await dataCell(page, 0, 0).boundingBox();
+
+    expect(after!.height).toBeGreaterThan(before!.height + 18);
+
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (grid) grid.resizeRow = false;
+    });
+    await page.waitForChanges();
+    await expect(page.locator('.row-resize-handle')).toHaveCount(0);
+  });
+
   test('is opt-in, supports dynamic row headers, and resizes live', async ({
     page,
   }) => {

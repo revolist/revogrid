@@ -12,20 +12,26 @@ describe('row resize utilities', () => {
     expect(resolveRowResizeConfig()).toEqual({
       minHeight: DEFAULT_MIN_ROW_HEIGHT,
       maxHeight: undefined,
+      fullRow: false,
     });
-    expect(resolveRowResizeConfig({ minHeight: 0, maxHeight: 5.6 })).toEqual({
-      minHeight: 1,
-      maxHeight: 6,
-    });
+    expect(
+      resolveRowResizeConfig({
+        minHeight: 0,
+        maxHeight: 5.6,
+        fullRow: true,
+      }),
+    ).toEqual({ minHeight: 1, maxHeight: 6, fullRow: true });
     expect(resolveRowResizeConfig({ minHeight: 30, maxHeight: 10 })).toEqual({
       minHeight: 30,
       maxHeight: 30,
+      fullRow: false,
     });
     expect(
       resolveRowResizeConfig({ minHeight: Number.NaN, maxHeight: Infinity }),
     ).toEqual({
       minHeight: DEFAULT_MIN_ROW_HEIGHT,
       maxHeight: undefined,
+      fullRow: false,
     });
   });
 

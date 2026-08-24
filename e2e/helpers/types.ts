@@ -4,6 +4,7 @@ import type {
   ColumnFilterConfig,
   RowDefinition,
   RowHeaders,
+  RowResizeConfig,
   ThemeDefinition,
 } from '../../src';
 
@@ -24,6 +25,7 @@ export type GridSetupOptions = {
   range?: boolean;
   useClipboard?: boolean | ClipboardConfig;
   resize?: boolean;
+  resizeRow?: boolean | RowResizeConfig;
   readonly?: boolean;
   canMoveColumns?: boolean;
   grouping?: Record<string, unknown>;

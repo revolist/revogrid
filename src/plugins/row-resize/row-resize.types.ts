@@ -5,11 +5,14 @@ export type RowResizeConfig = {
   minHeight?: number;
   /** Optional largest height a user can assign. */
   maxHeight?: number;
+  /** Makes the resize edge available across data rows, not only row headers. */
+  fullRow?: boolean;
 };
 
 export type ResolvedRowResizeConfig = {
   minHeight: number;
   maxHeight?: number;
+  fullRow: boolean;
 };
 
 export type RowResizeEventDetail = {
@@ -32,6 +35,7 @@ export type RowResizeCancelReason =
   | 'pointercancel'
   | 'blur'
   | 'destroy'
+  | 'config-change'
   | 'data-change'
   | 'row-headers-hidden';
 

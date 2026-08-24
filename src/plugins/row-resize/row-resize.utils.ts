@@ -23,7 +23,7 @@ export function resolveRowResizeConfig(
   const maxHeight = finiteNumber(config.maxHeight)
     ? Math.max(minHeight, Math.round(config.maxHeight))
     : undefined;
-  return { minHeight, maxHeight };
+  return { minHeight, maxHeight, fullRow: config.fullRow === true };
 }
 
 export function clampRowResizeHeight(

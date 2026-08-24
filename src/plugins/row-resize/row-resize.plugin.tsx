@@ -43,7 +43,10 @@ type ActiveResize = {
 };
 
 export class RowResizePlugin extends BasePlugin {
-  readonly config: ResolvedRowResizeConfig;
+  private config: ResolvedRowResizeConfig;
+  private enabled = true;
+  private gridResizeRow: HTMLRevoGridElement['resizeRow'] = false;
+  private gridPlugins: GridPlugin[] = [];
 
   private active?: ActiveResize;
   private readonly committedSizes = new Map<
@@ -56,6 +59,15 @@ export class RowResizePlugin extends BasePlugin {
   private previousBodyCursor = '';
   private rowDefinitionsRef: HTMLRevoGridElement['rowDefinitions'];
 
+  static fromGridProperty(
+    revogrid: HTMLRevoGridElement,
+    providers: PluginProviders,
+  ): RowResizePlugin {
+    const plugin = new RowResizePlugin(revogrid, providers);
+    plugin.controlFromGridProperty();
+    return plugin;
+  }
+
   constructor(
     revogrid: HTMLRevoGridElement,
     providers: PluginProviders,
@@ -64,7 +76,10 @@ export class RowResizePlugin extends BasePlugin {
     super(revogrid, providers);
     this.config = resolveRowResizeConfig(config);
     this.rowDefinitionsRef = revogrid.rowDefinitions;
+    this.registerEventListeners();
+  }
 
+  private registerEventListeners() {
     this.addEventListener('beforerowrender', this.decorateRow);
     this.addEventListener('beforeanysource', ({ detail }) => {
       this.cancel('data-change');
@@ -110,16 +125,74 @@ export class RowResizePlugin extends BasePlugin {
       queueMicrotask(this.reapplyCommittedSizes);
     });
     this.addEventListener('rowheaderschanged', ({ detail }) => {
-      if (!detail) {
+      if (!detail && !this.config.fullRow) {
         this.cancel('row-headers-hidden');
       }
     });
   }
 
+  private controlFromGridProperty() {
+    this.gridResizeRow = this.revogrid.resizeRow;
+    this.gridPlugins = this.revogrid.plugins;
+    this.syncGridProperty(false);
+    this.watch<HTMLRevoGridElement['resizeRow']>('resizeRow', value => {
+      this.gridResizeRow = value;
+      this.syncGridProperty();
+    });
+    this.watch<GridPlugin[]>('plugins', value => {
+      this.gridPlugins = value || [];
+      this.syncGridProperty();
+    });
+  }
+
+  private syncGridProperty(refresh = true) {
+    const configuredPlugin = this.gridPlugins.find(
+      plugin =>
+        plugin !== RowResizePlugin &&
+        plugin.prototype instanceof RowResizePlugin,
+    );
+    const explicitlyEnabled = this.gridPlugins.includes(RowResizePlugin);
+    const enabled = configuredPlugin
+      ? false
+      : explicitlyEnabled || !!this.gridResizeRow;
+    const config = resolveRowResizeConfig(
+      !configuredPlugin &&
+        !explicitlyEnabled &&
+        typeof this.gridResizeRow === 'object'
+        ? this.gridResizeRow
+        : undefined,
+    );
+    const configChanged =
+      config.minHeight !== this.config.minHeight ||
+      config.maxHeight !== this.config.maxHeight ||
+      config.fullRow !== this.config.fullRow;
+    if (enabled === this.enabled && !configChanged) {
+      return;
+    }
+
+    this.cancel('config-change');
+    this.config = config;
+    if (enabled !== this.enabled) {
+      this.enabled = enabled;
+      if (enabled) {
+        this.rowDefinitionsRef = this.revogrid.rowDefinitions;
+        this.registerEventListeners();
+      } else {
+        this.clearSubscriptions();
+      }
+    }
+    if (refresh) {
+      queueMicrotask(() => void this.revogrid.refresh());
+    }
+  }
+
   private readonly decorateRow = ({
     detail,
   }: CustomEvent<BeforeRowRenderEvent>) => {
-    if (detail.colType !== 'rowHeaders') {
+    if (
+      !this.enabled ||
+      (detail.colType !== 'rowHeaders' && !this.config.fullRow)
+    ) {
       return;
     }
     const handle = this.h('div', {
@@ -141,6 +214,7 @@ export class RowResizePlugin extends BasePlugin {
     index: number,
   ) {
     if (
+      !this.enabled ||
       this.active ||
       event.defaultPrevented ||
       !event.isPrimary ||
