@@ -606,7 +606,7 @@ export class OverlaySelection {
 
       // Range
       if (range) {
-        nodes.push(...this.renderRange(range));
+        nodes.push(this.renderRange(range));
       }
       // Autofill
       if (focus && !this.readonly && this.range) {
