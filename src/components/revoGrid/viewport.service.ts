@@ -206,7 +206,7 @@ export default class ViewportService {
     const changedItems: ResizeDetails = {};
     for (const i of Object.keys(detail || {})) {
       const size = detail[i];
-      const virtualIndex = parseInt(i, 10);
+      const virtualIndex = Number.parseInt(i, 10);
       const item = getSourceItem(store, virtualIndex);
       if (item) {
         changedItems[virtualIndex] = { ...item, size };
