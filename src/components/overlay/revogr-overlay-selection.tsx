@@ -57,6 +57,8 @@ import type {
   ClipboardConfig,
 } from '@type';
 
+type CellInteractionEvent = MouseEvent | TouchEvent | KeyboardEvent;
+
 /**
  * Component for overlaying the grid with the selection.
  */
@@ -490,7 +492,7 @@ export class OverlaySelection {
       this.dimensionCol.state,
     );
     const styles = styleByCellProps(cell);
-    return [
+    return (
       <div class={SELECTION_BORDER_CLASS} style={styles}>
         {this.isMobileDevice && (
           <div class="range-handlers">
@@ -498,8 +500,8 @@ export class OverlaySelection {
             <span class={MOBILE_CLASS}></span>
           </div>
         )}
-      </div>,
-    ];
+      </div>
+    );
   }
 
   private renderEditor() {
@@ -649,7 +651,7 @@ export class OverlaySelection {
     focus: Cell,
     end: Cell,
     changes?: Partial<Cell>,
-    originalEvent?: MouseEvent | TouchEvent | KeyboardEvent,
+    originalEvent?: CellInteractionEvent,
   ) {
     // 1. Trigger beforeFocus event
     const { defaultPrevented } = this.beforeFocusCell.emit(
@@ -697,7 +699,7 @@ export class OverlaySelection {
 
   private triggerRangeEvent(
     range: RangeArea,
-    originalEvent?: MouseEvent | TouchEvent | KeyboardEvent,
+    originalEvent?: CellInteractionEvent,
   ) {
     const type = this.types.rowType;
     // 1. Apply range
@@ -954,7 +956,7 @@ export class OverlaySelection {
   focus(
     cell?: Cell,
     isRangeEdit = false,
-    originalEvent?: MouseEvent | TouchEvent | KeyboardEvent,
+    originalEvent?: CellInteractionEvent,
   ) {
     if (!cell) return false;
 

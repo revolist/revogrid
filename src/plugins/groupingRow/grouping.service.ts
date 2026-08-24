@@ -233,7 +233,7 @@ export function isGrouping(rgRow?: DataType): rgRow is GroupingItem {
 }
 
 export function isGroupingColumn(column?: ColumnRegular) {
-  return typeof column?.[PSEUDO_GROUP_COLUMN] !== 'undefined';
+  return column?.[PSEUDO_GROUP_COLUMN] !== undefined;
 }
 
 export function measureEqualDepth<T>(groupA: T[], groupB: T[]) {

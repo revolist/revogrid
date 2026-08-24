@@ -28,9 +28,7 @@ export const trimmedPlugin = (storeService: {
         }
         case 'trimmed': {
           const trim = val as DimensionSettingsState['trimmed'];
-          if (!trimmedPreviousSizes) {
-            trimmedPreviousSizes = storeService.store.get('sizes');
-          }
+          trimmedPreviousSizes ??= storeService.store.get('sizes');
 
           trimmingObject = removeMultipleAndShift(
             trimmedPreviousSizes,

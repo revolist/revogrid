@@ -170,6 +170,7 @@ export const GroupingRowRenderer = (props: RowGroupingProps) => {
     <RowRenderer {...props} {...groupRowAttrs}>
       {hasExpand && [
         <button
+          type="button"
           class={{ [GROUP_EXPAND_BTN]: true }}
           onClick={e => expandEvent(e, model, itemIndex)}
         >

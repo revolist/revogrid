@@ -205,7 +205,7 @@ export function gatherGroup<T extends ColumnCollection>(
         // fill indexes per each viewport
         res.columnGrouping[type].push({
           ...group,
-          indexes: Array(itemLength).fill(columnLength).map((v, i) => v + i),
+          indexes: Array.from({ length: itemLength }, (_, i) => columnLength + i),
         });
       }
     }

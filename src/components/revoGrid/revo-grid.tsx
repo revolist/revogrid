@@ -687,7 +687,7 @@ export class RevoGridComponent {
   ) {
     if (this.dataProvider && this.columnProvider && !skipDataUpdate) {
       const columnProp = this.columnProvider.getColumn(col, colType)?.prop;
-      if (typeof columnProp !== 'undefined') {
+      if (columnProp !== undefined) {
         this.dataProvider.setCellData({
           type: rowType,
           rowIndex: row,

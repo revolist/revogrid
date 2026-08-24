@@ -31,7 +31,7 @@ export class LocalScrollTimer {
    * Remember last mw event time
    */
   latestScrollUpdate(dimension: DimensionType) {
-    this.mouseWheelScrollTimestamp[dimension] = new Date().getTime();
+    this.mouseWheelScrollTimestamp[dimension] = Date.now();
   }
 
   isReady(type: DimensionType, coordinate: number) {
@@ -44,7 +44,7 @@ export class LocalScrollTimer {
   }
 
   private verifyChange(type: DimensionType, coordinate: number) {
-    const now = new Date().getTime();
+    const now = Date.now();
     const change = now - this.mouseWheelScrollTimestamp[type];
     return change > this.scrollThrottling &&
     coordinate !== this.lastKnownScrollCoordinate[type];
@@ -75,7 +75,7 @@ export class LocalScrollTimer {
       // save lastScrollUpdate callback
       const callback = this.lastScrollUpdateCallbacks[type] = {
         callback: lastScrollUpdate,
-        timestamp: new Date().getTime(),
+        timestamp: Date.now(),
         coordinate,
         timeout: 0 as any,
       };
