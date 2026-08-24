@@ -6,6 +6,7 @@
  */
 import { HTMLStencilElement, JSXBase } from "@stencil/core/internal";
 import { AdditionalData, AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, CellTemplateProp, ChangedRange, ClipboardConfig, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, ExtraNodeFuncConfig, FocusAfterRenderEvent, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, Nullable, PluginBaseComponent, PluginProviders, PositionItem, ProvidersColumns, RangeArea, RangeClipboardCopyEventProps, RangeClipboardPasteEvent, RowDefinition, RowDragStartDetails, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, ThemeDefinition, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
+import { RowResizeConfig } from "./plugins/row-resize";
 import { GridPlugin } from "./plugins/base.plugin";
 import { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
 import { ColumnFilterConfig, FilterCaptions, FilterCollectionItem, LogicFunction, MultiFilterItem, ShowData } from "./plugins/filter/filter.types";
@@ -22,6 +23,7 @@ import { HeaderRenderProps } from "./components/header/header-renderer";
 import { HeaderGroupRendererProps } from "./components/header/header-group-renderer";
 import { EventData } from "./components/overlay/selection.utils";
 export { AdditionalData, AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, CellTemplateProp, ChangedRange, ClipboardConfig, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, ExtraNodeFuncConfig, FocusAfterRenderEvent, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, Nullable, PluginBaseComponent, PluginProviders, PositionItem, ProvidersColumns, RangeArea, RangeClipboardCopyEventProps, RangeClipboardPasteEvent, RowDefinition, RowDragStartDetails, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, ThemeDefinition, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
+export { RowResizeConfig } from "./plugins/row-resize";
 export { GridPlugin } from "./plugins/base.plugin";
 export { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
 export { ColumnFilterConfig, FilterCaptions, FilterCollectionItem, LogicFunction, MultiFilterItem, ShowData } from "./plugins/filter/filter.types";
@@ -255,6 +257,11 @@ export namespace Components {
           * @default true
          */
         "resize": boolean;
+        /**
+          * Enables row resizing. Pass a configuration object to customize the height limits or enable resize edges across the full row.
+          * @default false
+         */
+        "resizeRow": boolean | RowResizeConfig;
         /**
           * Row class property mapping. Map custom classes to rows from row object data. Define this property in rgRow object and this will be mapped as rgRow class.
           * @default ''
@@ -1730,6 +1737,11 @@ declare namespace LocalJSX {
          */
         "resize"?: boolean;
         /**
+          * Enables row resizing. Pass a configuration object to customize the height limits or enable resize edges across the full row.
+          * @default false
+         */
+        "resizeRow"?: boolean | RowResizeConfig;
+        /**
           * Row class property mapping. Map custom classes to rows from row object data. Define this property in rgRow object and this will be mapped as rgRow class.
           * @default ''
          */
@@ -2531,6 +2543,7 @@ declare namespace LocalJSX {
         "range": boolean;
         "readonly": boolean;
         "resize": boolean;
+        "resizeRow": boolean | RowResizeConfig;
         "noHorizontalScrollTransfer": boolean;
         "canFocus": boolean;
         "useClipboard": boolean | ClipboardConfig;

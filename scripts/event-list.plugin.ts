@@ -29,6 +29,32 @@ const supplementalEvents = [
     description:
       'Fired when the column drag operation completes. Includes reordered columns, physical order, and viewport type.',
   },
+  {
+    name: 'beforerowresize',
+    type: 'RowResizeEventDetail',
+    component: 'revo-grid',
+    description:
+      'Fired before a row-header resize gesture starts. Call preventDefault() to reject the gesture.',
+  },
+  {
+    name: 'rowresize',
+    type: 'RowResizeEventDetail',
+    component: 'revo-grid',
+    description: 'Fired after each live row-height update.',
+  },
+  {
+    name: 'afterrowresize',
+    type: 'RowResizeEventDetail',
+    component: 'revo-grid',
+    description: 'Fired after a row resize gesture commits.',
+  },
+  {
+    name: 'rowresizecancel',
+    type: 'RowResizeCancelEventDetail',
+    component: 'revo-grid',
+    description:
+      'Fired after an interrupted row resize restores the original heights.',
+  },
 ] as const;
 const unescapedMarkdownPipe = /(?<!\\)\|/g;
 
@@ -105,7 +131,7 @@ ${json2md(
 ${outputTarget.footer || ''}`;
 
     // Collecting and filtering unique event names
-    const eventNames = events.map(event => event.name);
+    const eventNames = [...new Set(events.map(event => event.name))];
 
     // Generate the TypeScript Set file content
     const setContent = `

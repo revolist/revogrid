@@ -61,6 +61,7 @@ export async function mountGrid(page: E2EPage, options: GridSetupOptions) {
       range,
       useClipboard,
       resize,
+      resizeRow,
       readonly,
       canMoveColumns,
       grouping,
@@ -93,6 +94,7 @@ export async function mountGrid(page: E2EPage, options: GridSetupOptions) {
     grid.range = range ?? false;
     grid.useClipboard = useClipboard ?? true;
     grid.resize = resize ?? false;
+    grid.resizeRow = resizeRow ?? false;
     grid.readonly = readonly ?? false;
     grid.canMoveColumns = canMoveColumns ?? false;
     grid.grouping = grouping as any;

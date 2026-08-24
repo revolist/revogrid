@@ -5,6 +5,7 @@ export type RevogridEvents = 'contentsizechanged'|
   'afteredit'|
   'beforeautofill'|
   'beforerange'|
+  'afterfocus'|
   'roworderchanged'|
   'beforesorting'|
   'beforesourcesortingapply'|
@@ -60,7 +61,6 @@ export type RevogridEvents = 'contentsizechanged'|
   'resetChange'|
   'beforefocusrender'|
   'beforescrollintoview'|
-  'afterfocus'|
   'beforeheaderclick'|
   'headerresize'|
   'beforeheaderresize'|
@@ -72,6 +72,10 @@ export type RevogridEvents = 'contentsizechanged'|
   'columndragmousemove'|
   'beforecolumndragend'|
   'columndragend'|
+  'beforerowresize'|
+  'rowresize'|
+  'afterrowresize'|
+  'rowresizecancel'|
   'rowdragstartinit'|
   'rowdragendinit'|
   'rowdragmoveinit'|
@@ -119,6 +123,7 @@ export const REVOGRID_EVENTS = new Map<RevogridEvents, RevogridEvents>([
   ['afteredit', 'afteredit'],
   ['beforeautofill', 'beforeautofill'],
   ['beforerange', 'beforerange'],
+  ['afterfocus', 'afterfocus'],
   ['roworderchanged', 'roworderchanged'],
   ['beforesorting', 'beforesorting'],
   ['beforesourcesortingapply', 'beforesourcesortingapply'],
@@ -174,7 +179,6 @@ export const REVOGRID_EVENTS = new Map<RevogridEvents, RevogridEvents>([
   ['resetChange', 'resetChange'],
   ['beforefocusrender', 'beforefocusrender'],
   ['beforescrollintoview', 'beforescrollintoview'],
-  ['afterfocus', 'afterfocus'],
   ['beforeheaderclick', 'beforeheaderclick'],
   ['headerresize', 'headerresize'],
   ['beforeheaderresize', 'beforeheaderresize'],
@@ -186,6 +190,10 @@ export const REVOGRID_EVENTS = new Map<RevogridEvents, RevogridEvents>([
   ['columndragmousemove', 'columndragmousemove'],
   ['beforecolumndragend', 'beforecolumndragend'],
   ['columndragend', 'columndragend'],
+  ['beforerowresize', 'beforerowresize'],
+  ['rowresize', 'rowresize'],
+  ['afterrowresize', 'afterrowresize'],
+  ['rowresizecancel', 'rowresizecancel'],
   ['rowdragstartinit', 'rowdragstartinit'],
   ['rowdragendinit', 'rowdragendinit'],
   ['rowdragmoveinit', 'rowdragmoveinit'],

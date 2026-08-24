@@ -73,6 +73,7 @@
 - **Custom Sizes**: Define custom sizes for [columns](https://rv-grid.com/guide/column/#Column-Size) and [rows](https://rv-grid.com/guide/row/height). Automatic sizing based on content.
 
 - **[Column Resizing](https://rv-grid.com/guide/column/resize)**: Adjust column widths.
+- **[Row Resizing](https://rv-grid.com/guide/row/resize)**: Resize from row-header edges or enable full-row resize edges with optional height limits.
 - **Auto Size Columns**: Intelligent column width adjustment that automatically adapts to content, ensuring optimal readability and layout efficiency.
 
 - **Pinned/Sticky/Freezed Elements**:

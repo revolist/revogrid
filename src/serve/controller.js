@@ -436,6 +436,7 @@ function onLoad() {
   grid.range = true;
   grid.useClipboard = { rangeFill: true };
   grid.resize = true;
+  grid.resizeRow = { fullRow: true };
 
   grid.exporting = true;
   grid.rowHeaders = true;

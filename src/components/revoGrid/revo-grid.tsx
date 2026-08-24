@@ -92,6 +92,10 @@ import { ColumnFilterConfig, FilterCollectionItem } from '../../plugins/filter/f
 import { PluginService } from './plugin.service';
 import { AfterSortingApplyEvent, SortingConfig, SortingOrder } from '../../plugins';
 import { RTLPlugin } from '../../plugins/rtl/rtl.plugin';
+import {
+  RowResizePlugin,
+  type RowResizeConfig,
+} from '../../plugins/row-resize';
 
 const DEFAULT_COLUMN_SIZE = 100;
 
@@ -156,6 +160,12 @@ export class RevoGridComponent {
 
   /** When true, columns are resizable. */
   @Prop() resize = true;
+
+  /**
+   * Enables row resizing. Pass a configuration object to customize the
+   * height limits or enable resize edges across the full row.
+   */
+  @Prop() resizeRow: boolean | RowResizeConfig = false;
 
   /**
    * Prevents horizontal scroll state from being mirrored across viewport sections.
@@ -1634,6 +1644,9 @@ export class RevoGridComponent {
 
     // register grouping plugin
     this.pluginService.add(new GroupingRowPlugin(this.element, pluginData));
+    this.pluginService.add(
+      RowResizePlugin.fromGridProperty(this.element, pluginData),
+    );
     if (this.canMoveColumns) {
       this.pluginService.add(new ColumnMovePlugin(this.element, pluginData));
     }
