@@ -292,12 +292,14 @@ export class SelectionStoreConnector {
           continue;
         }
         const lastCell = store.store.get('lastCell');
-        if (lastCell) {
-          store.setRange(
-            { x: 0, y: 0 },
-            { x: lastCell.x - 1, y: lastCell.y - 1 },
-          );
+        if (!lastCell || lastCell.x <= 0 || lastCell.y <= 0) {
+          store.setRangeArea(null);
+          continue;
         }
+        store.setRange(
+          { x: 0, y: 0 },
+          { x: lastCell.x - 1, y: lastCell.y - 1 },
+        );
       }
     }
   }
