@@ -18,6 +18,7 @@ import {
   clampRowResizeHeight,
   createRowResizePatch,
   getRowResizeIndexes,
+  mergeRowResizeDefinitions,
   resolveRowResizeConfig,
 } from './row-resize.utils';
 
@@ -68,15 +69,27 @@ export class RowResizePlugin extends BasePlugin {
     this.addEventListener('beforeanysource', ({ detail }) => {
       this.cancel('data-change');
       const committed = this.committedSizes.get(detail.type);
-      if (committed) {
-        for (const index of committed.keys()) {
-          if (index >= detail.source.length) {
-            committed.delete(index);
-          }
+      if (!committed) {
+        return;
+      }
+      const removedIndexes = new Set<number>();
+      for (const index of committed.keys()) {
+        if (index >= detail.source.length) {
+          committed.delete(index);
+          removedIndexes.add(index);
         }
       }
+      if (removedIndexes.size) {
+        const rowDefinitions = this.revogrid.rowDefinitions.filter(
+          definition =>
+            definition.type !== detail.type ||
+            !removedIndexes.has(definition.index),
+        );
+        this.rowDefinitionsRef = rowDefinitions;
+        this.revogrid.rowDefinitions = rowDefinitions;
+      }
     });
-    this.addEventListener('afteranysource', this.syncAppliedIndexes);
+    this.addEventListener('afteranysource', this.rebuildCommittedSizes);
     this.addEventListener('beforesourcesortingapply', this.cancelForDataChange);
     this.addEventListener('aftersortingapply', this.reapplyCommittedSizes);
     this.addEventListener('beforefilterapply', this.cancelForDataChange);
@@ -91,7 +104,7 @@ export class RowResizePlugin extends BasePlugin {
     this.addEventListener('afterthemechanged', this.reapplyCommittedSizes);
     this.addEventListener('aftertrimmed', this.syncAppliedIndexes);
     this.addEventListener('roworderchange', () => {
-      queueMicrotask(this.syncAppliedIndexes);
+      queueMicrotask(this.reapplyCommittedSizes);
     });
     this.addEventListener(GROUP_EXPAND_EVENT, () => {
       queueMicrotask(this.reapplyCommittedSizes);
@@ -103,7 +116,9 @@ export class RowResizePlugin extends BasePlugin {
     });
   }
 
-  private decorateRow = ({ detail }: CustomEvent<BeforeRowRenderEvent>) => {
+  private readonly decorateRow = ({
+    detail,
+  }: CustomEvent<BeforeRowRenderEvent>) => {
     if (detail.colType !== 'rowHeaders') {
       return;
     }
@@ -118,7 +133,7 @@ export class RowResizePlugin extends BasePlugin {
     detail.node.$children$ = [...(detail.node.$children$ || []), handle];
   };
 
-  private cancelForDataChange = () => this.cancel('data-change');
+  private readonly cancelForDataChange = () => this.cancel('data-change');
 
   private startResize(
     event: PointerEvent,
@@ -198,9 +213,9 @@ export class RowResizePlugin extends BasePlugin {
     doc.defaultView?.addEventListener('blur', this.onWindowBlur);
   }
 
-  private onPointerMove = (event: PointerEvent) => {
+  private readonly onPointerMove = (event: PointerEvent) => {
     const active = this.active;
-    if (!active || event.pointerId !== active.pointerId) {
+    if (active?.pointerId !== event.pointerId) {
       return;
     }
     event.preventDefault();
@@ -218,9 +233,9 @@ export class RowResizePlugin extends BasePlugin {
     }
   };
 
-  private onPointerUp = (event: PointerEvent) => {
+  private readonly onPointerUp = (event: PointerEvent) => {
     const active = this.active;
-    if (!active || event.pointerId !== active.pointerId) {
+    if (active?.pointerId !== event.pointerId) {
       return;
     }
     event.preventDefault();
@@ -233,27 +248,27 @@ export class RowResizePlugin extends BasePlugin {
     if (this.active !== active) {
       return;
     }
-    this.commitResize(active);
     const detail = this.eventDetail(active, event, active.currentHeight);
     this.finishGesture();
+    this.commitResize(active);
     this.emit<RowResizeEventDetail>(AFTER_ROW_RESIZE_EVENT, detail);
   };
 
-  private onPointerCancel = (event: PointerEvent) => {
+  private readonly onPointerCancel = (event: PointerEvent) => {
     if (this.active?.pointerId === event.pointerId) {
       this.active.lastEvent = event;
       this.cancel('pointercancel');
     }
   };
 
-  private onKeyDown = (event: KeyboardEvent) => {
+  private readonly onKeyDown = (event: KeyboardEvent) => {
     if (event.key === 'Escape' && this.active) {
       event.preventDefault();
       this.cancel('escape');
     }
   };
 
-  private onWindowBlur = () => this.cancel('blur');
+  private readonly onWindowBlur = () => this.cancel('blur');
 
   private flushPendingResize() {
     const active = this.active;
@@ -286,9 +301,7 @@ export class RowResizePlugin extends BasePlugin {
       ...this.providers.dimension.stores[active.rowType].store.get('sizes'),
     };
     for (const index of active.indexes) {
-      if (
-        Object.prototype.hasOwnProperty.call(active.originalCustomSizes, index)
-      ) {
+      if (Object.hasOwn(active.originalCustomSizes, index)) {
         currentSizes[index] = active.originalCustomSizes[index];
       } else {
         delete currentSizes[index];
@@ -337,16 +350,28 @@ export class RowResizePlugin extends BasePlugin {
       applied = new Set();
       this.appliedIndexes.set(active.rowType, applied);
     }
-    for (const index of active.indexes) {
+    const physicalIndexes = active.indexes.reduce<number[]>((result, index) => {
       const physicalIndex = items[index];
       if (physicalIndex !== undefined) {
         committed.set(physicalIndex, active.currentHeight);
         applied.add(index);
+        result.push(physicalIndex);
       }
+      return result;
+    }, []);
+    if (physicalIndexes.length) {
+      const rowDefinitions = mergeRowResizeDefinitions(
+        this.revogrid.rowDefinitions,
+        active.rowType,
+        physicalIndexes,
+        active.currentHeight,
+      );
+      this.rowDefinitionsRef = rowDefinitions;
+      this.revogrid.rowDefinitions = rowDefinitions;
     }
   }
 
-  private reapplyCommittedSizes = () => {
+  private readonly reapplyCommittedSizes = () => {
     for (const [rowType, committed] of this.committedSizes) {
       const dimension = this.providers.dimension.stores[rowType];
       const sizes = { ...dimension.store.get('sizes') };
@@ -364,7 +389,28 @@ export class RowResizePlugin extends BasePlugin {
     }
   };
 
-  private syncAppliedIndexes = () => {
+  private readonly rebuildCommittedSizes = () => {
+    for (const [rowType, committed] of this.committedSizes) {
+      const dimension = this.providers.dimension.stores[rowType];
+      const sizes = { ...dimension.store.get('sizes') };
+      for (const index of this.appliedIndexes.get(rowType) || []) {
+        delete sizes[index];
+      }
+      const items = this.providers.data.stores[rowType].store.get('items');
+      const indexes = new Set<number>();
+      items.forEach((physicalIndex, virtualIndex) => {
+        const size = committed.get(physicalIndex);
+        if (size !== undefined) {
+          sizes[virtualIndex] = size;
+          indexes.add(virtualIndex);
+        }
+      });
+      this.appliedIndexes.set(rowType, indexes);
+      this.providers.dimension.setCustomSizes(rowType, sizes);
+    }
+  };
+
+  private readonly syncAppliedIndexes = () => {
     for (const [rowType, committed] of this.committedSizes) {
       const items = this.providers.data.stores[rowType].store.get('items');
       const indexes = new Set<number>();

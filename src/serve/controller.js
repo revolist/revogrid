@@ -1,5 +1,8 @@
 import { generateFakeDataObjectAsync } from './data.js';
-import { modernThemeDefinitions } from './build/index.esm.js';
+import {
+  modernThemeDefinitions,
+  RowResizePlugin,
+} from './build/index.esm.js';
 
 /**
  * Map of prevented events
@@ -436,6 +439,7 @@ function onLoad() {
   grid.range = true;
   grid.useClipboard = { rangeFill: true };
   grid.resize = true;
+  grid.plugins = [RowResizePlugin];
 
   grid.exporting = true;
   grid.rowHeaders = true;

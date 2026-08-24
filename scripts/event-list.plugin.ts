@@ -131,7 +131,7 @@ ${json2md(
 ${outputTarget.footer || ''}`;
 
     // Collecting and filtering unique event names
-    const eventNames = events.map(event => event.name);
+    const eventNames = [...new Set(events.map(event => event.name))];
 
     // Generate the TypeScript Set file content
     const setContent = `

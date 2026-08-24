@@ -1,4 +1,9 @@
-import type { DimensionRows, RangeArea, ViewSettingSizeProp } from '@type';
+import type {
+  DimensionRows,
+  RangeArea,
+  RowDefinition,
+  ViewSettingSizeProp,
+} from '@type';
 import type {
   ResolvedRowResizeConfig,
   RowResizeConfig,
@@ -75,4 +80,28 @@ export function createRowResizePatch(
     patch[index] = size;
     return patch;
   }, {});
+}
+
+export function mergeRowResizeDefinitions(
+  definitions: readonly RowDefinition[],
+  rowType: DimensionRows,
+  physicalIndexes: readonly number[],
+  size: number,
+): RowDefinition[] {
+  const targetIndexes = new Set(physicalIndexes);
+  const existingIndexes = new Set<number>();
+  const merged = definitions.map(definition => {
+    if (definition.type !== rowType || !targetIndexes.has(definition.index)) {
+      return definition;
+    }
+    existingIndexes.add(definition.index);
+    return { ...definition, size };
+  });
+
+  for (const index of targetIndexes) {
+    if (!existingIndexes.has(index)) {
+      merged.push({ type: rowType, index, size });
+    }
+  }
+  return merged;
 }

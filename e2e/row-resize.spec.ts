@@ -372,7 +372,7 @@ test.describe('row resize plugin', () => {
       rowDefinitions: [{ type: 'rgRow', index: 3, size: 72 }],
     });
     await enableRowResize(page);
-    await dragHandle(page, resizeHandle(page, 1), 24);
+    await dragHandle(page, resizeHandle(page, 0), 24);
 
     await page
       .getByTestId('row-resize-filter-status')
@@ -382,10 +382,12 @@ test.describe('row resize plugin', () => {
     await panel.getByRole('combobox').selectOption({ label: 'Contains' });
     await page.locator(SELECTORS.filterInput).fill('keep');
 
-    await expect.poll(() => visibleColumnValues(page, 0)).toEqual(['Ben', 'Dan']);
-    let ben = await rowHeightsByText(page, 'Ben');
+    await expect
+      .poll(() => visibleColumnValues(page, 0))
+      .toEqual(['Ben', 'Dan']);
+    const ben = await rowHeightsByText(page, 'Ben');
     let dan = await rowHeightsByText(page, 'Dan');
-    expect(ben.data).toBeCloseTo(60, 0);
+    expect(ben.data).toBeCloseTo(36, 0);
     expect(dan.data).toBeCloseTo(72, 0);
     expect(ben.header).toBeCloseTo(ben.data, 0);
     expect(dan.header).toBeCloseTo(dan.data, 0);
@@ -394,8 +396,68 @@ test.describe('row resize plugin', () => {
     await expect
       .poll(() => visibleColumnValues(page, 0))
       .toEqual(['Alice', 'Ben', 'Cara', 'Dan']);
-    ben = await rowHeightsByText(page, 'Ben');
+    const alice = await rowHeightsByText(page, 'Alice');
     dan = await rowHeightsByText(page, 'Dan');
+    expect(alice.data).toBeCloseTo(60, 0);
+    expect(dan.data).toBeCloseTo(72, 0);
+  });
+
+  test('keeps a row resized while filtered attached to its physical row', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: buildColumns([
+        { prop: 'name', name: 'Name' },
+        {
+          prop: 'status',
+          name: 'Status',
+          filter: true,
+          ...withHeaderTestId('filtered-row-resize-status'),
+        },
+      ]),
+      source: [
+        { name: 'Alice', status: 'hide' },
+        { name: 'Ben', status: 'keep' },
+        { name: 'Cara', status: 'hide' },
+        { name: 'Dan', status: 'keep' },
+      ],
+      filter: true,
+      rowHeaders: true,
+      rowSize: 36,
+      rowDefinitions: [{ type: 'rgRow', index: 3, size: 72 }],
+    });
+    await enableRowResize(page);
+
+    await page
+      .getByTestId('filtered-row-resize-status')
+      .locator(SELECTORS.filterButton)
+      .click();
+    const panel = page.locator(SELECTORS.filterPanel);
+    await panel.getByRole('combobox').selectOption({ label: 'Contains' });
+    await page.locator(SELECTORS.filterInput).fill('keep');
+    await expect.poll(() => visibleColumnValues(page, 0)).toEqual(['Ben', 'Dan']);
+
+    await dragHandle(page, resizeHandle(page, 0), 24);
+    expect(
+      await page.evaluate(() => {
+        const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+        return grid?.rowDefinitions;
+      }),
+    ).toEqual(
+      expect.arrayContaining([
+        { type: 'rgRow', index: 1, size: 60 },
+        { type: 'rgRow', index: 3, size: 72 },
+      ]),
+    );
+    await panel.getByRole('button', { name: 'reset' }).click();
+
+    await expect
+      .poll(() => visibleColumnValues(page, 0))
+      .toEqual(['Alice', 'Ben', 'Cara', 'Dan']);
+    const alice = await rowHeightsByText(page, 'Alice');
+    const ben = await rowHeightsByText(page, 'Ben');
+    const dan = await rowHeightsByText(page, 'Dan');
+    expect(alice.data).toBeCloseTo(36, 0);
     expect(ben.data).toBeCloseTo(60, 0);
     expect(dan.data).toBeCloseTo(72, 0);
   });
@@ -469,12 +531,9 @@ test.describe('row resize plugin', () => {
     await dragHandle(page, resizeHandle(page, charlieIndex), 26);
 
     await page.getByTestId('grouped-row-resize-sort-name').click();
-    await expect.poll(() => visibleColumnValues(page, 0)).toEqual([
-      'Alice',
-      'Charlie',
-      'Ben',
-      'Dan',
-    ]);
+    await expect
+      .poll(() => visibleColumnValues(page, 0))
+      .toEqual(['Alice', 'Charlie', 'Ben', 'Dan']);
 
     const alice = await rowHeightsByText(page, 'Alice');
     const charlie = await rowHeightsByText(page, 'Charlie');
@@ -519,11 +578,9 @@ test.describe('row resize plugin', () => {
       { steps: 12 },
     );
     await page.mouse.up();
-    await expect.poll(() => visibleColumnValues(page, 0)).toEqual([
-      'Alice',
-      'Cara',
-      'Ben',
-    ]);
+    await expect
+      .poll(() => visibleColumnValues(page, 0))
+      .toEqual(['Alice', 'Cara', 'Ben']);
 
     let ben = await rowHeightsByText(page, 'Ben');
     expect(ben.data).toBeCloseTo(before.data + 24, 0);
@@ -564,13 +621,17 @@ test.describe('row resize plugin', () => {
 
     const northGroup = mainDataRows(page).filter({ hasText: 'North' }).first();
     await northGroup.locator(SELECTORS.groupExpandButton).click();
-    await expect(mainDataRows(page).filter({ hasText: 'Alice' })).toHaveCount(0);
+    await expect(mainDataRows(page).filter({ hasText: 'Alice' })).toHaveCount(
+      0,
+    );
     let north = await rowHeightsByText(page, 'North');
     expect(north.data).toBeCloseTo(54, 0);
     expect(north.header).toBeCloseTo(north.data, 0);
 
     await northGroup.locator(SELECTORS.groupExpandButton).click();
-    await expect(mainDataRows(page).filter({ hasText: 'Alice' })).toHaveCount(1);
+    await expect(mainDataRows(page).filter({ hasText: 'Alice' })).toHaveCount(
+      1,
+    );
     north = await rowHeightsByText(page, 'North');
     const alice = await rowHeightsByText(page, 'Alice');
     expect(north.data).toBeCloseTo(54, 0);
@@ -607,5 +668,116 @@ test.describe('row resize plugin', () => {
     first = await rowHeightsByText(page, 'New first');
     expect(first.data).toBeCloseTo(before.data + 24, 0);
     expect(first.header).toBeCloseTo(first.data, 0);
+  });
+
+  test('rebuilds committed heights after reordered source replacement', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: buildColumns([{ prop: 'name', name: 'Name', rowDrag: true }]),
+      source: [{ name: 'Alice' }, { name: 'Ben' }, { name: 'Cara' }],
+      rowHeaders: true,
+      rowSize: 36,
+    });
+    await enableRowResize(page);
+    await dragHandle(page, resizeHandle(page, 1), 24);
+
+    const rowDragHandle = mainDataRows(page)
+      .filter({ hasText: 'Ben' })
+      .locator('[data-rgcol="0"] .revo-draggable');
+    const target = mainDataRows(page).filter({ hasText: 'Cara' });
+    const handleBox = await rowDragHandle.boundingBox();
+    const targetBox = await target.boundingBox();
+    await page.mouse.move(
+      handleBox!.x + handleBox!.width / 2,
+      handleBox!.y + handleBox!.height / 2,
+    );
+    await page.mouse.down();
+    await page.mouse.move(
+      targetBox!.x + targetBox!.width / 2,
+      targetBox!.y + targetBox!.height + 16,
+      { steps: 12 },
+    );
+    await page.mouse.up();
+    await expect
+      .poll(() => visibleColumnValues(page, 0))
+      .toEqual(['Alice', 'Cara', 'Ben']);
+
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) throw new Error('Grid was not found');
+      grid.source = [
+        { name: 'New first' },
+        { name: 'New second' },
+        { name: 'New third' },
+      ];
+    });
+    await page.waitForChanges();
+
+    expect((await rowHeightsByText(page, 'New second')).data).toBeCloseTo(
+      60,
+      0,
+    );
+    expect((await rowHeightsByText(page, 'New third')).data).toBeCloseTo(36, 0);
+  });
+
+  test('does not revive a pruned height after the source grows again', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: buildColumns([{ prop: 'name', name: 'Name' }]),
+      source: [{ name: 'Alice' }, { name: 'Ben' }, { name: 'Cara' }],
+      rowHeaders: true,
+      rowSize: 36,
+    });
+    await enableRowResize(page);
+    await dragHandle(page, resizeHandle(page, 2), 24);
+
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) throw new Error('Grid was not found');
+      grid.source = [{ name: 'Short first' }, { name: 'Short second' }];
+    });
+    await page.waitForChanges();
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) throw new Error('Grid was not found');
+      grid.source = [
+        { name: 'Grown first' },
+        { name: 'Grown second' },
+        { name: 'Grown third' },
+      ];
+    });
+    await page.waitForChanges();
+
+    expect((await rowHeightsByText(page, 'Grown third')).data).toBeCloseTo(
+      36,
+      0,
+    );
+  });
+
+  test('keeps committed heights when rowSize changes at runtime', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: buildColumns([{ prop: 'name', name: 'Name' }]),
+      source: [{ name: 'Alice' }, { name: 'Ben' }],
+      rowHeaders: true,
+      rowSize: 36,
+    });
+    await enableRowResize(page);
+    await dragHandle(page, resizeHandle(page, 0), 24);
+
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (grid) grid.rowSize = 42;
+    });
+    await page.waitForChanges();
+
+    const alice = await rowHeightsByText(page, 'Alice');
+    const ben = await rowHeightsByText(page, 'Ben');
+    expect(alice.data).toBeCloseTo(60, 0);
+    expect(alice.header).toBeCloseTo(alice.data, 0);
+    expect(ben.data).toBeCloseTo(42, 0);
   });
 });

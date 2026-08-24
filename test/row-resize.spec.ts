@@ -3,6 +3,7 @@ import {
   createRowResizePatch,
   DEFAULT_MIN_ROW_HEIGHT,
   getRowResizeIndexes,
+  mergeRowResizeDefinitions,
   resolveRowResizeConfig,
 } from '../src/plugins/row-resize';
 
@@ -87,5 +88,23 @@ describe('row resize utilities', () => {
       3: 57,
       4: 57,
     });
+  });
+
+  it('merges physical row sizes without replacing existing definitions', () => {
+    const definitions = [
+      { type: 'rgRow' as const, index: 1, size: 40 },
+      { type: 'rgRow' as const, index: 3, size: 72 },
+      { type: 'rowPinStart' as const, index: 0, size: 48 },
+    ];
+
+    expect(
+      mergeRowResizeDefinitions(definitions, 'rgRow', [1, 2], 60),
+    ).toEqual([
+      { type: 'rgRow', index: 1, size: 60 },
+      { type: 'rgRow', index: 3, size: 72 },
+      { type: 'rowPinStart', index: 0, size: 48 },
+      { type: 'rgRow', index: 2, size: 60 },
+    ]);
+    expect(definitions[0].size).toBe(40);
   });
 });

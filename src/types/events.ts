@@ -5,6 +5,7 @@ export type RevogridEvents = 'contentsizechanged'|
   'afteredit'|
   'beforeautofill'|
   'beforerange'|
+  'afterfocus'|
   'roworderchanged'|
   'beforesorting'|
   'beforesourcesortingapply'|
@@ -60,7 +61,6 @@ export type RevogridEvents = 'contentsizechanged'|
   'resetChange'|
   'beforefocusrender'|
   'beforescrollintoview'|
-  'afterfocus'|
   'beforeheaderclick'|
   'headerresize'|
   'beforeheaderresize'|
@@ -123,6 +123,7 @@ export const REVOGRID_EVENTS = new Map<RevogridEvents, RevogridEvents>([
   ['afteredit', 'afteredit'],
   ['beforeautofill', 'beforeautofill'],
   ['beforerange', 'beforerange'],
+  ['afterfocus', 'afterfocus'],
   ['roworderchanged', 'roworderchanged'],
   ['beforesorting', 'beforesorting'],
   ['beforesourcesortingapply', 'beforesourcesortingapply'],
@@ -178,7 +179,6 @@ export const REVOGRID_EVENTS = new Map<RevogridEvents, RevogridEvents>([
   ['resetChange', 'resetChange'],
   ['beforefocusrender', 'beforefocusrender'],
   ['beforescrollintoview', 'beforescrollintoview'],
-  ['afterfocus', 'afterfocus'],
   ['beforeheaderclick', 'beforeheaderclick'],
   ['headerresize', 'headerresize'],
   ['beforeheaderresize', 'beforeheaderresize'],
