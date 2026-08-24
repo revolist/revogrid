@@ -7,7 +7,7 @@ export function mainDataRows(page: E2EPage): E2ELocator {
 
 export function dataCell(page: E2EPage, rowIndex: number, columnIndex: number): E2ELocator {
   return page.locator(
-    `${SELECTORS.mainViewport} [data-rgRow="${rowIndex}"][data-rgCol="${columnIndex}"]`,
+    `${SELECTORS.mainViewport} revogr-data[type="rgRow"] [data-rgRow="${rowIndex}"][data-rgCol="${columnIndex}"]`,
   );
 }
 
@@ -19,13 +19,13 @@ export function rowHeaderCell(page: E2EPage, rowIndex: number): E2ELocator {
 
 export function pinnedStartCell(page: E2EPage, rowIndex: number, columnIndex = 0): E2ELocator {
   return page.locator(
-    `${SELECTORS.pinnedStartViewport} [data-rgRow="${rowIndex}"][data-rgCol="${columnIndex}"]`,
+    `${SELECTORS.pinnedStartViewport} revogr-data[type="rgRow"] [data-rgRow="${rowIndex}"][data-rgCol="${columnIndex}"]`,
   );
 }
 
 export function pinnedEndCell(page: E2EPage, rowIndex: number, columnIndex = 0): E2ELocator {
   return page.locator(
-    `${SELECTORS.pinnedEndViewport} [data-rgRow="${rowIndex}"][data-rgCol="${columnIndex}"]`,
+    `${SELECTORS.pinnedEndViewport} revogr-data[type="rgRow"] [data-rgRow="${rowIndex}"][data-rgCol="${columnIndex}"]`,
   );
 }
 
@@ -38,6 +38,22 @@ export function pinnedTopCell(page: E2EPage, rowIndex: number, columnIndex: numb
 export function pinnedBottomCell(page: E2EPage, rowIndex: number, columnIndex: number): E2ELocator {
   return page.locator(
     `${SELECTORS.mainViewport} revogr-data[type="rowPinEnd"] [data-rgRow="${rowIndex}"][data-rgCol="${columnIndex}"]`,
+  );
+}
+
+export function pinnedCornerCell(
+  page: E2EPage,
+  rowType: 'rowPinStart' | 'rowPinEnd',
+  columnType: 'colPinStart' | 'colPinEnd',
+  rowIndex: number,
+  columnIndex = 0,
+): E2ELocator {
+  const viewport =
+    columnType === 'colPinStart'
+      ? SELECTORS.pinnedStartViewport
+      : SELECTORS.pinnedEndViewport;
+  return page.locator(
+    `${viewport} revogr-data[type="${rowType}"] [data-rgRow="${rowIndex}"][data-rgCol="${columnIndex}"]`,
   );
 }
 

@@ -25,6 +25,7 @@ export {
   pinnedEndCell,
   pinnedTopCell,
   pinnedBottomCell,
+  pinnedCornerCell,
   visibleColumnValues,
   visibleHeaderTexts,
 } from './helpers/locators';
