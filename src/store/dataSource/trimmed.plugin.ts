@@ -14,15 +14,11 @@ export const trimmedPlugin = <T extends GDataType>(
   set(k, newVal) {
     switch (k) {
       case 'trimmed': {
-        // full sorted items list
-        const proxy = store.get('proxyItems');
-        const trimmed = gatherTrimmedItems(newVal as Trimmed);
-
-        // filter our physical indexes which are not trimmed
-        const newItems = proxy.filter(v => !trimmed[v]);
-
         // set trimmed items in store
-        store.set('items', newItems);
+        store.set(
+          'items',
+          getVisibleItems(store.get('proxyItems'), newVal as Trimmed),
+        );
         break;
       }
     }
@@ -39,4 +35,13 @@ export function gatherTrimmedItems(trimmedItems: Trimmed) {
     }
   }
   return trimmed;
+}
+
+/**
+ * Preserve proxy order while removing physical indexes hidden by any trim
+ * layer.
+ */
+export function getVisibleItems(proxyItems: number[], trimmedItems: Trimmed) {
+  const trimmed = gatherTrimmedItems(trimmedItems);
+  return proxyItems.filter(index => !trimmed[index]);
 }

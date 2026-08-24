@@ -123,6 +123,68 @@ test.describe('filtering', () => {
     await expectVisibleColumnValues(page, 0, ['Dan']);
   });
 
+  test('hides a large replacement source while active filters run asynchronously', async ({ page }) => {
+    await mountGrid(page, {
+      columns: [
+        { name: 'Name', prop: 'name', size: 160 },
+        { name: 'Status', prop: 'status', size: 160, filter: true },
+      ],
+      source: [
+        { name: 'Alice', status: 'Active' },
+        { name: 'Bob', status: 'Inactive' },
+      ],
+      filter: {
+        multiFilterItems: {
+          status: [{ id: 0, type: 'eq', value: 'Active', relation: 'and' }],
+        },
+      },
+    });
+
+    const result = await page.evaluate(async () => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) {
+        throw new Error('Grid was not found');
+      }
+
+      return new Promise<{
+        visibleAtAfterSource: string[];
+        finalVisible: string[];
+        browserTaskRanBeforeFilteringCompleted: boolean;
+      }>((resolve) => {
+        let visibleAtAfterSource: string[] = [];
+        let browserTaskRan = false;
+        setTimeout(() => {
+          browserTaskRan = true;
+        });
+
+        grid.addEventListener('aftersourceset', async () => {
+          const rows = await grid.getVisibleSource() as Array<{ name: string }>;
+          visibleAtAfterSource = rows.map(row => row.name);
+        }, { once: true });
+        grid.addEventListener('afterfilterapply', async () => {
+          const rows = await grid.getVisibleSource() as Array<{ name: string }>;
+          resolve({
+            visibleAtAfterSource,
+            finalVisible: rows.map(row => row.name),
+            browserTaskRanBeforeFilteringCompleted: browserTaskRan,
+          });
+        }, { once: true });
+
+        grid.source = Array.from({ length: 6_000 }, (_, index) => ({
+          name: `Row ${index}`,
+          status: index === 5_999 ? 'Active' : 'Inactive',
+        }));
+      });
+    });
+
+    expect(result).toEqual({
+      visibleAtAfterSource: [],
+      finalVisible: ['Row 5999'],
+      browserTaskRanBeforeFilteringCompleted: true,
+    });
+    await expectVisibleColumnValues(page, 0, ['Row 5999']);
+  });
+
   test('allows duplicate operators by default', async ({ page }) => {
     const columns = buildColumns([
       { prop: 'role', name: 'Role', filter: true, ...withHeaderTestId('duplicate-default-role') },

@@ -467,6 +467,19 @@ describe('FilterPlugin.getRowFilter', () => {
     { name: 'Cara', role: 'Admin' },
   ];
 
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  function createRunnableGrid() {
+    return {
+      registerVNode: [],
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      dispatchEvent: jest.fn(() => true),
+    } as unknown as HTMLRevoGridElement;
+  }
+
   function containsRole(value: string, relation: FilterData['relation'] = 'and', id = 0): FilterData {
     return {
       id,
@@ -604,6 +617,193 @@ describe('FilterPlugin.getRowFilter', () => {
 
     expect(store.store.get('proxyItems')).toEqual([0, 1, 2]);
     expect(store.store.get('items')).toEqual([0, 2]);
+  });
+
+  it('keeps large filter runs pending until their trim is ready', async () => {
+    jest.useFakeTimers();
+    const rows = Array.from({ length: 6_000 }, (_, index) => ({
+      name: `Row ${index}`,
+      role: index === 5_999 ? 'Admin' : 'Engineer',
+    }));
+    const store = new DataStore('rgRow');
+    store.updateData(rows);
+    const providers = {
+      data: {
+        stores: { rgRow: store },
+        setItemsPending: (pending: boolean) => store.setItemsPending(pending),
+        setTrimmed: (trimmed: any) => store.addTrimmed(trimmed),
+      },
+      column: {
+        getColumns: () => [roleColumn],
+        updateColumns: jest.fn(),
+      },
+    } as any;
+    const plugin = new FilterPlugin(createRunnableGrid(), providers);
+
+    plugin.multiFilterItems = {
+      role: [{ id: 0, type: 'eq', value: 'Admin', relation: 'and' }],
+    };
+    const filtering = plugin.runFiltering(plugin.multiFilterItems);
+
+    expect(store.store.get('items')).toEqual([]);
+    await jest.runAllTimersAsync();
+    await filtering;
+
+    expect(store.store.get('items')).toEqual([5_999]);
+  });
+
+  it('runs subclass completion hooks after asynchronous filtering', async () => {
+    jest.useFakeTimers();
+    const rows = Array.from({ length: 6_000 }, (_, index) => ({
+      role: index === 5_999 ? 'Admin' : 'Engineer',
+    }));
+    const store = new DataStore('rgRow');
+    store.updateData(rows);
+    const providers = {
+      data: {
+        stores: { rgRow: store },
+        setItemsPending: (pending: boolean) => store.setItemsPending(pending),
+        setTrimmed: (trimmed: any) => store.addTrimmed(trimmed),
+      },
+      column: {
+        getColumns: () => [roleColumn],
+        updateColumns: jest.fn(),
+      },
+    } as any;
+    class CompletionFilterPlugin extends FilterPlugin {
+      completedRuns = 0;
+
+      async doFiltering(...args: Parameters<FilterPlugin['doFiltering']>) {
+        await super.doFiltering(...args);
+        this.completedRuns++;
+      }
+    }
+    const plugin = new CompletionFilterPlugin(createRunnableGrid(), providers);
+    plugin.multiFilterItems = {
+      role: [{ id: 0, type: 'eq', value: 'Admin', relation: 'and' }],
+    };
+
+    const filtering = plugin.runFiltering(plugin.multiFilterItems);
+    await jest.runAllTimersAsync();
+    await filtering;
+
+    expect(plugin.completedRuns).toBe(1);
+    expect(store.store.get('items')).toEqual([5_999]);
+  });
+
+  it('releases staged rows when filtering is prevented', async () => {
+    const rows = [{ role: 'Admin' }, { role: 'Engineer' }];
+    const store = new DataStore('rgRow');
+    store.updateData(rows);
+    store.setItemsPending(true);
+    const grid = {
+      registerVNode: [],
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      dispatchEvent: jest.fn((event: Event) => {
+        if (event.type === 'beforefilterapply') {
+          event.preventDefault();
+        }
+        return !event.defaultPrevented;
+      }),
+    } as unknown as HTMLRevoGridElement;
+    const providers = {
+      data: {
+        stores: { rgRow: store },
+        setItemsPending: (pending: boolean) => store.setItemsPending(pending),
+        setTrimmed: (trimmed: any) => store.addTrimmed(trimmed),
+      },
+      column: {
+        getColumns: () => [roleColumn],
+        updateColumns: jest.fn(),
+      },
+    } as any;
+    const plugin = new FilterPlugin(grid, providers);
+    plugin.multiFilterItems = {
+      role: [{ id: 0, type: 'eq', value: 'Admin', relation: 'and' }],
+    };
+
+    await plugin.runFiltering(plugin.multiFilterItems);
+
+    expect(store.store.get('items')).toEqual([0, 1]);
+  });
+
+  it('discards stale large filter work when a newer run starts', async () => {
+    jest.useFakeTimers();
+    const rows = Array.from({ length: 6_000 }, (_, index) => ({
+      role: index % 2 ? 'Admin' : 'Engineer',
+    }));
+    const store = new DataStore('rgRow');
+    store.updateData(rows);
+    const setTrimmed = jest.fn((trimmed: any) => store.addTrimmed(trimmed));
+    const providers = {
+      data: {
+        stores: { rgRow: store },
+        setItemsPending: (pending: boolean) => store.setItemsPending(pending),
+        setTrimmed,
+      },
+      column: {
+        getColumns: () => [roleColumn],
+        updateColumns: jest.fn(),
+      },
+    } as any;
+    const plugin = new FilterPlugin(createRunnableGrid(), providers);
+
+    plugin.multiFilterItems = {
+      role: [{ id: 0, type: 'eq', value: 'Admin', relation: 'and' }],
+    };
+    const staleRun = plugin.runFiltering(plugin.multiFilterItems);
+    plugin.multiFilterItems = {
+      role: [{ id: 1, type: 'eq', value: 'Engineer', relation: 'and' }],
+    };
+    const currentRun = plugin.runFiltering(plugin.multiFilterItems);
+
+    await jest.runAllTimersAsync();
+    await Promise.all([staleRun, currentRun]);
+
+    expect(setTrimmed).toHaveBeenCalledTimes(1);
+    expect(store.store.get('items')).toEqual(
+      Array.from({ length: 3_000 }, (_, index) => index * 2),
+    );
+  });
+
+  it('preserves whole-source semantics for getRowFilter overrides', async () => {
+    jest.useFakeTimers();
+    const rows = Array.from({ length: 6_000 }, (_, index) => ({
+      role: index === 5_999 ? 'Admin' : 'Engineer',
+    }));
+    const store = new DataStore('rgRow');
+    store.updateData(rows);
+    const providers = {
+      data: {
+        stores: { rgRow: store },
+        setItemsPending: (pending: boolean) => store.setItemsPending(pending),
+        setTrimmed: (trimmed: any) => store.addTrimmed(trimmed),
+      },
+      column: {
+        getColumns: () => [roleColumn],
+        updateColumns: jest.fn(),
+      },
+    } as any;
+    class WholeSourceFilterPlugin extends FilterPlugin {
+      evaluatedSourceLengths: number[] = [];
+
+      getRowFilter(...args: Parameters<FilterPlugin['getRowFilter']>) {
+        this.evaluatedSourceLengths.push(args[0].length);
+        return super.getRowFilter(...args);
+      }
+    }
+    const plugin = new WholeSourceFilterPlugin(createRunnableGrid(), providers);
+    plugin.multiFilterItems = {
+      role: [{ id: 0, type: 'eq', value: 'Admin', relation: 'and' }],
+    };
+
+    const filtering = plugin.runFiltering(plugin.multiFilterItems);
+    await jest.runAllTimersAsync();
+    await filtering;
+
+    expect(plugin.evaluatedSourceLengths).toEqual([6_000]);
+    expect(store.store.get('items')).toEqual([5_999]);
   });
 
   it('ignores configured collection filters without a registered filter function', () => {
