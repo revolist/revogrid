@@ -168,4 +168,71 @@ test.describe('range selection', () => {
       y1: lastRowIndex,
     });
   });
+
+  test('keeps select-all range and focus coherent across virtual scrolling', async ({
+    page,
+  }) => {
+    const rows = buildRows(120);
+    const targetRow = 60;
+
+    await mountGrid(page, {
+      columns: basicColumns(),
+      source: rows,
+      range: true,
+      height: 260,
+    });
+
+    await setCellsFocus(page, { x: 1, y: 4 });
+    await page.keyboard.press('Meta+A');
+    await page.waitForChanges();
+
+    await expectSelectedRange(page, {
+      x: 0,
+      y: 0,
+      x1: 3,
+      y1: rows.length - 1,
+    });
+    await expect.poll(() => callGridMethod(page, 'getFocused')).toMatchObject({
+      cell: { x: 1, y: 4 },
+    });
+    await expect(page.locator(SELECTORS.selectedRange)).toHaveCount(1);
+
+    await callGridMethod(page, 'scrollToRow', targetRow);
+    await expect(dataCell(page, targetRow, 0)).toBeVisible();
+    const scrolledFocusBox = await page
+      .locator(SELECTORS.focusedCell)
+      .boundingBox();
+    const viewportBox = await page
+      .locator(`${SELECTORS.mainViewport} .vertical-inner`)
+      .boundingBox();
+    expect(scrolledFocusBox).not.toBeNull();
+    expect(viewportBox).not.toBeNull();
+    expect(scrolledFocusBox!.y + scrolledFocusBox!.height).toBeLessThanOrEqual(
+      viewportBox!.y + 1,
+    );
+    await expectSelectedRange(page, {
+      x: 0,
+      y: 0,
+      x1: 3,
+      y1: rows.length - 1,
+    });
+    await expect(dataCell(page, targetRow, 0).locator('..')).toHaveClass(
+      /focused-rgRow/,
+    );
+
+    await setCellsFocus(page, { x: 2, y: targetRow });
+    await expectSelectedRange(page, {
+      x: 2,
+      y: targetRow,
+      x1: 2,
+      y1: targetRow,
+    });
+
+    const cellBox = await dataCell(page, targetRow, 2).boundingBox();
+    const focusBox = await page.locator(SELECTORS.focusedCell).boundingBox();
+    expect(cellBox).not.toBeNull();
+    expect(focusBox).not.toBeNull();
+    expect(Math.abs(cellBox!.x - focusBox!.x)).toBeLessThanOrEqual(2);
+    expect(Math.abs(cellBox!.y - focusBox!.y)).toBeLessThanOrEqual(2);
+  });
 });

@@ -6,6 +6,7 @@ import {
   callGridMethod,
   dataCell,
   expectFocusedCell,
+  expectSelectedRange,
   mountGrid,
   setCellsFocus,
 } from './helpers';
@@ -20,18 +21,31 @@ test.describe('navigation', () => {
 
     await setCellsFocus(page, { x: 0, y: 0 });
     await expectFocusedCell(page, { x: 0, y: 0 });
+    await expectSelectedRange(page, { x: 0, y: 0, x1: 0, y1: 0 });
 
     await page.keyboard.press('ArrowRight');
     await expectFocusedCell(page, { x: 1, y: 0 });
+    await expectSelectedRange(page, { x: 1, y: 0, x1: 1, y1: 0 });
 
     await page.keyboard.press('ArrowDown');
     await expectFocusedCell(page, { x: 1, y: 1 });
+    await expectSelectedRange(page, { x: 1, y: 1, x1: 1, y1: 1 });
+
+    await page.keyboard.press('Shift+ArrowDown');
+    await expectFocusedCell(page, { x: 1, y: 1 });
+    await expectSelectedRange(page, { x: 1, y: 1, x1: 1, y1: 2 });
+
+    await page.keyboard.press('ArrowRight');
+    await expectFocusedCell(page, { x: 2, y: 1 });
+    await expectSelectedRange(page, { x: 2, y: 1, x1: 2, y1: 1 });
 
     await page.keyboard.press('Tab');
-    await expectFocusedCell(page, { x: 2, y: 1 });
+    await expectFocusedCell(page, { x: 3, y: 1 });
+    await expectSelectedRange(page, { x: 3, y: 1, x1: 3, y1: 1 });
 
     await page.keyboard.press('Shift+Tab');
-    await expectFocusedCell(page, { x: 1, y: 1 });
+    await expectFocusedCell(page, { x: 2, y: 1 });
+    await expectSelectedRange(page, { x: 2, y: 1, x1: 2, y1: 1 });
   });
 
   test('keeps the focused cell visible during held ArrowRight navigation', async ({ page }) => {
