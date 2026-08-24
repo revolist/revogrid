@@ -180,40 +180,6 @@ test.describe('row resize plugin', () => {
     await expect(resizeHandle(page, 0)).toBeVisible();
   });
 
-  test('yields activation to an explicitly configured row-resize plugin', async ({
-    page,
-  }) => {
-    await mountGrid(page, {
-      columns: buildColumns([{ prop: 'name', name: 'Name' }]),
-      source: [{ name: 'Alice' }],
-      rowHeaders: true,
-      rowSize: 36,
-    });
-
-    await page.evaluate(async () => {
-      const loadModule = Function(
-        'return import("/build/index.esm.js")',
-      ) as () => Promise<{
-        createRowResizePlugin: (config: { minHeight: number }) => new (
-          ...args: any[]
-        ) => any;
-      }>;
-      const { createRowResizePlugin } = await loadModule();
-      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
-      if (!grid) throw new Error('Grid was not found');
-      grid.plugins = [createRowResizePlugin({ minHeight: 28 })];
-      await new Promise<void>(resolve =>
-        requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
-      );
-    });
-    await page.waitForChanges();
-
-    await expect(resizeHandle(page, 0)).toHaveCount(1);
-    await dragHandle(page, resizeHandle(page, 0), -100);
-    const resized = await dataCell(page, 0, 0).boundingBox();
-    expect(resized!.height).toBeCloseTo(28, 0);
-  });
-
   test('resizes from the full row edge when enabled in resize-row config', async ({
     page,
   }) => {

@@ -44,7 +44,7 @@ type ActiveResize = {
 
 export class RowResizePlugin extends BasePlugin {
   private config: ResolvedRowResizeConfig;
-  private enabled = true;
+  private enabled = false;
   private gridResizeRow: HTMLRevoGridElement['resizeRow'] = false;
   private gridPlugins: GridPlugin[] = [];
 
@@ -76,7 +76,10 @@ export class RowResizePlugin extends BasePlugin {
     super(revogrid, providers);
     this.config = resolveRowResizeConfig(config);
     this.rowDefinitionsRef = revogrid.rowDefinitions;
-    this.registerEventListeners();
+    if (new.target !== RowResizePlugin) {
+      this.enabled = true;
+      this.registerEventListeners();
+    }
   }
 
   private registerEventListeners() {
@@ -445,30 +448,19 @@ export class RowResizePlugin extends BasePlugin {
     }
   }
 
-  private readonly reapplyCommittedSizes = () => {
-    for (const [rowType, committed] of this.committedSizes) {
-      const dimension = this.providers.dimension.stores[rowType];
-      const sizes = { ...dimension.store.get('sizes') };
-      const items = this.providers.data.stores[rowType].store.get('items');
-      const indexes = new Set<number>();
-      items.forEach((physicalIndex, virtualIndex) => {
-        const size = committed.get(physicalIndex);
-        if (size !== undefined) {
-          sizes[virtualIndex] = size;
-          indexes.add(virtualIndex);
-        }
-      });
-      this.appliedIndexes.set(rowType, indexes);
-      this.providers.dimension.setCustomSizes(rowType, sizes);
-    }
-  };
+  private readonly reapplyCommittedSizes = () =>
+    this.applyCommittedSizes(false);
 
-  private readonly rebuildCommittedSizes = () => {
+  private readonly rebuildCommittedSizes = () => this.applyCommittedSizes(true);
+
+  private applyCommittedSizes(clearAppliedIndexes: boolean) {
     for (const [rowType, committed] of this.committedSizes) {
       const dimension = this.providers.dimension.stores[rowType];
       const sizes = { ...dimension.store.get('sizes') };
-      for (const index of this.appliedIndexes.get(rowType) || []) {
-        delete sizes[index];
+      if (clearAppliedIndexes) {
+        for (const index of this.appliedIndexes.get(rowType) || []) {
+          delete sizes[index];
+        }
       }
       const items = this.providers.data.stores[rowType].store.get('items');
       const indexes = new Set<number>();
@@ -482,7 +474,7 @@ export class RowResizePlugin extends BasePlugin {
       this.appliedIndexes.set(rowType, indexes);
       this.providers.dimension.setCustomSizes(rowType, sizes);
     }
-  };
+  }
 
   private readonly syncAppliedIndexes = () => {
     for (const [rowType, committed] of this.committedSizes) {
@@ -520,14 +512,4 @@ export class RowResizePlugin extends BasePlugin {
     this.cancel('destroy');
     super.destroy();
   }
-}
-
-export function createRowResizePlugin(
-  config: RowResizeConfig = {},
-): GridPlugin {
-  return class ConfiguredRowResizePlugin extends RowResizePlugin {
-    constructor(revogrid: HTMLRevoGridElement, providers: PluginProviders) {
-      super(revogrid, providers, config);
-    }
-  };
 }

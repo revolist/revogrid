@@ -4,10 +4,34 @@ import {
   DEFAULT_MIN_ROW_HEIGHT,
   getRowResizeIndexes,
   mergeRowResizeDefinitions,
+  RowResizePlugin,
   resolveRowResizeConfig,
 } from '../src/plugins/row-resize';
+import type { PluginProviders } from '../src/types';
 
 describe('row resize utilities', () => {
+  it('subscribes to grid events only after row resize is enabled', () => {
+    const grid = {
+      resizeRow: false,
+      plugins: [],
+      rowDefinitions: [],
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      refresh: jest.fn(),
+    } as unknown as HTMLRevoGridElement;
+    const plugin = RowResizePlugin.fromGridProperty(
+      grid,
+      {} as PluginProviders,
+    );
+
+    expect(grid.addEventListener).not.toHaveBeenCalled();
+
+    grid.resizeRow = true;
+
+    expect(grid.addEventListener).toHaveBeenCalled();
+    plugin.destroy();
+  });
+
   it('normalizes minimum and maximum heights', () => {
     expect(resolveRowResizeConfig()).toEqual({
       minHeight: DEFAULT_MIN_ROW_HEIGHT,
