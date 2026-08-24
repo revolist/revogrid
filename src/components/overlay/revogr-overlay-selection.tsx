@@ -910,11 +910,11 @@ export class OverlaySelection {
 
   protected clearCell() {
     const range = this.selectionStore.get('range');
-    if (range && !isRangeSingleCell(range)) {
+    const focused = this.selectionStore.get('focus');
+    if (range && (!isRangeSingleCell(range) || !focused)) {
       const data = this.columnService.getRangeStaticData(range, '');
       this.autoFillService?.onRangeApply(data, range, range);
     } else if (this.canEdit()) {
-      const focused = this.selectionStore.get('focus');
       if (!focused) {
         return;
       }

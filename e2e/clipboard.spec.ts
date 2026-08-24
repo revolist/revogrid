@@ -12,10 +12,6 @@ import {
   getCutText,
   getFirefoxCopiedText,
   mountGrid,
-  pinnedBottomCell,
-  pinnedEndCell,
-  pinnedStartCell,
-  pinnedTopCell,
   setCellsFocus,
 } from './helpers';
 
@@ -204,27 +200,26 @@ test.describe('clipboard', () => {
     await page.keyboard.press('Delete');
     await page.waitForChanges();
 
+    const partitionCell = (
+      viewport: string,
+      rowType: 'rowPinStart' | 'rgRow' | 'rowPinEnd',
+      columnIndex: number,
+    ) => page.locator(
+      `${viewport} revogr-data[type="${rowType}"] [data-rgRow="0"][data-rgCol="${columnIndex}"]`,
+    );
     const clearedCells = [
-      dataCell(page, 0, 0),
-      dataCell(page, 0, 1),
-      pinnedStartCell(page, 0),
-      pinnedEndCell(page, 0),
-      pinnedTopCell(page, 0, 0),
-      pinnedTopCell(page, 0, 1),
-      pinnedBottomCell(page, 0, 0),
-      pinnedBottomCell(page, 0, 1),
-      page.locator(
-        `${SELECTORS.pinnedStartViewport} revogr-data[type="rowPinStart"] [data-rgRow="0"][data-rgCol="0"]`,
-      ),
-      page.locator(
-        `${SELECTORS.pinnedEndViewport} revogr-data[type="rowPinStart"] [data-rgRow="0"][data-rgCol="0"]`,
-      ),
-      page.locator(
-        `${SELECTORS.pinnedStartViewport} revogr-data[type="rowPinEnd"] [data-rgRow="0"][data-rgCol="0"]`,
-      ),
-      page.locator(
-        `${SELECTORS.pinnedEndViewport} revogr-data[type="rowPinEnd"] [data-rgRow="0"][data-rgCol="0"]`,
-      ),
+      partitionCell(SELECTORS.mainViewport, 'rgRow', 0),
+      partitionCell(SELECTORS.mainViewport, 'rgRow', 1),
+      partitionCell(SELECTORS.pinnedStartViewport, 'rgRow', 0),
+      partitionCell(SELECTORS.pinnedEndViewport, 'rgRow', 0),
+      partitionCell(SELECTORS.mainViewport, 'rowPinStart', 0),
+      partitionCell(SELECTORS.mainViewport, 'rowPinStart', 1),
+      partitionCell(SELECTORS.mainViewport, 'rowPinEnd', 0),
+      partitionCell(SELECTORS.mainViewport, 'rowPinEnd', 1),
+      partitionCell(SELECTORS.pinnedStartViewport, 'rowPinStart', 0),
+      partitionCell(SELECTORS.pinnedEndViewport, 'rowPinStart', 0),
+      partitionCell(SELECTORS.pinnedStartViewport, 'rowPinEnd', 0),
+      partitionCell(SELECTORS.pinnedEndViewport, 'rowPinEnd', 0),
     ];
 
     for (const cell of clearedCells) {
