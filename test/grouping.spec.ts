@@ -8,6 +8,7 @@ import {
 } from '../src/plugins/groupingRow/grouping.const';
 import { doCollapse, doExpand } from '../src/plugins/groupingRow/grouping.row.expand.service';
 import { GroupingRowPlugin } from '../src/plugins/groupingRow/grouping.row.plugin';
+import { FILTER_TRIMMED_TYPE } from '../src/plugins/filter/filter.plugin';
 import {
   gatherGrouping,
   getSource,
@@ -705,6 +706,37 @@ describe('row grouping', () => {
   });
 
   describe('group renderers', () => {
+    it('does not remap stale filter trims while preparing an incoming source', () => {
+      const { plugin, revogrid, state } = createGroupingPlugin([]);
+      plugin.setGrouping({ props: ['team'], expandedAll: false });
+      state.trimmed = {
+        [FILTER_TRIMMED_TYPE]: { 0: true },
+        custom: { 1: true },
+      };
+
+      revogrid.dispatchEvent(
+        new CustomEvent('beforesourceset', {
+          detail: {
+            type: 'rgRow',
+            source: [
+              { name: 'Alice', team: 'North' },
+              { name: 'Cara', team: 'South' },
+            ],
+          },
+        }),
+      );
+
+      expect(revogrid.addTrimmed).not.toHaveBeenCalledWith(
+        expect.anything(),
+        FILTER_TRIMMED_TYPE,
+      );
+      expect(revogrid.addTrimmed).toHaveBeenCalledWith({ 3: true }, 'custom');
+      expect(revogrid.addTrimmed).toHaveBeenCalledWith(
+        { 1: true, 3: true },
+        TRIMMED_GROUPING,
+      );
+    });
+
     it('stores both legacy row and virtual cell renderers during initial source grouping', () => {
       const { plugin, providers, revogrid, state } = createGroupingPlugin([]);
       const groupLabelTemplate = jest.fn();

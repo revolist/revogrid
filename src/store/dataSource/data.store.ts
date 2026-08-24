@@ -2,9 +2,14 @@ import findIndex from 'lodash/findIndex';
 import range from 'lodash/range';
 import { createStore } from '@stencil/store';
 
-import { gatherTrimmedItems, Trimmed, trimmedPlugin } from './trimmed.plugin';
+import {
+  getVisibleItems,
+  Trimmed,
+  trimmedPlugin,
+} from './trimmed.plugin';
 import { setStore, Observable } from '../../utils';
 import { proxyPlugin } from './data.proxy';
+import { pendingItemsPlugin } from './data.pending.plugin';
 import type {
   GroupCellTemplateFunc,
   GroupLabelTemplateFunc,
@@ -43,6 +48,11 @@ export type DSourceState<
  */
 export class DataStore<T extends GDataType, ST extends GDimension> {
   private readonly dataStore: Observable<DSourceState<T, ST>>;
+  /**
+   * The source, proxy order, and trims may continue changing,
+   * but visible items must remain empty until the operation finishes.
+   */
+  private itemsPending = false;
   get store(): Observable<DSourceState<T, ST>> {
     return this.dataStore;
   }
@@ -61,6 +71,7 @@ export class DataStore<T extends GDataType, ST extends GDimension> {
     }));
     store.use(proxyPlugin(store));
     store.use(trimmedPlugin(store));
+    store.use(pendingItemsPlugin(store, () => this.itemsPending));
   }
 
   /**
@@ -87,8 +98,7 @@ export class DataStore<T extends GDataType, ST extends GDimension> {
     preserveTrimmed = false,
   ) {
     const trimmed = this.store.get('trimmed');
-    const trimmedItems =
-      silent && preserveTrimmed ? gatherTrimmedItems(trimmed) : null;
+    const preserveCurrentTrimmed = silent && preserveTrimmed;
     // during full update we do drop trim
     if (!silent) {
       this.store.set('trimmed', {});
@@ -106,7 +116,7 @@ export class DataStore<T extends GDataType, ST extends GDimension> {
     // across full data refreshes.
     this.store.set(
       'items',
-      trimmedItems ? items.filter(i => !trimmedItems[i]) : items,
+      preserveCurrentTrimmed ? getVisibleItems(items, trimmed) : items,
     );
     // apply grouping if present
     if (grouping) {
@@ -124,6 +134,29 @@ export class DataStore<T extends GDataType, ST extends GDimension> {
     let trimmed = this.store.get('trimmed');
     trimmed = { ...trimmed, ...some };
     setStore(this.store, { trimmed });
+  }
+
+  /**
+   * Keeps visible items empty while an asynchronous source operation is pending.
+   * Releasing the state restores the current proxy order with all trims applied.
+   */
+  setItemsPending(pending: boolean) {
+    if (this.itemsPending === pending) {
+      return;
+    }
+    this.itemsPending = pending;
+    if (pending) {
+      this.store.set('items', []);
+      return;
+    }
+
+    this.store.set(
+      'items',
+      getVisibleItems(
+        this.store.get('proxyItems'),
+        this.store.get('trimmed'),
+      ),
+    );
   }
 
   setSourceData(items: Record<number, any>, mutate = true) {

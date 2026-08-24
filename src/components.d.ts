@@ -87,7 +87,7 @@ export namespace Components {
         "canFocus": boolean;
         /**
           * Enable column move plugin.
-          * @default false
+          * @default true
          */
         "canMoveColumns": boolean;
         /**
@@ -130,12 +130,12 @@ export namespace Components {
         "editors": Editors;
         /**
           * Enable export plugin.
-          * @default false
+          * @default true
          */
         "exporting": boolean;
         /**
-          * Enables filter plugin. Can be boolean. Or can be filter collection See `FilterCollection` for more info.
-          * @default false
+          * Enables filter plugin. Enabled by default; set to `false` to opt out. Can be boolean. Or can be filter collection See `FilterCollection` for more info.
+          * @default true
          */
         "filter": boolean | ColumnFilterConfig;
         /**
@@ -252,7 +252,7 @@ export namespace Components {
   )[];
         /**
           * When true, columns are resizable.
-          * @default false
+          * @default true
          */
         "resize": boolean;
         /**
@@ -1415,7 +1415,7 @@ declare namespace LocalJSX {
         "canFocus"?: boolean;
         /**
           * Enable column move plugin.
-          * @default false
+          * @default true
          */
         "canMoveColumns"?: boolean;
         /**
@@ -1450,12 +1450,12 @@ declare namespace LocalJSX {
         "editors"?: Editors;
         /**
           * Enable export plugin.
-          * @default false
+          * @default true
          */
         "exporting"?: boolean;
         /**
-          * Enables filter plugin. Can be boolean. Or can be filter collection See `FilterCollection` for more info.
-          * @default false
+          * Enables filter plugin. Enabled by default; set to `false` to opt out. Can be boolean. Or can be filter collection See `FilterCollection` for more info.
+          * @default true
          */
         "filter"?: boolean | ColumnFilterConfig;
         /**
@@ -1726,7 +1726,7 @@ declare namespace LocalJSX {
   )[];
         /**
           * When true, columns are resizable.
-          * @default false
+          * @default true
          */
         "resize"?: boolean;
         /**

@@ -25,9 +25,14 @@ import type {
   ShowData,
 } from './filter.types';
 
-import { timeout } from '../../utils';
 import { TrimmedEntity } from '@store';
 import { resolveBlankSemantics } from './filter.blank';
+import { timeout } from '../../utils';
+import {
+  ASYNC_FILTER_ROW_THRESHOLD,
+  FILTER_CHUNK_SIZE,
+  FILTER_TIME_BUDGET_MS,
+} from './filter.constants';
 
 export * from './filter.types';
 export * from './filter.indexed';
@@ -81,6 +86,7 @@ export class FilterPlugin extends BasePlugin {
 
   filterProp = FILTER_PROP;
   private allowDuplicateOperators = true;
+  private filteringRunId = 0;
 
   extraHyperContent?: (data: ShowData) => VNode | VNode[];
   extraBottomHyperContent?: (data: ShowData) => VNode | VNode[];
@@ -116,7 +122,7 @@ export class FilterPlugin extends BasePlugin {
       </revogr-filter-panel>,
     ];
 
-    const aftersourceset = async () => {
+    const aftersourceset = () => {
       const filterCollectionProps = Object.keys(this.filterCollection);
       if (filterCollectionProps.length > 0) {
         // handle old way of filtering by reworking FilterCollection to new MultiFilterItem
@@ -133,12 +139,29 @@ export class FilterPlugin extends BasePlugin {
           }
         });
       }
-      if (Object.keys(this.multiFilterItems).length === 0) {
+      if (!this.hasActiveFilters()) {
+        this.cancelFiltering();
         return;
       }
-      await timeout();
-      await this.runFiltering(this.multiFilterItems);
+      void this.runFiltering(this.multiFilterItems);
     };
+
+    /**
+     * This executes before the data store replaces its source.
+     * For a large source with active filters:
+     * 1. Existing filtering runs are invalidated.
+     * 2. Pending state starts.
+     * 3. Visible rows become empty.
+     * 4. The source is replaced while the DataStore guard prevents it from exposing unfiltered rows.
+     */
+    this.addEventListener('beforesourceset', ({ detail }) => {
+      if (
+        detail.source.length >= ASYNC_FILTER_ROW_THRESHOLD &&
+        this.hasActiveFilters()
+      ) {
+        this.deferFiltering();
+      }
+    });
     this.addEventListener('headerclick', e => this.headerclick(e));
     this.addEventListener(
       FILTER_CONFIG_CHANGED_EVENT,
@@ -338,7 +361,7 @@ export class FilterPlugin extends BasePlugin {
     this.multiFilterItems = filterItems;
 
     // run the filtering when the items change
-    this.runFiltering(this.multiFilterItems);
+    await this.runFiltering(this.multiFilterItems);
   }
 
   onFilterReset(prop?: ColumnProp) {
@@ -355,6 +378,8 @@ export class FilterPlugin extends BasePlugin {
     columns: ColumnRegular[],
     filterItems: MultiFilterItem,
   ) {
+    // creates the execution token - owns the actual calculation
+    const runId = this.beginFiltering();
     const columnsToUpdate: ColumnRegular[] = [];
 
     /**
@@ -383,7 +408,28 @@ export class FilterPlugin extends BasePlugin {
         column[this.filterProp] = true;
       }
     });
-    const itemsToTrim = this.getRowFilter(source, filterItems, columnByProp);
+    let itemsToTrim: TrimmedEntity | undefined;
+    const hasFilters = Object.keys(filterItems).length > 0 || this.hasActiveFilters();
+    const isLargeSource = hasFilters && source.length >= ASYNC_FILTER_ROW_THRESHOLD;
+    if (isLargeSource) {
+      this.providers.data.setItemsPending(true);
+      await timeout();
+    }
+    if (!hasFilters) {
+      itemsToTrim = {};
+    } else if (isLargeSource && this.supportsChunkedFiltering()) {
+      itemsToTrim = await this.getRowFilterInChunks(
+        source,
+        filterItems,
+        columnByProp,
+        runId,
+      );
+    } else {
+      itemsToTrim = this.getRowFilter(source, filterItems, columnByProp);
+    }
+    if (!itemsToTrim || runId !== this.filteringRunId) {
+      return;
+    }
     // check is filter event prevented
     const { defaultPrevented, detail } = this.emit('beforefiltertrimmed', {
       collection,
@@ -391,11 +437,13 @@ export class FilterPlugin extends BasePlugin {
       source,
       filterItems,
     });
-    if (defaultPrevented) {
+    if (defaultPrevented || runId !== this.filteringRunId) {
+      this.releaseFiltering(runId);
       return;
     }
 
     this.providers.data.setTrimmed({ [FILTER_TRIMMED_TYPE]: detail.itemsToFilter });
+    this.releaseFiltering(runId);
 
     // applies the hasFilter to the columns to show filter icon
     this.providers.column.updateColumns(columnsToUpdate);
@@ -412,6 +460,11 @@ export class FilterPlugin extends BasePlugin {
   }
 
   async runFiltering(multiFilterItems: MultiFilterItem) {
+    // runFiltering: First token: "Is this request still valid after event handlers run?"
+    // doFiltering: Second token: "Is this calculation still the newest one?"
+
+    // creates a preflight token and sets the grid to a pending state
+    const runId = this.beginFiltering();
     const collection: Record<ColumnProp, FilterCollectionItem> = {};
 
     // handle old filterCollection to return the first filter only (if any) from multiFilterItems
@@ -439,15 +492,95 @@ export class FilterPlugin extends BasePlugin {
       columns,
       filterItems: this.multiFilterItems,
     });
-    if (defaultPrevented) {
+    if (defaultPrevented || runId !== this.filteringRunId) {
+      this.releaseFiltering(runId);
       return;
     }
-    this.doFiltering(
+    await this.doFiltering(
       detail.collection,
       detail.source,
       detail.columns,
       detail.filterItems,
     );
+  }
+
+  /** Whether this plugin currently owns filter state that must follow a new source. */
+  protected hasActiveFilters() {
+    return (
+      Object.keys(this.multiFilterItems).length > 0 ||
+      Object.keys(this.filterCollection).length > 0
+    );
+  }
+
+  /** Preserve whole-source semantics for plugins that override getRowFilter. */
+  protected supportsChunkedFiltering() {
+    return this.getRowFilter === FilterPlugin.prototype.getRowFilter;
+  }
+
+  /**
+   * Hide visible rows and invalidate current filtering until a deferred filter
+   * run is ready. Used by filter extensions with their own debounced state.
+   */
+  protected deferFiltering() {
+    this.beginFiltering(true);
+  }
+
+  private beginFiltering(pending = false) {
+    const runId = ++this.filteringRunId;
+    if (pending) {
+      this.providers.data.setItemsPending(true);
+    }
+    return runId;
+  }
+
+  private releaseFiltering(runId: number) {
+    if (runId === this.filteringRunId) {
+      this.providers.data.setItemsPending(false);
+    }
+  }
+
+  private cancelFiltering() {
+    this.releaseFiltering(this.beginFiltering());
+  }
+
+  private async getRowFilterInChunks(
+    rows: DataType[],
+    filterItems: MultiFilterItem,
+    columnByProp: Record<string, ColumnRegular>,
+    runId: number,
+  ): Promise<TrimmedEntity | undefined> {
+    const trimmed: TrimmedEntity = {};
+    let sliceStarted = performance.now();
+
+    for (let offset = 0; offset < rows.length; offset += FILTER_CHUNK_SIZE) {
+      if (runId !== this.filteringRunId) {
+        return;
+      }
+      const end = Math.min(offset + FILTER_CHUNK_SIZE, rows.length);
+      const chunkTrimmed = this.getRowFilter(
+        rows.slice(offset, end),
+        filterItems,
+        columnByProp,
+      );
+      // filter that chunk
+      for (const chunkIndex in chunkTrimmed) {
+        trimmed[offset + Number(chunkIndex)] = true;
+      }
+
+      if (
+        end < rows.length &&
+        performance.now() - sliceStarted >= FILTER_TIME_BUDGET_MS
+      ) {
+        await timeout();
+        sliceStarted = performance.now();
+      }
+    }
+    return runId === this.filteringRunId ? trimmed : undefined;
+  }
+
+  destroy() {
+    this.cancelFiltering();
+    super.destroy();
   }
 
   /**
@@ -564,7 +697,7 @@ export class FilterPlugin extends BasePlugin {
  * @param filters - Array of filters for the property.
  * @returns True if this is the last AND condition; false otherwise.
  */
-function isFinalAndFilter(index: number, filters: MultiFilterItem[string]): boolean {
+function isFinalAndFilter(index: number, filters: MultiFilterItem[string]) {
   const nextFilter = filters[index + 1]; // Get the next filter in the list.
   // Return true if there's no next filter or if the next filter defined and is not part of the AND sequence.
   return !nextFilter || (!!nextFilter.relation && nextFilter.relation !== 'and');
@@ -575,7 +708,7 @@ function isFinalAndFilter(index: number, filters: MultiFilterItem[string]): bool
  * @param pendingResults - An array of results from the AND conditions.
  * @returns True if all conditions are satisfied; false otherwise.
  */
-function allAndConditionsSatisfied(pendingResults: boolean[]): boolean {
+function allAndConditionsSatisfied(pendingResults: boolean[]) {
   // Check if there are any failed conditions in the pending results.
   return !pendingResults.includes(true);
 }

@@ -5,7 +5,6 @@ import {
   rowTypes,
   DataStore,
   getSourceItem,
-  getVisibleSourceItem,
   Groups,
   Trimmed,
 } from '@store';
@@ -184,9 +183,20 @@ export class DataProvider {
     this.dimensionProvider.setTrimmed(trimmed, type);
     if (type === 'rgRow') {
       this.dimensionProvider.setData(
-        getVisibleSourceItem(store.store).length,
+        store.store.get('items').length,
         type,
       );
     }
+  }
+
+  /** Keep a row source empty until its current asynchronous update is ready. */
+  setItemsPending(pending: boolean, type: DimensionRows = 'rgRow') {
+    const store = this.stores[type];
+    store.setItemsPending(pending);
+    this.dimensionProvider.setData(
+      store.store.get('items').length,
+      type,
+      type !== 'rgRow',
+    );
   }
 }
