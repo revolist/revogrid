@@ -5,6 +5,7 @@ import beginsWith from '../src/plugins/filter/conditions/string/beginswith';
 import gtThan from '../src/plugins/filter/conditions/number/greaterThan';
 import lt from '../src/plugins/filter/conditions/number/lessThan';
 import { FilterPlugin } from '../src/plugins/filter/filter.plugin';
+import { ASYNC_FILTER_ROW_THRESHOLD } from '../src/plugins/filter/filter.constants';
 import { getFilterReorderId, moveFilterItem } from '../src/plugins/filter/filter.reorder';
 import { DataStore } from '../src/store/dataSource/data.store';
 import type { ColumnRegular } from '../src';
@@ -621,10 +622,14 @@ describe('FilterPlugin.getRowFilter', () => {
 
   it('keeps large filter runs pending until their trim is ready', async () => {
     jest.useFakeTimers();
-    const rows = Array.from({ length: 6_000 }, (_, index) => ({
-      name: `Row ${index}`,
-      role: index === 5_999 ? 'Admin' : 'Engineer',
-    }));
+    const lastRowIndex = ASYNC_FILTER_ROW_THRESHOLD - 1;
+    const rows = Array.from(
+      { length: ASYNC_FILTER_ROW_THRESHOLD },
+      (_, index) => ({
+        name: `Row ${index}`,
+        role: index === lastRowIndex ? 'Admin' : 'Engineer',
+      }),
+    );
     const store = new DataStore('rgRow');
     store.updateData(rows);
     const providers = {
@@ -649,14 +654,18 @@ describe('FilterPlugin.getRowFilter', () => {
     await jest.runAllTimersAsync();
     await filtering;
 
-    expect(store.store.get('items')).toEqual([5_999]);
+    expect(store.store.get('items')).toEqual([lastRowIndex]);
   });
 
   it('runs subclass completion hooks after asynchronous filtering', async () => {
     jest.useFakeTimers();
-    const rows = Array.from({ length: 6_000 }, (_, index) => ({
-      role: index === 5_999 ? 'Admin' : 'Engineer',
-    }));
+    const lastRowIndex = ASYNC_FILTER_ROW_THRESHOLD - 1;
+    const rows = Array.from(
+      { length: ASYNC_FILTER_ROW_THRESHOLD },
+      (_, index) => ({
+        role: index === lastRowIndex ? 'Admin' : 'Engineer',
+      }),
+    );
     const store = new DataStore('rgRow');
     store.updateData(rows);
     const providers = {
@@ -688,7 +697,7 @@ describe('FilterPlugin.getRowFilter', () => {
     await filtering;
 
     expect(plugin.completedRuns).toBe(1);
-    expect(store.store.get('items')).toEqual([5_999]);
+    expect(store.store.get('items')).toEqual([lastRowIndex]);
   });
 
   it('releases staged rows when filtering is prevented', async () => {
@@ -730,9 +739,12 @@ describe('FilterPlugin.getRowFilter', () => {
 
   it('discards stale large filter work when a newer run starts', async () => {
     jest.useFakeTimers();
-    const rows = Array.from({ length: 6_000 }, (_, index) => ({
-      role: index % 2 ? 'Admin' : 'Engineer',
-    }));
+    const rows = Array.from(
+      { length: ASYNC_FILTER_ROW_THRESHOLD },
+      (_, index) => ({
+        role: index % 2 ? 'Admin' : 'Engineer',
+      }),
+    );
     const store = new DataStore('rgRow');
     store.updateData(rows);
     const setTrimmed = jest.fn((trimmed: any) => store.addTrimmed(trimmed));
@@ -763,15 +775,22 @@ describe('FilterPlugin.getRowFilter', () => {
 
     expect(setTrimmed).toHaveBeenCalledTimes(1);
     expect(store.store.get('items')).toEqual(
-      Array.from({ length: 3_000 }, (_, index) => index * 2),
+      Array.from(
+        { length: ASYNC_FILTER_ROW_THRESHOLD / 2 },
+        (_, index) => index * 2,
+      ),
     );
   });
 
   it('preserves whole-source semantics for getRowFilter overrides', async () => {
     jest.useFakeTimers();
-    const rows = Array.from({ length: 6_000 }, (_, index) => ({
-      role: index === 5_999 ? 'Admin' : 'Engineer',
-    }));
+    const lastRowIndex = ASYNC_FILTER_ROW_THRESHOLD - 1;
+    const rows = Array.from(
+      { length: ASYNC_FILTER_ROW_THRESHOLD },
+      (_, index) => ({
+        role: index === lastRowIndex ? 'Admin' : 'Engineer',
+      }),
+    );
     const store = new DataStore('rgRow');
     store.updateData(rows);
     const providers = {
@@ -802,8 +821,8 @@ describe('FilterPlugin.getRowFilter', () => {
     await jest.runAllTimersAsync();
     await filtering;
 
-    expect(plugin.evaluatedSourceLengths).toEqual([6_000]);
-    expect(store.store.get('items')).toEqual([5_999]);
+    expect(plugin.evaluatedSourceLengths).toEqual([ASYNC_FILTER_ROW_THRESHOLD]);
+    expect(store.store.get('items')).toEqual([lastRowIndex]);
   });
 
   it('ignores configured collection filters without a registered filter function', () => {

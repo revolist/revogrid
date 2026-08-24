@@ -28,6 +28,11 @@ import type {
 import { TrimmedEntity } from '@store';
 import { resolveBlankSemantics } from './filter.blank';
 import { timeout } from '../../utils';
+import {
+  ASYNC_FILTER_ROW_THRESHOLD,
+  FILTER_CHUNK_SIZE,
+  FILTER_TIME_BUDGET_MS,
+} from './filter.constants';
 
 export * from './filter.types';
 export * from './filter.indexed';
@@ -37,10 +42,6 @@ export * from './filter.button';
 export const FILTER_TRIMMED_TYPE = 'filter';
 export const FILTER_CONFIG_CHANGED_EVENT = 'filterconfigchanged';
 export const FILTE_PANEL = 'revogr-filter-panel';
-
-const ASYNC_FILTER_ROW_THRESHOLD = 15_000; // Fewer than N rows: keep the existing synchronous behavior.
-const FILTER_CHUNK_SIZE = 1_000; // Evaluate up to N rows per chunk.
-const FILTER_TIME_BUDGET_MS = 5; // Yield after approximately N ms of accumulated work.
 
 /**
  * @typedef ColumnFilterConfig

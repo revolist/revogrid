@@ -10,6 +10,7 @@ import {
   withHeaderTestId,
   type SampleRow,
 } from './helpers';
+import { ASYNC_FILTER_ROW_THRESHOLD } from '../src/plugins/filter/filter.constants';
 
 async function nextAnimationFrames(page: E2EPage, count = 2) {
   await page.evaluate(async (frameCount) => {
@@ -140,7 +141,7 @@ test.describe('filtering', () => {
       },
     });
 
-    const result = await page.evaluate(async () => {
+    const result = await page.evaluate(async (asyncFilterRowThreshold) => {
       const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
       if (!grid) {
         throw new Error('Grid was not found');
@@ -170,19 +171,25 @@ test.describe('filtering', () => {
           });
         }, { once: true });
 
-        grid.source = Array.from({ length: 6_000 }, (_, index) => ({
-          name: `Row ${index}`,
-          status: index === 5_999 ? 'Active' : 'Inactive',
-        }));
+        grid.source = Array.from(
+          { length: asyncFilterRowThreshold },
+          (_, index) => ({
+            name: `Row ${index}`,
+            status:
+              index === asyncFilterRowThreshold - 1 ? 'Active' : 'Inactive',
+          }),
+        );
       });
-    });
+    }, ASYNC_FILTER_ROW_THRESHOLD);
 
     expect(result).toEqual({
       visibleAtAfterSource: [],
-      finalVisible: ['Row 5999'],
+      finalVisible: [`Row ${ASYNC_FILTER_ROW_THRESHOLD - 1}`],
       browserTaskRanBeforeFilteringCompleted: true,
     });
-    await expectVisibleColumnValues(page, 0, ['Row 5999']);
+    await expectVisibleColumnValues(page, 0, [
+      `Row ${ASYNC_FILTER_ROW_THRESHOLD - 1}`,
+    ]);
   });
 
   test('allows duplicate operators by default', async ({ page }) => {
