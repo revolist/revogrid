@@ -116,6 +116,7 @@ Used by some of the largest companies in Europe and the United States.
 - **Custom Sizes**: Define custom sizes for [columns](https://rv-grid.com/guide/column/#Column-Size) and [rows](https://rv-grid.com/guide/row/height). Automatic sizing based on content.
 
 - **[Column Resizing](https://rv-grid.com/guide/column/resize)**: Adjust column widths.
+- **[Row Resizing](https://rv-grid.com/guide/row/resize)**: Resize from row-header edges or enable full-row resize edges with optional height limits.
 - **Auto Size Columns**: Intelligent column width adjustment that automatically adapts to content, ensuring optimal readability and layout efficiency.
 
 - **Pinned/Sticky/Freezed Elements**:
@@ -323,13 +324,13 @@ yarn add @revolist/revogrid;
 In `<revo-grid />` we have developed a sophisticated Continuous Delivery (CD) system powered by GitHub Actions. This advanced system automatically builds and delivers grid versions across multiple frameworks, including React, Angular, Svelte, Vue 2, Vue 3, and Plotly Dash for Python, with full type support. This ensures continuous version delivery, providing the latest grid enhancements and upgrades across all supported frameworks ✨. In the future (version 5), we are planning to switch to monorepo-based development.
 
 
-
 - [![VueJs](./assets/vuejs.svg) Vue 3](https://rv-grid.com/guide/vue3/) and [Vue 2](https://rv-grid.com/guide/vue2/)
 - [![React](./assets/react.svg) React](https://rv-grid.com/guide/react/)
 - [![Angular](./assets/angular.svg) Angular](https://rv-grid.com/guide/angular/)
 - [![Svelte](./assets/svelte.svg) Svelte](https://rv-grid.com/guide/svelte/)
 - [![Python](./assets/python.svg) Dash / Python](https://rv-grid.com/guide/dash/)
 - [![JavaScript](./assets/js.svg) JavaScript](https://rv-grid.com/guide/)
+
 
 ## Basic Usage
 
@@ -386,6 +387,7 @@ grid.source = [{ name: 'New Item' }];
 - [![Svelte](./assets/svelte.svg) Svelte](https://rv-grid.com/guide/svelte/)
 - [![Python](./assets/python.svg) Dash / Python](https://rv-grid.com/guide/dash/)
 - [![JavaScript](./assets/js.svg) JavaScript](https://rv-grid.com/guide/)
+
 
 ## Versions
 
@@ -498,3 +500,4 @@ By getting involved, you'll have the opportunity to enhance your skills, gain va
 MIT
 
 ---
+
