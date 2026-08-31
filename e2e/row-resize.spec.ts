@@ -512,6 +512,66 @@ test.describe('row resize plugin', () => {
     expect(dan.data).toBeCloseTo(72, 0);
   });
 
+  test('maps row definitions assigned while filtered without clearing provider sizes', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: buildColumns([
+        { prop: 'name', name: 'Name' },
+        {
+          prop: 'status',
+          name: 'Status',
+          filter: true,
+          ...withHeaderTestId('filtered-row-definition-status'),
+        },
+      ]),
+      source: [
+        { name: 'Alice', status: 'hide' },
+        { name: 'Ben', status: 'keep' },
+        { name: 'Cara', status: 'hide' },
+        { name: 'Dan', status: 'keep' },
+      ],
+      filter: true,
+      rowHeaders: true,
+      rowSize: 36,
+    });
+    await enableRowResize(page);
+    await dragHandle(page, resizeHandle(page, 0), 24);
+
+    await page
+      .getByTestId('filtered-row-definition-status')
+      .locator(SELECTORS.filterButton)
+      .click();
+    const panel = page.locator(SELECTORS.filterPanel);
+    await panel.getByRole('combobox').selectOption({ label: 'Contains' });
+    await page.locator(SELECTORS.filterInput).fill('keep');
+    await expect
+      .poll(() => visibleColumnValues(page, 0))
+      .toEqual(['Ben', 'Dan']);
+
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) throw new Error('Grid was not found');
+      grid.rowDefinitions = [{ type: 'rgRow', index: 3, size: 72 }];
+    });
+    await expect
+      .poll(async () => (await rowHeightsByText(page, 'Dan')).data)
+      .toBeCloseTo(72, 0);
+    await page.evaluate(async () => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) throw new Error('Grid was not found');
+      const providers = await grid.getProviders();
+      providers?.dimension.setCustomSizes('rgRow', { 0: 81 }, true);
+    });
+
+    await panel.getByRole('button', { name: 'reset' }).click();
+    await expect
+      .poll(() => visibleColumnValues(page, 0))
+      .toEqual(['Alice', 'Ben', 'Cara', 'Dan']);
+    expect((await rowHeightsByText(page, 'Alice')).data).toBeCloseTo(81, 0);
+    expect((await rowHeightsByText(page, 'Dan')).data).toBeCloseTo(72, 0);
+  });
+
   test('keeps a row resized while filtered attached to its physical row', async ({
     page,
   }) => {
@@ -920,10 +980,10 @@ test.describe('row resize plugin', () => {
       await page.mouse.move(pointerX, pointerY + delta);
       await page.waitForTimeout(50);
       await page.waitForChanges();
-      expect(await lastRenderedRowHeader(page)).toBe(52);
-      await expect(mainDataRows(page).filter({ hasText: '99:0' })).toHaveCount(
-        1,
-      );
+      await expect.poll(() => lastRenderedRowHeader(page)).toBe(52);
+      await expect
+        .poll(() => mainDataRows(page).filter({ hasText: '99:0' }).count())
+        .toBe(1);
     }
     await page.mouse.up();
     await page.waitForChanges();

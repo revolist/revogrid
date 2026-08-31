@@ -345,9 +345,15 @@ export class GroupingRowPlugin extends BasePlugin {
       }
     });
     // clear rows
+    const store = this.getStore();
+    const sortingPlugin = this.providers.plugins.getByClass(SortingPlugin);
+    const currentSource = store.get('source');
+    const sourceItems = this.isSortingActiveOrPending(sortingPlugin)
+      ? currentSource.map((_, index) => index)
+      : store.get('proxyItems');
     const { source, oldNewIndexes } = getSource(
-      this.getStore().get('source'),
-      this.getStore().get('proxyItems'),
+      currentSource,
+      sourceItems,
       true,
     );
     this.providers.data.setData(
@@ -358,6 +364,9 @@ export class GroupingRowPlugin extends BasePlugin {
       true,
     );
     this.updateTrimmed(undefined, undefined, oldNewIndexes, source);
+    if (hasActiveSorting(sortingPlugin?.sorting)) {
+      sortingPlugin?.reapplySorting();
+    }
   }
 
   private updateTrimmed(

@@ -1,5 +1,5 @@
 import type { VNode } from '@stencil/core';
-import { getItemByIndex, getViewportMaxCoordinate } from '@store';
+import { getItemByIndex, getViewportMaxCoordinate, rowTypes } from '@store';
 import type {
   BeforeRowRenderEvent,
   DimensionRows,
@@ -57,6 +57,7 @@ export class RowResizePlugin extends BasePlugin {
   private animationFrame?: number;
   private pendingHeight?: number;
   private pendingBottomAnchor = false;
+  private rowDefinitionRemapQueued = false;
   private previousBodyCursor = '';
 
   static fromGridConfig(
@@ -112,22 +113,16 @@ export class RowResizePlugin extends BasePlugin {
     this.addEventListener('beforesourcesortingapply', this.cancelForDataChange);
     this.addEventListener('aftersortingapply', this.reapplyCommittedSizes);
     this.addEventListener('beforefilterapply', this.cancelForDataChange);
-    this.addEventListener('afterfilterapply', () => {
-      queueMicrotask(this.reapplyRowDefinitionSizes);
-    });
+    this.addEventListener('afterfilterapply', this.scheduleRowDefinitionRemap);
     this.addEventListener('beforerowdefinition', ({ detail }) => {
       this.cancel('data-change');
       if (detail.vals !== this.providers.dimension.getRowDefinitions()) {
         this.committedSizes.clear();
-        this.appliedIndexes.clear();
-        return;
       }
-      queueMicrotask(this.reapplyRowDefinitionSizes);
+      this.scheduleRowDefinitionRemap();
     });
     this.addEventListener('afterthemechanged', this.reapplyCommittedSizes);
-    this.addEventListener('aftertrimmed', () => {
-      queueMicrotask(this.reapplyRowDefinitionSizes);
-    });
+    this.addEventListener('aftertrimmed', this.scheduleRowDefinitionRemap);
     this.addEventListener('roworderchange', () => {
       queueMicrotask(this.reapplyCommittedSizes);
     });
@@ -170,6 +165,7 @@ export class RowResizePlugin extends BasePlugin {
         this.registerEventListeners();
       } else {
         this.pendingBottomAnchor = false;
+        this.rowDefinitionRemapQueued = false;
         this.clearSubscriptions();
       }
     }
@@ -467,7 +463,10 @@ export class RowResizePlugin extends BasePlugin {
   private readonly reapplyCommittedSizes = () =>
     this.applyCommittedSizes(false);
 
-  private readonly rebuildCommittedSizes = () => this.applyCommittedSizes(true);
+  private readonly rebuildCommittedSizes = () => {
+    this.applyCommittedSizes(true);
+    this.scheduleRowDefinitionRemap();
+  };
 
   private applyCommittedSizes(clearAppliedIndexes: boolean) {
     for (const [rowType, committed] of this.committedSizes) {
@@ -492,29 +491,59 @@ export class RowResizePlugin extends BasePlugin {
     }
   }
 
+  private readonly scheduleRowDefinitionRemap = () => {
+    if (this.rowDefinitionRemapQueued) {
+      return;
+    }
+    this.rowDefinitionRemapQueued = true;
+    queueMicrotask(() => {
+      if (!this.rowDefinitionRemapQueued) {
+        return;
+      }
+      this.rowDefinitionRemapQueued = false;
+      this.reapplyRowDefinitionSizes();
+    });
+  };
+
   /** Map source-indexed row definitions back onto the current virtual order. */
   private readonly reapplyRowDefinitionSizes = () => {
-    for (const [rowType, committed] of this.committedSizes) {
+    const rowDefinitions = this.providers.dimension.getRowDefinitions();
+    for (const rowType of rowTypes) {
       const items = this.providers.data.stores[rowType].store.get('items');
       const definitions = new Map(
-        this.providers.dimension
-          .getRowDefinitions()
+        rowDefinitions
           .filter(definition => definition.type === rowType)
           .map(definition => [definition.index, definition.size]),
       );
-      const sizes: ViewSettingSizeProp = {};
+      const appliedIndexes = this.appliedIndexes.get(rowType);
+      if (!definitions.size && !appliedIndexes?.size) {
+        continue;
+      }
+      const dimension = this.providers.dimension.stores[rowType];
+      const currentSizes = dimension.store.get('sizes');
+      const sizes: ViewSettingSizeProp = { ...currentSizes };
+      for (const index of appliedIndexes || []) {
+        delete sizes[index];
+      }
+      for (const physicalIndex of definitions.keys()) {
+        delete sizes[physicalIndex];
+      }
       const indexes = new Set<number>();
       items.forEach((physicalIndex, virtualIndex) => {
         const size = definitions.get(physicalIndex);
         if (size !== undefined) {
           sizes[virtualIndex] = size;
-        }
-        if (committed.has(physicalIndex)) {
           indexes.add(virtualIndex);
         }
       });
       this.appliedIndexes.set(rowType, indexes);
-      this.providers.dimension.setCustomSizes(rowType, sizes);
+      const sizeKeys = Object.keys(sizes);
+      if (
+        sizeKeys.length !== Object.keys(currentSizes).length ||
+        sizeKeys.some(index => sizes[index] !== currentSizes[index])
+      ) {
+        this.providers.dimension.setCustomSizes(rowType, sizes);
+      }
     }
   };
 
@@ -539,6 +568,7 @@ export class RowResizePlugin extends BasePlugin {
 
   destroy() {
     this.cancel('destroy');
+    this.rowDefinitionRemapQueued = false;
     super.destroy();
   }
 }

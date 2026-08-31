@@ -606,6 +606,44 @@ test.describe('row grouping', () => {
     ]);
   });
 
+  test('restores source order after grouping is cleared during sorting', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: buildColumns([
+        {
+          prop: 'name',
+          name: 'Name',
+          sortable: true,
+          ...withHeaderTestId('clear-grouping-sort-name'),
+        },
+      ]),
+      source: [
+        { name: 'Charlie', team: 'North' },
+        { name: 'Alice', team: 'North' },
+        { name: 'Dan', team: 'South' },
+        { name: 'Ben', team: 'South' },
+      ],
+      grouping: { props: ['team'], expandedAll: true },
+    });
+
+    const header = page.getByTestId('clear-grouping-sort-name');
+    await header.click();
+    await expectVisibleColumnValues(page, 0, ['Alice', 'Charlie', 'Ben', 'Dan']);
+
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) throw new Error('Grid was not found');
+      grid.grouping = { props: [] };
+    });
+    await page.waitForChanges();
+    await expectVisibleColumnValues(page, 0, ['Alice', 'Ben', 'Charlie', 'Dan']);
+
+    await header.click();
+    await header.click();
+    await expectVisibleColumnValues(page, 0, ['Charlie', 'Alice', 'Dan', 'Ben']);
+  });
+
   test('preserves grouped multi-column sort priority when grouping is rebuilt', async ({
     page,
   }) => {
