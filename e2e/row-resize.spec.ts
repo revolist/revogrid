@@ -24,7 +24,7 @@ type EventSnapshot = {
 
 async function enableRowResize(
   page: E2EPage,
-  config?: { minHeight?: number; maxHeight?: number },
+  config?: { minHeight?: number; maxHeight?: number; fullRow?: boolean },
 ) {
   await page.evaluate(pluginConfig => {
     const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
@@ -771,6 +771,67 @@ test.describe('row resize plugin', () => {
     expect(north.data).toBeCloseTo(54, 0);
     expect(alice.data).toBeCloseTo(62, 0);
     expect(alice.header).toBeCloseTo(alice.data, 0);
+  });
+
+  test('does not create blank rows below a partially collapsed grouped grid', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: buildColumns([{ prop: 'name', name: 'Name', rowDrag: true }]),
+      source: Array.from({ length: 100 }, (_, index) => ({
+        name: `${index}:0`,
+        key: index % 2 ? 'a' : 'b',
+        ...(index % 4 ? { key2: 'c' } : index % 3 ? { key2: 'd' } : {}),
+      })),
+      grouping: {
+        props: ['key', 'key2'],
+        expandedAll: false,
+        prevExpanded: { 'a': true, 'a,c': true },
+      },
+      rowHeaders: true,
+      rowSize: 36,
+    });
+    await enableRowResize(page, { fullRow: true });
+    await expect(mainDataRows(page).filter({ hasText: '0:0' })).toHaveCount(0);
+
+    const lastRenderedRowHeader = async () =>
+      Math.max(
+        ...(await page
+          .locator(`${SELECTORS.rowHeaderViewport} ${SELECTORS.renderedRows}`)
+          .evaluateAll(rows =>
+            rows.map(row => Number(row.getAttribute('data-rgrow'))),
+          )),
+      );
+    const scrollToBottom = async () => {
+      await page
+        .locator(`${SELECTORS.mainViewport} .vertical-inner`)
+        .evaluate((element: HTMLElement) => {
+          element.scrollTop = element.scrollHeight;
+          element.dispatchEvent(new Event('scroll', { bubbles: true }));
+        });
+      await page.waitForChanges();
+    };
+
+    await scrollToBottom();
+    const bottomRowBeforeResize = await lastRenderedRowHeader();
+    expect(bottomRowBeforeResize).toBe(52);
+    const contentSizeBeforeResize = await callGridMethod<{ y: number }>(
+      page,
+      'getContentSize',
+    );
+
+    await callGridMethod(page, 'scrollToRow', 0);
+    await page.waitForChanges();
+    const resizedChildIndex = await rowIndexByText(page, '7:0');
+    await dragHandle(page, dataResizeHandle(page, resizedChildIndex), 500);
+    const contentSizeAfterResize = await callGridMethod<{ y: number }>(
+      page,
+      'getContentSize',
+    );
+    await scrollToBottom();
+    expect(await lastRenderedRowHeader()).toBe(bottomRowBeforeResize);
+    await expect(mainDataRows(page).filter({ hasText: '99:0' })).toHaveCount(1);
+    expect(contentSizeAfterResize.y).toBe(contentSizeBeforeResize.y + 500);
   });
 
   test('keeps committed row-position heights through source replacement and theme change', async ({
