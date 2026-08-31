@@ -21,6 +21,7 @@ import { SortingPlugin } from '../sorting/sorting.plugin';
 
 import {
   GROUP_EXPAND_EVENT,
+  GROUP_ORIGINAL_INDEX,
   GROUPING_ROW_TYPE,
   PSEUDO_GROUP_COLUMN,
 } from './grouping.const';
@@ -52,6 +53,8 @@ export * from './grouping.row.renderer';
 
 export class GroupingRowPlugin extends BasePlugin {
   private options: GroupingOptions | undefined;
+  private sortingBaselineActive = false;
+  private isRegrouping = false;
 
   getStore(
     type: DimensionRows = GROUPING_ROW_TYPE,
@@ -177,21 +180,52 @@ export class GroupingRowPlugin extends BasePlugin {
     return options;
   }
 
+  /** Marks the current physical data-row order as the baseline for one sorting cycle. */
+  private captureSortingBaseline() {
+    let originalIndex = 0;
+    this.getStore().get('source').forEach(item => {
+      if (!isGrouping(item)) {
+        item[GROUP_ORIGINAL_INDEX] = originalIndex++;
+      }
+    });
+    this.sortingBaselineActive = true;
+  }
+
   /**
    * Starts global source update with group clearing and applying new one
    * Initiated when need to reapply grouping
    */
-  private doSourceUpdate(options?: ExpandedOptions) {
+  private doSourceUpdate(
+    options?: ExpandedOptions,
+    sortingOrder?: 'preserve' | 'restore',
+  ) {
     /**
      * Get source without grouping
      * @param newOldIndexMap - provides us mapping with new indexes vs old indexes, we would use it for trimmed mapping
      */
     const store = this.getStore();
-    const { source, prevExpanded, oldNewIndexes } = getSource(
+    let { source, prevExpanded, oldNewIndexes } = getSource(
       store.get('source'),
       store.get('proxyItems'),
       true,
     );
+    if (sortingOrder === 'restore') {
+      source = [...source].sort((a, b) =>
+        (a[GROUP_ORIGINAL_INDEX] as number) - (b[GROUP_ORIGINAL_INDEX] as number),
+      );
+      const restoredIndexes = new Map(
+        source.map((item, index) => [item[GROUP_ORIGINAL_INDEX], index]),
+      );
+      oldNewIndexes = {};
+      store.get('source').forEach((item, physicalIndex) => {
+        if (!isGrouping(item)) {
+          const restoredIndex = restoredIndexes.get(item[GROUP_ORIGINAL_INDEX]);
+          if (typeof restoredIndex === 'number') {
+            oldNewIndexes[physicalIndex] = restoredIndex;
+          }
+        }
+      });
+    }
     const expanded: ExpandedOptions = {
       prevExpanded,
       ...options,
@@ -205,19 +239,29 @@ export class GroupingRowPlugin extends BasePlugin {
       depth,
       trimmed,
       oldNewIndexMap,
-    } = gatherGrouping(source, this.options?.props ?? [], expanded);
+    } = gatherGrouping(
+      source,
+      this.options?.props ?? [],
+      expanded,
+      sortingOrder === 'preserve',
+    );
 
     const customRenderer = options?.groupLabelTemplate;
     const cellRenderer = options?.groupCellTemplate;
 
     // setup source
-    this.providers.data.setData(
-      sourceWithGroups,
-      GROUPING_ROW_TYPE,
-      this.revogrid.disableVirtualY,
-      { depth, customRenderer, cellRenderer },
-      true,
-    );
+    this.isRegrouping = true;
+    try {
+      this.providers.data.setData(
+        sourceWithGroups,
+        GROUPING_ROW_TYPE,
+        this.revogrid.disableVirtualY,
+        { depth, customRenderer, cellRenderer },
+        true,
+      );
+    } finally {
+      this.isRegrouping = false;
+    }
     this.updateTrimmed(
       trimmed,
       oldNewIndexes ?? {},
@@ -304,8 +348,12 @@ export class GroupingRowPlugin extends BasePlugin {
       }
       // if sorting is running don't apply grouping, wait for sorting, then it'll apply in @aftersortingapply
       if (this.isSortingRunning()) {
+        if (!this.isRegrouping) {
+          this.sortingBaselineActive = false;
+        }
         return;
       }
+      this.sortingBaselineActive = false;
       this.onDataSet(detail);
     });
     this.addEventListener('beforecolumnsset', ({ detail }) => {
@@ -329,11 +377,22 @@ export class GroupingRowPlugin extends BasePlugin {
      * sorting applied need to clear grouping and apply again
      * based on new results whole grouping order will changed
      */
-    this.addEventListener('aftersortingapply', () => {
+    this.addEventListener('aftersortingapply', ({ detail }) => {
       if (!this.options?.props?.length) {
         return;
       }
-      this.doSourceUpdate(this.getCurrentExpandedOptions());
+      if (detail?.sorting) {
+        if (!this.sortingBaselineActive) {
+          this.captureSortingBaseline();
+        }
+        this.doSourceUpdate(this.getCurrentExpandedOptions(), 'preserve');
+        return;
+      }
+      this.doSourceUpdate(
+        this.getCurrentExpandedOptions(),
+        this.sortingBaselineActive ? 'restore' : undefined,
+      );
+      this.sortingBaselineActive = false;
     });
 
     /**
@@ -354,6 +413,7 @@ export class GroupingRowPlugin extends BasePlugin {
 
   // clear grouping
   clearGrouping() {
+    this.sortingBaselineActive = false;
     // clear columns
     columnTypes.forEach(t => {
       const cols = this.providers.column.getColumns(t);

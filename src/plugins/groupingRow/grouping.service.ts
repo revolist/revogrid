@@ -11,7 +11,11 @@ import {
 } from './grouping.const';
 import type { ExpandedOptions } from './grouping.row.types';
 
-type GroupedData = Map<string, GroupedData | DataType[]>;
+type GroupedItem = {
+  value: DataType;
+  originalIndex: number;
+};
+type GroupedData = Map<string, GroupedData | GroupedItem[]>;
 type SourceGather = {
   source: DataType[];
   prevExpanded: Record<string, boolean>;
@@ -116,14 +120,14 @@ function flattenGroupMaps({
     }
     if (Array.isArray(innerGroupedValues)) {
       // This branch handles leaf nodes (actual data items)
-      innerGroupedValues.forEach(value => {
+      innerGroupedValues.forEach(({ originalIndex }) => {
         itemIndex += 1;
         if (!isGroupExpanded) {
           trimmed[itemIndex] = true; // Mark items as hidden if group is collapsed
         }
-        oldNewIndexMap[value[GROUP_ORIGINAL_INDEX]] = itemIndex; // Keep track of new positions
+        oldNewIndexMap[originalIndex] = itemIndex; // Keep track of new positions
       });
-      sourceWithGroups.push(...innerGroupedValues);
+      sourceWithGroups.push(...innerGroupedValues.map(({ value }) => value));
     } else {
       // This branch handles nested groups (further subgroups)
       const children = flattenGroupMaps({
@@ -164,6 +168,7 @@ export function gatherGrouping(
     getGroupValue,
     emptyGroupValue = '',
   }: ExpandedOptions,
+  preserveOriginalIndex = false,
 ) {
   const groupedItems: GroupedData = new Map();
   
@@ -186,13 +191,18 @@ export function gatherGrouping(
       currentGroupLevel = currentGroupLevel.get(value) as GroupedData;
     });
     if (!currentGroupLevel.has(lastLevelValue)) {
-      const groupItems: DataType[] = [];
+      const groupItems: GroupedItem[] = [];
       currentGroupLevel.set(lastLevelValue, groupItems);
     }
-    const lastLevelItems = currentGroupLevel.get(lastLevelValue) as DataType[];
+    const lastLevelItems = currentGroupLevel.get(lastLevelValue) as GroupedItem[];
     lastLevelItems.push({
-      ...item,
-      [GROUP_ORIGINAL_INDEX]: originalIndex,
+      originalIndex,
+      value: {
+        ...item,
+        [GROUP_ORIGINAL_INDEX]: preserveOriginalIndex && typeof item[GROUP_ORIGINAL_INDEX] === 'number'
+          ? item[GROUP_ORIGINAL_INDEX]
+          : originalIndex,
+      },
     });
   });
 

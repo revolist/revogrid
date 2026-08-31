@@ -527,7 +527,7 @@ test.describe('row grouping', () => {
     await expect(mainDataRows(page)).toHaveCount(2);
   });
 
-  test('sorts data rows and reapplies grouping', async ({ page }) => {
+  test('restores source order after sorting with and without grouping', async ({ page }) => {
     const source = [
       { id: 1, name: 'Charlie', role: 'Engineer', city: 'Lisbon', team: 'North' },
       { id: 2, name: 'Alice', role: 'Designer', city: 'Porto', team: 'North' },
@@ -546,6 +546,23 @@ test.describe('row grouping', () => {
       { prop: 'role', name: 'Role' },
       { prop: 'city', name: 'City' },
     ]);
+
+    await mountGrid(page, {
+      columns,
+      source,
+      rowHeaders: true,
+    });
+
+    await expectVisibleColumnValues(page, 1, ['Charlie', 'Alice', 'Dan', 'Ben']);
+
+    await page.getByTestId('group-sort-name').click();
+    await expectVisibleColumnValues(page, 1, ['Alice', 'Ben', 'Charlie', 'Dan']);
+
+    await page.getByTestId('group-sort-name').click();
+    await expectVisibleColumnValues(page, 1, ['Dan', 'Charlie', 'Ben', 'Alice']);
+
+    await page.getByTestId('group-sort-name').click();
+    await expectVisibleColumnValues(page, 1, ['Charlie', 'Alice', 'Dan', 'Ben']);
 
     await mountGrid(page, {
       columns,
@@ -571,6 +588,13 @@ test.describe('row grouping', () => {
     await expect(page.locator(`${SELECTORS.mainViewport} .groupingRow`)).toContainText([
       'South',
       'North',
+    ]);
+
+    await page.getByTestId('group-sort-name').click();
+    await expectVisibleColumnValues(page, 1, ['Charlie', 'Alice', 'Dan', 'Ben']);
+    await expect(page.locator(`${SELECTORS.mainViewport} .groupingRow`)).toContainText([
+      'North',
+      'South',
     ]);
   });
 
