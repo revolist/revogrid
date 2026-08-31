@@ -1,5 +1,5 @@
 import type { VNode } from '@stencil/core';
-import { getItemByIndex } from '@store';
+import { getItemByIndex, getViewportMaxCoordinate } from '@store';
 import type {
   BeforeRowRenderEvent,
   DimensionRows,
@@ -38,6 +38,7 @@ type ActiveResize = {
   currentHeight: number;
   previousSizes: ViewSettingSizeProp;
   originalCustomSizes: ViewSettingSizeProp;
+  bottomAnchored: boolean;
   startEvent: PointerEvent;
   lastEvent: PointerEvent;
 };
@@ -56,6 +57,7 @@ export class RowResizePlugin extends BasePlugin {
   private readonly appliedIndexes = new Map<DimensionRows, Set<number>>();
   private animationFrame?: number;
   private pendingHeight?: number;
+  private pendingBottomAnchor = false;
   private previousBodyCursor = '';
   private rowDefinitionsRef: HTMLRevoGridElement['rowDefinitions'];
 
@@ -134,6 +136,7 @@ export class RowResizePlugin extends BasePlugin {
     this.addEventListener(GROUP_EXPAND_EVENT, () => {
       queueMicrotask(this.reapplyCommittedSizes);
     });
+    this.addEventListener('aftergridrender', this.applyPendingBottomAnchor);
     this.addEventListener('rowheaderschanged', ({ detail }) => {
       if (!detail && !this.config.fullRow) {
         this.cancel('row-headers-hidden');
@@ -235,6 +238,8 @@ export class RowResizePlugin extends BasePlugin {
 
     const dimension = this.providers.dimension.stores[rowType];
     const dimensionState = dimension.getCurrentState();
+    const viewport = this.providers.viewport.stores[rowType];
+    const viewportState = viewport.store.state;
     const item = getItemByIndex(dimensionState, index);
     const focusedStore = this.providers.selection.focusedStore;
     const selectedRowType = focusedStore
@@ -270,6 +275,11 @@ export class RowResizePlugin extends BasePlugin {
       currentHeight: startHeight,
       previousSizes,
       originalCustomSizes: { ...dimensionState.sizes },
+      bottomAnchored:
+        rowType === 'rgRow' &&
+        dimensionState.realSize > viewportState.clientSize &&
+        viewport.lastCoordinate >=
+          getViewportMaxCoordinate(dimensionState, viewportState.virtualSize),
       startEvent: event,
       lastEvent: event,
     };
@@ -335,6 +345,7 @@ export class RowResizePlugin extends BasePlugin {
     const detail = this.eventDetail(active, event, active.currentHeight);
     this.finishGesture();
     this.commitResize(active);
+    this.requestBottomAnchor(active);
     this.emit<RowResizeEventDetail>(AFTER_ROW_RESIZE_EVENT, detail);
   };
 
@@ -369,6 +380,7 @@ export class RowResizePlugin extends BasePlugin {
       createRowResizePatch(active.indexes, size),
       true,
     );
+    this.requestBottomAnchor(active);
     active.currentHeight = size;
     this.emit<RowResizeEventDetail>(
       ROW_RESIZE_EVENT,
@@ -392,6 +404,7 @@ export class RowResizePlugin extends BasePlugin {
       }
     }
     this.providers.dimension.setCustomSizes(active.rowType, currentSizes);
+    this.requestBottomAnchor(active);
     const detail = {
       ...this.eventDetail(
         active,
@@ -454,6 +467,24 @@ export class RowResizePlugin extends BasePlugin {
       this.revogrid.rowDefinitions = rowDefinitions;
     }
   }
+
+  private requestBottomAnchor(active: ActiveResize) {
+    if (active.bottomAnchored) {
+      this.pendingBottomAnchor = true;
+    }
+  }
+
+  private readonly applyPendingBottomAnchor = () => {
+    if (!this.pendingBottomAnchor) {
+      return;
+    }
+    this.pendingBottomAnchor = false;
+    const dimension = this.providers.dimension.stores.rgRow.store;
+    // Scroll surfaces have slightly different client sizes. Give the shared
+    // scrolling service the content end and let each surface clamp to its own
+    // exact bottom coordinate.
+    void this.revogrid.scrollToCoordinate({ y: dimension.get('realSize') });
+  };
 
   private readonly reapplyCommittedSizes = () =>
     this.applyCommittedSizes(false);

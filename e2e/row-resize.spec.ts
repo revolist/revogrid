@@ -137,6 +137,49 @@ async function rowHeightsByText(page: E2EPage, text: string) {
   return { index, data: data!.height, header: header!.height };
 }
 
+async function mainVerticalScrollMetrics(page: E2EPage) {
+  return page
+    .locator(`${SELECTORS.mainViewport} .vertical-inner`)
+    .evaluate((element: HTMLElement) => ({
+      scrollTop: element.scrollTop,
+      scrollHeight: element.scrollHeight,
+      clientHeight: element.clientHeight,
+    }));
+}
+
+async function scrollMainToBottom(page: E2EPage) {
+  await page
+    .locator(`${SELECTORS.mainViewport} .vertical-inner`)
+    .evaluate((element: HTMLElement) => {
+      element.scrollTop = element.scrollHeight;
+      element.dispatchEvent(new Event('scroll', { bubbles: true }));
+    });
+  await page.waitForChanges();
+}
+
+async function expectMainViewportAtTail(page: E2EPage) {
+  await expect
+    .poll(async () => {
+      const { scrollTop, scrollHeight, clientHeight } =
+        await mainVerticalScrollMetrics(page);
+      return scrollHeight - clientHeight - scrollTop;
+    })
+    // The virtual viewport intentionally keeps up to one origin row as an
+    // end buffer. The important invariant is that the rendered tail remains
+    // present rather than falling behind each resized row.
+    .toBeLessThanOrEqual(36);
+}
+
+async function lastRenderedRowHeader(page: E2EPage) {
+  return Math.max(
+    ...(await page
+      .locator(`${SELECTORS.rowHeaderViewport} ${SELECTORS.renderedRows}`)
+      .evaluateAll(rows =>
+        rows.map(row => Number(row.getAttribute('data-rgrow'))),
+      )),
+  );
+}
+
 test.describe('row resize plugin', () => {
   test('stays registered and activates in place from resize-row', async ({
     page,
@@ -794,26 +837,8 @@ test.describe('row resize plugin', () => {
     await enableRowResize(page, { fullRow: true });
     await expect(mainDataRows(page).filter({ hasText: '0:0' })).toHaveCount(0);
 
-    const lastRenderedRowHeader = async () =>
-      Math.max(
-        ...(await page
-          .locator(`${SELECTORS.rowHeaderViewport} ${SELECTORS.renderedRows}`)
-          .evaluateAll(rows =>
-            rows.map(row => Number(row.getAttribute('data-rgrow'))),
-          )),
-      );
-    const scrollToBottom = async () => {
-      await page
-        .locator(`${SELECTORS.mainViewport} .vertical-inner`)
-        .evaluate((element: HTMLElement) => {
-          element.scrollTop = element.scrollHeight;
-          element.dispatchEvent(new Event('scroll', { bubbles: true }));
-        });
-      await page.waitForChanges();
-    };
-
-    await scrollToBottom();
-    const bottomRowBeforeResize = await lastRenderedRowHeader();
+    await scrollMainToBottom(page);
+    const bottomRowBeforeResize = await lastRenderedRowHeader(page);
     expect(bottomRowBeforeResize).toBe(52);
     const contentSizeBeforeResize = await callGridMethod<{ y: number }>(
       page,
@@ -832,10 +857,183 @@ test.describe('row resize plugin', () => {
       page,
       'getContentSize',
     );
-    await scrollToBottom();
-    expect(await lastRenderedRowHeader()).toBe(bottomRowBeforeResize);
+    await scrollMainToBottom(page);
+    expect(await lastRenderedRowHeader(page)).toBe(bottomRowBeforeResize);
     await expect(mainDataRows(page).filter({ hasText: '99:0' })).toHaveCount(1);
     expect(contentSizeAfterResize.y).toBe(contentSizeBeforeResize.y + 400);
+  });
+
+  test('keeps a grouped bottom viewport anchored through repeated row resizes', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1888, height: 1632 });
+    await mountGrid(page, {
+      columns: buildColumns(
+        Array.from({ length: 9 }, (_, index) => ({
+          prop: String(index),
+          name: String.fromCodePoint(65 + index),
+          size: 200,
+          rowDrag: index === 0,
+        })),
+      ),
+      source: Array.from({ length: 100 }, (_, rowIndex) => ({
+        ...Object.fromEntries(
+          Array.from({ length: 9 }, (_, columnIndex) => [
+            columnIndex,
+            `${rowIndex}:${columnIndex}`,
+          ]),
+        ),
+        key: rowIndex % 2 ? 'a' : 'b',
+        ...(rowIndex % 4 ? { key2: 'c' } : rowIndex % 3 ? { key2: 'd' } : {}),
+      })),
+      grouping: {
+        props: ['key', 'key2'],
+        expandedAll: false,
+        prevExpanded: { 'a': true, 'a,c': true },
+      },
+      rowHeaders: true,
+      rowSize: 36,
+      height: 1560,
+    });
+    await enableRowResize(page, { fullRow: true });
+    for (const value of ['7:0', '13:0', '17:0']) {
+      const row = await rowHeightsByText(page, value);
+      await dragHandle(page, resizeHandle(page, row.index), 200);
+    }
+    await scrollMainToBottom(page);
+    await expectMainViewportAtTail(page);
+    expect(await lastRenderedRowHeader(page)).toBe(52);
+
+    const contentSizeBefore = await callGridMethod<{ y: number }>(
+      page,
+      'getContentSize',
+    );
+    const firstBefore = await rowHeightsByText(page, '93:0');
+    const firstHandle = resizeHandle(page, firstBefore.index);
+    const firstHandleBox = await firstHandle.boundingBox();
+    expect(firstHandleBox).not.toBeNull();
+    const pointerX = firstHandleBox!.x + firstHandleBox!.width / 2;
+    const pointerY = firstHandleBox!.y + 1;
+    await page.mouse.move(pointerX, pointerY);
+    await page.mouse.down();
+    for (const delta of [30, 60, 90, 120]) {
+      await page.mouse.move(pointerX, pointerY + delta);
+      await page.waitForTimeout(50);
+      await page.waitForChanges();
+      expect(await lastRenderedRowHeader(page)).toBe(52);
+      await expect(mainDataRows(page).filter({ hasText: '99:0' })).toHaveCount(
+        1,
+      );
+    }
+    await page.mouse.up();
+    await page.waitForChanges();
+    await expectMainViewportAtTail(page);
+    expect(await lastRenderedRowHeader(page)).toBe(52);
+    await expect(mainDataRows(page).filter({ hasText: '99:0' })).toHaveCount(1);
+    expect((await rowHeightsByText(page, '93:0')).data).toBeCloseTo(
+      firstBefore.data + 120,
+      0,
+    );
+
+    const secondBefore = await rowHeightsByText(page, '87:0');
+    await dragHandle(page, resizeHandle(page, secondBefore.index), 90);
+    await expectMainViewportAtTail(page);
+    expect(await lastRenderedRowHeader(page)).toBe(52);
+    await expect(mainDataRows(page).filter({ hasText: '99:0' })).toHaveCount(1);
+    expect((await rowHeightsByText(page, '87:0')).data).toBeCloseTo(
+      secondBefore.data + 90,
+      0,
+    );
+
+    const thirdBefore = await rowHeightsByText(page, '71:0');
+    await dragHandle(page, resizeHandle(page, thirdBefore.index), 70);
+    await expectMainViewportAtTail(page);
+    expect(await lastRenderedRowHeader(page)).toBe(52);
+    await expect(mainDataRows(page).filter({ hasText: '99:0' })).toHaveCount(1);
+    expect((await rowHeightsByText(page, '71:0')).data).toBeCloseTo(
+      thirdBefore.data + 70,
+      0,
+    );
+
+    const firstExpanded = await rowHeightsByText(page, '93:0');
+    await dragHandle(page, resizeHandle(page, firstExpanded.index), -50);
+    await expectMainViewportAtTail(page);
+    expect(await lastRenderedRowHeader(page)).toBe(52);
+    await expect(mainDataRows(page).filter({ hasText: '99:0' })).toHaveCount(1);
+    expect((await rowHeightsByText(page, '93:0')).data).toBeCloseTo(
+      firstExpanded.data - 50,
+      0,
+    );
+
+    const renderedHeaderIndexes = await page
+      .locator(`${SELECTORS.rowHeaderViewport} ${SELECTORS.renderedRows}`)
+      .evaluateAll(rows =>
+        rows.map(row => Number(row.getAttribute('data-rgrow'))),
+      );
+    expect(Math.max(...renderedHeaderIndexes)).toBe(52);
+    const contentSizeAfter = await callGridMethod<{ y: number }>(
+      page,
+      'getContentSize',
+    );
+    expect(contentSizeAfter.y).toBe(contentSizeBefore.y + 230);
+  });
+
+  test('keeps a non-grouped bottom viewport anchored while resizing', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: buildColumns([{ prop: 'name', name: 'Name' }]),
+      source: Array.from({ length: 30 }, (_, index) => ({
+        name: `Row ${index}`,
+      })),
+      rowHeaders: true,
+      rowSize: 36,
+    });
+    await enableRowResize(page);
+    await scrollMainToBottom(page);
+    await expectMainViewportAtTail(page);
+
+    const before = await rowHeightsByText(page, 'Row 27');
+    await dragHandle(page, resizeHandle(page, before.index), 80);
+
+    await expectMainViewportAtTail(page);
+    await expect(mainDataRows(page).filter({ hasText: 'Row 29' })).toHaveCount(
+      1,
+    );
+    expect((await rowHeightsByText(page, 'Row 27')).data).toBeCloseTo(
+      before.data + 80,
+      0,
+    );
+  });
+
+  test('does not bottom-anchor a resize started away from the bottom', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: buildColumns([{ prop: 'name', name: 'Name' }]),
+      source: Array.from({ length: 60 }, (_, index) => ({
+        name: `Row ${index}`,
+      })),
+      rowHeaders: true,
+      rowSize: 36,
+    });
+    await enableRowResize(page);
+    await callGridMethod(page, 'scrollToRow', 20);
+    await page.waitForChanges();
+    const beforeScroll = await mainVerticalScrollMetrics(page);
+    const before = await rowHeightsByText(page, 'Row 22');
+
+    await dragHandle(page, resizeHandle(page, before.index), 80);
+
+    const afterScroll = await mainVerticalScrollMetrics(page);
+    expect(afterScroll.scrollTop).toBeCloseTo(beforeScroll.scrollTop, 0);
+    expect(afterScroll.scrollHeight - afterScroll.clientHeight).toBeGreaterThan(
+      afterScroll.scrollTop,
+    );
+    expect((await rowHeightsByText(page, 'Row 22')).data).toBeCloseTo(
+      before.data + 80,
+      0,
+    );
   });
 
   test('keeps committed row-position heights through source replacement and theme change', async ({
