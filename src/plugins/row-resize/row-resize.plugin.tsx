@@ -6,12 +6,13 @@ import type {
   PluginProviders,
   ViewSettingSizeProp,
 } from '@type';
-import { BasePlugin, type GridPlugin } from '../base.plugin';
+import { BasePlugin } from '../base.plugin';
 import type {
   ResolvedRowResizeConfig,
   RowResizeCancelReason,
   RowResizeConfig,
   RowResizeEventDetail,
+  RowResizeGridConfig,
 } from './row-resize.types';
 import { GROUP_EXPAND_EVENT } from '../groupingRow/grouping.const';
 import {
@@ -46,8 +47,6 @@ type ActiveResize = {
 export class RowResizePlugin extends BasePlugin {
   private config: ResolvedRowResizeConfig;
   private enabled = false;
-  private gridResizeRow: HTMLRevoGridElement['resizeRow'] = false;
-  private gridPlugins: GridPlugin[] = [];
 
   private active?: ActiveResize;
   private readonly committedSizes = new Map<
@@ -59,14 +58,14 @@ export class RowResizePlugin extends BasePlugin {
   private pendingHeight?: number;
   private pendingBottomAnchor = false;
   private previousBodyCursor = '';
-  private rowDefinitionsRef: HTMLRevoGridElement['rowDefinitions'];
 
-  static fromGridProperty(
+  static fromGridConfig(
     revogrid: HTMLRevoGridElement,
     providers: PluginProviders,
+    gridConfig: RowResizeGridConfig,
   ): RowResizePlugin {
     const plugin = new RowResizePlugin(revogrid, providers);
-    plugin.controlFromGridProperty();
+    plugin.setGridConfig(gridConfig, false);
     return plugin;
   }
 
@@ -77,7 +76,6 @@ export class RowResizePlugin extends BasePlugin {
   ) {
     super(revogrid, providers);
     this.config = resolveRowResizeConfig(config);
-    this.rowDefinitionsRef = revogrid.rowDefinitions;
     if (new.target !== RowResizePlugin) {
       this.enabled = true;
       this.registerEventListeners();
@@ -100,13 +98,14 @@ export class RowResizePlugin extends BasePlugin {
         }
       }
       if (removedIndexes.size) {
-        const rowDefinitions = this.revogrid.rowDefinitions.filter(
-          definition =>
-            definition.type !== detail.type ||
-            !removedIndexes.has(definition.index),
-        );
-        this.rowDefinitionsRef = rowDefinitions;
-        this.revogrid.rowDefinitions = rowDefinitions;
+        const rowDefinitions = this.providers.dimension
+          .getRowDefinitions()
+          .filter(
+            definition =>
+              definition.type !== detail.type ||
+              !removedIndexes.has(definition.index),
+          );
+        this.providers.dimension.setRowDefinitions(rowDefinitions);
       }
     });
     this.addEventListener('afteranysource', this.rebuildCommittedSizes);
@@ -118,10 +117,9 @@ export class RowResizePlugin extends BasePlugin {
     });
     this.addEventListener('beforerowdefinition', ({ detail }) => {
       this.cancel('data-change');
-      if (detail.vals !== this.rowDefinitionsRef) {
+      if (detail.vals !== this.providers.dimension.getRowDefinitions()) {
         this.committedSizes.clear();
         this.appliedIndexes.clear();
-        this.rowDefinitionsRef = detail.vals;
         return;
       }
       queueMicrotask(this.reapplyRowDefinitionSizes);
@@ -144,35 +142,16 @@ export class RowResizePlugin extends BasePlugin {
     });
   }
 
-  private controlFromGridProperty() {
-    this.gridResizeRow = this.revogrid.resizeRow;
-    this.gridPlugins = this.revogrid.plugins;
-    this.syncGridProperty(false);
-    this.watch<HTMLRevoGridElement['resizeRow']>('resizeRow', value => {
-      this.gridResizeRow = value;
-      this.syncGridProperty();
-    });
-    this.watch<GridPlugin[]>('plugins', value => {
-      this.gridPlugins = value || [];
-      this.syncGridProperty();
-    });
-  }
-
-  private syncGridProperty(refresh = true) {
-    const hasConfiguredPlugin = this.gridPlugins.some(
-      plugin =>
-        plugin !== RowResizePlugin &&
-        plugin.prototype instanceof RowResizePlugin,
-    );
-    const explicitlyEnabled = this.gridPlugins.includes(RowResizePlugin);
+  setGridConfig(gridConfig: RowResizeGridConfig, refresh = true) {
+    const { hasConfiguredPlugin, explicitlyEnabled, resizeRow } = gridConfig;
     const enabled = hasConfiguredPlugin
       ? false
-      : explicitlyEnabled || !!this.gridResizeRow;
+      : explicitlyEnabled || !!resizeRow;
     const config = resolveRowResizeConfig(
       !hasConfiguredPlugin &&
         !explicitlyEnabled &&
-        typeof this.gridResizeRow === 'object'
-        ? this.gridResizeRow
+        typeof resizeRow === 'object'
+        ? resizeRow
         : undefined,
     );
     const configChanged =
@@ -188,7 +167,6 @@ export class RowResizePlugin extends BasePlugin {
     if (enabled !== this.enabled) {
       this.enabled = enabled;
       if (enabled) {
-        this.rowDefinitionsRef = this.revogrid.rowDefinitions;
         this.registerEventListeners();
       } else {
         this.pendingBottomAnchor = false;
@@ -458,13 +436,12 @@ export class RowResizePlugin extends BasePlugin {
     }, []);
     if (physicalIndexes.length) {
       const rowDefinitions = mergeRowResizeDefinitions(
-        this.revogrid.rowDefinitions,
+        this.providers.dimension.getRowDefinitions(),
         active.rowType,
         physicalIndexes,
         active.currentHeight,
       );
-      this.rowDefinitionsRef = rowDefinitions;
-      this.revogrid.rowDefinitions = rowDefinitions;
+      this.providers.dimension.setRowDefinitions(rowDefinitions);
       this.requestBottomAnchor(active);
     }
   }
@@ -520,7 +497,8 @@ export class RowResizePlugin extends BasePlugin {
     for (const [rowType, committed] of this.committedSizes) {
       const items = this.providers.data.stores[rowType].store.get('items');
       const definitions = new Map(
-        this.revogrid.rowDefinitions
+        this.providers.dimension
+          .getRowDefinitions()
           .filter(definition => definition.type === rowType)
           .map(definition => [definition.index, definition.size]),
       );

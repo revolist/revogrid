@@ -1485,6 +1485,7 @@ export class RevoGridComponent {
       vals: after,
       oldVals: before,
     });
+    this.dimensionProvider.syncRowDefinitions(newVal);
     // apply new values
     const newRows = rowDefinitionByType(newVal);
     // clear current defs
@@ -1560,6 +1561,10 @@ export class RevoGridComponent {
     this.rowheaderschanged.emit(rowHeaders);
   }
 
+  @Watch('resizeRow') resizeRowChanged() {
+    this.syncRowResizeConfig();
+  }
+
   /**
    * Register external VNodes
    */
@@ -1585,6 +1590,7 @@ export class RevoGridComponent {
    */
   @Watch('plugins') pluginsChanged(plugins: GridPlugin[] = [], prevPlugins?: GridPlugin[]) {
     this.pluginService.addUserPluginsAndCreate(this.element, plugins, prevPlugins, this.getPluginData());
+    this.syncRowResizeConfig();
   }
   // #endregion
 
@@ -1645,11 +1651,37 @@ export class RevoGridComponent {
     // register grouping plugin
     this.pluginService.add(new GroupingRowPlugin(this.element, pluginData));
     this.pluginService.add(
-      RowResizePlugin.fromGridProperty(this.element, pluginData),
+      RowResizePlugin.fromGridConfig(
+        this.element,
+        pluginData,
+        this.getRowResizeConfig(),
+      ),
     );
     if (this.canMoveColumns) {
       this.pluginService.add(new ColumnMovePlugin(this.element, pluginData));
     }
+  }
+
+  private getRowResizeConfig() {
+    const hasConfiguredPlugin = this.plugins.some(
+      plugin =>
+        plugin !== RowResizePlugin &&
+        plugin.prototype instanceof RowResizePlugin,
+    );
+    return {
+      resizeRow: this.resizeRow,
+      hasConfiguredPlugin,
+      explicitlyEnabled: this.plugins.includes(RowResizePlugin),
+    };
+  }
+
+  private syncRowResizeConfig() {
+    const plugin = this.pluginService
+      .get()
+      .find(plugin => plugin.constructor === RowResizePlugin) as
+      | RowResizePlugin
+      | undefined;
+    plugin?.setGridConfig(this.getRowResizeConfig());
   }
 
   getPluginData(): PluginProviders | undefined {
@@ -1699,6 +1731,9 @@ export class RevoGridComponent {
     this.dimensionProvider = new DimensionProvider(this.viewportProvider, {
       realSizeChanged: (k: MultiDimensionType) =>
         this.contentsizechanged.emit(k),
+      rowDefinitionsChanged: definitions => {
+        this.rowDefinitions = definitions;
+      },
     });
     this.dimensionProvider.setSettings(
       { originItemSize: getColumnSize(this.colSize) },

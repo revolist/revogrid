@@ -4,7 +4,10 @@ import {
   getItemByIndex,
 } from '../src/store/dimension/dimension.helpers';
 import { DimensionStore } from '../src/store/dimension/dimension.store';
-import { isVirtualXDimension } from '../src/services/dimension.provider';
+import DimensionProvider, {
+  isVirtualXDimension,
+} from '../src/services/dimension.provider';
+import ViewportProvider from '../src/services/viewport.provider';
 
 const ITEM_SIZE = 30;
 
@@ -19,6 +22,29 @@ describe('isVirtualXDimension', () => {
   it('lets disableVirtualX override configured virtual column dimensions', () => {
     expect(isVirtualXDimension('rgCol', true, ['rgCol', 'colPinEnd'])).toBe(false);
     expect(isVirtualXDimension('colPinEnd', true, ['rgCol', 'colPinEnd'])).toBe(false);
+  });
+});
+
+describe('row definition ownership', () => {
+  it('distinguishes component synchronization from provider updates', () => {
+    const rowDefinitionsChanged = jest.fn();
+    const provider = new DimensionProvider(new ViewportProvider(), {
+      realSizeChanged: jest.fn(),
+      rowDefinitionsChanged,
+    });
+    const initial = [{ type: 'rgRow' as const, index: 1, size: 40 }];
+    provider.syncRowDefinitions(initial);
+
+    expect(provider.getRowDefinitions()).toBe(initial);
+    expect(rowDefinitionsChanged).not.toHaveBeenCalled();
+
+    const updated = [{ type: 'rgRow' as const, index: 1, size: 52 }];
+    provider.setRowDefinitions(updated);
+    provider.setRowDefinitions(updated);
+
+    expect(provider.getRowDefinitions()).toBe(updated);
+    expect(rowDefinitionsChanged).toHaveBeenCalledTimes(1);
+    expect(rowDefinitionsChanged).toHaveBeenCalledWith(updated);
   });
 });
 

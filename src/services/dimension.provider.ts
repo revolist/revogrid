@@ -20,12 +20,14 @@ import type {
   ViewPortScrollEvent,
   ViewSettingSizeProp,
   ViewportState,
+  RowDefinition,
 } from '@type';
 import { getColumnSizes } from '../utils/column.utils';
 import { getScrollDimension } from './scroll.dimension.helpers';
 
 export type DimensionConfig = {
   realSizeChanged(k: MultiDimensionType): void;
+  rowDefinitionsChanged?(definitions: RowDefinition[]): void;
 };
 
 export const DEFAULT_VIRTUAL_X: readonly DimensionCols[] = ['rgCol'];
@@ -46,12 +48,13 @@ export function isVirtualXDimension(
  */
 export default class DimensionProvider {
   readonly stores: DimensionStoreCollection;
+  private rowDefinitions: RowDefinition[] = [];
   constructor(
     private viewports: ViewportProvider,
-    config: DimensionConfig,
+    private config: DimensionConfig,
   ) {
     const sizeChanged = debounce(
-      (k: MultiDimensionType) => config.realSizeChanged(k),
+      (k: MultiDimensionType) => this.config.realSizeChanged(k),
       RESIZE_INTERVAL,
     );
     this.stores = [...rowTypes, ...columnTypes].reduce(
@@ -76,6 +79,22 @@ export default class DimensionProvider {
       this.stores[t].store.get('originItemSize'),
     );
     this.setItemCount(count, t);
+  }
+
+  getRowDefinitions(): RowDefinition[] {
+    return this.rowDefinitions;
+  }
+
+  syncRowDefinitions(definitions: RowDefinition[]) {
+    this.rowDefinitions = definitions;
+  }
+
+  setRowDefinitions(definitions: RowDefinition[]) {
+    if (definitions === this.rowDefinitions) {
+      return;
+    }
+    this.syncRowDefinitions(definitions);
+    this.config.rowDefinitionsChanged?.(definitions);
   }
 
   /**
