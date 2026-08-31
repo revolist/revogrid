@@ -1047,6 +1047,34 @@ test.describe('row resize plugin', () => {
     ).toBeGreaterThan(36);
   });
 
+  test('does not defer bottom anchoring for a resize with no movement', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: buildColumns([{ prop: 'name', name: 'Name' }]),
+      source: Array.from({ length: 60 }, (_, index) => ({
+        name: `Row ${index}`,
+      })),
+      rowHeaders: true,
+      rowSize: 36,
+    });
+    await enableRowResize(page);
+    await scrollMainToBottom(page);
+
+    const row = await rowHeightsByText(page, 'Row 57');
+    await dragHandle(page, resizeHandle(page, row.index), 0);
+    await callGridMethod(page, 'scrollToRow', 10);
+    await page.waitForChanges();
+
+    const scroll = await mainVerticalScrollMetrics(page);
+    expect(scroll.scrollTop).toBeLessThan(
+      scroll.scrollHeight - scroll.clientHeight - 36,
+    );
+    await expect(mainDataRows(page).filter({ hasText: 'Row 10' })).toHaveCount(
+      1,
+    );
+  });
+
   test('does not bottom-anchor a resize started away from the bottom', async ({
     page,
   }) => {

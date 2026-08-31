@@ -346,7 +346,6 @@ export class RowResizePlugin extends BasePlugin {
     const detail = this.eventDetail(active, event, active.currentHeight);
     this.finishGesture();
     this.commitResize(active);
-    this.requestBottomAnchor(active);
     this.emit<RowResizeEventDetail>(AFTER_ROW_RESIZE_EVENT, detail);
   };
 
@@ -466,6 +465,7 @@ export class RowResizePlugin extends BasePlugin {
       );
       this.rowDefinitionsRef = rowDefinitions;
       this.revogrid.rowDefinitions = rowDefinitions;
+      this.requestBottomAnchor(active);
     }
   }
 
