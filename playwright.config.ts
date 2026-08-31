@@ -23,5 +23,11 @@ export default createConfig({
     command: 'stencil build --dev --watch --serve --no-open',
     url: 'http://localhost:3333/ping',
     reuseExistingServer: !process.env.CI,
+    // Playwright enables FORCE_COLOR for its child process. An inherited
+    // NO_COLOR makes Node 24 warn on stderr, which Stencil treats as a worker
+    // startup error. Keep the variable defined but empty for this process.
+    env: {
+      NO_COLOR: '',
+    },
   },
 });

@@ -1,5 +1,6 @@
 import type { DataType } from '../src';
 import {
+  GROUP_EXPAND_EVENT,
   GROUP_DEPTH,
   GROUP_EXPANDED,
   PSEUDO_GROUP_ITEM_ID,
@@ -15,6 +16,7 @@ import {
   isGrouping,
   measureEqualDepth,
 } from '../src/plugins/groupingRow/grouping.service';
+import { gatherGroupedRowIndexes } from '../src/plugins/groupingRow/grouping.sorting.service';
 import {
   filterOutEmptyGroupRows,
   filterOutEmptyGroups,
@@ -373,6 +375,63 @@ describe('row grouping', () => {
     });
   });
 
+  describe('gatherGroupedRowIndexes', () => {
+    it('places sorted rows under their existing group headers', () => {
+      const { sourceWithGroups } = gatherGrouping(
+        [
+          { name: 'Charlie', team: 'North' },
+          { name: 'Alice', team: 'North' },
+          { name: 'Dan', team: 'South' },
+          { name: 'Ben', team: 'South' },
+        ],
+        ['team'],
+        { expandedAll: true },
+      );
+
+      expect(gatherGroupedRowIndexes(sourceWithGroups, [2, 5, 1, 4])).toEqual([
+        0,
+        2,
+        1,
+        3,
+        5,
+        4,
+      ]);
+      expect(gatherGroupedRowIndexes(sourceWithGroups, [4, 1, 5, 2])).toEqual([
+        3,
+        4,
+        5,
+        0,
+        1,
+        2,
+      ]);
+    });
+
+    it('keeps nested group headers attached to sorted descendants', () => {
+      const { sourceWithGroups } = gatherGrouping(
+        [
+          { name: 'Alice', region: 'Europe', team: 'North' },
+          { name: 'Ben', region: 'Europe', team: 'North' },
+          { name: 'Cara', region: 'Europe', team: 'South' },
+          { name: 'Dan', region: 'Asia', team: 'East' },
+        ],
+        ['region', 'team'],
+        { expandedAll: true },
+      );
+
+      expect(gatherGroupedRowIndexes(sourceWithGroups, [8, 5, 3, 2])).toEqual([
+        6,
+        7,
+        8,
+        0,
+        4,
+        5,
+        1,
+        3,
+        2,
+      ]);
+    });
+  });
+
   describe('processDoubleConversionTrimmed', () => {
     it('remaps converted trims and drops unmapped group row indexes', () => {
       const trimmed = processDoubleConversionTrimmed(
@@ -670,7 +729,67 @@ describe('row grouping', () => {
   });
 
   describe('sorting integration', () => {
-    it('does not reopen collapsed groups after sorting reapplies grouping', () => {
+    it('builds grouping from physical order when the current proxy is sorted', () => {
+      const { plugin, state } = createGroupingPlugin([
+        { name: 'Charlie', team: 'North' },
+        { name: 'Alice', team: 'North' },
+        { name: 'Dan', team: 'South' },
+        { name: 'Ben', team: 'South' },
+      ]);
+      state.proxyItems = [2, 0, 3, 1];
+
+      plugin.setGrouping({ props: ['team'], expandedAll: true });
+
+      expect(
+        state.source.filter(row => !isGrouping(row)).map(row => row.name),
+      ).toEqual(['Charlie', 'Alice', 'Dan', 'Ben']);
+    });
+
+    it('does not rebuild the physical grouped source after sorting', () => {
+      const { plugin, providers, revogrid, state } = createGroupingPlugin([
+        { name: 'Charlie', team: 'North' },
+        { name: 'Alice', team: 'North' },
+        { name: 'Dan', team: 'South' },
+        { name: 'Ben', team: 'South' },
+      ]);
+      plugin.setGrouping({ props: ['team'], expandedAll: true });
+      const groupedSource = state.source;
+
+      state.proxyItems = [0, 4, 1, 3, 5, 2];
+      revogrid.dispatchEvent(new CustomEvent('aftersortingapply'));
+
+      expect(state.source).toBe(groupedSource);
+      expect(state.proxyItems).toEqual([0, 4, 1, 3, 5, 2]);
+      expect(providers.data.setData).toHaveBeenCalledTimes(1);
+    });
+
+    it('expands a group in sorted proxy order without moving the physical source', () => {
+      const { plugin, revogrid, state } = createGroupingPlugin([
+        { name: 'Charlie', team: 'North' },
+        { name: 'Alice', team: 'North' },
+        { name: 'Dan', team: 'South' },
+        { name: 'Ben', team: 'South' },
+      ]);
+      plugin.setGrouping({ props: ['team'], expandedAll: true });
+      const groupedSource = state.source;
+      const { trimmed } = doCollapse(0, state.source);
+      state.trimmed = { [TRIMMED_GROUPING]: trimmed };
+      state.proxyItems = [3, 4, 5, 0, 1, 2];
+      state.items = state.proxyItems.filter(index => !trimmed[index]);
+
+      revogrid.dispatchEvent(
+        new CustomEvent(GROUP_EXPAND_EVENT, {
+          detail: { virtualIndex: 3 },
+        }),
+      );
+
+      expect(state.source).toBe(groupedSource);
+      expect(
+        state.items.map(index => state.source[index].name).filter(Boolean),
+      ).toEqual(['Dan', 'Ben', 'Charlie', 'Alice']);
+    });
+
+    it('keeps collapsed groups closed while the proxy order changes', () => {
       const { plugin, revogrid, state } = createGroupingPlugin([
         { name: 'Charlie', team: 'North' },
         { name: 'Alice', team: 'North' },
@@ -690,6 +809,7 @@ describe('row grouping', () => {
       state.trimmed = {
         [TRIMMED_GROUPING]: trimmed,
       };
+      state.proxyItems = [0, 2, 1, 3, 5, 4];
       state.items = state.proxyItems.filter(index => !trimmed[index]);
 
       revogrid.dispatchEvent(new CustomEvent('aftersortingapply'));
@@ -699,8 +819,8 @@ describe('row grouping', () => {
       expect(northGroup?.[GROUP_EXPANDED]).toBe(false);
       expect(southGroup?.[GROUP_EXPANDED]).toBe(true);
       expect(state.items.map(index => state.source[index].name).filter(Boolean)).toEqual([
-        'Dan',
         'Ben',
+        'Dan',
       ]);
     });
   });

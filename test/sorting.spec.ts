@@ -8,6 +8,7 @@ import {
   getComparer,
 } from '../src/plugins/sorting/sorting.func';
 import { SortingPlugin } from '../src/plugins/sorting/sorting.plugin';
+import { gatherGrouping } from '../src/plugins/groupingRow/grouping.service';
 import { SortingSign } from '../src/plugins/sorting/sorting.sign';
 import {
   GROUP_COLUMN_PROP,
@@ -711,7 +712,7 @@ describe('SortingPlugin regressions', () => {
     expect(rowStore.state.source).toBe(source);
   });
 
-  it('sorts data indexes when the current source contains grouping rows', () => {
+  it('sorts data indexes into valid groups without rebuilding the source', () => {
     const source = [
       {
         [PSEUDO_GROUP_ITEM]: 'group-b',
@@ -741,7 +742,45 @@ describe('SortingPlugin regressions', () => {
       ['rgRow'],
     );
 
-    expect(rowStore.setData).toHaveBeenCalledWith({ proxyItems: [0, 4, 1, 3, 2] });
+    expect(rowStore.setData).toHaveBeenCalledWith({ proxyItems: [3, 4, 0, 1, 2] });
+    expect(rowStore.state.source).toBe(source);
+  });
+
+  it('restores the original grouped proxy order when sorting is cleared', () => {
+    const { sourceWithGroups } = gatherGrouping(
+      [
+        { name: 'Charlie', team: 'North' },
+        { name: 'Alice', team: 'North' },
+        { name: 'Dan', team: 'South' },
+        { name: 'Ben', team: 'South' },
+      ],
+      ['team'],
+      { expandedAll: true },
+    );
+    const { plugin, rowStore } = createPlugin(sourceWithGroups);
+
+    plugin.sort(
+      { name: 'asc' },
+      { name: getComparer({ prop: 'name' }, 'asc') },
+      { name: { prop: 'name' } },
+      ['name'],
+      ['rgRow'],
+    );
+    expect(rowStore.state.proxyItems).toEqual([0, 2, 1, 3, 5, 4]);
+
+    plugin.sort(
+      { name: 'desc' },
+      { name: getComparer({ prop: 'name' }, 'desc') },
+      { name: { prop: 'name' } },
+      ['name'],
+      ['rgRow'],
+    );
+    expect(rowStore.state.proxyItems).toEqual([3, 4, 5, 0, 1, 2]);
+
+    plugin.sort(undefined, undefined, ['rgRow']);
+
+    expect(rowStore.state.proxyItems).toEqual([0, 1, 2, 3, 4, 5]);
+    expect(rowStore.state.source).toBe(sourceWithGroups);
   });
 
   it('sorts full proxy order while preserving filtered visible items', () => {

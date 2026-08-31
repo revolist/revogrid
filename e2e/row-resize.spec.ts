@@ -567,7 +567,7 @@ test.describe('row resize plugin', () => {
     expect(jane.header).toBeCloseTo(jane.data, 0);
   });
 
-  test('keeps the resized grouped-row slot aligned when grouping rebuilds after sort', async ({
+  test('keeps a resized grouped row attached to its source across sort and clear', async ({
     page,
   }) => {
     await mountGrid(page, {
@@ -604,9 +604,19 @@ test.describe('row resize plugin', () => {
 
     const alice = await rowHeightsByText(page, 'Alice');
     const charlie = await rowHeightsByText(page, 'Charlie');
-    expect(alice.data).toBeCloseTo(62, 0);
-    expect(charlie.data).toBeCloseTo(36, 0);
-    expect(alice.header).toBeCloseTo(alice.data, 0);
+    expect(alice.data).toBeCloseTo(36, 0);
+    expect(charlie.data).toBeCloseTo(62, 0);
+    expect(charlie.header).toBeCloseTo(charlie.data, 0);
+
+    await page.getByTestId('grouped-row-resize-sort-name').click();
+    await page.getByTestId('grouped-row-resize-sort-name').click();
+    await expect
+      .poll(() => visibleColumnValues(page, 0))
+      .toEqual(['Charlie', 'Alice', 'Dan', 'Ben']);
+
+    const restoredCharlie = await rowHeightsByText(page, 'Charlie');
+    expect(restoredCharlie.data).toBeCloseTo(62, 0);
+    expect(restoredCharlie.header).toBeCloseTo(restoredCharlie.data, 0);
   });
 
   test('moves a resized row height through row reordering and theme changes', async ({
