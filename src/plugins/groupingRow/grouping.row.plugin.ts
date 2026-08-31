@@ -15,6 +15,7 @@ import type {
 
 import { BasePlugin } from '../base.plugin';
 import { FILTER_TRIMMED_TYPE } from '../filter/filter.plugin';
+import { SortingPlugin, hasActiveSorting } from '../sorting/sorting.plugin';
 
 import type { Observable, ColumnCollection } from '../../utils';
 import {
@@ -150,6 +151,16 @@ export class GroupingRowPlugin extends BasePlugin {
   }
 
   /**
+   * Sorting changes proxy order without changing the physical source baseline.
+   * Other proxy changes, such as row dragging, are user-authored source order
+   * and must be retained when grouping is rebuilt.
+   */
+  private isSortingActiveOrPending() {
+    const sortingPlugin = this.providers.plugins.getByClass(SortingPlugin);
+    return !!sortingPlugin?.sortingPromise || hasActiveSorting(sortingPlugin?.sorting);
+  }
+
+  /**
    * Starts global source update with group clearing and applying new one
    * Initiated when need to reapply grouping
    */
@@ -159,10 +170,13 @@ export class GroupingRowPlugin extends BasePlugin {
      * @param newOldIndexMap - provides us mapping with new indexes vs old indexes, we would use it for trimmed mapping
      */
     const store = this.getStore();
-    const physicalItems = store.get('source').map((_, index) => index);
+    const currentSource = store.get('source');
+    const sourceItems = this.isSortingActiveOrPending()
+      ? currentSource.map((_, index) => index)
+      : store.get('proxyItems');
     const { source, prevExpanded, oldNewIndexes } = getSource(
-      store.get('source'),
-      physicalItems,
+      currentSource,
+      sourceItems,
       true,
     );
     const expanded: ExpandedOptions = {

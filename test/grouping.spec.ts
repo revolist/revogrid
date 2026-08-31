@@ -730,19 +730,56 @@ describe('row grouping', () => {
 
   describe('sorting integration', () => {
     it('builds grouping from physical order when the current proxy is sorted', () => {
-      const { plugin, state } = createGroupingPlugin([
+      const { plugin, providers, state } = createGroupingPlugin([
         { name: 'Charlie', team: 'North' },
         { name: 'Alice', team: 'North' },
         { name: 'Dan', team: 'South' },
         { name: 'Ben', team: 'South' },
       ]);
       state.proxyItems = [2, 0, 3, 1];
+      providers.plugins.getByClass.mockReturnValue({
+        sorting: { name: 'asc' },
+        sortingPromise: null,
+      });
 
       plugin.setGrouping({ props: ['team'], expandedAll: true });
 
       expect(
         state.source.filter(row => !isGrouping(row)).map(row => row.name),
       ).toEqual(['Charlie', 'Alice', 'Dan', 'Ben']);
+    });
+
+    it('uses physical order while clearing sorting is still pending', () => {
+      const { plugin, providers, state } = createGroupingPlugin([
+        { name: 'Charlie', team: 'North' },
+        { name: 'Alice', team: 'North' },
+      ]);
+      state.proxyItems = [1, 0];
+      providers.plugins.getByClass.mockReturnValue({
+        sorting: undefined,
+        sortingPromise: jest.fn(),
+      });
+
+      plugin.setGrouping({ props: ['team'], expandedAll: true });
+
+      expect(
+        state.source.filter(row => !isGrouping(row)).map(row => row.name),
+      ).toEqual(['Charlie', 'Alice']);
+    });
+
+    it('builds grouping from drag-adjusted proxy order when sorting is inactive', () => {
+      const { plugin, state } = createGroupingPlugin([
+        { name: 'Alice', team: 'North' },
+        { name: 'Ben', team: 'North' },
+        { name: 'Cara', team: 'South' },
+      ]);
+      state.proxyItems = [1, 0, 2];
+
+      plugin.setGrouping({ props: ['team'], expandedAll: true });
+
+      expect(
+        state.source.filter(row => !isGrouping(row)).map(row => row.name),
+      ).toEqual(['Ben', 'Alice', 'Cara']);
     });
 
     it('does not rebuild the physical grouped source after sorting', () => {
@@ -774,7 +811,7 @@ describe('row grouping', () => {
       const groupedSource = state.source;
       const { trimmed } = doCollapse(0, state.source);
       state.trimmed = { [TRIMMED_GROUPING]: trimmed };
-      state.proxyItems = [3, 4, 5, 0, 1, 2];
+      state.proxyItems = [3, 5, 4, 0, 2, 1];
       state.items = state.proxyItems.filter(index => !trimmed[index]);
 
       revogrid.dispatchEvent(
@@ -786,7 +823,7 @@ describe('row grouping', () => {
       expect(state.source).toBe(groupedSource);
       expect(
         state.items.map(index => state.source[index].name).filter(Boolean),
-      ).toEqual(['Dan', 'Ben', 'Charlie', 'Alice']);
+      ).toEqual(['Ben', 'Dan', 'Alice', 'Charlie']);
     });
 
     it('keeps collapsed groups closed while the proxy order changes', () => {

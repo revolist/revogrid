@@ -632,8 +632,14 @@ test.describe('row grouping', () => {
       'West',
     ]);
 
+    await groupRows
+      .filter({ hasText: 'North' })
+      .locator(SELECTORS.groupExpandButton)
+      .click();
+    await expectVisibleColumnValues(page, 0, ['Yuri', 'Amy', 'Ben']);
+
     await page.getByTestId('nested-group-sort-name').click();
-    await expectVisibleColumnValues(page, 0, ['Amy', 'Ben', 'Mia', 'Zoe', 'Yuri']);
+    await expectVisibleColumnValues(page, 0, ['Amy', 'Ben', 'Yuri']);
     await expect(groupRows).toContainText([
       'Asia',
       'East',
@@ -642,6 +648,12 @@ test.describe('row grouping', () => {
       'North',
       'South',
     ]);
+
+    await groupRows
+      .filter({ hasText: 'North' })
+      .locator(SELECTORS.groupExpandButton)
+      .click();
+    await expectVisibleColumnValues(page, 0, ['Amy', 'Ben', 'Mia', 'Zoe', 'Yuri']);
 
     await page.getByTestId('nested-group-sort-name').click();
     await expectVisibleColumnValues(page, 0, ['Zoe', 'Mia', 'Yuri', 'Ben', 'Amy']);
@@ -765,6 +777,12 @@ test.describe('row grouping', () => {
     ]);
     await expect(mainGroupRows).toHaveCount(2);
     await expectVisibleColumnValues(page, 1, ['Ben', 'Dan']);
+
+    await mainGroupRows
+      .filter({ hasText: 'North' })
+      .locator(SELECTORS.groupExpandButton)
+      .click();
+    await expectVisibleColumnValues(page, 1, ['Alice', 'Charlie', 'Ben', 'Dan']);
   });
 
   test('allows row reordering inside a group and blocks dragging across groups', async ({ page }) => {
@@ -814,6 +832,16 @@ test.describe('row grouping', () => {
     );
     await page.mouse.up();
 
+    await expectVisibleColumnValues(page, 1, ['Ben', 'Alice', 'Cara', 'Dan']);
+
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) throw new Error('Grid was not found');
+      grid.grouping = {
+        ...(grid.grouping as Record<string, unknown>),
+      };
+    });
+    await page.waitForChanges();
     await expectVisibleColumnValues(page, 1, ['Ben', 'Alice', 'Cara', 'Dan']);
 
     const aliceDragHandle = mainDataRows(page).nth(2).locator('[data-rgCol="1"] .revo-draggable');
