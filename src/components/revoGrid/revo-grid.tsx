@@ -1495,8 +1495,8 @@ export class RevoGridComponent {
         if (remove.hasOwnProperty(t)) {
           const type = t as DimensionRows;
           const store = this.dataProvider.stores[type];
-          const sourceLength = store.store.get('source').length;
-          this.dimensionProvider.clearSize(type, sourceLength);
+          const itemCount = store.store.get('items').length;
+          this.dimensionProvider.clearSize(type, itemCount);
         }
       }
     }

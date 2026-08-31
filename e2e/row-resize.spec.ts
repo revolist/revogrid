@@ -822,8 +822,12 @@ test.describe('row resize plugin', () => {
 
     await callGridMethod(page, 'scrollToRow', 0);
     await page.waitForChanges();
-    const resizedChildIndex = await rowIndexByText(page, '7:0');
-    await dragHandle(page, dataResizeHandle(page, resizedChildIndex), 500);
+    let resizedChildIndex = await rowIndexByText(page, '7:0');
+    await dragHandle(page, resizeHandle(page, resizedChildIndex), 200);
+    resizedChildIndex = await rowIndexByText(page, '3:0');
+    const secondHandle = resizeHandle(page, resizedChildIndex);
+    await expect(secondHandle).toBeVisible();
+    await dragHandle(page, secondHandle, 200);
     const contentSizeAfterResize = await callGridMethod<{ y: number }>(
       page,
       'getContentSize',
@@ -831,7 +835,7 @@ test.describe('row resize plugin', () => {
     await scrollToBottom();
     expect(await lastRenderedRowHeader()).toBe(bottomRowBeforeResize);
     await expect(mainDataRows(page).filter({ hasText: '99:0' })).toHaveCount(1);
-    expect(contentSizeAfterResize.y).toBe(contentSizeBeforeResize.y + 500);
+    expect(contentSizeAfterResize.y).toBe(contentSizeBeforeResize.y + 400);
   });
 
   test('keeps committed row-position heights through source replacement and theme change', async ({
