@@ -2,6 +2,8 @@ import { CellProps, PluginProviders } from '@type';
 import { BasePlugin } from '../base.plugin';
 import { ColumnCollection } from 'src/utils';
 
+const toAriaIndex = (index: number) => `${index + 1}`;
+
 /**
  * WCAG Plugin is responsible for enhancing the accessibility features of the RevoGrid component.
  * It ensures that the grid is fully compliant with Web Content Accessibility Guidelines (WCAG) 2.1.
@@ -53,7 +55,7 @@ export class WCAGPlugin extends BasePlugin {
             const result = columnProperties?.(...args) || {};
 
             result.role = 'columnheader';
-            result['aria-colindex'] = `${index}`;
+            result['aria-colindex'] = toAriaIndex(index);
 
             return result;
           };
@@ -61,8 +63,8 @@ export class WCAGPlugin extends BasePlugin {
           column.cellProperties = (...args) => {
             const wcagProps: CellProps = {
               ['role']: 'gridcell',
-              ['aria-colindex']: `${index}`,
-              ['aria-rowindex']: `${args[0].rowIndex}`,
+              ['aria-colindex']: toAriaIndex(index),
+              ['aria-rowindex']: toAriaIndex(args[0].rowIndex),
               ['tabindex']: -1,
             };
             const columnProps: CellProps = cellProperties?.(...args) || {};
@@ -95,7 +97,7 @@ export class WCAGPlugin extends BasePlugin {
         detail.node.$attrs$ = {
           ...detail.node.$attrs$,
           role: 'row',
-          ['aria-rowindex']: detail.item.itemIndex,
+          ['aria-rowindex']: toAriaIndex(detail.item.itemIndex),
         };
       },
     );
