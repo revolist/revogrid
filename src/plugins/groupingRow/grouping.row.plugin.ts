@@ -155,8 +155,7 @@ export class GroupingRowPlugin extends BasePlugin {
    * Other proxy changes, such as row dragging, are user-authored source order
    * and must be retained when grouping is rebuilt.
    */
-  private isSortingActiveOrPending() {
-    const sortingPlugin = this.providers.plugins.getByClass(SortingPlugin);
+  private isSortingActiveOrPending(sortingPlugin?: SortingPlugin) {
     return !!sortingPlugin?.sortingPromise || hasActiveSorting(sortingPlugin?.sorting);
   }
 
@@ -170,8 +169,9 @@ export class GroupingRowPlugin extends BasePlugin {
      * @param newOldIndexMap - provides us mapping with new indexes vs old indexes, we would use it for trimmed mapping
      */
     const store = this.getStore();
+    const sortingPlugin = this.providers.plugins.getByClass(SortingPlugin);
     const currentSource = store.get('source');
-    const sourceItems = this.isSortingActiveOrPending()
+    const sourceItems = this.isSortingActiveOrPending(sortingPlugin)
       ? currentSource.map((_, index) => index)
       : store.get('proxyItems');
     const { source, prevExpanded, oldNewIndexes } = getSource(
@@ -211,6 +211,9 @@ export class GroupingRowPlugin extends BasePlugin {
       oldNewIndexMap,
       sourceWithGroups,
     );
+    if (hasActiveSorting(sortingPlugin?.sorting)) {
+      sortingPlugin?.reapplySorting();
+    }
   }
 
   /**

@@ -568,6 +568,16 @@ test.describe('row grouping', () => {
       'South',
     ]);
 
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) throw new Error('Grid was not found');
+      grid.grouping = {
+        ...(grid.grouping as Record<string, unknown>),
+      };
+    });
+    await page.waitForChanges();
+    await expectVisibleColumnValues(page, 1, ['Alice', 'Charlie', 'Ben', 'Dan']);
+
     await page.getByTestId('group-sort-name').click();
     await expectVisibleColumnValues(page, 1, ['Dan', 'Ben', 'Charlie', 'Alice']);
     await expect(page.locator(`${SELECTORS.mainViewport} .groupingRow`)).toContainText([

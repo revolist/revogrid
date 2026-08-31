@@ -1,6 +1,10 @@
 import { expect } from '@playwright/test';
 import { matchers, createConfig } from '@stencil/playwright';
 
+// Playwright enables FORCE_COLOR for its web server and workers. Remove an
+// inherited NO_COLOR first so Node does not emit a conflict warning on stderr.
+Reflect.deleteProperty(process.env, 'NO_COLOR');
+
 // Add custom Stencil matchers to Playwright assertions
 expect.extend(matchers);
 
@@ -23,11 +27,5 @@ export default createConfig({
     command: 'stencil build --dev --watch --serve --no-open',
     url: 'http://localhost:3333/ping',
     reuseExistingServer: !process.env.CI,
-    // Playwright enables FORCE_COLOR for its child process. An inherited
-    // NO_COLOR makes Node 24 warn on stderr, which Stencil treats as a worker
-    // startup error. Keep the variable defined but empty for this process.
-    env: {
-      NO_COLOR: '',
-    },
   },
 });

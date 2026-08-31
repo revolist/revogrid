@@ -379,6 +379,21 @@ export class SortingPlugin extends BasePlugin {
     this.postponeSort(order, sortingFunc, sortingColumns, sortingOrder, ignoreViewportUpdate);
   }
 
+  /**
+   * Schedules the current active sort again after another plugin rebuilds row
+   * proxy indexes while keeping the physical source unchanged.
+   */
+  reapplySorting() {
+    if (!hasActiveSorting(this.sorting) || !this.sortingFunc) {
+      return;
+    }
+    this.startSorting(
+      this.sorting,
+      this.sortingFunc,
+      this.sortingColumns,
+      this.sortingOrder,
+    );
+  }
 
   /**
    * Applies sorting requested by a sortable header click.

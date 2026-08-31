@@ -740,6 +740,7 @@ describe('row grouping', () => {
       providers.plugins.getByClass.mockReturnValue({
         sorting: { name: 'asc' },
         sortingPromise: null,
+        reapplySorting: jest.fn(),
       });
 
       plugin.setGrouping({ props: ['team'], expandedAll: true });
@@ -747,6 +748,24 @@ describe('row grouping', () => {
       expect(
         state.source.filter(row => !isGrouping(row)).map(row => row.name),
       ).toEqual(['Charlie', 'Alice', 'Dan', 'Ben']);
+    });
+
+    it('reapplies active sorting after rebuilding the grouped source', () => {
+      const { plugin, providers, state } = createGroupingPlugin([
+        { name: 'Charlie', team: 'North' },
+        { name: 'Alice', team: 'North' },
+      ]);
+      state.proxyItems = [1, 0];
+      const sortingPlugin = {
+        sorting: { name: 'asc' },
+        sortingPromise: null,
+        reapplySorting: jest.fn(),
+      };
+      providers.plugins.getByClass.mockReturnValue(sortingPlugin);
+
+      plugin.setGrouping({ props: ['team'], expandedAll: true });
+
+      expect(sortingPlugin.reapplySorting).toHaveBeenCalledTimes(1);
     });
 
     it('uses physical order while clearing sorting is still pending', () => {
