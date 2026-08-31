@@ -606,6 +606,108 @@ test.describe('row grouping', () => {
     ]);
   });
 
+  test('preserves grouped multi-column sort priority when grouping is rebuilt', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: buildColumns([
+        {
+          prop: 'priority',
+          name: 'Priority',
+          sortable: true,
+          ...withHeaderTestId('group-multi-sort-priority'),
+        },
+        {
+          prop: 'name',
+          name: 'Name',
+          sortable: true,
+          ...withHeaderTestId('group-multi-sort-name'),
+        },
+      ]),
+      source: [
+        { priority: 2, name: 'Charlie', team: 'North' },
+        { priority: 1, name: 'Ben', team: 'North' },
+        { priority: 1, name: 'Alice', team: 'North' },
+        { priority: 2, name: 'Dan', team: 'South' },
+        { priority: 1, name: 'Zoe', team: 'South' },
+        { priority: 1, name: 'Aaron', team: 'South' },
+      ],
+      grouping: {
+        props: ['team'],
+        expandedAll: true,
+      },
+    });
+
+    const priorityHeader = page.getByTestId('group-multi-sort-priority');
+    const nameHeader = page.getByTestId('group-multi-sort-name');
+    const groupRows = page.locator(`${SELECTORS.mainViewport} .groupingRow`);
+
+    await expectVisibleColumnValues(page, 1, [
+      'Charlie',
+      'Ben',
+      'Alice',
+      'Dan',
+      'Zoe',
+      'Aaron',
+    ]);
+
+    await priorityHeader.click();
+    await expectVisibleColumnValues(page, 1, [
+      'Ben',
+      'Alice',
+      'Charlie',
+      'Zoe',
+      'Aaron',
+      'Dan',
+    ]);
+
+    await nameHeader.click({ modifiers: ['Shift'] });
+    await expectVisibleColumnValues(page, 1, [
+      'Aaron',
+      'Zoe',
+      'Dan',
+      'Alice',
+      'Ben',
+      'Charlie',
+    ]);
+    await expect(groupRows).toContainText(['South', 'North']);
+    await expect(priorityHeader.locator('.sort-order-index')).toHaveText('1');
+    await expect(nameHeader.locator('.sort-order-index')).toHaveText('2');
+
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) throw new Error('Grid was not found');
+      grid.grouping = {
+        ...(grid.grouping as Record<string, unknown>),
+      };
+    });
+    await page.waitForChanges();
+
+    await expectVisibleColumnValues(page, 1, [
+      'Aaron',
+      'Zoe',
+      'Dan',
+      'Alice',
+      'Ben',
+      'Charlie',
+    ]);
+    await expect(groupRows).toContainText(['South', 'North']);
+    await expect(priorityHeader.locator('.sort-order-index')).toHaveText('1');
+    await expect(nameHeader.locator('.sort-order-index')).toHaveText('2');
+
+    await priorityHeader.click();
+    await priorityHeader.click();
+    await expectVisibleColumnValues(page, 1, [
+      'Charlie',
+      'Ben',
+      'Alice',
+      'Dan',
+      'Zoe',
+      'Aaron',
+    ]);
+    await expect(groupRows).toContainText(['North', 'South']);
+  });
+
   test('sorts nested groups and restores their original hierarchy order', async ({
     page,
   }) => {
