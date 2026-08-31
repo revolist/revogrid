@@ -502,7 +502,9 @@ test.describe('row resize plugin', () => {
     const panel = page.locator(SELECTORS.filterPanel);
     await panel.getByRole('combobox').selectOption({ label: 'Contains' });
     await page.locator(SELECTORS.filterInput).fill('keep');
-    await expect.poll(() => visibleColumnValues(page, 0)).toEqual(['Ben', 'Dan']);
+    await expect
+      .poll(() => visibleColumnValues(page, 0))
+      .toEqual(['Ben', 'Dan']);
 
     await dragHandle(page, resizeHandle(page, 0), 24);
     expect(
@@ -617,6 +619,61 @@ test.describe('row resize plugin', () => {
     const restoredCharlie = await rowHeightsByText(page, 'Charlie');
     expect(restoredCharlie.data).toBeCloseTo(62, 0);
     expect(restoredCharlie.header).toBeCloseTo(restoredCharlie.data, 0);
+  });
+
+  test('keeps a grouped child resize committed when resized after sorting', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: buildColumns([
+        {
+          prop: 'name',
+          name: 'Name',
+          sortable: true,
+          ...withHeaderTestId('sorted-group-child-resize-name'),
+        },
+      ]),
+      source: [
+        { name: 'Charlie', team: 'North' },
+        { name: 'Alice', team: 'North' },
+        { name: 'Dan', team: 'South' },
+        { name: 'Ben', team: 'South' },
+      ],
+      grouping: {
+        props: ['team'],
+        expandedAll: true,
+        prevExpanded: { North: true, South: true },
+      },
+      rowHeaders: true,
+      rowSize: 36,
+    });
+    await enableRowResize(page);
+
+    await page.getByTestId('sorted-group-child-resize-name').click();
+    await expect
+      .poll(() => visibleColumnValues(page, 0))
+      .toEqual(['Alice', 'Charlie', 'Ben', 'Dan']);
+
+    const charlieIndex = await rowIndexByText(page, 'Charlie');
+    await dragHandle(page, resizeHandle(page, charlieIndex), 26);
+
+    let alice = await rowHeightsByText(page, 'Alice');
+    let charlie = await rowHeightsByText(page, 'Charlie');
+    expect(alice.data).toBeCloseTo(36, 0);
+    expect(charlie.data).toBeCloseTo(62, 0);
+    expect(charlie.header).toBeCloseTo(charlie.data, 0);
+
+    await page.getByTestId('sorted-group-child-resize-name').click();
+    await page.getByTestId('sorted-group-child-resize-name').click();
+    await expect
+      .poll(() => visibleColumnValues(page, 0))
+      .toEqual(['Charlie', 'Alice', 'Dan', 'Ben']);
+
+    alice = await rowHeightsByText(page, 'Alice');
+    charlie = await rowHeightsByText(page, 'Charlie');
+    expect(alice.data).toBeCloseTo(36, 0);
+    expect(charlie.data).toBeCloseTo(62, 0);
+    expect(charlie.header).toBeCloseTo(charlie.data, 0);
   });
 
   test('moves a resized row height through row reordering and theme changes', async ({

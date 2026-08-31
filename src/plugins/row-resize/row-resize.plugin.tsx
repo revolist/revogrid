@@ -111,16 +111,23 @@ export class RowResizePlugin extends BasePlugin {
     this.addEventListener('beforesourcesortingapply', this.cancelForDataChange);
     this.addEventListener('aftersortingapply', this.reapplyCommittedSizes);
     this.addEventListener('beforefilterapply', this.cancelForDataChange);
+    this.addEventListener('afterfilterapply', () => {
+      queueMicrotask(this.reapplyRowDefinitionSizes);
+    });
     this.addEventListener('beforerowdefinition', ({ detail }) => {
       this.cancel('data-change');
       if (detail.vals !== this.rowDefinitionsRef) {
         this.committedSizes.clear();
         this.appliedIndexes.clear();
         this.rowDefinitionsRef = detail.vals;
+        return;
       }
+      queueMicrotask(this.reapplyRowDefinitionSizes);
     });
     this.addEventListener('afterthemechanged', this.reapplyCommittedSizes);
-    this.addEventListener('aftertrimmed', this.syncAppliedIndexes);
+    this.addEventListener('aftertrimmed', () => {
+      queueMicrotask(this.reapplyRowDefinitionSizes);
+    });
     this.addEventListener('roworderchange', () => {
       queueMicrotask(this.reapplyCommittedSizes);
     });
@@ -476,16 +483,28 @@ export class RowResizePlugin extends BasePlugin {
     }
   }
 
-  private readonly syncAppliedIndexes = () => {
+  /** Map source-indexed row definitions back onto the current virtual order. */
+  private readonly reapplyRowDefinitionSizes = () => {
     for (const [rowType, committed] of this.committedSizes) {
       const items = this.providers.data.stores[rowType].store.get('items');
+      const definitions = new Map(
+        this.revogrid.rowDefinitions
+          .filter(definition => definition.type === rowType)
+          .map(definition => [definition.index, definition.size]),
+      );
+      const sizes: ViewSettingSizeProp = {};
       const indexes = new Set<number>();
       items.forEach((physicalIndex, virtualIndex) => {
+        const size = definitions.get(physicalIndex);
+        if (size !== undefined) {
+          sizes[virtualIndex] = size;
+        }
         if (committed.has(physicalIndex)) {
           indexes.add(virtualIndex);
         }
       });
       this.appliedIndexes.set(rowType, indexes);
+      this.providers.dimension.setCustomSizes(rowType, sizes);
     }
   };
 
