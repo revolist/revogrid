@@ -1006,6 +1006,47 @@ test.describe('row resize plugin', () => {
     );
   });
 
+  test('clears deferred bottom anchoring when row resize is disabled', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: buildColumns([{ prop: 'name', name: 'Name' }]),
+      source: Array.from({ length: 60 }, (_, index) => ({
+        name: `Row ${index}`,
+      })),
+      rowHeaders: true,
+      rowSize: 36,
+    });
+    await enableRowResize(page);
+    await scrollMainToBottom(page);
+
+    const row = await rowHeightsByText(page, 'Row 57');
+    await dragHandle(page, resizeHandle(page, row.index), 80, false);
+    await page.waitForTimeout(32);
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (grid) grid.resizeRow = false;
+    });
+    await page.waitForChanges();
+    await page.mouse.up();
+
+    await callGridMethod(page, 'scrollToRow', 10);
+    await page.waitForChanges();
+    const scrollBeforeEnable = await mainVerticalScrollMetrics(page);
+    await enableRowResize(page);
+    const scrollAfterEnable = await mainVerticalScrollMetrics(page);
+
+    expect(scrollAfterEnable.scrollTop).toBeCloseTo(
+      scrollBeforeEnable.scrollTop,
+      0,
+    );
+    expect(
+      scrollAfterEnable.scrollHeight -
+        scrollAfterEnable.clientHeight -
+        scrollAfterEnable.scrollTop,
+    ).toBeGreaterThan(36);
+  });
+
   test('does not bottom-anchor a resize started away from the bottom', async ({
     page,
   }) => {

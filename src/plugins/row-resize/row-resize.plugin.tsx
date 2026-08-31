@@ -191,6 +191,7 @@ export class RowResizePlugin extends BasePlugin {
         this.rowDefinitionsRef = this.revogrid.rowDefinitions;
         this.registerEventListeners();
       } else {
+        this.pendingBottomAnchor = false;
         this.clearSubscriptions();
       }
     }
