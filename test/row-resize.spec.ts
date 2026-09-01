@@ -60,12 +60,6 @@ describe('row resize utilities', () => {
       subscriptionCount,
     );
 
-    plugin.setGridConfig({
-      resizeRow: false,
-      hasConfiguredPlugin: true,
-      explicitlyEnabled: false,
-    });
-    expect(grid.removeEventListener).toHaveBeenCalled();
     plugin.destroy();
   });
 

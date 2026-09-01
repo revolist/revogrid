@@ -18,11 +18,7 @@ export type ResolvedRowResizeConfig = {
 
 export type RowResizeGridConfig = {
   resizeRow: boolean | RowResizeConfig;
-  plugins?: GridPlugin[];
-  /** @deprecated Pass `plugins` and let the row resize plugin resolve precedence. */
-  hasConfiguredPlugin?: boolean;
-  /** @deprecated Pass `plugins` and let the row resize plugin resolve precedence. */
-  explicitlyEnabled?: boolean;
+  plugins: GridPlugin[];
 };
 
 export type RowResizeEventDetail = {

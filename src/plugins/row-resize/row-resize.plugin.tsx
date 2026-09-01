@@ -146,16 +146,12 @@ export class RowResizePlugin extends BasePlugin {
 
   setGridConfig(gridConfig: RowResizeGridConfig, refresh = true) {
     const { plugins, resizeRow } = gridConfig;
-    const hasConfiguredPlugin = plugins
-      ? plugins.some(
-          plugin =>
-            plugin !== RowResizePlugin &&
-            plugin.prototype instanceof RowResizePlugin,
-        )
-      : !!gridConfig.hasConfiguredPlugin;
-    const explicitlyEnabled = plugins
-      ? plugins.includes(RowResizePlugin)
-      : !!gridConfig.explicitlyEnabled;
+    const hasConfiguredPlugin = plugins.some(
+      plugin =>
+        plugin !== RowResizePlugin &&
+        plugin.prototype instanceof RowResizePlugin,
+    );
+    const explicitlyEnabled = plugins.includes(RowResizePlugin);
     const enabled = hasConfiguredPlugin
       ? false
       : explicitlyEnabled || !!resizeRow;
