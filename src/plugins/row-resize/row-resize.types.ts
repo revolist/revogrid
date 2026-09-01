@@ -15,10 +15,6 @@ export type ResolvedRowResizeConfig = {
   fullRow: boolean;
 };
 
-export type RowResizeGridConfig = {
-  resizeRow: boolean | RowResizeConfig;
-};
-
 export type RowResizeEventDetail = {
   /** Row dimension containing the resized rows. */
   rowType: DimensionRows;

@@ -1651,11 +1651,7 @@ export class RevoGridComponent {
     // register grouping plugin
     this.pluginService.add(new GroupingRowPlugin(this.element, pluginData));
     this.pluginService.add(
-      RowResizePlugin.fromGridConfig(
-        this.element,
-        pluginData,
-        { resizeRow: this.resizeRow },
-      ),
+      new RowResizePlugin(this.element, pluginData),
     );
     if (this.canMoveColumns) {
       this.pluginService.add(new ColumnMovePlugin(this.element, pluginData));
@@ -1664,9 +1660,7 @@ export class RevoGridComponent {
 
   private syncRowResizeConfig() {
     const plugin = this.pluginService.getByClass(RowResizePlugin);
-    plugin?.setGridConfig({
-      resizeRow: this.resizeRow,
-    });
+    plugin?.syncGridConfig();
   }
 
   getPluginData(): PluginProviders | undefined {

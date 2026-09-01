@@ -13,7 +13,6 @@ import type {
   RowResizeCancelReason,
   RowResizeConfig,
   RowResizeEventDetail,
-  RowResizeGridConfig,
 } from './row-resize.types';
 import { GROUP_EXPAND_EVENT } from '../groupingRow/grouping.const';
 import {
@@ -62,16 +61,6 @@ export class RowResizePlugin extends BasePlugin {
   private rowDefinitionRemapQueued = false;
   private previousBodyCursor = '';
 
-  static fromGridConfig(
-    revogrid: HTMLRevoGridElement,
-    providers: PluginProviders,
-    gridConfig: RowResizeGridConfig,
-  ): RowResizePlugin {
-    const plugin = new RowResizePlugin(revogrid, providers);
-    plugin.setGridConfig(gridConfig, false);
-    return plugin;
-  }
-
   constructor(
     revogrid: HTMLRevoGridElement,
     providers: PluginProviders,
@@ -82,6 +71,8 @@ export class RowResizePlugin extends BasePlugin {
     if (new.target !== RowResizePlugin) {
       this.enabled = true;
       this.registerEventListeners();
+    } else {
+      this.syncGridConfig(false);
     }
   }
 
@@ -144,8 +135,8 @@ export class RowResizePlugin extends BasePlugin {
     });
   }
 
-  setGridConfig(gridConfig: RowResizeGridConfig, refresh = true) {
-    const { resizeRow } = gridConfig;
+  syncGridConfig(refresh = true) {
+    const { resizeRow } = this.revogrid;
     const hasConfiguredPlugin = this.providers.plugins
       .get()
       .some(plugin => plugin !== this && plugin instanceof RowResizePlugin);
