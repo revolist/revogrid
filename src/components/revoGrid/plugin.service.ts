@@ -1,5 +1,5 @@
-import type { PluginBaseComponent, PluginProviders, PluginServiceBase } from '@type';
-import type { GridPlugin } from 'src/plugins';
+import { PluginBaseComponent, PluginProviders, PluginServiceBase } from '@type';
+import { GridPlugin } from 'src/plugins';
 
 /**
  * Plugin service
@@ -11,10 +11,6 @@ export class PluginService implements PluginServiceBase {
    * Define plugins collection
    */
   internalPlugins: PluginBaseComponent[] = [];
-  private readonly userPluginInstances = new Map<
-    GridPlugin,
-    PluginBaseComponent
-  >();
 
   /**
    * Get all plugins
@@ -51,15 +47,13 @@ export class PluginService implements PluginServiceBase {
 
     // Step 2: Remove old plugins
     pluginsToRemove.forEach(plugin => {
-      const createdPlugin = this.userPluginInstances.get(plugin);
-      const index = createdPlugin
-        ? this.internalPlugins.indexOf(createdPlugin)
-        : -1;
+      const index = this.internalPlugins.findIndex(
+        createdPlugin => createdPlugin instanceof plugin,
+      );
       if (index !== -1) {
-        createdPlugin?.destroy?.();
+        this.internalPlugins[index].destroy?.();
         this.internalPlugins.splice(index, 1); // Remove the plugin
       }
-      this.userPluginInstances.delete(plugin);
     });
 
     // Step 3: Register user plugins
@@ -71,9 +65,7 @@ export class PluginService implements PluginServiceBase {
       if (existingPlugin) {
         return;
       }
-      const createdPlugin = new userPlugin(element, pluginData);
-      this.add(createdPlugin);
-      this.userPluginInstances.set(userPlugin, createdPlugin);
+      this.add(new userPlugin(element, pluginData));
     });
   }
 
@@ -96,12 +88,6 @@ export class PluginService implements PluginServiceBase {
     if (index > -1) {
       this.internalPlugins[index].destroy?.();
       this.internalPlugins.splice(index, 1);
-      for (const [pluginClass, instance] of this.userPluginInstances) {
-        if (instance === plugin) {
-          this.userPluginInstances.delete(pluginClass);
-          break;
-        }
-      }
     }
   }
 
@@ -112,6 +98,5 @@ export class PluginService implements PluginServiceBase {
   destroy() {
     this.internalPlugins.forEach(p => p.destroy?.());
     this.internalPlugins = [];
-    this.userPluginInstances.clear();
   }
 }
