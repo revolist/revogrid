@@ -212,6 +212,10 @@ test.describe('row resize plugin', () => {
       const before = (await grid.getPlugins()).find(
         plugin => plugin instanceof RowResizePlugin,
       );
+      grid.plugins = [RowResizePlugin];
+      await new Promise<void>(resolve => queueMicrotask(resolve));
+      grid.plugins = [];
+      await new Promise<void>(resolve => queueMicrotask(resolve));
       grid.resizeRow = true;
       await new Promise<void>(resolve =>
         requestAnimationFrame(() => requestAnimationFrame(() => resolve())),

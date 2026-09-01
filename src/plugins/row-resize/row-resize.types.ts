@@ -1,4 +1,5 @@
 import type { DimensionRows, ViewSettingSizeProp } from '@type';
+import type { GridPlugin } from '../base.plugin';
 
 export type RowResizeConfig = {
   /** Smallest height a user can assign. Defaults to 20px. */
@@ -17,8 +18,11 @@ export type ResolvedRowResizeConfig = {
 
 export type RowResizeGridConfig = {
   resizeRow: boolean | RowResizeConfig;
-  hasConfiguredPlugin: boolean;
-  explicitlyEnabled: boolean;
+  plugins?: GridPlugin[];
+  /** @deprecated Pass `plugins` and let the row resize plugin resolve precedence. */
+  hasConfiguredPlugin?: boolean;
+  /** @deprecated Pass `plugins` and let the row resize plugin resolve precedence. */
+  explicitlyEnabled?: boolean;
 };
 
 export type RowResizeEventDetail = {

@@ -1169,6 +1169,7 @@ export class RevoGridComponent {
   private pendingColumnFocusRestore?: PendingColumnFocusRestore;
   private appliedThemeRowSize?: number;
   private pendingNormalizedTheme?: string;
+  private rowResizePlugin?: RowResizePlugin;
   private themeStyles: Record<string, string> = {};
 
   // #endregion
@@ -1650,38 +1651,22 @@ export class RevoGridComponent {
 
     // register grouping plugin
     this.pluginService.add(new GroupingRowPlugin(this.element, pluginData));
-    this.pluginService.add(
-      RowResizePlugin.fromGridConfig(
-        this.element,
-        pluginData,
-        this.getRowResizeConfig(),
-      ),
+    this.rowResizePlugin = RowResizePlugin.fromGridConfig(
+      this.element,
+      pluginData,
+      { resizeRow: this.resizeRow, plugins: this.plugins },
     );
+    this.pluginService.add(this.rowResizePlugin);
     if (this.canMoveColumns) {
       this.pluginService.add(new ColumnMovePlugin(this.element, pluginData));
     }
   }
 
-  private getRowResizeConfig() {
-    const hasConfiguredPlugin = this.plugins.some(
-      plugin =>
-        plugin !== RowResizePlugin &&
-        plugin.prototype instanceof RowResizePlugin,
-    );
-    return {
-      resizeRow: this.resizeRow,
-      hasConfiguredPlugin,
-      explicitlyEnabled: this.plugins.includes(RowResizePlugin),
-    };
-  }
-
   private syncRowResizeConfig() {
-    const plugin = this.pluginService
-      .get()
-      .find(plugin => plugin.constructor === RowResizePlugin) as
-      | RowResizePlugin
-      | undefined;
-    plugin?.setGridConfig(this.getRowResizeConfig());
+    this.rowResizePlugin?.setGridConfig({
+      resizeRow: this.resizeRow,
+      plugins: this.plugins,
+    });
   }
 
   getPluginData(): PluginProviders | undefined {
@@ -1704,6 +1689,7 @@ export class RevoGridComponent {
 
   private removePlugins() {
     this.pluginService.destroy();
+    this.rowResizePlugin = undefined;
   }
   // #endregion
 

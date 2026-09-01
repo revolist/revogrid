@@ -11,6 +11,7 @@ import type { PluginProviders } from '../src/types';
 
 describe('row resize utilities', () => {
   it('subscribes from supplied config without reading grid properties', () => {
+    class ConfiguredRowResizePlugin extends RowResizePlugin {}
     const grid = {
       get resizeRow(): never {
         throw new Error('resizeRow must be supplied by the component');
@@ -30,8 +31,7 @@ describe('row resize utilities', () => {
       {} as PluginProviders,
       {
         resizeRow: false,
-        hasConfiguredPlugin: false,
-        explicitlyEnabled: false,
+        plugins: [],
       },
     );
 
@@ -39,8 +39,7 @@ describe('row resize utilities', () => {
 
     plugin.setGridConfig({
       resizeRow: true,
-      hasConfiguredPlugin: false,
-      explicitlyEnabled: false,
+      plugins: [],
     });
 
     expect(grid.addEventListener).toHaveBeenCalled();
@@ -49,19 +48,24 @@ describe('row resize utilities', () => {
 
     plugin.setGridConfig({
       resizeRow: true,
-      hasConfiguredPlugin: true,
-      explicitlyEnabled: false,
+      plugins: [ConfiguredRowResizePlugin],
     });
     expect(grid.removeEventListener).toHaveBeenCalled();
 
     plugin.setGridConfig({
       resizeRow: false,
-      hasConfiguredPlugin: false,
-      explicitlyEnabled: true,
+      plugins: [RowResizePlugin],
     });
     expect((grid.addEventListener as jest.Mock).mock.calls.length).toBeGreaterThan(
       subscriptionCount,
     );
+
+    plugin.setGridConfig({
+      resizeRow: false,
+      hasConfiguredPlugin: true,
+      explicitlyEnabled: false,
+    });
+    expect(grid.removeEventListener).toHaveBeenCalled();
     plugin.destroy();
   });
 
