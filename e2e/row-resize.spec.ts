@@ -137,6 +137,16 @@ async function rowHeightsByText(page: E2EPage, text: string) {
   return { index, data: data!.height, header: header!.height };
 }
 
+async function rowHeightsByExactText(page: E2EPage, text: string) {
+  const row = mainDataRows(page)
+    .filter({ has: page.getByText(text, { exact: true }) })
+    .first();
+  const index = Number(await row.getAttribute('data-rgrow'));
+  const data = await row.boundingBox();
+  const header = await rowHeaderCell(page, index).boundingBox();
+  return { index, data: data!.height, header: header!.height };
+}
+
 async function mainVerticalScrollMetrics(page: E2EPage) {
   return page
     .locator(`${SELECTORS.mainViewport} .vertical-inner`)
@@ -1036,6 +1046,90 @@ test.describe('row resize plugin', () => {
       'getContentSize',
     );
     expect(contentSizeAfter.y).toBe(contentSizeBefore.y + 230);
+  });
+
+  test('keeps a resized row attached when the trailing sorted group expands', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: buildColumns([
+        {
+          prop: 'value',
+          name: 'Value',
+          sortable: true,
+          ...withHeaderTestId('expand-after-resize-sort'),
+        },
+      ]),
+      source: Array.from({ length: 100 }, (_, index) => ({
+        value: `${index}:0`,
+        key: index % 2 ? 'a' : 'b',
+        ...(index % 4 ? { key2: 'c' } : index % 3 ? { key2: 'd' } : {}),
+      })),
+      rowHeaders: true,
+      rowSize: 36,
+    });
+    await enableRowResize(page, { fullRow: true });
+
+    const sortHeader = page.getByTestId('expand-after-resize-sort');
+    await sortHeader.click();
+    await sortHeader.click();
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) throw new Error('Grid was not found');
+      grid.grouping = {
+        props: ['key', 'key2'],
+        expandedAll: false,
+        prevExpanded: { 'a': true, 'a,c': true },
+      };
+    });
+    await page.waitForChanges();
+    await scrollMainToBottom(page);
+    await expect(
+      mainDataRows(page).filter({
+        has: page.getByText('25:0', { exact: true }),
+      }),
+    ).toHaveCount(1);
+
+    const resizedBefore = await rowHeightsByExactText(page, '25:0');
+    await dragHandle(page, resizeHandle(page, resizedBefore.index), 200);
+    await expect
+      .poll(async () => (await rowHeightsByExactText(page, '25:0')).data)
+      .toBeCloseTo(236, 0);
+
+    const trailingGroup = page
+      .locator(`${SELECTORS.mainViewport} .groupingRow`)
+      .filter({ hasText: 'b' })
+      .last();
+    await trailingGroup.locator(SELECTORS.groupExpandButton).click();
+    await page.waitForChanges();
+
+    const state = await page.evaluate(async () => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) throw new Error('Grid was not found');
+      const store = await grid.getSourceStore();
+      const providers = await grid.getProviders();
+      const physicalIndex = store
+        .get('source')
+        .findIndex((row: Record<string, unknown>) => row.value === '25:0');
+      const resizedVirtualIndex = store.get('items').indexOf(physicalIndex);
+      return {
+        itemCount: store.get('items').length,
+        dimensionCount: providers?.dimension.stores.rgRow.store.get('count'),
+        realSize: providers?.dimension.stores.rgRow.store.get('realSize'),
+        resizedVirtualIndex,
+        resizedSize:
+          providers?.dimension.stores.rgRow.store.get('sizes')[
+            resizedVirtualIndex
+          ],
+      };
+    });
+    expect(state.dimensionCount).toBe(state.itemCount);
+    expect(state.realSize).toBe(state.itemCount * 36 + 200);
+    expect(state.resizedVirtualIndex).toBeGreaterThanOrEqual(0);
+    expect(state.resizedSize).toBe(236);
+
+    await expectMainViewportAtTail(page);
+    await expect.poll(() => lastRenderedRowHeader(page)).toBe(state.itemCount - 1);
   });
 
   test('keeps a non-grouped bottom viewport anchored while resizing', async ({

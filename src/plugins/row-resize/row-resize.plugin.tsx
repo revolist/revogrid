@@ -4,6 +4,7 @@ import type {
   BeforeRowRenderEvent,
   DimensionRows,
   PluginProviders,
+  ViewPortScrollEvent,
   ViewSettingSizeProp,
 } from '@type';
 import { BasePlugin } from '../base.plugin';
@@ -57,6 +58,7 @@ export class RowResizePlugin extends BasePlugin {
   private animationFrame?: number;
   private pendingHeight?: number;
   private pendingBottomAnchor = false;
+  private keepBottomAnchor = false;
   private rowDefinitionRemapQueued = false;
   private previousBodyCursor = '';
 
@@ -87,6 +89,7 @@ export class RowResizePlugin extends BasePlugin {
     this.addEventListener('beforerowrender', this.decorateRow);
     this.addEventListener('beforeanysource', ({ detail }) => {
       this.cancel('data-change');
+      this.keepBottomAnchor = false;
       const committed = this.committedSizes.get(detail.type);
       if (!committed) {
         return;
@@ -127,9 +130,13 @@ export class RowResizePlugin extends BasePlugin {
       queueMicrotask(this.reapplyCommittedSizes);
     });
     this.addEventListener(GROUP_EXPAND_EVENT, () => {
+      if (this.keepBottomAnchor) {
+        this.pendingBottomAnchor = true;
+      }
       queueMicrotask(this.reapplyCommittedSizes);
     });
     this.addEventListener('aftergridrender', this.applyPendingBottomAnchor);
+    this.addEventListener('viewportscroll', this.updateBottomAnchorState);
     this.addEventListener('rowheaderschanged', ({ detail }) => {
       if (!detail && !this.config.fullRow) {
         this.cancel('row-headers-hidden');
@@ -165,6 +172,7 @@ export class RowResizePlugin extends BasePlugin {
         this.registerEventListeners();
       } else {
         this.pendingBottomAnchor = false;
+        this.keepBottomAnchor = false;
         this.rowDefinitionRemapQueued = false;
         this.clearSubscriptions();
       }
@@ -438,6 +446,7 @@ export class RowResizePlugin extends BasePlugin {
         active.currentHeight,
       );
       this.providers.dimension.setRowDefinitions(rowDefinitions);
+      this.keepBottomAnchor = active.bottomAnchored;
       this.requestBottomAnchor(active);
     }
   }
@@ -447,6 +456,22 @@ export class RowResizePlugin extends BasePlugin {
       this.pendingBottomAnchor = true;
     }
   }
+
+  private readonly updateBottomAnchorState = ({
+    detail,
+  }: CustomEvent<ViewPortScrollEvent>) => {
+    if (detail.dimension !== 'rgRow') {
+      return;
+    }
+    const dimension = this.providers.dimension.stores.rgRow.store;
+    const viewport = this.providers.viewport.stores.rgRow.store;
+    const realSize = dimension.get('realSize');
+    const clientSize = viewport.get('clientSize');
+    this.keepBottomAnchor =
+      realSize > clientSize &&
+      detail.coordinate >=
+        realSize - clientSize - dimension.get('originItemSize');
+  };
 
   private readonly applyPendingBottomAnchor = () => {
     if (!this.pendingBottomAnchor) {
@@ -568,6 +593,7 @@ export class RowResizePlugin extends BasePlugin {
 
   destroy() {
     this.cancel('destroy');
+    this.keepBottomAnchor = false;
     this.rowDefinitionRemapQueued = false;
     super.destroy();
   }
