@@ -1169,7 +1169,6 @@ export class RevoGridComponent {
   private pendingColumnFocusRestore?: PendingColumnFocusRestore;
   private appliedThemeRowSize?: number;
   private pendingNormalizedTheme?: string;
-  private rowResizePlugin?: RowResizePlugin;
   private themeStyles: Record<string, string> = {};
 
   // #endregion
@@ -1651,19 +1650,26 @@ export class RevoGridComponent {
 
     // register grouping plugin
     this.pluginService.add(new GroupingRowPlugin(this.element, pluginData));
-    this.rowResizePlugin = RowResizePlugin.fromGridConfig(
-      this.element,
-      pluginData,
-      { resizeRow: this.resizeRow, plugins: this.plugins },
+    this.pluginService.add(
+      RowResizePlugin.fromGridConfig(
+        this.element,
+        pluginData,
+        { resizeRow: this.resizeRow, plugins: this.plugins },
+      ),
     );
-    this.pluginService.add(this.rowResizePlugin);
     if (this.canMoveColumns) {
       this.pluginService.add(new ColumnMovePlugin(this.element, pluginData));
     }
   }
 
   private syncRowResizeConfig() {
-    this.rowResizePlugin?.setGridConfig({
+    const plugin = this.pluginService
+      .get()
+      .find(
+        (plugin): plugin is RowResizePlugin =>
+          plugin.constructor === RowResizePlugin,
+      );
+    plugin?.setGridConfig({
       resizeRow: this.resizeRow,
       plugins: this.plugins,
     });
@@ -1689,7 +1695,6 @@ export class RevoGridComponent {
 
   private removePlugins() {
     this.pluginService.destroy();
-    this.rowResizePlugin = undefined;
   }
   // #endregion
 
