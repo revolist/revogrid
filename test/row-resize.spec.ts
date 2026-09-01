@@ -7,16 +7,86 @@ import {
   RowResizePlugin,
   resolveRowResizeConfig,
 } from '../src/plugins/row-resize';
+import { PluginService } from '../src/components/revoGrid/plugin.service';
 import type { PluginProviders } from '../src/types';
 
 describe('row resize utilities', () => {
-  it('syncs config from the host property and plugin provider', () => {
+  function createPluginHarness(resizeRow: HTMLRevoGridElement['resizeRow']) {
+    const grid = {
+      resizeRow,
+      plugins: [] as Array<typeof RowResizePlugin>,
+      addEventListener: jest.fn(),
+      removeEventListener: jest.fn(),
+      refresh: jest.fn(),
+    } as unknown as HTMLRevoGridElement;
+    const pluginService = new PluginService();
+    const providers = {
+      plugins: pluginService,
+    } as unknown as PluginProviders;
+
+    return { grid, pluginService, providers };
+  }
+
+  it('keeps the core plugin dormant until configured subclasses are registered', () => {
+    class ConfiguredRowResizePlugin extends RowResizePlugin {}
+    const { grid, pluginService, providers } = createPluginHarness(true);
+
+    const corePlugin = new RowResizePlugin(grid, providers);
+
+    expect(grid.addEventListener).not.toHaveBeenCalled();
+    expect(corePlugin.subscriptions).toEqual({});
+
+    pluginService.add(corePlugin);
+    grid.plugins = [ConfiguredRowResizePlugin];
+    pluginService.addUserPluginsAndCreate(
+      grid,
+      [ConfiguredRowResizePlugin],
+      [],
+      providers,
+    );
+    corePlugin.syncGridConfig();
+
+    expect(corePlugin.subscriptions).toEqual({});
+    pluginService.destroy();
+  });
+
+  it('preserves subclass constructor config when it becomes the row-resize lookup result', () => {
+    class ConfiguredRowResizePlugin extends RowResizePlugin {
+      constructor(grid: HTMLRevoGridElement, providers: PluginProviders) {
+        super(grid, providers, { minHeight: 50, maxHeight: 80 });
+      }
+    }
+    const { grid, pluginService, providers } = createPluginHarness(false);
+    const corePlugin = new RowResizePlugin(grid, providers);
+    const configuredPlugin = new ConfiguredRowResizePlugin(grid, providers);
+    pluginService.add(corePlugin);
+    pluginService.add(configuredPlugin);
+
+    pluginService.addUserPluginsAndCreate(
+      grid,
+      [ConfiguredRowResizePlugin],
+      [RowResizePlugin, ConfiguredRowResizePlugin],
+      providers,
+    );
+    const lookupResult = pluginService.getByClass(RowResizePlugin);
+    lookupResult?.syncGridConfig();
+
+    expect(lookupResult).toBe(configuredPlugin);
+    expect(
+      (
+        configuredPlugin as unknown as {
+          config: { minHeight: number; maxHeight?: number };
+        }
+      ).config,
+    ).toMatchObject({ minHeight: 50, maxHeight: 80 });
+    pluginService.destroy();
+  });
+
+  it('syncs config from host properties', () => {
     class ConfiguredRowResizePlugin extends RowResizePlugin {}
     const grid = {
       resizeRow: false,
-      get plugins(): never {
-        throw new Error('plugins must be supplied by the component');
-      },
+      plugins: [],
       get rowDefinitions(): never {
         throw new Error('rowDefinitions must be read from the provider');
       },
@@ -24,14 +94,8 @@ describe('row resize utilities', () => {
       removeEventListener: jest.fn(),
       refresh: jest.fn(),
     } as unknown as HTMLRevoGridElement;
-    const registeredPlugins: RowResizePlugin[] = [];
-    const providers = {
-      plugins: {
-        get: () => registeredPlugins,
-      },
-    } as unknown as PluginProviders;
+    const providers = {} as PluginProviders;
     const plugin = new RowResizePlugin(grid, providers);
-    registeredPlugins.push(plugin);
 
     expect(grid.addEventListener).not.toHaveBeenCalled();
 
@@ -42,17 +106,15 @@ describe('row resize utilities', () => {
     const subscriptionCount = (grid.addEventListener as jest.Mock).mock.calls
       .length;
 
-    registeredPlugins.push(
-      Object.create(ConfiguredRowResizePlugin.prototype),
-    );
+    grid.plugins = [ConfiguredRowResizePlugin];
     plugin.syncGridConfig();
     expect(grid.removeEventListener).toHaveBeenCalled();
 
-    registeredPlugins.pop();
+    grid.plugins = [];
     plugin.syncGridConfig();
-    expect((grid.addEventListener as jest.Mock).mock.calls.length).toBeGreaterThan(
-      subscriptionCount,
-    );
+    expect(
+      (grid.addEventListener as jest.Mock).mock.calls.length,
+    ).toBeGreaterThan(subscriptionCount);
 
     plugin.destroy();
   });

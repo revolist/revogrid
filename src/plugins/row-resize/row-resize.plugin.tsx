@@ -14,7 +14,10 @@ import type {
   RowResizeConfig,
   RowResizeEventDetail,
 } from './row-resize.types';
-import { GROUP_EXPAND_EVENT } from '../groupingRow/grouping.const';
+import {
+  BEFORE_GROUPING_APPLY_EVENT,
+  GROUP_EXPAND_EVENT,
+} from '../groupingRow/grouping.const';
 import {
   clampRowResizeHeight,
   createRowResizePatch,
@@ -40,7 +43,6 @@ type ActiveResize = {
   previousSizes: ViewSettingSizeProp;
   originalCustomSizes: ViewSettingSizeProp;
   bottomAnchored: boolean;
-  startEvent: PointerEvent;
   lastEvent: PointerEvent;
 };
 
@@ -49,16 +51,16 @@ export class RowResizePlugin extends BasePlugin {
   private enabled = false;
 
   private active?: ActiveResize;
-  private readonly committedSizes = new Map<
+  private readonly appliedDefinitionIndexes = new Map<
     DimensionRows,
-    Map<number, number>
+    Set<number>
   >();
-  private readonly appliedIndexes = new Map<DimensionRows, Set<number>>();
   private animationFrame?: number;
   private pendingHeight?: number;
   private pendingBottomAnchor = false;
   private keepBottomAnchor = false;
   private rowDefinitionRemapQueued = false;
+  private readonly pendingSourceCounts = new Map<DimensionRows, number>();
   private previousBodyCursor = '';
 
   constructor(
@@ -71,60 +73,38 @@ export class RowResizePlugin extends BasePlugin {
     if (new.target !== RowResizePlugin) {
       this.enabled = true;
       this.registerEventListeners();
-    } else {
-      this.syncGridConfig(false);
     }
   }
 
   private registerEventListeners() {
     this.addEventListener('beforerowrender', this.decorateRow);
-    this.addEventListener('beforeanysource', ({ detail }) => {
+    this.addEventListener('beforeanysource', () => {
       this.cancel('data-change');
       this.keepBottomAnchor = false;
-      const committed = this.committedSizes.get(detail.type);
-      if (!committed) {
-        return;
-      }
-      const removedIndexes = new Set<number>();
-      for (const index of committed.keys()) {
-        if (index >= detail.source.length) {
-          committed.delete(index);
-          removedIndexes.add(index);
-        }
-      }
-      if (removedIndexes.size) {
-        const rowDefinitions = this.providers.dimension
-          .getRowDefinitions()
-          .filter(
-            definition =>
-              definition.type !== detail.type ||
-              !removedIndexes.has(definition.index),
-          );
-        this.providers.dimension.setRowDefinitions(rowDefinitions);
-      }
     });
-    this.addEventListener('afteranysource', this.rebuildCommittedSizes);
-    this.addEventListener('beforesourcesortingapply', this.cancelForDataChange);
-    this.addEventListener('aftersortingapply', this.reapplyCommittedSizes);
-    this.addEventListener('beforefilterapply', this.cancelForDataChange);
-    this.addEventListener('afterfilterapply', this.scheduleRowDefinitionRemap);
-    this.addEventListener('beforerowdefinition', ({ detail }) => {
-      this.cancel('data-change');
-      if (detail.vals !== this.providers.dimension.getRowDefinitions()) {
-        this.committedSizes.clear();
-      }
+    this.addEventListener('afteranysource', ({ detail }) => {
+      this.pendingSourceCounts.set(detail.type, detail.source.length);
       this.scheduleRowDefinitionRemap();
     });
-    this.addEventListener('afterthemechanged', this.reapplyCommittedSizes);
-    this.addEventListener('aftertrimmed', this.scheduleRowDefinitionRemap);
-    this.addEventListener('roworderchange', () => {
-      queueMicrotask(this.reapplyCommittedSizes);
+    this.addEventListener('beforesourcesortingapply', this.cancelForDataChange);
+    this.addEventListener('beforesortingapply', this.cancelForDataChange);
+    this.addEventListener('sortingconfigchanged', this.cancelForDataChange);
+    this.addEventListener(BEFORE_GROUPING_APPLY_EVENT, this.cancelForDataChange);
+    this.addEventListener('aftersortingapply', this.scheduleRowDefinitionRemap);
+    this.addEventListener('beforefilterapply', this.cancelForDataChange);
+    this.addEventListener('afterfilterapply', this.scheduleRowDefinitionRemap);
+    this.addEventListener('beforerowdefinition', () => {
+      this.cancel('data-change');
+      this.scheduleRowDefinitionRemap();
     });
+    this.addEventListener('afterthemechanged', this.scheduleRowDefinitionRemap);
+    this.addEventListener('aftertrimmed', this.scheduleRowDefinitionRemap);
+    this.addEventListener('roworderchange', this.scheduleRowDefinitionRemap);
     this.addEventListener(GROUP_EXPAND_EVENT, () => {
       if (this.keepBottomAnchor) {
         this.pendingBottomAnchor = true;
       }
-      queueMicrotask(this.reapplyCommittedSizes);
+      this.scheduleRowDefinitionRemap();
     });
     this.addEventListener('aftergridrender', this.applyPendingBottomAnchor);
     this.addEventListener('viewportscroll', this.updateBottomAnchorState);
@@ -136,16 +116,21 @@ export class RowResizePlugin extends BasePlugin {
   }
 
   syncGridConfig(refresh = true) {
-    const { resizeRow } = this.revogrid;
-    const hasConfiguredPlugin = this.providers.plugins
-      .get()
-      .some(plugin => plugin !== this && plugin instanceof RowResizePlugin);
-    const enabled =
-      this.constructor !== RowResizePlugin ||
-      (!hasConfiguredPlugin && !!resizeRow);
-    const config = resolveRowResizeConfig(
-      typeof resizeRow === 'object' ? resizeRow : undefined,
+    const { plugins = [], resizeRow } = this.revogrid;
+    const isCorePlugin = this.constructor === RowResizePlugin;
+    const hasConfiguredPlugin = plugins.some(
+      plugin =>
+        plugin !== RowResizePlugin &&
+        plugin.prototype instanceof RowResizePlugin,
     );
+    const enabled =
+      !isCorePlugin ||
+      (!hasConfiguredPlugin && !!resizeRow);
+    const resizeConfig =
+      typeof resizeRow === 'object' ? resizeRow : undefined;
+    const config = isCorePlugin
+      ? resolveRowResizeConfig(resizeConfig)
+      : this.config;
     const configChanged =
       config.minHeight !== this.config.minHeight ||
       config.maxHeight !== this.config.maxHeight ||
@@ -164,6 +149,7 @@ export class RowResizePlugin extends BasePlugin {
         this.pendingBottomAnchor = false;
         this.keepBottomAnchor = false;
         this.rowDefinitionRemapQueued = false;
+        this.pendingSourceCounts.clear();
         this.clearSubscriptions();
       }
     }
@@ -212,7 +198,6 @@ export class RowResizePlugin extends BasePlugin {
     const dimension = this.providers.dimension.stores[rowType];
     const dimensionState = dimension.getCurrentState();
     const viewport = this.providers.viewport.stores[rowType];
-    const viewportState = viewport.store.state;
     const item = getItemByIndex(dimensionState, index);
     const focusedStore = this.providers.selection.focusedStore;
     const selectedRowType = focusedStore
@@ -250,24 +235,27 @@ export class RowResizePlugin extends BasePlugin {
       originalCustomSizes: { ...dimensionState.sizes },
       bottomAnchored:
         rowType === 'rgRow' &&
-        dimensionState.realSize > viewportState.clientSize &&
-        viewport.lastCoordinate >=
-          getViewportMaxCoordinate(dimensionState, viewportState.virtualSize),
-      startEvent: event,
+        this.isMainViewportAtBottom(viewport.lastCoordinate),
       lastEvent: event,
     };
 
+    this.active = active;
     const beforeEvent = this.emit<RowResizeEventDetail>(
       BEFORE_ROW_RESIZE_EVENT,
       this.eventDetail(active, event, startHeight),
     );
     if (beforeEvent.defaultPrevented) {
+      if (this.active === active) {
+        this.active = undefined;
+      }
+      return;
+    }
+    if (!this.enabled || this.active !== active) {
       return;
     }
 
     event.preventDefault();
     event.stopPropagation();
-    this.active = active;
     const doc = this.revogrid.ownerDocument;
     this.previousBodyCursor = doc.body?.style.cursor || '';
     if (doc.body) {
@@ -380,7 +368,7 @@ export class RowResizePlugin extends BasePlugin {
     const detail = {
       ...this.eventDetail(
         active,
-        active.lastEvent || active.startEvent,
+        active.lastEvent,
         active.startHeight,
       ),
       reason,
@@ -409,21 +397,9 @@ export class RowResizePlugin extends BasePlugin {
       return;
     }
     const items = this.providers.data.stores[active.rowType].store.get('items');
-    let committed = this.committedSizes.get(active.rowType);
-    if (!committed) {
-      committed = new Map();
-      this.committedSizes.set(active.rowType, committed);
-    }
-    let applied = this.appliedIndexes.get(active.rowType);
-    if (!applied) {
-      applied = new Set();
-      this.appliedIndexes.set(active.rowType, applied);
-    }
     const physicalIndexes = active.indexes.reduce<number[]>((result, index) => {
       const physicalIndex = items[index];
       if (physicalIndex !== undefined) {
-        committed.set(physicalIndex, active.currentHeight);
-        applied.add(index);
         result.push(physicalIndex);
       }
       return result;
@@ -436,6 +412,7 @@ export class RowResizePlugin extends BasePlugin {
         active.currentHeight,
       );
       this.providers.dimension.setRowDefinitions(rowDefinitions);
+      this.scheduleRowDefinitionRemap();
       this.keepBottomAnchor = active.bottomAnchored;
       this.requestBottomAnchor(active);
     }
@@ -447,20 +424,22 @@ export class RowResizePlugin extends BasePlugin {
     }
   }
 
+  private isMainViewportAtBottom(coordinate: number) {
+    const dimension = this.providers.dimension.stores.rgRow.getCurrentState();
+    const viewport = this.providers.viewport.stores.rgRow.store.state;
+    return (
+      dimension.realSize > viewport.clientSize &&
+      coordinate >= getViewportMaxCoordinate(dimension, viewport.virtualSize)
+    );
+  }
+
   private readonly updateBottomAnchorState = ({
     detail,
   }: CustomEvent<ViewPortScrollEvent>) => {
     if (detail.dimension !== 'rgRow') {
       return;
     }
-    const dimension = this.providers.dimension.stores.rgRow.store;
-    const viewport = this.providers.viewport.stores.rgRow.store;
-    const realSize = dimension.get('realSize');
-    const clientSize = viewport.get('clientSize');
-    this.keepBottomAnchor =
-      realSize > clientSize &&
-      detail.coordinate >=
-        realSize - clientSize - dimension.get('originItemSize');
+    this.keepBottomAnchor = this.isMainViewportAtBottom(detail.coordinate);
   };
 
   private readonly applyPendingBottomAnchor = () => {
@@ -475,37 +454,6 @@ export class RowResizePlugin extends BasePlugin {
     void this.revogrid.scrollToCoordinate({ y: dimension.get('realSize') });
   };
 
-  private readonly reapplyCommittedSizes = () =>
-    this.applyCommittedSizes(false);
-
-  private readonly rebuildCommittedSizes = () => {
-    this.applyCommittedSizes(true);
-    this.scheduleRowDefinitionRemap();
-  };
-
-  private applyCommittedSizes(clearAppliedIndexes: boolean) {
-    for (const [rowType, committed] of this.committedSizes) {
-      const dimension = this.providers.dimension.stores[rowType];
-      const sizes = { ...dimension.store.get('sizes') };
-      if (clearAppliedIndexes) {
-        for (const index of this.appliedIndexes.get(rowType) || []) {
-          delete sizes[index];
-        }
-      }
-      const items = this.providers.data.stores[rowType].store.get('items');
-      const indexes = new Set<number>();
-      items.forEach((physicalIndex, virtualIndex) => {
-        const size = committed.get(physicalIndex);
-        if (size !== undefined) {
-          sizes[virtualIndex] = size;
-          indexes.add(virtualIndex);
-        }
-      });
-      this.appliedIndexes.set(rowType, indexes);
-      this.providers.dimension.setCustomSizes(rowType, sizes);
-    }
-  }
-
   private readonly scheduleRowDefinitionRemap = () => {
     if (this.rowDefinitionRemapQueued) {
       return;
@@ -515,10 +463,26 @@ export class RowResizePlugin extends BasePlugin {
       if (!this.rowDefinitionRemapQueued) {
         return;
       }
-      this.rowDefinitionRemapQueued = false;
+      this.pruneRowDefinitions();
       this.reapplyRowDefinitionSizes();
+      this.rowDefinitionRemapQueued = false;
     });
   };
+
+  private pruneRowDefinitions() {
+    if (!this.pendingSourceCounts.size) {
+      return;
+    }
+    const definitions = this.providers.dimension.getRowDefinitions();
+    const rowDefinitions = definitions.filter(definition => {
+      const count = this.pendingSourceCounts.get(definition.type);
+      return count === undefined || definition.index < count;
+    });
+    this.pendingSourceCounts.clear();
+    if (rowDefinitions.length !== definitions.length) {
+      this.providers.dimension.setRowDefinitions(rowDefinitions);
+    }
+  }
 
   /** Map source-indexed row definitions back onto the current virtual order. */
   private readonly reapplyRowDefinitionSizes = () => {
@@ -530,7 +494,7 @@ export class RowResizePlugin extends BasePlugin {
           .filter(definition => definition.type === rowType)
           .map(definition => [definition.index, definition.size]),
       );
-      const appliedIndexes = this.appliedIndexes.get(rowType);
+      const appliedIndexes = this.appliedDefinitionIndexes.get(rowType);
       if (!definitions.size && !appliedIndexes?.size) {
         continue;
       }
@@ -540,9 +504,6 @@ export class RowResizePlugin extends BasePlugin {
       for (const index of appliedIndexes || []) {
         delete sizes[index];
       }
-      for (const physicalIndex of definitions.keys()) {
-        delete sizes[physicalIndex];
-      }
       const indexes = new Set<number>();
       items.forEach((physicalIndex, virtualIndex) => {
         const size = definitions.get(physicalIndex);
@@ -551,7 +512,7 @@ export class RowResizePlugin extends BasePlugin {
           indexes.add(virtualIndex);
         }
       });
-      this.appliedIndexes.set(rowType, indexes);
+      this.appliedDefinitionIndexes.set(rowType, indexes);
       const sizeKeys = Object.keys(sizes);
       if (
         sizeKeys.length !== Object.keys(currentSizes).length ||
@@ -585,6 +546,7 @@ export class RowResizePlugin extends BasePlugin {
     this.cancel('destroy');
     this.keepBottomAnchor = false;
     this.rowDefinitionRemapQueued = false;
+    this.pendingSourceCounts.clear();
     super.destroy();
   }
 }

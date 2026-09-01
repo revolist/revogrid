@@ -412,6 +412,40 @@ test.describe('row resize plugin', () => {
     expect(after!.height).toBeCloseTo(before!.height, 0);
   });
 
+  test('does not start a gesture when before-row-resize disables the plugin', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: buildColumns([{ prop: 'name', name: 'Name' }]),
+      source: [{ name: 'Alice' }],
+      rowHeaders: true,
+      rowSize: 36,
+    });
+    await enableRowResize(page);
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) throw new Error('Grid was not found');
+      grid.addEventListener(
+        'beforerowresize',
+        () => {
+          grid.resizeRow = false;
+        },
+        { once: true },
+      );
+    });
+
+    await dragHandle(page, resizeHandle(page, 0), 24);
+
+    expect((await rowHeightsByText(page, 'Alice')).data).toBeCloseTo(36, 0);
+    await expect(resizeHandle(page, 0)).toHaveCount(0);
+    expect(
+      await page.evaluate(() => {
+        const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+        return grid?.rowDefinitions;
+      }),
+    ).toEqual([]);
+  });
+
   test('keeps pinned, grouped, and deep virtual rows aligned', async ({
     page,
   }) => {
@@ -465,6 +499,44 @@ test.describe('row resize plugin', () => {
     const deepHeader = await rowHeaderCell(page, 800).boundingBox();
     const deepCell = await dataCell(page, 800, 0).boundingBox();
     expect(Math.abs(deepHeader!.height - deepCell!.height)).toBeLessThan(2);
+  });
+
+  test('preserves provider-owned main and pinned sizes when a resize commits', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: buildColumns([{ prop: 'name', name: 'Name' }]),
+      source: [{ name: 'Alice' }, { name: 'Ben' }],
+      pinnedTopSource: [{ name: 'Pinned' }],
+      rowHeaders: true,
+      rowSize: 36,
+    });
+    await enableRowResize(page);
+    await page.evaluate(async () => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) throw new Error('Grid was not found');
+      const providers = await grid.getProviders();
+      providers?.dimension.setCustomSizes('rgRow', { 1: 81 }, true);
+      providers?.dimension.setCustomSizes('rowPinStart', { 0: 54 }, true);
+    });
+    await expect
+      .poll(async () => (await rowHeightsByText(page, 'Ben')).data)
+      .toBeCloseTo(81, 0);
+    const pinnedRow = page
+      .locator(
+        `${SELECTORS.mainViewport} revogr-data[type="rowPinStart"] [data-rgrow="0"]`,
+      )
+      .first();
+    await expect
+      .poll(async () => (await pinnedRow.boundingBox())?.height)
+      .toBeCloseTo(54, 0);
+
+    await dragHandle(page, resizeHandle(page, 0), 24);
+
+    expect((await rowHeightsByText(page, 'Alice')).data).toBeCloseTo(60, 0);
+    expect((await rowHeightsByText(page, 'Ben')).data).toBeCloseTo(81, 0);
+    const pinned = await pinnedRow.boundingBox();
+    expect(pinned?.height).toBeCloseTo(54, 0);
   });
 
   test('preserves plugin and row-definition heights while filtering', async ({
@@ -680,6 +752,86 @@ test.describe('row resize plugin', () => {
     expect(jane.data).toBeCloseTo(72, 0);
     expect(mike.header).toBeCloseTo(mike.data, 0);
     expect(jane.header).toBeCloseTo(jane.data, 0);
+  });
+
+  test('preserves independent row sizes when sort and filter remap colliding indexes', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: buildColumns([
+        {
+          prop: 'name',
+          name: 'Name',
+          sortable: true,
+          ...withHeaderTestId('colliding-row-size-sort-name'),
+        },
+        {
+          prop: 'status',
+          name: 'Status',
+          filter: true,
+          ...withHeaderTestId('colliding-row-size-filter-status'),
+        },
+      ]),
+      source: [
+        { name: 'Zulu', status: 'keep' },
+        { name: 'Mike', status: 'keep' },
+        { name: 'Amy', status: 'hide' },
+        { name: 'Yuri', status: 'keep' },
+        { name: 'Bob', status: 'keep' },
+        { name: 'Jane', status: 'keep' },
+        { name: 'Cara', status: 'keep' },
+        { name: 'Xena', status: 'keep' },
+      ],
+      filter: true,
+      rowHeaders: true,
+      rowSize: 36,
+      rowDefinitions: [{ type: 'rgRow', index: 5, size: 72 }],
+    });
+    await enableRowResize(page);
+
+    await dragHandle(page, resizeHandle(page, 0), 24);
+    await page.getByTestId('colliding-row-size-sort-name').click();
+    await expect
+      .poll(() => visibleColumnValues(page, 0))
+      .toEqual(['Amy', 'Bob', 'Cara', 'Jane', 'Mike', 'Xena', 'Yuri', 'Zulu']);
+    expect((await rowHeightsByText(page, 'Jane')).data).toBeCloseTo(72, 0);
+    expect((await rowHeightsByText(page, 'Zulu')).data).toBeCloseTo(60, 0);
+
+    await page.evaluate(async () => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) throw new Error('Grid was not found');
+      const providers = await grid.getProviders();
+      // Filtering Amy moves Yuri from virtual index 6 to index 5, deliberately
+      // colliding with Jane's physical row-definition index 5 during remap.
+      providers?.dimension.setCustomSizes('rgRow', { 6: 81 }, true);
+    });
+
+    await page
+      .getByTestId('colliding-row-size-filter-status')
+      .locator(SELECTORS.filterButton)
+      .click();
+    const panel = page.locator(SELECTORS.filterPanel);
+    await panel.getByRole('combobox').selectOption({ label: 'Contains' });
+    await page.locator(SELECTORS.filterInput).fill('keep');
+    await expect
+      .poll(() => visibleColumnValues(page, 0))
+      .toEqual(['Bob', 'Cara', 'Jane', 'Mike', 'Xena', 'Yuri', 'Zulu']);
+
+    const heights = await Promise.all(
+      ['Bob', 'Cara', 'Jane', 'Mike', 'Xena', 'Yuri', 'Zulu'].map(
+        async name =>
+          [name, (await rowHeightsByText(page, name)).data] as const,
+      ),
+    );
+    expect(Object.fromEntries(heights)).toEqual({
+      Bob: 36,
+      Cara: 36,
+      Jane: 72,
+      Mike: 36,
+      Xena: 36,
+      Yuri: 81,
+      Zulu: 60,
+    });
   });
 
   test('keeps a resized grouped row attached to its source across sort and clear', async ({

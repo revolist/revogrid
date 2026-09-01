@@ -7,7 +7,10 @@ import {
   PSEUDO_GROUP_ITEM,
   PSEUDO_GROUP_ITEM_VALUE,
 } from '../src/plugins/groupingRow/grouping.const';
-import { doCollapse, doExpand } from '../src/plugins/groupingRow/grouping.row.expand.service';
+import {
+  doCollapse,
+  doExpand,
+} from '../src/plugins/groupingRow/grouping.row.expand.service';
 import { GroupingRowPlugin } from '../src/plugins/groupingRow/grouping.row.plugin';
 import { FILTER_TRIMMED_TYPE } from '../src/plugins/filter/filter.plugin';
 import {
@@ -24,7 +27,12 @@ import {
   TRIMMED_GROUPING,
 } from '../src/plugins/groupingRow/grouping.trimmed.service';
 
-function groupRow(name: string, depth: number, expanded = false, path: string[] = [name]): DataType {
+function groupRow(
+  name: string,
+  depth: number,
+  expanded = false,
+  path: string[] = [name],
+): DataType {
   return {
     [PSEUDO_GROUP_ITEM]: name,
     [GROUP_DEPTH]: depth,
@@ -45,6 +53,11 @@ describe('row grouping', () => {
       groups: {},
       groupingCustomRenderer: undefined,
       groupingCellRenderer: undefined,
+      rowDefinitions: [] as Array<{
+        type: 'rgRow';
+        index: number;
+        size: number;
+      }>,
     };
     const store = {
       get: (key: keyof typeof state) => state[key],
@@ -79,7 +92,8 @@ describe('row grouping', () => {
           state.proxyItems = nextSource.map((_, index) => index);
           state.items = [...state.proxyItems];
         }),
-        setGrouping: jest.fn(({
+        setGrouping: jest.fn(
+          ({
           depth,
           customRenderer,
           cellRenderer,
@@ -91,7 +105,8 @@ describe('row grouping', () => {
           state.groupingDepth = depth;
           state.groupingCustomRenderer = customRenderer;
           state.groupingCellRenderer = cellRenderer;
-        }),
+          },
+        ),
       },
       column: {
         getColumns: jest.fn(() => [{ prop: 'name' }, { prop: 'team' }]),
@@ -99,6 +114,12 @@ describe('row grouping', () => {
       },
       plugins: {
         getByClass: jest.fn(() => undefined),
+      },
+      dimension: {
+        getRowDefinitions: jest.fn(() => state.rowDefinitions),
+        setRowDefinitions: jest.fn(definitions => {
+          state.rowDefinitions = definitions;
+        }),
       },
     };
 
@@ -729,6 +750,25 @@ describe('row grouping', () => {
   });
 
   describe('sorting integration', () => {
+    it('remaps group-header and child row definitions by their identities', () => {
+      const { plugin, state } = createGroupingPlugin([
+        { name: 'Alice', team: 'North' },
+        { name: 'Ben', team: 'North' },
+        { name: 'Cara', team: 'South' },
+      ]);
+      plugin.setGrouping({ props: ['team'], expandedAll: true });
+      state.rowDefinitions = [
+        { type: 'rgRow', index: 0, size: 48 },
+        { type: 'rgRow', index: 1, size: 60 },
+      ];
+
+      plugin.setGrouping({ props: ['team'], expandedAll: true });
+
+      expect(state.rowDefinitions).toEqual([
+        { type: 'rgRow', index: 0, size: 48 },
+        { type: 'rgRow', index: 1, size: 60 },
+      ]);
+    });
     it('builds grouping from physical order when the current proxy is sorted', () => {
       const { plugin, providers, state } = createGroupingPlugin([
         { name: 'Charlie', team: 'North' },

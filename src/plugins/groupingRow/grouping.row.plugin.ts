@@ -19,9 +19,11 @@ import { SortingPlugin, hasActiveSorting } from '../sorting/sorting.plugin';
 
 import type { Observable, ColumnCollection } from '../../utils';
 import {
+  BEFORE_GROUPING_APPLY_EVENT,
   GROUP_EXPAND_EVENT,
   GROUPING_ROW_TYPE,
   PSEUDO_GROUP_COLUMN,
+  PSEUDO_GROUP_ITEM_ID,
 } from './grouping.const';
 import { doExpand, doCollapse } from './grouping.row.expand.service';
 import type {
@@ -38,6 +40,7 @@ import {
   isGroupingColumn,
 } from './grouping.service';
 import {
+  convertGroupingIndex,
   filterOutEmptyGroupRows,
   processDoubleConversionTrimmed,
   TRIMMED_GROUPING,
@@ -198,12 +201,19 @@ export class GroupingRowPlugin extends BasePlugin {
     const cellRenderer = options?.groupCellTemplate;
 
     // setup source
+    this.revogrid.dispatchEvent(new CustomEvent(BEFORE_GROUPING_APPLY_EVENT));
     this.providers.data.setData(
       sourceWithGroups,
       GROUPING_ROW_TYPE,
       this.revogrid.disableVirtualY,
       { depth, customRenderer, cellRenderer },
       true,
+    );
+    this.remapRowDefinitions(
+      oldNewIndexes ?? {},
+      oldNewIndexMap,
+      currentSource,
+      sourceWithGroups,
     );
     this.updateTrimmed(
       trimmed,
@@ -222,13 +232,18 @@ export class GroupingRowPlugin extends BasePlugin {
    * If source came from other plugin
    */
   private onDataSet(data: BeforeSourceSetEvent) {
+    const currentSource = this.getStore().get('source');
+    const sortingPlugin = this.providers.plugins.getByClass(SortingPlugin);
+    const currentItems = this.isSortingActiveOrPending(sortingPlugin)
+      ? currentSource.map((_, index) => index)
+      : this.getStore().get('proxyItems');
+    const { prevExpanded, oldNewIndexes } = getSource(
+      currentSource,
+      currentItems,
+      true,
+    );
     let preservedExpanded: ExpandedOptions['prevExpanded'] = {};
     if (this.options?.preserveGroupingOnUpdate !== false) {
-      let { prevExpanded } = getSource(
-        this.getStore().get('source'),
-        this.getStore().get('proxyItems'),
-        true,
-      );
       preservedExpanded = prevExpanded;
     }
     const source = data.source.filter(s => !isGrouping(s));
@@ -248,6 +263,14 @@ export class GroupingRowPlugin extends BasePlugin {
       customRenderer: options.groupLabelTemplate,
       cellRenderer: options.groupCellTemplate,
     });
+    queueMicrotask(() =>
+      this.remapRowDefinitions(
+        oldNewIndexes ?? {},
+        oldNewIndexMap,
+        currentSource,
+        sourceWithGroups,
+      ),
+    );
     this.updateTrimmed(
       trimmed,
       oldNewIndexMap,
@@ -356,6 +379,7 @@ export class GroupingRowPlugin extends BasePlugin {
       sourceItems,
       true,
     );
+    this.revogrid.dispatchEvent(new CustomEvent(BEFORE_GROUPING_APPLY_EVENT));
     this.providers.data.setData(
       source,
       GROUPING_ROW_TYPE,
@@ -363,9 +387,62 @@ export class GroupingRowPlugin extends BasePlugin {
       undefined,
       true,
     );
+    this.remapRowDefinitions(
+      oldNewIndexes ?? {},
+      undefined,
+      currentSource,
+      source,
+    );
     this.updateTrimmed(undefined, undefined, oldNewIndexes, source);
     if (hasActiveSorting(sortingPlugin?.sorting)) {
       sortingPlugin?.reapplySorting();
+    }
+  }
+
+  private remapRowDefinitions(
+    firstLevelMap: Record<number, number>,
+    secondLevelMap?: Record<number, number>,
+    previousSource?: DataType[],
+    nextSource?: DataType[],
+  ) {
+    const definitions = this.providers.dimension.getRowDefinitions();
+    const nextGroupIndexes = new Map<string, number>();
+    nextSource?.forEach((row, index) => {
+      const groupId = row[PSEUDO_GROUP_ITEM_ID];
+      if (groupId && !nextGroupIndexes.has(groupId)) {
+        nextGroupIndexes.set(groupId, index);
+      }
+    });
+    let changed = false;
+    const remapped = definitions.flatMap(definition => {
+      if (definition.type !== GROUPING_ROW_TYPE) {
+        return [definition];
+      }
+      const previousRow = previousSource?.[definition.index];
+      const groupId = previousRow?.[PSEUDO_GROUP_ITEM_ID];
+      const index = groupId
+        ? nextGroupIndexes.get(groupId)
+        : convertGroupingIndex(
+            definition.index,
+            firstLevelMap,
+            secondLevelMap,
+          );
+      if (typeof index !== 'number') {
+        changed = true;
+        return [];
+      }
+      if (index < 0) {
+        changed = true;
+        return [];
+      }
+      if (index === definition.index) {
+        return [definition];
+      }
+      changed = true;
+      return [{ ...definition, index }];
+    });
+    if (changed) {
+      this.providers.dimension.setRowDefinitions(remapped);
     }
   }
 
