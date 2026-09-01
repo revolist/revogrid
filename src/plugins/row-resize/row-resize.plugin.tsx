@@ -145,22 +145,15 @@ export class RowResizePlugin extends BasePlugin {
   }
 
   setGridConfig(gridConfig: RowResizeGridConfig, refresh = true) {
-    const { plugins, resizeRow } = gridConfig;
-    const hasConfiguredPlugin = plugins.some(
-      plugin =>
-        plugin !== RowResizePlugin &&
-        plugin.prototype instanceof RowResizePlugin,
-    );
-    const explicitlyEnabled = plugins.includes(RowResizePlugin);
-    const enabled = hasConfiguredPlugin
-      ? false
-      : explicitlyEnabled || !!resizeRow;
+    const { resizeRow } = gridConfig;
+    const hasConfiguredPlugin = this.providers.plugins
+      .get()
+      .some(plugin => plugin !== this && plugin instanceof RowResizePlugin);
+    const enabled =
+      this.constructor !== RowResizePlugin ||
+      (!hasConfiguredPlugin && !!resizeRow);
     const config = resolveRowResizeConfig(
-      !hasConfiguredPlugin &&
-        !explicitlyEnabled &&
-        typeof resizeRow === 'object'
-        ? resizeRow
-        : undefined,
+      typeof resizeRow === 'object' ? resizeRow : undefined,
     );
     const configChanged =
       config.minHeight !== this.config.minHeight ||

@@ -26,35 +26,42 @@ describe('row resize utilities', () => {
       removeEventListener: jest.fn(),
       refresh: jest.fn(),
     } as unknown as HTMLRevoGridElement;
+    const registeredPlugins: RowResizePlugin[] = [];
+    const providers = {
+      plugins: {
+        get: () => registeredPlugins,
+      },
+    } as unknown as PluginProviders;
     const plugin = RowResizePlugin.fromGridConfig(
       grid,
-      {} as PluginProviders,
+      providers,
       {
         resizeRow: false,
-        plugins: [],
       },
     );
+    registeredPlugins.push(plugin);
 
     expect(grid.addEventListener).not.toHaveBeenCalled();
 
     plugin.setGridConfig({
       resizeRow: true,
-      plugins: [],
     });
 
     expect(grid.addEventListener).toHaveBeenCalled();
     const subscriptionCount = (grid.addEventListener as jest.Mock).mock.calls
       .length;
 
+    registeredPlugins.push(
+      Object.create(ConfiguredRowResizePlugin.prototype),
+    );
     plugin.setGridConfig({
       resizeRow: true,
-      plugins: [ConfiguredRowResizePlugin],
     });
     expect(grid.removeEventListener).toHaveBeenCalled();
 
+    registeredPlugins.pop();
     plugin.setGridConfig({
-      resizeRow: false,
-      plugins: [RowResizePlugin],
+      resizeRow: true,
     });
     expect((grid.addEventListener as jest.Mock).mock.calls.length).toBeGreaterThan(
       subscriptionCount,

@@ -1654,7 +1654,7 @@ export class RevoGridComponent {
       RowResizePlugin.fromGridConfig(
         this.element,
         pluginData,
-        { resizeRow: this.resizeRow, plugins: this.plugins },
+        { resizeRow: this.resizeRow },
       ),
     );
     if (this.canMoveColumns) {
@@ -1666,7 +1666,6 @@ export class RevoGridComponent {
     const plugin = this.pluginService.getByClass(RowResizePlugin);
     plugin?.setGridConfig({
       resizeRow: this.resizeRow,
-      plugins: this.plugins,
     });
   }
 
