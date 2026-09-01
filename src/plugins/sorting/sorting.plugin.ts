@@ -21,6 +21,7 @@ import type {
 import { getColumnByProp } from '../../utils/column.utils';
 import { columnTypes, rowTypes } from '@store';
 import { isGrouping } from '../groupingRow/grouping.service';
+import { gatherGroupedRowIndexes } from '../groupingRow/grouping.sorting.service';
 import {
   getComparer,
   getNextOrder,
@@ -45,24 +46,6 @@ function getSortableRowIndexes(
   source: DataType[],
 ) {
   return indexes.filter(index => !isGrouping(source[index]));
-}
-
-function mergeSortedRowsWithGroups(
-  indexes: number[],
-  source: DataType[],
-  sortedRows: number[],
-) {
-  if (sortedRows.length === indexes.length) {
-    return sortedRows;
-  }
-
-  let rowIndex = 0;
-  return indexes.map(index => {
-    if (isGrouping(source[index])) {
-      return index;
-    }
-    return sortedRows[rowIndex++];
-  });
 }
 
 /**
@@ -335,7 +318,10 @@ export class SortingPlugin extends BasePlugin {
       sortingColumns,
       sortingOrder,
     );
-    const newItemsOrder = mergeSortedRowsWithGroups(proxyItems, source, sortedItems);
+    const hasGroupingRows = sortedItems.length !== proxyItems.length;
+    const newItemsOrder = hasGroupingRows
+      ? gatherGroupedRowIndexes(source, sortedItems) ?? proxyItems
+      : sortedItems;
 
     // take row indexes before trim applied and proxy items
     const prevItems = storeService.store.get('items');
@@ -393,6 +379,21 @@ export class SortingPlugin extends BasePlugin {
     this.postponeSort(order, sortingFunc, sortingColumns, sortingOrder, ignoreViewportUpdate);
   }
 
+  /**
+   * Schedules the current active sort again after another plugin rebuilds row
+   * proxy indexes while keeping the physical source unchanged.
+   */
+  reapplySorting() {
+    if (!hasActiveSorting(this.sorting) || !this.sortingFunc) {
+      return;
+    }
+    this.startSorting(
+      this.sorting,
+      this.sortingFunc,
+      this.sortingColumns,
+      this.sortingOrder,
+    );
+  }
 
   /**
    * Applies sorting requested by a sortable header click.

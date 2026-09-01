@@ -24,7 +24,7 @@ type EventSnapshot = {
 
 async function enableRowResize(
   page: E2EPage,
-  config?: { minHeight?: number; maxHeight?: number },
+  config?: { minHeight?: number; maxHeight?: number; fullRow?: boolean },
 ) {
   await page.evaluate(pluginConfig => {
     const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
@@ -135,6 +135,59 @@ async function rowHeightsByText(page: E2EPage, text: string) {
     )
     .boundingBox();
   return { index, data: data!.height, header: header!.height };
+}
+
+async function rowHeightsByExactText(page: E2EPage, text: string) {
+  const row = mainDataRows(page)
+    .filter({ has: page.getByText(text, { exact: true }) })
+    .first();
+  const index = Number(await row.getAttribute('data-rgrow'));
+  const data = await row.boundingBox();
+  const header = await rowHeaderCell(page, index).boundingBox();
+  return { index, data: data!.height, header: header!.height };
+}
+
+async function mainVerticalScrollMetrics(page: E2EPage) {
+  return page
+    .locator(`${SELECTORS.mainViewport} .vertical-inner`)
+    .evaluate((element: HTMLElement) => ({
+      scrollTop: element.scrollTop,
+      scrollHeight: element.scrollHeight,
+      clientHeight: element.clientHeight,
+    }));
+}
+
+async function scrollMainToBottom(page: E2EPage) {
+  await page
+    .locator(`${SELECTORS.mainViewport} .vertical-inner`)
+    .evaluate((element: HTMLElement) => {
+      element.scrollTop = element.scrollHeight;
+      element.dispatchEvent(new Event('scroll', { bubbles: true }));
+    });
+  await page.waitForChanges();
+}
+
+async function expectMainViewportAtTail(page: E2EPage) {
+  await expect
+    .poll(async () => {
+      const { scrollTop, scrollHeight, clientHeight } =
+        await mainVerticalScrollMetrics(page);
+      return scrollHeight - clientHeight - scrollTop;
+    })
+    // The virtual viewport intentionally keeps up to one origin row as an
+    // end buffer. The important invariant is that the rendered tail remains
+    // present rather than falling behind each resized row.
+    .toBeLessThanOrEqual(36);
+}
+
+async function lastRenderedRowHeader(page: E2EPage) {
+  return Math.max(
+    ...(await page
+      .locator(`${SELECTORS.rowHeaderViewport} ${SELECTORS.renderedRows}`)
+      .evaluateAll(rows =>
+        rows.map(row => Number(row.getAttribute('data-rgrow'))),
+      )),
+  );
 }
 
 test.describe('row resize plugin', () => {
@@ -469,6 +522,66 @@ test.describe('row resize plugin', () => {
     expect(dan.data).toBeCloseTo(72, 0);
   });
 
+  test('maps row definitions assigned while filtered without clearing provider sizes', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: buildColumns([
+        { prop: 'name', name: 'Name' },
+        {
+          prop: 'status',
+          name: 'Status',
+          filter: true,
+          ...withHeaderTestId('filtered-row-definition-status'),
+        },
+      ]),
+      source: [
+        { name: 'Alice', status: 'hide' },
+        { name: 'Ben', status: 'keep' },
+        { name: 'Cara', status: 'hide' },
+        { name: 'Dan', status: 'keep' },
+      ],
+      filter: true,
+      rowHeaders: true,
+      rowSize: 36,
+    });
+    await enableRowResize(page);
+    await dragHandle(page, resizeHandle(page, 0), 24);
+
+    await page
+      .getByTestId('filtered-row-definition-status')
+      .locator(SELECTORS.filterButton)
+      .click();
+    const panel = page.locator(SELECTORS.filterPanel);
+    await panel.getByRole('combobox').selectOption({ label: 'Contains' });
+    await page.locator(SELECTORS.filterInput).fill('keep');
+    await expect
+      .poll(() => visibleColumnValues(page, 0))
+      .toEqual(['Ben', 'Dan']);
+
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) throw new Error('Grid was not found');
+      grid.rowDefinitions = [{ type: 'rgRow', index: 3, size: 72 }];
+    });
+    await expect
+      .poll(async () => (await rowHeightsByText(page, 'Dan')).data)
+      .toBeCloseTo(72, 0);
+    await page.evaluate(async () => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) throw new Error('Grid was not found');
+      const providers = await grid.getProviders();
+      providers?.dimension.setCustomSizes('rgRow', { 0: 81 }, true);
+    });
+
+    await panel.getByRole('button', { name: 'reset' }).click();
+    await expect
+      .poll(() => visibleColumnValues(page, 0))
+      .toEqual(['Alice', 'Ben', 'Cara', 'Dan']);
+    expect((await rowHeightsByText(page, 'Alice')).data).toBeCloseTo(81, 0);
+    expect((await rowHeightsByText(page, 'Dan')).data).toBeCloseTo(72, 0);
+  });
+
   test('keeps a row resized while filtered attached to its physical row', async ({
     page,
   }) => {
@@ -502,7 +615,9 @@ test.describe('row resize plugin', () => {
     const panel = page.locator(SELECTORS.filterPanel);
     await panel.getByRole('combobox').selectOption({ label: 'Contains' });
     await page.locator(SELECTORS.filterInput).fill('keep');
-    await expect.poll(() => visibleColumnValues(page, 0)).toEqual(['Ben', 'Dan']);
+    await expect
+      .poll(() => visibleColumnValues(page, 0))
+      .toEqual(['Ben', 'Dan']);
 
     await dragHandle(page, resizeHandle(page, 0), 24);
     expect(
@@ -567,7 +682,7 @@ test.describe('row resize plugin', () => {
     expect(jane.header).toBeCloseTo(jane.data, 0);
   });
 
-  test('keeps the resized grouped-row slot aligned when grouping rebuilds after sort', async ({
+  test('keeps a resized grouped row attached to its source across sort and clear', async ({
     page,
   }) => {
     await mountGrid(page, {
@@ -604,9 +719,74 @@ test.describe('row resize plugin', () => {
 
     const alice = await rowHeightsByText(page, 'Alice');
     const charlie = await rowHeightsByText(page, 'Charlie');
-    expect(alice.data).toBeCloseTo(62, 0);
-    expect(charlie.data).toBeCloseTo(36, 0);
-    expect(alice.header).toBeCloseTo(alice.data, 0);
+    expect(alice.data).toBeCloseTo(36, 0);
+    expect(charlie.data).toBeCloseTo(62, 0);
+    expect(charlie.header).toBeCloseTo(charlie.data, 0);
+
+    await page.getByTestId('grouped-row-resize-sort-name').click();
+    await page.getByTestId('grouped-row-resize-sort-name').click();
+    await expect
+      .poll(() => visibleColumnValues(page, 0))
+      .toEqual(['Charlie', 'Alice', 'Dan', 'Ben']);
+
+    const restoredCharlie = await rowHeightsByText(page, 'Charlie');
+    expect(restoredCharlie.data).toBeCloseTo(62, 0);
+    expect(restoredCharlie.header).toBeCloseTo(restoredCharlie.data, 0);
+  });
+
+  test('keeps a grouped child resize committed when resized after sorting', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: buildColumns([
+        {
+          prop: 'name',
+          name: 'Name',
+          sortable: true,
+          ...withHeaderTestId('sorted-group-child-resize-name'),
+        },
+      ]),
+      source: [
+        { name: 'Charlie', team: 'North' },
+        { name: 'Alice', team: 'North' },
+        { name: 'Dan', team: 'South' },
+        { name: 'Ben', team: 'South' },
+      ],
+      grouping: {
+        props: ['team'],
+        expandedAll: true,
+        prevExpanded: { North: true, South: true },
+      },
+      rowHeaders: true,
+      rowSize: 36,
+    });
+    await enableRowResize(page);
+
+    await page.getByTestId('sorted-group-child-resize-name').click();
+    await expect
+      .poll(() => visibleColumnValues(page, 0))
+      .toEqual(['Alice', 'Charlie', 'Ben', 'Dan']);
+
+    const charlieIndex = await rowIndexByText(page, 'Charlie');
+    await dragHandle(page, resizeHandle(page, charlieIndex), 26);
+
+    let alice = await rowHeightsByText(page, 'Alice');
+    let charlie = await rowHeightsByText(page, 'Charlie');
+    expect(alice.data).toBeCloseTo(36, 0);
+    expect(charlie.data).toBeCloseTo(62, 0);
+    expect(charlie.header).toBeCloseTo(charlie.data, 0);
+
+    await page.getByTestId('sorted-group-child-resize-name').click();
+    await page.getByTestId('sorted-group-child-resize-name').click();
+    await expect
+      .poll(() => visibleColumnValues(page, 0))
+      .toEqual(['Charlie', 'Alice', 'Dan', 'Ben']);
+
+    alice = await rowHeightsByText(page, 'Alice');
+    charlie = await rowHeightsByText(page, 'Charlie');
+    expect(alice.data).toBeCloseTo(36, 0);
+    expect(charlie.data).toBeCloseTo(62, 0);
+    expect(charlie.header).toBeCloseTo(charlie.data, 0);
   });
 
   test('moves a resized row height through row reordering and theme changes', async ({
@@ -704,6 +884,520 @@ test.describe('row resize plugin', () => {
     expect(north.data).toBeCloseTo(54, 0);
     expect(alice.data).toBeCloseTo(62, 0);
     expect(alice.header).toBeCloseTo(alice.data, 0);
+  });
+
+  test('does not create blank rows below a partially collapsed grouped grid', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: buildColumns([{ prop: 'name', name: 'Name', rowDrag: true }]),
+      source: Array.from({ length: 100 }, (_, index) => ({
+        name: `${index}:0`,
+        key: index % 2 ? 'a' : 'b',
+        ...(index % 4 ? { key2: 'c' } : index % 3 ? { key2: 'd' } : {}),
+      })),
+      grouping: {
+        props: ['key', 'key2'],
+        expandedAll: false,
+        prevExpanded: { 'a': true, 'a,c': true },
+      },
+      rowHeaders: true,
+      rowSize: 36,
+    });
+    await enableRowResize(page, { fullRow: true });
+    await expect(mainDataRows(page).filter({ hasText: '0:0' })).toHaveCount(0);
+
+    await scrollMainToBottom(page);
+    const bottomRowBeforeResize = await lastRenderedRowHeader(page);
+    expect(bottomRowBeforeResize).toBe(52);
+    const contentSizeBeforeResize = await callGridMethod<{ y: number }>(
+      page,
+      'getContentSize',
+    );
+
+    await callGridMethod(page, 'scrollToRow', 0);
+    await page.waitForChanges();
+    let resizedChildIndex = await rowIndexByText(page, '7:0');
+    await dragHandle(page, resizeHandle(page, resizedChildIndex), 200);
+    resizedChildIndex = await rowIndexByText(page, '3:0');
+    const secondHandle = resizeHandle(page, resizedChildIndex);
+    await expect(secondHandle).toBeVisible();
+    await dragHandle(page, secondHandle, 200);
+    const contentSizeAfterResize = await callGridMethod<{ y: number }>(
+      page,
+      'getContentSize',
+    );
+    await scrollMainToBottom(page);
+    expect(await lastRenderedRowHeader(page)).toBe(bottomRowBeforeResize);
+    await expect(mainDataRows(page).filter({ hasText: '99:0' })).toHaveCount(1);
+    expect(contentSizeAfterResize.y).toBe(contentSizeBeforeResize.y + 400);
+  });
+
+  test('keeps a grouped bottom viewport anchored through repeated row resizes', async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1888, height: 1632 });
+    await mountGrid(page, {
+      columns: buildColumns(
+        Array.from({ length: 9 }, (_, index) => ({
+          prop: String(index),
+          name: String.fromCodePoint(65 + index),
+          size: 200,
+          rowDrag: index === 0,
+        })),
+      ),
+      source: Array.from({ length: 100 }, (_, rowIndex) => ({
+        ...Object.fromEntries(
+          Array.from({ length: 9 }, (_, columnIndex) => [
+            columnIndex,
+            `${rowIndex}:${columnIndex}`,
+          ]),
+        ),
+        key: rowIndex % 2 ? 'a' : 'b',
+        ...(rowIndex % 4 ? { key2: 'c' } : rowIndex % 3 ? { key2: 'd' } : {}),
+      })),
+      grouping: {
+        props: ['key', 'key2'],
+        expandedAll: false,
+        prevExpanded: { 'a': true, 'a,c': true },
+      },
+      rowHeaders: true,
+      rowSize: 36,
+      height: 1560,
+    });
+    await enableRowResize(page, { fullRow: true });
+    for (const value of ['7:0', '13:0', '17:0']) {
+      const row = await rowHeightsByText(page, value);
+      await dragHandle(page, resizeHandle(page, row.index), 200);
+    }
+    await scrollMainToBottom(page);
+    await expectMainViewportAtTail(page);
+    expect(await lastRenderedRowHeader(page)).toBe(52);
+
+    const contentSizeBefore = await callGridMethod<{ y: number }>(
+      page,
+      'getContentSize',
+    );
+    const firstBefore = await rowHeightsByText(page, '93:0');
+    const firstHandle = resizeHandle(page, firstBefore.index);
+    const firstHandleBox = await firstHandle.boundingBox();
+    expect(firstHandleBox).not.toBeNull();
+    const pointerX = firstHandleBox!.x + firstHandleBox!.width / 2;
+    const pointerY = firstHandleBox!.y + 1;
+    await page.mouse.move(pointerX, pointerY);
+    await page.mouse.down();
+    for (const delta of [30, 60, 90, 120]) {
+      await page.mouse.move(pointerX, pointerY + delta);
+      await page.waitForTimeout(50);
+      await page.waitForChanges();
+      await expect.poll(() => lastRenderedRowHeader(page)).toBe(52);
+      await expect
+        .poll(() => mainDataRows(page).filter({ hasText: '99:0' }).count())
+        .toBe(1);
+    }
+    await page.mouse.up();
+    await page.waitForChanges();
+    await expectMainViewportAtTail(page);
+    expect(await lastRenderedRowHeader(page)).toBe(52);
+    await expect(mainDataRows(page).filter({ hasText: '99:0' })).toHaveCount(1);
+    expect((await rowHeightsByText(page, '93:0')).data).toBeCloseTo(
+      firstBefore.data + 120,
+      0,
+    );
+
+    const secondBefore = await rowHeightsByText(page, '87:0');
+    await dragHandle(page, resizeHandle(page, secondBefore.index), 90);
+    await expectMainViewportAtTail(page);
+    expect(await lastRenderedRowHeader(page)).toBe(52);
+    await expect(mainDataRows(page).filter({ hasText: '99:0' })).toHaveCount(1);
+    expect((await rowHeightsByText(page, '87:0')).data).toBeCloseTo(
+      secondBefore.data + 90,
+      0,
+    );
+
+    const thirdBefore = await rowHeightsByText(page, '71:0');
+    await dragHandle(page, resizeHandle(page, thirdBefore.index), 70);
+    await expectMainViewportAtTail(page);
+    expect(await lastRenderedRowHeader(page)).toBe(52);
+    await expect(mainDataRows(page).filter({ hasText: '99:0' })).toHaveCount(1);
+    expect((await rowHeightsByText(page, '71:0')).data).toBeCloseTo(
+      thirdBefore.data + 70,
+      0,
+    );
+
+    const firstExpanded = await rowHeightsByText(page, '93:0');
+    await dragHandle(page, resizeHandle(page, firstExpanded.index), -50);
+    await expectMainViewportAtTail(page);
+    expect(await lastRenderedRowHeader(page)).toBe(52);
+    await expect(mainDataRows(page).filter({ hasText: '99:0' })).toHaveCount(1);
+    expect((await rowHeightsByText(page, '93:0')).data).toBeCloseTo(
+      firstExpanded.data - 50,
+      0,
+    );
+
+    const renderedHeaderIndexes = await page
+      .locator(`${SELECTORS.rowHeaderViewport} ${SELECTORS.renderedRows}`)
+      .evaluateAll(rows =>
+        rows.map(row => Number(row.getAttribute('data-rgrow'))),
+      );
+    expect(Math.max(...renderedHeaderIndexes)).toBe(52);
+    const contentSizeAfter = await callGridMethod<{ y: number }>(
+      page,
+      'getContentSize',
+    );
+    expect(contentSizeAfter.y).toBe(contentSizeBefore.y + 230);
+  });
+
+  test('keeps a resized row attached when the trailing sorted group expands', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: buildColumns([
+        {
+          prop: 'value',
+          name: 'Value',
+          sortable: true,
+          ...withHeaderTestId('expand-after-resize-sort'),
+        },
+      ]),
+      source: Array.from({ length: 100 }, (_, index) => ({
+        value: `${index}:0`,
+        key: index % 2 ? 'a' : 'b',
+        ...(index % 4 ? { key2: 'c' } : index % 3 ? { key2: 'd' } : {}),
+      })),
+      rowHeaders: true,
+      rowSize: 36,
+    });
+    await enableRowResize(page, { fullRow: true });
+
+    const sortHeader = page.getByTestId('expand-after-resize-sort');
+    await sortHeader.click();
+    await sortHeader.click();
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) throw new Error('Grid was not found');
+      grid.grouping = {
+        props: ['key', 'key2'],
+        expandedAll: false,
+        prevExpanded: { 'a': true, 'a,c': true },
+      };
+    });
+    await page.waitForChanges();
+    await scrollMainToBottom(page);
+    await expect(
+      mainDataRows(page).filter({
+        has: page.getByText('25:0', { exact: true }),
+      }),
+    ).toHaveCount(1);
+
+    const resizedBefore = await rowHeightsByExactText(page, '25:0');
+    await dragHandle(page, resizeHandle(page, resizedBefore.index), 200);
+    await expect
+      .poll(async () => (await rowHeightsByExactText(page, '25:0')).data)
+      .toBeCloseTo(236, 0);
+
+    const trailingGroup = page
+      .locator(`${SELECTORS.mainViewport} .groupingRow`)
+      .filter({ hasText: 'b' })
+      .last();
+    await trailingGroup.locator(SELECTORS.groupExpandButton).click();
+    await page.waitForChanges();
+
+    const state = await page.evaluate(async () => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) throw new Error('Grid was not found');
+      const store = await grid.getSourceStore();
+      const providers = await grid.getProviders();
+      const physicalIndex = store
+        .get('source')
+        .findIndex((row: Record<string, unknown>) => row.value === '25:0');
+      const resizedVirtualIndex = store.get('items').indexOf(physicalIndex);
+      return {
+        itemCount: store.get('items').length,
+        dimensionCount: providers?.dimension.stores.rgRow.store.get('count'),
+        realSize: providers?.dimension.stores.rgRow.store.get('realSize'),
+        resizedVirtualIndex,
+        resizedSize:
+          providers?.dimension.stores.rgRow.store.get('sizes')[
+            resizedVirtualIndex
+          ],
+      };
+    });
+    expect(state.dimensionCount).toBe(state.itemCount);
+    expect(state.realSize).toBe(state.itemCount * 36 + 200);
+    expect(state.resizedVirtualIndex).toBeGreaterThanOrEqual(0);
+    expect(state.resizedSize).toBe(236);
+
+    await expectMainViewportAtTail(page);
+    await expect.poll(() => lastRenderedRowHeader(page)).toBe(state.itemCount - 1);
+  });
+
+  test('keeps resize and grouping state isolated between two grids', async ({
+    page,
+  }) => {
+    await page.setContent(`
+      <div style="width:900px;height:360px"><revo-grid id="resize-grid"></revo-grid></div>
+      <div style="width:900px;height:360px"><revo-grid id="control-grid"></revo-grid></div>
+    `);
+    await expect(page.locator('revo-grid')).toHaveCount(2);
+    await page.evaluate(() => {
+      const first = document.querySelector<HTMLRevoGridElement>('#resize-grid');
+      const second = document.querySelector<HTMLRevoGridElement>('#control-grid');
+      if (!first || !second) throw new Error('Both grids must be mounted');
+
+      first.columns = [
+        {
+          prop: 'value',
+          name: 'Value',
+          sortable: true,
+          columnProperties: () => ({ 'data-testid': 'isolated-grid-sort' }),
+        },
+      ];
+      first.source = Array.from({ length: 100 }, (_, index) => ({
+        value: `${index}:0`,
+        key: index % 2 ? 'a' : 'b',
+        ...(index % 4 ? { key2: 'c' } : index % 3 ? { key2: 'd' } : {}),
+      }));
+      first.rowHeaders = true;
+      first.rowSize = 36;
+      first.resizeRow = { fullRow: true };
+
+      second.columns = [{ prop: 'value', name: 'Control' }];
+      second.source = Array.from({ length: 40 }, (_, index) => ({
+        value: `control-${index}`,
+        team: index < 20 ? 'left' : 'right',
+      }));
+      second.rowHeaders = true;
+      second.rowSize = 36;
+      second.resizeRow = true;
+      second.rowDefinitions = [{ type: 'rgRow', index: 3, size: 72 }];
+      second.grouping = { props: ['team'], expandedAll: true };
+    });
+    await page.waitForChanges();
+
+    const first = page.locator('#resize-grid');
+    const second = page.locator('#control-grid');
+    await page.getByTestId('isolated-grid-sort').click();
+    await page.getByTestId('isolated-grid-sort').click();
+    await first.evaluate((grid: HTMLRevoGridElement) => {
+      grid.grouping = {
+        props: ['key', 'key2'],
+        expandedAll: false,
+        prevExpanded: { 'a': true, 'a,c': true },
+      };
+    });
+    await second.evaluate(async (grid: HTMLRevoGridElement) => {
+      await grid.scrollToCoordinate({ y: 240 });
+    });
+    await page.waitForChanges();
+
+    const controlSnapshot = async () => {
+      const providerState = await second.evaluate(
+        async (grid: HTMLRevoGridElement) => {
+          const store = await grid.getSourceStore();
+          const providers = await grid.getProviders();
+          return {
+            items: [...store.get('items')],
+            count: providers?.dimension.stores.rgRow.store.get('count'),
+            realSize: providers?.dimension.stores.rgRow.store.get('realSize'),
+            sizes: {
+              ...providers?.dimension.stores.rgRow.store.get('sizes'),
+            },
+            rowDefinitions: [...grid.rowDefinitions],
+          };
+        },
+      );
+      const scrollTop = await second
+        .locator('revogr-viewport-scroll.rgCol:not([row-header]) .vertical-inner')
+        .evaluate((element: HTMLElement) => element.scrollTop);
+      const visibleRows = await second
+        .locator('revogr-viewport-scroll.rgCol:not([row-header]) revogr-data[type="rgRow"] .rgRow')
+        .allTextContents();
+      return { ...providerState, scrollTop, visibleRows };
+    };
+    const controlBefore = await controlSnapshot();
+
+    await first
+      .locator('revogr-viewport-scroll.rgCol:not([row-header]) .vertical-inner')
+      .evaluate((element: HTMLElement) => {
+        element.scrollTop = element.scrollHeight;
+        element.dispatchEvent(new Event('scroll', { bubbles: true }));
+      });
+    await page.waitForChanges();
+
+    const resizedRow = first
+      .locator(
+        'revogr-viewport-scroll.rgCol:not([row-header]) revogr-data[type="rgRow"] .rgRow:not(.groupingRow)',
+      )
+      .last();
+    await expect(resizedRow).toBeVisible();
+    const resizedIndex = Number(await resizedRow.getAttribute('data-rgrow'));
+    const handle = first.locator(
+      `revogr-viewport-scroll[row-header] revogr-data[type="rgRow"][col-type="rowHeaders"] .rgRow[data-rgrow="${resizedIndex}"] > .row-resize-handle`,
+    );
+    const handleBox = await handle.boundingBox();
+    expect(handleBox).not.toBeNull();
+    await page.mouse.move(handleBox!.x + handleBox!.width / 2, handleBox!.y + 1);
+    await page.mouse.down();
+    await page.mouse.move(
+      handleBox!.x + handleBox!.width / 2,
+      handleBox!.y + 201,
+      { steps: 5 },
+    );
+    await page.mouse.up();
+    await page.waitForChanges();
+
+    await first
+      .locator('.groupingRow')
+      .filter({ hasText: 'b' })
+      .last()
+      .locator(SELECTORS.groupExpandButton)
+      .click();
+    await page.waitForChanges();
+
+    const firstState = await first.evaluate(async (grid: HTMLRevoGridElement) => {
+      const store = await grid.getSourceStore();
+      return { itemCount: store.get('items').length };
+    });
+    await expect
+      .poll(async () =>
+        Math.max(
+          ...(await first
+            .locator('revogr-viewport-scroll[row-header] revogr-data[type="rgRow"] .rgRow')
+            .evaluateAll(rows =>
+              rows.map(row => Number(row.getAttribute('data-rgrow'))),
+            )),
+        ),
+      )
+      .toBe(firstState.itemCount - 1);
+    expect(await controlSnapshot()).toEqual(controlBefore);
+  });
+
+  test('keeps a non-grouped bottom viewport anchored while resizing', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: buildColumns([{ prop: 'name', name: 'Name' }]),
+      source: Array.from({ length: 30 }, (_, index) => ({
+        name: `Row ${index}`,
+      })),
+      rowHeaders: true,
+      rowSize: 36,
+    });
+    await enableRowResize(page);
+    await scrollMainToBottom(page);
+    await expectMainViewportAtTail(page);
+
+    const before = await rowHeightsByText(page, 'Row 27');
+    await dragHandle(page, resizeHandle(page, before.index), 80);
+
+    await expectMainViewportAtTail(page);
+    await expect(mainDataRows(page).filter({ hasText: 'Row 29' })).toHaveCount(
+      1,
+    );
+    expect((await rowHeightsByText(page, 'Row 27')).data).toBeCloseTo(
+      before.data + 80,
+      0,
+    );
+  });
+
+  test('clears deferred bottom anchoring when row resize is disabled', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: buildColumns([{ prop: 'name', name: 'Name' }]),
+      source: Array.from({ length: 60 }, (_, index) => ({
+        name: `Row ${index}`,
+      })),
+      rowHeaders: true,
+      rowSize: 36,
+    });
+    await enableRowResize(page);
+    await scrollMainToBottom(page);
+
+    const row = await rowHeightsByText(page, 'Row 57');
+    await dragHandle(page, resizeHandle(page, row.index), 80, false);
+    await page.waitForTimeout(32);
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (grid) grid.resizeRow = false;
+    });
+    await page.waitForChanges();
+    await page.mouse.up();
+
+    await callGridMethod(page, 'scrollToRow', 10);
+    await page.waitForChanges();
+    const scrollBeforeEnable = await mainVerticalScrollMetrics(page);
+    await enableRowResize(page);
+    const scrollAfterEnable = await mainVerticalScrollMetrics(page);
+
+    expect(scrollAfterEnable.scrollTop).toBeCloseTo(
+      scrollBeforeEnable.scrollTop,
+      0,
+    );
+    expect(
+      scrollAfterEnable.scrollHeight -
+        scrollAfterEnable.clientHeight -
+        scrollAfterEnable.scrollTop,
+    ).toBeGreaterThan(36);
+  });
+
+  test('does not defer bottom anchoring for a resize with no movement', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: buildColumns([{ prop: 'name', name: 'Name' }]),
+      source: Array.from({ length: 60 }, (_, index) => ({
+        name: `Row ${index}`,
+      })),
+      rowHeaders: true,
+      rowSize: 36,
+    });
+    await enableRowResize(page);
+    await scrollMainToBottom(page);
+
+    const row = await rowHeightsByText(page, 'Row 57');
+    await dragHandle(page, resizeHandle(page, row.index), 0);
+    await callGridMethod(page, 'scrollToRow', 10);
+    await page.waitForChanges();
+
+    const scroll = await mainVerticalScrollMetrics(page);
+    expect(scroll.scrollTop).toBeLessThan(
+      scroll.scrollHeight - scroll.clientHeight - 36,
+    );
+    await expect(mainDataRows(page).filter({ hasText: 'Row 10' })).toHaveCount(
+      1,
+    );
+  });
+
+  test('does not bottom-anchor a resize started away from the bottom', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: buildColumns([{ prop: 'name', name: 'Name' }]),
+      source: Array.from({ length: 60 }, (_, index) => ({
+        name: `Row ${index}`,
+      })),
+      rowHeaders: true,
+      rowSize: 36,
+    });
+    await enableRowResize(page);
+    await callGridMethod(page, 'scrollToRow', 20);
+    await page.waitForChanges();
+    const beforeScroll = await mainVerticalScrollMetrics(page);
+    const before = await rowHeightsByText(page, 'Row 22');
+
+    await dragHandle(page, resizeHandle(page, before.index), 80);
+
+    const afterScroll = await mainVerticalScrollMetrics(page);
+    expect(afterScroll.scrollTop).toBeCloseTo(beforeScroll.scrollTop, 0);
+    expect(afterScroll.scrollHeight - afterScroll.clientHeight).toBeGreaterThan(
+      afterScroll.scrollTop,
+    );
+    expect((await rowHeightsByText(page, 'Row 22')).data).toBeCloseTo(
+      before.data + 80,
+      0,
+    );
   });
 
   test('keeps committed row-position heights through source replacement and theme change', async ({

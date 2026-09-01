@@ -15,10 +15,9 @@ import type {
 
 import { BasePlugin } from '../base.plugin';
 import { FILTER_TRIMMED_TYPE } from '../filter/filter.plugin';
+import { SortingPlugin, hasActiveSorting } from '../sorting/sorting.plugin';
 
 import type { Observable, ColumnCollection } from '../../utils';
-import { SortingPlugin } from '../sorting/sorting.plugin';
-
 import {
   GROUP_EXPAND_EVENT,
   GROUPING_ROW_TYPE,
@@ -75,23 +74,21 @@ export class GroupingRowPlugin extends BasePlugin {
 
   // expand event triggered
   private onExpand({ virtualIndex }: OnExpandEvent) {
-    const { source } = getSource(
-      this.getStore().get('source'),
-      this.getStore().get('proxyItems'),
-    );
-    let newTrimmed = this.getStore().get('trimmed')[TRIMMED_GROUPING];
+    const store = this.getStore();
+    const source = store.get('source');
+    let newTrimmed = store.get('trimmed')[TRIMMED_GROUPING];
 
-    let i = getPhysical(this.getStore(), virtualIndex);
+    const i = getPhysical(store, virtualIndex);
     const isExpanded = getExpanded(source[i]);
     if (!isExpanded) {
-      const { trimmed, items } = doExpand(
+      const { trimmed, items: expandedItems } = doExpand(
         virtualIndex,
         source,
-        this.getStore().get('items'),
+        store.get('items'),
       );
       newTrimmed = { ...newTrimmed, ...trimmed };
-      if (items) {
-        setItems(this.getStore(), items);
+      if (expandedItems) {
+        setItems(store, expandedItems);
       }
     } else {
       const { trimmed } = doCollapse(i, source);
@@ -99,7 +96,7 @@ export class GroupingRowPlugin extends BasePlugin {
       this.revogrid.clearFocus();
     }
 
-    this.getStore().set('source', source);
+    store.set('source', source);
     this.revogrid.addTrimmed(newTrimmed, TRIMMED_GROUPING);
   }
 
@@ -124,10 +121,7 @@ export class GroupingRowPlugin extends BasePlugin {
   private onDrag(e: CustomEvent<{ from: number; to: number }>) {
     const { from, to } = e.detail;
     const isDown = to - from >= 0;
-    const { source } = getSource(
-      this.getStore().get('source'),
-      this.getStore().get('proxyItems'),
-    );
+    const source = this.getStore().get('source');
     const items = this.getStore().get('items');
     let i = isDown ? from : to;
     const end = isDown ? to : from;
@@ -156,25 +150,13 @@ export class GroupingRowPlugin extends BasePlugin {
     return filterOutEmptyGroupRows(source, trimmed);
   }
 
-  private isSortingRunning() {
-    const sortingPlugin = this.providers.plugins.getByClass(SortingPlugin);
-    return !!sortingPlugin?.sortingPromise;
-  }
-
   /**
-   * Returns grouping options for regrouping that must preserve current UI state.
-   *
-   * `expandedAll` and config `prevExpanded` are initial/config instructions.
-   * Reusing them after sorting would reopen groups the user collapsed before
-   * sorting instead of using the current grouped source state.
+   * Sorting changes proxy order without changing the physical source baseline.
+   * Other proxy changes, such as row dragging, are user-authored source order
+   * and must be retained when grouping is rebuilt.
    */
-  private getCurrentExpandedOptions(): ExpandedOptions {
-    const {
-      expandedAll: _expandedAll,
-      prevExpanded: _prevExpanded,
-      ...options
-    } = this.options ?? {};
-    return options;
+  private isSortingActiveOrPending(sortingPlugin?: SortingPlugin) {
+    return !!sortingPlugin?.sortingPromise || hasActiveSorting(sortingPlugin?.sorting);
   }
 
   /**
@@ -187,9 +169,14 @@ export class GroupingRowPlugin extends BasePlugin {
      * @param newOldIndexMap - provides us mapping with new indexes vs old indexes, we would use it for trimmed mapping
      */
     const store = this.getStore();
+    const sortingPlugin = this.providers.plugins.getByClass(SortingPlugin);
+    const currentSource = store.get('source');
+    const sourceItems = this.isSortingActiveOrPending(sortingPlugin)
+      ? currentSource.map((_, index) => index)
+      : store.get('proxyItems');
     const { source, prevExpanded, oldNewIndexes } = getSource(
-      store.get('source'),
-      store.get('proxyItems'),
+      currentSource,
+      sourceItems,
       true,
     );
     const expanded: ExpandedOptions = {
@@ -224,6 +211,9 @@ export class GroupingRowPlugin extends BasePlugin {
       oldNewIndexMap,
       sourceWithGroups,
     );
+    if (hasActiveSorting(sortingPlugin?.sorting)) {
+      sortingPlugin?.reapplySorting();
+    }
   }
 
   /**
@@ -302,10 +292,6 @@ export class GroupingRowPlugin extends BasePlugin {
       if (!(this.options?.props?.length && detail?.source?.length)) {
         return;
       }
-      // if sorting is running don't apply grouping, wait for sorting, then it'll apply in @aftersortingapply
-      if (this.isSortingRunning()) {
-        return;
-      }
       this.onDataSet(detail);
     });
     this.addEventListener('beforecolumnsset', ({ detail }) => {
@@ -325,17 +311,6 @@ export class GroupingRowPlugin extends BasePlugin {
     this.addEventListener('beforefiltertrimmed', ({ detail }) => {
       detail.itemsToFilter = this.beforeFilterTrimmed(detail.itemsToFilter);
     });
-    /**
-     * sorting applied need to clear grouping and apply again
-     * based on new results whole grouping order will changed
-     */
-    this.addEventListener('aftersortingapply', () => {
-      if (!this.options?.props?.length) {
-        return;
-      }
-      this.doSourceUpdate(this.getCurrentExpandedOptions());
-    });
-
     /**
      * Apply logic for focus inside of grouping
      * We can't focus on grouping rows, navigation only inside of groups for now
@@ -370,9 +345,15 @@ export class GroupingRowPlugin extends BasePlugin {
       }
     });
     // clear rows
+    const store = this.getStore();
+    const sortingPlugin = this.providers.plugins.getByClass(SortingPlugin);
+    const currentSource = store.get('source');
+    const sourceItems = this.isSortingActiveOrPending(sortingPlugin)
+      ? currentSource.map((_, index) => index)
+      : store.get('proxyItems');
     const { source, oldNewIndexes } = getSource(
-      this.getStore().get('source'),
-      this.getStore().get('proxyItems'),
+      currentSource,
+      sourceItems,
       true,
     );
     this.providers.data.setData(
@@ -383,6 +364,9 @@ export class GroupingRowPlugin extends BasePlugin {
       true,
     );
     this.updateTrimmed(undefined, undefined, oldNewIndexes, source);
+    if (hasActiveSorting(sortingPlugin?.sorting)) {
+      sortingPlugin?.reapplySorting();
+    }
   }
 
   private updateTrimmed(

@@ -1,12 +1,13 @@
 import type { VNode } from '@stencil/core';
-import { getItemByIndex } from '@store';
+import { getItemByIndex, getViewportMaxCoordinate, rowTypes } from '@store';
 import type {
   BeforeRowRenderEvent,
   DimensionRows,
   PluginProviders,
+  ViewPortScrollEvent,
   ViewSettingSizeProp,
 } from '@type';
-import { BasePlugin, type GridPlugin } from '../base.plugin';
+import { BasePlugin } from '../base.plugin';
 import type {
   ResolvedRowResizeConfig,
   RowResizeCancelReason,
@@ -38,6 +39,7 @@ type ActiveResize = {
   currentHeight: number;
   previousSizes: ViewSettingSizeProp;
   originalCustomSizes: ViewSettingSizeProp;
+  bottomAnchored: boolean;
   startEvent: PointerEvent;
   lastEvent: PointerEvent;
 };
@@ -45,8 +47,6 @@ type ActiveResize = {
 export class RowResizePlugin extends BasePlugin {
   private config: ResolvedRowResizeConfig;
   private enabled = false;
-  private gridResizeRow: HTMLRevoGridElement['resizeRow'] = false;
-  private gridPlugins: GridPlugin[] = [];
 
   private active?: ActiveResize;
   private readonly committedSizes = new Map<
@@ -56,17 +56,10 @@ export class RowResizePlugin extends BasePlugin {
   private readonly appliedIndexes = new Map<DimensionRows, Set<number>>();
   private animationFrame?: number;
   private pendingHeight?: number;
+  private pendingBottomAnchor = false;
+  private keepBottomAnchor = false;
+  private rowDefinitionRemapQueued = false;
   private previousBodyCursor = '';
-  private rowDefinitionsRef: HTMLRevoGridElement['rowDefinitions'];
-
-  static fromGridProperty(
-    revogrid: HTMLRevoGridElement,
-    providers: PluginProviders,
-  ): RowResizePlugin {
-    const plugin = new RowResizePlugin(revogrid, providers);
-    plugin.controlFromGridProperty();
-    return plugin;
-  }
 
   constructor(
     revogrid: HTMLRevoGridElement,
@@ -75,10 +68,11 @@ export class RowResizePlugin extends BasePlugin {
   ) {
     super(revogrid, providers);
     this.config = resolveRowResizeConfig(config);
-    this.rowDefinitionsRef = revogrid.rowDefinitions;
     if (new.target !== RowResizePlugin) {
       this.enabled = true;
       this.registerEventListeners();
+    } else {
+      this.syncGridConfig(false);
     }
   }
 
@@ -86,6 +80,7 @@ export class RowResizePlugin extends BasePlugin {
     this.addEventListener('beforerowrender', this.decorateRow);
     this.addEventListener('beforeanysource', ({ detail }) => {
       this.cancel('data-change');
+      this.keepBottomAnchor = false;
       const committed = this.committedSizes.get(detail.type);
       if (!committed) {
         return;
@@ -98,35 +93,41 @@ export class RowResizePlugin extends BasePlugin {
         }
       }
       if (removedIndexes.size) {
-        const rowDefinitions = this.revogrid.rowDefinitions.filter(
-          definition =>
-            definition.type !== detail.type ||
-            !removedIndexes.has(definition.index),
-        );
-        this.rowDefinitionsRef = rowDefinitions;
-        this.revogrid.rowDefinitions = rowDefinitions;
+        const rowDefinitions = this.providers.dimension
+          .getRowDefinitions()
+          .filter(
+            definition =>
+              definition.type !== detail.type ||
+              !removedIndexes.has(definition.index),
+          );
+        this.providers.dimension.setRowDefinitions(rowDefinitions);
       }
     });
     this.addEventListener('afteranysource', this.rebuildCommittedSizes);
     this.addEventListener('beforesourcesortingapply', this.cancelForDataChange);
     this.addEventListener('aftersortingapply', this.reapplyCommittedSizes);
     this.addEventListener('beforefilterapply', this.cancelForDataChange);
+    this.addEventListener('afterfilterapply', this.scheduleRowDefinitionRemap);
     this.addEventListener('beforerowdefinition', ({ detail }) => {
       this.cancel('data-change');
-      if (detail.vals !== this.rowDefinitionsRef) {
+      if (detail.vals !== this.providers.dimension.getRowDefinitions()) {
         this.committedSizes.clear();
-        this.appliedIndexes.clear();
-        this.rowDefinitionsRef = detail.vals;
       }
+      this.scheduleRowDefinitionRemap();
     });
     this.addEventListener('afterthemechanged', this.reapplyCommittedSizes);
-    this.addEventListener('aftertrimmed', this.syncAppliedIndexes);
+    this.addEventListener('aftertrimmed', this.scheduleRowDefinitionRemap);
     this.addEventListener('roworderchange', () => {
       queueMicrotask(this.reapplyCommittedSizes);
     });
     this.addEventListener(GROUP_EXPAND_EVENT, () => {
+      if (this.keepBottomAnchor) {
+        this.pendingBottomAnchor = true;
+      }
       queueMicrotask(this.reapplyCommittedSizes);
     });
+    this.addEventListener('aftergridrender', this.applyPendingBottomAnchor);
+    this.addEventListener('viewportscroll', this.updateBottomAnchorState);
     this.addEventListener('rowheaderschanged', ({ detail }) => {
       if (!detail && !this.config.fullRow) {
         this.cancel('row-headers-hidden');
@@ -134,36 +135,16 @@ export class RowResizePlugin extends BasePlugin {
     });
   }
 
-  private controlFromGridProperty() {
-    this.gridResizeRow = this.revogrid.resizeRow;
-    this.gridPlugins = this.revogrid.plugins;
-    this.syncGridProperty(false);
-    this.watch<HTMLRevoGridElement['resizeRow']>('resizeRow', value => {
-      this.gridResizeRow = value;
-      this.syncGridProperty();
-    });
-    this.watch<GridPlugin[]>('plugins', value => {
-      this.gridPlugins = value || [];
-      this.syncGridProperty();
-    });
-  }
-
-  private syncGridProperty(refresh = true) {
-    const hasConfiguredPlugin = this.gridPlugins.some(
-      plugin =>
-        plugin !== RowResizePlugin &&
-        plugin.prototype instanceof RowResizePlugin,
-    );
-    const explicitlyEnabled = this.gridPlugins.includes(RowResizePlugin);
-    const enabled = hasConfiguredPlugin
-      ? false
-      : explicitlyEnabled || !!this.gridResizeRow;
+  syncGridConfig(refresh = true) {
+    const { resizeRow } = this.revogrid;
+    const hasConfiguredPlugin = this.providers.plugins
+      .get()
+      .some(plugin => plugin !== this && plugin instanceof RowResizePlugin);
+    const enabled =
+      this.constructor !== RowResizePlugin ||
+      (!hasConfiguredPlugin && !!resizeRow);
     const config = resolveRowResizeConfig(
-      !hasConfiguredPlugin &&
-        !explicitlyEnabled &&
-        typeof this.gridResizeRow === 'object'
-        ? this.gridResizeRow
-        : undefined,
+      typeof resizeRow === 'object' ? resizeRow : undefined,
     );
     const configChanged =
       config.minHeight !== this.config.minHeight ||
@@ -178,9 +159,11 @@ export class RowResizePlugin extends BasePlugin {
     if (enabled !== this.enabled) {
       this.enabled = enabled;
       if (enabled) {
-        this.rowDefinitionsRef = this.revogrid.rowDefinitions;
         this.registerEventListeners();
       } else {
+        this.pendingBottomAnchor = false;
+        this.keepBottomAnchor = false;
+        this.rowDefinitionRemapQueued = false;
         this.clearSubscriptions();
       }
     }
@@ -228,6 +211,8 @@ export class RowResizePlugin extends BasePlugin {
 
     const dimension = this.providers.dimension.stores[rowType];
     const dimensionState = dimension.getCurrentState();
+    const viewport = this.providers.viewport.stores[rowType];
+    const viewportState = viewport.store.state;
     const item = getItemByIndex(dimensionState, index);
     const focusedStore = this.providers.selection.focusedStore;
     const selectedRowType = focusedStore
@@ -263,6 +248,11 @@ export class RowResizePlugin extends BasePlugin {
       currentHeight: startHeight,
       previousSizes,
       originalCustomSizes: { ...dimensionState.sizes },
+      bottomAnchored:
+        rowType === 'rgRow' &&
+        dimensionState.realSize > viewportState.clientSize &&
+        viewport.lastCoordinate >=
+          getViewportMaxCoordinate(dimensionState, viewportState.virtualSize),
       startEvent: event,
       lastEvent: event,
     };
@@ -362,6 +352,7 @@ export class RowResizePlugin extends BasePlugin {
       createRowResizePatch(active.indexes, size),
       true,
     );
+    this.requestBottomAnchor(active);
     active.currentHeight = size;
     this.emit<RowResizeEventDetail>(
       ROW_RESIZE_EVENT,
@@ -385,6 +376,7 @@ export class RowResizePlugin extends BasePlugin {
       }
     }
     this.providers.dimension.setCustomSizes(active.rowType, currentSizes);
+    this.requestBottomAnchor(active);
     const detail = {
       ...this.eventDetail(
         active,
@@ -438,20 +430,58 @@ export class RowResizePlugin extends BasePlugin {
     }, []);
     if (physicalIndexes.length) {
       const rowDefinitions = mergeRowResizeDefinitions(
-        this.revogrid.rowDefinitions,
+        this.providers.dimension.getRowDefinitions(),
         active.rowType,
         physicalIndexes,
         active.currentHeight,
       );
-      this.rowDefinitionsRef = rowDefinitions;
-      this.revogrid.rowDefinitions = rowDefinitions;
+      this.providers.dimension.setRowDefinitions(rowDefinitions);
+      this.keepBottomAnchor = active.bottomAnchored;
+      this.requestBottomAnchor(active);
     }
   }
+
+  private requestBottomAnchor(active: ActiveResize) {
+    if (active.bottomAnchored) {
+      this.pendingBottomAnchor = true;
+    }
+  }
+
+  private readonly updateBottomAnchorState = ({
+    detail,
+  }: CustomEvent<ViewPortScrollEvent>) => {
+    if (detail.dimension !== 'rgRow') {
+      return;
+    }
+    const dimension = this.providers.dimension.stores.rgRow.store;
+    const viewport = this.providers.viewport.stores.rgRow.store;
+    const realSize = dimension.get('realSize');
+    const clientSize = viewport.get('clientSize');
+    this.keepBottomAnchor =
+      realSize > clientSize &&
+      detail.coordinate >=
+        realSize - clientSize - dimension.get('originItemSize');
+  };
+
+  private readonly applyPendingBottomAnchor = () => {
+    if (!this.pendingBottomAnchor) {
+      return;
+    }
+    this.pendingBottomAnchor = false;
+    const dimension = this.providers.dimension.stores.rgRow.store;
+    // Scroll surfaces have slightly different client sizes. Give the shared
+    // scrolling service the content end and let each surface clamp to its own
+    // exact bottom coordinate.
+    void this.revogrid.scrollToCoordinate({ y: dimension.get('realSize') });
+  };
 
   private readonly reapplyCommittedSizes = () =>
     this.applyCommittedSizes(false);
 
-  private readonly rebuildCommittedSizes = () => this.applyCommittedSizes(true);
+  private readonly rebuildCommittedSizes = () => {
+    this.applyCommittedSizes(true);
+    this.scheduleRowDefinitionRemap();
+  };
 
   private applyCommittedSizes(clearAppliedIndexes: boolean) {
     for (const [rowType, committed] of this.committedSizes) {
@@ -476,16 +506,59 @@ export class RowResizePlugin extends BasePlugin {
     }
   }
 
-  private readonly syncAppliedIndexes = () => {
-    for (const [rowType, committed] of this.committedSizes) {
+  private readonly scheduleRowDefinitionRemap = () => {
+    if (this.rowDefinitionRemapQueued) {
+      return;
+    }
+    this.rowDefinitionRemapQueued = true;
+    queueMicrotask(() => {
+      if (!this.rowDefinitionRemapQueued) {
+        return;
+      }
+      this.rowDefinitionRemapQueued = false;
+      this.reapplyRowDefinitionSizes();
+    });
+  };
+
+  /** Map source-indexed row definitions back onto the current virtual order. */
+  private readonly reapplyRowDefinitionSizes = () => {
+    const rowDefinitions = this.providers.dimension.getRowDefinitions();
+    for (const rowType of rowTypes) {
       const items = this.providers.data.stores[rowType].store.get('items');
+      const definitions = new Map(
+        rowDefinitions
+          .filter(definition => definition.type === rowType)
+          .map(definition => [definition.index, definition.size]),
+      );
+      const appliedIndexes = this.appliedIndexes.get(rowType);
+      if (!definitions.size && !appliedIndexes?.size) {
+        continue;
+      }
+      const dimension = this.providers.dimension.stores[rowType];
+      const currentSizes = dimension.store.get('sizes');
+      const sizes: ViewSettingSizeProp = { ...currentSizes };
+      for (const index of appliedIndexes || []) {
+        delete sizes[index];
+      }
+      for (const physicalIndex of definitions.keys()) {
+        delete sizes[physicalIndex];
+      }
       const indexes = new Set<number>();
       items.forEach((physicalIndex, virtualIndex) => {
-        if (committed.has(physicalIndex)) {
+        const size = definitions.get(physicalIndex);
+        if (size !== undefined) {
+          sizes[virtualIndex] = size;
           indexes.add(virtualIndex);
         }
       });
       this.appliedIndexes.set(rowType, indexes);
+      const sizeKeys = Object.keys(sizes);
+      if (
+        sizeKeys.length !== Object.keys(currentSizes).length ||
+        sizeKeys.some(index => sizes[index] !== currentSizes[index])
+      ) {
+        this.providers.dimension.setCustomSizes(rowType, sizes);
+      }
     }
   };
 
@@ -510,6 +583,8 @@ export class RowResizePlugin extends BasePlugin {
 
   destroy() {
     this.cancel('destroy');
+    this.keepBottomAnchor = false;
+    this.rowDefinitionRemapQueued = false;
     super.destroy();
   }
 }

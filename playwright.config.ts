@@ -1,6 +1,10 @@
 import { expect } from '@playwright/test';
 import { matchers, createConfig } from '@stencil/playwright';
 
+// Playwright enables FORCE_COLOR for its web server and workers. Remove an
+// inherited NO_COLOR first so Node does not emit a conflict warning on stderr.
+Reflect.deleteProperty(process.env, 'NO_COLOR');
+
 // Add custom Stencil matchers to Playwright assertions
 expect.extend(matchers);
 

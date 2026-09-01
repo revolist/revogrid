@@ -527,7 +527,9 @@ test.describe('row grouping', () => {
     await expect(mainDataRows(page)).toHaveCount(2);
   });
 
-  test('sorts data rows and reapplies grouping', async ({ page }) => {
+  test('sorts grouped rows and restores source order when sorting is cleared', async ({
+    page,
+  }) => {
     const source = [
       { id: 1, name: 'Charlie', role: 'Engineer', city: 'Lisbon', team: 'North' },
       { id: 2, name: 'Alice', role: 'Designer', city: 'Porto', team: 'North' },
@@ -566,11 +568,316 @@ test.describe('row grouping', () => {
       'South',
     ]);
 
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) throw new Error('Grid was not found');
+      grid.grouping = {
+        ...(grid.grouping as Record<string, unknown>),
+      };
+    });
+    await page.waitForChanges();
+    await expectVisibleColumnValues(page, 1, ['Alice', 'Charlie', 'Ben', 'Dan']);
+
     await page.getByTestId('group-sort-name').click();
     await expectVisibleColumnValues(page, 1, ['Dan', 'Ben', 'Charlie', 'Alice']);
     await expect(page.locator(`${SELECTORS.mainViewport} .groupingRow`)).toContainText([
       'South',
       'North',
+    ]);
+    await expect
+      .poll(() =>
+        page.evaluate(async () => {
+          const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+          if (!grid) throw new Error('Grid was not found');
+          const store = await grid.getSourceStore();
+          return store
+            .get('source')
+            .map((row: Record<string, unknown>) => row.name)
+            .filter((name): name is string => typeof name === 'string');
+        }),
+      )
+      .toEqual(['Charlie', 'Alice', 'Dan', 'Ben']);
+
+    await page.getByTestId('group-sort-name').click();
+    await expectVisibleColumnValues(page, 1, ['Charlie', 'Alice', 'Dan', 'Ben']);
+    await expect(page.locator(`${SELECTORS.mainViewport} .groupingRow`)).toContainText([
+      'North',
+      'South',
+    ]);
+  });
+
+  test('restores source order after grouping is cleared during sorting', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: buildColumns([
+        {
+          prop: 'name',
+          name: 'Name',
+          sortable: true,
+          ...withHeaderTestId('clear-grouping-sort-name'),
+        },
+      ]),
+      source: [
+        { name: 'Charlie', team: 'North' },
+        { name: 'Alice', team: 'North' },
+        { name: 'Dan', team: 'South' },
+        { name: 'Ben', team: 'South' },
+      ],
+      grouping: { props: ['team'], expandedAll: true },
+    });
+
+    const header = page.getByTestId('clear-grouping-sort-name');
+    await header.click();
+    await expectVisibleColumnValues(page, 0, ['Alice', 'Charlie', 'Ben', 'Dan']);
+
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) throw new Error('Grid was not found');
+      grid.grouping = { props: [] };
+    });
+    await page.waitForChanges();
+    await expectVisibleColumnValues(page, 0, ['Alice', 'Ben', 'Charlie', 'Dan']);
+
+    await header.click();
+    await header.click();
+    await expectVisibleColumnValues(page, 0, ['Charlie', 'Alice', 'Dan', 'Ben']);
+  });
+
+  test('preserves grouped multi-column sort priority when grouping is rebuilt', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: buildColumns([
+        {
+          prop: 'priority',
+          name: 'Priority',
+          sortable: true,
+          ...withHeaderTestId('group-multi-sort-priority'),
+        },
+        {
+          prop: 'name',
+          name: 'Name',
+          sortable: true,
+          ...withHeaderTestId('group-multi-sort-name'),
+        },
+      ]),
+      source: [
+        { priority: 2, name: 'Charlie', team: 'North' },
+        { priority: 1, name: 'Ben', team: 'North' },
+        { priority: 1, name: 'Alice', team: 'North' },
+        { priority: 2, name: 'Dan', team: 'South' },
+        { priority: 1, name: 'Zoe', team: 'South' },
+        { priority: 1, name: 'Aaron', team: 'South' },
+      ],
+      grouping: {
+        props: ['team'],
+        expandedAll: true,
+      },
+    });
+
+    const priorityHeader = page.getByTestId('group-multi-sort-priority');
+    const nameHeader = page.getByTestId('group-multi-sort-name');
+    const groupRows = page.locator(`${SELECTORS.mainViewport} .groupingRow`);
+
+    await expectVisibleColumnValues(page, 1, [
+      'Charlie',
+      'Ben',
+      'Alice',
+      'Dan',
+      'Zoe',
+      'Aaron',
+    ]);
+
+    await priorityHeader.click();
+    await expectVisibleColumnValues(page, 1, [
+      'Ben',
+      'Alice',
+      'Charlie',
+      'Zoe',
+      'Aaron',
+      'Dan',
+    ]);
+
+    await nameHeader.click({ modifiers: ['Shift'] });
+    await expectVisibleColumnValues(page, 1, [
+      'Aaron',
+      'Zoe',
+      'Dan',
+      'Alice',
+      'Ben',
+      'Charlie',
+    ]);
+    await expect(groupRows).toContainText(['South', 'North']);
+    await expect(priorityHeader.locator('.sort-order-index')).toHaveText('1');
+    await expect(nameHeader.locator('.sort-order-index')).toHaveText('2');
+
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) throw new Error('Grid was not found');
+      grid.grouping = {
+        ...(grid.grouping as Record<string, unknown>),
+      };
+    });
+    await page.waitForChanges();
+
+    await expectVisibleColumnValues(page, 1, [
+      'Aaron',
+      'Zoe',
+      'Dan',
+      'Alice',
+      'Ben',
+      'Charlie',
+    ]);
+    await expect(groupRows).toContainText(['South', 'North']);
+    await expect(priorityHeader.locator('.sort-order-index')).toHaveText('1');
+    await expect(nameHeader.locator('.sort-order-index')).toHaveText('2');
+
+    await priorityHeader.click();
+    await priorityHeader.click();
+    await expectVisibleColumnValues(page, 1, [
+      'Charlie',
+      'Ben',
+      'Alice',
+      'Dan',
+      'Zoe',
+      'Aaron',
+    ]);
+    await expect(groupRows).toContainText(['North', 'South']);
+  });
+
+  test('sorts nested groups and restores their original hierarchy order', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: buildColumns([
+        {
+          prop: 'name',
+          name: 'Name',
+          sortable: true,
+          ...withHeaderTestId('nested-group-sort-name'),
+        },
+      ]),
+      source: [
+        { name: 'Zoe', region: 'Europe', team: 'North' },
+        { name: 'Mia', region: 'Europe', team: 'North' },
+        { name: 'Yuri', region: 'Europe', team: 'South' },
+        { name: 'Amy', region: 'Asia', team: 'East' },
+        { name: 'Ben', region: 'Asia', team: 'West' },
+      ],
+      grouping: {
+        props: ['region', 'team'],
+        expandedAll: true,
+      },
+    });
+
+    const groupRows = page.locator(`${SELECTORS.mainViewport} .groupingRow`);
+    await expectVisibleColumnValues(page, 0, ['Zoe', 'Mia', 'Yuri', 'Amy', 'Ben']);
+    await expect(groupRows).toContainText([
+      'Europe',
+      'North',
+      'South',
+      'Asia',
+      'East',
+      'West',
+    ]);
+
+    await groupRows
+      .filter({ hasText: 'North' })
+      .locator(SELECTORS.groupExpandButton)
+      .click();
+    await expectVisibleColumnValues(page, 0, ['Yuri', 'Amy', 'Ben']);
+
+    await page.getByTestId('nested-group-sort-name').click();
+    await expectVisibleColumnValues(page, 0, ['Amy', 'Ben', 'Yuri']);
+    await expect(groupRows).toContainText([
+      'Asia',
+      'East',
+      'West',
+      'Europe',
+      'North',
+      'South',
+    ]);
+
+    await groupRows
+      .filter({ hasText: 'North' })
+      .locator(SELECTORS.groupExpandButton)
+      .click();
+    await expectVisibleColumnValues(page, 0, ['Amy', 'Ben', 'Mia', 'Zoe', 'Yuri']);
+
+    await page.getByTestId('nested-group-sort-name').click();
+    await expectVisibleColumnValues(page, 0, ['Zoe', 'Mia', 'Yuri', 'Ben', 'Amy']);
+    await expect(groupRows).toContainText([
+      'Europe',
+      'North',
+      'South',
+      'Asia',
+      'West',
+      'East',
+    ]);
+
+    await page.getByTestId('nested-group-sort-name').click();
+    await expectVisibleColumnValues(page, 0, ['Zoe', 'Mia', 'Yuri', 'Amy', 'Ben']);
+    await expect(groupRows).toContainText([
+      'Europe',
+      'North',
+      'South',
+      'Asia',
+      'East',
+      'West',
+    ]);
+  });
+
+  test('sorts replacement grouped source and clears to its original grouped order', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: buildColumns([
+        {
+          prop: 'name',
+          name: 'Name',
+          sortable: true,
+          ...withHeaderTestId('replacement-group-sort-name'),
+        },
+      ]),
+      source: [
+        { name: 'Charlie', team: 'North' },
+        { name: 'Alice', team: 'North' },
+      ],
+      grouping: {
+        props: ['team'],
+        expandedAll: true,
+      },
+    });
+
+    await page.getByTestId('replacement-group-sort-name').click();
+    await expectVisibleColumnValues(page, 0, ['Alice', 'Charlie']);
+
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) throw new Error('Grid was not found');
+      grid.source = [
+        { name: 'Zoe', team: 'West' },
+        { name: 'Adam', team: 'East' },
+        { name: 'Mike', team: 'West' },
+      ];
+    });
+    await page.waitForChanges();
+
+    await expectVisibleColumnValues(page, 0, ['Adam', 'Mike', 'Zoe']);
+    await expect(page.locator(`${SELECTORS.mainViewport} .groupingRow`)).toContainText([
+      'East',
+      'West',
+    ]);
+
+    await page.getByTestId('replacement-group-sort-name').click();
+    await expectVisibleColumnValues(page, 0, ['Zoe', 'Mike', 'Adam']);
+
+    await page.getByTestId('replacement-group-sort-name').click();
+    await expectVisibleColumnValues(page, 0, ['Zoe', 'Mike', 'Adam']);
+    await expect(page.locator(`${SELECTORS.mainViewport} .groupingRow`)).toContainText([
+      'West',
+      'East',
     ]);
   });
 
@@ -620,6 +927,12 @@ test.describe('row grouping', () => {
     ]);
     await expect(mainGroupRows).toHaveCount(2);
     await expectVisibleColumnValues(page, 1, ['Ben', 'Dan']);
+
+    await mainGroupRows
+      .filter({ hasText: 'North' })
+      .locator(SELECTORS.groupExpandButton)
+      .click();
+    await expectVisibleColumnValues(page, 1, ['Alice', 'Charlie', 'Ben', 'Dan']);
   });
 
   test('allows row reordering inside a group and blocks dragging across groups', async ({ page }) => {
@@ -669,6 +982,16 @@ test.describe('row grouping', () => {
     );
     await page.mouse.up();
 
+    await expectVisibleColumnValues(page, 1, ['Ben', 'Alice', 'Cara', 'Dan']);
+
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) throw new Error('Grid was not found');
+      grid.grouping = {
+        ...(grid.grouping as Record<string, unknown>),
+      };
+    });
+    await page.waitForChanges();
     await expectVisibleColumnValues(page, 1, ['Ben', 'Alice', 'Cara', 'Dan']);
 
     const aliceDragHandle = mainDataRows(page).nth(2).locator('[data-rgCol="1"] .revo-draggable');

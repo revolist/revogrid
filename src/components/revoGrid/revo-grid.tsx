@@ -1485,6 +1485,7 @@ export class RevoGridComponent {
       vals: after,
       oldVals: before,
     });
+    this.dimensionProvider.syncRowDefinitions(newVal);
     // apply new values
     const newRows = rowDefinitionByType(newVal);
     // clear current defs
@@ -1495,8 +1496,8 @@ export class RevoGridComponent {
         if (remove.hasOwnProperty(t)) {
           const type = t as DimensionRows;
           const store = this.dataProvider.stores[type];
-          const sourceLength = store.store.get('source').length;
-          this.dimensionProvider.clearSize(type, sourceLength);
+          const itemCount = store.store.get('items').length;
+          this.dimensionProvider.clearSize(type, itemCount);
         }
       }
     }
@@ -1560,6 +1561,10 @@ export class RevoGridComponent {
     this.rowheaderschanged.emit(rowHeaders);
   }
 
+  @Watch('resizeRow') resizeRowChanged() {
+    this.syncRowResizeConfig();
+  }
+
   /**
    * Register external VNodes
    */
@@ -1585,6 +1590,7 @@ export class RevoGridComponent {
    */
   @Watch('plugins') pluginsChanged(plugins: GridPlugin[] = [], prevPlugins?: GridPlugin[]) {
     this.pluginService.addUserPluginsAndCreate(this.element, plugins, prevPlugins, this.getPluginData());
+    this.syncRowResizeConfig();
   }
   // #endregion
 
@@ -1645,11 +1651,16 @@ export class RevoGridComponent {
     // register grouping plugin
     this.pluginService.add(new GroupingRowPlugin(this.element, pluginData));
     this.pluginService.add(
-      RowResizePlugin.fromGridProperty(this.element, pluginData),
+      new RowResizePlugin(this.element, pluginData),
     );
     if (this.canMoveColumns) {
       this.pluginService.add(new ColumnMovePlugin(this.element, pluginData));
     }
+  }
+
+  private syncRowResizeConfig() {
+    const plugin = this.pluginService.getByClass(RowResizePlugin);
+    plugin?.syncGridConfig();
   }
 
   getPluginData(): PluginProviders | undefined {
@@ -1699,6 +1710,9 @@ export class RevoGridComponent {
     this.dimensionProvider = new DimensionProvider(this.viewportProvider, {
       realSizeChanged: (k: MultiDimensionType) =>
         this.contentsizechanged.emit(k),
+      rowDefinitionsChanged: definitions => {
+        this.rowDefinitions = definitions;
+      },
     });
     this.dimensionProvider.setSettings(
       { originItemSize: getColumnSize(this.colSize) },
