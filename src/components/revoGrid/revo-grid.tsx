@@ -1663,12 +1663,7 @@ export class RevoGridComponent {
   }
 
   private syncRowResizeConfig() {
-    const plugin = this.pluginService
-      .get()
-      .find(
-        (plugin): plugin is RowResizePlugin =>
-          plugin.constructor === RowResizePlugin,
-      );
+    const plugin = this.pluginService.getByClass(RowResizePlugin);
     plugin?.setGridConfig({
       resizeRow: this.resizeRow,
       plugins: this.plugins,
