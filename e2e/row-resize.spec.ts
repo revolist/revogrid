@@ -1132,6 +1132,147 @@ test.describe('row resize plugin', () => {
     await expect.poll(() => lastRenderedRowHeader(page)).toBe(state.itemCount - 1);
   });
 
+  test('keeps resize and grouping state isolated between two grids', async ({
+    page,
+  }) => {
+    await page.setContent(`
+      <div style="width:900px;height:360px"><revo-grid id="resize-grid"></revo-grid></div>
+      <div style="width:900px;height:360px"><revo-grid id="control-grid"></revo-grid></div>
+    `);
+    await expect(page.locator('revo-grid')).toHaveCount(2);
+    await page.evaluate(() => {
+      const first = document.querySelector<HTMLRevoGridElement>('#resize-grid');
+      const second = document.querySelector<HTMLRevoGridElement>('#control-grid');
+      if (!first || !second) throw new Error('Both grids must be mounted');
+
+      first.columns = [
+        {
+          prop: 'value',
+          name: 'Value',
+          sortable: true,
+          columnProperties: () => ({ 'data-testid': 'isolated-grid-sort' }),
+        },
+      ];
+      first.source = Array.from({ length: 100 }, (_, index) => ({
+        value: `${index}:0`,
+        key: index % 2 ? 'a' : 'b',
+        ...(index % 4 ? { key2: 'c' } : index % 3 ? { key2: 'd' } : {}),
+      }));
+      first.rowHeaders = true;
+      first.rowSize = 36;
+      first.resizeRow = { fullRow: true };
+
+      second.columns = [{ prop: 'value', name: 'Control' }];
+      second.source = Array.from({ length: 40 }, (_, index) => ({
+        value: `control-${index}`,
+        team: index < 20 ? 'left' : 'right',
+      }));
+      second.rowHeaders = true;
+      second.rowSize = 36;
+      second.resizeRow = true;
+      second.rowDefinitions = [{ type: 'rgRow', index: 3, size: 72 }];
+      second.grouping = { props: ['team'], expandedAll: true };
+    });
+    await page.waitForChanges();
+
+    const first = page.locator('#resize-grid');
+    const second = page.locator('#control-grid');
+    await page.getByTestId('isolated-grid-sort').click();
+    await page.getByTestId('isolated-grid-sort').click();
+    await first.evaluate((grid: HTMLRevoGridElement) => {
+      grid.grouping = {
+        props: ['key', 'key2'],
+        expandedAll: false,
+        prevExpanded: { 'a': true, 'a,c': true },
+      };
+    });
+    await second.evaluate(async (grid: HTMLRevoGridElement) => {
+      await grid.scrollToCoordinate({ y: 240 });
+    });
+    await page.waitForChanges();
+
+    const controlSnapshot = async () => {
+      const providerState = await second.evaluate(
+        async (grid: HTMLRevoGridElement) => {
+          const store = await grid.getSourceStore();
+          const providers = await grid.getProviders();
+          return {
+            items: [...store.get('items')],
+            count: providers?.dimension.stores.rgRow.store.get('count'),
+            realSize: providers?.dimension.stores.rgRow.store.get('realSize'),
+            sizes: {
+              ...providers?.dimension.stores.rgRow.store.get('sizes'),
+            },
+            rowDefinitions: [...grid.rowDefinitions],
+          };
+        },
+      );
+      const scrollTop = await second
+        .locator('revogr-viewport-scroll.rgCol:not([row-header]) .vertical-inner')
+        .evaluate((element: HTMLElement) => element.scrollTop);
+      const visibleRows = await second
+        .locator('revogr-viewport-scroll.rgCol:not([row-header]) revogr-data[type="rgRow"] .rgRow')
+        .allTextContents();
+      return { ...providerState, scrollTop, visibleRows };
+    };
+    const controlBefore = await controlSnapshot();
+
+    await first
+      .locator('revogr-viewport-scroll.rgCol:not([row-header]) .vertical-inner')
+      .evaluate((element: HTMLElement) => {
+        element.scrollTop = element.scrollHeight;
+        element.dispatchEvent(new Event('scroll', { bubbles: true }));
+      });
+    await page.waitForChanges();
+
+    const resizedRow = first
+      .locator(
+        'revogr-viewport-scroll.rgCol:not([row-header]) revogr-data[type="rgRow"] .rgRow:not(.groupingRow)',
+      )
+      .last();
+    await expect(resizedRow).toBeVisible();
+    const resizedIndex = Number(await resizedRow.getAttribute('data-rgrow'));
+    const handle = first.locator(
+      `revogr-viewport-scroll[row-header] revogr-data[type="rgRow"][col-type="rowHeaders"] .rgRow[data-rgrow="${resizedIndex}"] > .row-resize-handle`,
+    );
+    const handleBox = await handle.boundingBox();
+    expect(handleBox).not.toBeNull();
+    await page.mouse.move(handleBox!.x + handleBox!.width / 2, handleBox!.y + 1);
+    await page.mouse.down();
+    await page.mouse.move(
+      handleBox!.x + handleBox!.width / 2,
+      handleBox!.y + 201,
+      { steps: 5 },
+    );
+    await page.mouse.up();
+    await page.waitForChanges();
+
+    await first
+      .locator('.groupingRow')
+      .filter({ hasText: 'b' })
+      .last()
+      .locator(SELECTORS.groupExpandButton)
+      .click();
+    await page.waitForChanges();
+
+    const firstState = await first.evaluate(async (grid: HTMLRevoGridElement) => {
+      const store = await grid.getSourceStore();
+      return { itemCount: store.get('items').length };
+    });
+    await expect
+      .poll(async () =>
+        Math.max(
+          ...(await first
+            .locator('revogr-viewport-scroll[row-header] revogr-data[type="rgRow"] .rgRow')
+            .evaluateAll(rows =>
+              rows.map(row => Number(row.getAttribute('data-rgrow'))),
+            )),
+        ),
+      )
+      .toBe(firstState.itemCount - 1);
+    expect(await controlSnapshot()).toEqual(controlBefore);
+  });
+
   test('keeps a non-grouped bottom viewport anchored while resizing', async ({
     page,
   }) => {
