@@ -10,8 +10,12 @@
     text-align: var(--rg-theme-header-text-align);
 
     .rgHeaderCell {
-      padding: var(--rg-theme-header-padding);
+      padding: 0;
       text-overflow: ellipsis;
+
+      .header-content {
+        padding: var(--rg-theme-header-padding);
+      }
     }
 
     .header-rgRow {
