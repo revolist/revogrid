@@ -677,6 +677,7 @@ test.describe('row grouping', () => {
 
     await expect(mainDataRows(page)).toHaveCount(2);
 
+    await page.getByTestId('group-filter-role').hover();
     await page
       .getByTestId('group-filter-role')
       .locator(SELECTORS.filterButton)
@@ -684,7 +685,7 @@ test.describe('row grouping', () => {
 
     const filterPanel = page.locator(SELECTORS.filterPanel);
     await expect(filterPanel).toBeVisible();
-    await filterPanel.getByRole('combobox').selectOption({ label: 'Contains' });
+    await filterPanel.locator('.select-filter').selectOption({ label: 'Contains' });
     await page.locator(SELECTORS.filterInput).fill('Manager');
 
     const mainGroupRows = page.locator(`${SELECTORS.mainViewport} .groupingRow`);
@@ -784,6 +785,7 @@ test.describe('row grouping', () => {
       rowHeaders: true,
     });
 
+    await page.getByTestId('clear-grouping-filter-role').hover();
     await page
       .getByTestId('clear-grouping-filter-role')
       .locator(SELECTORS.filterButton)
@@ -791,7 +793,7 @@ test.describe('row grouping', () => {
 
     const filterPanel = page.locator(SELECTORS.filterPanel);
     await expect(filterPanel).toBeVisible();
-    await filterPanel.getByRole('combobox').selectOption({ label: 'Contains' });
+    await filterPanel.locator('.select-filter').selectOption({ label: 'Contains' });
     await page.locator(SELECTORS.filterInput).fill('Manager');
 
     await expectVisibleColumnValues(page, 1, ['Cara']);
@@ -836,6 +838,7 @@ test.describe('row grouping', () => {
       rowHeaders: true,
     });
 
+    await page.getByTestId('source-update-filter-role').hover();
     await page
       .getByTestId('source-update-filter-role')
       .locator(SELECTORS.filterButton)
@@ -843,7 +846,7 @@ test.describe('row grouping', () => {
 
     const filterPanel = page.locator(SELECTORS.filterPanel);
     await expect(filterPanel).toBeVisible();
-    await filterPanel.getByRole('combobox').selectOption({ label: 'Contains' });
+    await filterPanel.locator('.select-filter').selectOption({ label: 'Contains' });
     await page.locator(SELECTORS.filterInput).fill('Manager');
 
     await expect(page.locator(`${SELECTORS.mainViewport} .groupingRow`)).toContainText(['South']);

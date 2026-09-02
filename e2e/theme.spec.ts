@@ -346,6 +346,7 @@ test.describe('custom themes', () => {
     );
     await page.keyboard.press('Escape');
 
+    await page.getByTestId('theme-header-name').hover();
     await page
       .getByTestId('theme-header-name')
       .locator(SELECTORS.filterButton)

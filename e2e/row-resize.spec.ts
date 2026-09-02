@@ -566,12 +566,13 @@ test.describe('row resize plugin', () => {
     await enableRowResize(page);
     await dragHandle(page, resizeHandle(page, 0), 24);
 
+    await page.getByTestId('row-resize-filter-status').hover();
     await page
       .getByTestId('row-resize-filter-status')
       .locator(SELECTORS.filterButton)
       .click();
     const panel = page.locator(SELECTORS.filterPanel);
-    await panel.getByRole('combobox').selectOption({ label: 'Contains' });
+    await panel.locator('.select-filter').selectOption({ label: 'Contains' });
     await page.locator(SELECTORS.filterInput).fill('keep');
 
     await expect
@@ -620,12 +621,13 @@ test.describe('row resize plugin', () => {
     await enableRowResize(page);
     await dragHandle(page, resizeHandle(page, 0), 24);
 
+    await page.getByTestId('filtered-row-definition-status').hover();
     await page
       .getByTestId('filtered-row-definition-status')
       .locator(SELECTORS.filterButton)
       .click();
     const panel = page.locator(SELECTORS.filterPanel);
-    await panel.getByRole('combobox').selectOption({ label: 'Contains' });
+    await panel.locator('.select-filter').selectOption({ label: 'Contains' });
     await page.locator(SELECTORS.filterInput).fill('keep');
     await expect
       .poll(() => visibleColumnValues(page, 0))
@@ -680,12 +682,13 @@ test.describe('row resize plugin', () => {
     });
     await enableRowResize(page);
 
+    await page.getByTestId('filtered-row-resize-status').hover();
     await page
       .getByTestId('filtered-row-resize-status')
       .locator(SELECTORS.filterButton)
       .click();
     const panel = page.locator(SELECTORS.filterPanel);
-    await panel.getByRole('combobox').selectOption({ label: 'Contains' });
+    await panel.locator('.select-filter').selectOption({ label: 'Contains' });
     await page.locator(SELECTORS.filterInput).fill('keep');
     await expect
       .poll(() => visibleColumnValues(page, 0))
@@ -806,12 +809,13 @@ test.describe('row resize plugin', () => {
       providers?.dimension.setCustomSizes('rgRow', { 6: 81 }, true);
     });
 
+    await page.getByTestId('colliding-row-size-filter-status').hover();
     await page
       .getByTestId('colliding-row-size-filter-status')
       .locator(SELECTORS.filterButton)
       .click();
     const panel = page.locator(SELECTORS.filterPanel);
-    await panel.getByRole('combobox').selectOption({ label: 'Contains' });
+    await panel.locator('.select-filter').selectOption({ label: 'Contains' });
     await page.locator(SELECTORS.filterInput).fill('keep');
     await expect
       .poll(() => visibleColumnValues(page, 0))
