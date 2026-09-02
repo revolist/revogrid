@@ -48,6 +48,7 @@ import type {
   AdditionalData,
   PendingColumnFocusRestore,
   ClipboardConfig,
+  ViewSettingSizeProp,
 } from '@type';
 
 import ColumnDataProvider from '../../services/column.data.provider';
@@ -80,7 +81,7 @@ import {
   StretchColumn,
   isStretchPlugin,
 } from '../../plugins/column.stretch.plugin';
-import { rowDefinitionByType, rowDefinitionRemoveByType } from './grid.helpers';
+import { rowDefinitionByType } from './grid.helpers';
 import { ColumnMovePlugin } from '../../plugins/moveColumn/column.drag.plugin';
 import { getPropertyFromEvent } from '../../utils/events';
 import { isMobileDevice } from '../../utils/mobile';
@@ -1486,28 +1487,34 @@ export class RevoGridComponent {
       oldVals: before,
     });
     this.dimensionProvider.syncRowDefinitions(newVal);
-    // apply new values
     const newRows = rowDefinitionByType(newVal);
-    // clear current defs
-    if (oldVal) {
-      const remove = rowDefinitionRemoveByType(oldVal);
-      // clear all old data and drop sizes
-      for (const t in remove) {
-        if (remove.hasOwnProperty(t)) {
-          const type = t as DimensionRows;
-          const store = this.dataProvider.stores[type];
-          const itemCount = store.store.get('items').length;
-          this.dimensionProvider.clearSize(type, itemCount);
-        }
-      }
-    }
-    // set new sizes
+    const oldRows = rowDefinitionByType(oldVal);
+    const dataProvider = this.dataProvider;
+    const dimensionProvider = this.dimensionProvider;
     rowTypes.forEach((t) => {
       const newSizes = newRows[t];
-      // apply new sizes or force update
-      if (newSizes || forceUpdate) {
-        this.dimensionProvider?.setCustomSizes(t, newSizes?.sizes || {});
+      const oldSizes = oldRows[t];
+      if (!newSizes && !oldSizes && !forceUpdate) {
+        return;
       }
+      const sizes: ViewSettingSizeProp = {
+        ...dimensionProvider.stores[t].store.get('sizes'),
+      };
+      const definitionSizes = newSizes?.sizes || {};
+      const previousDefinitionSizes = oldSizes?.sizes || {};
+      const items = dataProvider.stores[t].store.get('items');
+      items.forEach((physicalIndex, virtualIndex) => {
+        if (
+          Object.hasOwn(previousDefinitionSizes, physicalIndex) &&
+          sizes[virtualIndex] === previousDefinitionSizes[physicalIndex]
+        ) {
+          delete sizes[virtualIndex];
+        }
+        if (Object.hasOwn(definitionSizes, physicalIndex)) {
+          sizes[virtualIndex] = definitionSizes[physicalIndex];
+        }
+      });
+      dimensionProvider.setCustomSizes(t, sizes);
     });
   }
 

@@ -12,12 +12,15 @@ export const TRIMMED_GROUPING = 'grouping';
  * against the grouped physical source can still be remapped. If neither path
  * resolves to a number, the caller drops the stale trim entry.
  */
-function convertTrimmedIndex(
-  initialIndex: string,
+export function convertGroupingIndex(
+  initialIndex: string | number,
   firstLevelMap: Record<number, number>,
   secondLevelMap?: Record<number, number>,
 ) {
-  const sourceIndex = Number.parseInt(initialIndex, 10);
+  const sourceIndex =
+    typeof initialIndex === 'number'
+      ? initialIndex
+      : Number.parseInt(initialIndex, 10);
   const firstConversionIndex = firstLevelMap[sourceIndex];
   if (!secondLevelMap) {
     return firstConversionIndex;
@@ -53,7 +56,7 @@ export function processDoubleConversionTrimmed(initiallyTrimed: Trimmed, firstLe
        * if item exists we find it in collection
        * we support 2 level of conversions
        */
-      const newConversionIndex = convertTrimmedIndex(
+      const newConversionIndex = convertGroupingIndex(
         initialIndex,
         firstLevelMap,
         secondLevelMap,

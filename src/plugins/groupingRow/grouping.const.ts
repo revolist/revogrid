@@ -11,4 +11,5 @@ export const GROUP_COLUMN_PROP = `${GRID_INTERNALS}-prop`;
 export const GROUP_ORIGINAL_INDEX = `${GRID_INTERNALS}-original-index`;
 export const GROUP_EXPAND_BTN = `group-expand`;
 export const GROUP_EXPAND_EVENT = `groupexpandclick`;
+export const BEFORE_GROUPING_APPLY_EVENT = `beforegroupingapply`;
 export const GROUPING_ROW_TYPE: DimensionRows = 'rgRow';

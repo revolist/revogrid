@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test';
-import { test } from '@stencil/playwright';
+import { test, type E2EPage } from '@stencil/playwright';
 import {
   SELECTORS,
   buildColumns,
@@ -10,7 +10,350 @@ import {
   withHeaderTestId,
 } from './helpers';
 
+async function enableRowResize(page: E2EPage) {
+  await page.evaluate(() => {
+    const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+    if (!grid) throw new Error('Grid was not found');
+    grid.resizeRow = true;
+  });
+  await page.evaluate(async () => {
+    await new Promise<void>(resolve =>
+      requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+    );
+  });
+  await page.waitForChanges();
+}
+
+function resizeHandle(page: E2EPage, rowIndex: number) {
+  return page.locator(
+    `${SELECTORS.rowHeaderViewport} revogr-data[type="rgRow"][col-type="rowHeaders"] .rgRow[data-rgrow="${rowIndex}"] > .row-resize-handle`,
+  );
+}
+
+async function rowIndexByText(page: E2EPage, text: string) {
+  const index = await mainDataRows(page)
+    .filter({ hasText: text })
+    .first()
+    .getAttribute('data-rgrow');
+  if (index === null) throw new Error(`Row "${text}" was not found`);
+  return Number(index);
+}
+
+async function rowHeightByText(page: E2EPage, text: string) {
+  const box = await mainDataRows(page)
+    .filter({ hasText: text })
+    .first()
+    .boundingBox();
+  if (!box) throw new Error(`Row "${text}" was not rendered`);
+  return box.height;
+}
+
+async function dragResizeHandle(
+  page: E2EPage,
+  rowIndex: number,
+  deltaY: number,
+  release = true,
+) {
+  const box = await resizeHandle(page, rowIndex).boundingBox();
+  expect(box).not.toBeNull();
+  const x = box!.x + box!.width / 2;
+  const y = box!.y + 1;
+  await page.mouse.move(x, y);
+  await page.mouse.down();
+  await page.mouse.move(x, y + deltaY, { steps: 5 });
+  if (release) {
+    await page.mouse.up();
+    await page.waitForChanges();
+  }
+}
+
 test.describe('row grouping', () => {
+  test('keeps a resized data row height when grouping is enabled', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: buildColumns([{ prop: 'name', name: 'Name' }]),
+      source: [
+        { name: 'Alice', team: 'North' },
+        { name: 'Ben', team: 'North' },
+        { name: 'Cara', team: 'South' },
+      ],
+      rowHeaders: true,
+      rowSize: 36,
+    });
+    await enableRowResize(page);
+
+    await dragResizeHandle(page, await rowIndexByText(page, 'Alice'), 24);
+    expect(await rowHeightByText(page, 'Alice')).toBeCloseTo(60, 0);
+
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) throw new Error('Grid was not found');
+      grid.grouping = { props: ['team'], expandedAll: true };
+    });
+    await page.waitForChanges();
+
+    expect(await rowHeightByText(page, 'Alice')).toBeCloseTo(60, 0);
+    const northGroup = await mainDataRows(page)
+      .filter({ hasText: 'North' })
+      .first()
+      .boundingBox();
+    expect(northGroup?.height).toBeCloseTo(36, 0);
+  });
+
+  test('keeps group-header and child heights attached through regrouping', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: buildColumns([{ prop: 'name', name: 'Name' }]),
+      source: [
+        { name: 'Alice', team: 'North' },
+        { name: 'Ben', team: 'North' },
+        { name: 'Cara', team: 'South' },
+      ],
+      grouping: { props: ['team'], expandedAll: true },
+      rowHeaders: true,
+      rowSize: 36,
+    });
+    await enableRowResize(page);
+
+    await dragResizeHandle(page, await rowIndexByText(page, 'North'), 12);
+    await dragResizeHandle(page, await rowIndexByText(page, 'Alice'), 24);
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) throw new Error('Grid was not found');
+      grid.grouping = { ...(grid.grouping as object) };
+    });
+    await page.waitForChanges();
+
+    expect(await rowHeightByText(page, 'North')).toBeCloseTo(48, 0);
+    expect(await rowHeightByText(page, 'Alice')).toBeCloseTo(60, 0);
+    expect(await rowHeightByText(page, 'South')).toBeCloseTo(36, 0);
+  });
+
+  test('cancels an active resize before grouping rebuilds indexes', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: buildColumns([{ prop: 'name', name: 'Name' }]),
+      source: [
+        { name: 'Alice', team: 'North' },
+        { name: 'Ben', team: 'South' },
+      ],
+      rowHeaders: true,
+      rowSize: 36,
+    });
+    await enableRowResize(page);
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) throw new Error('Grid was not found');
+      (globalThis as typeof globalThis & { __groupCancelCount?: number })
+        .__groupCancelCount = 0;
+      grid.addEventListener('rowresizecancel', () => {
+        (globalThis as typeof globalThis & { __groupCancelCount?: number })
+          .__groupCancelCount! += 1;
+      });
+    });
+
+    await dragResizeHandle(page, 0, 24, false);
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) throw new Error('Grid was not found');
+      grid.grouping = { props: ['team'], expandedAll: true };
+    });
+    await page.mouse.up();
+    await page.waitForChanges();
+
+    expect(
+      await page.evaluate(
+        () =>
+          (globalThis as typeof globalThis & { __groupCancelCount?: number })
+            .__groupCancelCount,
+      ),
+    ).toBe(1);
+    expect(await rowHeightByText(page, 'North')).toBeCloseTo(36, 0);
+    expect(await rowHeightByText(page, 'Alice')).toBeCloseTo(36, 0);
+  });
+
+  test('remaps resized rows when grouped source is replaced', async ({ page }) => {
+    await mountGrid(page, {
+      columns: buildColumns([{ prop: 'name', name: 'Name' }]),
+      source: [
+        { name: 'Alice', team: 'North' },
+        { name: 'Ben', team: 'North' },
+        { name: 'Cara', team: 'South' },
+      ],
+      grouping: { props: ['team'], expandedAll: true },
+      rowHeaders: true,
+      rowSize: 36,
+    });
+    await enableRowResize(page);
+    await dragResizeHandle(page, await rowIndexByText(page, 'Alice'), 24);
+
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) throw new Error('Grid was not found');
+      grid.source = [
+        { name: 'Dora', team: 'South' },
+        { name: 'Evan', team: 'North' },
+        { name: 'Finn', team: 'North' },
+      ];
+    });
+    await page.waitForChanges();
+
+    expect(await rowHeightByText(page, 'Dora')).toBeCloseTo(60, 0);
+    expect(await rowHeightByText(page, 'South')).toBeCloseTo(36, 0);
+    expect(await rowHeightByText(page, 'Evan')).toBeCloseTo(36, 0);
+  });
+
+  test('preserves a resized trailing row when replacement has fewer groups', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: buildColumns([{ prop: 'name', name: 'Name' }]),
+      source: [
+        { name: 'A0', team: 'A' },
+        { name: 'A1', team: 'A' },
+        { name: 'B0', team: 'B' },
+        { name: 'B1', team: 'B' },
+        { name: 'C0', team: 'C' },
+        { name: 'C1', team: 'C' },
+      ],
+      grouping: { props: ['team'], expandedAll: true },
+      rowHeaders: true,
+      rowSize: 36,
+    });
+    await enableRowResize(page);
+    await dragResizeHandle(page, await rowIndexByText(page, 'C1'), 24);
+
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) throw new Error('Grid was not found');
+      grid.source = Array.from({ length: 6 }, (_, index) => ({
+        name: `New ${index}`,
+        team: 'Only',
+      }));
+    });
+    await page.waitForChanges();
+
+    expect(await rowHeightByText(page, 'New 5')).toBeCloseTo(60, 0);
+    expect(await rowHeightByText(page, 'New 4')).toBeCloseTo(36, 0);
+  });
+
+  test('maps resized rows by physical order when sorted source is replaced', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: buildColumns([
+        {
+          prop: 'name',
+          name: 'Name',
+          sortable: true,
+          ...withHeaderTestId('sorted-replacement-resize-name'),
+        },
+      ]),
+      source: [
+        { name: 'Charlie', team: 'Team' },
+        { name: 'Alice', team: 'Team' },
+        { name: 'Dan', team: 'Team' },
+        { name: 'Ben', team: 'Team' },
+      ],
+      grouping: { props: ['team'], expandedAll: true },
+      rowHeaders: true,
+      rowSize: 36,
+    });
+    await enableRowResize(page);
+    await dragResizeHandle(page, await rowIndexByText(page, 'Charlie'), 24);
+    await page.getByTestId('sorted-replacement-resize-name').click();
+    await expectVisibleColumnValues(page, 0, [
+      'Alice',
+      'Ben',
+      'Charlie',
+      'Dan',
+    ]);
+
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) throw new Error('Grid was not found');
+      grid.source = [
+        { name: 'Zoe', team: 'Team' },
+        { name: 'Adam', team: 'Team' },
+        { name: 'Mike', team: 'Team' },
+        { name: 'Beth', team: 'Team' },
+      ];
+    });
+    await page.waitForChanges();
+
+    expect(await rowHeightByText(page, 'Zoe')).toBeCloseTo(60, 0);
+    expect(await rowHeightByText(page, 'Mike')).toBeCloseTo(36, 0);
+  });
+
+  test('cancels an active row resize before programmatic sorting', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: buildColumns([
+        {
+          prop: 'name',
+          name: 'Name',
+          sortable: true,
+          ...withHeaderTestId('active-resize-sort-name'),
+        },
+      ]),
+      source: [
+        { name: 'Charlie', team: 'North' },
+        { name: 'Alice', team: 'North' },
+        { name: 'Dan', team: 'South' },
+        { name: 'Ben', team: 'South' },
+      ],
+      grouping: { props: ['team'], expandedAll: true },
+      rowHeaders: true,
+      rowSize: 36,
+    });
+    await enableRowResize(page);
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) throw new Error('Grid was not found');
+      (
+        globalThis as typeof globalThis & { __resizeCancelCount?: number }
+      ).__resizeCancelCount = 0;
+      grid.addEventListener('rowresizecancel', () => {
+        (
+          globalThis as typeof globalThis & { __resizeCancelCount?: number }
+        ).__resizeCancelCount! += 1;
+      });
+    });
+
+    await dragResizeHandle(
+      page,
+      await rowIndexByText(page, 'Charlie'),
+      24,
+      false,
+    );
+    await page.evaluate(async () => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) throw new Error('Grid was not found');
+      await grid.updateColumnSorting({ prop: 'name' }, 'asc', false);
+    });
+    await expect
+      .poll(() => visibleColumnValues(page, 0))
+      .toEqual(['Alice', 'Charlie', 'Ben', 'Dan']);
+    await page.mouse.up();
+    await page.waitForChanges();
+
+    expect(
+      await page.evaluate(
+        () =>
+          (
+            globalThis as typeof globalThis & {
+              __resizeCancelCount?: number;
+            }
+          ).__resizeCancelCount,
+      ),
+    ).toBe(1);
+    expect(await rowHeightByText(page, 'Alice')).toBeCloseTo(36, 0);
+    expect(await rowHeightByText(page, 'Charlie')).toBeCloseTo(36, 0);
+  });
   test('renders grouped rows and toggles expansion', async ({ page }) => {
     const source = [
       { id: 1, name: 'Alice', role: 'Engineer', city: 'Lisbon', team: 'North' },
@@ -531,7 +874,13 @@ test.describe('row grouping', () => {
     page,
   }) => {
     const source = [
-      { id: 1, name: 'Charlie', role: 'Engineer', city: 'Lisbon', team: 'North' },
+      {
+        id: 1,
+        name: 'Charlie',
+        role: 'Engineer',
+        city: 'Lisbon',
+        team: 'North',
+      },
       { id: 2, name: 'Alice', role: 'Designer', city: 'Porto', team: 'North' },
       { id: 3, name: 'Dan', role: 'Analyst', city: 'Coimbra', team: 'South' },
       { id: 4, name: 'Ben', role: 'Manager', city: 'Braga', team: 'South' },
@@ -559,14 +908,23 @@ test.describe('row grouping', () => {
       rowHeaders: true,
     });
 
-    await expectVisibleColumnValues(page, 1, ['Charlie', 'Alice', 'Dan', 'Ben']);
+    await expectVisibleColumnValues(page, 1, [
+      'Charlie',
+      'Alice',
+      'Dan',
+      'Ben',
+    ]);
 
     await page.getByTestId('group-sort-name').click();
-    await expectVisibleColumnValues(page, 1, ['Alice', 'Charlie', 'Ben', 'Dan']);
-    await expect(page.locator(`${SELECTORS.mainViewport} .groupingRow`)).toContainText([
-      'North',
-      'South',
+    await expectVisibleColumnValues(page, 1, [
+      'Alice',
+      'Charlie',
+      'Ben',
+      'Dan',
     ]);
+    await expect(
+      page.locator(`${SELECTORS.mainViewport} .groupingRow`),
+    ).toContainText(['North', 'South']);
 
     await page.evaluate(() => {
       const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
@@ -576,14 +934,23 @@ test.describe('row grouping', () => {
       };
     });
     await page.waitForChanges();
-    await expectVisibleColumnValues(page, 1, ['Alice', 'Charlie', 'Ben', 'Dan']);
+    await expectVisibleColumnValues(page, 1, [
+      'Alice',
+      'Charlie',
+      'Ben',
+      'Dan',
+    ]);
 
     await page.getByTestId('group-sort-name').click();
-    await expectVisibleColumnValues(page, 1, ['Dan', 'Ben', 'Charlie', 'Alice']);
-    await expect(page.locator(`${SELECTORS.mainViewport} .groupingRow`)).toContainText([
-      'South',
-      'North',
+    await expectVisibleColumnValues(page, 1, [
+      'Dan',
+      'Ben',
+      'Charlie',
+      'Alice',
     ]);
+    await expect(
+      page.locator(`${SELECTORS.mainViewport} .groupingRow`),
+    ).toContainText(['South', 'North']);
     await expect
       .poll(() =>
         page.evaluate(async () => {
@@ -599,11 +966,15 @@ test.describe('row grouping', () => {
       .toEqual(['Charlie', 'Alice', 'Dan', 'Ben']);
 
     await page.getByTestId('group-sort-name').click();
-    await expectVisibleColumnValues(page, 1, ['Charlie', 'Alice', 'Dan', 'Ben']);
-    await expect(page.locator(`${SELECTORS.mainViewport} .groupingRow`)).toContainText([
-      'North',
-      'South',
+    await expectVisibleColumnValues(page, 1, [
+      'Charlie',
+      'Alice',
+      'Dan',
+      'Ben',
     ]);
+    await expect(
+      page.locator(`${SELECTORS.mainViewport} .groupingRow`),
+    ).toContainText(['North', 'South']);
   });
 
   test('restores source order after grouping is cleared during sorting', async ({
@@ -883,7 +1254,13 @@ test.describe('row grouping', () => {
 
   test('does not reopen collapsed groups when sorting', async ({ page }) => {
     const source = [
-      { id: 1, name: 'Charlie', role: 'Engineer', city: 'Lisbon', team: 'North' },
+      {
+        id: 1,
+        name: 'Charlie',
+        role: 'Engineer',
+        city: 'Lisbon',
+        team: 'North',
+      },
       { id: 2, name: 'Alice', role: 'Designer', city: 'Porto', team: 'North' },
       { id: 3, name: 'Dan', role: 'Analyst', city: 'Coimbra', team: 'South' },
       { id: 4, name: 'Ben', role: 'Manager', city: 'Braga', team: 'South' },
@@ -911,7 +1288,9 @@ test.describe('row grouping', () => {
       rowHeaders: true,
     });
 
-    const mainGroupRows = page.locator(`${SELECTORS.mainViewport} .groupingRow`);
+    const mainGroupRows = page.locator(
+      `${SELECTORS.mainViewport} .groupingRow`,
+    );
     await mainGroupRows
       .filter({ hasText: 'North' })
       .locator(SELECTORS.groupExpandButton)
@@ -921,10 +1300,9 @@ test.describe('row grouping', () => {
 
     await page.getByTestId('group-sort-preserve-collapse-name').click();
 
-    await expect(page.locator(`${SELECTORS.mainViewport} .groupingRow`)).toContainText([
-      'North',
-      'South',
-    ]);
+    await expect(
+      page.locator(`${SELECTORS.mainViewport} .groupingRow`),
+    ).toContainText(['North', 'South']);
     await expect(mainGroupRows).toHaveCount(2);
     await expectVisibleColumnValues(page, 1, ['Ben', 'Dan']);
 
@@ -932,7 +1310,12 @@ test.describe('row grouping', () => {
       .filter({ hasText: 'North' })
       .locator(SELECTORS.groupExpandButton)
       .click();
-    await expectVisibleColumnValues(page, 1, ['Alice', 'Charlie', 'Ben', 'Dan']);
+    await expectVisibleColumnValues(page, 1, [
+      'Alice',
+      'Charlie',
+      'Ben',
+      'Dan',
+    ]);
   });
 
   test('allows row reordering inside a group and blocks dragging across groups', async ({ page }) => {
