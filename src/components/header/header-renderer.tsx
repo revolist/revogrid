@@ -3,7 +3,7 @@ import type {
   VirtualPositionItem,
   ColumnTemplateProp,
   InitialHeaderClick,
-  RangeArea
+  RangeArea,
 } from '@type';
 
 import { FilterButton } from '../../plugins/filter/filter.button';
@@ -42,6 +42,7 @@ const HeaderRenderer = (p: HeaderRenderProps): ReturnType<typeof h> => {
     p.data?.order ||
     p.data?.sortIndex
   );
+  const hasFilterButton = !!(p.canFilter && p.data?.filter !== false);
   const cellClass: { [key: string]: boolean } = {
     [HEADER_CLASS]: true,
     [HEADER_SORTABLE_CLASS]: !!p.data?.sortable,
@@ -95,12 +96,12 @@ const HeaderRenderer = (p: HeaderRenderProps): ReturnType<typeof h> => {
       props={dataProps}
       additionalData={p.additionalData}
     >
-      {hasSortingSign ? <SortingSign column={p.data} /> : null}
-      {p.canFilter && p.data?.filter !== false ? (
-        <FilterButton column={p.data} />
-      ) : (
-        ''
-      )}
+      {hasSortingSign || hasFilterButton ? (
+        <span class="header-controls">
+          {hasSortingSign ? <SortingSign column={p.data} /> : null}
+          {hasFilterButton ? <FilterButton column={p.data} /> : null}
+        </span>
+      ) : null}
     </HeaderCellRenderer>
   );
 };

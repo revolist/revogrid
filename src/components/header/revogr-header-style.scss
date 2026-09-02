@@ -86,10 +86,15 @@ revogr-header {
       white-space: nowrap;
       flex-grow: 1;
     }
-    > span:first-of-type {
-      position: relative;
+    .header-controls {
+      position: absolute;
+      top: 0;
+      right: 1px;
+      bottom: 1px;
+      min-width: 15px;
       z-index: 1;
-      margin-left: auto;
+      display: flex;
+      align-items: center;
     }
     .resizable {
       display: block;
