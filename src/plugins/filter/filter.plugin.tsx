@@ -3,6 +3,7 @@ import { h, type VNode } from '@stencil/core';
 
 import type {
   ColumnProp,
+  ColumnFilterOption,
   ColumnRegular,
   DataType,
   PluginProviders,
@@ -12,6 +13,7 @@ import { FILTER_PROP, isFilterBtn } from './filter.button';
 import {
   filterCoreFunctionsIndexedByType,
   filterNames,
+  filterTypeDefaults,
   filterTypes,
 } from './filter.indexed';
 
@@ -57,6 +59,8 @@ export const FILTE_PANEL = 'revogr-filter-panel';
  *
  * @property {FilterLocalization|undefined} localization - translation for filter popup captions.
  *
+ * @property {boolean|undefined} defaultFilter - creates a draft condition when an empty filter panel opens. Defaults to true.
+ *
  * @property {boolean|undefined} disableDynamicFiltering - disables dynamic filtering. A way to apply filters on Save only.
  */
 /**
@@ -76,7 +80,9 @@ export class FilterPlugin extends BasePlugin {
    *    number: ['eqN', 'neqN', 'gt']
    *  }
    */
-  filterByType: Record<string, string[]> = { ...filterTypes };
+  filterByType: Record<string, string[]> = Object.fromEntries(
+    Object.entries(filterTypes).map(([type, filters]) => [type, [...filters]]),
+  );
   filterNameIndexByType: Record<string, string> = {
     ...filterNames,
   };
@@ -211,6 +217,11 @@ export class FilterPlugin extends BasePlugin {
     this.allowDuplicateOperators = config.allowDuplicateOperators ?? true;
     if (this.pop) {
       this.pop.allowDuplicateOperators = this.allowDuplicateOperators;
+      this.pop.disableDynamicFiltering =
+        config.disableDynamicFiltering ?? false;
+      this.pop.closeOnOutsideClick =
+        config.closeFilterPanelOnOutsideClick ?? true;
+      this.pop.filterCaptions = config.localization?.captions;
     }
     if (config.multiFilterItems) {
       this.multiFilterItems = { ...config.multiFilterItems };
@@ -317,6 +328,8 @@ export class FilterPlugin extends BasePlugin {
       anchorY: buttonPos.y,
       autoCorrect: true,
       filterTypes: this.getColumnFilter(e.detail.filter),
+      defaultFilterType: this.getDefaultFilter(e.detail.filter),
+      showDefaultFilter: this.shouldShowDefaultFilter(e.detail.filter),
       filterItems: this.multiFilterItems,
       extraContent: this.extraHyperContent,
       extraBottomContent: this.extraBottomHyperContent,
@@ -326,8 +339,9 @@ export class FilterPlugin extends BasePlugin {
   }
 
   getColumnFilter(
-    type?: boolean | string | string[],
+    config?: ColumnRegular['filter'],
   ): Record<string, string[]> {
+    const type = this.isColumnFilterOption(config) ? config.type : config;
     let filterType = 'string';
     if (!type) {
       return { [filterType]: this.filterByType[filterType] };
@@ -347,6 +361,49 @@ export class FilterPlugin extends BasePlugin {
       }, {});
     }
     return { [filterType]: this.filterByType[filterType] };
+  }
+
+  /** Resolve the preferred operator against the column's available filters. */
+  getDefaultFilter(config?: ColumnRegular['filter']): string | undefined {
+    const filters = this.getColumnFilter(config);
+    const availableFilters = Object.values(filters).flat();
+    const columnDefault = this.isColumnFilterOption(config)
+      ? config.default
+      : undefined;
+
+    if (
+      typeof columnDefault === 'string' &&
+      availableFilters.includes(columnDefault)
+    ) {
+      return columnDefault;
+    }
+
+    const firstFamily = Object.keys(filters)[0];
+    const familyDefault = filterTypeDefaults[firstFamily];
+    if (familyDefault && filters[firstFamily]?.includes(familyDefault)) {
+      return familyDefault;
+    }
+
+    return availableFilters[0];
+  }
+
+  /** Resolve grid and column-level draft opt-outs. */
+  shouldShowDefaultFilter(config?: ColumnRegular['filter']): boolean {
+    if (this.isColumnFilterOption(config)) {
+      if (config.default === false) {
+        return false;
+      }
+      if (typeof config.default === 'string') {
+        return true;
+      }
+    }
+    return this.config?.defaultFilter !== false;
+  }
+
+  private isColumnFilterOption(
+    value?: ColumnRegular['filter'],
+  ): value is ColumnFilterOption {
+    return !!value && typeof value === 'object' && !Array.isArray(value);
   }
 
   isValidType(type: any): type is string {

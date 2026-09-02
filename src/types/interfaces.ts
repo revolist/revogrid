@@ -211,6 +211,20 @@ export interface ColumnType<TModel extends DataType = DataType> extends ColumnPr
   cellParser?: (model: TModel, column: ColumnRegular<ColumnProp, TModel>) => any;
 }
 export type Order = 'asc' | 'desc' | undefined;
+
+/**
+ * Structured filter configuration for an individual column.
+ */
+export interface ColumnFilterOption {
+  /** Filter family, or ordered filter families, available to the column. */
+  type: string | string[];
+  /**
+   * Preferred operator shown when the column has no filter conditions, or false
+   * to disable the draft.
+   */
+  default?: string | false;
+}
+
 /**
  * Interface for regular column definition.
  * Regular column can be any column that is not a grouping column.
@@ -240,7 +254,7 @@ export interface ColumnRegular<P extends ColumnProp = ColumnProp, TModel extends
   /**
    * Filter. Require filter plugin to be installed and activated through grid config filter.
    */
-  filter?: boolean | string | string[];
+  filter?: boolean | string | string[] | ColumnFilterOption;
   /** Partial column override for the grid-level blank filtering policy. */
   blankSemantics?: BlankSemantics;
   /**

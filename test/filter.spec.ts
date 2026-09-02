@@ -9,7 +9,11 @@ import { ASYNC_FILTER_ROW_THRESHOLD } from '../src/plugins/filter/filter.constan
 import { getFilterReorderId, moveFilterItem } from '../src/plugins/filter/filter.reorder';
 import { DataStore } from '../src/store/dataSource/data.store';
 import type { ColumnRegular } from '../src';
-import { filterNames, filterTypes } from '../src/plugins/filter/filter.indexed';
+import {
+  filterNames,
+  filterTypeDefaults,
+  filterTypes,
+} from '../src/plugins/filter/filter.indexed';
 import type {
   ColumnFilterConfig,
   FilterData,
@@ -23,6 +27,85 @@ function createFilterPlugin(config: ColumnFilterConfig = {}) {
 
   return new FilterPlugin(revogrid, {} as any, config);
 }
+
+describe('default filter resolution', () => {
+  it('exports and resolves the built-in string and number defaults', () => {
+    const plugin = createFilterPlugin();
+
+    expect(filterTypeDefaults).toEqual({
+      string: 'contains',
+      number: 'eqN',
+    });
+    expect(plugin.getDefaultFilter(true)).toBe('contains');
+    expect(plugin.getDefaultFilter('string')).toBe('contains');
+    expect(plugin.getDefaultFilter('number')).toBe('eqN');
+  });
+
+  it('uses a valid structured column override', () => {
+    const plugin = createFilterPlugin();
+
+    expect(
+      plugin.getColumnFilter({ type: ['string', 'number'], default: 'lte' }),
+    ).toEqual({
+      string: filterTypes.string,
+      number: filterTypes.number,
+    });
+    expect(
+      plugin.getDefaultFilter({ type: ['string', 'number'], default: 'lte' }),
+    ).toBe('lte');
+  });
+
+  it('falls back from invalid or excluded defaults', () => {
+    const plugin = createFilterPlugin({ include: ['empty', 'notEq', 'lte'] });
+
+    expect(
+      plugin.getDefaultFilter({ type: 'string', default: 'missing' }),
+    ).toBe('empty');
+    expect(
+      plugin.getDefaultFilter({ type: 'number', default: 'eqN' }),
+    ).toBe('empty');
+  });
+
+  it('uses the first operator from the first custom family without a default', () => {
+    const plugin = createFilterPlugin({
+      customFilters: {
+        selected: {
+          columnFilterType: 'selection',
+          name: 'Selected',
+          func: () => true,
+        },
+        notSelected: {
+          columnFilterType: 'selection',
+          name: 'Not selected',
+          func: () => true,
+        },
+      },
+    });
+
+    expect(plugin.getDefaultFilter('selection')).toBe('selected');
+    expect(plugin.getDefaultFilter(['selection', 'number'])).toBe('selected');
+    expect(
+      plugin.getDefaultFilter({
+        type: ['selection', 'number'],
+        default: 'eqN',
+      }),
+    ).toBe('eqN');
+  });
+
+  it('supports grid and column-level default draft opt-outs', () => {
+    const enabledPlugin = createFilterPlugin();
+    const disabledPlugin = createFilterPlugin({ defaultFilter: false });
+
+    expect(enabledPlugin.shouldShowDefaultFilter('string')).toBe(true);
+    expect(
+      enabledPlugin.shouldShowDefaultFilter({ type: 'string', default: false }),
+    ).toBe(false);
+    expect(disabledPlugin.shouldShowDefaultFilter('string')).toBe(false);
+    expect(
+      disabledPlugin.shouldShowDefaultFilter({ type: 'string', default: 'eq' }),
+    ).toBe(true);
+  });
+});
 
 // ---------------------------------------------------------------------------
 // eq / notEq
