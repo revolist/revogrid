@@ -136,7 +136,11 @@ export class FilterPanel {
       this.changes.type = this.changes.type || defaultType;
       const prop = this.changes.prop;
       const propFilters = prop === undefined ? undefined : this.filterItems[prop];
-      if (!propFilters?.length && this.changes.showDefaultFilter !== false) {
+      if (
+        !propFilters?.length &&
+        this.changes.showDefaultFilter !== false &&
+        this.changes.hideDefaultFilters !== true
+      ) {
         const type = this.resolveDraftFilterType(
           this.changes.defaultFilterType,
         );

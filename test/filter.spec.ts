@@ -5,6 +5,7 @@ import beginsWith from '../src/plugins/filter/conditions/string/beginswith';
 import gtThan from '../src/plugins/filter/conditions/number/greaterThan';
 import lt from '../src/plugins/filter/conditions/number/lessThan';
 import { FilterPlugin } from '../src/plugins/filter/filter.plugin';
+import { FilterPanel } from '../src/plugins/filter/filter.panel';
 import { ASYNC_FILTER_ROW_THRESHOLD } from '../src/plugins/filter/filter.constants';
 import { getFilterReorderId, moveFilterItem } from '../src/plugins/filter/filter.reorder';
 import { DataStore } from '../src/store/dataSource/data.store';
@@ -18,6 +19,7 @@ import type {
   ColumnFilterConfig,
   FilterData,
   FilterEvaluationContext,
+  ShowData,
 } from '../src/plugins/filter/filter.types';
 
 function createFilterPlugin(config: ColumnFilterConfig = {}) {
@@ -104,6 +106,20 @@ describe('default filter resolution', () => {
     expect(
       disabledPlugin.shouldShowDefaultFilter({ type: 'string', default: 'eq' }),
     ).toBe(true);
+  });
+
+  it('does not seed a hidden draft for panels owned by another plugin', async () => {
+    const panel = new FilterPanel();
+
+    await panel.show({
+      prop: 'name',
+      x: 0,
+      y: 0,
+      filterTypes: { string: ['contains'] },
+      hideDefaultFilters: true,
+    } as ShowData);
+
+    expect(panel.draftFilter).toBeUndefined();
   });
 });
 
