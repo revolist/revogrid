@@ -19,6 +19,7 @@ import type {
   ColumnFilterConfig,
   FilterData,
   FilterEvaluationContext,
+  MultiFilterItem,
   ShowData,
 } from '../src/plugins/filter/filter.types';
 
@@ -120,6 +121,39 @@ describe('default filter resolution', () => {
     } as ShowData);
 
     expect(panel.draftFilter).toBeUndefined();
+  });
+});
+
+describe('filter panel state replacement', () => {
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('flushes a pending dynamic change before installing a new entity', async () => {
+    jest.useFakeTimers();
+    const panel = new FilterPanel();
+    const emit = jest.fn();
+    const originalFilterItems = {
+      name: [{ id: 1, type: 'contains', value: 'Ada', relation: 'and' }],
+    } as MultiFilterItem;
+    (panel as any).filterChange = { emit };
+    panel.filterItems = originalFilterItems;
+    (panel as any).debouncedApplyFilter();
+
+    await panel.show({
+      prop: 'role',
+      x: 0,
+      y: 0,
+      filterTypes: { string: ['contains'] },
+      filterItems: {
+        role: [{ id: 2, type: 'contains', value: 'Admin', relation: 'and' }],
+      },
+    } as ShowData);
+
+    expect(emit).toHaveBeenCalledTimes(1);
+    expect(emit).toHaveBeenCalledWith(originalFilterItems);
+    jest.advanceTimersByTime(400);
+    expect(emit).toHaveBeenCalledTimes(1);
   });
 });
 

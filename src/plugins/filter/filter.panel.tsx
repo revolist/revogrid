@@ -128,6 +128,7 @@ export class FilterPanel {
   }
 
   @Method() async show(newEntity?: ShowData) {
+    this.debouncedApplyFilter.flush();
     this.hasChanges = false;
     this.changes = newEntity;
     this.filterItems = this.cloneFilterItems(newEntity?.filterItems || {});
