@@ -21,6 +21,47 @@ async function nextAnimationFrames(page: E2EPage, count = 2) {
 }
 
 test.describe('filtering', () => {
+  test('keeps filter-only header text clear and reveals the button for keyboard focus', async ({ page }) => {
+    await mountGrid(page, {
+      columns: [
+        {
+          name: 'Filter-only heading',
+          prop: 'status',
+          size: 140,
+          filter: true,
+          ...withHeaderTestId('keyboard-filter-header'),
+        },
+      ],
+      source: [{ status: 'Active' }],
+      filter: true,
+    });
+
+    const header = page.getByTestId('keyboard-filter-header');
+    const button = header.locator(SELECTORS.filterButton);
+    await button.focus();
+
+    await expect(button).toHaveCSS('width', '24px');
+    await expect(button).toHaveCSS('opacity', '1');
+    await expect(header.locator('.header-content')).toHaveCSS(
+      'margin-right',
+      '24px',
+    );
+
+    const { buttonLeft, contentRight } = await header.evaluate(element => {
+      const content = element.querySelector('.header-content');
+      const filterButton = element.querySelector('.rv-filter');
+      if (!content || !filterButton) {
+        throw new Error('Header content or filter button was not found');
+      }
+      return {
+        buttonLeft: filterButton.getBoundingClientRect().left,
+        contentRight: content.getBoundingClientRect().right,
+      };
+    });
+
+    expect(contentRight).toBeLessThanOrEqual(buttonLeft + 1);
+  });
+
   test('never exposes unfiltered rows while equivalent reactive sources refresh', async ({ page }) => {
     await mountGrid(page, {
       columns: [

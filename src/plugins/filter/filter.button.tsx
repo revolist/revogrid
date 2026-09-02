@@ -13,12 +13,13 @@ type Props = {
   column: ColumnRegular;
 };
 export const FilterButton = ({ column }: Props) => {
+  const active = !!column?.[FILTER_PROP];
   return (
-    <span>
+    <span class="filter-button-wrapper">
       <button
         class={{
           [FILTER_BUTTON_CLASS]: true,
-          [FILTER_BUTTON_ACTIVE]: column && !!column[FILTER_PROP],
+          [FILTER_BUTTON_ACTIVE]: active,
         }}
       >
         <svg class="filter-img" viewBox="0 0 64 64">

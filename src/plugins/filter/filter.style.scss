@@ -92,20 +92,65 @@ revogr-filter-panel .filter-panel-dialog {
 }
 
 .rgHeaderCell {
-  &:hover .rv-filter {
-    transition:
-      opacity 267ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,
-      transform 178ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+  $btn-size: 24px;
+  $sort-and-filter-margin: 8px;
+
+  &:hover {
+    .rv-filter {
+      transition:
+        opacity 267ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,
+        width 267ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,
+        transform 178ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+    }
   }
+
+  &:hover:has(.rv-filter),
+  &:focus-within:has(.rv-filter),
+  &:has(.rv-filter.active) {
+    .header-content {
+      margin-right: $btn-size;
+    }
+
+    &:has(.desc),
+    &:has(.asc) {
+      .header-content {
+        margin-right: $sort-and-filter-margin;
+        padding-right: $sort-and-filter-margin * 3;
+      }
+    }
+  }
+
   &:hover .rv-filter,
+  &:focus-within .rv-filter,
   .rv-filter.active {
     opacity: 1;
+    width: $btn-size;
+  }
+
+  @media (hover: none), (pointer: coarse) {
+    &:has(.rv-filter) {
+      .header-content {
+        margin-right: $btn-size;
+      }
+
+      &:has(.desc),
+      &:has(.asc) {
+        .header-content {
+          margin-right: $sort-and-filter-margin;
+          padding-right: $sort-and-filter-margin * 3;
+        }
+      }
+    }
+
+    .rv-filter {
+      opacity: 1;
+      width: $btn-size;
+    }
   }
 
   .rv-filter {
-    $btn-size: 24px;
     height: $btn-size;
-    width: $btn-size;
+    width: 0;
     background: none;
     border: 0;
     opacity: 0;
@@ -114,6 +159,7 @@ revogr-filter-panel .filter-panel-dialog {
     border-radius: 4px;
     position: relative;
     z-index: 1;
+    padding: 0;
 
     &.active {
       color: var(--rg-theme-filter-panel-icon-active);
