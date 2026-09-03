@@ -137,6 +137,75 @@ test.describe('layout', () => {
     await expect(activeHeader.locator('.no-resize')).toHaveCount(0);
   });
 
+  for (const theme of ['compact', 'material'] as const) {
+    test(`keeps the active sort control clear of header text in ${theme} without filtering`, async ({
+      page,
+    }) => {
+      await mountGrid(page, {
+        columns: [
+          {
+            prop: 'month',
+            name: 'Jun 2026',
+            sortable: true,
+            order: 'asc',
+            size: 120,
+            ...withHeaderTestId(`sorted-header-${theme}`),
+          },
+        ],
+        source: [{ month: 120 }],
+        filter: false,
+        theme,
+        width: 120,
+      });
+
+      const header = page.getByTestId(`sorted-header-${theme}`);
+      const boxes = await header.evaluate(element => {
+        const content = element.querySelector('.header-content');
+        const controls = element.querySelector('.header-controls');
+        if (!content || !controls) {
+          throw new Error('Expected sorted header content and controls');
+        }
+        const contentBox = content.getBoundingClientRect();
+        const controlsBox = controls.getBoundingClientRect();
+        return {
+          contentRight: contentBox.right,
+          controlsLeft: controlsBox.left,
+        };
+      });
+
+      expect(boxes.contentRight).toBeLessThanOrEqual(boxes.controlsLeft);
+    });
+
+    test(`keeps RevoGrid filter header content in place when sorted in ${theme}`, async ({
+      page,
+    }) => {
+      await mountGrid(page, {
+        columns: [
+          {
+            prop: 'status',
+            name: 'All',
+            sortable: true,
+            order: 'asc',
+            filter: true,
+            size: 120,
+            ...withHeaderTestId(`filtered-header-${theme}`),
+          },
+        ],
+        source: [{ status: 'Active' }],
+        filter: true,
+        theme,
+        width: 120,
+      });
+
+      const header = page.getByTestId(`filtered-header-${theme}`);
+      await expect(header.locator(SELECTORS.filterButton)).toHaveCount(1);
+      await expect(header.locator('.header-content')).toHaveCSS(
+        'margin-right',
+        '0px',
+      );
+    });
+  }
+
   test('resizes a column and keeps header and cell widths aligned', async ({ page }) => {
     const columns = [
       { prop: 'id', name: 'ID' },
