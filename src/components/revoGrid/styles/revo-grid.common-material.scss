@@ -16,6 +16,11 @@
       .header-content {
         padding: var(--rg-theme-header-padding);
       }
+
+      &:is(.asc, .desc):not(:has(.rv-filter)) .header-content {
+        // Filter headers already manage their own control spacing.
+        margin-right: 16px;
+      }
     }
 
     .header-rgRow {
