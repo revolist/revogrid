@@ -126,6 +126,10 @@ export interface ColumnFilterConfig {
   /** Grid-level blank policy. Individual columns can override fields. */
   blankSemantics?: BlankSemantics;
   /**
+   * Whether empty filter panels start with a draft condition. Defaults to true.
+   */
+  defaultFilter?: boolean;
+  /**
    * The collection of filters to be applied to the column.
    */
   collection?: Record<ColumnProp, FilterCollectionItem>;
@@ -218,6 +222,10 @@ export interface ShowData extends FilterItem, Omit<ColumnRegular, 'filter'> {
    */
   autoCorrect?: boolean;
   filterTypes?: Record<string, string[]>;
+  /** Preferred operator for an empty panel. */
+  defaultFilterType?: string;
+  /** Whether an empty panel should create a draft condition. */
+  showDefaultFilter?: boolean;
   filterItems?: MultiFilterItem;
   // hide default filters
   hideDefaultFilters?: boolean;

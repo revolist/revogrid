@@ -36,6 +36,12 @@ export const filterTypes: Record<string, FilterType[]> = {
   array: ['notEmpty', 'empty'],
 };
 
+/** Preferred initial operator for built-in filter families. */
+export const filterTypeDefaults: Partial<Record<string, FilterType>> = {
+  string: 'contains',
+  number: 'eqN',
+};
+
 export const filterNames = {
   none: 'None',
   empty: 'Is blank',

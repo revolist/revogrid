@@ -5,15 +5,22 @@ import beginsWith from '../src/plugins/filter/conditions/string/beginswith';
 import gtThan from '../src/plugins/filter/conditions/number/greaterThan';
 import lt from '../src/plugins/filter/conditions/number/lessThan';
 import { FilterPlugin } from '../src/plugins/filter/filter.plugin';
+import { FilterPanel } from '../src/plugins/filter/filter.panel';
 import { ASYNC_FILTER_ROW_THRESHOLD } from '../src/plugins/filter/filter.constants';
 import { getFilterReorderId, moveFilterItem } from '../src/plugins/filter/filter.reorder';
 import { DataStore } from '../src/store/dataSource/data.store';
 import type { ColumnRegular } from '../src';
-import { filterNames, filterTypes } from '../src/plugins/filter/filter.indexed';
+import {
+  filterNames,
+  filterTypeDefaults,
+  filterTypes,
+} from '../src/plugins/filter/filter.indexed';
 import type {
   ColumnFilterConfig,
   FilterData,
   FilterEvaluationContext,
+  MultiFilterItem,
+  ShowData,
 } from '../src/plugins/filter/filter.types';
 
 function createFilterPlugin(config: ColumnFilterConfig = {}) {
@@ -23,6 +30,132 @@ function createFilterPlugin(config: ColumnFilterConfig = {}) {
 
   return new FilterPlugin(revogrid, {} as any, config);
 }
+
+describe('default filter resolution', () => {
+  it('exports and resolves the built-in string and number defaults', () => {
+    const plugin = createFilterPlugin();
+
+    expect(filterTypeDefaults).toEqual({
+      string: 'contains',
+      number: 'eqN',
+    });
+    expect(plugin.getDefaultFilter(true)).toBe('contains');
+    expect(plugin.getDefaultFilter('string')).toBe('contains');
+    expect(plugin.getDefaultFilter('number')).toBe('eqN');
+  });
+
+  it('uses a valid structured column override', () => {
+    const plugin = createFilterPlugin();
+
+    expect(
+      plugin.getColumnFilter({ type: ['string', 'number'], default: 'lte' }),
+    ).toEqual({
+      string: filterTypes.string,
+      number: filterTypes.number,
+    });
+    expect(
+      plugin.getDefaultFilter({ type: ['string', 'number'], default: 'lte' }),
+    ).toBe('lte');
+  });
+
+  it('falls back from invalid or excluded defaults', () => {
+    const plugin = createFilterPlugin({ include: ['empty', 'notEq', 'lte'] });
+
+    expect(
+      plugin.getDefaultFilter({ type: 'string', default: 'missing' }),
+    ).toBe('empty');
+    expect(
+      plugin.getDefaultFilter({ type: 'number', default: 'eqN' }),
+    ).toBe('empty');
+  });
+
+  it('uses the first operator from the first custom family without a default', () => {
+    const plugin = createFilterPlugin({
+      customFilters: {
+        selected: {
+          columnFilterType: 'selection',
+          name: 'Selected',
+          func: () => true,
+        },
+        notSelected: {
+          columnFilterType: 'selection',
+          name: 'Not selected',
+          func: () => true,
+        },
+      },
+    });
+
+    expect(plugin.getDefaultFilter('selection')).toBe('selected');
+    expect(plugin.getDefaultFilter(['selection', 'number'])).toBe('selected');
+    expect(
+      plugin.getDefaultFilter({
+        type: ['selection', 'number'],
+        default: 'eqN',
+      }),
+    ).toBe('eqN');
+  });
+
+  it('supports grid and column-level default draft opt-outs', () => {
+    const enabledPlugin = createFilterPlugin();
+    const disabledPlugin = createFilterPlugin({ defaultFilter: false });
+
+    expect(enabledPlugin.shouldShowDefaultFilter('string')).toBe(true);
+    expect(
+      enabledPlugin.shouldShowDefaultFilter({ type: 'string', default: false }),
+    ).toBe(false);
+    expect(disabledPlugin.shouldShowDefaultFilter('string')).toBe(false);
+    expect(
+      disabledPlugin.shouldShowDefaultFilter({ type: 'string', default: 'eq' }),
+    ).toBe(true);
+  });
+
+  it('does not seed a hidden draft for panels owned by another plugin', async () => {
+    const panel = new FilterPanel();
+
+    await panel.show({
+      prop: 'name',
+      x: 0,
+      y: 0,
+      filterTypes: { string: ['contains'] },
+      hideDefaultFilters: true,
+    } as ShowData);
+
+    expect(panel.draftFilter).toBeUndefined();
+  });
+});
+
+describe('filter panel state replacement', () => {
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('flushes a pending dynamic change before installing a new entity', async () => {
+    jest.useFakeTimers();
+    const panel = new FilterPanel();
+    const emit = jest.fn();
+    const originalFilterItems = {
+      name: [{ id: 1, type: 'contains', value: 'Ada', relation: 'and' }],
+    } as MultiFilterItem;
+    (panel as any).filterChange = { emit };
+    panel.filterItems = originalFilterItems;
+    (panel as any).debouncedApplyFilter();
+
+    await panel.show({
+      prop: 'role',
+      x: 0,
+      y: 0,
+      filterTypes: { string: ['contains'] },
+      filterItems: {
+        role: [{ id: 2, type: 'contains', value: 'Admin', relation: 'and' }],
+      },
+    } as ShowData);
+
+    expect(emit).toHaveBeenCalledTimes(1);
+    expect(emit).toHaveBeenCalledWith(originalFilterItems);
+    jest.advanceTimersByTime(400);
+    expect(emit).toHaveBeenCalledTimes(1);
+  });
+});
 
 // ---------------------------------------------------------------------------
 // eq / notEq

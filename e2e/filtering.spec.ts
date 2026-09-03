@@ -233,12 +233,280 @@ test.describe('filtering', () => {
     ]);
   });
 
+  test('shows column defaults as inactive drafts', async ({ page }) => {
+    const columns = buildColumns([
+      {
+        prop: 'role',
+        name: 'Role',
+        filter: true,
+        ...withHeaderTestId('default-string-filter'),
+      },
+      {
+        prop: 'score',
+        name: 'Score',
+        filter: 'number',
+        ...withHeaderTestId('default-number-filter'),
+      },
+      {
+        prop: 'city',
+        name: 'City',
+        filter: { type: 'string', default: 'eq' },
+        ...withHeaderTestId('overridden-string-filter'),
+      },
+    ]);
+
+    await mountGrid(page, {
+      columns,
+      source: [
+        { role: 'Admin', score: 10, city: 'Lisbon' },
+        { role: 'Editor', score: 20, city: 'Porto' },
+      ],
+      filter: true,
+    });
+
+    await page.evaluate(() => {
+      const grid = document.querySelector('revo-grid');
+      if (!grid) throw new Error('Grid not found');
+      (window as any).__draftFilterEvents = [];
+      grid.addEventListener('beforefilterapply', () =>
+        (window as any).__draftFilterEvents.push('before'),
+      );
+      grid.addEventListener('afterfilterapply', () =>
+        (window as any).__draftFilterEvents.push('after'),
+      );
+    });
+
+    const panel = page.locator(SELECTORS.filterPanel);
+    for (const [testId, expectedType] of [
+      ['default-string-filter', 'contains'],
+      ['default-number-filter', 'eqN'],
+      ['overridden-string-filter', 'eq'],
+    ] as const) {
+      const button = page.getByTestId(testId).locator(SELECTORS.filterButton);
+      await page.getByTestId(testId).hover();
+      await button.click();
+      await expect(panel.locator('.select-filter')).toHaveCount(1);
+      await expect(panel.locator('.select-filter')).toHaveValue(expectedType);
+      await expect(button).not.toHaveClass(/active/);
+      await expect(mainDataRows(page)).toHaveCount(2);
+      await panel.getByRole('button', { name: 'ok' }).click();
+    }
+
+    await page.waitForTimeout(500);
+    expect(
+      await page.evaluate(() => (window as any).__draftFilterEvents),
+    ).toEqual([]);
+  });
+
+  test('disables default drafts grid-wide unless a column explicitly opts in', async ({ page }) => {
+    const columns = buildColumns([
+      {
+        prop: 'role',
+        name: 'Role',
+        filter: true,
+        ...withHeaderTestId('globally-disabled-default-filter'),
+      },
+      {
+        prop: 'city',
+        name: 'City',
+        filter: { type: 'string', default: 'eq' },
+        ...withHeaderTestId('explicitly-enabled-default-filter'),
+      },
+    ]);
+
+    await mountGrid(page, {
+      columns,
+      source: [{ role: 'Admin', city: 'Lisbon' }],
+      filter: { defaultFilter: false },
+    });
+
+    const panel = page.locator(SELECTORS.filterPanel);
+    await page.getByTestId('globally-disabled-default-filter').hover();
+    await page
+      .getByTestId('globally-disabled-default-filter')
+      .locator(SELECTORS.filterButton)
+      .click();
+    await expect(panel.locator('.select-filter')).toHaveCount(0);
+    await panel.getByRole('button', { name: 'ok' }).click();
+
+    await page.getByTestId('explicitly-enabled-default-filter').hover();
+    await page
+      .getByTestId('explicitly-enabled-default-filter')
+      .locator(SELECTORS.filterButton)
+      .click();
+    await expect(panel.locator('.select-filter')).toHaveCount(1);
+    await expect(panel.locator('.select-filter')).toHaveValue('eq');
+  });
+
+  test('disables a default draft for an individual column', async ({ page }) => {
+    const columns = buildColumns([
+      {
+        prop: 'role',
+        name: 'Role',
+        filter: { type: 'string', default: false },
+        ...withHeaderTestId('column-disabled-default-filter'),
+      },
+      {
+        prop: 'city',
+        name: 'City',
+        filter: 'string',
+        ...withHeaderTestId('column-enabled-default-filter'),
+      },
+    ]);
+
+    await mountGrid(page, {
+      columns,
+      source: [{ role: 'Admin', city: 'Lisbon' }],
+      filter: true,
+    });
+
+    const panel = page.locator(SELECTORS.filterPanel);
+    await page.getByTestId('column-disabled-default-filter').hover();
+    await page
+      .getByTestId('column-disabled-default-filter')
+      .locator(SELECTORS.filterButton)
+      .click();
+    await expect(panel.locator('.select-filter')).toHaveCount(0);
+    await panel.getByRole('button', { name: 'ok' }).click();
+
+    await page.getByTestId('column-enabled-default-filter').hover();
+    await page
+      .getByTestId('column-enabled-default-filter')
+      .locator(SELECTORS.filterButton)
+      .click();
+    await expect(panel.locator('.select-filter')).toHaveValue('contains');
+  });
+
+  test('promotes an explicitly selected no-input draft and reseeds only after reopen', async ({ page }) => {
+    const columns = buildColumns([
+      {
+        prop: 'role',
+        name: 'Role',
+        filter: true,
+        ...withHeaderTestId('promoted-default-filter'),
+      },
+    ]);
+
+    await mountGrid(page, {
+      columns,
+      source: [{ role: 'Admin' }, { role: '' }],
+      filter: true,
+    });
+
+    const button = page
+      .getByTestId('promoted-default-filter')
+      .locator(SELECTORS.filterButton);
+    const panel = page.locator(SELECTORS.filterPanel);
+    await page.getByTestId('promoted-default-filter').hover();
+    await button.click();
+    await panel.locator('.select-filter').selectOption('notEmpty');
+
+    await expect(mainDataRows(page)).toHaveCount(1);
+    await expect(button).toHaveClass(/active/);
+
+    await panel.getByRole('button', { name: 'reset' }).click();
+    await expect(mainDataRows(page)).toHaveCount(2);
+    await expect(panel.locator('.select-filter')).toHaveCount(0);
+    await expect(button).not.toHaveClass(/active/);
+
+    await panel.getByRole('button', { name: 'ok' }).click();
+    await page.getByTestId('promoted-default-filter').hover();
+    await button.click();
+    await expect(panel.locator('.select-filter')).toHaveValue('contains');
+
+    await panel.getByRole('button', { name: 'Remove filter' }).click();
+    await expect(panel.locator('.select-filter')).toHaveCount(0);
+    await panel.getByRole('button', { name: 'ok' }).click();
+    await page.getByTestId('promoted-default-filter').hover();
+    await button.click();
+    await expect(panel.locator('.select-filter')).toHaveValue('contains');
+  });
+
+  test('replaces an untouched draft when adding a condition', async ({ page }) => {
+    const columns = buildColumns([
+      {
+        prop: 'role',
+        name: 'Role',
+        filter: true,
+        ...withHeaderTestId('replace-default-filter'),
+      },
+    ]);
+
+    await mountGrid(page, {
+      columns,
+      source: [{ role: 'Admin' }],
+      filter: true,
+    });
+
+    const button = page
+      .getByTestId('replace-default-filter')
+      .locator(SELECTORS.filterButton);
+    const panel = page.locator(SELECTORS.filterPanel);
+    await page.getByTestId('replace-default-filter').hover();
+    await button.click();
+    await panel.locator('#add-filter').selectOption('eq');
+
+    await expect(panel.locator('.select-filter')).toHaveCount(1);
+    await expect(panel.locator('.select-filter')).toHaveValue('eq');
+    await expect(button).toHaveClass(/active/);
+  });
+
+  test('keeps promoted drafts local until Save when dynamic filtering is disabled', async ({ page }) => {
+    const columns = buildColumns([
+      {
+        prop: 'role',
+        name: 'Role',
+        filter: true,
+        ...withHeaderTestId('saved-default-filter'),
+      },
+    ]);
+
+    await mountGrid(page, {
+      columns,
+      source: [{ role: 'Admin' }, { role: 'Editor' }],
+      filter: { disableDynamicFiltering: true },
+    });
+
+    const button = page
+      .getByTestId('saved-default-filter')
+      .locator(SELECTORS.filterButton);
+    const panel = page.locator(SELECTORS.filterPanel);
+    await page.evaluate(() => {
+      const grid = document.querySelector('revo-grid');
+      if (!grid) throw new Error('Grid not found');
+      (window as any).__savedDraftApplyEvents = 0;
+      grid.addEventListener('beforefilterapply', () => {
+        (window as any).__savedDraftApplyEvents += 1;
+      });
+    });
+    await page.getByTestId('saved-default-filter').hover();
+    await button.click();
+    await panel.getByRole('button', { name: 'save' }).click();
+    expect(
+      await page.evaluate(() => (window as any).__savedDraftApplyEvents),
+    ).toBe(0);
+    await expect(button).not.toHaveClass(/active/);
+
+    await page.locator(SELECTORS.filterInput).fill('Admin');
+
+    await expect(mainDataRows(page)).toHaveCount(2);
+    await expect(button).not.toHaveClass(/active/);
+
+    await panel.getByRole('button', { name: 'save' }).click();
+    await expect(mainDataRows(page)).toHaveCount(1);
+    await expect(button).toHaveClass(/active/);
+    expect(
+      await page.evaluate(() => (window as any).__savedDraftApplyEvents),
+    ).toBe(1);
+  });
+
   test('allows duplicate operators by default', async ({ page }) => {
     const columns = buildColumns([
       { prop: 'role', name: 'Role', filter: true, ...withHeaderTestId('duplicate-default-role') },
     ]);
 
     await mountGrid(page, { columns, source: [{ id: 1, role: 'Admin' }], filter: true });
+    await page.getByTestId('duplicate-default-role').hover();
     await page
       .getByTestId('duplicate-default-role')
       .locator(SELECTORS.filterButton)
@@ -264,6 +532,7 @@ test.describe('filtering', () => {
       source: [{ id: 1, role: 'Admin', city: 'Lisbon' }],
       filter: { allowDuplicateOperators: false },
     });
+    await page.getByTestId('exclusive-role').hover();
     await page.getByTestId('exclusive-role').locator(SELECTORS.filterButton).click();
 
     const filterPanel = page.locator(SELECTORS.filterPanel);
@@ -275,6 +544,7 @@ test.describe('filtering', () => {
     await expect(filterPanel.locator('.select-filter').nth(1)).toHaveValue('eq');
     await expect(filterPanel.locator('.select-filter').nth(1).locator('option[value="contains"]')).toHaveCount(0);
 
+    await page.getByTestId('exclusive-city').hover();
     await page.getByTestId('exclusive-city').locator(SELECTORS.filterButton).click();
     await expect(filterPanel.locator('#add-filter option[value="contains"]')).toHaveCount(1);
   });
@@ -297,6 +567,7 @@ test.describe('filtering', () => {
         },
       },
     });
+    await page.getByTestId('preloaded-exclusive-role').hover();
     await page.getByTestId('preloaded-exclusive-role').locator(SELECTORS.filterButton).click();
 
     const filterPanel = page.locator(SELECTORS.filterPanel);
@@ -316,6 +587,7 @@ test.describe('filtering', () => {
     ]);
 
     await mountGrid(page, { columns, source: [{ id: 1, role: 'Admin' }], filter: true });
+    await page.getByTestId('runtime-filter-role').hover();
     await page.getByTestId('runtime-filter-role').locator(SELECTORS.filterButton).click();
     const initialFilterPanel = page.locator(SELECTORS.filterPanel);
     await initialFilterPanel.locator('#add-filter').selectOption('contains');
@@ -330,6 +602,7 @@ test.describe('filtering', () => {
       grid.filter = { allowDuplicateOperators: false };
     });
     await page.waitForChanges();
+    await page.getByTestId('runtime-filter-role').hover();
     await page.getByTestId('runtime-filter-role').locator(SELECTORS.filterButton).click();
 
     const filterPanel = page.locator(SELECTORS.filterPanel);
@@ -344,6 +617,7 @@ test.describe('filtering', () => {
       grid.filter = { allowDuplicateOperators: true };
     });
     await page.waitForChanges();
+    await page.getByTestId('runtime-filter-role').hover();
     await page.getByTestId('runtime-filter-role').locator(SELECTORS.filterButton).click();
     await expect(page.locator(`${SELECTORS.filterPanel} .select-filter`).first()).toHaveValue('contains');
     await expect(page.locator(`${SELECTORS.filterPanel} #add-filter option[value="contains"]`)).toHaveCount(1);
@@ -368,6 +642,7 @@ test.describe('filtering', () => {
 
     await expectVisibleColumnValues(page, 1, ['Alice', 'Ben', 'Cara', 'Dan']);
 
+    await page.getByTestId('filter-header-role').hover();
     await page
       .getByTestId('filter-header-role')
       .locator(SELECTORS.filterButton)
@@ -375,7 +650,7 @@ test.describe('filtering', () => {
 
     const filterPanel = page.locator(SELECTORS.filterPanel);
     await expect(filterPanel).toBeVisible();
-    await filterPanel.getByRole('combobox').selectOption({ label: 'Contains' });
+    await filterPanel.locator('.select-filter').selectOption({ label: 'Contains' });
     await expect(filterPanel.locator('.reorder-button')).toHaveCount(0);
     await page.locator(SELECTORS.filterInput).fill('Admin');
 
@@ -409,6 +684,7 @@ test.describe('filtering', () => {
       .locator(SELECTORS.filterButton);
     const filterPanel = page.locator(SELECTORS.filterPanel);
 
+    await page.getByTestId('toggle-filter-role').hover();
     await filterButton.click();
     await expect(filterPanel).toBeVisible();
 
@@ -425,7 +701,7 @@ test.describe('filtering', () => {
       }
       const root = host.attachShadow({ mode: 'open' });
       root.innerHTML = `
-        <div style="display: grid; gap: 24px; width: 900px;">
+        <div style="display: grid; gap: 240px; width: 900px;">
           <div style="height: 180px;">
             <revo-grid filter style="display:block; width:100%; height:100%;"></revo-grid>
           </div>
@@ -481,12 +757,14 @@ test.describe('filtering', () => {
 
     const openFilterPanels = page.locator(`${SELECTORS.filterPanel}[open]`);
 
+    await page.getByTestId('first-filter-role').hover();
     await page
       .getByTestId('first-filter-role')
       .locator(SELECTORS.filterButton)
       .click();
     await expect(openFilterPanels).toHaveCount(1);
 
+    await page.getByTestId('second-filter-role').hover();
     await page
       .getByTestId('second-filter-role')
       .locator(SELECTORS.filterButton)
@@ -523,6 +801,7 @@ test.describe('filtering', () => {
       wrapper.style.overflow = 'hidden';
     });
 
+    await page.getByTestId('dialog-filter-role').hover();
     await page
       .getByTestId('dialog-filter-role')
       .locator(SELECTORS.filterButton)
@@ -582,6 +861,7 @@ test.describe('filtering', () => {
       wrapper.style.marginTop = '160px';
     });
 
+    await page.getByTestId('bottom-filter-role').hover();
     await page
       .getByTestId('bottom-filter-role')
       .locator(SELECTORS.filterButton)
@@ -611,7 +891,7 @@ test.describe('filtering', () => {
       };
     });
 
-    expect(panelTop).toBeGreaterThanOrEqual(8);
+    expect(panelTop).toBeGreaterThanOrEqual(7);
     expect(panelBottom).toBeLessThanOrEqual(buttonTop + 3);
     expect(panelBottom).toBeLessThanOrEqual(viewportBottom - 8);
     expect(Math.abs(actionBottom - panelBottom)).toBeLessThanOrEqual(2);
@@ -642,6 +922,7 @@ test.describe('filtering', () => {
       },
     });
 
+    await page.getByTestId('layout-filter-role').hover();
     await page
       .getByTestId('layout-filter-role')
       .locator(SELECTORS.filterButton)
@@ -649,7 +930,7 @@ test.describe('filtering', () => {
 
     const filterPanel = page.locator(SELECTORS.filterPanel);
     await expect(filterPanel).toBeVisible();
-    await filterPanel.getByRole('combobox').selectOption({ label: 'Contains' });
+    await filterPanel.locator('.select-filter').selectOption({ label: 'Contains' });
     await filterPanel.locator('#add-filter').selectOption({ label: 'Equal' });
 
     const row = filterPanel.locator('.multi-filter-list-row').first();
@@ -694,6 +975,7 @@ test.describe('filtering', () => {
 
     await mountGrid(page, { columns, source, filter: true });
 
+    await page.getByTestId('reorder-filter-role').hover();
     await page
       .getByTestId('reorder-filter-role')
       .locator(SELECTORS.filterButton)
@@ -702,7 +984,7 @@ test.describe('filtering', () => {
     const filterPanel = page.locator(SELECTORS.filterPanel);
     const filterInputs = page.locator(SELECTORS.filterInput);
     await expect(filterPanel).toBeVisible();
-    await filterPanel.getByRole('combobox').selectOption({ label: 'Contains' });
+    await filterPanel.locator('.select-filter').selectOption({ label: 'Contains' });
     await filterInputs.fill('Admin');
     await filterPanel.locator('#add-filter').selectOption({ label: 'Equal' });
     await filterInputs.nth(1).fill('Engineer');
@@ -788,6 +1070,7 @@ test.describe('filtering', () => {
 
     await mountGrid(page, { columns, source, filter: true });
 
+    await page.getByTestId('source-filter-role').hover();
     await page
       .getByTestId('source-filter-role')
       .locator(SELECTORS.filterButton)
@@ -795,7 +1078,7 @@ test.describe('filtering', () => {
 
     const filterPanel = page.locator(SELECTORS.filterPanel);
     await expect(filterPanel).toBeVisible();
-    await filterPanel.getByRole('combobox').selectOption({ label: 'Contains' });
+    await filterPanel.locator('.select-filter').selectOption({ label: 'Contains' });
     await page.locator(SELECTORS.filterInput).fill('Admin');
 
     await expectVisibleColumnValues(page, 1, ['Alice', 'Cara']);

@@ -19,6 +19,7 @@ import { AndOrButton, isFilterBtn, ReorderButton, TrashButton } from './filter.b
 import '../../utils/closest.polifill';
 import {
   FilterCaptions,
+  FilterData,
   LogicFunction,
   MultiFilterItem,
   ShowData,
@@ -50,6 +51,7 @@ const VIEWPORT_PADDING = 8;
 })
 export class FilterPanel {
   private dialog?: HTMLDialogElement;
+  private hasChanges = false;
   private filterCaptionsInternal: FilterCaptions = {
     title: 'Filter by',
     ok: 'Close',
@@ -73,6 +75,7 @@ export class FilterPanel {
   @State() currentFilterType: FilterType = defaultType;
   @State() changes: ShowData | undefined;
   @State() filterItems: MultiFilterItem = {};
+  @State() draftFilter: FilterData | undefined;
   @State() draggedFilterId: number | undefined;
   @State() dragOverFilterId: number | undefined;
   @Prop() filterNames: Record<string, string> = {};
@@ -125,10 +128,32 @@ export class FilterPanel {
   }
 
   @Method() async show(newEntity?: ShowData) {
+    this.debouncedApplyFilter.flush();
+    this.hasChanges = false;
     this.changes = newEntity;
-    this.filterItems = newEntity?.filterItems || {};
+    this.filterItems = this.cloneFilterItems(newEntity?.filterItems || {});
+    this.draftFilter = undefined;
     if (this.changes) {
       this.changes.type = this.changes.type || defaultType;
+      const prop = this.changes.prop;
+      const propFilters = prop === undefined ? undefined : this.filterItems[prop];
+      if (
+        !propFilters?.length &&
+        this.changes.showDefaultFilter !== false &&
+        this.changes.hideDefaultFilters !== true
+      ) {
+        const type = this.resolveDraftFilterType(
+          this.changes.defaultFilterType,
+        );
+        if (type) {
+          this.draftFilter = {
+            id: ++this.filterId,
+            type,
+            value: '',
+            relation: 'and',
+          };
+        }
+      }
     }
   }
 
@@ -151,8 +176,20 @@ export class FilterPanel {
     const prop = this.changes?.prop;
     if (prop === undefined) return '';
 
-    const propFilters = this.filterItems[prop] ?? [];
-    const visibleFilterCount = propFilters.filter(filter => !filter.hidden).length;
+    const propFilters = (this.filterItems[prop] ?? []).map((filter, index) => ({
+      filter,
+      index,
+      isDraft: false,
+    }));
+    if (this.draftFilter) {
+      propFilters.push({
+        filter: this.draftFilter,
+        index: propFilters.length,
+        isDraft: true,
+      });
+    }
+    const visibleFilters = propFilters.filter(({ filter }) => !filter.hidden);
+    const visibleFilterCount = visibleFilters.length;
     const capts = {
       ...this.filterCaptionsInternal,
       ...this.filterCaptions,
@@ -160,14 +197,14 @@ export class FilterPanel {
     return (
       <div key={this.filterId}>
         <ul class="multi-filter-list-container">
-          {propFilters.map((filter, index) => {
+          {propFilters.map(({ filter, index, isDraft }) => {
             let andOrButton;
             if (filter.hidden) {
               return;
             }
 
             // hide toggle button if there is only one filter and the last one
-            if (index !== this.filterItems[prop].length - 1) {
+            if (visibleFilters[visibleFilterCount - 1]?.filter.id !== filter.id) {
               andOrButton = (
                 <AndOrButton
                   text={filter.relation === 'and' ? capts.and : capts.or}
@@ -176,10 +213,10 @@ export class FilterPanel {
               );
             }
 
-            const extra = this.renderExtra(prop, index);
+            const extra = this.renderExtra(prop, index, isDraft);
             const isDragging = this.draggedFilterId === filter.id;
             const isDragOver = this.dragOverFilterId === filter.id && !isDragging;
-            const canReorder = visibleFilterCount > 1;
+            const canReorder = visibleFilterCount > 1 && !isDraft;
 
             return (
               <li
@@ -219,10 +256,12 @@ export class FilterPanel {
                   <div class={{ 'select-input': true }}>
                     <select
                       class="select-css select-filter"
-                      onChange={e => this.onFilterTypeChange(e, prop, index)}
+                      onChange={e =>
+                        this.onFilterTypeChange(e, prop, index, isDraft)
+                      }
                     >
                       {this.renderSelectOptions(
-                        this.filterItems[prop][index].type,
+                        filter.type,
                         true,
                       )}
                     </select>
@@ -241,7 +280,7 @@ export class FilterPanel {
           })}
         </ul>
 
-        {propFilters.some(f => !f.hidden) ? <div class="add-filter-divider" /> : ''}
+        {visibleFilterCount ? <div class="add-filter-divider" /> : ''}
       </div>
     );
   }
@@ -312,11 +351,24 @@ export class FilterPanel {
     el.style.top = `${top}px`;
   }
 
-  private onFilterTypeChange(e: Event, prop: ColumnProp, index: number) {
+  private onFilterTypeChange(
+    e: Event,
+    prop: ColumnProp,
+    index: number,
+    isDraft = false,
+  ) {
     if (!(e.target instanceof HTMLSelectElement)) {
       return;
     }
-    this.filterItems[prop][index].type = e.target.value as FilterType;
+    const type = e.target.value as FilterType;
+    const filter = isDraft
+      ? this.promoteDraft(prop, type)
+      : this.filterItems[prop][index];
+    if (!filter) {
+      return;
+    }
+    filter.type = type;
+    this.hasChanges = true;
 
     // this re-renders the input to know if we need extra input
     this.filterId++;
@@ -324,7 +376,7 @@ export class FilterPanel {
     // adding setTimeout will wait for the next tick DOM update then focus on input
     setTimeout(() => {
       const input = document.getElementById(
-        'filter-input-' + this.filterItems[prop][index].id,
+        'filter-input-' + filter.id,
       );
       if (input instanceof HTMLInputElement) {
         input.focus();
@@ -337,7 +389,7 @@ export class FilterPanel {
   }
 
   private debouncedApplyFilter = debounce(() => {
-    this.filterChange.emit(this.filterItems);
+    this.emitFilterChange();
   }, 400);
 
   private onAddNewFilter(e: Event) {
@@ -369,13 +421,19 @@ export class FilterPanel {
 
     this.filterId++;
     this.currentFilterId = this.filterId;
-
-    this.filterItems[prop].push({
-      id: this.currentFilterId,
-      type: this.currentFilterType,
-      value: '',
-      relation: 'and',
-    });
+    if (this.draftFilter) {
+      this.draftFilter.id = this.currentFilterId;
+      this.draftFilter.type = this.currentFilterType;
+      this.promoteDraft(prop);
+    } else {
+      this.filterItems[prop].push({
+        id: this.currentFilterId,
+        type: this.currentFilterType,
+        value: '',
+        relation: 'and',
+      });
+      this.hasChanges = true;
+    }
 
     // adding setTimeout will wait for the next tick DOM update then focus on input
     setTimeout(() => {
@@ -387,7 +445,9 @@ export class FilterPanel {
   }
 
   private onSave() {
-    this.filterChange.emit(this.filterItems);
+    if (this.hasChanges) {
+      this.emitFilterChange();
+    }
   }
 
   private onCancel() {
@@ -397,7 +457,12 @@ export class FilterPanel {
   private onReset() {
     this.assertChanges();
 
-    this.resetChange.emit(this.changes?.prop);
+    this.draftFilter = undefined;
+    const prop = this.changes?.prop;
+    if (prop !== undefined) {
+      delete this.filterItems[prop];
+    }
+    this.resetChange.emit(prop);
 
     // this updates the DOM which is used by getFilterItemsList() key
     this.filterId++;
@@ -411,12 +476,18 @@ export class FilterPanel {
 
     const prop = this.changes?.prop;
 
+    if (this.draftFilter?.id === id) {
+      this.draftFilter = undefined;
+      return;
+    }
+
     const items = this.filterItems[prop ?? ''];
     if (!items) return;
 
     const index = items.findIndex(d => d.id === id);
     if (index === -1) return;
     items.splice(index, 1);
+    this.hasChanges = true;
 
     // let's remove the prop if no more filters so the filter icon will be removed
     if (items.length === 0) delete this.filterItems[prop ?? ''];
@@ -466,6 +537,7 @@ export class FilterPanel {
       return;
     }
 
+    this.hasChanges = true;
     this.filterId++;
 
     if (!this.disableDynamicFiltering) {
@@ -505,6 +577,7 @@ export class FilterPanel {
       return;
     }
 
+    this.hasChanges = true;
     this.filterId++;
 
     if (!this.disableDynamicFiltering) {
@@ -527,6 +600,7 @@ export class FilterPanel {
     if (index === -1) return;
 
     items[index].relation = items[index].relation === 'and' ? 'or' : 'and';
+    this.hasChanges = true;
     if (!this.disableDynamicFiltering) {
       this.debouncedApplyFilter();
     }
@@ -604,13 +678,22 @@ export class FilterPanel {
     return options;
   }
 
-  renderExtra(prop: ColumnProp, index: number) {
-    const currentFilter = this.filterItems[prop];
+  renderExtra(prop: ColumnProp, index: number, isDraft = false) {
+    const currentFilter = isDraft
+      ? this.draftFilter
+      : this.filterItems[prop]?.[index];
 
     if (!currentFilter) return '';
 
     const applyFilter = (value?: any) => {
-      this.filterItems[prop][index].value = value;
+      currentFilter.value = value;
+      if (isDraft && !this.isMeaningfulDraftValue(value)) {
+        return;
+      }
+      if (isDraft && !this.promoteDraft(prop)) {
+        return;
+      }
+      this.hasChanges = true;
       if (!this.disableDynamicFiltering) {
         this.debouncedApplyFilter();
       }
@@ -630,11 +713,11 @@ export class FilterPanel {
       ...this.filterCaptionsInternal,
       ...this.filterCaptions,
     };
-    const extra = this.filterEntities[currentFilter[index].type].extra;
+    const extra = this.filterEntities[currentFilter.type]?.extra;
     if (typeof extra === 'function') {
       return extra(h, {
-        value: currentFilter[index].value,
-        filter: currentFilter[index],
+        value: currentFilter.value,
+        filter: currentFilter,
         prop,
         index,
         placeholder: capts.placeholder,
@@ -651,10 +734,10 @@ export class FilterPanel {
     }
     return (
       <input
-        id={`filter-input-${currentFilter[index].id}`}
+        id={`filter-input-${currentFilter.id}`}
         placeholder={capts.placeholder}
         type={extra === 'datepicker' ? 'date' : 'text'}
-        value={currentFilter[index].value}
+        value={currentFilter.value}
         onInput={(e) => {
           if (e.target instanceof HTMLInputElement) {
             applyFilter(e.target.value);
@@ -672,6 +755,48 @@ export class FilterPanel {
           e.stopPropagation();
         }}
       />
+    );
+  }
+
+  private resolveDraftFilterType(preferred?: string): FilterType | undefined {
+    const available = Object.values(this.changes?.filterTypes ?? {}).flat();
+    const type = preferred && available.includes(preferred)
+      ? preferred
+      : available[0];
+    return type as FilterType | undefined;
+  }
+
+  private promoteDraft(prop: ColumnProp, type?: FilterType) {
+    if (!this.draftFilter) {
+      return;
+    }
+    if (!this.filterItems[prop]) {
+      this.filterItems[prop] = [];
+    }
+    if (type) {
+      this.draftFilter.type = type;
+    }
+    const filter = this.draftFilter;
+    this.filterItems[prop].push(filter);
+    this.draftFilter = undefined;
+    this.hasChanges = true;
+    return filter;
+  }
+
+  private isMeaningfulDraftValue(value: any) {
+    return value !== '' && value !== undefined && value !== null;
+  }
+
+  private emitFilterChange() {
+    this.filterChange.emit(this.cloneFilterItems(this.filterItems));
+  }
+
+  private cloneFilterItems(filterItems: MultiFilterItem): MultiFilterItem {
+    return Object.fromEntries(
+      Object.entries(filterItems).map(([prop, filters]) => [
+        prop,
+        filters.map(filter => ({ ...filter })),
+      ]),
     );
   }
 

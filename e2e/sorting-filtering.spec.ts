@@ -42,11 +42,12 @@ test.describe('sorting and filtering', () => {
     await page.getByTestId('combo-sort-name').click();
     await expectVisibleColumnValues(page, 1, ['Amy', 'Bob', 'Max', 'Zed']);
 
+    await page.getByTestId('combo-filter-role').hover();
     await page
       .getByTestId('combo-filter-role')
       .locator(SELECTORS.filterButton)
       .click();
-    await page.locator(SELECTORS.filterPanel).getByRole('combobox').selectOption({ label: 'Contains' });
+    await page.locator(SELECTORS.filterPanel).locator('.select-filter').selectOption({ label: 'Contains' });
     await page.locator(SELECTORS.filterInput).fill('Admin');
 
     await expectVisibleColumnValues(page, 1, ['Amy', 'Bob', 'Zed']);
