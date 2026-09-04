@@ -116,6 +116,7 @@ revogr-filter-panel .filter-panel-dialog {
   .rv-filter.active {
     opacity: 1;
     width: $btn-size;
+    visibility: visible;
   }
 
   @media (hover: none), (pointer: coarse) {
