@@ -96,6 +96,23 @@ revogr-header {
       display: flex;
       align-items: center;
     }
+    // Active controls participate in layout so arrows, sorting ranks and
+    // revealed filters reserve their actual width instead of covering text.
+    &.asc,
+    &.desc {
+      .header-content {
+        position: relative;
+        inset: auto;
+        min-width: 0;
+        flex: 1 1 0;
+      }
+
+      .header-controls {
+        position: static;
+        flex: 0 0 auto;
+        margin-inline-end: 1px;
+      }
+    }
     .resizable {
       display: block;
       position: absolute;

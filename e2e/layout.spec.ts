@@ -137,6 +137,70 @@ test.describe('layout', () => {
     await expect(activeHeader.locator('.no-resize')).toHaveCount(0);
   });
 
+  for (const theme of ['default', 'compact', 'material']) {
+    for (const rtl of [false, true]) {
+      test(`keeps sorting controls outside the label in ${theme} (${rtl ? 'rtl' : 'ltr'})`, async ({
+        page,
+      }) => {
+        await mountGrid(page, {
+          columns: [
+            {
+              prop: 'id',
+              name: '🎰 Ticker',
+              size: 100,
+              sortable: true,
+              order: 'asc',
+              ...withHeaderTestId('sorted-ticker'),
+            },
+            {
+              prop: 'name',
+              name: 'Company Name',
+              size: 180,
+              sortable: true,
+              order: 'asc',
+            },
+          ],
+          source: SAMPLE_ROWS.pair,
+          theme,
+          rtl,
+          resize: true,
+        });
+        const header = page.getByTestId('sorted-ticker');
+        const assertSeparated = async () => {
+          await expect
+            .poll(() =>
+              header.evaluate(element => {
+                const label = element
+                  .querySelector('.header-content')!
+                  .getBoundingClientRect();
+                const controls = element
+                  .querySelector('.header-controls')!
+                  .getBoundingClientRect();
+                return (
+                  Math.min(label.right, controls.right) -
+                  Math.max(label.left, controls.left)
+                );
+              }),
+            )
+            .toBeLessThanOrEqual(0);
+          await expect(header.locator('.sort-indicator i')).toBeVisible();
+        };
+        await assertSeparated();
+        await expect(header.locator('.sort-order-index')).toHaveText('1');
+        await page.evaluate(() => {
+          document.querySelector('revo-grid')!.filter = true;
+        });
+        await page.waitForChanges();
+        await header.hover();
+        await expect(header.locator('.rv-filter')).toHaveCSS('width', '24px');
+        await assertSeparated();
+        await header.locator('.header-content').click();
+        await expect(header.locator('.sort-indicator .desc')).toHaveCount(1);
+        await assertSeparated();
+      });
+    }
+  }
+
   test('resizes a column and keeps header and cell widths aligned', async ({ page }) => {
     const columns = [
       { prop: 'id', name: 'ID' },

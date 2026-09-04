@@ -93,7 +93,6 @@ revogr-filter-panel .filter-panel-dialog {
 
 .rgHeaderCell {
   $btn-size: 24px;
-  $sort-and-filter-margin: 8px;
 
   &:hover {
     .rv-filter {
@@ -107,16 +106,8 @@ revogr-filter-panel .filter-panel-dialog {
   &:hover:has(.rv-filter),
   &:focus-within:has(.rv-filter),
   &:has(.rv-filter.active) {
-    .header-content {
+    &:not(.asc):not(.desc) .header-content {
       margin-right: $btn-size;
-    }
-
-    &:has(.desc),
-    &:has(.asc) {
-      .header-content {
-        margin-right: $sort-and-filter-margin;
-        padding-right: $sort-and-filter-margin * 3;
-      }
     }
   }
 
@@ -129,16 +120,8 @@ revogr-filter-panel .filter-panel-dialog {
 
   @media (hover: none), (pointer: coarse) {
     &:has(.rv-filter) {
-      .header-content {
+      &:not(.asc):not(.desc) .header-content {
         margin-right: $btn-size;
-      }
-
-      &:has(.desc),
-      &:has(.asc) {
-        .header-content {
-          margin-right: $sort-and-filter-margin;
-          padding-right: $sort-and-filter-margin * 3;
-        }
       }
     }
 
