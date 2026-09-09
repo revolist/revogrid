@@ -38,6 +38,7 @@ export {
 export {
   editCellValue,
   cancelEditCellValue,
+  clickFilterButton,
   dragBetweenLocators,
 } from './helpers/interactions';
 export {

@@ -2,6 +2,7 @@ import { test } from '@stencil/playwright';
 import {
   SELECTORS,
   buildColumns,
+  clickFilterButton,
   expectVisibleColumnValues,
   mountGrid,
   withHeaderTestId,
@@ -42,10 +43,7 @@ test.describe('sorting and filtering', () => {
     await page.getByTestId('combo-sort-name').click();
     await expectVisibleColumnValues(page, 1, ['Amy', 'Bob', 'Max', 'Zed']);
 
-    await page
-      .getByTestId('combo-filter-role')
-      .locator(SELECTORS.filterButton)
-      .click();
+    await clickFilterButton(page, 'combo-filter-role');
     await page.locator(SELECTORS.filterPanel).getByRole('combobox').selectOption({ label: 'Contains' });
     await page.locator(SELECTORS.filterInput).fill('Admin');
 

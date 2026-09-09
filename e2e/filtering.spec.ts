@@ -3,6 +3,7 @@ import { test, type E2EPage } from '@stencil/playwright';
 import {
   SELECTORS,
   buildColumns,
+  clickFilterButton,
   dataCell,
   expectVisibleColumnValues,
   mainDataRows,
@@ -239,10 +240,7 @@ test.describe('filtering', () => {
     ]);
 
     await mountGrid(page, { columns, source: [{ id: 1, role: 'Admin' }], filter: true });
-    await page
-      .getByTestId('duplicate-default-role')
-      .locator(SELECTORS.filterButton)
-      .click();
+    await clickFilterButton(page, 'duplicate-default-role');
 
     const filterPanel = page.locator(SELECTORS.filterPanel);
     await filterPanel.locator('#add-filter').selectOption('contains');
@@ -264,7 +262,7 @@ test.describe('filtering', () => {
       source: [{ id: 1, role: 'Admin', city: 'Lisbon' }],
       filter: { allowDuplicateOperators: false },
     });
-    await page.getByTestId('exclusive-role').locator(SELECTORS.filterButton).click();
+    await clickFilterButton(page, 'exclusive-role');
 
     const filterPanel = page.locator(SELECTORS.filterPanel);
     await filterPanel.locator('#add-filter').selectOption('contains');
@@ -275,7 +273,7 @@ test.describe('filtering', () => {
     await expect(filterPanel.locator('.select-filter').nth(1)).toHaveValue('eq');
     await expect(filterPanel.locator('.select-filter').nth(1).locator('option[value="contains"]')).toHaveCount(0);
 
-    await page.getByTestId('exclusive-city').locator(SELECTORS.filterButton).click();
+    await clickFilterButton(page, 'exclusive-city');
     await expect(filterPanel.locator('#add-filter option[value="contains"]')).toHaveCount(1);
   });
 
@@ -297,7 +295,7 @@ test.describe('filtering', () => {
         },
       },
     });
-    await page.getByTestId('preloaded-exclusive-role').locator(SELECTORS.filterButton).click();
+    await clickFilterButton(page, 'preloaded-exclusive-role');
 
     const filterPanel = page.locator(SELECTORS.filterPanel);
     await expect(filterPanel.locator('.select-filter')).toHaveCount(2);
@@ -316,7 +314,7 @@ test.describe('filtering', () => {
     ]);
 
     await mountGrid(page, { columns, source: [{ id: 1, role: 'Admin' }], filter: true });
-    await page.getByTestId('runtime-filter-role').locator(SELECTORS.filterButton).click();
+    await clickFilterButton(page, 'runtime-filter-role');
     const initialFilterPanel = page.locator(SELECTORS.filterPanel);
     await initialFilterPanel.locator('#add-filter').selectOption('contains');
     await expect(initialFilterPanel.locator('input[placeholder="Enter value..."]').first()).toBeVisible();
@@ -330,21 +328,21 @@ test.describe('filtering', () => {
       grid.filter = { allowDuplicateOperators: false };
     });
     await page.waitForChanges();
-    await page.getByTestId('runtime-filter-role').locator(SELECTORS.filterButton).click();
+    await clickFilterButton(page, 'runtime-filter-role');
 
     const filterPanel = page.locator(SELECTORS.filterPanel);
     await expect(filterPanel.locator('.select-filter').first()).toHaveValue('contains');
     await expect(filterPanel.locator('input[placeholder="Enter value..."]').first()).toHaveValue('Admin');
     await expect(filterPanel.locator('#add-filter option[value="contains"]')).toHaveCount(0);
 
-    await page.getByTestId('runtime-filter-role').locator(SELECTORS.filterButton).click();
+    await clickFilterButton(page, 'runtime-filter-role');
     await page.evaluate(() => {
       const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
       if (!grid) throw new Error('Grid not found');
       grid.filter = { allowDuplicateOperators: true };
     });
     await page.waitForChanges();
-    await page.getByTestId('runtime-filter-role').locator(SELECTORS.filterButton).click();
+    await clickFilterButton(page, 'runtime-filter-role');
     await expect(page.locator(`${SELECTORS.filterPanel} .select-filter`).first()).toHaveValue('contains');
     await expect(page.locator(`${SELECTORS.filterPanel} #add-filter option[value="contains"]`)).toHaveCount(1);
   });
@@ -368,10 +366,7 @@ test.describe('filtering', () => {
 
     await expectVisibleColumnValues(page, 1, ['Alice', 'Ben', 'Cara', 'Dan']);
 
-    await page
-      .getByTestId('filter-header-role')
-      .locator(SELECTORS.filterButton)
-      .click();
+    await clickFilterButton(page, 'filter-header-role');
 
     const filterPanel = page.locator(SELECTORS.filterPanel);
     await expect(filterPanel).toBeVisible();
@@ -409,7 +404,7 @@ test.describe('filtering', () => {
       .locator(SELECTORS.filterButton);
     const filterPanel = page.locator(SELECTORS.filterPanel);
 
-    await filterButton.click();
+    await clickFilterButton(page, 'toggle-filter-role');
     await expect(filterPanel).toBeVisible();
 
     await filterButton.click();
@@ -481,16 +476,10 @@ test.describe('filtering', () => {
 
     const openFilterPanels = page.locator(`${SELECTORS.filterPanel}[open]`);
 
-    await page
-      .getByTestId('first-filter-role')
-      .locator(SELECTORS.filterButton)
-      .click();
+    await clickFilterButton(page, 'first-filter-role');
     await expect(openFilterPanels).toHaveCount(1);
 
-    await page
-      .getByTestId('second-filter-role')
-      .locator(SELECTORS.filterButton)
-      .click();
+    await clickFilterButton(page, 'second-filter-role');
     await expect(openFilterPanels).toHaveCount(1);
 
     await expect(
@@ -523,10 +512,7 @@ test.describe('filtering', () => {
       wrapper.style.overflow = 'hidden';
     });
 
-    await page
-      .getByTestId('dialog-filter-role')
-      .locator(SELECTORS.filterButton)
-      .click();
+    await clickFilterButton(page, 'dialog-filter-role');
 
     const filterPanel = page.locator(SELECTORS.filterPanel);
     await expect(filterPanel).toBeVisible();
@@ -582,10 +568,7 @@ test.describe('filtering', () => {
       wrapper.style.marginTop = '160px';
     });
 
-    await page
-      .getByTestId('bottom-filter-role')
-      .locator(SELECTORS.filterButton)
-      .click();
+    await clickFilterButton(page, 'bottom-filter-role');
 
     const filterPanel = page.locator(SELECTORS.filterPanel);
     await expect(filterPanel).toBeVisible();
@@ -642,10 +625,7 @@ test.describe('filtering', () => {
       },
     });
 
-    await page
-      .getByTestId('layout-filter-role')
-      .locator(SELECTORS.filterButton)
-      .click();
+    await clickFilterButton(page, 'layout-filter-role');
 
     const filterPanel = page.locator(SELECTORS.filterPanel);
     await expect(filterPanel).toBeVisible();
@@ -694,10 +674,7 @@ test.describe('filtering', () => {
 
     await mountGrid(page, { columns, source, filter: true });
 
-    await page
-      .getByTestId('reorder-filter-role')
-      .locator(SELECTORS.filterButton)
-      .click();
+    await clickFilterButton(page, 'reorder-filter-role');
 
     const filterPanel = page.locator(SELECTORS.filterPanel);
     const filterInputs = page.locator(SELECTORS.filterInput);
@@ -788,10 +765,7 @@ test.describe('filtering', () => {
 
     await mountGrid(page, { columns, source, filter: true });
 
-    await page
-      .getByTestId('source-filter-role')
-      .locator(SELECTORS.filterButton)
-      .click();
+    await clickFilterButton(page, 'source-filter-role');
 
     const filterPanel = page.locator(SELECTORS.filterPanel);
     await expect(filterPanel).toBeVisible();

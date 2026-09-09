@@ -3,6 +3,7 @@ import { test, type E2EPage } from '@stencil/playwright';
 import {
   SELECTORS,
   buildColumns,
+  clickFilterButton,
   expectVisibleColumnValues,
   mainDataRows,
   mountGrid,
@@ -677,10 +678,7 @@ test.describe('row grouping', () => {
 
     await expect(mainDataRows(page)).toHaveCount(2);
 
-    await page
-      .getByTestId('group-filter-role')
-      .locator(SELECTORS.filterButton)
-      .click();
+    await clickFilterButton(page, 'group-filter-role');
 
     const filterPanel = page.locator(SELECTORS.filterPanel);
     await expect(filterPanel).toBeVisible();
@@ -784,10 +782,7 @@ test.describe('row grouping', () => {
       rowHeaders: true,
     });
 
-    await page
-      .getByTestId('clear-grouping-filter-role')
-      .locator(SELECTORS.filterButton)
-      .click();
+    await clickFilterButton(page, 'clear-grouping-filter-role');
 
     const filterPanel = page.locator(SELECTORS.filterPanel);
     await expect(filterPanel).toBeVisible();
@@ -836,10 +831,7 @@ test.describe('row grouping', () => {
       rowHeaders: true,
     });
 
-    await page
-      .getByTestId('source-update-filter-role')
-      .locator(SELECTORS.filterButton)
-      .click();
+    await clickFilterButton(page, 'source-update-filter-role');
 
     const filterPanel = page.locator(SELECTORS.filterPanel);
     await expect(filterPanel).toBeVisible();

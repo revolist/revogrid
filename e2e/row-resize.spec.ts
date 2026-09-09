@@ -3,6 +3,7 @@ import { test, type E2EPage } from '@stencil/playwright';
 import {
   SELECTORS,
   buildColumns,
+  clickFilterButton,
   callGridMethod,
   dataCell,
   mainDataRows,
@@ -566,10 +567,7 @@ test.describe('row resize plugin', () => {
     await enableRowResize(page);
     await dragHandle(page, resizeHandle(page, 0), 24);
 
-    await page
-      .getByTestId('row-resize-filter-status')
-      .locator(SELECTORS.filterButton)
-      .click();
+    await clickFilterButton(page, 'row-resize-filter-status');
     const panel = page.locator(SELECTORS.filterPanel);
     await panel.getByRole('combobox').selectOption({ label: 'Contains' });
     await page.locator(SELECTORS.filterInput).fill('keep');
@@ -620,10 +618,7 @@ test.describe('row resize plugin', () => {
     await enableRowResize(page);
     await dragHandle(page, resizeHandle(page, 0), 24);
 
-    await page
-      .getByTestId('filtered-row-definition-status')
-      .locator(SELECTORS.filterButton)
-      .click();
+    await clickFilterButton(page, 'filtered-row-definition-status');
     const panel = page.locator(SELECTORS.filterPanel);
     await panel.getByRole('combobox').selectOption({ label: 'Contains' });
     await page.locator(SELECTORS.filterInput).fill('keep');
@@ -680,10 +675,7 @@ test.describe('row resize plugin', () => {
     });
     await enableRowResize(page);
 
-    await page
-      .getByTestId('filtered-row-resize-status')
-      .locator(SELECTORS.filterButton)
-      .click();
+    await clickFilterButton(page, 'filtered-row-resize-status');
     const panel = page.locator(SELECTORS.filterPanel);
     await panel.getByRole('combobox').selectOption({ label: 'Contains' });
     await page.locator(SELECTORS.filterInput).fill('keep');
@@ -806,10 +798,7 @@ test.describe('row resize plugin', () => {
       providers?.dimension.setCustomSizes('rgRow', { 6: 81 }, true);
     });
 
-    await page
-      .getByTestId('colliding-row-size-filter-status')
-      .locator(SELECTORS.filterButton)
-      .click();
+    await clickFilterButton(page, 'colliding-row-size-filter-status');
     const panel = page.locator(SELECTORS.filterPanel);
     await panel.getByRole('combobox').selectOption({ label: 'Contains' });
     await page.locator(SELECTORS.filterInput).fill('keep');

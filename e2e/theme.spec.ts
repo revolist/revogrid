@@ -3,6 +3,7 @@ import { test } from '@stencil/playwright';
 import { modernThemeDefinitions } from '../src/themeManager/presets';
 import {
   SELECTORS,
+  clickFilterButton,
   buildColumns,
   buildRows,
   callGridMethod,
@@ -346,10 +347,7 @@ test.describe('custom themes', () => {
     );
     await page.keyboard.press('Escape');
 
-    await page
-      .getByTestId('theme-header-name')
-      .locator(SELECTORS.filterButton)
-      .click();
+    await clickFilterButton(page, 'theme-header-name');
     const filterPanel = page.locator(SELECTORS.filterPanel);
     await expect(filterPanel).toHaveCSS('background-color', 'rgb(40, 50, 60)');
     await expect(filterPanel).toHaveCSS('color', 'rgb(230, 231, 232)');

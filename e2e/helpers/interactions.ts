@@ -30,6 +30,15 @@ export async function cancelEditCellValue(
   await page.waitForChanges();
 }
 
+export async function clickFilterButton(
+  page: E2EPage,
+  headerTestId: string,
+): Promise<void> {
+  const header = page.getByTestId(headerTestId);
+  await header.hover();
+  await header.locator(SELECTORS.filterButton).click();
+}
+
 export async function dragBetweenLocators(
   page: E2EPage,
   from: { boundingBox(): Promise<{ x: number; y: number; width: number; height: number } | null> },
