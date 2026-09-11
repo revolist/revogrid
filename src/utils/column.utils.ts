@@ -198,7 +198,7 @@ export function gatherGroup<T extends ColumnCollection>(
       // fill grouping
       const itemLength = collectionItem.length;
       if (itemLength) {
-        const columnLength = [...(existingColumnsByType?.[type] || []), ...resultItem].length;
+        const columnLength = (existingColumnsByType?.[type] || []).length + resultItem.length;
         // fill columns
         resultItem.push(...collectionItem);
 
@@ -221,11 +221,13 @@ export function gatherGroup<T extends ColumnCollection>(
     res.columnGrouping[key].push(...rebasedItem);
   }
   res.maxLevel = Math.max(res.maxLevel, collection.maxLevel);
-  res.sort = { ...res.sort, ...collection.sort };
-  res.columnByProp = {
-    ...res.columnByProp,
-    ...collection.columnByProp,
-  };
+
+  res.sort = res.sort || {};
+  res.columnByProp = res.columnByProp || {};
+
+  Object.assign(res.sort, collection.sort);
+  Object.assign(res.columnByProp, collection.columnByProp);
+
   return res;
 }
 
