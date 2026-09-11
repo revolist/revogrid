@@ -403,6 +403,16 @@ export class OverlaySelection {
         await this.revogrEdit?.cancelChanges();
         this.closeEdit();
       },
+      appendEditValue: value => {
+        // Only the text editor renders a bare input as the editor root.
+        const input = this.revogrEdit?.firstElementChild;
+        if (!(input instanceof HTMLInputElement)) {
+          return false;
+        }
+        input.value += value;
+        input.focus();
+        return true;
+      },
       clearCell: () => !this.readonly && this.clearCell(),
       internalPaste: () => !this.readonly && this.beforeRegionPaste.emit(),
       getData: () => this.getData(),

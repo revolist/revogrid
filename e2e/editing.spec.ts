@@ -288,6 +288,57 @@ test.describe('editing', () => {
     await expect(dataCell(page, 0, 1)).toHaveText(barcode);
   });
 
+  test('keeps input typed natively right after a keystroke buffered while the editor was mounting', async ({ page }) => {
+    const source: SampleRow[] = [
+      { id: 1, name: '', role: 'Engineer', city: 'Lisbon' },
+      { id: 2, name: '', role: 'Designer', city: 'Porto' },
+    ];
+
+    const columns = buildColumns([
+      { prop: 'id', name: 'ID' },
+      { prop: 'name', name: 'Name' },
+      { prop: 'role', name: 'Role' },
+    ]);
+
+    await mountGrid(page, {
+      columns,
+      source,
+    });
+
+    await setCellsFocus(page, { x: 1, y: 0 });
+
+    // First key opens the editor and its input takes focus.
+    await page.keyboard.press('C');
+    const input = page.locator(SELECTORS.editInput);
+    await expect(input).toBeFocused();
+    await expect(input).toHaveValue('C');
+
+    // A scanner keeps emitting while the input mounts and gets focus: one key
+    // still reaches the grid with a target outside the input, and the next
+    // one is typed natively into the input before the grid re-rendered.
+    await page.evaluate(() => {
+      document.dispatchEvent(
+        new KeyboardEvent('keydown', {
+          bubbles: true,
+          cancelable: true,
+          key: 'H',
+          code: 'KeyH',
+        }),
+      );
+      const editInput = document.querySelector<HTMLInputElement>(
+        'revo-grid revogr-edit input',
+      );
+      editInput.value += 'N';
+    });
+    await page.waitForChanges();
+
+    await expect(input).toHaveValue('CHN');
+
+    await input.press('Enter');
+    await page.waitForChanges();
+    await expect(dataCell(page, 0, 1)).toHaveText('CHN');
+  });
+
   test('starts editing from AltGr printable characters', async ({ page }) => {
     const source: SampleRow[] = [
       { id: 1, name: 'Alice', role: 'Engineer', city: 'Lisbon' },
