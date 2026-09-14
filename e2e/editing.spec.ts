@@ -288,6 +288,137 @@ test.describe('editing', () => {
     await expect(dataCell(page, 0, 1)).toHaveText(barcode);
   });
 
+  test('keeps native input during the pending edit render handoff', async ({
+    page,
+  }) => {
+    const source: SampleRow[] = [
+      { id: 1, name: '', role: 'Engineer', city: 'Lisbon' },
+    ];
+
+    const columns = buildColumns([
+      { prop: 'id', name: 'ID' },
+      { prop: 'name', name: 'Name' },
+    ]);
+
+    await mountGrid(page, { columns, source });
+    await setCellsFocus(page, { x: 1, y: 0 });
+
+    const value = await page.evaluate(async () => {
+      const editorMounted = new Promise<HTMLInputElement>(resolve => {
+        const observer = new MutationObserver(() => {
+          const input =
+            document.querySelector<HTMLInputElement>('revogr-edit input');
+          if (input) {
+            observer.disconnect();
+            resolve(input);
+          }
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+      });
+
+      document.dispatchEvent(
+        new KeyboardEvent('keydown', {
+          bubbles: true,
+          cancelable: true,
+          key: 'C',
+          code: 'KeyC',
+        }),
+      );
+
+      const input = await editorMounted;
+      input.addEventListener(
+        'focus',
+        () => {
+          input.value += 'N';
+          input.dispatchEvent(
+            new InputEvent('input', {
+              bubbles: true,
+              data: 'N',
+              inputType: 'insertText',
+            }),
+          );
+        },
+        { once: true },
+      );
+
+      document.dispatchEvent(
+        new KeyboardEvent('keydown', {
+          bubbles: true,
+          cancelable: true,
+          key: 'H',
+          code: 'KeyH',
+        }),
+      );
+
+      await new Promise<void>(resolve =>
+        requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+      );
+      return input.value;
+    });
+
+    expect(value).toBe('CHN');
+    await page.locator(SELECTORS.editInput).press('Enter');
+    await page.waitForChanges();
+    await expect(dataCell(page, 0, 1)).toHaveText('CHN');
+  });
+
+  test('commits buffered input when Enter arrives before editor focus', async ({
+    page,
+  }) => {
+    const source: SampleRow[] = [
+      { id: 1, name: '', role: 'Engineer', city: 'Lisbon' },
+    ];
+    const columns = buildColumns([
+      { prop: 'id', name: 'ID' },
+      { prop: 'name', name: 'Name' },
+    ]);
+
+    await mountGrid(page, { columns, source });
+    await setCellsFocus(page, { x: 1, y: 0 });
+
+    await page.evaluate(async () => {
+      const editorMounted = new Promise<void>(resolve => {
+        const observer = new MutationObserver(() => {
+          if (document.querySelector('revogr-edit input')) {
+            observer.disconnect();
+            resolve();
+          }
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+      });
+
+      for (const [key, code] of [
+        ['C', 'KeyC'],
+        ['H', 'KeyH'],
+      ]) {
+        document.dispatchEvent(
+          new KeyboardEvent('keydown', {
+            bubbles: true,
+            cancelable: true,
+            key,
+            code,
+          }),
+        );
+        if (key === 'C') {
+          await editorMounted;
+        }
+      }
+
+      document.dispatchEvent(
+        new KeyboardEvent('keydown', {
+          bubbles: true,
+          cancelable: true,
+          key: 'Enter',
+          code: 'Enter',
+        }),
+      );
+    });
+
+    await page.waitForChanges();
+    await expect(page.locator(SELECTORS.editInput)).toHaveCount(0);
+    await expect(dataCell(page, 0, 1)).toHaveText('CH');
+  });
+
   test('starts editing from AltGr printable characters', async ({ page }) => {
     const source: SampleRow[] = [
       { id: 1, name: 'Alice', role: 'Engineer', city: 'Lisbon' },

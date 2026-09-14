@@ -6,6 +6,7 @@ import {
   h,
   Element,
   Host,
+  Listen,
   Method,
 } from '@stencil/core';
 import { EDIT_INPUT_WR } from '../../utils/consts';
@@ -84,6 +85,20 @@ export class RevoEdit {
    */
   @Method() async beforeDisconnect() {
     this.currentEditor?.beforeDisconnect?.();
+  }
+
+  @Listen('internaleditkeydown')
+  onInternalEditKeyDown(
+    e: CustomEvent<{ original: KeyboardEvent; pendingValue?: any }>,
+  ) {
+    if (
+      this.currentEditor?.onBeforeKeyDown?.(
+        e.detail.original,
+        e.detail.pendingValue,
+      )
+    ) {
+      e.preventDefault();
+    }
   }
 
   onAutoSave() {

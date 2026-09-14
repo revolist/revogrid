@@ -1,7 +1,12 @@
 import { type VNode, h as createElement } from '@stencil/core';
-import { isEnterKeyValue, isTab } from '../../utils/key.utils';
+import {
+  isEnterKeyValue,
+  isShortcutModifier,
+  isTab,
+} from '../../utils/key.utils';
 import { timeout } from '../../utils';
 import type { EditCell, EditorBase, ColumnDataSchemaModel } from '@type';
+import { isEditInput } from './edit.utils';
 
 /**
  * Represents a cell editor in a grid.
@@ -19,6 +24,12 @@ export type SaveCallback = (value: any, preventFocus: boolean) => void;
 
 export class TextEditor implements EditorBase {
   editInput: HTMLInputElement | null = null;
+  /**
+   * False while the grid's edit store owns characters typed during mount.
+   * Once the input receives or consumes a printable key, the DOM value becomes
+   * authoritative and must not be replaced by a delayed store render.
+   */
+  private inputOwnsValue = false;
 
   element: Element | null = null;
   editCell?: EditCell = undefined;
@@ -36,6 +47,68 @@ export class TextEditor implements EditorBase {
       await timeout();
       this.editInput?.focus();
     }
+  }
+
+  /**
+   * Bridges the short period between starting an edit on the focused grid cell
+   * and the rendered input receiving browser focus.
+   *
+   * @param e The original document keydown event.
+   * @param pendingValue Characters buffered by the grid before the input mounted.
+   * @returns True when this editor consumed the event; false lets the normal
+   * keyboard service or native input behavior continue.
+   */
+  onBeforeKeyDown(e: KeyboardEvent, pendingValue?: any): boolean {
+    if (!this.editInput) {
+      // The grid must keep buffering until there is an input to receive data.
+      return false;
+    }
+
+    // Perform the store-to-input handoff once, immediately before native input
+    // starts. Moving the caret is essential: assigning input.value resets the
+    // selection and would otherwise insert the next character at the beginning.
+    if (
+      !this.inputOwnsValue &&
+      typeof pendingValue === 'string' &&
+      (pendingValue.length > 0 || this.editInput.value.length === 0)
+    ) {
+      this.editInput.value = pendingValue;
+      this.editInput.setSelectionRange(
+        pendingValue.length,
+        pendingValue.length,
+      );
+    }
+
+    if (e.target instanceof HTMLElement && isEditInput(e.target)) {
+      // The event already targets an editor input. Do not append it ourselves;
+      // returning false allows the browser's native text insertion to run.
+      if (!isShortcutModifier(e) && e.key.length === 1) {
+        this.inputOwnsValue = true;
+      }
+      return false;
+    }
+
+    if (!isShortcutModifier(e) && e.key.length === 1) {
+      // The input exists but is not focused yet. Consume this character here,
+      // focus the input, and let subsequent scanner keys use native insertion.
+      e.preventDefault();
+      this.inputOwnsValue = true;
+      this.editInput.value += e.key;
+      this.editInput.focus();
+      const valueLength = this.editInput.value.length;
+      this.editInput.setSelectionRange(valueLength, valueLength);
+      return true;
+    }
+
+    if (isEnterKeyValue(e.key) && !e.isComposing) {
+      // Barcode scanners commonly finish with Enter. Save even if that Enter
+      // reached the grid before the delayed input focus completed.
+      e.preventDefault();
+      this.onKeyDown(e);
+      return true;
+    }
+
+    return false;
   }
 
   onKeyDown(e: KeyboardEvent) {
@@ -80,8 +153,10 @@ export class TextEditor implements EditorBase {
     return h('input', {
       type: 'text',
       enterKeyHint: 'enter',
-      // set input value from cell data
-      value: this.editCell?.val ?? '',
+      // Use an initial value rather than a controlled value. After the handoff,
+      // a delayed Stencil render must not overwrite characters already inserted
+      // natively into the input.
+      defaultValue: this.editCell?.val ?? '',
       // save input element as ref for further usage
       ref: (el: HTMLInputElement | null) => {
         this.editInput = el;

@@ -209,6 +209,11 @@ export interface EditorBase {
   element?: Element | null;
   editCell?: EditCell;
   /**
+   * Handle a key that reached the grid while the editor was mounting.
+   * Return true when the editor consumed the event.
+   */
+  onBeforeKeyDown?(e: KeyboardEvent, pendingValue?: any): boolean;
+  /**
    * Autosave usage when you want to return value for models.
    */
   getValue?(): any;

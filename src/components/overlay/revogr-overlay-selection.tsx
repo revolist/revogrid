@@ -403,6 +403,17 @@ export class OverlaySelection {
         await this.revogrEdit?.cancelChanges();
         this.closeEdit();
       },
+      forwardEditKey: (original, pendingValue) => {
+        if (!this.revogrEdit) {
+          return false;
+        }
+        return !this.revogrEdit.dispatchEvent(
+          new CustomEvent('internaleditkeydown', {
+            cancelable: true,
+            detail: { original, pendingValue },
+          }),
+        );
+      },
       clearCell: () => !this.readonly && this.clearCell(),
       internalPaste: () => !this.readonly && this.beforeRegionPaste.emit(),
       getData: () => this.getData(),

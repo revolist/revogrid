@@ -29,6 +29,8 @@ type Config = {
   change(val?: any): boolean;
   // Cancels edit. Escape changes.
   cancel(): void;
+  // Gives a mounted editor first chance to consume pending keyboard input.
+  forwardEditKey(e: KeyboardEvent, pendingValue?: any): boolean;
 
   clearCell(): void;
   focus(
@@ -99,6 +101,10 @@ export class KeyboardService {
   ) {
     // IF EDIT MODE
     if (isEditMode) {
+      const editCell = this.sv.selectionStore.get('edit');
+      if (this.sv.forwardEditKey(e, editCell?.val)) {
+        return;
+      }
       if (this.appendPendingEditValue(e)) {
         return;
       }
