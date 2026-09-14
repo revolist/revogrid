@@ -7,6 +7,7 @@ import type {
   EditCellStore,
   RangeArea,
 } from '@type';
+import { setRangeToEdge, type SelectionEdge } from './selection.edge';
 
 type StoreByDimension = Record<number, SelectionStore>;
 type FocusedStore = {
@@ -160,32 +161,61 @@ export class SelectionStoreConnector {
     this.focus(store, { focus: start, end });
   }
 
-  focus(store: SelectionStore, { focus, end, next: transition }: { focus: Cell; end: Cell; next?: Partial<Cell> }) {
+  setRangeToEdge(store: SelectionStore, edge: SelectionEdge) {
+    const currentStorePointer = this.getStorePointer(store);
+    const focus = store.store.get('focus');
+    if (!currentStorePointer || !focus) {
+      return false;
+    }
+    return setRangeToEdge(this.stores, currentStorePointer, focus, edge);
+  }
+
+  clearRangesExcept(store: SelectionStore) {
+    for (const y in this.stores) {
+      for (const x in this.stores[y]) {
+        const current = this.stores[y][x];
+        if (current !== store) {
+          current.setRangeArea(null);
+        }
+      }
+    }
+  }
+
+  private getStorePointer(store: SelectionStore): Cell | undefined {
+    for (const y in this.stores) {
+      for (const x in this.stores[y]) {
+        if (this.stores[y][x] === store) {
+          return { x: Number(x), y: Number(y) };
+        }
+      }
+    }
+    return;
+  }
+
+  focus(
+    store: SelectionStore,
+    { focus, end, next: transition }: {
+      focus: Cell;
+      end: Cell;
+      next?: Partial<Cell>;
+    },
+  ): Cell | null {
     const currentStorePointer = this.getCurrentStorePointer(store);
     if (!currentStorePointer) {
       return null;
     }
 
-    const edgeCoordinate = transition && (Object.keys(transition).find(
-      coordinate => Math.abs(transition[coordinate as keyof Cell] || 0) > 1,
-    ) as keyof Cell | undefined);
+    const edgeCoordinate = transition && (
+      Object.keys(transition).find(
+        coordinate => !Number.isFinite(transition[coordinate as keyof Cell]),
+      ) as keyof Cell | undefined
+    );
     if (edgeCoordinate) {
-      const direction = transition![edgeCoordinate]!;
-      const stores = edgeCoordinate === 'x'
-        ? this.getXStores(currentStorePointer.y)
-        : this.getYStores(currentStorePointer.x);
-      const positions = Object.keys(stores).map(Number).sort((a, b) => a - b);
-      const edgePosition = direction > 0 ? positions.at(-1) : positions[0];
-      const edgeStore = edgePosition === undefined ? undefined : stores[edgePosition];
-      const edgeLastCell = edgeStore?.store.get('lastCell');
-      if (edgeStore && edgeLastCell) {
-        const edgeCell = {
-          ...focus,
-          [edgeCoordinate]: direction > 0 ? edgeLastCell[edgeCoordinate] - 1 : 0,
-        };
-        this.focus(edgeStore, { focus: edgeCell, end: edgeCell });
-      }
-      return null;
+      const target = {
+        ...focus,
+        [edgeCoordinate]: transition![edgeCoordinate],
+      };
+      return this.focus(store, { focus: target, end: target });
     }
 
     // check for the focus in nearby store/viewport

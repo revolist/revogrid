@@ -21,6 +21,7 @@ import {
 } from './selection.utils';
 import { Cell, Nullable, RangeArea, SelectionStoreState } from '@type';
 import { isEditInput } from '../editors/edit.utils';
+import type { SelectionEdge } from '../../services/selection.edge';
 
 type Config = {
   selectionStore: Observable<SelectionStoreState>;
@@ -40,16 +41,22 @@ type Config = {
   getData(): any;
   internalPaste(): void;
   range(range: RangeArea | null): boolean;
+  rangeToEdge(range: RangeArea, edge: SelectionEdge): boolean;
   selectAll(): void;
 };
 
-const DIRECTION_CODES: string[] = [
-  codesLetter.TAB,
+const ARROW_CODES: string[] = [
   codesLetter.ARROW_UP,
   codesLetter.ARROW_DOWN,
   codesLetter.ARROW_LEFT,
   codesLetter.ARROW_RIGHT,
 ];
+const DIRECTION_CODES: string[] = [codesLetter.TAB, ...ARROW_CODES];
+type DirectionKeyChange = {
+  changes: Partial<Cell>;
+  isMulti?: boolean;
+  edge?: SelectionEdge;
+};
 export class KeyboardService {
   /** Keep focus transitions in keydown order so rendering can scroll each cell into view. */
   private keyChangeQueue: Promise<boolean> = Promise.resolve(false);
@@ -261,7 +268,7 @@ export class KeyboardService {
   }
 
   private keyEdgeChange(
-    edge: Partial<Cell>,
+    edge: SelectionEdge,
     range: RangeArea | null,
     focus: Cell | null,
     isMulti: boolean,
@@ -269,21 +276,29 @@ export class KeyboardService {
     if (!range || !focus) {
       return false;
     }
-    const data = this.sv.getData();
-    const coordinate = Object.keys(edge)[0] as keyof Cell;
-    const direction = edge[coordinate] as number;
+    const { lastCell } = this.sv.getData();
+    const { coordinate, direction } = edge;
+    const target = direction > 0 ? lastCell[coordinate] - 1 : 0;
 
     if (isMulti) {
-      const end = {
-        ...focus,
-        [coordinate]: direction > 0 ? data.lastCell[coordinate] - 1 : 0,
-      };
-      return this.sv.range(getRange(focus, end));
+      const edgeRange = { ...range };
+      if (coordinate === 'x') {
+        edgeRange.x = direction < 0 ? target : focus.x;
+        edgeRange.x1 = direction > 0 ? target : focus.x;
+      } else {
+        edgeRange.y = direction < 0 ? target : focus.y;
+        edgeRange.y1 = direction > 0 ? target : focus.y;
+      }
+      return this.sv.rangeToEdge(edgeRange, edge);
     }
 
     return this.sv.focus(
-      { ...focus, [coordinate]: direction > 0 ? Number.MAX_SAFE_INTEGER : -1 },
-      { [coordinate]: direction * 2 },
+      focus,
+      {
+        [coordinate]: direction > 0
+          ? Number.POSITIVE_INFINITY
+          : Number.NEGATIVE_INFINITY,
+      },
     );
   }
 
@@ -291,8 +306,15 @@ export class KeyboardService {
   changeDirectionKey(
     e: KeyboardEvent,
     canRange: boolean,
-  ): { changes: Partial<Cell>; isMulti?: boolean; edge?: Partial<Cell> } | void {
+  ): DirectionKeyChange | void {
     const isMulti = canRange && e.shiftKey;
+    const hasPrimaryModifier = e.ctrlKey || e.metaKey;
+    const isArrow = ARROW_CODES.includes(e.code);
+    const isEdgeShortcut = hasPrimaryModifier && !e.altKey && isArrow;
+
+    if (hasPrimaryModifier && !isEdgeShortcut) {
+      return;
+    }
     if (DIRECTION_CODES.includes(e.code)) {
       e.preventDefault();
     }
@@ -304,16 +326,32 @@ export class KeyboardService {
       }
     }
 
-    if ((e.ctrlKey || e.metaKey) && !e.altKey) {
+    if (isEdgeShortcut) {
       switch (e.code) {
         case codesLetter.ARROW_UP:
-          return { changes: { y: -1 }, edge: { y: -1 }, isMulti };
+          return {
+            changes: { y: -1 },
+            edge: { coordinate: 'y', direction: -1 },
+            isMulti,
+          };
         case codesLetter.ARROW_DOWN:
-          return { changes: { y: 1 }, edge: { y: 1 }, isMulti };
+          return {
+            changes: { y: 1 },
+            edge: { coordinate: 'y', direction: 1 },
+            isMulti,
+          };
         case codesLetter.ARROW_LEFT:
-          return { changes: { x: -1 }, edge: { x: -1 }, isMulti };
+          return {
+            changes: { x: -1 },
+            edge: { coordinate: 'x', direction: -1 },
+            isMulti,
+          };
         case codesLetter.ARROW_RIGHT:
-          return { changes: { x: 1 }, edge: { x: 1 }, isMulti };
+          return {
+            changes: { x: 1 },
+            edge: { coordinate: 'x', direction: 1 },
+            isMulti,
+          };
       }
     }
 

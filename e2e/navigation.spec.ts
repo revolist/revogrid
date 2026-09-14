@@ -2,11 +2,14 @@ import { expect } from '@playwright/test';
 import { test } from '@stencil/playwright';
 import {
   SAMPLE_ROWS,
+  SELECTORS,
   basicColumns,
   callGridMethod,
   dataCell,
   expectFocusedCell,
   expectSelectedRange,
+  getFocused,
+  getSelectedRange,
   mountGrid,
   setCellsFocus,
 } from './helpers';
@@ -48,7 +51,7 @@ test.describe('navigation', () => {
     await expectSelectedRange(page, { x: 2, y: 1, x1: 2, y1: 1 });
   });
 
-  test('moves focus and extends ranges to logical grid edges with Ctrl or Cmd arrows', async ({ page }) => {
+  test('moves focus to every virtualized logical edge with Ctrl or Cmd arrows', async ({ page }) => {
     const columns = Array.from({ length: 24 }, (_, index) => ({
       name: `Column ${index}`,
       prop: `column${index}`,
@@ -69,17 +72,136 @@ test.describe('navigation', () => {
     await expectFocusedCell(page, { x: 23, y: 10 });
     await expect.poll(() => dataCell(page, 10, 23).isVisible()).toBe(true);
 
-    await page.keyboard.press('Control+ArrowDown');
-    await expectFocusedCell(page, { x: 23, y: 79 });
-    await expect.poll(() => dataCell(page, 79, 23).isVisible()).toBe(true);
+    await page.keyboard.press('Control+ArrowLeft');
+    await expectFocusedCell(page, { x: 0, y: 10 });
+    await expect.poll(() => dataCell(page, 10, 0).isVisible()).toBe(true);
 
-    await setCellsFocus(page, { x: 5, y: 10 });
+    await page.keyboard.press('Meta+ArrowDown');
+    await expectFocusedCell(page, { x: 0, y: 79 });
+    await expect.poll(() => dataCell(page, 79, 0).isVisible()).toBe(true);
+
+    await page.keyboard.press('Meta+ArrowUp');
+    await expectFocusedCell(page, { x: 0, y: 0 });
+    await expect.poll(() => dataCell(page, 0, 0).isVisible()).toBe(true);
+
+    await page.keyboard.press('Control+ArrowUp');
+    await expectFocusedCell(page, { x: 0, y: 0 });
+  });
+
+  test('extends ranges to every logical edge while preserving the other axis', async ({ page }) => {
+    const columns = Array.from({ length: 8 }, (_, index) => ({
+      name: `Column ${index}`,
+      prop: `column${index}`,
+    }));
+    await mountGrid(page, {
+      columns,
+      source: Array.from({ length: 20 }, (_, row) => Object.fromEntries(
+        columns.map((column, columnIndex) => [column.prop, `${row}-${columnIndex}`]),
+      )),
+      range: true,
+    });
+
+    await setCellsFocus(page, { x: 3, y: 7 });
     await page.keyboard.press('Control+Shift+ArrowDown');
-    await expectFocusedCell(page, { x: 5, y: 10 });
-    await expectSelectedRange(page, { x: 5, y: 10, x1: 5, y1: 79 });
+    await expectFocusedCell(page, { x: 3, y: 7 });
+    await expectSelectedRange(page, { x: 3, y: 7, x1: 3, y1: 19 });
 
-    await page.keyboard.press('Control+Shift+ArrowLeft');
-    await expectSelectedRange(page, { x: 0, y: 10, x1: 5, y1: 10 });
+    await page.keyboard.press('Control+Shift+ArrowRight');
+    await expectSelectedRange(page, { x: 3, y: 7, x1: 7, y1: 19 });
+
+    await setCellsFocus(page, { x: 3, y: 7 });
+    await page.keyboard.press('Meta+Shift+ArrowUp');
+    await expectSelectedRange(page, { x: 3, y: 0, x1: 3, y1: 7 });
+
+    await page.keyboard.press('Meta+Shift+ArrowLeft');
+    await expectSelectedRange(page, { x: 0, y: 0, x1: 3, y1: 7 });
+  });
+
+  test('moves focus without creating a range when range selection is disabled', async ({ page }) => {
+    await mountGrid(page, {
+      columns: basicColumns(),
+      source: Array.from({ length: 10 }, (_, index) => ({
+        id: index,
+        name: `Name ${index}`,
+        role: `Role ${index}`,
+        city: `City ${index}`,
+      })),
+      trimmedRows: { 1: true, 7: true },
+      range: false,
+    });
+
+    await setCellsFocus(page, { x: 1, y: 1 });
+    await page.keyboard.press('Control+Shift+ArrowDown');
+    await expectFocusedCell(page, { x: 1, y: 7 });
+    await expect.poll(() => getSelectedRange(page)).toMatchObject({
+      x: 1,
+      y: 7,
+      x1: 1,
+      y1: 7,
+    });
+  });
+
+  test('crosses populated pinned partitions as one logical grid', async ({ page }) => {
+    await mountGrid(page, {
+      columns: [
+        { prop: 'left', name: 'Left', pin: 'colPinStart' },
+        { prop: 'middle', name: 'Middle' },
+        { prop: 'right', name: 'Right', pin: 'colPinEnd' },
+      ],
+      source: Array.from({ length: 10 }, (_, index) => ({
+        left: `L${index}`,
+        middle: `M${index}`,
+        right: `R${index}`,
+      })),
+      pinnedTopSource: [{ left: 'LT', middle: 'MT', right: 'RT' }],
+      pinnedBottomSource: [{ left: 'LB', middle: 'MB', right: 'RB' }],
+      range: true,
+    });
+
+    await setCellsFocus(page, { x: 0, y: 3 }, undefined, 'rgCol', 'rgRow');
+    await page.keyboard.press('Control+ArrowLeft');
+    await expect.poll(() => getFocused(page)).toMatchObject({
+      cell: { x: 0, y: 3 },
+      colType: 'colPinStart',
+      rowType: 'rgRow',
+    });
+
+    await page.keyboard.press('Control+ArrowRight');
+    await expect.poll(() => getFocused(page)).toMatchObject({
+      cell: { x: 0, y: 3 },
+      colType: 'colPinEnd',
+      rowType: 'rgRow',
+    });
+
+    await page.keyboard.press('Control+ArrowUp');
+    await expect.poll(() => getFocused(page)).toMatchObject({
+      cell: { x: 0, y: 0 },
+      colType: 'colPinEnd',
+      rowType: 'rowPinStart',
+    });
+
+    await page.keyboard.press('Control+ArrowDown');
+    await expect.poll(() => getFocused(page)).toMatchObject({
+      cell: { x: 0, y: 0 },
+      colType: 'colPinEnd',
+      rowType: 'rowPinEnd',
+    });
+
+    await setCellsFocus(page, { x: 0, y: 3 }, undefined, 'rgCol', 'rgRow');
+    await page.keyboard.press('Control+Shift+ArrowRight');
+    await page.keyboard.press('Control+Shift+ArrowDown');
+    await expect.poll(() => getFocused(page)).toMatchObject({
+      cell: { x: 0, y: 3 },
+      colType: 'rgCol',
+      rowType: 'rgRow',
+    });
+    await expect.poll(() => getSelectedRange(page)).toMatchObject({
+      x: 0,
+      y: 3,
+      x1: 0,
+      y1: 9,
+    });
+    await expect(page.locator(SELECTORS.selectedRange)).toHaveCount(4);
   });
 
   test('keeps the focused cell visible during held ArrowRight navigation', async ({ page }) => {
