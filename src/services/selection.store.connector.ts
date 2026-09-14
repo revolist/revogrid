@@ -160,9 +160,31 @@ export class SelectionStoreConnector {
     this.focus(store, { focus: start, end });
   }
 
-  focus(store: SelectionStore, { focus, end }: { focus: Cell; end: Cell }) {
+  focus(store: SelectionStore, { focus, end, next: transition }: { focus: Cell; end: Cell; next?: Partial<Cell> }) {
     const currentStorePointer = this.getCurrentStorePointer(store);
     if (!currentStorePointer) {
+      return null;
+    }
+
+    const edgeCoordinate = transition && (Object.keys(transition).find(
+      coordinate => Math.abs(transition[coordinate as keyof Cell] || 0) > 1,
+    ) as keyof Cell | undefined);
+    if (edgeCoordinate) {
+      const direction = transition![edgeCoordinate]!;
+      const stores = edgeCoordinate === 'x'
+        ? this.getXStores(currentStorePointer.y)
+        : this.getYStores(currentStorePointer.x);
+      const positions = Object.keys(stores).map(Number).sort((a, b) => a - b);
+      const edgePosition = direction > 0 ? positions.at(-1) : positions[0];
+      const edgeStore = edgePosition === undefined ? undefined : stores[edgePosition];
+      const edgeLastCell = edgeStore?.store.get('lastCell');
+      if (edgeStore && edgeLastCell) {
+        const edgeCell = {
+          ...focus,
+          [edgeCoordinate]: direction > 0 ? edgeLastCell[edgeCoordinate] - 1 : 0,
+        };
+        this.focus(edgeStore, { focus: edgeCell, end: edgeCell });
+      }
       return null;
     }
 

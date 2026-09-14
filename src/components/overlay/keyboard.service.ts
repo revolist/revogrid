@@ -209,7 +209,9 @@ export class KeyboardService {
       this.applyingKeyChange = true;
       let changed: boolean;
       try {
-        changed = this.keyPositionChange(data.changes, range, focus, data.isMulti);
+        changed = data.edge
+          ? this.keyEdgeChange(data.edge, range, focus, !!data.isMulti)
+          : this.keyPositionChange(data.changes, range, focus, data.isMulti);
       } finally {
         this.applyingKeyChange = false;
       }
@@ -258,11 +260,38 @@ export class KeyboardService {
     );
   }
 
+  private keyEdgeChange(
+    edge: Partial<Cell>,
+    range: RangeArea | null,
+    focus: Cell | null,
+    isMulti: boolean,
+  ) {
+    if (!range || !focus) {
+      return false;
+    }
+    const data = this.sv.getData();
+    const coordinate = Object.keys(edge)[0] as keyof Cell;
+    const direction = edge[coordinate] as number;
+
+    if (isMulti) {
+      const end = {
+        ...focus,
+        [coordinate]: direction > 0 ? data.lastCell[coordinate] - 1 : 0,
+      };
+      return this.sv.range(getRange(focus, end));
+    }
+
+    return this.sv.focus(
+      { ...focus, [coordinate]: direction > 0 ? Number.MAX_SAFE_INTEGER : -1 },
+      { [coordinate]: direction * 2 },
+    );
+  }
+
   /** Monitor key direction changes */
   changeDirectionKey(
     e: KeyboardEvent,
     canRange: boolean,
-  ): { changes: Partial<Cell>; isMulti?: boolean } | void {
+  ): { changes: Partial<Cell>; isMulti?: boolean; edge?: Partial<Cell> } | void {
     const isMulti = canRange && e.shiftKey;
     if (DIRECTION_CODES.includes(e.code)) {
       e.preventDefault();
@@ -272,6 +301,19 @@ export class KeyboardService {
       switch (e.code) {
         case codesLetter.TAB:
           return { changes: { x: -1 }, isMulti: false };
+      }
+    }
+
+    if ((e.ctrlKey || e.metaKey) && !e.altKey) {
+      switch (e.code) {
+        case codesLetter.ARROW_UP:
+          return { changes: { y: -1 }, edge: { y: -1 }, isMulti };
+        case codesLetter.ARROW_DOWN:
+          return { changes: { y: 1 }, edge: { y: 1 }, isMulti };
+        case codesLetter.ARROW_LEFT:
+          return { changes: { x: -1 }, edge: { x: -1 }, isMulti };
+        case codesLetter.ARROW_RIGHT:
+          return { changes: { x: 1 }, edge: { x: 1 }, isMulti };
       }
     }
 
