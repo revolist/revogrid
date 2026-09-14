@@ -2,13 +2,11 @@ import { expect } from '@playwright/test';
 import { test } from '@stencil/playwright';
 import {
   SAMPLE_ROWS,
-  SELECTORS,
   basicColumns,
   callGridMethod,
   dataCell,
   expectFocusedCell,
   expectSelectedRange,
-  getFocused,
   getSelectedRange,
   mountGrid,
   setCellsFocus,
@@ -139,69 +137,6 @@ test.describe('navigation', () => {
       x1: 1,
       y1: 7,
     });
-  });
-
-  test('crosses populated pinned partitions as one logical grid', async ({ page }) => {
-    await mountGrid(page, {
-      columns: [
-        { prop: 'left', name: 'Left', pin: 'colPinStart' },
-        { prop: 'middle', name: 'Middle' },
-        { prop: 'right', name: 'Right', pin: 'colPinEnd' },
-      ],
-      source: Array.from({ length: 10 }, (_, index) => ({
-        left: `L${index}`,
-        middle: `M${index}`,
-        right: `R${index}`,
-      })),
-      pinnedTopSource: [{ left: 'LT', middle: 'MT', right: 'RT' }],
-      pinnedBottomSource: [{ left: 'LB', middle: 'MB', right: 'RB' }],
-      range: true,
-    });
-
-    await setCellsFocus(page, { x: 0, y: 3 }, undefined, 'rgCol', 'rgRow');
-    await page.keyboard.press('Control+ArrowLeft');
-    await expect.poll(() => getFocused(page)).toMatchObject({
-      cell: { x: 0, y: 3 },
-      colType: 'colPinStart',
-      rowType: 'rgRow',
-    });
-
-    await page.keyboard.press('Control+ArrowRight');
-    await expect.poll(() => getFocused(page)).toMatchObject({
-      cell: { x: 0, y: 3 },
-      colType: 'colPinEnd',
-      rowType: 'rgRow',
-    });
-
-    await page.keyboard.press('Control+ArrowUp');
-    await expect.poll(() => getFocused(page)).toMatchObject({
-      cell: { x: 0, y: 0 },
-      colType: 'colPinEnd',
-      rowType: 'rowPinStart',
-    });
-
-    await page.keyboard.press('Control+ArrowDown');
-    await expect.poll(() => getFocused(page)).toMatchObject({
-      cell: { x: 0, y: 0 },
-      colType: 'colPinEnd',
-      rowType: 'rowPinEnd',
-    });
-
-    await setCellsFocus(page, { x: 0, y: 3 }, undefined, 'rgCol', 'rgRow');
-    await page.keyboard.press('Control+Shift+ArrowRight');
-    await page.keyboard.press('Control+Shift+ArrowDown');
-    await expect.poll(() => getFocused(page)).toMatchObject({
-      cell: { x: 0, y: 3 },
-      colType: 'rgCol',
-      rowType: 'rgRow',
-    });
-    await expect.poll(() => getSelectedRange(page)).toMatchObject({
-      x: 0,
-      y: 3,
-      x1: 0,
-      y1: 9,
-    });
-    await expect(page.locator(SELECTORS.selectedRange)).toHaveCount(4);
   });
 
   test('keeps the focused cell visible during held ArrowRight navigation', async ({ page }) => {

@@ -21,7 +21,6 @@ import {
 } from './selection.utils';
 import { Cell, Nullable, RangeArea, SelectionStoreState } from '@type';
 import { isEditInput } from '../editors/edit.utils';
-import type { SelectionEdge } from '../../services/selection.edge';
 
 type Config = {
   selectionStore: Observable<SelectionStoreState>;
@@ -41,7 +40,6 @@ type Config = {
   getData(): any;
   internalPaste(): void;
   range(range: RangeArea | null): boolean;
-  rangeToEdge(range: RangeArea, edge: SelectionEdge): boolean;
   selectAll(): void;
 };
 
@@ -55,7 +53,7 @@ const DIRECTION_CODES: string[] = [codesLetter.TAB, ...ARROW_CODES];
 type DirectionKeyChange = {
   changes: Partial<Cell>;
   isMulti?: boolean;
-  edge?: SelectionEdge;
+  edge?: boolean;
 };
 export class KeyboardService {
   /** Keep focus transitions in keydown order so rendering can scroll each cell into view. */
@@ -217,7 +215,7 @@ export class KeyboardService {
       let changed: boolean;
       try {
         changed = data.edge
-          ? this.keyEdgeChange(data.edge, range, focus, !!data.isMulti)
+          ? this.keyEdgeChange(data.changes, range, focus, !!data.isMulti)
           : this.keyPositionChange(data.changes, range, focus, data.isMulti);
       } finally {
         this.applyingKeyChange = false;
@@ -268,7 +266,7 @@ export class KeyboardService {
   }
 
   private keyEdgeChange(
-    edge: SelectionEdge,
+    changes: Partial<Cell>,
     range: RangeArea | null,
     focus: Cell | null,
     isMulti: boolean,
@@ -277,7 +275,8 @@ export class KeyboardService {
       return false;
     }
     const { lastCell } = this.sv.getData();
-    const { coordinate, direction } = edge;
+    const coordinate = changes.x ? 'x' : 'y';
+    const direction = changes[coordinate]!;
     const target = direction > 0 ? lastCell[coordinate] - 1 : 0;
 
     if (isMulti) {
@@ -289,17 +288,13 @@ export class KeyboardService {
         edgeRange.y = direction < 0 ? target : focus.y;
         edgeRange.y1 = direction > 0 ? target : focus.y;
       }
-      return this.sv.rangeToEdge(edgeRange, edge);
+      return this.sv.range(edgeRange);
     }
 
-    return this.sv.focus(
-      focus,
-      {
-        [coordinate]: direction > 0
-          ? Number.POSITIVE_INFINITY
-          : Number.NEGATIVE_INFINITY,
-      },
-    );
+    const edgeFocus = { ...focus, [coordinate]: target };
+    return this.sv.focus(edgeFocus, {
+      [coordinate]: target - focus[coordinate],
+    });
   }
 
   /** Monitor key direction changes */
@@ -326,45 +321,24 @@ export class KeyboardService {
       }
     }
 
-    if (isEdgeShortcut) {
-      switch (e.code) {
-        case codesLetter.ARROW_UP:
-          return {
-            changes: { y: -1 },
-            edge: { coordinate: 'y', direction: -1 },
-            isMulti,
-          };
-        case codesLetter.ARROW_DOWN:
-          return {
-            changes: { y: 1 },
-            edge: { coordinate: 'y', direction: 1 },
-            isMulti,
-          };
-        case codesLetter.ARROW_LEFT:
-          return {
-            changes: { x: -1 },
-            edge: { coordinate: 'x', direction: -1 },
-            isMulti,
-          };
-        case codesLetter.ARROW_RIGHT:
-          return {
-            changes: { x: 1 },
-            edge: { coordinate: 'x', direction: 1 },
-            isMulti,
-          };
-      }
-    }
-
+    let changes: Partial<Cell>;
     switch (e.code) {
       case codesLetter.ARROW_UP:
-        return { changes: { y: -1 }, isMulti };
+        changes = { y: -1 };
+        break;
       case codesLetter.ARROW_DOWN:
-        return { changes: { y: 1 }, isMulti };
+        changes = { y: 1 };
+        break;
       case codesLetter.ARROW_LEFT:
-        return { changes: { x: -1 }, isMulti };
+        changes = { x: -1 };
+        break;
       case codesLetter.TAB:
       case codesLetter.ARROW_RIGHT:
-        return { changes: { x: 1 }, isMulti };
+        changes = { x: 1 };
+        break;
+      default:
+        return;
     }
+    return { changes, isMulti, ...(isEdgeShortcut && { edge: true }) };
   }
 }

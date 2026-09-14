@@ -26,7 +26,6 @@ import type {
   ViewSettingSizeProp,
 } from '@type';
 import { Observable } from '../../utils';
-import type { SelectionEdge } from '../../services/selection.edge';
 
 export type ResizeDetails = { [index: number]: ColumnRegular };
 type Config = {
@@ -52,10 +51,6 @@ export type FocusedData = {
   colType: DimensionCols;
   rowType: DimensionRows;
   column?: ColumnRegular;
-};
-type ViewportDataWithRangeEdge = ViewportData & {
-  onInternalsetrangeedge(e: CustomEvent<SelectionEdge>): void;
-  onInternalclearranges(): void;
 };
 
 export function getViewportResizeDimension(
@@ -166,24 +161,13 @@ export default class ViewportService {
             rgRow.position.y,
             rgRow.type,
           );
-          const rowDef: ViewportDataWithRangeEdge = {
+          const rowDef: ViewportData = {
             colType: val,
             ...rgRow,
             rowSelectionStore,
             selectionStore: segmentSelection.store,
             onSetrange: e => {
               segmentSelection.setRangeArea(e.detail);
-            },
-            onInternalsetrangeedge: (e: CustomEvent<SelectionEdge>) => {
-              config.selectionStoreConnector.setRangeToEdge(
-                segmentSelection,
-                e.detail,
-              );
-            },
-            onInternalclearranges: () => {
-              config.selectionStoreConnector.clearRangesExcept(
-                segmentSelection,
-              );
             },
             onSettemprange: e => segmentSelection.setTempArea(e.detail),
             onFocuscell: e => {

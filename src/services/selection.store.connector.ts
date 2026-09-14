@@ -7,7 +7,6 @@ import type {
   EditCellStore,
   RangeArea,
 } from '@type';
-import { setRangeToEdge, type SelectionEdge } from './selection.edge';
 
 type StoreByDimension = Record<number, SelectionStore>;
 type FocusedStore = {
@@ -161,61 +160,10 @@ export class SelectionStoreConnector {
     this.focus(store, { focus: start, end });
   }
 
-  setRangeToEdge(store: SelectionStore, edge: SelectionEdge) {
-    const currentStorePointer = this.getStorePointer(store);
-    const focus = store.store.get('focus');
-    if (!currentStorePointer || !focus) {
-      return false;
-    }
-    return setRangeToEdge(this.stores, currentStorePointer, focus, edge);
-  }
-
-  clearRangesExcept(store: SelectionStore) {
-    for (const y in this.stores) {
-      for (const x in this.stores[y]) {
-        const current = this.stores[y][x];
-        if (current !== store) {
-          current.setRangeArea(null);
-        }
-      }
-    }
-  }
-
-  private getStorePointer(store: SelectionStore): Cell | undefined {
-    for (const y in this.stores) {
-      for (const x in this.stores[y]) {
-        if (this.stores[y][x] === store) {
-          return { x: Number(x), y: Number(y) };
-        }
-      }
-    }
-    return;
-  }
-
-  focus(
-    store: SelectionStore,
-    { focus, end, next: transition }: {
-      focus: Cell;
-      end: Cell;
-      next?: Partial<Cell>;
-    },
-  ): Cell | null {
+  focus(store: SelectionStore, { focus, end }: { focus: Cell; end: Cell }) {
     const currentStorePointer = this.getCurrentStorePointer(store);
     if (!currentStorePointer) {
       return null;
-    }
-
-    const edgeCoordinate = transition && (
-      Object.keys(transition).find(
-        coordinate => !Number.isFinite(transition[coordinate as keyof Cell]),
-      ) as keyof Cell | undefined
-    );
-    if (edgeCoordinate) {
-      const target = {
-        ...focus,
-        [edgeCoordinate]: transition![edgeCoordinate],
-      };
-      return this.focus(store, { focus: target, end: target });
     }
 
     // check for the focus in nearby store/viewport

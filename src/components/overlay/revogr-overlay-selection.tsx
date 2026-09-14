@@ -27,7 +27,6 @@ import { AutoFillService } from './autofill.service';
 import { getRangeFillClipboardData } from './clipboard.utils';
 import { verifyTouchTarget } from '../../utils/events';
 import { getCellData, type Observable } from '../../utils';
-import type { SelectionEdge } from '../../services/selection.edge';
 
 import type {
   SelectionStoreState,
@@ -391,18 +390,6 @@ export class OverlaySelection {
     this.keyboardService = new KeyboardService({
       selectionStore,
       range: r => !!r && this.triggerRangeEvent(r),
-      rangeToEdge: (range, edge) => {
-        if (!this.triggerRangeEvent(range, undefined, true)) {
-          return false;
-        }
-        return this.element.dispatchEvent(
-          new CustomEvent<SelectionEdge>('internalsetrangeedge', {
-            bubbles: true,
-            cancelable: true,
-            detail: edge,
-          }),
-        );
-      },
       focus: (f, changes, focusNextViewport) => {
         if (focusNextViewport) {
           this.beforeNextViewportFocus.emit(f);
@@ -713,7 +700,6 @@ export class OverlaySelection {
   private triggerRangeEvent(
     range: RangeArea,
     originalEvent?: CellInteractionEvent,
-    preserveOtherRanges = false,
   ) {
     const type = this.types.rowType;
     // 1. Apply range
@@ -735,11 +721,6 @@ export class OverlaySelection {
     let e = this.beforeSetRange.emit(data);
     if (e.defaultPrevented) {
       return false;
-    }
-    if (!preserveOtherRanges) {
-      this.element.dispatchEvent(new CustomEvent('internalclearranges', {
-        bubbles: true,
-      }));
     }
     // 3. Set range
     e = this.setRange.emit({ ...applyEvent.detail.range, type });
