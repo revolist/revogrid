@@ -1,5 +1,6 @@
 import { RevoEdit } from '../src/components/editors/revogr-edit';
 import { TextEditor } from '../src/components/editors/text-editor';
+import { OverlaySelection } from '../src/components/overlay/revogr-overlay-selection';
 
 function appendValue(component: RevoEdit, value: string) {
   const event = new CustomEvent<string>('internalappendeditvalue', {
@@ -11,6 +12,36 @@ function appendValue(component: RevoEdit, value: string) {
 }
 
 describe('RevoEdit pending input', () => {
+  it('consumes appended input through the overlay callback', () => {
+    const component = new RevoEdit();
+    const editor = new TextEditor({} as any);
+    editor.editInput = document.createElement('input');
+    editor.editInput.value = 'C';
+    (component as any).currentEditor = editor;
+
+    const host = {
+      dispatchEvent(event: Event) {
+        component.onInternalAppendEditValue(event as CustomEvent<string>);
+        return !event.defaultPrevented;
+      },
+    };
+
+    const overlay = new OverlaySelection();
+    (overlay as any).revogrEdit = host;
+    jest.spyOn(overlay, 'createAutoFillService').mockImplementation();
+    overlay.selectionServiceSet({
+      onChange: () => () => undefined,
+    } as any);
+
+    const appendEditValue = (overlay as any).keyboardService.sv
+      .appendEditValue as (value: string) => boolean;
+
+    const consumed = appendEditValue('H');
+
+    expect(editor.editInput.value).toBe('CH');
+    expect(consumed).toBe(true);
+  });
+
   it('appends input for TextEditor instances', () => {
     const component = new RevoEdit();
     const editor = new TextEditor({} as any);
