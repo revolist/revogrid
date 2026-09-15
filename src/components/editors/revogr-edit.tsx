@@ -6,6 +6,7 @@ import {
   h,
   Element,
   Host,
+  Listen,
   Method,
 } from '@stencil/core';
 import { EDIT_INPUT_WR } from '../../utils/consts';
@@ -84,6 +85,17 @@ export class RevoEdit {
    */
   @Method() async beforeDisconnect() {
     this.currentEditor?.beforeDisconnect?.();
+  }
+
+  @Listen('internalappendeditvalue')
+  onInternalAppendEditValue(e: CustomEvent<string>) {
+    const editor = this.currentEditor;
+    if (!(editor instanceof TextEditor) || !editor.editInput) {
+      return;
+    }
+    editor.editInput.value += e.detail;
+    editor.editInput.focus();
+    e.preventDefault();
   }
 
   onAutoSave() {
