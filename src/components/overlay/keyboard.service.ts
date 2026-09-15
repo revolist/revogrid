@@ -29,6 +29,8 @@ type Config = {
   change(val?: any): boolean;
   // Cancels edit. Escape changes.
   cancel(): void;
+  // Types into the editor input once it is rendered. False while no input exists yet.
+  appendEditValue(value: string): boolean;
 
   clearCell(): void;
   focus(
@@ -73,6 +75,10 @@ export class KeyboardService {
   /**
    * Appends printable key input that arrives after edit mode was requested
    * but before the editor input has mounted or received focus.
+   *
+   * Once the input is rendered the key goes straight into it: a store update
+   * would only reach the input on the next render, and that render would
+   * overwrite whatever was typed natively into the input in the meantime.
    */
   private appendPendingEditValue(e: KeyboardEvent): boolean {
     if (
@@ -89,6 +95,9 @@ export class KeyboardService {
     }
 
     e.preventDefault();
+    if (this.sv.appendEditValue(e.key)) {
+      return true;
+    }
     this.sv.selectionStore.set('edit', {
       ...editCell,
       val: `${editCell.val}${e.key}`,
