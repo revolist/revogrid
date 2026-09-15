@@ -45,13 +45,18 @@ type Config = {
   selectAll(): void;
 };
 
-const DIRECTION_CODES: string[] = [
-  codesLetter.TAB,
+const ARROW_CODES: string[] = [
   codesLetter.ARROW_UP,
   codesLetter.ARROW_DOWN,
   codesLetter.ARROW_LEFT,
   codesLetter.ARROW_RIGHT,
 ];
+const DIRECTION_CODES = new Set<string>([codesLetter.TAB, ...ARROW_CODES]);
+type DirectionKeyChange = {
+  changes: Partial<Cell>;
+  isMulti?: boolean;
+  edge?: boolean;
+};
 export class KeyboardService {
   /** Keep focus transitions in keydown order so rendering can scroll each cell into view. */
   private keyChangeQueue: Promise<boolean> = Promise.resolve(false);
@@ -218,7 +223,9 @@ export class KeyboardService {
       this.applyingKeyChange = true;
       let changed: boolean;
       try {
-        changed = this.keyPositionChange(data.changes, range, focus, data.isMulti);
+        changed = data.edge
+          ? this.keyEdgeChange(data.changes, range, focus, !!data.isMulti)
+          : this.keyPositionChange(data.changes, range, focus, data.isMulti);
       } finally {
         this.applyingKeyChange = false;
       }
@@ -267,13 +274,49 @@ export class KeyboardService {
     );
   }
 
+  private keyEdgeChange(
+    changes: Partial<Cell>,
+    range: RangeArea | null,
+    focus: Cell | null,
+    isMulti: boolean,
+  ) {
+    if (!range || !focus) {
+      return false;
+    }
+    const { lastCell } = this.sv.getData();
+    const coordinate = changes.x ? 'x' : 'y';
+    const direction = changes[coordinate]!;
+    const target = direction > 0 ? lastCell[coordinate] - 1 : 0;
+
+    if (isMulti) {
+      const edgeCoordinate = coordinate === 'x' ? 'x1' : 'y1';
+      return this.sv.range({
+        ...range,
+        [coordinate]: direction < 0 ? target : focus[coordinate],
+        [edgeCoordinate]: direction > 0 ? target : focus[coordinate],
+      });
+    }
+
+    const edgeFocus = { ...focus, [coordinate]: target };
+    return this.sv.focus(edgeFocus, {
+      [coordinate]: target - focus[coordinate],
+    });
+  }
+
   /** Monitor key direction changes */
   changeDirectionKey(
     e: KeyboardEvent,
     canRange: boolean,
-  ): { changes: Partial<Cell>; isMulti?: boolean } | void {
+  ): DirectionKeyChange | void {
     const isMulti = canRange && e.shiftKey;
-    if (DIRECTION_CODES.includes(e.code)) {
+    const hasPrimaryModifier = e.ctrlKey || e.metaKey;
+    const isArrow = ARROW_CODES.includes(e.code);
+    const isEdgeShortcut = hasPrimaryModifier && !e.altKey && isArrow;
+
+    if (hasPrimaryModifier && !isEdgeShortcut) {
+      return;
+    }
+    if (DIRECTION_CODES.has(e.code)) {
       e.preventDefault();
     }
 
@@ -284,16 +327,24 @@ export class KeyboardService {
       }
     }
 
+    let changes: Partial<Cell>;
     switch (e.code) {
       case codesLetter.ARROW_UP:
-        return { changes: { y: -1 }, isMulti };
+        changes = { y: -1 };
+        break;
       case codesLetter.ARROW_DOWN:
-        return { changes: { y: 1 }, isMulti };
+        changes = { y: 1 };
+        break;
       case codesLetter.ARROW_LEFT:
-        return { changes: { x: -1 }, isMulti };
+        changes = { x: -1 };
+        break;
       case codesLetter.TAB:
       case codesLetter.ARROW_RIGHT:
-        return { changes: { x: 1 }, isMulti };
+        changes = { x: 1 };
+        break;
+      default:
+        return;
     }
+    return { changes, isMulti, ...(isEdgeShortcut && { edge: true }) };
   }
 }
