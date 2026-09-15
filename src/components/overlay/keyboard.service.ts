@@ -49,7 +49,7 @@ const ARROW_CODES: string[] = [
   codesLetter.ARROW_LEFT,
   codesLetter.ARROW_RIGHT,
 ];
-const DIRECTION_CODES: string[] = [codesLetter.TAB, ...ARROW_CODES];
+const DIRECTION_CODES = new Set<string>([codesLetter.TAB, ...ARROW_CODES]);
 type DirectionKeyChange = {
   changes: Partial<Cell>;
   isMulti?: boolean;
@@ -280,15 +280,12 @@ export class KeyboardService {
     const target = direction > 0 ? lastCell[coordinate] - 1 : 0;
 
     if (isMulti) {
-      const edgeRange = { ...range };
-      if (coordinate === 'x') {
-        edgeRange.x = direction < 0 ? target : focus.x;
-        edgeRange.x1 = direction > 0 ? target : focus.x;
-      } else {
-        edgeRange.y = direction < 0 ? target : focus.y;
-        edgeRange.y1 = direction > 0 ? target : focus.y;
-      }
-      return this.sv.range(edgeRange);
+      const edgeCoordinate = coordinate === 'x' ? 'x1' : 'y1';
+      return this.sv.range({
+        ...range,
+        [coordinate]: direction < 0 ? target : focus[coordinate],
+        [edgeCoordinate]: direction > 0 ? target : focus[coordinate],
+      });
     }
 
     const edgeFocus = { ...focus, [coordinate]: target };
@@ -310,7 +307,7 @@ export class KeyboardService {
     if (hasPrimaryModifier && !isEdgeShortcut) {
       return;
     }
-    if (DIRECTION_CODES.includes(e.code)) {
+    if (DIRECTION_CODES.has(e.code)) {
       e.preventDefault();
     }
 

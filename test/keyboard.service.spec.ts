@@ -77,6 +77,24 @@ describe('KeyboardService grid-edge navigation', () => {
     expect(controlTab.defaultPrevented).toBe(false);
   });
 
+  it('consumes direction keys but leaves unrelated keys untouched', () => {
+    const { service } = createService();
+    const arrowRight = new KeyboardEvent('keydown', {
+      code: 'ArrowRight',
+      cancelable: true,
+    });
+    const letter = new KeyboardEvent('keydown', {
+      code: 'KeyA',
+      cancelable: true,
+    });
+
+    service.changeDirectionKey(arrowRight, true);
+    service.changeDirectionKey(letter, true);
+
+    expect(arrowRight.defaultPrevented).toBe(true);
+    expect(letter.defaultPrevented).toBe(false);
+  });
+
   it('jumps focus directly to the known last row', () => {
     const { service, focuses, selectionState } = createService();
 
@@ -106,5 +124,18 @@ describe('KeyboardService grid-edge navigation', () => {
     );
 
     expect(ranges).toEqual([{ x: 3, y: 2, x1: 7, y1: 6 }]);
+  });
+
+  it('extends the existing range to the first row', () => {
+    const { service, ranges, selectionState } = createService();
+
+    (service as any).keyEdgeChange(
+      { y: -1 },
+      selectionState.range,
+      selectionState.focus,
+      true,
+    );
+
+    expect(ranges).toEqual([{ x: 3, y: 0, x1: 3, y1: 2 }]);
   });
 });
