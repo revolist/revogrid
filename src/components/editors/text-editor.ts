@@ -38,6 +38,15 @@ export class TextEditor implements EditorBase {
     }
   }
 
+  appendPendingInput(value: string): boolean {
+    if (!this.editInput) {
+      return false;
+    }
+    this.editInput.value += value;
+    this.editInput.focus();
+    return true;
+  }
+
   onKeyDown(e: KeyboardEvent) {
     const isEnter = isEnterKeyValue(e.key);
     const isKeyTab = isTab(e.key);

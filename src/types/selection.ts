@@ -209,6 +209,11 @@ export interface EditorBase {
   element?: Element | null;
   editCell?: EditCell;
   /**
+   * Consume printable input that reached the grid while the editor mounted.
+   * Return true when the editor handled the value.
+   */
+  appendPendingInput?(value: string): boolean;
+  /**
    * Autosave usage when you want to return value for models.
    */
   getValue?(): any;
