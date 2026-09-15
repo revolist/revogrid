@@ -39,7 +39,18 @@ describe('RevoEdit pending input', () => {
     expect(editor.editInput.value).toBe('CH');
   });
 
-  it('does not append input for custom editors', () => {
+  it('consumes input from constructor-independent editor capabilities', () => {
+    const component = new RevoEdit();
+    const appendPendingInput = jest.fn(() => true);
+    (component as any).currentEditor = { appendPendingInput };
+
+    const event = appendValue(component, 'H');
+
+    expect(appendPendingInput).toHaveBeenCalledWith('H');
+    expect(event.defaultPrevented).toBe(true);
+  });
+
+  it('does not append input for custom editors without the capability', () => {
     const component = new RevoEdit();
     const input = document.createElement('input');
     input.value = 'C';

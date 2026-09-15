@@ -89,13 +89,9 @@ export class RevoEdit {
 
   @Listen('internalappendeditvalue')
   onInternalAppendEditValue(e: CustomEvent<string>) {
-    const editor = this.currentEditor;
-    if (!(editor instanceof TextEditor) || !editor.editInput) {
-      return;
+    if (this.currentEditor?.appendPendingInput?.(e.detail)) {
+      e.preventDefault();
     }
-    editor.editInput.value += e.detail;
-    editor.editInput.focus();
-    e.preventDefault();
   }
 
   onAutoSave() {
