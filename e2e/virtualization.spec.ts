@@ -18,6 +18,34 @@ import {
 } from './helpers';
 
 test.describe('virtualization', () => {
+  test('uses Shift + wheel to scroll horizontally without scrolling rows', async ({ page }) => {
+    const source = buildRows(40, ['id', 'name', 'role', 'city']);
+
+    await mountGrid(page, {
+      columns: [
+        { prop: 'id', name: 'ID', size: 180 },
+        { prop: 'name', name: 'Name', size: 180 },
+        { prop: 'role', name: 'Role', size: 180 },
+        { prop: 'city', name: 'City', size: 180 },
+      ],
+      source,
+      width: 320,
+      height: 180,
+      rowSize: 30,
+    });
+
+    const viewport = page.locator(SELECTORS.mainViewport);
+    const verticalScroll = page.locator(`${SELECTORS.mainViewport} .vertical-inner`);
+
+    await verticalScroll.dispatchEvent('wheel', {
+      deltaY: 120,
+      shiftKey: true,
+    });
+
+    await expect.poll(() => viewport.evaluate((el: HTMLElement) => el.scrollLeft)).toBeGreaterThan(0);
+    await expect(verticalScroll).toHaveJSProperty('scrollTop', 0);
+  });
+
   test('renders only the visible window and reveals later rows on scroll', async ({ page }) => {
     const rowSize = 30;
     const source = buildRows(200, ['id', 'name', 'role', 'city']);
