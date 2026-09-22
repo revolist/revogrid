@@ -30,6 +30,7 @@ import type {
 type Delta = 'deltaX' | 'deltaY';
 type LocalScrollEvent = {
   preventDefault(): void;
+  shiftKey?: boolean;
 } & { [x in Delta]: number };
 
 /**
@@ -457,6 +458,16 @@ export class RevogrViewportScroll implements ElementScroll {
     delta: Delta,
     e: LocalScrollEvent,
   ) {
+    // Some browsers report Shift + wheel as a vertical delta instead of deltaX.
+    // Route it through the existing horizontal scroll path before it can move rows.
+    if (e.shiftKey && !e.deltaX && e.deltaY) {
+      this.horizontalMouseWheel({
+        deltaX: e.deltaY,
+        preventDefault: () => e.preventDefault?.(),
+      });
+      return;
+    }
+
     const scrollTop = this.verticalScroll?.scrollTop ?? 0;
     const clientHeight = this.verticalScroll?.clientHeight ?? 0;
     const scrollHeight = this.verticalScroll?.scrollHeight ?? 0;
