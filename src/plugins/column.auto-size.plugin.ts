@@ -164,7 +164,7 @@ export class AutoSizeColumnPlugin extends BasePlugin {
 
   getLength(len?: any): number {
     const padding = 15;
-    if (!len) {
+    if (len === null || typeof len === 'undefined' || len === '') {
       return 0;
     }
     try {
