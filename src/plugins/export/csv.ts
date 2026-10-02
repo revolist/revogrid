@@ -67,7 +67,11 @@ export class ExportCsv implements Formatter {
   private parseCell(value: any, columnDelimiter: string, force = false) {
     let escape = value;
     if (typeof value !== 'string') {
-      escape = JSON.stringify(value);
+      escape = typeof value === 'bigint'
+        ? value.toString()
+        : JSON.stringify(value, (_key, current) =>
+            typeof current === 'bigint' ? current.toString() : current,
+          );
     }
     const toEscape = [CARRIAGE_RETURN, DOUBLE_QT, LINE_FEED, columnDelimiter];
     if (typeof escape === 'undefined') {
