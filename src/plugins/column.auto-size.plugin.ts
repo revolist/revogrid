@@ -258,25 +258,26 @@ export class AutoSizeColumnPlugin extends BasePlugin {
   }
 
   columnSet(columns: Record<DimensionCols, ColumnRegular[]>) {
+    const autoSizeColumns: Partial<AutoSizeColumns> = {};
     for (let t of columnTypes) {
       const type = t as DimensionCols;
       const cols = columns[type];
 
       for (let i in cols) {
         if (cols[i].autoSize || this.config?.allColumns) {
-          if (!this.autoSizeColumns) {
-            this.autoSizeColumns = {};
+          if (!autoSizeColumns[type]) {
+            autoSizeColumns[type] = {};
           }
-          if (!this.autoSizeColumns[type]) {
-            this.autoSizeColumns[type] = {};
-          }
-          this.autoSizeColumns[type][i] = {
+          autoSizeColumns[type]![i] = {
             ...cols[i],
             index: parseInt(i, 10),
           };
         }
       }
     }
+    this.autoSizeColumns = Object.keys(autoSizeColumns).length
+      ? autoSizeColumns
+      : null;
 
     if (this.dataResolve) {
       this.dataResolve(this.autoSizeColumns || {});
