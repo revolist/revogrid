@@ -26,7 +26,7 @@ export { AdditionalData, AfterEditEvent, AllDimensionType, ApplyFocusEvent, Befo
 export { RowResizeConfig } from "./plugins/row-resize";
 export { GridPlugin } from "./plugins/base.plugin";
 export { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
-export { AfterFilterApplyEventProps, BeforeFilterApplyEventProps, BeforeFilterTrimmedEventProps, ColumnFilterConfig, FilterCaptions, LogicFunction, MultiFilterItem, ShowData } from "./plugins/filter/filter.types";
+export { AfterFilterApplyEventProps, BeforeFilterApplyEventProps, BeforeFilterTrimmedEventProps, ColumnFilterConfig, FilterCaptions, FilterCollectionItem, LogicFunction, MultiFilterItem, ShowData } from "./plugins/filter/filter.types";
 export { AfterSortingApplyEvent, SortingConfig, SortingOrder } from "./plugins";
 export { GroupingOptions } from "./plugins/groupingRow/grouping.row.types";
 export { VNode } from "@stencil/core";
