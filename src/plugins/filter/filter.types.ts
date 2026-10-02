@@ -206,6 +206,62 @@ export interface MultiFilterItem {
   [prop: string]: FilterData[];
 }
 
+/**
+ * Payload emitted before Core applies filters. `collection` is a legacy view
+ * containing only the first condition for each column; `filterItems` is the
+ * complete multi-condition model.
+ *
+ * @example
+ * grid.addEventListener('beforefilterapply', event => {
+ *   event.preventDefault();
+ *   const filters = event.detail.filterItems;
+ *   // Send filters to the application's server-side query endpoint.
+ * });
+ */
+export interface BeforeFilterApplyEventProps<
+  TModel extends DataType = DataType,
+  TColumn extends ColumnRegular = ColumnRegular,
+> {
+  /** Legacy first-condition-per-column view. */
+  collection: Record<ColumnProp, FilterCollectionItem>;
+  /** Complete filter model; authoritative for multi-condition filters. */
+  filterItems: MultiFilterItem;
+  /** Source rows being filtered. */
+  source: TModel[];
+  /** Regular grid columns. */
+  columns: TColumn[];
+}
+
+/** Payload emitted before filter trim indexes are applied to the data source. */
+export interface BeforeFilterTrimmedEventProps<
+  TModel extends DataType = DataType,
+> {
+  /** Legacy first-condition-per-column view. */
+  collection: Record<ColumnProp, FilterCollectionItem>;
+  /** Complete filter model; authoritative for multi-condition filters. */
+  filterItems: MultiFilterItem;
+  /** Source rows being filtered. */
+  source: TModel[];
+  /** Physical source indexes to trim. */
+  itemsToFilter: Record<number, boolean>;
+}
+
+/** Payload emitted after the current filters and filter trims have been applied. */
+export interface AfterFilterApplyEventProps<
+  TModel extends DataType = DataType,
+> {
+  /** Legacy first-condition-per-column view. */
+  collection: Record<ColumnProp, FilterCollectionItem>;
+  /** Canonical complete filter model. */
+  filterItems: MultiFilterItem;
+  /** Backward-compatible alias for `filterItems`. */
+  multiFilterItems: MultiFilterItem;
+  /** Source rows that were filtered. */
+  source: TModel[];
+  /** Physical source indexes currently trimmed by the filter. */
+  itemsToFilter: Record<number, boolean>;
+}
+
 export interface ShowData extends FilterItem, Omit<ColumnRegular, 'filter'> {
   x: number;
   y: number;

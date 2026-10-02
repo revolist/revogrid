@@ -9,7 +9,7 @@ import { AdditionalData, AfterEditEvent, AllDimensionType, ApplyFocusEvent, Befo
 import { RowResizeConfig } from "./plugins/row-resize";
 import { GridPlugin } from "./plugins/base.plugin";
 import { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
-import { ColumnFilterConfig, FilterCaptions, FilterCollectionItem, LogicFunction, MultiFilterItem, ShowData } from "./plugins/filter/filter.types";
+import { AfterFilterApplyEventProps, BeforeFilterApplyEventProps, BeforeFilterTrimmedEventProps, ColumnFilterConfig, FilterCaptions, LogicFunction, MultiFilterItem, ShowData } from "./plugins/filter/filter.types";
 import { AfterSortingApplyEvent, SortingConfig, SortingOrder } from "./plugins";
 import { GroupingOptions } from "./plugins/groupingRow/grouping.row.types";
 import { VNode } from "@stencil/core";
@@ -26,7 +26,7 @@ export { AdditionalData, AfterEditEvent, AllDimensionType, ApplyFocusEvent, Befo
 export { RowResizeConfig } from "./plugins/row-resize";
 export { GridPlugin } from "./plugins/base.plugin";
 export { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
-export { ColumnFilterConfig, FilterCaptions, FilterCollectionItem, LogicFunction, MultiFilterItem, ShowData } from "./plugins/filter/filter.types";
+export { AfterFilterApplyEventProps, BeforeFilterApplyEventProps, BeforeFilterTrimmedEventProps, ColumnFilterConfig, FilterCaptions, LogicFunction, MultiFilterItem, ShowData } from "./plugins/filter/filter.types";
 export { AfterSortingApplyEvent, SortingConfig, SortingOrder } from "./plugins";
 export { GroupingOptions } from "./plugins/groupingRow/grouping.row.types";
 export { VNode } from "@stencil/core";
@@ -941,11 +941,9 @@ declare global {
     columns: ColumnCollection;
     order: SortingOrder;
   };
-        "beforefilterapply": { collection: Record<ColumnProp, FilterCollectionItem> };
-        "beforefiltertrimmed": {
-    collection: Record<ColumnProp, FilterCollectionItem>;
-    itemsToFilter: Record<number, boolean>;
-  };
+        "beforefilterapply": BeforeFilterApplyEventProps;
+        "beforefiltertrimmed": BeforeFilterTrimmedEventProps;
+        "afterfilterapply": AfterFilterApplyEventProps;
         "beforetrimmed": {
     trimmed: Record<number, boolean>;
     trimmedType: string;
@@ -1522,6 +1520,10 @@ declare namespace LocalJSX {
          */
         "onAfteredit"?: (event: RevoGridCustomEvent<AfterEditEvent>) => void;
         /**
+          * Emitted after the filter trim has been applied. `collection` remains the legacy first-condition-per-column view; `filterItems` is authoritative, and `multiFilterItems` is retained as a compatibility alias.
+         */
+        "onAfterfilterapply"?: (event: RevoGridCustomEvent<AfterFilterApplyEventProps>) => void;
+        /**
           * After focus render finished. Can be used to access a focus element through `event.target`. This is just a duplicate of `afterfocus` from `revogr-focus.tsx`.
          */
         "onAfterfocus"?: (event: RevoGridCustomEvent<FocusAfterRenderEvent>) => void;
@@ -1594,16 +1596,13 @@ declare namespace LocalJSX {
          */
         "onBeforeexport"?: (event: RevoGridCustomEvent<DataInput>) => void;
         /**
-          * Emitted before applying a filter to the data source. Use e.preventDefault() to prevent cell focus change. Modify if you need to change filters.
+          * Emitted before applying a filter to the data source. Use `event.preventDefault()` to handle filtering outside Core. `collection` is the legacy first-condition-per-column view; use `filterItems` for the complete multi-condition model.
          */
-        "onBeforefilterapply"?: (event: RevoGridCustomEvent<{ collection: Record<ColumnProp, FilterCollectionItem> }>) => void;
+        "onBeforefilterapply"?: (event: RevoGridCustomEvent<BeforeFilterApplyEventProps>) => void;
         /**
-          * Emitted before applying a filter to the data source. Use e.preventDefault() to prevent the default behavior of trimming values and applying the filter. Modify the `collection` property if you want to change the filters. Modify the `itemsToFilter` property if you want to filter the indexes for trimming.
+          * Emitted before applying filter trim indexes. Use `event.preventDefault()` to cancel. `collection` is the legacy first-condition-per-column view; use `filterItems` for the complete model.
          */
-        "onBeforefiltertrimmed"?: (event: RevoGridCustomEvent<{
-    collection: Record<ColumnProp, FilterCollectionItem>;
-    itemsToFilter: Record<number, boolean>;
-  }>) => void;
+        "onBeforefiltertrimmed"?: (event: RevoGridCustomEvent<BeforeFilterTrimmedEventProps>) => void;
         /**
           * Before the grid focus is lost. To prevent the default behavior of changing the cell focus, you can call `e.preventDefault()`.
          */
