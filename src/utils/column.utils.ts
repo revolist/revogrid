@@ -157,11 +157,26 @@ export function getColumns(
         res.columns[regularColumn.pin].push(regularColumn);
       }
       if (regularColumn.order) {
-        res.sort[regularColumn.prop] = regularColumn;
+        Object.defineProperty(res.sort, regularColumn.prop, {
+          configurable: true,
+          enumerable: true,
+          value: regularColumn,
+          writable: true,
+        });
       }
       // it's possible that some columns have same prop, but better to avoid it
-      if (!res.columnByProp[regularColumn.prop]) {
-        res.columnByProp[regularColumn.prop] = [];
+      if (
+        !Object.prototype.hasOwnProperty.call(
+          res.columnByProp,
+          regularColumn.prop,
+        )
+      ) {
+        Object.defineProperty(res.columnByProp, regularColumn.prop, {
+          configurable: true,
+          enumerable: true,
+          value: [],
+          writable: true,
+        });
       }
       res.columnByProp[regularColumn.prop].push(regularColumn);
 
