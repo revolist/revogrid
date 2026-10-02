@@ -26,6 +26,8 @@ const toAriaIndex = (index: number) => `${index + 1}`;
  * default behavior and may conflict with other plugins if added earlier.
  */
 export class WCAGPlugin extends BasePlugin {
+  private readonly unsubscribeRowSources: Array<() => void> = [];
+
   constructor(revogrid: HTMLRevoGridElement, providers: PluginProviders) {
     super(revogrid, providers);
 
@@ -34,6 +36,16 @@ export class WCAGPlugin extends BasePlugin {
     revogrid.setAttribute('aria-multiselectable', 'true');
     revogrid.setAttribute('tabindex', '0');
     this.updateRowCount();
+
+    // Internal data-provider paths can replace a row source without emitting
+    // the public afteranysource event (for example, rows added during paste).
+    for (const type of ['rowPinStart', 'rgRow', 'rowPinEnd'] as const) {
+      this.unsubscribeRowSources.push(
+        providers.data.stores[type].store.onChange('source', () => {
+          this.updateRowCount();
+        }),
+      );
+    }
 
     this.addEventListener('afteranysource', () => {
       this.updateRowCount();
@@ -146,5 +158,11 @@ export class WCAGPlugin extends BasePlugin {
       stores.rgRow.store.get('source').length +
       stores.rowPinEnd.store.get('source').length;
     this.revogrid.setAttribute('aria-rowcount', `${rowCount}`);
+  }
+
+  destroy() {
+    this.unsubscribeRowSources.forEach(unsubscribe => unsubscribe());
+    this.unsubscribeRowSources.length = 0;
+    super.destroy();
   }
 }
