@@ -1,4 +1,4 @@
-import { CellProps, PluginProviders } from '@type';
+import type { CellProps, DimensionRows, PluginProviders } from '@type';
 import { BasePlugin } from '../base.plugin';
 import { ColumnCollection } from 'src/utils';
 
@@ -33,6 +33,11 @@ export class WCAGPlugin extends BasePlugin {
     revogrid.setAttribute('aria-keyshortcuts', 'Enter');
     revogrid.setAttribute('aria-multiselectable', 'true');
     revogrid.setAttribute('tabindex', '0');
+    this.updateRowCount();
+
+    this.addEventListener('afteranysource', () => {
+      this.updateRowCount();
+    });
 
     /**
      * Before Columns Set Event
@@ -64,7 +69,10 @@ export class WCAGPlugin extends BasePlugin {
             const wcagProps: CellProps = {
               ['role']: 'gridcell',
               ['aria-colindex']: toAriaIndex(index),
-              ['aria-rowindex']: toAriaIndex(args[0].rowIndex),
+              ['aria-rowindex']: this.getRowAriaIndex(
+                args[0].type,
+                args[0].rowIndex,
+              ),
               ['tabindex']: -1,
             };
             const columnProps: CellProps = cellProperties?.(...args) || {};
@@ -82,14 +90,6 @@ export class WCAGPlugin extends BasePlugin {
      * Before Row Set Event
      */
     this.addEventListener(
-      'beforesourceset',
-      ({
-        detail,
-      }: CustomEvent<HTMLRevoGridElementEventMap['beforesourceset']>) => {
-        revogrid.setAttribute('aria-rowcount', `${detail.source.length}`);
-      },
-    );
-    this.addEventListener(
       'beforerowrender',
       ({
         detail,
@@ -97,7 +97,10 @@ export class WCAGPlugin extends BasePlugin {
         detail.node.$attrs$ = {
           ...detail.node.$attrs$,
           role: 'row',
-          ['aria-rowindex']: toAriaIndex(detail.item.itemIndex),
+          ['aria-rowindex']: this.getRowAriaIndex(
+            detail.rowType,
+            detail.item.itemIndex,
+          ),
         };
       },
     );
@@ -119,5 +122,29 @@ export class WCAGPlugin extends BasePlugin {
         }
       },
     );
+  }
+
+  private getRowAriaIndex(type: DimensionRows, index: number): string {
+    const pinnedTopCount = this.providers.data.stores.rowPinStart.store.get(
+      'source',
+    ).length;
+    if (type === 'rowPinStart') {
+      return toAriaIndex(index);
+    }
+    if (type === 'rowPinEnd') {
+      const mainCount = this.providers.data.stores.rgRow.store.get('source')
+        .length;
+      return toAriaIndex(pinnedTopCount + mainCount + index);
+    }
+    return toAriaIndex(pinnedTopCount + index);
+  }
+
+  private updateRowCount() {
+    const stores = this.providers.data.stores;
+    const rowCount =
+      stores.rowPinStart.store.get('source').length +
+      stores.rgRow.store.get('source').length +
+      stores.rowPinEnd.store.get('source').length;
+    this.revogrid.setAttribute('aria-rowcount', `${rowCount}`);
   }
 }
