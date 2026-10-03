@@ -207,7 +207,7 @@ export interface MultiFilterItem {
 }
 
 /**
- * Payload emitted before Core applies filters. `collection` is a legacy view
+ * Payload emitted before Core applies filters. `collection` is a view
  * containing only the first condition for each column; `filterItems` is the
  * complete multi-condition model.
  *
@@ -222,9 +222,9 @@ export interface BeforeFilterApplyEventProps<
   TModel extends DataType = DataType,
   TColumn extends ColumnRegular = ColumnRegular,
 > {
-  /** Legacy first-condition-per-column view. */
+  /** First condition for each column. */
   collection: Record<ColumnProp, FilterCollectionItem>;
-  /** Complete filter model; authoritative for multi-condition filters. */
+  /** Complete multi-condition filter model. */
   filterItems: MultiFilterItem;
   /** Source rows being filtered. */
   source: TModel[];
@@ -236,9 +236,9 @@ export interface BeforeFilterApplyEventProps<
 export interface BeforeFilterTrimmedEventProps<
   TModel extends DataType = DataType,
 > {
-  /** Legacy first-condition-per-column view. */
+  /** First condition for each column. */
   collection: Record<ColumnProp, FilterCollectionItem>;
-  /** Complete filter model; authoritative for multi-condition filters. */
+  /** Complete multi-condition filter model. */
   filterItems: MultiFilterItem;
   /** Source rows being filtered. */
   source: TModel[];
@@ -250,11 +250,11 @@ export interface BeforeFilterTrimmedEventProps<
 export interface AfterFilterApplyEventProps<
   TModel extends DataType = DataType,
 > {
-  /** Legacy first-condition-per-column view. */
+  /** First condition for each column. */
   collection: Record<ColumnProp, FilterCollectionItem>;
-  /** Canonical complete filter model. */
+  /** Complete multi-condition filter model. */
   filterItems: MultiFilterItem;
-  /** Backward-compatible alias for `filterItems`. */
+  /** Alias for `filterItems`. */
   multiFilterItems: MultiFilterItem;
   /** Source rows that were filtered. */
   source: TModel[];

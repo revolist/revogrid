@@ -1520,7 +1520,7 @@ declare namespace LocalJSX {
          */
         "onAfteredit"?: (event: RevoGridCustomEvent<AfterEditEvent>) => void;
         /**
-          * Emitted after the filter trim has been applied. `collection` remains the legacy first-condition-per-column view; `filterItems` is authoritative, and `multiFilterItems` is retained as a compatibility alias.
+          * Emitted after the filter trim has been applied. `collection` contains the first condition for each column; `filterItems` contains the complete model, and `multiFilterItems` is an alias for `filterItems`.
          */
         "onAfterfilterapply"?: (event: RevoGridCustomEvent<AfterFilterApplyEventProps>) => void;
         /**
@@ -1596,11 +1596,11 @@ declare namespace LocalJSX {
          */
         "onBeforeexport"?: (event: RevoGridCustomEvent<DataInput>) => void;
         /**
-          * Emitted before applying a filter to the data source. Use `event.preventDefault()` to handle filtering outside Core. `collection` is the legacy first-condition-per-column view; use `filterItems` for the complete multi-condition model.
+          * Emitted before applying a filter to the data source. Use `event.preventDefault()` to handle filtering outside Core. `collection` contains the first condition for each column; `filterItems` contains the complete multi-condition model.
          */
         "onBeforefilterapply"?: (event: RevoGridCustomEvent<BeforeFilterApplyEventProps>) => void;
         /**
-          * Emitted before applying filter trim indexes. Use `event.preventDefault()` to cancel. `collection` is the legacy first-condition-per-column view; use `filterItems` for the complete model.
+          * Emitted before applying filter trim indexes. Use `event.preventDefault()` to cancel. `collection` contains the first condition for each column; `filterItems` contains the complete model.
          */
         "onBeforefiltertrimmed"?: (event: RevoGridCustomEvent<BeforeFilterTrimmedEventProps>) => void;
         /**

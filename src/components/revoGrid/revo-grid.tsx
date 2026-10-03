@@ -557,22 +557,22 @@ export class RevoGridComponent {
   /**
    * Emitted before applying a filter to the data source.
    * Use `event.preventDefault()` to handle filtering outside Core. `collection`
-   * is the legacy first-condition-per-column view; use `filterItems` for the
+   * contains the first condition for each column; `filterItems` contains the
    * complete multi-condition model.
    */
   @Event() beforefilterapply: EventEmitter<BeforeFilterApplyEventProps>;
 
   /**
    * Emitted before applying filter trim indexes. Use `event.preventDefault()`
-   * to cancel. `collection` is the legacy first-condition-per-column view;
-   * use `filterItems` for the complete model.
+   * to cancel. `collection` contains the first condition for each column;
+   * `filterItems` contains the complete model.
    */
   @Event() beforefiltertrimmed: EventEmitter<BeforeFilterTrimmedEventProps>;
 
   /**
-   * Emitted after the filter trim has been applied. `collection` remains the
-   * legacy first-condition-per-column view; `filterItems` is authoritative,
-   * and `multiFilterItems` is retained as a compatibility alias.
+   * Emitted after the filter trim has been applied. `collection` contains the
+   * first condition for each column; `filterItems` contains the complete model,
+   * and `multiFilterItems` is an alias for `filterItems`.
    */
   @Event() afterfilterapply: EventEmitter<AfterFilterApplyEventProps>;
 
