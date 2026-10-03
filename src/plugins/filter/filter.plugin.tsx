@@ -630,10 +630,8 @@ export class FilterPlugin extends BasePlugin {
     column?: ColumnRegular,
     model: DataType = {},
   ) {
-    // reset the count of satisfied filters
-    let propFilterSatisfiedCount = 0;
-    // reset the array of last filter results
-    let lastFilterResults: boolean[] = [];
+    let andGroupSatisfied = true;
+    let anyGroupSatisfied = false;
 
     // THE MAGIC OF FILTERING IS HERE
     // If there is no column but user wants to filter by a property
@@ -652,63 +650,24 @@ export class FilterPlugin extends BasePlugin {
       blankSemantics,
     };
 
-    // testing each filter for a prop
+    // Each relation joins this condition to the next one. Evaluate adjacent
+    // AND conditions together, then combine completed groups with OR.
     for (const [filterIndex, filterData] of propFilters.entries()) {
       // the filter LogicFunction based on the type
       const filterFunc = this.filterFunctionsIndexedByType[filterData.type];
-      // OR relation
-      if (filterData.relation === 'or') {
-        // reset the array of last filter results
-        lastFilterResults = [];
-        // if the filter is satisfied, continue to the next filter
-        if (filterFunc(parsedValue, filterData.value, context)) {
-          continue;
+      andGroupSatisfied =
+        andGroupSatisfied && filterFunc(parsedValue, filterData.value, context);
+
+      const isFinalAndGroup =
+        filterData.relation === 'or' || filterIndex === propFilters.length - 1;
+      if (isFinalAndGroup) {
+        anyGroupSatisfied = anyGroupSatisfied || andGroupSatisfied;
+        if (anyGroupSatisfied) {
+          return false;
         }
-        // if the filter is not satisfied, count it
-        propFilterSatisfiedCount++;
-
-        // AND relation
-      } else {
-        // 'and' relation will need to know the next filter
-        // so we save this current filter to include it in the next filter
-        lastFilterResults.push(!filterFunc(parsedValue, filterData.value, context));
-
-        if (isFinalAndFilter(filterIndex, propFilters)) {
-          // let's just continue since for sure propFilterSatisfiedCount cannot be satisfied
-          if (allAndConditionsSatisfied(lastFilterResults)) {
-            // reset the array of last filter results
-            lastFilterResults = [];
-            continue;
-          }
-
-          // we need to add all of the lastFilterResults since we need to satisfy all
-          propFilterSatisfiedCount += lastFilterResults.length;
-          // reset the array of last filter results
-          lastFilterResults = [];
-        }
+        andGroupSatisfied = true;
       }
     } // end of propFilters forEach
-    return propFilterSatisfiedCount === propFilters.length;
+    return !anyGroupSatisfied;
   }
-}
-/**
- * Checks if the current filter is the final one in an AND sequence.
- * @param index - Current filter index in the list.
- * @param filters - Array of filters for the property.
- * @returns True if this is the last AND condition; false otherwise.
- */
-function isFinalAndFilter(index: number, filters: MultiFilterItem[string]) {
-  const nextFilter = filters[index + 1]; // Get the next filter in the list.
-  // Return true if there's no next filter or if the next filter defined and is not part of the AND sequence.
-  return !nextFilter || (!!nextFilter.relation && nextFilter.relation !== 'and');
-}
-
-/**
- * Determines if all conditions in an AND sequence are satisfied.
- * @param pendingResults - An array of results from the AND conditions.
- * @returns True if all conditions are satisfied; false otherwise.
- */
-function allAndConditionsSatisfied(pendingResults: boolean[]) {
-  // Check if there are any failed conditions in the pending results.
-  return !pendingResults.includes(true);
 }
