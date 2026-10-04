@@ -70,7 +70,10 @@ export class ExportCsv implements Formatter {
       escape = typeof value === 'bigint'
         ? value.toString()
         : JSON.stringify(value, (_key, current) =>
-            typeof current === 'bigint' ? current.toString() : current,
+            typeof current === 'bigint' ||
+            (typeof BigInt === 'function' && current instanceof BigInt)
+              ? current.toString()
+              : current,
           );
     }
     const toEscape = [CARRIAGE_RETURN, DOUBLE_QT, LINE_FEED, columnDelimiter];
