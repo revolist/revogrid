@@ -534,7 +534,9 @@ test.describe('row resize plugin', () => {
 
     await dragHandle(page, resizeHandle(page, 0), 24);
 
-    expect((await rowHeightsByText(page, 'Alice')).data).toBeCloseTo(60, 0);
+    await expect
+      .poll(async () => (await rowHeightsByText(page, 'Alice')).data)
+      .toBeCloseTo(60, 0);
     expect((await rowHeightsByText(page, 'Ben')).data).toBeCloseTo(81, 0);
     const pinned = await pinnedRow.boundingBox();
     expect(pinned?.height).toBeCloseTo(54, 0);
