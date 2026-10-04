@@ -1,11 +1,69 @@
 import { WCAGPlugin } from '../src/plugins/wcag';
+import { createStore } from '@stencil/store';
 
 describe('WCAGPlugin', () => {
+  it('counts pinned rows in global indices and tracks source replacements', () => {
+    const revogrid = document.createElement('div') as HTMLRevoGridElement;
+    const stores = {
+      rowPinStart: { store: createStore({ source: [{}, {}] }) },
+      rgRow: { store: createStore({ source: [{}, {}, {}] }) },
+      rowPinEnd: { store: createStore({ source: [{}] }) },
+    };
+    const plugin = new WCAGPlugin(revogrid, { data: { stores } } as never);
+    expect(revogrid.getAttribute('aria-rowcount')).toBe('6');
+
+    const column: Record<string, any> = {};
+    revogrid.dispatchEvent(
+      new CustomEvent('beforecolumnsset', {
+        detail: {
+          columns: { colPinStart: [], rgCol: [column], colPinEnd: [] },
+        },
+      }),
+    );
+    for (const [type, index] of [
+      ['rowPinStart', '1'],
+      ['rgRow', '3'],
+      ['rowPinEnd', '6'],
+    ]) {
+      expect(
+        column.cellProperties({ type, rowIndex: 0 })['aria-rowindex'],
+      ).toBe(index);
+      const node = { $attrs$: {} };
+      revogrid.dispatchEvent(
+        new CustomEvent('beforerowrender', {
+          detail: { node, rowType: type, item: { itemIndex: 0 } },
+        }),
+      );
+      expect(node.$attrs$).toMatchObject({ 'aria-rowindex': index });
+    }
+
+    stores.rowPinStart.store.set('source', [{}]);
+    expect(revogrid.getAttribute('aria-rowcount')).toBe('5');
+    expect(
+      column.cellProperties({ type: 'rgRow', rowIndex: 0 })['aria-rowindex'],
+    ).toBe('2');
+    plugin.destroy();
+    stores.rgRow.store.set('source', []);
+    expect(revogrid.getAttribute('aria-rowcount')).toBe('5');
+  });
+
   it('uses one-based ARIA indices for headers, rows, and data cells', () => {
     const revogrid = document.createElement('div') as HTMLRevoGridElement;
     const firstColumn: Record<string, any> = {};
     const secondColumn: Record<string, any> = {};
-    new WCAGPlugin(revogrid, {} as never);
+    const store = {
+      get: () => [],
+      onChange: () => () => {},
+    };
+    new WCAGPlugin(revogrid, {
+      data: {
+        stores: {
+          rowPinStart: { store },
+          rgRow: { store },
+          rowPinEnd: { store },
+        },
+      },
+    } as never);
 
     revogrid.dispatchEvent(
       new CustomEvent('beforecolumnsset', {
