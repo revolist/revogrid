@@ -21,13 +21,22 @@ test.describe('column groups', () => {
         { name: 'Inner', children: [{ prop: '__proto__', name: 'Prototype' }] },
         { prop: 'constructor', name: 'Constructor' },
       ] }],
-      source: [JSON.parse('{"__proto__":"Prototype value","constructor":"Constructor value"}')],
+      source: [],
     });
+    // Build this own-property fixture in the browser, without transporting the
+    // __proto__ key through Playwright's object serializer.
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid')!;
+      grid.source = [JSON.parse('{"__proto__":"Prototype value","constructor":"Constructor value"}')];
+      if (!Object.prototype.hasOwnProperty.call(grid.source[0], '__proto__')) {
+        throw new Error('Fixture must have its own __proto__ data property');
+      }
+    });
+    await page.waitForChanges();
 
     await expect(dataCell(page, 0, 0)).toHaveText('Prototype value');
     await expect(dataCell(page, 0, 1)).toHaveText('Constructor value');
-    await expect(page.locator('revogr-header')).toContainText('Outer');
-    await expect(page.locator('revogr-header')).toContainText('Inner');
+    await expect(page.locator('revogr-header').filter({ hasText: 'Outer' })).toContainText('Inner');
   });
 
   test('renders column groups correctly', async ({ page }) => {
