@@ -236,11 +236,14 @@ export function gatherGroup<T extends ColumnCollection>(
     res.columnGrouping[key].push(...rebasedItem);
   }
   res.maxLevel = Math.max(res.maxLevel, collection.maxLevel);
-  res.sort = { ...res.sort, ...collection.sort };
-  res.columnByProp = {
-    ...res.columnByProp,
-    ...collection.columnByProp,
-  };
+  res.sort = Object.defineProperties(
+    Object.defineProperties({}, Object.getOwnPropertyDescriptors(res.sort)),
+    Object.getOwnPropertyDescriptors(collection.sort),
+  );
+  res.columnByProp = Object.defineProperties(
+    Object.defineProperties({}, Object.getOwnPropertyDescriptors(res.columnByProp)),
+    Object.getOwnPropertyDescriptors(collection.columnByProp),
+  );
   return res;
 }
 

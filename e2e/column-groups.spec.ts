@@ -15,6 +15,21 @@ import {
 } from './helpers';
 
 test.describe('column groups', () => {
+  test('renders prototype-sensitive properties inside nested groups', async ({ page }) => {
+    await mountGrid(page, {
+      columns: [{ name: 'Outer', children: [
+        { name: 'Inner', children: [{ prop: '__proto__', name: 'Prototype' }] },
+        { prop: 'constructor', name: 'Constructor' },
+      ] }],
+      source: [JSON.parse('{"__proto__":"Prototype value","constructor":"Constructor value"}')],
+    });
+
+    await expect(dataCell(page, 0, 0)).toHaveText('Prototype value');
+    await expect(dataCell(page, 0, 1)).toHaveText('Constructor value');
+    await expect(page.locator('revogr-header')).toContainText('Outer');
+    await expect(page.locator('revogr-header')).toContainText('Inner');
+  });
+
   test('renders column groups correctly', async ({ page }) => {
     const source: SampleRow[] = [
       { id: 401, name: 'Alice', role: 'Engineer', city: 'Lisbon' },
