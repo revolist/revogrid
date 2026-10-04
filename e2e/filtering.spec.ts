@@ -22,6 +22,20 @@ async function nextAnimationFrames(page: E2EPage, count = 2) {
 }
 
 test.describe('filtering', () => {
+  test('applies mixed AND and OR connectors in their displayed row positions', async ({ page }) => {
+    await mountGrid(page, {
+      columns: [{ prop: 'role', name: 'Role', filter: true }],
+      source: [{ role: 'A' }, { role: 'A B' }, { role: 'C' }, { role: 'B' }],
+      filter: { multiFilterItems: { role: [
+        { id: 0, type: 'contains', value: 'A', relation: 'and' },
+        { id: 1, type: 'contains', value: 'B', relation: 'or' },
+        { id: 2, type: 'contains', value: 'C', relation: 'and' },
+      ] } },
+    });
+    await expect(mainDataRows(page)).toHaveCount(2);
+    await expectVisibleColumnValues(page, 0, ['A B', 'C']);
+  });
+
   test('keeps filter-only header text clear and reveals the button for keyboard focus', async ({ page }) => {
     await mountGrid(page, {
       columns: [
