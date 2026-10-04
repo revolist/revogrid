@@ -89,7 +89,7 @@ export class AutoSizeColumnPlugin extends BasePlugin {
     const aftersourceset = ({
       detail: { source },
     }: CustomEvent<SourceSetEvent>) => {
-      this.setSource(source);
+      void this.setSource(source);
     };
     const beforecolumnsset = ({
       detail: { columns },
@@ -265,9 +265,7 @@ export class AutoSizeColumnPlugin extends BasePlugin {
 
       for (let i in cols) {
         if (cols[i].autoSize || this.config?.allColumns) {
-          if (!autoSizeColumns[type]) {
-            autoSizeColumns[type] = {};
-          }
+          autoSizeColumns[type] ??= {};
           autoSizeColumns[type]![i] = {
             ...cols[i],
             index: parseInt(i, 10),
