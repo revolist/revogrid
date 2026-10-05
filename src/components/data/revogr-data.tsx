@@ -139,9 +139,11 @@ export class RevogrData {
     col: number; // virtual
   }) {
     // Stencil tweak to update cell content
-    const cell = this.renderedRows.get(e.row)?.$children$?.find(
-      child => child.$attrs$?.[DATA_COL] === e.col,
-    );
+    const cells = this.renderedRows.get(e.row)?.$children$;
+    const indexedCell = cells?.[e.col];
+    const cell = indexedCell?.$attrs$?.[DATA_COL] === e.col
+      ? indexedCell
+      : cells?.find(child => child.$attrs$?.[DATA_COL] === e.col);
     if (cell?.$attrs$?.redraw) {
       const children = await convertVNodeToHTML(
         this.element,
