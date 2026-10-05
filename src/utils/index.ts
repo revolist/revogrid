@@ -45,7 +45,8 @@ export function findPositionInArray<T>(this: T[], el: T, compareFn: (el: T, el2:
  * Sorted push
  */
 export function pushSorted<T>(arr: T[], el: T, fn: (el: T, el2: T) => number): T[] {
-  arr.splice(findPositionInArray.bind(arr)(el, fn), 0, el);
+  const position = findPositionInArray.bind(arr)(el, fn);
+  arr.splice(position < 0 ? -position - 1 : position, 0, el);
   return arr;
 }
 
