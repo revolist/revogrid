@@ -63,6 +63,7 @@ export enum ColumnAutoSizeMode {
 
 export class AutoSizeColumnPlugin extends BasePlugin {
   autoSizeColumns: Partial<AutoSizeColumns> | null = null;
+  private columnsSet = false;
   readonly letterBlockSize: number;
 
   /** for config option when preciseSize enabled */
@@ -136,7 +137,7 @@ export class AutoSizeColumnPlugin extends BasePlugin {
     }
 
     /** If data set first and no column provided await until get one */
-    if (!autoSize) {
+    if (!autoSize && !this.columnsSet) {
       const request = new Promise((resolve: Resolve, reject: Reject) => {
         this.dataResolve = resolve;
         this.dataReject = reject;
@@ -146,6 +147,8 @@ export class AutoSizeColumnPlugin extends BasePlugin {
       } catch (e) {
         return;
       }
+    } else if (!autoSize) {
+      autoSize = {};
     }
 
     // calculate sizes
@@ -258,6 +261,7 @@ export class AutoSizeColumnPlugin extends BasePlugin {
   }
 
   columnSet(columns: Record<DimensionCols, ColumnRegular[]>) {
+    this.columnsSet = true;
     const autoSizeColumns: Partial<AutoSizeColumns> = {};
     for (let t of columnTypes) {
       const type = t as DimensionCols;

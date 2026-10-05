@@ -51,4 +51,17 @@ describe('auto-size column replacement', () => {
     expect(setCustomSizes).not.toHaveBeenCalled();
     plugin.destroy();
   });
+
+  it('does not wait for another column set after an empty set is known', async () => {
+    const { plugin, setCustomSizes } = createPlugin();
+    plugin.columnSet(columns([]));
+    const pending = plugin.setSource([{ value: 'Pending' }]);
+    expect(plugin.dataResolve).toBeNull();
+    plugin.columnSet(columns([]));
+    await pending;
+    expect(plugin.dataResolve).toBeNull();
+    expect(plugin.dataReject).toBeNull();
+    expect(setCustomSizes).not.toHaveBeenCalled();
+    plugin.destroy();
+  });
 });
