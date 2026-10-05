@@ -534,7 +534,9 @@ test.describe('row resize plugin', () => {
 
     await dragHandle(page, resizeHandle(page, 0), 24);
 
-    expect((await rowHeightsByText(page, 'Alice')).data).toBeCloseTo(60, 0);
+    await expect
+      .poll(async () => (await rowHeightsByText(page, 'Alice')).data)
+      .toBeCloseTo(60, 0);
     expect((await rowHeightsByText(page, 'Ben')).data).toBeCloseTo(81, 0);
     const pinned = await pinnedRow.boundingBox();
     expect(pinned?.height).toBeCloseTo(54, 0);
@@ -1681,5 +1683,32 @@ test.describe('row resize plugin', () => {
     expect(alice.data).toBeCloseTo(60, 0);
     expect(alice.header).toBeCloseTo(alice.data, 0);
     expect(ben.data).toBeCloseTo(42, 0);
+  });
+
+  test('ignores non-finite row definition sizes and preserves zero-size rows', async ({ page }) => {
+    await mountGrid(page, {
+      columns: buildColumns([{ prop: 'name', name: 'Name' }]),
+      source: [{ name: 'Alice' }, { name: 'Ben' }],
+      rowHeaders: true,
+      rowSize: 30,
+    });
+
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) throw new Error('Grid was not found');
+      grid.rowDefinitions = [
+        { type: 'rgRow', index: 0, size: Number.NaN },
+        { type: 'rgRow', index: 1, size: 0 },
+      ];
+    });
+    await page.waitForChanges();
+
+    const realRowSize = await page.evaluate(async () => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) throw new Error('Grid was not found');
+      const providers = await grid.getProviders();
+      return providers?.dimension.stores.rgRow.store.get('realSize');
+    });
+    expect(realRowSize).toBe(30);
   });
 });

@@ -103,13 +103,16 @@ export class DimensionStore {
    * @param sizes - sizes to set
    */
   setDimensionSize(sizes: ViewSettingSizeProp = {}) {
+    const finiteSizes = Object.fromEntries(
+      Object.entries(sizes).filter(([, size]) => Number.isFinite(size)),
+    );
     const dimensionData = calculateDimensionData(
       this.store.get('originItemSize'),
-      sizes,
+      finiteSizes,
     );
     setStore(this.store, {
       ...dimensionData,
-      sizes,
+      sizes: finiteSizes,
     });
   }
 

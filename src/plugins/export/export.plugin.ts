@@ -43,7 +43,10 @@ export class ExportFilePlugin extends BasePlugin {
     const name = `${filename}.${fileKind}`;
 
     const blob = await this.getBlob(formatter);
-    const url = blob ? URL.createObjectURL(blob) : '';
+    if (!blob) {
+      return;
+    }
+    const url = URL.createObjectURL(blob);
 
     a.style.display = 'none';
     a.setAttribute('href', url);
