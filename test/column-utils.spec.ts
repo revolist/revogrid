@@ -36,4 +36,15 @@ describe('prototype-sensitive column properties', () => {
     expect(Object.getPrototypeOf(collection.columnByProp)).toBe(Object.prototype);
     expect(Object.getPrototypeOf(collection.sort)).toBe(Object.prototype);
   });
+
+  it('keeps same-prop columns when a nested group is merged', () => {
+    const collection = getColumns([
+      { prop: '__proto__', name: 'Root' },
+      { name: 'Group', children: [{ prop: '__proto__', name: 'Nested' }] },
+    ]);
+
+    expect(collection.columnByProp.__proto__.map(column => column.name)).toEqual([
+      'Root', 'Nested',
+    ]);
+  });
 });

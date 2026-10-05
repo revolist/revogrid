@@ -240,10 +240,28 @@ export function gatherGroup<T extends ColumnCollection>(
     Object.defineProperties({}, Object.getOwnPropertyDescriptors(res.sort)),
     Object.getOwnPropertyDescriptors(collection.sort),
   );
-  res.columnByProp = Object.defineProperties(
-    Object.defineProperties({}, Object.getOwnPropertyDescriptors(res.columnByProp)),
-    Object.getOwnPropertyDescriptors(collection.columnByProp),
-  );
+  const columnByProp: ColumnCollection['columnByProp'] = {};
+  for (const prop of Object.keys(res.columnByProp)) {
+    Object.defineProperty(columnByProp, prop, {
+      configurable: true,
+      enumerable: true,
+      value: [...res.columnByProp[prop]],
+      writable: true,
+    });
+  }
+  for (const prop of Object.keys(collection.columnByProp)) {
+    if (Object.prototype.hasOwnProperty.call(columnByProp, prop)) {
+      columnByProp[prop].push(...collection.columnByProp[prop]);
+    } else {
+      Object.defineProperty(columnByProp, prop, {
+        configurable: true,
+        enumerable: true,
+        value: [...collection.columnByProp[prop]],
+        writable: true,
+      });
+    }
+  }
+  res.columnByProp = columnByProp;
   return res;
 }
 
