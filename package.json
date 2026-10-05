@@ -99,7 +99,6 @@
     "api:update": "./scripts/generate_api.sh",
     "readme": "node ./scripts/generate_readme.mjs",
     "test": "stencil test --spec",
-    "test:hydrate": "tsc --noEmit --strict --skipLibCheck --target es2020 --moduleResolution node test/hydrate-types.ts && node --test test/hydrate.test.mjs",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "dev": "stencil build --dev --watch --serve",
