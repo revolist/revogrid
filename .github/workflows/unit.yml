@@ -37,7 +37,7 @@ jobs:
       - name: Build hydrate output
         run: npm run build
 
-      - name: Run hydrate contract tests
+      - name: Check hydrate declarations
         run: npm run test:hydrate
 
       - name: Write job summary
