@@ -37,6 +37,33 @@ Alice,25"`, () => {
   });
 
   describe('doExport — cell escaping', () => {
+    it('serializes nested primitive and boxed BigInt without losing precision', () => {
+      const value = BigInt('9007199254740993');
+      expect(doExport({
+        data: [{ v: { primitive: value, boxed: Object(value) } }],
+        headers: [],
+        props: ['v'],
+      })).toBe('"{""primitive"":""9007199254740993"",""boxed"":""9007199254740993""}"');
+    });
+
+    it('serializes a top-level primitive BigInt without losing precision', () => {
+      const value = BigInt('9007199254740993');
+      expect(doExport({
+        data: [{ v: value }],
+        headers: [],
+        props: ['v'],
+      })).toBe('9007199254740993');
+    });
+
+    it('serializes a top-level boxed BigInt without losing precision', () => {
+      const value = Object(BigInt('9007199254740993'));
+      expect(doExport({
+        data: [{ v: value }],
+        headers: [],
+        props: ['v'],
+      })).toBe('9007199254740993');
+    });
+
     it('value "Hello, World" → ""Hello, World"" (comma triggers double-quote wrapping)', () => {
       expect(doExport({ data: [{ v: 'Hello, World' }], headers: [], props: ['v'] })).toBe('"Hello, World"');
     });
