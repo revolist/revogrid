@@ -60,13 +60,15 @@ async function dragHandle(
   deltaY: number,
   release = true,
 ) {
+  const initialBox = await handle.boundingBox();
+  expect(initialBox).not.toBeNull();
+  // Hover waits for a stable, unobstructed handle after pinned-row layout updates.
+  // Keep the pointer inside its owning row; the lower half overlaps the next row.
+  await handle.hover({ position: { x: initialBox!.width / 2, y: 1 } });
   const box = await handle.boundingBox();
   expect(box).not.toBeNull();
   const x = box!.x + box!.width / 2;
-  // Use the part of the boundary handle that remains inside its owning row.
-  // The lower half intentionally overlaps the next row to enlarge the hit area.
   const y = box!.y + 1;
-  await page.mouse.move(x, y);
   await page.mouse.down();
   await page.mouse.move(x, y + deltaY, { steps: 5 });
   if (release) {
