@@ -38,6 +38,15 @@ Alice,25"`, () => {
   });
 
   describe('doExport — cell escaping', () => {
+    it('serializes objects with spoofed BigInt tags as ordinary top-level and nested objects', () => {
+      const value = { [Symbol.toStringTag]: 'BigInt', name: 'ordinary object' };
+      expect(doExport({
+        data: [{ v: value }, { v: { boxed: value } }],
+        headers: [],
+        props: ['v'],
+      })).toBe('"{""name"":""ordinary object""}"\r\n"{""boxed"":{""name"":""ordinary object""}}"');
+    });
+
     it('serializes top-level and nested boxed BigInt from another realm without losing precision', () => {
       const value = runInNewContext('Object(BigInt("9007199254740993"))');
       expect(doExport({
