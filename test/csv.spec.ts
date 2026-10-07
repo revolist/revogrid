@@ -1,3 +1,4 @@
+import { runInNewContext } from 'node:vm';
 import { ExportCsv } from '../src/plugins/export/csv';
 import type { DataInput } from '../src/plugins/export/types';
 
@@ -37,6 +38,15 @@ Alice,25"`, () => {
   });
 
   describe('doExport — cell escaping', () => {
+    it('serializes top-level and nested boxed BigInt from another realm without losing precision', () => {
+      const value = runInNewContext('Object(BigInt("9007199254740993"))');
+      expect(doExport({
+        data: [{ v: value }, { v: { boxed: value } }],
+        headers: [],
+        props: ['v'],
+      })).toBe('9007199254740993\r\n"{""boxed"":""9007199254740993""}"');
+    });
+
     it('serializes nested primitive and boxed BigInt without losing precision', () => {
       const value = BigInt('9007199254740993');
       expect(doExport({

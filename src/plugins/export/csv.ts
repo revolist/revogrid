@@ -20,9 +20,8 @@ const LINE_FEED = String.fromCharCode(10);
 const DOUBLE_QT = String.fromCharCode(34);
 const NO_BREAK_SPACE = String.fromCharCode(0xfeff);
 const escapeRegex = new RegExp('"', 'g');
-const hasBigInt = typeof BigInt === 'function';
 const isBigInt = (value: unknown): value is bigint | BigInt =>
-  typeof value === 'bigint' || (hasBigInt && value instanceof BigInt);
+  typeof value === 'bigint' || Object.prototype.toString.call(value) === '[object BigInt]';
 
 const bigIntReplacer = (_key: string, value: unknown): unknown =>
   isBigInt(value) ? value.toString() : value;
