@@ -24,6 +24,7 @@ export const hydrateTypesOutputTarget = (): OutputTargetCustom => ({
     }
     // Evict the source's queued copy so it cannot overwrite our corrected output.
     compilerCtx.fs.clearFileCache(sourcePath);
+    const writes = [];
     for (const target of config.outputTargets || []) {
       if (target.type !== 'dist-hydrate-script') {
         continue;
@@ -34,10 +35,13 @@ export const hydrateTypesOutputTarget = (): OutputTargetCustom => ({
         'index.d.ts',
       );
       // Preserve the Promise fallback on streaming error paths without changing runtime behavior.
-      await compilerCtx.fs.writeFile(
-        declarationsPath,
-        declarations.replace(original, corrected),
+      writes.push(
+        compilerCtx.fs.writeFile(
+          declarationsPath,
+          declarations.replace(original, corrected),
+        ),
       );
     }
+    await Promise.all(writes);
   },
 });
