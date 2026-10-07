@@ -34,6 +34,12 @@ jobs:
       - name: Run unit tests
         run: npm test -- --runInBand --json --outputFile=jest-results.json || true
 
+      - name: Build hydrate output
+        run: npm run build
+
+      - name: Run hydrate contract tests
+        run: npm run test:hydrate
+
       - name: Write job summary
         if: always()
         run: |
