@@ -305,7 +305,7 @@ export async function generateFakeDataObjectAsync(config = {}, options = {}) {
         rows: rgRow + 1,
         totalRows: rows,
       });
-      await yieldToBrowser();
+      await yieldToBrowser(); // NOSONAR: Yield sequential chunks so progress can paint and cancellation can interrupt generation.
     }
   }
 

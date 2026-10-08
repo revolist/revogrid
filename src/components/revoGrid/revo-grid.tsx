@@ -990,7 +990,7 @@ export class RevoGridComponent {
    * Get all providers for grid
    * Useful for external grid integration
    */
-  @Method() async getProviders() {
+  @Method() async getProviders(): Promise<PluginProviders | undefined> {
     return this.getPluginData();
   }
 
@@ -1948,9 +1948,12 @@ export class RevoGridComponent {
             this.scrollingService.registerElement(el, `${view.prop.key}`)
           }
           onScrollviewport={e => {
-              this.scrollingService.proxyScroll(e.detail, `${view.prop.key}`, this.noHorizontalScrollTransfer && e.detail.dimension === 'rgCol')
-           }
-          }
+            void this.scrollingService.proxyScroll(
+              e.detail,
+              `${view.prop.key}`,
+              this.noHorizontalScrollTransfer && e.detail.dimension === 'rgCol',
+            );
+          }}
           onScrollviewportsilent={e =>
             this.scrollingService.scrollSilentService(
               e.detail,
