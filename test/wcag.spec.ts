@@ -11,6 +11,9 @@ describe('WCAGPlugin', () => {
     };
     const plugin = new WCAGPlugin(revogrid, { data: { stores } } as never);
     expect(revogrid.getAttribute('aria-rowcount')).toBe('6');
+    const sourceReads = Object.values(stores).map(({ store }) =>
+      jest.spyOn(store, 'get'),
+    );
 
     const column: Record<string, any> = {};
     revogrid.dispatchEvent(
@@ -36,6 +39,13 @@ describe('WCAGPlugin', () => {
       );
       expect(node.$attrs$).toMatchObject({ 'aria-rowindex': index });
     }
+
+    for (const sourceRead of sourceReads) {
+      expect(sourceRead).not.toHaveBeenCalled();
+    }
+    const setAttribute = jest.spyOn(revogrid, 'setAttribute');
+    stores.rgRow.store.set('source', [{ edited: true }, {}, {}]);
+    expect(setAttribute).not.toHaveBeenCalled();
 
     stores.rowPinStart.store.set('source', [{}]);
     expect(revogrid.getAttribute('aria-rowcount')).toBe('5');

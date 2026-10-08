@@ -1,6 +1,7 @@
 import type { CellProps, DimensionRows, PluginProviders } from '@type';
 import { BasePlugin } from '../base.plugin';
 import { ColumnCollection } from 'src/utils';
+import { createStore } from '@stencil/store';
 
 const toAriaIndex = (index: number) => `${index + 1}`;
 
@@ -27,6 +28,11 @@ const toAriaIndex = (index: number) => `${index + 1}`;
  */
 export class WCAGPlugin extends BasePlugin {
   private readonly unsubscribeRowSources: Array<() => void> = [];
+  private readonly rowLengths = createStore({
+    rowPinStart: 0,
+    rgRow: 0,
+    rowPinEnd: 0,
+  });
 
   constructor(revogrid: HTMLRevoGridElement, providers: PluginProviders) {
     super(revogrid, providers);
@@ -35,21 +41,19 @@ export class WCAGPlugin extends BasePlugin {
     revogrid.setAttribute('aria-keyshortcuts', 'Enter');
     revogrid.setAttribute('aria-multiselectable', 'true');
     revogrid.setAttribute('tabindex', '0');
-    this.updateRowCount();
-
-    // Internal data-provider paths can replace a row source without emitting
-    // the public afteranysource event (for example, rows added during paste).
     for (const type of ['rowPinStart', 'rgRow', 'rowPinEnd'] as const) {
+      this.rowLengths.state[type] =
+        providers.data.stores[type].store.get('source').length;
       this.unsubscribeRowSources.push(
-        providers.data.stores[type].store.onChange('source', () => {
-          this.updateRowCount();
+        providers.data.stores[type].store.onChange('source', source => {
+          if (this.rowLengths.state[type] !== source.length) {
+            this.rowLengths.state[type] = source.length;
+            this.updateRowCount();
+          }
         }),
       );
     }
-
-    this.addEventListener('afteranysource', () => {
-      this.updateRowCount();
-    });
+    this.updateRowCount();
 
     /**
      * Before Columns Set Event
@@ -120,9 +124,7 @@ export class WCAGPlugin extends BasePlugin {
     // focuscell
     this.addEventListener(
       'afterfocus',
-      async (
-        e: CustomEvent<HTMLRevogrFocusElementEventMap['afterfocus']>,
-      ) => {
+      async (e: CustomEvent<HTMLRevogrFocusElementEventMap['afterfocus']>) => {
         if (e.defaultPrevented) {
           return;
         }
@@ -137,32 +139,27 @@ export class WCAGPlugin extends BasePlugin {
   }
 
   private getRowAriaIndex(type: DimensionRows, index: number): string {
-    const pinnedTopCount = this.providers.data.stores.rowPinStart.store.get(
-      'source',
-    ).length;
     if (type === 'rowPinStart') {
       return toAriaIndex(index);
     }
+    const pinnedTopCount = this.rowLengths.state.rowPinStart;
     if (type === 'rowPinEnd') {
-      const mainCount = this.providers.data.stores.rgRow.store.get('source')
-        .length;
+      const mainCount = this.rowLengths.state.rgRow;
       return toAriaIndex(pinnedTopCount + mainCount + index);
     }
     return toAriaIndex(pinnedTopCount + index);
   }
 
   private updateRowCount() {
-    const stores = this.providers.data.stores;
-    const rowCount =
-      stores.rowPinStart.store.get('source').length +
-      stores.rgRow.store.get('source').length +
-      stores.rowPinEnd.store.get('source').length;
+    const lengths = this.rowLengths.state;
+    const rowCount = lengths.rowPinStart + lengths.rgRow + lengths.rowPinEnd;
     this.revogrid.setAttribute('aria-rowcount', `${rowCount}`);
   }
 
   destroy() {
     this.unsubscribeRowSources.forEach(unsubscribe => unsubscribe());
     this.unsubscribeRowSources.length = 0;
+    this.rowLengths.dispose();
     super.destroy();
   }
 }
