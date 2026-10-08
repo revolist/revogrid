@@ -165,6 +165,24 @@ describe('DimensionStore realSize recalculation', () => {
     expect(store.store.get('realSize')).toBe(30_000_010);
   });
 
+  it('ignores non-finite custom sizes while retaining valid zero sizes', () => {
+    const store = new DimensionStore('rgRow');
+    store.setStore({
+      originItemSize: ITEM_SIZE,
+      count: 3,
+    });
+
+    store.setDimensionSize({
+      0: Number.NaN,
+      1: Number.POSITIVE_INFINITY,
+      2: 0,
+    });
+
+    expect(store.store.get('sizes')).toEqual({ 2: 0 });
+    expect(store.store.get('indexes')).toEqual([2]);
+    expect(store.store.get('realSize')).toBe(60);
+  });
+
   it('ignores stale custom-size entries outside the active item count', () => {
     const store = new DimensionStore('rgRow');
     store.setStore({

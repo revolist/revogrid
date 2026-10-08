@@ -89,7 +89,12 @@ import type { Observable } from '../../utils';
 import type { GridPlugin } from '../../plugins/base.plugin';
 import { ColumnCollection, getColumnByProp, getColumns } from '../../utils/column.utils';
 import { WCAGPlugin } from '../../plugins/wcag';
-import { ColumnFilterConfig, FilterCollectionItem } from '../../plugins/filter/filter.types';
+import type {
+  AfterFilterApplyEventProps,
+  BeforeFilterApplyEventProps,
+  BeforeFilterTrimmedEventProps,
+  ColumnFilterConfig,
+} from '../../plugins/filter/filter.types';
 import { PluginService } from './plugin.service';
 import { AfterSortingApplyEvent, SortingConfig, SortingOrder } from '../../plugins';
 import { RTLPlugin } from '../../plugins/rtl/rtl.plugin';
@@ -551,21 +556,25 @@ export class RevoGridComponent {
 
   /**
    * Emitted before applying a filter to the data source.
-   * Use e.preventDefault() to prevent cell focus change.
-   * Modify if you need to change filters.
+   * Use `event.preventDefault()` to handle filtering outside Core. `collection`
+   * contains the first condition for each column; `filterItems` contains the
+   * complete multi-condition model.
    */
-  @Event() beforefilterapply: EventEmitter<{ collection: Record<ColumnProp, FilterCollectionItem> }>;
+  @Event() beforefilterapply: EventEmitter<BeforeFilterApplyEventProps>;
 
   /**
-   * Emitted before applying a filter to the data source.
-   * Use e.preventDefault() to prevent the default behavior of trimming values and applying the filter.
-   * Modify the `collection` property if you want to change the filters.
-   * Modify the `itemsToFilter` property if you want to filter the indexes for trimming.
+   * Emitted before applying filter trim indexes. Use `event.preventDefault()`
+   * to cancel. `collection` contains the first condition for each column;
+   * `filterItems` contains the complete model.
    */
-  @Event() beforefiltertrimmed: EventEmitter<{
-    collection: Record<ColumnProp, FilterCollectionItem>;
-    itemsToFilter: Record<number, boolean>;
-  }>;
+  @Event() beforefiltertrimmed: EventEmitter<BeforeFilterTrimmedEventProps>;
+
+  /**
+   * Emitted after the filter trim has been applied. `collection` contains the
+   * first condition for each column; `filterItems` contains the complete model,
+   * and `multiFilterItems` is an alias for `filterItems`.
+   */
+  @Event() afterfilterapply: EventEmitter<AfterFilterApplyEventProps>;
 
   /**
    * Emitted before trimming values.

@@ -112,6 +112,25 @@ describe('findPositionInArray', () => {
 describe('pushSorted', () => {
   const numCompare = (a: number, b: number) => a - b;
 
+  it.each<[number, number[]]>([
+    [0, [0, 1, 3, 5]],
+    [2, [1, 2, 3, 5]],
+    [4, [1, 3, 4, 5]],
+    [6, [1, 3, 5, 6]],
+  ])('inserts missing value %s at its decoded position', (value, expected) => {
+    const arr = [1, 3, 5];
+    expect(pushSorted(arr, value, numCompare)).toBe(arr);
+    expect(arr).toEqual(expected);
+  });
+
+  it('honors a descending comparator for object values', () => {
+    const arr = [{ score: 5 }, { score: 1 }];
+    const inserted = { score: 3 };
+    pushSorted(arr, inserted, (a, b) => b.score - a.score);
+    expect(arr.map(item => item.score)).toEqual([5, 3, 1]);
+    expect(arr[1]).toBe(inserted);
+  });
+
   it('[] + insert 5 → [5]', () => {
     const arr: number[] = [];
     pushSorted(arr, 5, numCompare);

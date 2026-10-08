@@ -63,6 +63,7 @@ export enum ColumnAutoSizeMode {
 
 export class AutoSizeColumnPlugin extends BasePlugin {
   autoSizeColumns: Partial<AutoSizeColumns> | null = null;
+  private columnsSet = false;
   readonly letterBlockSize: number;
 
   /** for config option when preciseSize enabled */
@@ -89,7 +90,7 @@ export class AutoSizeColumnPlugin extends BasePlugin {
     const aftersourceset = ({
       detail: { source },
     }: CustomEvent<SourceSetEvent>) => {
-      this.setSource(source);
+      void this.setSource(source);
     };
     const beforecolumnsset = ({
       detail: { columns },
@@ -136,7 +137,7 @@ export class AutoSizeColumnPlugin extends BasePlugin {
     }
 
     /** If data set first and no column provided await until get one */
-    if (!autoSize) {
+    if (!autoSize && !this.columnsSet) {
       const request = new Promise((resolve: Resolve, reject: Reject) => {
         this.dataResolve = resolve;
         this.dataReject = reject;
@@ -146,6 +147,8 @@ export class AutoSizeColumnPlugin extends BasePlugin {
       } catch (e) {
         return;
       }
+    } else if (!autoSize) {
+      autoSize = {};
     }
 
     // calculate sizes
@@ -164,7 +167,7 @@ export class AutoSizeColumnPlugin extends BasePlugin {
 
   getLength(len?: any): number {
     const padding = 15;
-    if (!len) {
+    if (len === null || len === undefined || len === '') {
       return 0;
     }
     try {
@@ -258,25 +261,25 @@ export class AutoSizeColumnPlugin extends BasePlugin {
   }
 
   columnSet(columns: Record<DimensionCols, ColumnRegular[]>) {
+    this.columnsSet = true;
+    const autoSizeColumns: Partial<AutoSizeColumns> = {};
     for (let t of columnTypes) {
       const type = t as DimensionCols;
       const cols = columns[type];
 
       for (let i in cols) {
         if (cols[i].autoSize || this.config?.allColumns) {
-          if (!this.autoSizeColumns) {
-            this.autoSizeColumns = {};
-          }
-          if (!this.autoSizeColumns[type]) {
-            this.autoSizeColumns[type] = {};
-          }
-          this.autoSizeColumns[type][i] = {
+          autoSizeColumns[type] ??= {};
+          autoSizeColumns[type]![i] = {
             ...cols[i],
             index: parseInt(i, 10),
           };
         }
       }
     }
+    this.autoSizeColumns = Object.keys(autoSizeColumns).length
+      ? autoSizeColumns
+      : null;
 
     if (this.dataResolve) {
       this.dataResolve(this.autoSizeColumns || {});

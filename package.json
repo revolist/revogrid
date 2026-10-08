@@ -1,6 +1,6 @@
 {
   "name": "@revolist/revogrid",
-  "version": "4.28.2",
+  "version": "4.28.3",
   "type": "module",
   "description": "Virtual reactive data grid spreadsheet component - RevoGrid.",
   "license": "MIT",
@@ -99,6 +99,7 @@
     "api:update": "./scripts/generate_api.sh",
     "readme": "node ./scripts/generate_readme.mjs",
     "test": "stencil test --spec",
+    "test:hydrate": "tsc --noEmit --strict --skipLibCheck --target es2020 --moduleResolution node test/hydrate-types.ts",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "dev": "stencil build --dev --watch --serve",

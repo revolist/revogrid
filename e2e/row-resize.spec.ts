@@ -60,13 +60,15 @@ async function dragHandle(
   deltaY: number,
   release = true,
 ) {
+  const initialBox = await handle.boundingBox();
+  expect(initialBox).not.toBeNull();
+  // Hover waits for a stable, unobstructed handle after pinned-row layout updates.
+  // Keep the pointer inside its owning row; the lower half overlaps the next row.
+  await handle.hover({ position: { x: initialBox!.width / 2, y: 1 } });
   const box = await handle.boundingBox();
   expect(box).not.toBeNull();
   const x = box!.x + box!.width / 2;
-  // Use the part of the boundary handle that remains inside its owning row.
-  // The lower half intentionally overlaps the next row to enlarge the hit area.
   const y = box!.y + 1;
-  await page.mouse.move(x, y);
   await page.mouse.down();
   await page.mouse.move(x, y + deltaY, { steps: 5 });
   if (release) {
@@ -534,7 +536,9 @@ test.describe('row resize plugin', () => {
 
     await dragHandle(page, resizeHandle(page, 0), 24);
 
-    expect((await rowHeightsByText(page, 'Alice')).data).toBeCloseTo(60, 0);
+    await expect
+      .poll(async () => (await rowHeightsByText(page, 'Alice')).data)
+      .toBeCloseTo(60, 0);
     expect((await rowHeightsByText(page, 'Ben')).data).toBeCloseTo(81, 0);
     const pinned = await pinnedRow.boundingBox();
     expect(pinned?.height).toBeCloseTo(54, 0);
@@ -1681,5 +1685,32 @@ test.describe('row resize plugin', () => {
     expect(alice.data).toBeCloseTo(60, 0);
     expect(alice.header).toBeCloseTo(alice.data, 0);
     expect(ben.data).toBeCloseTo(42, 0);
+  });
+
+  test('ignores non-finite row definition sizes and preserves zero-size rows', async ({ page }) => {
+    await mountGrid(page, {
+      columns: buildColumns([{ prop: 'name', name: 'Name' }]),
+      source: [{ name: 'Alice' }, { name: 'Ben' }],
+      rowHeaders: true,
+      rowSize: 30,
+    });
+
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) throw new Error('Grid was not found');
+      grid.rowDefinitions = [
+        { type: 'rgRow', index: 0, size: Number.NaN },
+        { type: 'rgRow', index: 1, size: 0 },
+      ];
+    });
+    await page.waitForChanges();
+
+    const realRowSize = await page.evaluate(async () => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');
+      if (!grid) throw new Error('Grid was not found');
+      const providers = await grid.getProviders();
+      return providers?.dimension.stores.rgRow.store.get('realSize');
+    });
+    expect(realRowSize).toBe(30);
   });
 });

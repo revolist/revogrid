@@ -12,6 +12,10 @@ export type WatchConfig = { immediate: boolean };
 export class BasePlugin implements PluginBaseComponent {
   readonly h = h;
   readonly subscriptions: Record<string, (...args: any[]) => void> = {};
+  private readonly eventSubscriptions: Array<{
+    eventName: string;
+    callback: (...args: any[]) => void;
+  }> = [];
   constructor(public revogrid: HTMLRevoGridElement, public providers: PluginProviders) {}
   /**
    *
@@ -24,6 +28,10 @@ export class BasePlugin implements PluginBaseComponent {
   ) {
     this.revogrid.addEventListener(eventName as string, callback);
     this.subscriptions[eventName as string] = callback;
+    this.eventSubscriptions.push({
+      eventName: eventName as string,
+      callback,
+    });
   }
 
   /**
@@ -70,7 +78,16 @@ export class BasePlugin implements PluginBaseComponent {
    * @param eventName
    */
   removeEventListener(eventName: string) {
-    this.revogrid.removeEventListener(eventName, this.subscriptions[eventName]);
+    this.eventSubscriptions
+      .filter(subscription => subscription.eventName === eventName)
+      .forEach(({ callback }) =>
+        this.revogrid.removeEventListener(eventName, callback),
+      );
+    for (let i = this.eventSubscriptions.length - 1; i >= 0; i--) {
+      if (this.eventSubscriptions[i].eventName === eventName) {
+        this.eventSubscriptions.splice(i, 1);
+      }
+    }
     delete this.subscriptions[eventName];
   }
 

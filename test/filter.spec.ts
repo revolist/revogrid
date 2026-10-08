@@ -8,7 +8,12 @@ import { FilterPlugin } from '../src/plugins/filter/filter.plugin';
 import { ASYNC_FILTER_ROW_THRESHOLD } from '../src/plugins/filter/filter.constants';
 import { getFilterReorderId, moveFilterItem } from '../src/plugins/filter/filter.reorder';
 import { DataStore } from '../src/store/dataSource/data.store';
-import type { ColumnRegular } from '../src';
+import type {
+  AfterFilterApplyEventProps,
+  BeforeFilterApplyEventProps,
+  BeforeFilterTrimmedEventProps,
+  ColumnRegular,
+} from '../src';
 import { filterNames, filterTypes } from '../src/plugins/filter/filter.indexed';
 import type {
   ColumnFilterConfig,
@@ -637,6 +642,89 @@ describe('FilterPlugin.getRowFilter', () => {
 
     expect(store.store.get('proxyItems')).toEqual([0, 1, 2]);
     expect(store.store.get('items')).toEqual([0, 2]);
+  });
+
+  it('emits the full typed payload through the filter lifecycle', async () => {
+    const rows = [
+      { name: 'Alice', role: 'Admin' },
+      { name: 'Ben', role: 'Engineer' },
+      { name: 'Cara', role: 'Designer' },
+    ];
+    const store = new DataStore('rgRow');
+    store.updateData(rows);
+    const listeners: Record<string, Array<(event: any) => void>> = {};
+    const grid = {
+      registerVNode: [],
+      addEventListener: (type: string, listener: (event: any) => void) => {
+        listeners[type] = [...(listeners[type] ?? []), listener];
+      },
+      removeEventListener: (type: string, listener: (event: any) => void) => {
+        listeners[type] = (listeners[type] ?? []).filter(item => item !== listener);
+      },
+      dispatchEvent: (event: any) => {
+        for (const listener of listeners[event.type] ?? []) {
+          listener(event);
+        }
+        return !event.defaultPrevented;
+      },
+    } as unknown as HTMLRevoGridElement;
+    const column = {
+      ...roleColumn,
+      filter: 'string',
+    } as ColumnRegular;
+    const providers = {
+      data: {
+        stores: { rgRow: store },
+        setItemsPending: (pending: boolean) => store.setItemsPending(pending),
+        setTrimmed: (trimmed: any) => store.addTrimmed(trimmed),
+      },
+      column: {
+        getColumns: () => [column],
+        updateColumns: jest.fn(),
+      },
+    } as any;
+    const plugin = new FilterPlugin(grid, providers);
+    const filterItems = {
+      role: [
+        containsRole('Admin', 'or'),
+        containsRole('Engineer', 'or', 1),
+      ],
+    };
+    let beforeApply: BeforeFilterApplyEventProps | undefined;
+    let beforeTrimmed: BeforeFilterTrimmedEventProps | undefined;
+    let afterApply: AfterFilterApplyEventProps | undefined;
+    grid.addEventListener('beforefilterapply', event => {
+      beforeApply = (event as CustomEvent<BeforeFilterApplyEventProps>).detail;
+    });
+    grid.addEventListener('beforefiltertrimmed', event => {
+      beforeTrimmed = (event as CustomEvent<BeforeFilterTrimmedEventProps>).detail;
+    });
+    grid.addEventListener('afterfilterapply', event => {
+      afterApply = (event as CustomEvent<AfterFilterApplyEventProps>).detail;
+    });
+
+    plugin.multiFilterItems = filterItems;
+    await plugin.runFiltering(filterItems);
+
+    expect(beforeApply).toMatchObject({
+      collection: { role: { type: 'contains', value: 'Admin' } },
+      filterItems,
+      source: rows,
+      columns: [column],
+    });
+    expect(beforeTrimmed).toMatchObject({
+      collection: { role: { type: 'contains', value: 'Admin' } },
+      filterItems,
+      source: rows,
+      itemsToFilter: { 2: true },
+    });
+    expect(afterApply).toMatchObject({
+      collection: { role: { type: 'contains', value: 'Admin' } },
+      filterItems,
+      multiFilterItems: filterItems,
+      source: rows,
+      itemsToFilter: { 2: true },
+    });
   });
 
   it('keeps large filter runs pending until their trim is ready', async () => {

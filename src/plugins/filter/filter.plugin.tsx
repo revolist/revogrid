@@ -448,9 +448,11 @@ export class FilterPlugin extends BasePlugin {
     // applies the hasFilter to the columns to show filter icon
     this.providers.column.updateColumns(columnsToUpdate);
     this.emit('afterfilterapply', {
+      filterItems,
       multiFilterItems: filterItems,
       source,
       collection,
+      itemsToFilter: detail.itemsToFilter,
     });
   }
 
