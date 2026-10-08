@@ -1,3 +1,4 @@
+import { getFilterValue } from '../value';
 import { LogicFunction, LogicFunctionExtraParam, LogicFunctionParam } from '../../filter.types';
 
 const contains: LogicFunction = (value: LogicFunctionParam, extra?: LogicFunctionExtraParam) => {
@@ -8,10 +9,8 @@ const contains: LogicFunction = (value: LogicFunctionParam, extra?: LogicFunctio
     return false;
   }
   if (extra) {
-    if (typeof value !== 'string') {
-      value = JSON.stringify(value);
-    }
-    return value.toLocaleLowerCase().indexOf(extra.toString().toLowerCase()) > -1;
+    const text = getFilterValue(value);
+    return text !== undefined && text.toLocaleLowerCase().indexOf(extra.toString().toLowerCase()) > -1;
   }
   return true;
 };

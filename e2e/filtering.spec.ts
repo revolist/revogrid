@@ -22,6 +22,46 @@ async function nextAnimationFrames(page: E2EPage, count = 2) {
 }
 
 test.describe('filtering', () => {
+  for (const type of ['eq', 'contains', 'begins', 'notEq', 'notContains']) {
+    test(`filters BigInt and cyclic cell values with ${type}`, async ({ page }) => {
+      await mountGrid(page, {
+        columns: [{ prop: 'name' }, { prop: 'value', filter: true }],
+        source: [],
+        filter: true,
+      });
+      await page.evaluate(() => {
+        const grid = document.querySelector<HTMLRevoGridElement>('revo-grid')!;
+        const cyclic: Record<string, unknown> = {};
+        cyclic.self = cyclic;
+        // Render a label so this test isolates filtering arbitrary source values.
+        grid.columns = [{ prop: 'name' }, { prop: 'value', filter: true, cellTemplate: () => 'Value' }];
+        grid.source = [
+          { name: 'Cyclic', value: cyclic },
+          { name: 'Primitive', value: BigInt('9007199254740993') },
+          { name: 'Boxed', value: Object(BigInt('9007199254740993')) },
+          { name: 'Other', value: 'other' },
+        ];
+      });
+      await page.waitForChanges();
+
+      const errors: string[] = [];
+      page.on('pageerror', error => errors.push(error.message));
+      await page.evaluate(async filterType => {
+        const grid = document.querySelector<HTMLRevoGridElement>('revo-grid')!;
+        await new Promise<void>(resolve => {
+          grid.addEventListener('afterfilterapply', () => resolve(), { once: true });
+          grid.dispatchEvent(new CustomEvent('filter', {
+            detail: { value: [{ id: 0, type: filterType, value: '9007199254740993', relation: 'and' }] },
+          }));
+        });
+      }, type);
+      await page.waitForChanges();
+      await expectVisibleColumnValues(page, 0,
+        type.startsWith('not') ? ['Cyclic', 'Other'] : ['Primitive', 'Boxed']);
+      expect(errors).toEqual([]);
+    });
+  }
+
   for (const activation of ['click', 'Enter', 'Space'] as const) {
     test(`opens the header filter without submitting an ancestor form via ${activation}`, async ({ page }) => {
       await mountGrid(page, {

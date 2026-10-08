@@ -1,3 +1,4 @@
+import { runInNewContext } from 'node:vm';
 import eq, { notEq } from '../src/plugins/filter/conditions/equal';
 import set, { notSet } from '../src/plugins/filter/conditions/set';
 import contains, { notContains } from '../src/plugins/filter/conditions/string/contains';
@@ -64,6 +65,60 @@ describe('notEq', () => {
   it('notEq("Hello", "world") → true, notEq("Hello", "hello") → false (strict inverse of eq)', () => {
     expect(notEq('Hello', 'world')).toBe(true);
     expect(notEq('Hello', 'hello')).toBe(false);
+  });
+});
+
+describe('text filters with non-JSON cell values', () => {
+  const digits = '9007199254740993';
+  const bigint = BigInt(digits);
+
+  for (const [name, predicate] of [
+    ['eq', eq],
+    ['contains', contains],
+    ['begins', beginsWith],
+  ] as const) {
+    it(`${name} matches primitive, boxed, and cross-realm BigInt without losing precision`, () => {
+      for (const value of [bigint, Object(bigint), runInNewContext(`Object(BigInt("${digits}"))`)]) {
+        expect(predicate(value, digits)).toBe(true);
+        expect(predicate(value, '9007199254740992')).toBe(false);
+      }
+    });
+
+    it(`${name} preserves JSON formatting and supports nested BigInt`, () => {
+      expect(predicate({ id: bigint }, `{"id":"${digits}"}`)).toBe(true);
+      expect(predicate([bigint, Object(bigint)], `["${digits}","${digits}"]`)).toBe(true);
+      expect(predicate({ id: 42 }, '{"id":42}')).toBe(true);
+      expect(predicate({ [Symbol.toStringTag]: 'BigInt', id: 42 }, '{"id":42}')).toBe(true);
+    });
+
+    it(`${name} treats cyclic and nonserializable values as nonmatches`, () => {
+      const cyclic: Record<string, unknown> = {};
+      cyclic.self = cyclic;
+      for (const value of [cyclic, Symbol('value'), () => 'value']) {
+        expect(predicate(value, 'value')).toBe(false);
+      }
+    });
+  }
+
+  it('negated operators remain inverses for BigInt and cyclic values', () => {
+    const cyclic: Record<string, unknown> = {};
+    cyclic.self = cyclic;
+    expect(notEq(bigint, digits)).toBe(false);
+    expect(notContains(bigint, digits)).toBe(false);
+    expect(notEq(cyclic, 'value')).toBe(true);
+    expect(notContains(cyclic, 'value')).toBe(true);
+  });
+
+  it('continues filtering subsequent rows after a cyclic cell', () => {
+    const cyclic: Record<string, unknown> = {};
+    cyclic.self = cyclic;
+    for (const type of ['eq', 'contains', 'begins']) {
+      expect(createFilterPlugin().getRowFilter(
+        [{ value: cyclic }, { value: bigint }, { value: 'other' }],
+        { value: [{ id: 0, type, value: digits, relation: 'and' }] },
+        { value: { prop: 'value' } },
+      )).toEqual({ 0: true, 2: true });
+    }
   });
 });
 
