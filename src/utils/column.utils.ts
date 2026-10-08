@@ -157,11 +157,26 @@ export function getColumns(
         res.columns[regularColumn.pin].push(regularColumn);
       }
       if (regularColumn.order) {
-        res.sort[regularColumn.prop] = regularColumn;
+        Object.defineProperty(res.sort, regularColumn.prop, {
+          configurable: true,
+          enumerable: true,
+          value: regularColumn,
+          writable: true,
+        });
       }
       // it's possible that some columns have same prop, but better to avoid it
-      if (!res.columnByProp[regularColumn.prop]) {
-        res.columnByProp[regularColumn.prop] = [];
+      if (
+        !Object.prototype.hasOwnProperty.call(
+          res.columnByProp,
+          regularColumn.prop,
+        )
+      ) {
+        Object.defineProperty(res.columnByProp, regularColumn.prop, {
+          configurable: true,
+          enumerable: true,
+          value: [],
+          writable: true,
+        });
       }
       res.columnByProp[regularColumn.prop].push(regularColumn);
 
@@ -221,11 +236,32 @@ export function gatherGroup<T extends ColumnCollection>(
     res.columnGrouping[key].push(...rebasedItem);
   }
   res.maxLevel = Math.max(res.maxLevel, collection.maxLevel);
-  res.sort = { ...res.sort, ...collection.sort };
-  res.columnByProp = {
-    ...res.columnByProp,
-    ...collection.columnByProp,
-  };
+  res.sort = Object.defineProperties(
+    Object.defineProperties({}, Object.getOwnPropertyDescriptors(res.sort)),
+    Object.getOwnPropertyDescriptors(collection.sort),
+  );
+  const columnByProp: ColumnCollection['columnByProp'] = {};
+  for (const prop of Object.keys(res.columnByProp)) {
+    Object.defineProperty(columnByProp, prop, {
+      configurable: true,
+      enumerable: true,
+      value: [...res.columnByProp[prop]],
+      writable: true,
+    });
+  }
+  for (const prop of Object.keys(collection.columnByProp)) {
+    if (Object.prototype.hasOwnProperty.call(columnByProp, prop)) {
+      columnByProp[prop].push(...collection.columnByProp[prop]);
+    } else {
+      Object.defineProperty(columnByProp, prop, {
+        configurable: true,
+        enumerable: true,
+        value: [...collection.columnByProp[prop]],
+        writable: true,
+      });
+    }
+  }
+  res.columnByProp = columnByProp;
   return res;
 }
 
