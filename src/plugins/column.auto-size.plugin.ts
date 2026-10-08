@@ -147,9 +147,8 @@ export class AutoSizeColumnPlugin extends BasePlugin {
       } catch (e) {
         return;
       }
-    } else if (!autoSize) {
-      autoSize = {};
     }
+    autoSize ??= {};
 
     // calculate sizes
     each(autoSize, (_v, type: DimensionCols) => {

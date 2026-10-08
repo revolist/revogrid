@@ -20,7 +20,7 @@ globalThis.showRowHeaders = function (isShow) {
  * @param {boolean} isShow - Show column grouping if true, hide otherwise
  */
 globalThis.showColGrouping = function (isShow) {
-  globalThis.setData({
+  void globalThis.setData({
     groupedHeader: isShow,
   });
 };
@@ -227,7 +227,7 @@ globalThis.setPinned = function (type, checked) {
         break;
     }
   }
-  globalThis.setData({
+  void globalThis.setData({
     [type]: val,
   });
 };
@@ -270,7 +270,7 @@ globalThis.toggleVisibility = function (checked) {
     });
     grid.setAttribute('key', keys++);
     holder.appendChild(grid);
-    globalThis.setData();
+    void globalThis.setData();
   }
 };
 
@@ -318,14 +318,14 @@ globalThis.clearFilter = () => {
 
 globalThis.sortColumn = (columnProp= 0, additive = false) => {
   const grid = document.querySelector('revo-grid');
-  grid.updateColumnSorting({
+  void grid.updateColumnSorting({
     prop: columnProp,
   }, 'asc', additive);
 };
 
 globalThis.clearSorting = () => {
   const grid = document.querySelector('revo-grid');
-  grid.clearSorting();
+  void grid.clearSorting();
 };
 
 globalThis.setFilter = () => {
@@ -461,7 +461,7 @@ function onLoad() {
     mode: 'autoSizeAll',
   };*/
   // default
-  setData({ rows: 100, cols: 100 });
+  void globalThis.setData({ rows: 100, cols: 100 });
 
   // events testing
   // 'beforerange', 'setRange', 'beforefocuslost', 'beforecellfocus', 'afterfocus', 'beforeedit', 'aftercolumnresize'

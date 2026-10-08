@@ -7,11 +7,8 @@ const stencilJSLink = 'https://stenciljs.com';
 
 async function generateReadme(files, output, variables, pkg) {
   try {
-    // Clear the existing README.md if it exists
-    await fs.writeFile(output, '');
-
-    // Loop through each file and append its contents to README.md
-    for (const file of files) {
+    // Read independently, then write once in the configured section order.
+    const sections = await Promise.all(files.map(async file => {
       const filePath = path.join('readme', file);
       try {
         let content = await fs.readFile(filePath, 'utf-8');
@@ -22,15 +19,17 @@ async function generateReadme(files, output, variables, pkg) {
           return Object.hasOwn(variables, variable) ? variables[variable] : `{{${variable}}}`; // Replace or keep the placeholder if not found
         });
 
-        await fs.appendFile(output, content + '\n\n'); // Add a newline for separation between sections
+        return content + '\n\n';
       } catch (err) {
         if (err.code === 'ENOENT') {
           console.log(chalk.yellow(`Warning: ${file} not found, skipping.`));
+          return '';
         } else {
           throw err;
         }
       }
-    }
+    }));
+    await fs.writeFile(output, sections.join(''));
 
     console.log(chalk.green(`${pkg || 'JS'}: README.md successfully generated`));
   } catch (err) {

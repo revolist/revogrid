@@ -162,7 +162,9 @@ export class FilterPlugin extends BasePlugin {
         this.deferFiltering();
       }
     });
-    this.addEventListener('headerclick', e => this.headerclick(e));
+    this.addEventListener('headerclick', e => {
+      void this.headerclick(e);
+    });
     this.addEventListener(
       FILTER_CONFIG_CHANGED_EVENT,
       ({ detail }: CustomEvent<ColumnFilterConfig | boolean>) => {
@@ -322,7 +324,7 @@ export class FilterPlugin extends BasePlugin {
       extraBottomContent: this.extraBottomHyperContent,
     };
     this.beforeshow?.(data);
-    this.pop.show(data);
+    await this.pop.show(data);
   }
 
   getColumnFilter(
