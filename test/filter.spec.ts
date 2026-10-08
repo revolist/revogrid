@@ -505,6 +505,25 @@ describe('FilterPlugin.getRowFilter', () => {
     );
   }
 
+  it.each(['and-or', 'or-and'])('evaluates every truth assignment for %s connectors', expression => {
+    const rows = Array.from({ length: 8 }, (_, mask) => ({
+      role: ['A', 'B', 'C'].filter((_, index) => (mask & (1 << index)) !== 0).join(' '),
+    }));
+    const expected: Record<number, boolean> = {};
+    for (let mask = 0; mask < rows.length; mask++) {
+      const a = (mask & 1) !== 0;
+      const b = (mask & 2) !== 0;
+      const c = (mask & 4) !== 0;
+      const accepted = expression === 'and-or' ? (a && b) || c : a || (b && c);
+      if (!accepted) expected[mask] = true;
+    }
+    expect(trimByRole(rows, [
+      containsRole('A', expression === 'and-or' ? 'and' : 'or', 0),
+      containsRole('B', expression === 'and-or' ? 'or' : 'and', 1),
+      containsRole('C', 'and', 2),
+    ])).toEqual(expected);
+  });
+
   it('returns trim indexes for rows that do not match a contains filter', () => {
     const trimmed = trimByRole(adminRows, [containsRole('Admin')]);
 
