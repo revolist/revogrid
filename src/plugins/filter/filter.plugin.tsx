@@ -169,7 +169,7 @@ export class FilterPlugin extends BasePlugin {
       FILTER_CONFIG_CHANGED_EVENT,
       ({ detail }: CustomEvent<ColumnFilterConfig | boolean>) => {
         if (!detail) {
-          this.clearFiltering();
+          void this.clearFiltering();
           return;
         }
         if (typeof detail === 'object') {
@@ -187,7 +187,7 @@ export class FilterPlugin extends BasePlugin {
               aftersourceset();
               return;
             }
-            this.clearFiltering();
+            void this.clearFiltering();
             return;
           }
         }
