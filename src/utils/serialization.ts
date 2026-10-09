@@ -1,3 +1,4 @@
+/** Detect primitive or boxed BigInts, including values from another realm. */
 const isBigInt = (value: unknown): value is bigint | BigInt => {
   if (typeof value === 'bigint') {
     return true;
@@ -14,13 +15,14 @@ const isBigInt = (value: unknown): value is bigint | BigInt => {
   }
 };
 
+/** Preserve nested BigInt values as decimal strings during JSON serialization. */
 const bigIntReplacer = (_key: string, value: unknown): unknown =>
-  isBigInt(value) ? value.toString() : value;
+  isBigInt(value) ? BigInt.prototype.toString.call(value) : value;
 
 /** Serialize a cell like JSON, preserving primitive and boxed BigInt precision. */
 export function stringifyCellValue(value: unknown): string | undefined {
   if (typeof value === 'string') {
     return value;
   }
-  return isBigInt(value) ? value.toString() : JSON.stringify(value, bigIntReplacer);
+  return isBigInt(value) ? BigInt.prototype.toString.call(value) : JSON.stringify(value, bigIntReplacer);
 }

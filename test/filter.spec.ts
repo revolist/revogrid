@@ -84,6 +84,17 @@ describe('text filters with non-JSON cell values', () => {
       }
     });
 
+    it(`${name} ignores overridden and throwing boxed BigInt toString methods`, () => {
+      for (const value of [Object(bigint), runInNewContext(`Object(BigInt("${digits}"))`)]) {
+        for (const toString of [() => 'wrong', () => { throw new Error('Must not call toString'); }]) {
+          value.toString = toString;
+          expect(predicate(value, digits)).toBe(true);
+          expect(predicate(value, 'wrong')).toBe(false);
+          expect(predicate({ id: value }, `{"id":"${digits}"}`)).toBe(true);
+        }
+      }
+    });
+
     it(`${name} preserves JSON formatting and supports nested BigInt`, () => {
       expect(predicate({ id: bigint }, `{"id":"${digits}"}`)).toBe(true);
       expect(predicate([bigint, Object(bigint)], `["${digits}","${digits}"]`)).toBe(true);

@@ -35,10 +35,16 @@ test.describe('filtering', () => {
         cyclic.self = cyclic;
         // Render a label so this test isolates filtering arbitrary source values.
         grid.columns = [{ prop: 'name' }, { prop: 'value', filter: true, cellTemplate: () => 'Value' }];
+        const overridden = Object(BigInt('9007199254740993'));
+        overridden.toString = () => '2';
+        const throwing = Object(BigInt('9007199254740993'));
+        throwing.toString = () => { throw new Error('Must not call toString'); };
         grid.source = [
           { name: 'Cyclic', value: cyclic },
           { name: 'Primitive', value: BigInt('9007199254740993') },
           { name: 'Boxed', value: Object(BigInt('9007199254740993')) },
+          { name: 'Overridden', value: overridden },
+          { name: 'Throwing', value: throwing },
           { name: 'Other', value: 'other' },
         ];
       });
@@ -57,7 +63,7 @@ test.describe('filtering', () => {
       }, type);
       await page.waitForChanges();
       await expectVisibleColumnValues(page, 0,
-        type.startsWith('not') ? ['Cyclic', 'Other'] : ['Primitive', 'Boxed']);
+        type.startsWith('not') ? ['Cyclic', 'Other'] : ['Primitive', 'Boxed', 'Overridden', 'Throwing']);
       expect(errors).toEqual([]);
     });
   }
