@@ -201,14 +201,51 @@ export class Clipboard {
   }
 
   parserCopy(data: DataFormat[][]) {
-    return data.map(rgRow => rgRow.join('\t')).join('\n');
+    return data
+      .map(rgRow =>
+        rgRow
+          .map(value => {
+            const text = value == null ? '' : String(value);
+            return /[\t\r\n"]/.test(text)
+              ? `"${text.replace(/"/g, '""')}"`
+              : text;
+          })
+          .join('\t'),
+      )
+      .join('\n');
   }
 
   private textParse(data: string) {
-    const result: string[][] = [];
-    const rows = data.split(/\r\n|\n|\r/);
-    for (let y in rows) {
-      result.push(rows[y].split('\t'));
+    const result: string[][] = [[]];
+    // Only recognize complete quoted fields. Ordinary or unmatched quotes
+    // remain literal text, as they did before quoted TSV was supported.
+    const quotedField = /"((?:[^"]|"")*)"(?=\t|\r|\n|$)/y;
+    let position = 0;
+    while (position <= data.length) {
+      quotedField.lastIndex = position;
+      const quoted = data[position] === '"' ? quotedField.exec(data) : null;
+      let value: string;
+      if (quoted) {
+        value = quoted[1].replace(/""/g, '"');
+        position = quotedField.lastIndex;
+      } else {
+        const start = position;
+        while (position < data.length && !/[\t\r\n]/.test(data[position])) {
+          position++;
+        }
+        value = data.slice(start, position);
+      }
+      result[result.length - 1].push(value);
+      if (position === data.length) {
+        break;
+      }
+      if (data[position] !== '\t') {
+        result.push([]);
+        if (data[position] === '\r' && data[position + 1] === '\n') {
+          position++;
+        }
+      }
+      position++;
     }
     return result;
   }
