@@ -15,6 +15,48 @@ import {
 } from './helpers';
 
 test.describe('column groups', () => {
+  test('renders prototype-sensitive properties inside nested groups', async ({ page }) => {
+    await mountGrid(page, {
+      columns: [{ name: 'Outer', children: [
+        { name: 'Inner', children: [{ prop: '__proto__', name: 'Prototype' }] },
+        { prop: 'constructor', name: 'Constructor' },
+      ] }],
+      source: [],
+    });
+    // Build this own-property fixture in the browser, without transporting the
+    // __proto__ key through Playwright's object serializer.
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid')!;
+      grid.source = [JSON.parse('{"__proto__":"Prototype value","constructor":"Constructor value"}')];
+      if (!Object.prototype.hasOwnProperty.call(grid.source[0], '__proto__')) {
+        throw new Error('Fixture must have its own __proto__ data property');
+      }
+    });
+    await page.waitForChanges();
+
+    await expect(dataCell(page, 0, 0)).toHaveText('Prototype value');
+    await expect(dataCell(page, 0, 1)).toHaveText('Constructor value');
+    await expect(page.locator('revogr-header').filter({ hasText: 'Outer' })).toContainText('Inner');
+  });
+
+  test('keeps root and nested columns with the same prototype-sensitive property', async ({ page }) => {
+    await mountGrid(page, {
+      columns: [
+        { prop: '__proto__', name: 'Root prototype' },
+        { name: 'Group', children: [{ prop: '__proto__', name: 'Nested prototype' }] },
+      ],
+      source: [],
+    });
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid')!;
+      grid.source = [JSON.parse('{"__proto__":"Prototype value"}')];
+    });
+    await page.waitForChanges();
+
+    await expect(dataCell(page, 0, 0)).toHaveText('Prototype value');
+    await expect(dataCell(page, 0, 1)).toHaveText('Prototype value');
+  });
+
   test('renders column groups correctly', async ({ page }) => {
     const source: SampleRow[] = [
       { id: 401, name: 'Alice', role: 'Engineer', city: 'Lisbon' },
