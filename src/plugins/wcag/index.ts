@@ -43,11 +43,11 @@ export class WCAGPlugin extends BasePlugin {
     revogrid.setAttribute('tabindex', '0');
     for (const type of ['rowPinStart', 'rgRow', 'rowPinEnd'] as const) {
       this.rowLengths.state[type] =
-        providers.data.stores[type].store.get('source').length;
+        providers.data.stores[type].store.get('items').length;
       this.unsubscribeRowSources.push(
-        providers.data.stores[type].store.onChange('source', source => {
-          if (this.rowLengths.state[type] !== source.length) {
-            this.rowLengths.state[type] = source.length;
+        providers.data.stores[type].store.onChange('items', items => {
+          if (this.rowLengths.state[type] !== items.length) {
+            this.rowLengths.state[type] = items.length;
             this.updateRowCount();
           }
         }),

@@ -2,12 +2,12 @@ import { WCAGPlugin } from '../src/plugins/wcag';
 import { createStore } from '@stencil/store';
 
 describe('WCAGPlugin', () => {
-  it('counts pinned rows in global indices and tracks source replacements', () => {
+  it('counts represented pinned rows in global indices and tracks item replacements', () => {
     const revogrid = document.createElement('div') as HTMLRevoGridElement;
     const stores = {
-      rowPinStart: { store: createStore({ source: [{}, {}] }) },
-      rgRow: { store: createStore({ source: [{}, {}, {}] }) },
-      rowPinEnd: { store: createStore({ source: [{}] }) },
+      rowPinStart: { store: createStore({ source: [{}, {}], items: [0, 1] }) },
+      rgRow: { store: createStore({ source: [{}, {}, {}], items: [0, 1, 2] }) },
+      rowPinEnd: { store: createStore({ source: [{}], items: [0] }) },
     };
     const plugin = new WCAGPlugin(revogrid, { data: { stores } } as never);
     expect(revogrid.getAttribute('aria-rowcount')).toBe('6');
@@ -47,13 +47,13 @@ describe('WCAGPlugin', () => {
     stores.rgRow.store.set('source', [{ edited: true }, {}, {}]);
     expect(setAttribute).not.toHaveBeenCalled();
 
-    stores.rowPinStart.store.set('source', [{}]);
+    stores.rowPinStart.store.set('items', [0]);
     expect(revogrid.getAttribute('aria-rowcount')).toBe('5');
     expect(
       column.cellProperties({ type: 'rgRow', rowIndex: 0 })['aria-rowindex'],
     ).toBe('2');
     plugin.destroy();
-    stores.rgRow.store.set('source', []);
+    stores.rgRow.store.set('items', []);
     expect(revogrid.getAttribute('aria-rowcount')).toBe('5');
   });
 
