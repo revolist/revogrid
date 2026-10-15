@@ -165,7 +165,7 @@ export class RevoGridComponent {
   @Prop() readonly = false;
 
   /** When true, columns are resizable. */
-  @Prop() resize = true;
+  @Prop() resize = false;
 
   /**
    * Enables row resizing. Pass a configuration object to customize the
@@ -258,11 +258,11 @@ export class RevoGridComponent {
   @Prop() autoSizeColumn: boolean | AutoSizeColumnConfig = false;
 
   /**
-   * Enables filter plugin. Enabled by default; set to `false` to opt out.
+   * Enables filter plugin. Disabled by default; set to `true` or a configuration object to enable.
    * Can be boolean.
    * Or can be filter collection See `FilterCollection` for more info.
    */
-  @Prop() filter: boolean | ColumnFilterConfig = true;
+  @Prop() filter: boolean | ColumnFilterConfig = false;
 
   /**
    * Alternative way to set sorting.
@@ -281,7 +281,7 @@ export class RevoGridComponent {
   /**
    * Enable column move plugin.
    */
-  @Prop() canMoveColumns = true;
+  @Prop() canMoveColumns = false;
   /**
    * Trimmed rows.
    * Functionality which allows to hide rows from main data set.
@@ -292,7 +292,7 @@ export class RevoGridComponent {
   /**
    * Enable export plugin.
    */
-  @Prop() exporting = true;
+  @Prop() exporting = false;
 
   /**
    * Group rows based on this property.
