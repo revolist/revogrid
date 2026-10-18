@@ -316,3 +316,20 @@ for (const { language, segments } of compositionCases) {
     await session.detach();
   });
 }
+
+test('IME fast edit autosaves a new session after cancelling the previous one', async ({
+  page,
+}) => {
+  await readyGrid(page);
+  await page.evaluate(() => {
+    document.querySelector('revo-grid')!.applyOnClose = true;
+  });
+  const input = page.locator('revogr-edit input');
+  await page.keyboard.type('Discarded');
+  await input.press('Escape');
+  await expect(input).toHaveValue('');
+  await expect(dataCell(page, 0, 0)).toHaveText('Original');
+  await page.keyboard.type('Saved after cancellation');
+  await setCellsFocus(page, { x: 0, y: 1 });
+  await expect(dataCell(page, 0, 0)).toHaveText('Saved after cancellation');
+});

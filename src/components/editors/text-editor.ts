@@ -48,8 +48,7 @@ export class TextEditor implements EditorBase {
   }
 
   onKeyDown(e: KeyboardEvent) {
-    // A mounted input without an edit session is only a native input target.
-    if (!this.editCell || e.isComposing || e.keyCode === 229) {
+    if (e.isComposing || e.keyCode === 229) {
       return;
     }
     const isEnter = isEnterKeyValue(e.key);
@@ -82,6 +81,11 @@ export class TextEditor implements EditorBase {
     return this.editInput?.value;
   }
 
+  /** Value rendered by the input; subclasses may preserve native input. */
+  protected getInputValue() {
+    return this.editCell?.val ?? '';
+  }
+
   /**
    * Render method for Editor plugin.
    * Renders input element with passed data from cell.
@@ -93,7 +97,7 @@ export class TextEditor implements EditorBase {
     return h('input', {
       type: 'text',
       enterKeyHint: 'enter',
-      value: this.editCell?.val ?? '',
+      value: this.getInputValue(),
       'aria-label': 'Cell editor',
       // save input element as ref for further usage
       ref: (el: HTMLInputElement | null) => {
