@@ -22,10 +22,6 @@ export class TextEditor implements EditorBase {
 
   element: Element | null = null;
   editCell?: EditCell = undefined;
-  imeReady = false;
-  startNativeEdit?: () => boolean;
-  nativeEditing = false;
-  private focused = false;
 
   constructor(
     public data: ColumnDataSchemaModel,
@@ -36,13 +32,7 @@ export class TextEditor implements EditorBase {
    * Callback triggered on cell editor render
    */
   async componentDidRender(): Promise<void> {
-    if (
-      this.editInput && (
-        (!this.imeReady && !this.nativeEditing) || !this.focused ||
-        (this.imeReady && document.activeElement === document.body)
-      )
-    ) {
-      this.focused = true;
+    if (this.editInput) {
       await timeout();
       this.editInput?.focus({ preventScroll: true });
     }
@@ -57,22 +47,9 @@ export class TextEditor implements EditorBase {
     return true;
   }
 
-  private onNativeInput() {
-    if (!this.imeReady || this.nativeEditing) {
-      return;
-    }
-    this.nativeEditing = true;
-    if (!this.startNativeEdit?.()) {
-      this.nativeEditing = false;
-      if (this.editInput) {
-        this.editInput.value = '';
-        this.editInput.blur();
-      }
-    }
-  }
-
   onKeyDown(e: KeyboardEvent) {
-    if ((this.imeReady && !this.nativeEditing) || e.isComposing || e.keyCode === 229) {
+    // A mounted input without an edit session is only a native input target.
+    if (!this.editCell || e.isComposing || e.keyCode === 229) {
       return;
     }
     const isEnter = isEnterKeyValue(e.key);
@@ -116,14 +93,8 @@ export class TextEditor implements EditorBase {
     return h('input', {
       type: 'text',
       enterKeyHint: 'enter',
-      // Retain the native value during fast edit so a render cannot replace
-      // an ongoing composition with the cell model.
-      value: this.nativeEditing ? this.editInput?.value ?? '' :
-        this.imeReady ? '' : this.editCell?.val ?? '',
-      'data-rg-ime-ready': this.imeReady ? '' : undefined,
+      value: this.editCell?.val ?? '',
       'aria-label': 'Cell editor',
-      onCompositionStart: () => this.onNativeInput(),
-      onInput: () => this.onNativeInput(),
       // save input element as ref for further usage
       ref: (el: HTMLInputElement | null) => {
         this.editInput = el;

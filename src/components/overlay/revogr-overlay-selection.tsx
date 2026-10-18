@@ -379,7 +379,7 @@ export class OverlaySelection {
     // requests editing without preventing the browser's composition.
     if (
       e.target instanceof HTMLInputElement &&
-      e.target.hasAttribute('data-rg-ime-ready') &&
+      this.revogrEdit?.imeReady && this.revogrEdit.contains(e.target) &&
       !e.ctrlKey && !e.metaKey && !e.altKey && e.key.length === 1
     ) {
       return;

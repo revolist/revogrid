@@ -76,11 +76,11 @@ export class RevoEdit {
   @Element() element: HTMLElement;
   private currentEditor: EditorBase | null = null;
   private preventSaveOnClose = false;
-  private wasReady = false;
+  private inputMode: 'ready' | 'native' | 'edit' = 'edit';
 
   /** Focus the native IME input while the cell is selected. */
   @Method() async focusReadyInput() {
-    if (this.imeReady && this.currentEditor instanceof TextEditor) {
+    if (this.inputMode === 'ready' && this.currentEditor instanceof TextEditor) {
       this.currentEditor.editInput?.focus({ preventScroll: true });
     }
   }
@@ -95,8 +95,26 @@ export class RevoEdit {
    * Can be triggered multiple times before actual disconnect.
    */
   @Method() async beforeDisconnect() {
-    if (!this.imeReady) {
+    if (this.inputMode !== 'ready') {
       this.currentEditor?.beforeDisconnect?.();
+    }
+  }
+
+  @Listen('compositionstart')
+  @Listen('input')
+  onNativeInput(e: Event) {
+    if (this.inputMode !== 'ready' || this.editor ||
+      !(this.currentEditor instanceof TextEditor) || e.target !== this.currentEditor.editInput) {
+      return;
+    }
+    this.inputMode = 'native';
+    // Assign the session synchronously: a fast Tab can arrive before rendering.
+    this.currentEditor.editCell = this.editCell;
+    if (!this.requestNativeEdit?.()) {
+      this.inputMode = 'ready';
+      this.currentEditor.editCell = undefined;
+      this.currentEditor.editInput!.value = '';
+      this.currentEditor.beforeDisconnect();
     }
   }
 
@@ -141,21 +159,19 @@ export class RevoEdit {
   }
 
   componentWillRender() {
-    if (
-      this.imeReady && this.currentEditor && (
-        !this.wasReady ||
-        (this.currentEditor instanceof TextEditor && this.currentEditor.nativeEditing)
-      )
-    ) {
+    if (this.imeReady && this.inputMode !== 'ready') {
       // A finished/cancelled session returns to an empty ready input.
       this.currentEditor = null;
     }
-    this.wasReady = this.imeReady;
+    if (!this.imeReady && this.inputMode === 'ready') {
+      this.inputMode = 'edit';
+    }
     // Active editor present and not yet closed.
     if (this.currentEditor || !this.column) {
       return;
     }
     this.preventSaveOnClose = false;
+    this.inputMode = this.imeReady ? 'ready' : 'edit';
 
     // Custom editor usage.
     // Start with TextEditor (editors/text.tsx) for Custom editor.
@@ -193,24 +209,26 @@ export class RevoEdit {
       return;
     }
     // Default text editor usage
-    const editor = new TextEditor(this.column, (e, preventFocus) =>
+    this.currentEditor = new TextEditor(this.column, (e, preventFocus) =>
       this.onSave(e, preventFocus),
     );
-    editor.startNativeEdit = () => this.requestNativeEdit?.() ?? false;
-    this.currentEditor = editor;
   }
 
   componentDidRender() {
     if (!this.currentEditor) {
       return;
     }
+    const firstRender = !this.currentEditor.element;
     this.currentEditor.element = this.element.firstElementChild;
-    this.currentEditor.componentDidRender?.();
+    if (this.inputMode === 'edit') {
+      this.currentEditor.componentDidRender?.();
+    } else if (firstRender) {
+      void this.focusReadyInput();
+    }
   }
 
   disconnectedCallback() {
-    const nativeEditing = this.currentEditor instanceof TextEditor && this.currentEditor.nativeEditing;
-    if (this.saveOnClose && (!this.imeReady || nativeEditing)) {
+    if (this.saveOnClose && this.inputMode !== 'ready') {
       // Can not be cancelled by `preventSaveOnClose` prop.
       // Editor requires `getValue` to be able to save.
       if (!this.preventSaveOnClose) {
@@ -230,10 +248,12 @@ export class RevoEdit {
 
   render() {
     if (this.currentEditor) {
-      this.currentEditor.editCell = this.editCell;
-      if (this.currentEditor instanceof TextEditor) {
-        this.currentEditor.imeReady = this.imeReady;
-      }
+      // During native editing the browser owns the current value, including
+      // unfinished composition. Never replace it with the original cell model.
+      this.currentEditor.editCell = this.inputMode === 'ready' ? undefined :
+        this.inputMode === 'native'
+          ? { ...this.editCell, val: this.currentEditor.getValue?.() }
+          : this.editCell;
       return (
         <Host class={{ [EDIT_INPUT_WR]: true, 'ime-ready': this.imeReady }}>
           {this.currentEditor.render(h, this.additionalData)}
