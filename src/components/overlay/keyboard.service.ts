@@ -111,6 +111,11 @@ export class KeyboardService {
     isEditMode: boolean,
     { range, focus }: Nullable<Pick<EventData, 'range' | 'focus'>>,
   ) {
+    // IME owns navigation/confirmation keys until composition has finished.
+    // Some engines only expose the legacy 229 keyCode during composition.
+    if (e.isComposing || e.keyCode === 229) {
+      return;
+    }
     // IF EDIT MODE
     if (isEditMode) {
       if (this.appendPendingEditValue(e)) {
