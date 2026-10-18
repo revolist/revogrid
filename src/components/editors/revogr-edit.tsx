@@ -49,6 +49,11 @@ export class RevoEdit {
    * Save on editor close. Defines if data should be saved on editor close.
    */
   @Prop() saveOnClose = false;
+
+  /** Keep the built-in editor mounted but transparent until native input. */
+  @Prop() imeReady = false;
+  /** Requests editing through the selection owner. False means editing was vetoed. */
+  @Prop() requestNativeEdit?: () => boolean;
   /**
    * Additional data to pass to renderer
    */
@@ -71,10 +76,16 @@ export class RevoEdit {
   @Element() element: HTMLElement;
   private currentEditor: EditorBase | null = null;
   private preventSaveOnClose = false;
+  private wasReady = false;
 
-  /**
-   * Cancel pending changes flag. Editor will be closed without autosave.
-   */
+  /** Focus the native IME input while the cell is selected. */
+  @Method() async focusReadyInput() {
+    if (this.imeReady && this.currentEditor instanceof TextEditor) {
+      this.currentEditor.editInput?.focus({ preventScroll: true });
+    }
+  }
+
+  /** Cancel pending changes without autosave. */
   @Method() async cancelChanges() {
     this.preventSaveOnClose = true;
   }
@@ -84,7 +95,9 @@ export class RevoEdit {
    * Can be triggered multiple times before actual disconnect.
    */
   @Method() async beforeDisconnect() {
-    this.currentEditor?.beforeDisconnect?.();
+    if (!this.imeReady) {
+      this.currentEditor?.beforeDisconnect?.();
+    }
   }
 
   @Listen('internalappendeditvalue')
@@ -128,6 +141,16 @@ export class RevoEdit {
   }
 
   componentWillRender() {
+    if (
+      this.imeReady && this.currentEditor && (
+        !this.wasReady ||
+        (this.currentEditor instanceof TextEditor && this.currentEditor.nativeEditing)
+      )
+    ) {
+      // A finished/cancelled session returns to an empty ready input.
+      this.currentEditor = null;
+    }
+    this.wasReady = this.imeReady;
     // Active editor present and not yet closed.
     if (this.currentEditor || !this.column) {
       return;
@@ -170,9 +193,11 @@ export class RevoEdit {
       return;
     }
     // Default text editor usage
-    this.currentEditor = new TextEditor(this.column, (e, preventFocus) =>
+    const editor = new TextEditor(this.column, (e, preventFocus) =>
       this.onSave(e, preventFocus),
     );
+    editor.startNativeEdit = () => this.requestNativeEdit?.() ?? false;
+    this.currentEditor = editor;
   }
 
   componentDidRender() {
@@ -184,7 +209,8 @@ export class RevoEdit {
   }
 
   disconnectedCallback() {
-    if (this.saveOnClose) {
+    const nativeEditing = this.currentEditor instanceof TextEditor && this.currentEditor.nativeEditing;
+    if (this.saveOnClose && (!this.imeReady || nativeEditing)) {
       // Can not be cancelled by `preventSaveOnClose` prop.
       // Editor requires `getValue` to be able to save.
       if (!this.preventSaveOnClose) {
@@ -205,8 +231,11 @@ export class RevoEdit {
   render() {
     if (this.currentEditor) {
       this.currentEditor.editCell = this.editCell;
+      if (this.currentEditor instanceof TextEditor) {
+        this.currentEditor.imeReady = this.imeReady;
+      }
       return (
-        <Host class={EDIT_INPUT_WR}>
+        <Host class={{ [EDIT_INPUT_WR]: true, 'ime-ready': this.imeReady }}>
           {this.currentEditor.render(h, this.additionalData)}
         </Host>
       );
