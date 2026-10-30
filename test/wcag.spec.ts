@@ -1,11 +1,79 @@
 import { WCAGPlugin } from '../src/plugins/wcag';
+import { createStore } from '@stencil/store';
 
 describe('WCAGPlugin', () => {
+  it('counts represented pinned rows in global indices and tracks item replacements', () => {
+    const revogrid = document.createElement('div') as HTMLRevoGridElement;
+    const stores = {
+      rowPinStart: { store: createStore({ source: [{}, {}], items: [0, 1] }) },
+      rgRow: { store: createStore({ source: [{}, {}, {}], items: [0, 1, 2] }) },
+      rowPinEnd: { store: createStore({ source: [{}], items: [0] }) },
+    };
+    const plugin = new WCAGPlugin(revogrid, { data: { stores } } as never);
+    expect(revogrid.getAttribute('aria-rowcount')).toBe('6');
+    const sourceReads = Object.values(stores).map(({ store }) =>
+      jest.spyOn(store, 'get'),
+    );
+
+    const column: Record<string, any> = {};
+    revogrid.dispatchEvent(
+      new CustomEvent('beforecolumnsset', {
+        detail: {
+          columns: { colPinStart: [], rgCol: [column], colPinEnd: [] },
+        },
+      }),
+    );
+    for (const [type, index] of [
+      ['rowPinStart', '1'],
+      ['rgRow', '3'],
+      ['rowPinEnd', '6'],
+    ]) {
+      expect(
+        column.cellProperties({ type, rowIndex: 0 })['aria-rowindex'],
+      ).toBe(index);
+      const node = { $attrs$: {} };
+      revogrid.dispatchEvent(
+        new CustomEvent('beforerowrender', {
+          detail: { node, rowType: type, item: { itemIndex: 0 } },
+        }),
+      );
+      expect(node.$attrs$).toMatchObject({ 'aria-rowindex': index });
+    }
+
+    for (const sourceRead of sourceReads) {
+      expect(sourceRead).not.toHaveBeenCalled();
+    }
+    const setAttribute = jest.spyOn(revogrid, 'setAttribute');
+    stores.rgRow.store.set('source', [{ edited: true }, {}, {}]);
+    expect(setAttribute).not.toHaveBeenCalled();
+
+    stores.rowPinStart.store.set('items', [0]);
+    expect(revogrid.getAttribute('aria-rowcount')).toBe('5');
+    expect(
+      column.cellProperties({ type: 'rgRow', rowIndex: 0 })['aria-rowindex'],
+    ).toBe('2');
+    plugin.destroy();
+    stores.rgRow.store.set('items', []);
+    expect(revogrid.getAttribute('aria-rowcount')).toBe('5');
+  });
+
   it('uses one-based ARIA indices for headers, rows, and data cells', () => {
     const revogrid = document.createElement('div') as HTMLRevoGridElement;
     const firstColumn: Record<string, any> = {};
     const secondColumn: Record<string, any> = {};
-    new WCAGPlugin(revogrid, {} as never);
+    const store = {
+      get: () => [],
+      onChange: () => () => {},
+    };
+    new WCAGPlugin(revogrid, {
+      data: {
+        stores: {
+          rowPinStart: { store },
+          rgRow: { store },
+          rowPinEnd: { store },
+        },
+      },
+    } as never);
 
     revogrid.dispatchEvent(
       new CustomEvent('beforecolumnsset', {
