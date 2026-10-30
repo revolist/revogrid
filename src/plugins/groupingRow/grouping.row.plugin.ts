@@ -128,11 +128,11 @@ export class GroupingRowPlugin extends BasePlugin {
         trimmed[index] = true;
       }
     }
-    if (!expanded) this.revogrid.clearFocus();
+    if (!expanded) void this.revogrid.clearFocus();
     store.set('source', source);
     // The normal trimmed pipeline combines this with filtering/custom trims,
     // updates dimensions and notifies consumers once.
-    this.revogrid.addTrimmed(trimmed, TRIMMED_GROUPING);
+    void this.revogrid.addTrimmed(trimmed, TRIMMED_GROUPING);
   }
 
   private setColumnGrouping(cols?: ColumnRegular[]) {
