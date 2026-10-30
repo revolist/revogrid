@@ -131,6 +131,77 @@ describe('row grouping', () => {
     };
   }
 
+  describe('large groups and bulk expansion', () => {
+    const count = 220000;
+    it('flattens a large leaf without exceeding the argument limit', () => {
+      const rows = Array.from({ length: count }, (_, id) => ({ id, team: 'North' }));
+      const result = gatherGrouping(rows, ['team'], { expandedAll: false });
+      expect(result.sourceWithGroups).toHaveLength(count + 1);
+      expect(result.sourceWithGroups[count].id).toBe(count - 1);
+      expect(result.oldNewIndexMap[count - 1]).toBe(count);
+      expect(result.trimmed[count]).toBe(true);
+      expect(rows[0]).toEqual({ id: 0, team: 'North' });
+    });
+    it('flattens a large nested subtree and preserves its index mapping', () => {
+      const rows = Array.from({ length: count }, (_, id) => ({ id, team: 'North', bucket: id % 10 }));
+      const result = gatherGrouping(rows, ['team', 'bucket'], { expandedAll: true });
+      expect(result.sourceWithGroups).toHaveLength(count + 11);
+      expect(result.sourceWithGroups[result.oldNewIndexMap[count - 1]].id).toBe(count - 1);
+      expect(result.trimmed).toEqual({});
+    });
+    it('expands a large group and restores sorted data indexes without argument spreading', () => {
+      const source = [groupRow('North', 0), ...Array.from({ length: count }, (_, id) => ({ id }))];
+      const items = Array.from({ length: count + 1 }, (_, index) => index);
+      expect(doExpand(0, source, [0]).items).toEqual(items);
+      const sorted = gatherGroupedRowIndexes(source, items.slice(1).reverse());
+      expect(sorted).toHaveLength(count + 1);
+      expect(sorted?.slice(0, 3)).toEqual([0, count, count - 1]);
+    });
+    it('toggles all groups without rebuilding source, proxy order or row definitions', () => {
+      const { plugin, providers, revogrid, state } = createGroupingPlugin([
+        { name: 'Alice', team: 'North', role: 'Dev' },
+        { name: 'Ben', team: 'North', role: 'QA' },
+        { name: 'Cara', team: 'South', role: 'Dev' },
+      ]);
+      plugin.setGrouping({ props: ['team', 'role'], expandedAll: true });
+      const source = state.source;
+      state.proxyItems = [5, 6, 7, 0, 3, 4, 1, 2];
+      const proxy = state.proxyItems;
+      state.trimmed.filter = { 2: true };
+      state.trimmed.custom = { 4: true };
+      state.rowDefinitions = [{ type: 'rgRow', index: 1, size: 48 }];
+      const definitions = state.rowDefinitions;
+      providers.data.setData.mockClear();
+      providers.dimension.setRowDefinitions.mockClear();
+      plugin.setAllGroupsExpanded(false);
+      expect(state.source).toBe(source);
+      expect(state.proxyItems).toBe(proxy);
+      expect(state.items).toEqual([5, 0]);
+      expect(state.source.filter(isGrouping).every(row => !row[GROUP_EXPANDED])).toBe(true);
+      plugin.setAllGroupsExpanded(true);
+      expect(state.items).toEqual(proxy.filter(index => index !== 2 && index !== 4));
+      expect(state.source.filter(isGrouping).every(row => row[GROUP_EXPANDED])).toBe(true);
+      expect(state.rowDefinitions).toBe(definitions);
+      expect(providers.data.setData).not.toHaveBeenCalled();
+      expect(providers.dimension.setRowDefinitions).not.toHaveBeenCalled();
+      expect(revogrid.clearFocus).toHaveBeenCalledTimes(1);
+      plugin.setAllGroupsExpanded(false);
+      const detail = { type: 'rgRow', source: [{ name: 'New', team: 'West', role: 'Dev' }] };
+      revogrid.dispatchEvent(new CustomEvent('beforesourceset', { detail }));
+      expect(detail.source.filter(isGrouping).every(row => !row[GROUP_EXPANDED])).toBe(true);
+      expect(state.trimmed.grouping[1]).toBe(true);
+      expect(state.trimmed.grouping[2]).toBe(true);
+    });
+    it('ignores bulk expansion on an ungrouped source', () => {
+      const { plugin, providers, revogrid, state } = createGroupingPlugin([{ name: 'Alice' }]);
+      const source = state.source;
+      plugin.setAllGroupsExpanded(false);
+      expect(state.source).toBe(source);
+      expect(revogrid.addTrimmed).not.toHaveBeenCalled();
+      expect(providers.data.setData).not.toHaveBeenCalled();
+    });
+  });
+
   describe('gatherGrouping', () => {
     it('keeps defined falsy group keys and renders nullish keys as empty labels', () => {
       const { sourceWithGroups } = gatherGrouping(

@@ -62,7 +62,7 @@ export function gatherGroupedRowIndexes(
       groupedIndexes.push(groupIndex);
       appendNode(child);
     });
-    groupedIndexes.push(...node.items);
+    for (const index of node.items) groupedIndexes.push(index);
   };
   appendNode(root);
   return groupedIndexes;
