@@ -21,6 +21,8 @@ import type { Observable, ColumnCollection } from '../../utils';
 import {
   BEFORE_GROUPING_APPLY_EVENT,
   GROUP_EXPAND_EVENT,
+  GROUP_EXPANDED,
+  GROUP_DEPTH,
   GROUPING_ROW_TYPE,
   PSEUDO_GROUP_COLUMN,
   PSEUDO_GROUP_ITEM_ID,
@@ -101,6 +103,36 @@ export class GroupingRowPlugin extends BasePlugin {
 
     store.set('source', source);
     this.revogrid.addTrimmed(newTrimmed, TRIMMED_GROUPING);
+  }
+
+  /**
+   * Expand or collapse every group without regrouping the source.
+   * Preserves sorting, non-grouping trims, physical row indexes and row sizes.
+   * Also sets the default expansion policy for subsequent source updates.
+   * Find this plugin through `await grid.getPlugins()`.
+   */
+  setAllGroupsExpanded(expanded: boolean): void {
+    if (!this.options?.props?.length) return;
+    this.options = { ...this.options, expandedAll: expanded, prevExpanded: {} };
+    const store = this.getStore();
+    const source = store.get('source');
+    const trimmed: TrimmedEntity = {};
+    let inGroup = false;
+    for (let index = 0; index < source.length; index++) {
+      const row = source[index];
+      if (isGrouping(row)) {
+        row[GROUP_EXPANDED] = expanded;
+        inGroup = true;
+        if (!expanded && row[GROUP_DEPTH] > 0) trimmed[index] = true;
+      } else if (!expanded && inGroup) {
+        trimmed[index] = true;
+      }
+    }
+    if (!expanded) this.revogrid.clearFocus();
+    store.set('source', source);
+    // The normal trimmed pipeline combines this with filtering/custom trims,
+    // updates dimensions and notifies consumers once.
+    this.revogrid.addTrimmed(trimmed, TRIMMED_GROUPING);
   }
 
   private setColumnGrouping(cols?: ColumnRegular[]) {

@@ -75,9 +75,9 @@ export function doExpand(vIndex: number, source: DataType[], rowItemsIndexes: nu
     trimmed,
   };
   if (groupItems.length) {
-    const items = [...rowItemsIndexes];
-    items.splice(vIndex + 1, 0, ...groupItems);
-    result.items = items;
+    result.items = rowItemsIndexes.slice(0, vIndex + 1).concat(
+      groupItems, rowItemsIndexes.slice(vIndex + 1),
+    );
   }
   return result;
 }
