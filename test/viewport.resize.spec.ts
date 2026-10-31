@@ -55,10 +55,30 @@ describe('viewport resize synchronization', () => {
     unsubscribe();
   });
 
+  it.each(['colPinStart', 'colPinEnd'] as const)('fills newly visible %s columns without a follow-up scroll event', type => {
+    const { viewport, dimension, resize } = setup(type, { virtualX: ['rgCol', type] });
+    dimension.stores[type].setStore({ originItemSize: 80, count: 30 });
+    viewport.setViewport(type, { virtualSize: 100, clientSize: 100, realCount: 30 });
+    dimension.setViewPortCoordinate({ type, coordinate: 80, force: true });
+    const store = viewport.stores[type].store;
+    const before = store.get('items');
+    const publications: number[] = [];
+    const unsubscribe = store.onChange('items', items => publications.push(items.length));
+    resize('rgCol', 400);
+    expect(store.get('virtualSize')).toBe(400);
+    expect(store.get('items').length).toBeGreaterThan(before.length);
+    expect(Math.max(...store.get('items').map(item => item.end))).toBeGreaterThanOrEqual(480);
+    expect(store.get('items')[0].itemIndex).toBe(before[0].itemIndex);
+    expect(publications).not.toContain(0);
+    expect(viewport.stores.rgCol.store.get('virtualSize')).toBe(0);
+    unsubscribe();
+  });
+
   it('routes pinned column resize to its own opted-in viewport', () => {
-    const { viewport, resize } = setup('colPinEnd', { virtualX: ['rgCol', 'colPinEnd'] });
-    const items = [{ itemIndex: 2, start: 60, end: 90, size: 30 }];
-    viewport.setViewport('colPinEnd', { virtualSize: 100, items });
+    const { viewport, dimension, resize } = setup('colPinEnd', { virtualX: ['rgCol', 'colPinEnd'] });
+    dimension.stores.colPinEnd.setStore({ originItemSize: 500, count: 1 });
+    const items = [{ itemIndex: 0, start: 0, end: 500, size: 500 }];
+    viewport.setViewport('colPinEnd', { virtualSize: 100, realCount: 1, items });
     resize('rgCol', 200);
     expect(viewport.stores.colPinEnd.store.get('virtualSize')).toBe(200);
     expect(viewport.stores.colPinEnd.store.get('items')).toBe(items);

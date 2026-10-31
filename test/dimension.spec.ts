@@ -228,3 +228,33 @@ describe('DimensionStore trim size restoration', () => {
     dimension.dispose();
   });
 });
+
+
+describe('custom size input ownership', () => {
+  it('copies caller sizes before calculating positions and real size', () => {
+    const dimension = new DimensionStore('rgRow');
+    dimension.setStore({ originItemSize: 30, count: 3 });
+    const sizes = { 1: 65 };
+    dimension.setDimensionSize(sizes);
+    sizes[1] = 999;
+    expect(dimension.store.get('sizes')).toEqual({ 1: 65 });
+    expect(dimension.store.get('indexToItem')[1]).toEqual({ itemIndex: 1, start: 30, end: 95 });
+    expect(dimension.store.get('realSize')).toBe(125);
+    dimension.store.set('trimmed', { 0: 1 });
+    dimension.store.set('trimmed', {});
+    expect(dimension.store.get('sizes')).toEqual({ 1: 65 });
+    dimension.dispose();
+  });
+
+  it('copies maps passed through DimensionProvider.setCustomSizes', () => {
+    const provider = new DimensionProvider(new ViewportProvider(), { realSizeChanged: jest.fn() });
+    const dimension = provider.stores.rgRow;
+    dimension.setStore({ originItemSize: 30, count: 3 });
+    const sizes = { 1: 65 };
+    provider.setCustomSizes('rgRow', sizes);
+    sizes[1] = 999;
+    expect(dimension.store.get('sizes')).toEqual({ 1: 65 });
+    expect(dimension.store.get('realSize')).toBe(125);
+    dimension.dispose();
+  });
+});

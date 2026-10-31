@@ -75,3 +75,30 @@ test('retains rendered windows during resize synchronization and fills a larger 
   await expect.poll(() => page.locator('revogr-header .rgHeaderCell').count()).toBeLessThan(largerHeaders);
   await expect(mainDataRows(page).first()).toContainText('0:0');
 });
+
+test('fills an opted-in pinned viewport immediately after growth without scrolling', async ({ page }) => {
+  await mountGrid(page, {
+    columns: [
+      { prop: 'id', name: 'ID' },
+      ...Array.from({ length: 30 }, (_, i) => ({ prop: `c${i}`, name: `C${i}`, size: 80, pin: 'colPinEnd' as const })),
+    ],
+    source: [Object.fromEntries([['id', 'row'], ...Array.from({ length: 30 }, (_, i) => [`c${i}`, `Value ${i}`])])],
+  });
+  await page.evaluate(() => { document.querySelector('revo-grid')!.virtualX = ['rgCol', 'colPinEnd']; });
+  await page.waitForChanges();
+  const coverage = await page.evaluate(async () => {
+    const grid = document.querySelector('revo-grid')!;
+    const providers = (await grid.getProviders())!;
+    providers.viewport.setViewport('colPinEnd', { virtualSize: 100, clientSize: 100 });
+    providers.dimension.setViewPortCoordinate({ type: 'colPinEnd', coordinate: 0, force: true });
+    const store = providers.viewport.stores.colPinEnd.store;
+    const before = store.get('items').length;
+    grid.querySelector('revogr-viewport-scroll.colPinEnd')!.dispatchEvent(
+      new CustomEvent('resizeviewport', { bubbles: true, detail: { dimension: 'rgCol', size: 400 } }),
+    );
+    return { before, after: store.get('items').length, end: Math.max(...store.get('items').map(item => item.end)) };
+  });
+  expect(coverage.after).toBeGreaterThan(coverage.before);
+  expect(coverage.end).toBeGreaterThanOrEqual(400);
+  await expect(page.locator('revogr-viewport-scroll.colPinEnd revogr-header .rgHeaderCell')).toHaveCount(coverage.after);
+});

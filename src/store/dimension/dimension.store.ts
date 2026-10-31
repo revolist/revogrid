@@ -60,7 +60,8 @@ export class DimensionStore {
     this.store = createStore(initialState());
     this.store.use(trimmedPlugin({
       store: this.store,
-      setSizes: this.setDimensionSize.bind(this),
+      // Trim projections are already normalized and own their map identity.
+      setSizes: sizes => this.applyDimensionSize(sizes),
     }));
     this.store.use(recalculateRealSizePlugin({
       store: this.store,
@@ -103,20 +104,20 @@ export class DimensionStore {
    * @param sizes - sizes to set
    */
   setDimensionSize(sizes: ViewSettingSizeProp = {}) {
-    // The trim plugin recognizes its own projected sizes by reference. Preserve
-    // finite maps so normalization does not discard the cached untrimmed sizes.
-    const finiteSizes = Object.values(sizes).every(Number.isFinite)
-      ? sizes
-      : Object.fromEntries(
-          Object.entries(sizes).filter(([, size]) => Number.isFinite(size)),
-        );
+    const finiteSizes = Object.fromEntries(
+      Object.entries(sizes).filter(([, size]) => Number.isFinite(size)),
+    );
+    this.applyDimensionSize(finiteSizes);
+  }
+
+  private applyDimensionSize(sizes: ViewSettingSizeProp) {
     const dimensionData = calculateDimensionData(
       this.store.get('originItemSize'),
-      finiteSizes,
+      sizes,
     );
     setStore(this.store, {
       ...dimensionData,
-      sizes: finiteSizes,
+      sizes,
     });
   }
 
