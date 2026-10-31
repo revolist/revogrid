@@ -143,7 +143,13 @@ export default class ViewportService {
 
         // Keep virtual dimensions in sync with their viewport size.
         if ((dimension === 'rgRow' && !config.disableVirtualY) || isVirtualColumn) {
-          vpState.virtualSize = e.detail.size;
+          const viewport = config.viewportProvider.stores[dimension].store;
+          if (viewport.get('virtualSize') !== e.detail.size) {
+            vpState.virtualSize = e.detail.size;
+            // Keep the rendered window until coordinate synchronization updates
+            // its coverage; a virtual-size-only update otherwise clears it.
+            vpState.items = viewport.get('items');
+          }
         }
         config.viewportProvider?.setViewport(dimension, vpState);
       };

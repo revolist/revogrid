@@ -103,9 +103,13 @@ export class DimensionStore {
    * @param sizes - sizes to set
    */
   setDimensionSize(sizes: ViewSettingSizeProp = {}) {
-    const finiteSizes = Object.fromEntries(
-      Object.entries(sizes).filter(([, size]) => Number.isFinite(size)),
-    );
+    // The trim plugin recognizes its own projected sizes by reference. Preserve
+    // finite maps so normalization does not discard the cached untrimmed sizes.
+    const finiteSizes = Object.values(sizes).every(Number.isFinite)
+      ? sizes
+      : Object.fromEntries(
+          Object.entries(sizes).filter(([, size]) => Number.isFinite(size)),
+        );
     const dimensionData = calculateDimensionData(
       this.store.get('originItemSize'),
       finiteSizes,

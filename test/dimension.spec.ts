@@ -198,3 +198,33 @@ describe('DimensionStore realSize recalculation', () => {
     expect(store.store.get('realSize')).toBe(110);
   });
 });
+
+
+describe('DimensionStore trim size restoration', () => {
+  it('restores detail/custom heights before removing hidden detail slots', () => {
+    const dimension = new DimensionStore('rgRow');
+    dimension.setDimensionSize({ 1: 180, 3: 180, 4: 65 });
+    dimension.store.set('trimmed', { 0: 1 });
+    expect(dimension.store.get('sizes')).toEqual({ 0: 180, 2: 180, 3: 65 });
+    dimension.store.set('trimmed', {});
+    expect(dimension.store.get('sizes')).toEqual({ 1: 180, 3: 180, 4: 65 });
+    dimension.setDimensionSize({ 2: 65 });
+    dimension.store.set('trimmed', { 0: 1 });
+    expect(dimension.store.get('sizes')).toEqual({ 1: 65 });
+    dimension.store.set('trimmed', {});
+    expect(dimension.store.get('sizes')).toEqual({ 2: 65 });
+    dimension.dispose();
+  });
+
+  it('filters invalid sizes and restores zero heights through repeated trim changes', () => {
+    const dimension = new DimensionStore('rgRow');
+    dimension.setDimensionSize({ 0: NaN, 1: 0, 2: 65, 3: Infinity });
+    for (let cycle = 0; cycle < 2; cycle++) {
+      dimension.store.set('trimmed', { 1: 1 });
+      expect(dimension.store.get('sizes')).toEqual({ 1: 65 });
+      dimension.store.set('trimmed', {});
+      expect(dimension.store.get('sizes')).toEqual({ 1: 0, 2: 65 });
+    }
+    dimension.dispose();
+  });
+});
