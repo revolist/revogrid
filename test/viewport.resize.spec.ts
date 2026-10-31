@@ -23,7 +23,7 @@ function setup(type: DimensionCols = 'rgCol', options = {}) {
   }, 300);
   const resize = (dimension: ViewPortResizeEvent['dimension'], size: number) =>
     service.columns[0].prop.onResizeviewport!(new CustomEvent('resizeviewport', { detail: { dimension, size } }));
-  return { viewport, resize };
+  return { viewport, dimension, resize };
 }
 
 describe('viewport resize synchronization', () => {
@@ -36,6 +36,23 @@ describe('viewport resize synchronization', () => {
     expect(viewport.stores[type].store.get('items')).toBe(items);
     resize(type, 400);
     expect(viewport.stores[type].store.get('items')).toBe(items);
+  });
+
+  it.each(['rgRow', 'rgCol'] as const)('rebuilds %s coverage on shrink without publishing an empty window', type => {
+    const { viewport, dimension, resize } = setup();
+    dimension.stores[type].setStore({ originItemSize: 30, count: 100 });
+    viewport.setViewport(type, { virtualSize: 400, clientSize: 400, realCount: 100 });
+    dimension.setViewPortCoordinate({ type, coordinate: 300, force: true });
+    const store = viewport.stores[type].store;
+    const before = store.get('items');
+    const publications: number[] = [];
+    const unsubscribe = store.onChange('items', items => publications.push(items.length));
+    resize(type, 150);
+    expect(store.get('items').length).toBeGreaterThan(0);
+    expect(store.get('items').length).toBeLessThan(before.length);
+    expect(store.get('items')[0].itemIndex).toBe(before[0].itemIndex);
+    expect(publications).not.toContain(0);
+    unsubscribe();
   });
 
   it('routes pinned column resize to its own opted-in viewport', () => {

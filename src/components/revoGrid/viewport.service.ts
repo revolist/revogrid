@@ -141,10 +141,13 @@ export default class ViewportService {
             config.virtualX,
           );
 
+        let shrunk = false;
         // Keep virtual dimensions in sync with their viewport size.
         if ((dimension === 'rgRow' && !config.disableVirtualY) || isVirtualColumn) {
           const viewport = config.viewportProvider.stores[dimension].store;
-          if (viewport.get('virtualSize') !== e.detail.size) {
+          const previousSize = viewport.get('virtualSize');
+          if (previousSize !== e.detail.size) {
+            shrunk = e.detail.size < previousSize;
             vpState.virtualSize = e.detail.size;
             // Keep the rendered window until coordinate synchronization updates
             // its coverage; a virtual-size-only update otherwise clears it.
@@ -152,6 +155,11 @@ export default class ViewportService {
           }
         }
         config.viewportProvider?.setViewport(dimension, vpState);
+        if (shrunk) {
+          // Coordinate reuse only appends missing items. Rebuild a smaller
+          // window in one publication instead of retaining the larger range.
+          config.dimensionProvider.setViewPortCoordinate({ type: dimension, force: true });
+        }
       };
       const colData = gatherColumnData(column);
       const columnSelectionStore = this.registerCol(colData.position.x, val);

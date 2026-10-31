@@ -65,5 +65,13 @@ test('retains rendered windows during resize synchronization and fills a larger 
   });
   await expect.poll(() => mainDataRows(page).count()).toBeGreaterThan(initialRows);
   await expect.poll(() => page.locator('revogr-header .rgHeaderCell').count()).toBeGreaterThan(initialHeaders);
+  const largerRows = await mainDataRows(page).count();
+  const largerHeaders = await page.locator('revogr-header .rgHeaderCell').count();
+  await page.evaluate(() => {
+    const host = document.querySelector('revo-grid')!.parentElement!;
+    host.style.width = '400px'; host.style.height = '300px';
+  });
+  await expect.poll(() => mainDataRows(page).count()).toBeLessThan(largerRows);
+  await expect.poll(() => page.locator('revogr-header .rgHeaderCell').count()).toBeLessThan(largerHeaders);
   await expect(mainDataRows(page).first()).toContainText('0:0');
 });
