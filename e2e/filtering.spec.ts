@@ -22,6 +22,92 @@ async function nextAnimationFrames(page: E2EPage, count = 2) {
 }
 
 test.describe('filtering', () => {
+  test('filters nested boxed BigInt using its digits despite toJSON substitutions', async ({ page }) => {
+    await mountGrid(page, {
+      columns: [{ prop: 'name' }, { prop: 'value', filter: true }],
+      source: [],
+      filter: true,
+    });
+    const errors: string[] = [];
+    page.on('pageerror', error => errors.push(error.message));
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid')!;
+      const value = Object(BigInt('9007199254740993'));
+      value.toJSON = () => '2';
+      grid.columns = [{ prop: 'name' }, { prop: 'value', filter: true, cellTemplate: () => 'Value' }];
+      grid.source = [
+        { name: 'Object', value: { id: value } },
+        { name: 'Array', value: [value] },
+        { name: 'Other', value: { id: '2' } },
+      ];
+    });
+    await page.waitForChanges();
+
+    for (const [query, names] of [
+      ['9007199254740993', ['Object', 'Array']],
+      ['"2"', ['Other']],
+    ] as const) {
+      await page.evaluate(async value => {
+        const grid = document.querySelector<HTMLRevoGridElement>('revo-grid')!;
+        await new Promise<void>(resolve => {
+          grid.addEventListener('afterfilterapply', () => resolve(), { once: true });
+          grid.dispatchEvent(new CustomEvent('filter', {
+            detail: { value: [{ id: 0, type: 'contains', value, relation: 'and' }] },
+          }));
+        });
+      }, query);
+      await page.waitForChanges();
+      await expectVisibleColumnValues(page, 0, [...names]);
+    }
+    expect(errors).toEqual([]);
+  });
+
+  for (const type of ['eq', 'contains', 'begins', 'notEq', 'notContains']) {
+    test(`filters BigInt and cyclic cell values with ${type}`, async ({ page }) => {
+      await mountGrid(page, {
+        columns: [{ prop: 'name' }, { prop: 'value', filter: true }],
+        source: [],
+        filter: true,
+      });
+      await page.evaluate(() => {
+        const grid = document.querySelector<HTMLRevoGridElement>('revo-grid')!;
+        const cyclic: Record<string, unknown> = {};
+        cyclic.self = cyclic;
+        // Render a label so this test isolates filtering arbitrary source values.
+        grid.columns = [{ prop: 'name' }, { prop: 'value', filter: true, cellTemplate: () => 'Value' }];
+        const overridden = Object(BigInt('9007199254740993'));
+        overridden.toString = () => '2';
+        const throwing = Object(BigInt('9007199254740993'));
+        throwing.toString = () => { throw new Error('Must not call toString'); };
+        grid.source = [
+          { name: 'Cyclic', value: cyclic },
+          { name: 'Primitive', value: BigInt('9007199254740993') },
+          { name: 'Boxed', value: Object(BigInt('9007199254740993')) },
+          { name: 'Overridden', value: overridden },
+          { name: 'Throwing', value: throwing },
+          { name: 'Other', value: 'other' },
+        ];
+      });
+      await page.waitForChanges();
+
+      const errors: string[] = [];
+      page.on('pageerror', error => errors.push(error.message));
+      await page.evaluate(async filterType => {
+        const grid = document.querySelector<HTMLRevoGridElement>('revo-grid')!;
+        await new Promise<void>(resolve => {
+          grid.addEventListener('afterfilterapply', () => resolve(), { once: true });
+          grid.dispatchEvent(new CustomEvent('filter', {
+            detail: { value: [{ id: 0, type: filterType, value: '9007199254740993', relation: 'and' }] },
+          }));
+        });
+      }, type);
+      await page.waitForChanges();
+      await expectVisibleColumnValues(page, 0,
+        type.startsWith('not') ? ['Cyclic', 'Other'] : ['Primitive', 'Boxed', 'Overridden', 'Throwing']);
+      expect(errors).toEqual([]);
+    });
+  }
+
   test('applies mixed AND and OR connectors in their displayed row positions', async ({ page }) => {
     await mountGrid(page, {
       columns: [{ prop: 'role', name: 'Role', filter: true }],
