@@ -127,6 +127,9 @@ export class RevogrScrollVirtual {
   }
 
   private getContentViewport() {
+    // Slotted scrollbars belong to an external panel whose viewport size is
+    // supplied by its owner. The grid's main viewport may have a different size.
+    if (this.element.slot === 'viewport') return null;
     // The cached clientSize is updated by a throttled ResizeObserver. Use the
     // current content viewport so a simultaneous source/host resize cannot add
     // an artificial scroll range. The content viewport excludes pinned areas.
@@ -138,7 +141,7 @@ export class RevogrScrollVirtual {
 
   private getViewportSize() {
     const viewport = this.getContentViewport();
-    if (!viewport) return this.clientSize;
+    if (!viewport) return this.virtualSize || this.clientSize;
     if (this.dimension === 'rgCol') return viewport.clientWidth;
     // The body may still reflect the previous source while child components
     // render. Measure available space, excluding headers and pinned rows,
