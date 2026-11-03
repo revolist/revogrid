@@ -104,6 +104,27 @@ jobs:
           git diff --stat "$comparison_range" > .codex-release/diff-stat.txt
           printf 'previous_tag=%s\n' "$previous_tag" >> "$GITHUB_OUTPUT"
 
+      - name: Prepare unprivileged Codex user
+        run: |
+          set -euo pipefail
+
+          # Use a separate UID for Codex so it cannot access the API proxy's memory.
+          # This also avoids drop-sudo's service-socket ACL changes on hosted runners.
+          sudo adduser --system --home /home/codex --shell /bin/bash --group codex
+          sudo usermod -a -G "$(id -gn)" codex
+          sudo chmod 755 /home/codex
+
+          # Allow checkout traversal, context reads, and final-message output writes.
+          sudo chown -R "$(id -un):codex" "$GITHUB_WORKSPACE"
+          sudo chmod -R g+rwX "$GITHUB_WORKSPACE"
+          sudo find "$GITHUB_WORKSPACE" -type d -exec chmod g+s {} +
+
+          # The checkout is owned by runner; trust it for read-only Git inspection.
+          sudo -u codex git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          sudo -u codex git -C "$GITHUB_WORKSPACE" rev-parse --verify HEAD
+          sudo -u codex test -r "$GITHUB_WORKSPACE/.codex-release/release-context.json"
+          sudo -u codex test -w "$GITHUB_WORKSPACE/.codex-release"
+
       - name: Generate release highlights with Codex
         id: codex
         uses: openai/codex-action@v1
@@ -115,7 +136,8 @@ jobs:
           output-file: .codex-release/generated-summary.md
           codex-args: '["--ephemeral"]'
           sandbox: read-only
-          safety-strategy: drop-sudo
+          safety-strategy: unprivileged-user
+          codex-user: codex
 
   update_release_notes:
     name: Update GitHub release notes
