@@ -176,34 +176,30 @@ export class RevogrScrollVirtual {
   }
 
   private updateScrollSize() {
+    const vertical = this.dimension === 'rgRow';
+    const clientSize = vertical ? 'clientHeight' : 'clientWidth';
+    const scrollExtent = vertical ? 'scrollHeight' : 'scrollWidth';
+    const minSize = vertical ? 'minWidth' : 'minHeight';
     // A host resize can happen before Stencil renders new dimension props. Sync
     // the spacer before paint as well as after render, rather than adding a frame
     // of overflow while waiting for another component update.
     const content = this.element.firstElementChild as HTMLElement | null;
     if (content) {
-      const property = this.dimension === 'rgRow' ? 'height' : 'width';
+      const property = vertical ? 'height' : 'width';
       content.style[property] = `${getContentSize(
         this.realSize,
-        this.dimension === 'rgRow' ? this.element.clientHeight : this.element.clientWidth,
+        this.element[clientSize],
         this.getViewportSize(),
       )}px`;
     }
-    let scrollSize = 0;
-    let hasScroll: boolean;
-    if (this.dimension === 'rgRow') {
-      hasScroll = this.element.scrollHeight > this.element.clientHeight;
-      scrollSize = hasScroll ? this.scrollSize : 0;
-      this.element.style.minWidth = scrollSize ? `${scrollSize}px` : '';
-    } else {
-      hasScroll = this.element.scrollWidth > this.element.clientWidth;
-      scrollSize = hasScroll ? this.scrollSize : 0;
-      this.element.style.minHeight = scrollSize ? `${scrollSize}px` : '';
-    }
+    const hasScroll = this.element[scrollExtent] > this.element[clientSize];
+    const scrollSize = hasScroll ? this.scrollSize : 0;
+    this.element.style[minSize] = scrollSize ? `${scrollSize}px` : '';
     this.autohideScrollPlugin.setScrollSize(scrollSize, hasScroll);
     this.localScrollService.setParams(
       {
         contentSize: this.realSize,
-        clientSize: this.dimension === 'rgRow' ?  this.element.clientHeight : this.element.clientWidth,
+        clientSize: this.element[clientSize],
         virtualSize: this.getViewportSize(),
       },
       this.dimension,
