@@ -147,10 +147,11 @@ export class DataProvider {
   }
 
   refresh(type: DimensionRows | 'all' = 'all') {
-    if (isRowType(type)) {
+    if (type === 'all') {
+      rowTypes.forEach((t: DimensionRows) => this.refreshItems(t));
+    } else if (isRowType(type)) {
       this.refreshItems(type);
     }
-    rowTypes.forEach((t: DimensionRows) => this.refreshItems(t));
   }
 
   refreshItems(type: DimensionRows = 'rgRow') {

@@ -9,7 +9,7 @@ import { AdditionalData, AfterEditEvent, AllDimensionType, ApplyFocusEvent, Befo
 import { RowResizeConfig } from "./plugins/row-resize";
 import { GridPlugin } from "./plugins/base.plugin";
 import { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
-import { ColumnFilterConfig, FilterCaptions, FilterCollectionItem, LogicFunction, MultiFilterItem, ShowData } from "./plugins/filter/filter.types";
+import { AfterFilterApplyEventProps, BeforeFilterApplyEventProps, BeforeFilterTrimmedEventProps, ColumnFilterConfig, FilterCaptions, LogicFunction, MultiFilterItem, ShowData } from "./plugins/filter/filter.types";
 import { AfterSortingApplyEvent, SortingConfig, SortingOrder } from "./plugins";
 import { GroupingOptions } from "./plugins/groupingRow/grouping.row.types";
 import { VNode } from "@stencil/core";
@@ -26,7 +26,7 @@ export { AdditionalData, AfterEditEvent, AllDimensionType, ApplyFocusEvent, Befo
 export { RowResizeConfig } from "./plugins/row-resize";
 export { GridPlugin } from "./plugins/base.plugin";
 export { AutoSizeColumnConfig } from "./plugins/column.auto-size.plugin";
-export { ColumnFilterConfig, FilterCaptions, FilterCollectionItem, LogicFunction, MultiFilterItem, ShowData } from "./plugins/filter/filter.types";
+export { AfterFilterApplyEventProps, BeforeFilterApplyEventProps, BeforeFilterTrimmedEventProps, ColumnFilterConfig, FilterCaptions, LogicFunction, MultiFilterItem, ShowData } from "./plugins/filter/filter.types";
 export { AfterSortingApplyEvent, SortingConfig, SortingOrder } from "./plugins";
 export { GroupingOptions } from "./plugins/groupingRow/grouping.row.types";
 export { VNode } from "@stencil/core";
@@ -89,7 +89,7 @@ export namespace Components {
         "canFocus": boolean;
         /**
           * Enable column move plugin.
-          * @default true
+          * @default false
          */
         "canMoveColumns": boolean;
         /**
@@ -132,12 +132,12 @@ export namespace Components {
         "editors": Editors;
         /**
           * Enable export plugin.
-          * @default true
+          * @default false
          */
         "exporting": boolean;
         /**
-          * Enables filter plugin. Enabled by default; set to `false` to opt out. Can be boolean. Or can be filter collection See `FilterCollection` for more info.
-          * @default true
+          * Enables filter plugin. Disabled by default; set to `true` or a configuration object to enable. Can be boolean. Or can be filter collection See `FilterCollection` for more info.
+          * @default false
          */
         "filter": boolean | ColumnFilterConfig;
         /**
@@ -254,7 +254,7 @@ export namespace Components {
   )[];
         /**
           * When true, columns are resizable.
-          * @default true
+          * @default false
          */
         "resize": boolean;
         /**
@@ -941,11 +941,9 @@ declare global {
     columns: ColumnCollection;
     order: SortingOrder;
   };
-        "beforefilterapply": { collection: Record<ColumnProp, FilterCollectionItem> };
-        "beforefiltertrimmed": {
-    collection: Record<ColumnProp, FilterCollectionItem>;
-    itemsToFilter: Record<number, boolean>;
-  };
+        "beforefilterapply": BeforeFilterApplyEventProps;
+        "beforefiltertrimmed": BeforeFilterTrimmedEventProps;
+        "afterfilterapply": AfterFilterApplyEventProps;
         "beforetrimmed": {
     trimmed: Record<number, boolean>;
     trimmedType: string;
@@ -1422,7 +1420,7 @@ declare namespace LocalJSX {
         "canFocus"?: boolean;
         /**
           * Enable column move plugin.
-          * @default true
+          * @default false
          */
         "canMoveColumns"?: boolean;
         /**
@@ -1457,12 +1455,12 @@ declare namespace LocalJSX {
         "editors"?: Editors;
         /**
           * Enable export plugin.
-          * @default true
+          * @default false
          */
         "exporting"?: boolean;
         /**
-          * Enables filter plugin. Enabled by default; set to `false` to opt out. Can be boolean. Or can be filter collection See `FilterCollection` for more info.
-          * @default true
+          * Enables filter plugin. Disabled by default; set to `true` or a configuration object to enable. Can be boolean. Or can be filter collection See `FilterCollection` for more info.
+          * @default false
          */
         "filter"?: boolean | ColumnFilterConfig;
         /**
@@ -1521,6 +1519,10 @@ declare namespace LocalJSX {
           * After data applied or range changed.
          */
         "onAfteredit"?: (event: RevoGridCustomEvent<AfterEditEvent>) => void;
+        /**
+          * Emitted after the filter trim has been applied. `collection` contains the first condition for each column; `filterItems` contains the complete model, and `multiFilterItems` is an alias for `filterItems`.
+         */
+        "onAfterfilterapply"?: (event: RevoGridCustomEvent<AfterFilterApplyEventProps>) => void;
         /**
           * After focus render finished. Can be used to access a focus element through `event.target`. This is just a duplicate of `afterfocus` from `revogr-focus.tsx`.
          */
@@ -1594,16 +1596,13 @@ declare namespace LocalJSX {
          */
         "onBeforeexport"?: (event: RevoGridCustomEvent<DataInput>) => void;
         /**
-          * Emitted before applying a filter to the data source. Use e.preventDefault() to prevent cell focus change. Modify if you need to change filters.
+          * Emitted before applying a filter to the data source. Use `event.preventDefault()` to handle filtering outside Core. `collection` contains the first condition for each column; `filterItems` contains the complete multi-condition model.
          */
-        "onBeforefilterapply"?: (event: RevoGridCustomEvent<{ collection: Record<ColumnProp, FilterCollectionItem> }>) => void;
+        "onBeforefilterapply"?: (event: RevoGridCustomEvent<BeforeFilterApplyEventProps>) => void;
         /**
-          * Emitted before applying a filter to the data source. Use e.preventDefault() to prevent the default behavior of trimming values and applying the filter. Modify the `collection` property if you want to change the filters. Modify the `itemsToFilter` property if you want to filter the indexes for trimming.
+          * Emitted before applying filter trim indexes. Use `event.preventDefault()` to cancel. `collection` contains the first condition for each column; `filterItems` contains the complete model.
          */
-        "onBeforefiltertrimmed"?: (event: RevoGridCustomEvent<{
-    collection: Record<ColumnProp, FilterCollectionItem>;
-    itemsToFilter: Record<number, boolean>;
-  }>) => void;
+        "onBeforefiltertrimmed"?: (event: RevoGridCustomEvent<BeforeFilterTrimmedEventProps>) => void;
         /**
           * Before the grid focus is lost. To prevent the default behavior of changing the cell focus, you can call `e.preventDefault()`.
          */
@@ -1733,7 +1732,7 @@ declare namespace LocalJSX {
   )[];
         /**
           * When true, columns are resizable.
-          * @default true
+          * @default false
          */
         "resize"?: boolean;
         /**

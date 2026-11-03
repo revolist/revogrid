@@ -7,6 +7,7 @@ import { svelteOutputTarget } from '@revolist/svelte-output-target';
 import { vueOutputTarget as vue2OutputTarget } from '@revolist/stencil-vue2-output-target';
 import { dashOutputTarget } from '@revolist/stencil-dash-output-target';
 import { eventListOutputTarget } from './scripts/event-list.plugin';
+import { hydrateTypesOutputTarget } from './scripts/hydrate-types.plugin';
 
 const componentCorePackage = '@revolist/revogrid';
 const parent = './packages';
@@ -172,6 +173,7 @@ export const config: Config = {
     {
       type: 'dist-hydrate-script',
     },
+    hydrateTypesOutputTarget(),
     {
       type: 'www',
       copy: [

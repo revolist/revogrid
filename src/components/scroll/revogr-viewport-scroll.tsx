@@ -100,6 +100,7 @@ export class RevogrViewportScroll implements ElementScroll {
   private verticalMouseWheel: (e: Partial<LocalScrollEvent>) => void;
 
   private resizeService?: GridResizeService;
+  private hasLoaded = false;
   private localScrollService: LocalScrollService;
   private localScrollTimer: LocalScrollTimer;
 
@@ -212,9 +213,18 @@ export class RevogrViewportScroll implements ElementScroll {
         }
       },
     });
+    if (this.hasLoaded) {
+      this.initResizeService();
+    }
   }
 
   componentDidLoad() {
+    this.hasLoaded = true;
+    this.initResizeService();
+  }
+
+  private initResizeService() {
+    if (this.resizeService) return;
     // track viewport resize
     this.resizeService = new GridResizeService(
       this.horizontalScroll,
@@ -312,6 +322,7 @@ export class RevogrViewportScroll implements ElementScroll {
 
   disconnectedCallback() {
     this.resizeService?.destroy();
+    this.resizeService = undefined;
   }
 
   async componentDidRender() {

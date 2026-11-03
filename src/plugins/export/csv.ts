@@ -20,6 +20,24 @@ const LINE_FEED = String.fromCharCode(10);
 const DOUBLE_QT = String.fromCharCode(34);
 const NO_BREAK_SPACE = String.fromCharCode(0xfeff);
 const escapeRegex = new RegExp('"', 'g');
+const isBigInt = (value: unknown): value is bigint | BigInt => {
+  if (typeof value === 'bigint') {
+    return true;
+  }
+  if (typeof BigInt !== 'function' || typeof value !== 'object' || value === null) {
+    return false;
+  }
+  try {
+    // Check the internal BigInt value rather than a spoofable type tag.
+    BigInt.prototype.valueOf.call(value);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const bigIntReplacer = (_key: string, value: unknown): unknown =>
+  isBigInt(value) ? value.toString() : value;
 
 export class ExportCsv implements Formatter {
   readonly options: Readonly<CSVFormat>;
@@ -67,7 +85,9 @@ export class ExportCsv implements Formatter {
   private parseCell(value: any, columnDelimiter: string, force = false) {
     let escape = value;
     if (typeof value !== 'string') {
-      escape = JSON.stringify(value);
+      escape = isBigInt(value)
+        ? value.toString()
+        : JSON.stringify(value, bigIntReplacer);
     }
     const toEscape = [CARRIAGE_RETURN, DOUBLE_QT, LINE_FEED, columnDelimiter];
     if (typeof escape === 'undefined') {

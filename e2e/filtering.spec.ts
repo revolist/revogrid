@@ -22,6 +22,63 @@ async function nextAnimationFrames(page: E2EPage, count = 2) {
 }
 
 test.describe('filtering', () => {
+  test('applies mixed AND and OR connectors in their displayed row positions', async ({ page }) => {
+    await mountGrid(page, {
+      columns: [{ prop: 'role', name: 'Role', filter: true }],
+      source: [{ role: 'A' }, { role: 'A B' }, { role: 'C' }, { role: 'B' }],
+      filter: { multiFilterItems: { role: [
+        { id: 0, type: 'contains', value: 'A', relation: 'and' },
+        { id: 1, type: 'contains', value: 'B', relation: 'or' },
+        { id: 2, type: 'contains', value: 'C', relation: 'and' },
+      ] } },
+    });
+    await expect(mainDataRows(page)).toHaveCount(2);
+    await expectVisibleColumnValues(page, 0, ['A B', 'C']);
+  });
+  for (const activation of ['click', 'Enter', 'Space'] as const) {
+    test(`opens the header filter without submitting an ancestor form via ${activation}`, async ({ page }) => {
+      await mountGrid(page, {
+        columns: [
+          { name: 'Status', prop: 'status', filter: true, ...withHeaderTestId('form-filter-header') },
+        ],
+        source: [{ status: 'Active' }],
+        filter: true,
+      });
+
+      await page.evaluate(() => {
+        const container = document.querySelector('revo-grid')!.parentElement!;
+        const form = document.createElement('form');
+        form.dataset.submissions = '0';
+        form.addEventListener('submit', event => {
+          event.preventDefault();
+          form.dataset.submissions = String(Number(form.dataset.submissions) + 1);
+        });
+        container.before(form);
+        form.append(container);
+        const submit = document.createElement('button');
+        submit.type = 'submit';
+        submit.textContent = 'Submit form';
+        form.append(submit);
+      });
+      await page.waitForChanges();
+
+      const form = page.locator('form');
+      await form.getByRole('button', { name: 'Submit form' }).click();
+      await expect(form).toHaveAttribute('data-submissions', '1');
+
+      if (activation === 'click') {
+        await clickFilterButton(page, 'form-filter-header');
+      } else {
+        const button = page.getByTestId('form-filter-header').locator(SELECTORS.filterButton);
+        await button.focus();
+        await button.press(activation);
+      }
+
+      await expect(page.locator(SELECTORS.filterPanel)).toBeVisible();
+      await expect(form).toHaveAttribute('data-submissions', '1');
+    });
+  }
+
   test('keeps filter-only header text clear and reveals the button for keyboard focus', async ({ page }) => {
     await mountGrid(page, {
       columns: [

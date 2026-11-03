@@ -164,7 +164,13 @@ test.describe('layout', () => {
           theme,
           rtl,
           resize: true,
+          filter: true,
         });
+        // Register the opt-in filter plugin before testing its hidden/shown layout.
+        await page.evaluate(() => {
+          document.querySelector('revo-grid')!.filter = false;
+        });
+        await page.waitForChanges();
         const header = page.getByTestId('sorted-ticker');
         const assertSeparated = async () => {
           await expect

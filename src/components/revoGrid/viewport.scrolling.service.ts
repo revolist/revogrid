@@ -21,10 +21,7 @@ export default class GridScrollingService {
         // pinned column only
       }
       if (this.isPinnedColumn(key) && e.dimension === 'rgCol') {
-        if (elKey === key || !e.delta) {
-          continue;
-        }
-        const changedEvent = this.changeScroll(this.elements[elKey], e);
+        const changedEvent = this.changePinnedScroll(elKey, e, key);
         if (changedEvent) {
           newEventPromise = changedEvent;
         }
@@ -41,6 +38,13 @@ export default class GridScrollingService {
         ? { ...event, dimension: key }
         : event,
     );
+  }
+
+  private changePinnedScroll(elKey: string, e: ViewPortScrollEvent, key: DimensionColPin) {
+    if (elKey === key || !e.delta) {
+      return;
+    }
+    return this.changeScroll(this.elements[elKey], e);
   }
 
   private changeScroll(elements: ElementScroll[], e: ViewPortScrollEvent) {
