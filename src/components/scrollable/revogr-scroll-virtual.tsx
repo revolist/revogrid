@@ -101,10 +101,12 @@ export class RevogrScrollVirtual {
     this.localScrollService = new LocalScrollService({
       runScroll: e => this.scrollVirtual.emit(e),
       applyScroll: e => {
-        this.localScrollTimer.setCoordinate(e);
         const type = e.dimension === 'rgRow' ? 'scrollTop' : 'scrollLeft';
         // this will trigger on scroll event
         this.element[type] = e.coordinate;
+        const coordinate = this.element[type];
+        this.localScrollTimer.setCoordinate({ ...e, coordinate });
+        return coordinate;
       },
     });
     if (typeof ResizeObserver !== 'undefined') {

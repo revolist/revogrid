@@ -141,11 +141,27 @@ export default class ViewportService {
             config.virtualX,
           );
 
+        let shrunk = false;
+        let grewPinnedColumn = false;
         // Keep virtual dimensions in sync with their viewport size.
         if ((dimension === 'rgRow' && !config.disableVirtualY) || isVirtualColumn) {
-          vpState.virtualSize = e.detail.size;
+          const viewport = config.viewportProvider.stores[dimension].store;
+          const previousSize = viewport.get('virtualSize');
+          if (previousSize !== e.detail.size) {
+            shrunk = e.detail.size < previousSize;
+            grewPinnedColumn = isVirtualColumn && dimension !== 'rgCol' && e.detail.size > previousSize;
+            vpState.virtualSize = e.detail.size;
+            // Keep the rendered window until coordinate synchronization updates
+            // its coverage; a virtual-size-only update otherwise clears it.
+            vpState.items = viewport.get('items');
+          }
         }
         config.viewportProvider?.setViewport(dimension, vpState);
+        if (shrunk || grewPinnedColumn) {
+          // Pinned columns do not emit a follow-up scroll after resize, so fill
+          // their new coverage here. Shrink needs a fresh, smaller window.
+          config.dimensionProvider.setViewPortCoordinate({ type: dimension, force: shrunk });
+        }
       };
       const colData = gatherColumnData(column);
       const columnSelectionStore = this.registerCol(colData.position.x, val);
