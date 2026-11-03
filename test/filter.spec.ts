@@ -102,6 +102,23 @@ describe('text filters with non-JSON cell values', () => {
       expect(predicate({ [Symbol.toStringTag]: 'BigInt', id: 42 }, '{"id":42}')).toBe(true);
     });
 
+    it(`${name} preserves nested boxed BigInt digits despite toJSON substitutions`, () => {
+      for (const value of [Object(bigint), runInNewContext(`Object(BigInt("${digits}"))`)]) {
+        for (const replacement of ['2', undefined]) {
+          value.toJSON = () => replacement;
+          expect(predicate({ id: value }, `{"id":"${digits}"}`)).toBe(true);
+          expect(predicate([value], `["${digits}"]`)).toBe(true);
+          expect(predicate({ id: value }, '{"id":"2"}')).toBe(false);
+        }
+      }
+    });
+
+    it(`${name} preserves ordinary toJSON conversions`, () => {
+      expect(predicate({ id: { toJSON: () => 'custom' } }, '{"id":"custom"}')).toBe(true);
+      expect(predicate({ id: { toJSON: () => undefined } }, '{}')).toBe(true);
+      expect(predicate({ id: new Date('2026-01-01T00:00:00Z') }, '{"id":"2026-01-01T00:00:00.000Z"}')).toBe(true);
+    });
+
     it(`${name} treats cyclic and nonserializable values as nonmatches`, () => {
       const cyclic: Record<string, unknown> = {};
       cyclic.self = cyclic;
