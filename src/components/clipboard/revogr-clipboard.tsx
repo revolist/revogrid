@@ -7,6 +7,25 @@ import {
   Prop,
 } from '@stencil/core';
 import { DataFormat } from '@type';
+
+/** Read one field while leaving the row/column separator for the caller. */
+function readTextField(data: string, position: number, quotedField: RegExp) {
+  quotedField.lastIndex = position;
+  const quoted = data[position] === '"' ? quotedField.exec(data) : null;
+  let value: string;
+  if (quoted) {
+    value = quoted[1].replace(/""/g, '"');
+    position = quotedField.lastIndex;
+  } else {
+    const start = position;
+    while (position < data.length && !/[\t\r\n]/.test(data[position])) {
+      position++;
+    }
+    value = data.slice(start, position);
+  }
+  return { value, position };
+}
+
 /**
  * This Clipboard provides functionality for handling clipboard events in a web application.
  */
@@ -222,19 +241,9 @@ export class Clipboard {
     const quotedField = /"((?:[^"]|"")*)"(?=\t|\r|\n|$)/y;
     let position = 0;
     while (position <= data.length) {
-      quotedField.lastIndex = position;
-      const quoted = data[position] === '"' ? quotedField.exec(data) : null;
-      let value: string;
-      if (quoted) {
-        value = quoted[1].replace(/""/g, '"');
-        position = quotedField.lastIndex;
-      } else {
-        const start = position;
-        while (position < data.length && !/[\t\r\n]/.test(data[position])) {
-          position++;
-        }
-        value = data.slice(start, position);
-      }
+      const field = readTextField(data, position, quotedField);
+      const value = field.value;
+      position = field.position;
       result[result.length - 1].push(value);
       if (position === data.length) {
         break;

@@ -84,11 +84,39 @@ describe('text filters with non-JSON cell values', () => {
       }
     });
 
+    it(`${name} ignores overridden and throwing boxed BigInt toString methods`, () => {
+      for (const value of [Object(bigint), runInNewContext(`Object(BigInt("${digits}"))`)]) {
+        for (const toString of [() => 'wrong', () => { throw new Error('Must not call toString'); }]) {
+          value.toString = toString;
+          expect(predicate(value, digits)).toBe(true);
+          expect(predicate(value, 'wrong')).toBe(false);
+          expect(predicate({ id: value }, `{"id":"${digits}"}`)).toBe(true);
+        }
+      }
+    });
+
     it(`${name} preserves JSON formatting and supports nested BigInt`, () => {
       expect(predicate({ id: bigint }, `{"id":"${digits}"}`)).toBe(true);
       expect(predicate([bigint, Object(bigint)], `["${digits}","${digits}"]`)).toBe(true);
       expect(predicate({ id: 42 }, '{"id":42}')).toBe(true);
       expect(predicate({ [Symbol.toStringTag]: 'BigInt', id: 42 }, '{"id":42}')).toBe(true);
+    });
+
+    it(`${name} preserves nested boxed BigInt digits despite toJSON substitutions`, () => {
+      for (const value of [Object(bigint), runInNewContext(`Object(BigInt("${digits}"))`)]) {
+        for (const replacement of ['2', undefined]) {
+          value.toJSON = () => replacement;
+          expect(predicate({ id: value }, `{"id":"${digits}"}`)).toBe(true);
+          expect(predicate([value], `["${digits}"]`)).toBe(true);
+          expect(predicate({ id: value }, '{"id":"2"}')).toBe(false);
+        }
+      }
+    });
+
+    it(`${name} preserves ordinary toJSON conversions`, () => {
+      expect(predicate({ id: { toJSON: () => 'custom' } }, '{"id":"custom"}')).toBe(true);
+      expect(predicate({ id: { toJSON: () => undefined } }, '{}')).toBe(true);
+      expect(predicate({ id: new Date('2026-01-01T00:00:00Z') }, '{"id":"2026-01-01T00:00:00.000Z"}')).toBe(true);
     });
 
     it(`${name} treats cyclic and nonserializable values as nonmatches`, () => {
@@ -559,6 +587,25 @@ describe('FilterPlugin.getRowFilter', () => {
       columnsByProp,
     );
   }
+
+  it.each(['and-or', 'or-and'])('evaluates every truth assignment for %s connectors', expression => {
+    const rows = Array.from({ length: 8 }, (_, mask) => ({
+      role: ['A', 'B', 'C'].filter((_, index) => (mask & (1 << index)) !== 0).join(' '),
+    }));
+    const expected: Record<number, boolean> = {};
+    for (let mask = 0; mask < rows.length; mask++) {
+      const a = (mask & 1) !== 0;
+      const b = (mask & 2) !== 0;
+      const c = (mask & 4) !== 0;
+      const accepted = expression === 'and-or' ? (a && b) || c : a || (b && c);
+      if (!accepted) expected[mask] = true;
+    }
+    expect(trimByRole(rows, [
+      containsRole('A', expression === 'and-or' ? 'and' : 'or', 0),
+      containsRole('B', expression === 'and-or' ? 'or' : 'and', 1),
+      containsRole('C', 'and', 2),
+    ])).toEqual(expected);
+  });
 
   it('returns trim indexes for rows that do not match a contains filter', () => {
     const trimmed = trimByRole(adminRows, [containsRole('Admin')]);

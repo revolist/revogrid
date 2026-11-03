@@ -70,83 +70,48 @@ export function getExpanded(model: DataType = {}) {
   return model[GROUP_EXPANDED];
 }
 
-function flattenGroupMaps({
-  groupedValues,
-  parentIds,
-  isExpanded,
-  itemIndex,
-  expandedAll,
-  prevExpanded,
-  columnProps,
-}: {
-  groupedValues: GroupedData;
-  parentIds: string[];
-  isExpanded: boolean;
-  itemIndex: number;
-  expandedAll: boolean;
-  prevExpanded: Record<string, boolean>;
-  columnProps: ColumnProp[];
-}) {
-  const depth = parentIds.length;
-  const sourceWithGroups: DataType[] = [];
-  // collapse all groups in the beginning
-  let trimmed: Record<number, boolean> = {};
-
-  // index mapping
-  let oldNewIndexMap: Record<number, number> = {};
-
-  groupedValues.forEach((innerGroupedValues, groupId) => {
-    const levelIds = [...parentIds, groupId];
-    const mergedIds = levelIds.join(',');
-    const isGroupExpanded =
-      isExpanded && (!!expandedAll || !!prevExpanded[mergedIds]);
-    sourceWithGroups.push({
-      [PSEUDO_GROUP_ITEM]: groupId,
-      [GROUP_DEPTH]: depth,
-      [PSEUDO_GROUP_ITEM_ID]: JSON.stringify(levelIds),
-      [PSEUDO_GROUP_ITEM_VALUE]: mergedIds,
-      [GROUP_EXPANDED]: isGroupExpanded,
-      [GROUP_COLUMN_PROP]: columnProps[depth],
-      [columnProps[depth]]: groupId,
-    });
-    itemIndex += 1;
-    // If parent group is collapsed, mark all items as hidden
-    if (!isExpanded && depth) {
-      trimmed[itemIndex] = true;
-    }
-    if (Array.isArray(innerGroupedValues)) {
-      // This branch handles leaf nodes (actual data items)
-      innerGroupedValues.forEach(value => {
-        itemIndex += 1;
-        if (!isGroupExpanded) {
-          trimmed[itemIndex] = true; // Mark items as hidden if group is collapsed
-        }
-        oldNewIndexMap[value[GROUP_ORIGINAL_INDEX]] = itemIndex; // Keep track of new positions
+function flattenGroupMaps(
+  groupedValues: GroupedData,
+  columnProps: ColumnProp[],
+  expandedAll: boolean,
+  prevExpanded: Record<string, boolean>,
+) {
+  // One accumulator across all levels: each row and index is appended once.
+  // Passing large child arrays as arguments exceeds the engine's call limit.
+  const source: DataType[] = [];
+  const trimmed: Record<number, boolean> = {};
+  const oldNewIndexMap: Record<number, number> = {};
+  function append(groups: GroupedData, parentIds: string[], isExpanded: boolean) {
+    const depth = parentIds.length;
+    groups.forEach((children, groupId) => {
+      const levelIds = [...parentIds, groupId];
+      const mergedIds = levelIds.join(',');
+      const groupExpanded = isExpanded && (expandedAll || !!prevExpanded[mergedIds]);
+      const groupIndex = source.length;
+      source.push({
+        [PSEUDO_GROUP_ITEM]: groupId,
+        [GROUP_DEPTH]: depth,
+        [PSEUDO_GROUP_ITEM_ID]: JSON.stringify(levelIds),
+        [PSEUDO_GROUP_ITEM_VALUE]: mergedIds,
+        [GROUP_EXPANDED]: groupExpanded,
+        [GROUP_COLUMN_PROP]: columnProps[depth],
+        [columnProps[depth]]: groupId,
       });
-      sourceWithGroups.push(...innerGroupedValues);
-    } else {
-      // This branch handles nested groups (further subgroups)
-      const children = flattenGroupMaps({
-        groupedValues: innerGroupedValues,
-        parentIds: levelIds,
-        isExpanded: isGroupExpanded,
-        itemIndex,
-        expandedAll,
-        prevExpanded,
-        columnProps,
-      }); // Recursively process subgroups
-      sourceWithGroups.push(...children.source);
-      trimmed = { ...children.trimmed, ...trimmed };
-      oldNewIndexMap = { ...children.oldNewIndexMap, ...oldNewIndexMap };
-      itemIndex = children.itemIndex;
-    }
-  });
-  return {
-    source: sourceWithGroups,
-    oldNewIndexMap,
-    trimmed,
-    itemIndex,
-  };
+      if (!isExpanded && depth) trimmed[groupIndex] = true;
+      if (Array.isArray(children)) {
+        for (const row of children) {
+          const index = source.length;
+          if (!groupExpanded) trimmed[index] = true;
+          oldNewIndexMap[row[GROUP_ORIGINAL_INDEX]] = index;
+          source.push(row);
+        }
+      } else {
+        append(children, levelIds, groupExpanded);
+      }
+    });
+  }
+  append(groupedValues, [], true);
+  return { source, trimmed, oldNewIndexMap };
 }
 
 /**
@@ -198,15 +163,9 @@ export function gatherGrouping(
 
   const groupingDepth = columnProps.length;
 
-  const { source: sourceWithGroups, trimmed, oldNewIndexMap } = flattenGroupMaps({
-    groupedValues: groupedItems,
-    parentIds: [],
-    isExpanded: true,
-    itemIndex: -1,
-    expandedAll,
-    prevExpanded,
-    columnProps
-  });
+  const { source: sourceWithGroups, trimmed, oldNewIndexMap } = flattenGroupMaps(
+    groupedItems, columnProps, expandedAll, prevExpanded,
+  );
 
   return {
     sourceWithGroups, // updates source mirror

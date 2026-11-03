@@ -11,6 +11,86 @@ import {
   withHeaderTestId,
 } from './helpers';
 
+test('bulk expansion renders a large group and its final row', async ({ page }) => {
+  await mountGrid(page, {
+    columns: buildColumns([{ prop: 'id', name: 'ID' }]),
+    source: [], grouping: { props: ['team'], expandedAll: true }, rowSize: 20,
+  });
+  await page.evaluate(() => {
+    document.querySelector<HTMLRevoGridElement>('revo-grid')!.source = Array.from(
+      { length: 220000 }, (_, id) => ({ id, team: 'North' }),
+    );
+  });
+  await page.waitForChanges();
+  await expect(mainDataRows(page).first()).toContainText('North');
+  await page.evaluate(async () => {
+    const grid = document.querySelector<HTMLRevoGridElement>('revo-grid')!;
+    const plugin = (await grid.getPlugins()).find(p => 'setAllGroupsExpanded' in p) as unknown as { setAllGroupsExpanded(value: boolean): void };
+    plugin.setAllGroupsExpanded(false);
+  });
+  await page.waitForChanges();
+  await expect(mainDataRows(page)).toHaveCount(1);
+  await page.evaluate(async () => {
+    const grid = document.querySelector<HTMLRevoGridElement>('revo-grid')!;
+    const plugin = (await grid.getPlugins()).find(p => 'setAllGroupsExpanded' in p) as unknown as { setAllGroupsExpanded(value: boolean): void };
+    plugin.setAllGroupsExpanded(true);
+    await grid.scrollToRow(220000);
+  });
+  await page.waitForChanges();
+  await expect(mainDataRows(page).last()).toContainText('219999');
+});
+
+test('bulk expansion preserves filtered sorted rows and resized heights', async ({ page }) => {
+  await mountGrid(page, {
+    columns: buildColumns([
+      { prop: 'name', name: 'Name', sortable: true, ...withHeaderTestId('bulk-name') },
+      { prop: 'role', name: 'Role', filter: true },
+    ]),
+    source: [
+      { name: 'Ben', team: 'North', role: 'Engineer' },
+      { name: 'Alice', team: 'North', role: 'Manager' },
+      { name: 'Cara', team: 'South', role: 'Manager' },
+    ],
+    grouping: { props: ['team'], expandedAll: true },
+    filter: { multiFilterItems: { role: [{ id: 0, type: 'eq', value: 'Manager', relation: 'and' }] } },
+    rowHeaders: true,
+    rowSize: 36,
+  });
+  await page.getByTestId('bulk-name').click();
+  await expectVisibleColumnValues(page, 0, ['Alice', 'Cara']);
+  await enableRowResize(page);
+  await dragResizeHandle(page, await rowIndexByText(page, 'Alice'), 24);
+  const before = await rowHeightByText(page, 'Alice');
+  async function toggle(expanded: boolean) {
+    await page.evaluate(async expanded => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid')!;
+      const plugin = (await grid.getPlugins()).find(p => 'setAllGroupsExpanded' in p) as unknown as { setAllGroupsExpanded(value: boolean): void };
+      if (!plugin) throw new Error('Bulk grouping API unavailable');
+      plugin.setAllGroupsExpanded(expanded);
+    }, expanded);
+    await page.waitForChanges();
+  }
+  await toggle(false);
+  await expect(mainDataRows(page)).toHaveCount(2);
+  await expect(page.locator(`${SELECTORS.mainViewport} .groupingRow`)).toContainText(['North', 'South']);
+  await toggle(true);
+  await expectVisibleColumnValues(page, 0, ['Alice', 'Cara']);
+  expect(await rowHeightByText(page, 'Alice')).toBeCloseTo(before, 0);
+  await toggle(false);
+  await page.evaluate(() => {
+    document.querySelector<HTMLRevoGridElement>('revo-grid')!.source = [
+      { name: 'Eve', team: 'West', role: 'Manager' },
+      { name: 'Finn', team: 'West', role: 'Engineer' },
+    ];
+  });
+  await page.waitForChanges();
+  await expect(mainDataRows(page)).toHaveCount(1);
+  await toggle(true);
+  await expectVisibleColumnValues(page, 0, ['Eve']);
+  await page.locator(`${SELECTORS.mainViewport} .groupingRow ${SELECTORS.groupExpandButton}`).click();
+  await expect(mainDataRows(page)).toHaveCount(1);
+});
+
 async function enableRowResize(page: E2EPage) {
   await page.evaluate(() => {
     const grid = document.querySelector<HTMLRevoGridElement>('revo-grid');

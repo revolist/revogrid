@@ -38,6 +38,34 @@ Alice,25"`, () => {
   });
 
   describe('doExport — cell escaping', () => {
+    it('preserves nested boxed BigInt digits despite toJSON substitutions', () => {
+      const digits = '9007199254740993';
+      for (const value of [Object(BigInt(digits)), runInNewContext(`Object(BigInt("${digits}"))`)]) {
+        for (const replacement of ['2', undefined]) {
+          value.toJSON = () => replacement;
+          expect(doExport({
+            data: [{ v: { id: value } }, { v: [value] }],
+            headers: [],
+            props: ['v'],
+          })).toBe(`"{""id"":""${digits}""}"\r\n"[""${digits}""]"`);
+        }
+      }
+    });
+
+    it('uses the internal boxed BigInt value despite overridden or throwing toString methods', () => {
+      const digits = '9007199254740993';
+      for (const value of [Object(BigInt(digits)), runInNewContext(`Object(BigInt("${digits}"))`)]) {
+        for (const toString of [() => '2', () => { throw new Error('Must not call toString'); }]) {
+          value.toString = toString;
+          expect(doExport({
+            data: [{ v: value }, { v: { boxed: value } }],
+            headers: [],
+            props: ['v'],
+          })).toBe(`${digits}\r\n"{""boxed"":""${digits}""}"`);
+        }
+      }
+    });
+
     it('serializes objects with spoofed BigInt tags as ordinary top-level and nested objects', () => {
       const value = { [Symbol.toStringTag]: 'BigInt', name: 'ordinary object' };
       expect(doExport({
