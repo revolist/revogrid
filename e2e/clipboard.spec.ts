@@ -21,6 +21,38 @@ import {
 } from './helpers';
 
 test.describe('clipboard', () => {
+  test('round-trips copied cells containing tabs, line breaks, quotes, and empty values', async ({ page }) => {
+    const values = [
+      { id: 'tab\tvalue', name: 'line\nvalue', role: 'say "hi"' },
+      { id: 'CR\rvalue', name: 'CRLF\r\nvalue', role: '' },
+    ];
+    const blank = { id: '', name: '', role: '' };
+    await mountGrid(page, {
+      columns: basicColumns(['id', 'name', 'role']),
+      source: [
+        ...values,
+        { ...blank },
+        { ...blank },
+        { id: 'untouched', name: 'untouched', role: 'untouched' },
+      ],
+      range: true,
+    });
+
+    await setCellsFocus(page, { x: 0, y: 0 }, { x: 2, y: 1 });
+    const copiedText = await getCopiedText(page);
+    expect(copiedText).toBe(
+      '"tab\tvalue"\t"line\nvalue"\t"say ""hi"""\n"CR\rvalue"\t"CRLF\r\nvalue"\t',
+    );
+    await setCellsFocus(page, { x: 0, y: 2 });
+    await dispatchClipboardEvent(page, 'paste', copiedText);
+
+    const source = await page.locator('revo-grid').evaluate(
+      grid => (grid as HTMLRevoGridElement).source,
+    );
+    expect(source.slice(2, 4)).toEqual(values);
+    expect(source[4]).toEqual({ id: 'untouched', name: 'untouched', role: 'untouched' });
+  });
+
   test('copies the selected range as tabular text', async ({ page }) => {
     await mountGrid(page, {
       columns: basicColumns(['id', 'name', 'role']),
