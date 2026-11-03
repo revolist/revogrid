@@ -59,7 +59,7 @@ export class RevogrScrollVirtual {
   private localScrollService: LocalScrollService;
   private localScrollTimer: LocalScrollTimer;
   private resizeObserver?: ResizeObserver;
-  private contentViewport?: Element;
+  private observedViewportElements: Element[] = [];
 
   @Method()
   async setScroll(e: ViewPortScrollEvent): Promise<void> {
@@ -116,7 +116,7 @@ export class RevogrScrollVirtual {
   disconnectedCallback() {
     this.resizeObserver?.disconnect();
     this.resizeObserver = undefined;
-    this.contentViewport = undefined;
+    this.observedViewportElements = [];
     this.autohideScrollPlugin.clear();
   }
 
@@ -148,11 +148,21 @@ export class RevogrScrollVirtual {
 
   componentDidRender() {
     const viewport = this.getContentViewport();
-    if (viewport !== this.contentViewport) {
-      if (this.contentViewport) this.resizeObserver?.unobserve(this.contentViewport);
-      if (viewport) this.resizeObserver?.observe(viewport);
-      this.contentViewport = viewport ?? undefined;
+    const elements: Element[] = viewport ? [viewport] : [];
+    if (viewport && this.dimension === 'rgRow') {
+      // Header/pinned-row heights can change without resizing either host.
+      for (const area of ['header', 'footer']) {
+        const wrapper = viewport.querySelector(`.inner-content-table > .${area}-wrapper`);
+        if (wrapper) elements.push(wrapper);
+      }
     }
+    for (const element of this.observedViewportElements) {
+      if (!elements.includes(element)) this.resizeObserver?.unobserve(element);
+    }
+    for (const element of elements) {
+      if (!this.observedViewportElements.includes(element)) this.resizeObserver?.observe(element);
+    }
+    this.observedViewportElements = elements;
     this.updateScrollSize();
   }
 

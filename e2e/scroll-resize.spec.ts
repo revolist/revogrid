@@ -2,6 +2,55 @@ import { expect } from '@playwright/test';
 import { test } from '@stencil/playwright';
 import { mountGrid } from './helpers';
 
+for (const area of ['header', 'footer']) {
+  test(`updates the scrollbar before paint when only the ${area} height changes`, async ({ page }) => {
+    await mountGrid(page, {
+      columns: [{ prop: 'id', size: 200 }],
+      source: Array.from({ length: 6 }, (_, id) => ({ id })),
+      rowSize: 30,
+      width: 400,
+      height: 240,
+    });
+    await page.addStyleTag({ content: `
+      revo-grid { min-height: 0; }
+      revo-grid .header-rgRow { display: none; }
+      revo-grid .${area}-wrapper { height: 100px; flex-shrink: 0; }
+    ` });
+    const scrollbar = page.locator('revogr-scroll-virtual.vertical');
+    await expect.poll(() => scrollbar.evaluate(el => el.scrollHeight - el.clientHeight)).toBe(40);
+
+    for (const height of [40, 100, 40, 100]) {
+      const samples = await page.evaluate(async ({ area, height }) => {
+        const grid = document.querySelector('revo-grid')!;
+        const viewport = grid.querySelector('revogr-viewport-scroll.rgCol')!;
+        const wrapper = viewport.querySelector(`.inner-content-table > .${area}-wrapper`) as HTMLElement;
+        const scroll = grid.querySelector('revogr-scroll-virtual.vertical')!;
+        const samples: { overflow: number; available: number }[] = [];
+        wrapper.style.height = `${height}px`;
+        const start = performance.now();
+        await new Promise<void>(resolve => {
+          // Read after ResizeObserver delivery/layout, as in the host-resize regressions.
+          const sample = () => setTimeout(() => {
+            samples.push({
+              overflow: scroll.scrollHeight - scroll.clientHeight,
+              available: viewport.clientHeight - wrapper.clientHeight,
+            });
+            if (performance.now() - start < 100) requestAnimationFrame(sample);
+            else resolve();
+          }, 0);
+          requestAnimationFrame(sample);
+        });
+        return samples;
+      }, { area, height });
+      expect(samples.length).toBeGreaterThan(2);
+      for (const sample of samples) {
+        expect(sample.available).toBe(240 - height);
+        expect(sample.overflow, JSON.stringify(samples)).toBe(Math.max(0, 180 - sample.available));
+      }
+    }
+  });
+}
+
 test('does not flash a scrollbar when source and grid height grow together', async ({ page }) => {
   await mountGrid(page, {
     columns: [{ prop: 'id', size: 400 }],
