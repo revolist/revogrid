@@ -55,6 +55,37 @@ describe('viewport resize synchronization', () => {
     unsubscribe();
   });
 
+  it.each(['rgRow', 'rgCol'] as const)('clamps %s growth at the end and retains its coordinate on shrink', type => {
+    const { viewport, dimension, resize } = setup();
+    dimension.stores[type].setStore({ originItemSize: 30, count: 100 });
+    viewport.setViewport(type, { virtualSize: 300, clientSize: 300, realCount: 100 });
+    dimension.setViewPortCoordinate({ type, coordinate: 2700, force: true });
+    const store = viewport.stores[type].store;
+    const originalItems = store.get('items');
+    const publications: number[] = [];
+    const unsubscribe = store.onChange('items', items => publications.push(items.length));
+
+    resize(type, 600);
+    expect(store.get('items')).toBe(originalItems);
+    // Main viewports synchronize their scroll coordinate after the resize event.
+    dimension.setViewPortCoordinate({ type, coordinate: 2700 });
+    expect(viewport.stores[type].lastCoordinate).toBe(2370);
+    const expanded = store.get('items');
+    expect(Math.min(...expanded.map(item => item.start))).toBeLessThanOrEqual(2400);
+    expect(Math.max(...expanded.map(item => item.end))).toBe(3000);
+    expect(expanded.some(item => item.itemIndex === 99)).toBe(true);
+
+    resize(type, 150);
+    expect(viewport.stores[type].lastCoordinate).toBe(2370);
+    const shrunken = store.get('items');
+    expect(shrunken.length).toBeGreaterThan(0);
+    expect(shrunken.length).toBeLessThan(expanded.length);
+    expect(Math.min(...shrunken.map(item => item.start))).toBeLessThanOrEqual(2370);
+    expect(Math.max(...shrunken.map(item => item.end))).toBeGreaterThanOrEqual(2520);
+    expect(publications).not.toContain(0);
+    unsubscribe();
+  });
+
   it.each(['colPinStart', 'colPinEnd'] as const)('fills newly visible %s columns without a follow-up scroll event', type => {
     const { viewport, dimension, resize } = setup(type, { virtualX: ['rgCol', type] });
     dimension.stores[type].setStore({ originItemSize: 80, count: 30 });
