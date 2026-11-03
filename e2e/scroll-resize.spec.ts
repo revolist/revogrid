@@ -2,6 +2,37 @@ import { expect } from '@playwright/test';
 import { test } from '@stencil/playwright';
 import { mountGrid } from './helpers';
 
+test('external viewport-slot scrollbars retain their supplied panel size', async ({ page }) => {
+  await mountGrid(page, {
+    columns: [{ prop: 'id', size: 1000 }],
+    source: [{ id: 0 }],
+    width: 400,
+    height: 240,
+  });
+  await page.evaluate(() => {
+    const scroll = document.createElement('revogr-scroll-virtual');
+    scroll.id = 'panel-scroll';
+    scroll.slot = 'viewport';
+    scroll.className = 'horizontal';
+    scroll.dimension = 'rgCol';
+    scroll.realSize = 1800;
+    scroll.clientSize = 700;
+    scroll.virtualSize = 700;
+    scroll.style.cssText = 'position:absolute;bottom:0;width:700px;height:20px;';
+    document.querySelector('revo-grid')!.appendChild(scroll);
+  });
+  const scroll = page.locator('#panel-scroll');
+  for (const width of [700, 300, 1900]) {
+    await scroll.evaluate((el: HTMLRevogrScrollVirtualElement, width) => {
+      el.clientSize = width;
+      el.virtualSize = width;
+      el.style.width = `${width}px`;
+    }, width);
+    await expect.poll(() => scroll.evaluate(el => el.scrollWidth - el.clientWidth))
+      .toBe(Math.max(0, 1800 - width));
+  }
+});
+
 for (const area of ['header', 'footer']) {
   test(`updates the scrollbar before paint when only the ${area} height changes`, async ({ page }) => {
     await mountGrid(page, {
