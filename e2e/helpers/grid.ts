@@ -24,7 +24,7 @@ function installBrowserGridHelpers() {
   };
 }
 
-export async function mountGrid(page: E2EPage, options: GridSetupOptions) {
+export async function mountGrid(page: E2EPage, options: GridSetupOptions, css = '') {
   const width = options.width ?? 900;
   const height = options.height ?? 360;
   const initialAttrs = [
@@ -37,9 +37,10 @@ export async function mountGrid(page: E2EPage, options: GridSetupOptions) {
 
   await page.addInitScript(installBrowserGridHelpers);
   await page.setContent(`
-    <div style="width:${width}px; height:${height}px;">
+    <head><style>${css}</style></head>
+    <body><div style="width:${width}px; height:${height}px;">
       <revo-grid ${initialAttrs} style="display:block; width:100%; height:100%;"></revo-grid>
-    </div>
+    </div></body>
   `);
 
   await page.waitForSelector(SELECTORS.grid);

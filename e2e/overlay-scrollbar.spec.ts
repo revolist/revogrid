@@ -6,31 +6,19 @@ for (const axis of ['vertical', 'horizontal'] as const) {
   test(`overlay ${axis} scrollbar remains reachable while idle`, async ({
     page,
   }) => {
-    // Reproduce a zero-width native gutter independently of the host OS setting.
-    await page.addInitScript(() => {
-      const style = document.createElement('style');
-      style.textContent =
-        '* { scrollbar-width: none; } ::-webkit-scrollbar { width: 0; height: 0; }';
-      if (document.head) document.head.append(style);
-      else {
-        const observer = new MutationObserver(() => {
-          if (document.head) {
-            document.head.append(style);
-            observer.disconnect();
-          }
-        });
-        observer.observe(document, { childList: true, subtree: true });
-      }
-    });
-    await mountGrid(page, {
-      columns: Array.from({ length: 10 }, (_, i) => ({
-        prop: `c${i}`,
-        size: 150,
-      })),
-      source: Array.from({ length: 100 }, (_, id) => ({ c0: id })),
-      width: 400,
-      height: 240,
-    });
+    await mountGrid(
+      page,
+      {
+        columns: Array.from({ length: 10 }, (_, i) => ({
+          prop: `c${i}`,
+          size: 150,
+        })),
+        source: Array.from({ length: 100 }, (_, id) => ({ c0: id })),
+        width: 400,
+        height: 240,
+      },
+      '* { scrollbar-width: none; }',
+    );
     const scrollbar = page.locator(`revogr-scroll-virtual.${axis}`);
     const vertical = axis === 'vertical';
     const size = () =>
@@ -38,6 +26,7 @@ for (const axis of ['vertical', 'horizontal'] as const) {
         const rect = el.getBoundingClientRect();
         return vertical ? rect.width : rect.height;
       }, vertical);
+    await expect(scrollbar).toHaveCSS('scrollbar-width', 'none');
     await expect(scrollbar).toHaveAttribute('autohide', 'true');
     await page.mouse.move(0, 0);
     await expect(scrollbar).not.toHaveAttribute('visible');
@@ -55,15 +44,13 @@ for (const axis of ['vertical', 'horizontal'] as const) {
     await page.mouse.move(point.x, point.y);
     await expect.poll(size).toBeGreaterThanOrEqual(20);
 
-    // The timed visible state must not collapse a scrollbar still under the pointer.
-    await scrollbar.evaluate(
-      (el, vertical) =>
-        el.setScroll({
-          dimension: vertical ? 'rgRow' : 'rgCol',
-          coordinate: 100,
-        }),
-      vertical,
+    // Drag from the original idle strip, outside any native scrollbar pixels.
+    await page.mouse.down();
+    await page.mouse.move(
+      point.x + (vertical ? 0 : 30),
+      point.y + (vertical ? 30 : 0),
     );
+    await page.mouse.up();
     await expect(scrollbar).toHaveAttribute('visible', 'true');
     await expect
       .poll(() =>
@@ -73,6 +60,7 @@ for (const axis of ['vertical', 'horizontal'] as const) {
         ),
       )
       .toBeGreaterThan(0);
+    // The timed visible state must not collapse a scrollbar still under the pointer.
     await expect(scrollbar).not.toHaveAttribute('visible', { timeout: 3000 });
     await expect.poll(size).toBeGreaterThanOrEqual(20);
     await page.mouse.move(0, 0);

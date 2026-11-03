@@ -12,11 +12,11 @@ revogr-scroll-virtual {
       right: 0;
 
       &[scrollable] {
-        min-width: $hit-size !important;
+        min-width: $hit-size;
 
         &[visible],
         &:hover {
-          min-width: $min-size !important;
+          min-width: $min-size;
         }
       }
     }
@@ -26,11 +26,11 @@ revogr-scroll-virtual {
       left: 0;
 
       &[scrollable] {
-        min-height: $hit-size !important;
+        min-height: $hit-size;
 
         &[visible],
         &:hover {
-          min-height: $min-size !important;
+          min-height: $min-size;
         }
       }
     }

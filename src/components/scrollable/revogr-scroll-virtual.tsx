@@ -60,6 +60,12 @@ export class RevogrScrollVirtual {
   private localScrollTimer: LocalScrollTimer;
   private resizeObserver?: ResizeObserver;
   private observedViewportElements: Element[] = [];
+  private overlayDrag?: {
+    pointerId: number;
+    position: number;
+    scrollOffset: number;
+    scale: number;
+  };
 
   @Method()
   async setScroll(e: ViewPortScrollEvent): Promise<void> {
@@ -119,6 +125,7 @@ export class RevogrScrollVirtual {
     this.resizeObserver?.disconnect();
     this.resizeObserver = undefined;
     this.observedViewportElements = [];
+    this.overlayDrag = undefined;
     this.autohideScrollPlugin.clear();
   }
 
@@ -186,11 +193,11 @@ export class RevogrScrollVirtual {
     if (this.dimension === 'rgRow') {
       hasScroll = this.element.scrollHeight > this.element.clientHeight;
       scrollSize = hasScroll ? this.scrollSize : 0;
-      this.element.style.minWidth = `${scrollSize}px`;
+      this.element.style.minWidth = scrollSize ? `${scrollSize}px` : '';
     } else {
       hasScroll = this.element.scrollWidth > this.element.clientWidth;
       scrollSize = hasScroll ? this.scrollSize : 0;
-      this.element.style.minHeight = `${scrollSize}px`;
+      this.element.style.minHeight = scrollSize ? `${scrollSize}px` : '';
     }
     this.autohideScrollPlugin.setScrollSize(scrollSize, hasScroll);
     this.localScrollService.setParams(
@@ -201,6 +208,41 @@ export class RevogrScrollVirtual {
       },
       this.dimension,
     );
+  }
+
+  private startOverlayDrag(event: PointerEvent) {
+    const element = this.element;
+    if (event.pointerType !== 'mouse' || event.button !== 0 || !element.hasAttribute('scrollable')) {
+      return;
+    }
+
+    const vertical = this.dimension === 'rgRow';
+    const trackSize = vertical ? element.clientHeight : element.clientWidth;
+    if (!trackSize) return;
+
+    // Handle presses delivered to the overlay strip. The browser still handles
+    // presses on its native scrollbar directly.
+    element.setPointerCapture(event.pointerId);
+    event.preventDefault();
+    this.overlayDrag = {
+      pointerId: event.pointerId,
+      position: vertical ? event.clientY : event.clientX,
+      scrollOffset: vertical ? element.scrollTop : element.scrollLeft,
+      scale: (vertical ? element.scrollHeight : element.scrollWidth) / trackSize,
+    };
+  }
+
+  private moveOverlayDrag(event: PointerEvent) {
+    const drag = this.overlayDrag;
+    if (drag?.pointerId !== event.pointerId || !this.element.hasAttribute('scrollable')) {
+      return;
+    }
+
+    const vertical = this.dimension === 'rgRow';
+    const position = vertical ? event.clientY : event.clientX;
+    // Let the browser clamp the physical offset and emit the normal scroll event.
+    this.element[vertical ? 'scrollTop' : 'scrollLeft'] =
+      drag.scrollOffset + (position - drag.position) * drag.scale;
   }
 
   onScroll(e: MouseEvent) {
@@ -231,7 +273,14 @@ export class RevogrScrollVirtual {
       this.getViewportSize(), // measure with the same layout as the scrollbar
     );
     return (
-      <Host onScroll={(e: MouseEvent) => this.onScroll(e)}>
+      <Host
+        onScroll={(e: MouseEvent) => this.onScroll(e)}
+        onPointerDown={(event: PointerEvent) => this.startOverlayDrag(event)}
+        onPointerMove={(event: PointerEvent) => this.moveOverlayDrag(event)}
+        onLostPointerCapture={() => {
+          this.overlayDrag = undefined;
+        }}
+      >
         <div
           style={{
             [this.dimension === 'rgRow' ? 'height' : 'width']: `${size}px`,
