@@ -25,6 +25,7 @@ export type RevogridEvents = 'contentsizechanged'|
   'aftercolumnsset'|
   'beforefilterapply'|
   'beforefiltertrimmed'|
+  'afterfilterapply'|
   'beforetrimmed'|
   'aftertrimmed'|
   'viewportscroll'|
@@ -143,6 +144,7 @@ export const REVOGRID_EVENTS = new Map<RevogridEvents, RevogridEvents>([
   ['aftercolumnsset', 'aftercolumnsset'],
   ['beforefilterapply', 'beforefilterapply'],
   ['beforefiltertrimmed', 'beforefiltertrimmed'],
+  ['afterfilterapply', 'afterfilterapply'],
   ['beforetrimmed', 'beforetrimmed'],
   ['aftertrimmed', 'aftertrimmed'],
   ['viewportscroll', 'viewportscroll'],

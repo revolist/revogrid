@@ -82,6 +82,48 @@ async function expectSameGridInstance(page: E2EPage) {
 }
 
 test.describe('lifecycle', () => {
+  test('updates viewport width and height after repeated DOM moves', async ({ page }) => {
+    await page.setContent('<div id="moved" style="width:400px;height:200px"></div><div id="control" style="width:400px;height:200px"></div>');
+    await page.evaluate(() => {
+      for (const id of ['moved', 'control']) {
+        const grid = document.createElement('revo-grid');
+        grid.style.cssText = 'display:block;width:100%;height:100%';
+        grid.rowSize = 30;
+        grid.columns = Array.from({ length: 20 }, (_, i) => ({ prop: `c${i}`, name: `c${i}`, size: 80 }));
+        grid.source = Array.from({ length: 60 }, (_, row) => Object.fromEntries(
+          Array.from({ length: 20 }, (_, col) => [`c${col}`, `${row}:${col}`]),
+        ));
+        document.getElementById(id)!.appendChild(grid);
+      }
+    });
+    await page.waitForChanges();
+    const visible = (id: string) => page.locator(`#${id} revo-grid`).evaluate(grid => ({
+      headers: [...grid.querySelectorAll('revogr-header .rgHeaderCell')].map(el => el.textContent),
+      rows: grid.querySelectorAll('revogr-data[type="rgRow"] .rgRow').length,
+    }));
+    await expect.poll(() => visible('moved')).toEqual(await visible('control'));
+    const original = await page.locator('#moved revo-grid').elementHandle();
+
+    for (const size of [{ width: 1000, height: 420 }, { width: 320, height: 150 }]) {
+      const before = await visible('control');
+      await page.evaluate(({ width, height }) => {
+        const host = document.getElementById('moved')!;
+        const replacement = host.cloneNode(false) as HTMLElement;
+        host.replaceWith(replacement);
+        replacement.appendChild(host.firstElementChild!);
+        for (const id of ['moved', 'control']) {
+          const container = document.getElementById(id)!;
+          container.style.width = `${width}px`;
+          container.style.height = `${height}px`;
+        }
+      }, size);
+      await page.waitForChanges();
+      await expect.poll(() => visible('control')).not.toEqual(before);
+      await expect.poll(() => visible('moved')).toEqual(await visible('control'));
+      expect(await original!.evaluate(grid => grid === document.querySelector('#moved revo-grid'))).toBe(true);
+    }
+  });
+
   test('keeps the same grid instance stable across disconnect and reconnect', async ({ page }) => {
     const pageErrors: string[] = [];
     const consoleErrors: string[] = [];

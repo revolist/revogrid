@@ -587,7 +587,7 @@ export class OverlaySelection {
 
     // if not clear navigate to next cell after edit
     if (!saveEv.detail.preventFocus) {
-      this.focusNext();
+      void this.focusNext();
     }
   }
 

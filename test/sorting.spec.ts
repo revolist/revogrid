@@ -73,6 +73,12 @@ describe('defaultCellCompare', () => {
     expect(cmp('name', { name: '' }, {})).toBe(0);
     expect(cmp('name', { name: null }, { name: '' })).toBe(0);
   });
+
+  it('treats NaN as an empty numeric value with a symmetric comparison', () => {
+    expect(cmp('age', { age: Number.NaN }, { age: Number.NaN })).toBe(0);
+    expect(cmp('age', { age: Number.NaN }, { age: 5 })).toBeLessThan(0);
+    expect(cmp('age', { age: 5 }, { age: Number.NaN })).toBeGreaterThan(0);
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -140,6 +146,21 @@ describe('sortIndexByItems', () => {
     );
 
     expect(result).toEqual([1, 2, 0]);
+  });
+
+  it('sorts NaN consistently through the default comparer fast path', () => {
+    const numericSource = [{ age: Number.NaN }, { age: 9 }, { age: 2 }];
+    const cmp = getComparer({ prop: 'age' }, 'asc');
+
+    const result = sortIndexByItems(
+      [0, 1, 2],
+      numericSource,
+      { age: cmp },
+      { age: 'asc' },
+      { age: { prop: 'age' } },
+    );
+
+    expect(result).toEqual([0, 2, 1]);
   });
 
   it('precomputes default parsed values once per sorted row', () => {

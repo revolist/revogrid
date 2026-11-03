@@ -17,6 +17,7 @@ export const FilterButton = ({ column }: Props) => {
   return (
     <span class="filter-button-wrapper">
       <button
+        type="button"
         class={{
           [FILTER_BUTTON_CLASS]: true,
           [FILTER_BUTTON_ACTIVE]: active,

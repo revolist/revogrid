@@ -89,7 +89,12 @@ import type { Observable } from '../../utils';
 import type { GridPlugin } from '../../plugins/base.plugin';
 import { ColumnCollection, getColumnByProp, getColumns } from '../../utils/column.utils';
 import { WCAGPlugin } from '../../plugins/wcag';
-import { ColumnFilterConfig, FilterCollectionItem } from '../../plugins/filter/filter.types';
+import type {
+  AfterFilterApplyEventProps,
+  BeforeFilterApplyEventProps,
+  BeforeFilterTrimmedEventProps,
+  ColumnFilterConfig,
+} from '../../plugins/filter/filter.types';
 import { PluginService } from './plugin.service';
 import { AfterSortingApplyEvent, SortingConfig, SortingOrder } from '../../plugins';
 import { RTLPlugin } from '../../plugins/rtl/rtl.plugin';
@@ -160,7 +165,7 @@ export class RevoGridComponent {
   @Prop() readonly = false;
 
   /** When true, columns are resizable. */
-  @Prop() resize = true;
+  @Prop() resize = false;
 
   /**
    * Enables row resizing. Pass a configuration object to customize the
@@ -253,11 +258,11 @@ export class RevoGridComponent {
   @Prop() autoSizeColumn: boolean | AutoSizeColumnConfig = false;
 
   /**
-   * Enables filter plugin. Enabled by default; set to `false` to opt out.
+   * Enables filter plugin. Disabled by default; set to `true` or a configuration object to enable.
    * Can be boolean.
    * Or can be filter collection See `FilterCollection` for more info.
    */
-  @Prop() filter: boolean | ColumnFilterConfig = true;
+  @Prop() filter: boolean | ColumnFilterConfig = false;
 
   /**
    * Alternative way to set sorting.
@@ -276,7 +281,7 @@ export class RevoGridComponent {
   /**
    * Enable column move plugin.
    */
-  @Prop() canMoveColumns = true;
+  @Prop() canMoveColumns = false;
   /**
    * Trimmed rows.
    * Functionality which allows to hide rows from main data set.
@@ -287,7 +292,7 @@ export class RevoGridComponent {
   /**
    * Enable export plugin.
    */
-  @Prop() exporting = true;
+  @Prop() exporting = false;
 
   /**
    * Group rows based on this property.
@@ -551,21 +556,25 @@ export class RevoGridComponent {
 
   /**
    * Emitted before applying a filter to the data source.
-   * Use e.preventDefault() to prevent cell focus change.
-   * Modify if you need to change filters.
+   * Use `event.preventDefault()` to handle filtering outside Core. `collection`
+   * contains the first condition for each column; `filterItems` contains the
+   * complete multi-condition model.
    */
-  @Event() beforefilterapply: EventEmitter<{ collection: Record<ColumnProp, FilterCollectionItem> }>;
+  @Event() beforefilterapply: EventEmitter<BeforeFilterApplyEventProps>;
 
   /**
-   * Emitted before applying a filter to the data source.
-   * Use e.preventDefault() to prevent the default behavior of trimming values and applying the filter.
-   * Modify the `collection` property if you want to change the filters.
-   * Modify the `itemsToFilter` property if you want to filter the indexes for trimming.
+   * Emitted before applying filter trim indexes. Use `event.preventDefault()`
+   * to cancel. `collection` contains the first condition for each column;
+   * `filterItems` contains the complete model.
    */
-  @Event() beforefiltertrimmed: EventEmitter<{
-    collection: Record<ColumnProp, FilterCollectionItem>;
-    itemsToFilter: Record<number, boolean>;
-  }>;
+  @Event() beforefiltertrimmed: EventEmitter<BeforeFilterTrimmedEventProps>;
+
+  /**
+   * Emitted after the filter trim has been applied. `collection` contains the
+   * first condition for each column; `filterItems` contains the complete model,
+   * and `multiFilterItems` is an alias for `filterItems`.
+   */
+  @Event() afterfilterapply: EventEmitter<AfterFilterApplyEventProps>;
 
   /**
    * Emitted before trimming values.
@@ -981,7 +990,7 @@ export class RevoGridComponent {
    * Get all providers for grid
    * Useful for external grid integration
    */
-  @Method() async getProviders() {
+  @Method() async getProviders(): Promise<PluginProviders | undefined> {
     return this.getPluginData();
   }
 
@@ -1939,9 +1948,12 @@ export class RevoGridComponent {
             this.scrollingService.registerElement(el, `${view.prop.key}`)
           }
           onScrollviewport={e => {
-              this.scrollingService.proxyScroll(e.detail, `${view.prop.key}`, this.noHorizontalScrollTransfer && e.detail.dimension === 'rgCol')
-           }
-          }
+            void this.scrollingService.proxyScroll(
+              e.detail,
+              `${view.prop.key}`,
+              this.noHorizontalScrollTransfer && e.detail.dimension === 'rgCol',
+            );
+          }}
           onScrollviewportsilent={e =>
             this.scrollingService.scrollSilentService(
               e.detail,
