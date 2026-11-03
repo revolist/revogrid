@@ -182,14 +182,17 @@ export class RevogrScrollVirtual {
       )}px`;
     }
     let scrollSize = 0;
+    let hasScroll: boolean;
     if (this.dimension === 'rgRow') {
-      scrollSize = this.element.scrollHeight > this.element.clientHeight ? this.scrollSize : 0;
+      hasScroll = this.element.scrollHeight > this.element.clientHeight;
+      scrollSize = hasScroll ? this.scrollSize : 0;
       this.element.style.minWidth = `${scrollSize}px`;
     } else {
-      scrollSize = this.element.scrollWidth > this.element.clientWidth ? this.scrollSize : 0;
+      hasScroll = this.element.scrollWidth > this.element.clientWidth;
+      scrollSize = hasScroll ? this.scrollSize : 0;
       this.element.style.minHeight = `${scrollSize}px`;
     }
-    this.autohideScrollPlugin.setScrollSize(scrollSize);
+    this.autohideScrollPlugin.setScrollSize(scrollSize, hasScroll);
     this.localScrollService.setParams(
       {
         contentSize: this.realSize,
