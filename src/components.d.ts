@@ -17,7 +17,7 @@ import { FocusedData } from "./components/revoGrid/viewport.service";
 import { ColumnCollection } from "./utils/column.utils";
 import { DataInput } from "./plugins/export/types";
 import { Observable } from "./utils";
-import { DSourceState, Groups } from "./store/index";
+import { DimensionStore, DSourceState, Groups } from "./store/index";
 import { ResizeProps } from "./components/header/resizable.directive";
 import { HeaderRenderProps } from "./components/header/header-renderer";
 import { HeaderGroupRendererProps } from "./components/header/header-group-renderer";
@@ -34,7 +34,7 @@ export { FocusedData } from "./components/revoGrid/viewport.service";
 export { ColumnCollection } from "./utils/column.utils";
 export { DataInput } from "./plugins/export/types";
 export { Observable } from "./utils";
-export { DSourceState, Groups } from "./store/index";
+export { DimensionStore, DSourceState, Groups } from "./store/index";
 export { ResizeProps } from "./components/header/resizable.directive";
 export { HeaderRenderProps } from "./components/header/header-renderer";
 export { HeaderGroupRendererProps } from "./components/header/header-group-renderer";
@@ -767,6 +767,10 @@ export namespace Components {
           * @default 'rgRow'
          */
         "dimension": DimensionType;
+        /**
+          * Grid-owned size source, updated before component rendering.
+         */
+        "dimensionStore"?: DimensionStore['store'];
         /**
           * Dimensions
          */
@@ -2453,6 +2457,10 @@ declare namespace LocalJSX {
           * @default 'rgRow'
          */
         "dimension"?: DimensionType;
+        /**
+          * Grid-owned size source, updated before component rendering.
+         */
+        "dimensionStore"?: DimensionStore['store'];
         /**
           * Scroll event
          */

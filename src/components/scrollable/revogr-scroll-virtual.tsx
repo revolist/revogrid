@@ -17,6 +17,7 @@ import type {
 } from '@type';
 import { AutohideScrollPlugin } from './autohide-scroll.plugin';
 import { LocalScrollTimer } from '../../services/local.scroll.timer';
+import type { DimensionStore } from '@store';
 import { getScrollbarSize } from '../../utils';
 
 /**
@@ -36,6 +37,15 @@ export class RevogrScrollVirtual {
    * Dimensions
    */
   @Prop() realSize!: number;
+
+  /** Grid-owned size source, updated before component rendering. */
+  @Prop() dimensionStore?: DimensionStore['store'];
+
+  private stopSizeSync?: () => void;
+
+  private get contentSize() {
+    return this.dimensionStore?.get('realSize') ?? this.realSize;
+  }
 
   /**
    * Virtual size
@@ -71,7 +81,7 @@ export class RevogrScrollVirtual {
     if (e.coordinate) {
       this.autohideScrollPlugin.checkScroll({
         scrollSize: this.scrollSize,
-        contentSize: this.realSize,
+        contentSize: this.contentSize,
         virtualSize: this.virtualSize,
       });
     }
@@ -113,9 +123,12 @@ export class RevogrScrollVirtual {
       this.resizeObserver = new ResizeObserver(() => this.updateScrollSize());
       this.resizeObserver.observe(this.element);
     }
+    this.stopSizeSync = this.dimensionStore?.onChange('realSize', () => this.updateScrollSize());
   }
 
   disconnectedCallback() {
+    this.stopSizeSync?.();
+    this.stopSizeSync = undefined;
     this.resizeObserver?.disconnect();
     this.resizeObserver = undefined;
     this.observedViewportElements = [];
@@ -180,7 +193,7 @@ export class RevogrScrollVirtual {
     if (content) {
       const property = this.dimension === 'rgRow' ? 'height' : 'width';
       content.style[property] = `${getContentSize(
-        this.realSize,
+        this.contentSize,
         this.dimension === 'rgRow' ? this.element.clientHeight : this.element.clientWidth,
         this.getViewportSize(),
       )}px`;
@@ -196,7 +209,7 @@ export class RevogrScrollVirtual {
     this.autohideScrollPlugin.setScrollSize(scrollSize);
     this.localScrollService.setParams(
       {
-        contentSize: this.realSize,
+        contentSize: this.contentSize,
         clientSize: this.dimension === 'rgRow' ?  this.element.clientHeight : this.element.clientWidth,
         virtualSize: this.getViewportSize(),
       },
@@ -227,7 +240,7 @@ export class RevogrScrollVirtual {
 
   render() {
     const size = getContentSize(
-      this.realSize,
+      this.contentSize,
       this.dimension === 'rgRow' ?  this.element.clientHeight : this.element.clientWidth,
       this.getViewportSize(), // measure with the same layout as the scrollbar
     );
