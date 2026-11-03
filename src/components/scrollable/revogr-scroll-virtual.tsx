@@ -58,6 +58,8 @@ export class RevogrScrollVirtual {
   private scrollSize = 0;
   private localScrollService: LocalScrollService;
   private localScrollTimer: LocalScrollTimer;
+  private resizeObserver?: ResizeObserver;
+  private contentViewport?: Element;
 
   @Method()
   async setScroll(e: ViewPortScrollEvent): Promise<void> {
@@ -105,9 +107,16 @@ export class RevogrScrollVirtual {
         this.element[type] = e.coordinate;
       },
     });
+    if (typeof ResizeObserver !== 'undefined') {
+      this.resizeObserver = new ResizeObserver(() => this.updateScrollSize());
+      this.resizeObserver.observe(this.element);
+    }
   }
 
   disconnectedCallback() {
+    this.resizeObserver?.disconnect();
+    this.resizeObserver = undefined;
+    this.contentViewport = undefined;
     this.autohideScrollPlugin.clear();
   }
 
@@ -115,7 +124,51 @@ export class RevogrScrollVirtual {
     this.scrollSize = getScrollbarSize(document);
   }
 
+  private getContentViewport() {
+    // The cached clientSize is updated by a throttled ResizeObserver. Use the
+    // current content viewport so a simultaneous source/host resize cannot add
+    // an artificial scroll range. The content viewport excludes pinned areas.
+    const grid = this.element.closest('revo-grid');
+    const viewport = grid?.querySelector('revogr-viewport-scroll.rgCol')
+      ?? grid?.querySelector('revogr-viewport-scroll');
+    return viewport;
+  }
+
+  private getViewportSize() {
+    const viewport = this.getContentViewport();
+    if (!viewport) return this.clientSize;
+    if (this.dimension === 'rgCol') return viewport.clientWidth;
+    // The body may still reflect the previous source while child components
+    // render. Measure available space, excluding headers and pinned rows,
+    // instead of the body's temporarily shrunken content height.
+    const header = viewport.querySelector('.inner-content-table > .header-wrapper');
+    const footer = viewport.querySelector('.inner-content-table > .footer-wrapper');
+    return Math.max(0, viewport.clientHeight - (header?.clientHeight ?? 0) - (footer?.clientHeight ?? 0));
+  }
+
   componentDidRender() {
+    const viewport = this.getContentViewport();
+    if (viewport !== this.contentViewport) {
+      if (this.contentViewport) this.resizeObserver?.unobserve(this.contentViewport);
+      if (viewport) this.resizeObserver?.observe(viewport);
+      this.contentViewport = viewport ?? undefined;
+    }
+    this.updateScrollSize();
+  }
+
+  private updateScrollSize() {
+    // A host resize can happen before Stencil renders new dimension props. Sync
+    // the spacer before paint as well as after render, rather than adding a frame
+    // of overflow while waiting for another component update.
+    const content = this.element.firstElementChild as HTMLElement | null;
+    if (content) {
+      const property = this.dimension === 'rgRow' ? 'height' : 'width';
+      content.style[property] = `${getContentSize(
+        this.realSize,
+        this.dimension === 'rgRow' ? this.element.clientHeight : this.element.clientWidth,
+        this.getViewportSize(),
+      )}px`;
+    }
     let scrollSize = 0;
     if (this.dimension === 'rgRow') {
       scrollSize = this.element.scrollHeight > this.element.clientHeight ? this.scrollSize : 0;
@@ -129,7 +182,7 @@ export class RevogrScrollVirtual {
       {
         contentSize: this.realSize,
         clientSize: this.dimension === 'rgRow' ?  this.element.clientHeight : this.element.clientWidth,
-        virtualSize: this.clientSize,
+        virtualSize: this.getViewportSize(),
       },
       this.dimension,
     );
@@ -160,7 +213,7 @@ export class RevogrScrollVirtual {
     const size = getContentSize(
       this.realSize,
       this.dimension === 'rgRow' ?  this.element.clientHeight : this.element.clientWidth,
-      this.clientSize, // content viewport size
+      this.getViewportSize(), // measure with the same layout as the scrollbar
     );
     return (
       <Host onScroll={(e: MouseEvent) => this.onScroll(e)}>
