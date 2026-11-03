@@ -211,12 +211,101 @@ describe('browser-limit-aware scroll dimensions', () => {
     }
   });
 
+  it.each(['rgRow', 'rgCol'] as const)('ignores browser-rounded %s scroll feedback and preserves logical wheel deltas', async dimension => {
+    const events: any[] = [];
+    let physicalCoordinate = 0;
+    const service = new LocalScrollService({
+      skipAnimationFrame: true,
+      runScroll: e => events.push(e),
+      // At large offsets Chromium stores physical scroll positions in steps
+      // of two pixels, rather than retaining the requested fractional value.
+      applyScroll: e => {
+        physicalCoordinate = Math.round(e.coordinate / 2) * 2;
+        return physicalCoordinate;
+      },
+    });
+    service.setParams({
+      contentSize: 36_000_000,
+      clientSize: 270,
+      virtualSize: 270,
+      maxScrollSize: 32_554_428,
+    }, dimension);
+    await service.setScroll({ dimension, coordinate: 33_000_000 });
+    const appliedCoordinate = physicalCoordinate;
+    service.scroll(appliedCoordinate, dimension);
+    service.scroll(appliedCoordinate, dimension);
+    expect(events).toHaveLength(0);
+
+    // Suppressing native feedback must retain the exact logical coordinate
+    // used by the next wheel delta, rather than round-tripping through pixels.
+    const next = await service.setScrollByDelta({ dimension, coordinate: 0, delta: 10 }, appliedCoordinate);
+    expect(next.coordinate).toBe(33_000_010);
+
+    service.scroll(physicalCoordinate + 20, dimension);
+    expect(events).toHaveLength(1);
+    service.scroll(physicalCoordinate, dimension);
+    expect(events).toHaveLength(2);
+  });
+
+  it.each(['rgRow', 'rgCol'] as const)('accumulates repeated %s wheel deltas before the physical scroll changes', async dimension => {
+    const events: any[] = [];
+    let physicalCoordinate = 0;
+    const service = new LocalScrollService({
+      skipAnimationFrame: true,
+      runScroll: e => events.push(e),
+      applyScroll: e => {
+        physicalCoordinate = Math.round(e.coordinate / 2) * 2;
+        return physicalCoordinate;
+      },
+    });
+    service.setParams({
+      contentSize: 36_000_000, clientSize: 270, virtualSize: 270, maxScrollSize: 32_554_428,
+    }, dimension);
+    await service.setScroll({ dimension, coordinate: 33_000_000 });
+    // Both wheel handlers read the same DOM scroll position until the queued
+    // animation frame applies it; each delta still represents real input.
+    service.scroll(physicalCoordinate + 10, dimension, false, 10);
+    service.scroll(physicalCoordinate + 10, dimension, false, 10);
+    expect(events).toHaveLength(2);
+    expect(events[0].coordinate).toBeCloseTo(33_000_010, 6);
+    expect(events[1].coordinate).toBeCloseTo(33_000_020, 6);
+  });
+
+  it('does not cancel a pending scroll when native feedback matches the last applied coordinate', async () => {
+    let applyFrame!: FrameRequestCallback;
+    const requestFrame = jest.spyOn(window, 'requestAnimationFrame').mockImplementation(callback => {
+      applyFrame = callback;
+      return 1;
+    });
+    const cancelFrame = jest.spyOn(window, 'cancelAnimationFrame').mockImplementation(() => undefined);
+    const applied: number[] = [];
+    try {
+      const service = new LocalScrollService({
+        runScroll: jest.fn(),
+        applyScroll: e => { applied.push(e.coordinate); return e.coordinate; },
+      });
+      service.setParams({ contentSize: 1_000, clientSize: 100, virtualSize: 100 }, 'rgRow');
+      const initial = service.setScroll({ dimension: 'rgRow', coordinate: 100 });
+      applyFrame(0);
+      await initial;
+      const next = service.setScroll({ dimension: 'rgRow', coordinate: 200 });
+      service.scroll(100, 'rgRow');
+      applyFrame(0);
+      await next;
+      expect(applied).toEqual([100, 200]);
+      expect(cancelFrame).not.toHaveBeenCalled();
+    } finally {
+      requestFrame.mockRestore();
+      cancelFrame.mockRestore();
+    }
+  });
+
   it('keeps delta-based setScroll updates in logical pixels under compression', async () => {
     const applied: any[] = [];
     const service = new LocalScrollService({
       skipAnimationFrame: true,
       runScroll: () => undefined,
-      applyScroll: e => applied.push(e),
+      applyScroll: e => { applied.push(e); },
     });
     service.setParams({
       contentSize: 100_000,
@@ -253,7 +342,7 @@ describe('browser-limit-aware scroll dimensions', () => {
       .mockImplementation(() => undefined);
     const service = new LocalScrollService({
       runScroll: () => undefined,
-      applyScroll: e => applied.push(e),
+      applyScroll: e => { applied.push(e); },
     });
     service.setParams({
       contentSize: 100_000,

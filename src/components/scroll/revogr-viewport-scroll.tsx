@@ -194,16 +194,18 @@ export class RevogrViewportScroll implements ElementScroll {
       // skipAnimationFrame: isSafariDesktop(),
       runScroll: e => this.scrollViewport.emit(e),
       applyScroll: e => {
-        this.localScrollTimer.setCoordinate(e);
+        let coordinate = e.coordinate;
         switch (e.dimension) {
           case 'rgCol':
             // this will trigger on scroll event
             this.horizontalScroll.scrollLeft = e.coordinate;
+            coordinate = this.horizontalScroll.scrollLeft;
             break;
           case 'rgRow':
             if (this.verticalScroll) {
               // this will trigger on scroll event
               this.verticalScroll.scrollTop = e.coordinate;
+              coordinate = this.verticalScroll.scrollTop;
               // for mobile devices to skip negative scroll loop. only on vertical scroll
               if (this.verticalScroll.style.transform) {
                 this.verticalScroll.style.transform = '';
@@ -211,6 +213,8 @@ export class RevogrViewportScroll implements ElementScroll {
             }
             break;
         }
+        this.localScrollTimer.setCoordinate({ ...e, coordinate });
+        return coordinate;
       },
     });
     if (this.hasLoaded) {

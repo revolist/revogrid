@@ -83,6 +83,15 @@ test.describe('row headers', () => {
       .evaluate((el: HTMLElement) => el.scrollHeight);
     expect(physicalScrollHeight).toBeLessThan(logicalContentSize.y);
 
+    const scrollEvents = await page.evaluateHandle(() => {
+      const coordinates: number[] = [];
+      const grid = document.querySelector('revo-grid')!;
+      const onScroll = (event: CustomEvent<{ dimension: string; coordinate: number }>) => {
+        if (event.detail.dimension === 'rgRow') coordinates.push(event.detail.coordinate);
+      };
+      grid.addEventListener('viewportscroll', onScroll as EventListener);
+      return { coordinates, stop: () => grid.removeEventListener('viewportscroll', onScroll as EventListener) };
+    });
     await callGridMethod(page, 'scrollToRow', targetRow);
     await page.waitForChanges();
 
@@ -96,5 +105,10 @@ test.describe('row headers', () => {
     expect(headerBox).not.toBeNull();
     expect(cellBox).not.toBeNull();
     expect(Math.abs(headerBox!.y - cellBox!.y)).toBeLessThan(2);
+    // Browser-rounded scrollTop values must not be treated as new user input
+    // and shift the requested logical coordinate by one or two pixels.
+    expect(await scrollEvents.evaluate(events => events.coordinates)).toEqual([targetRow * rowSize]);
+    await scrollEvents.evaluate(events => events.stop());
+    await scrollEvents.dispose();
   });
 });

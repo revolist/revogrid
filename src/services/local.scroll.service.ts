@@ -8,7 +8,8 @@ interface Config {
   // setScroll event called from scrollingService
   runScroll(e: ViewPortScrollEvent): void;
   // all operation finished, apply scroll values
-  applyScroll(e: ViewPortScrollEvent): void;
+  // Return the browser-applied physical coordinate when it rounds/clamps a write.
+  applyScroll(e: ViewPortScrollEvent): number | void;
 }
 
 type Params = {
@@ -50,7 +51,7 @@ export default class LocalScrollService {
     rgRow: null,
     rgCol: null,
   };
-  // to check if scroll changed
+  // Last browser-applied or observed physical position, never a proposed wheel position.
   private previousScroll: Record<DimensionType, number> = {
     rgRow: NO_COORDINATE,
     rgCol: NO_COORDINATE,
@@ -102,12 +103,15 @@ export default class LocalScrollService {
       e.coordinate = Math.ceil(e.coordinate);
       this.previousLogicalScroll[e.dimension] = this.wrapLogicalCoordinate(e.coordinate, params);
       const physicalCoordinate = this.toPhysicalCoordinate(e.coordinate, params);
-      this.previousScroll[e.dimension] = this.wrapPhysicalCoordinate(physicalCoordinate, params);
       this.preventArtificialScroll[e.dimension] = null;
-      this.cfg.applyScroll({
+      const appliedCoordinate = this.cfg.applyScroll({
         ...e,
         coordinate: physicalCoordinate,
       });
+      this.previousScroll[e.dimension] = this.wrapPhysicalCoordinate(
+        appliedCoordinate ?? physicalCoordinate,
+        params,
+      );
     } catch (id) {
       window.cancelAnimationFrame(id);
     }
@@ -143,14 +147,13 @@ export default class LocalScrollService {
     delta?: number,
     outside = false,
   ) {
-    // cancel all previous scrolls for same dimension
-    this.cancelScroll(dimension);
-
-    // drop if no change
-    if (!force && this.previousScroll[dimension] === coordinate) {
-      this.previousScroll[dimension] = NO_COORDINATE;
+    const nativeScroll = typeof delta !== 'number';
+    // Native feedback must not cancel an unapplied newer scroll. Wheel events
+    // can share a DOM coordinate before the next frame and still carry input.
+    if (!force && nativeScroll && this.previousScroll[dimension] === coordinate) {
       return;
     }
+    this.cancelScroll(dimension);
 
     const param = this.getParams(dimension);
     const logicalCoordinate = this.toLogicalScrollCoordinate(
@@ -167,6 +170,9 @@ export default class LocalScrollService {
       outside,
     });
     this.previousLogicalScroll[dimension] = logicalCoordinate;
+    if (nativeScroll) {
+      this.previousScroll[dimension] = coordinate;
+    }
   }
 
   private getParams(dimension: DimensionType): Params {
