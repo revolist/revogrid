@@ -1,7 +1,7 @@
 
 
 /**
- * Autohide scroll for MacOS when scroll is visible only for 1 sec
+ * Autohide overlay scrollbars when scroll is visible only for 1 sec.
  */
 export class AutohideScrollPlugin {
   private autohideScrollTimeout = 0;
@@ -11,11 +11,20 @@ export class AutohideScrollPlugin {
   /**
    * When scroll size updates set it up for autohide
    */
-  setScrollSize(s: number) {
+  setScrollSize(s: number, hasScroll: boolean) {
+    // Preserve overlay positioning even without overflow so the spacer does
+    // not consume layout space. Only an overflowing bar gets a hit area.
     if (!s) {
       this.element.setAttribute('autohide', 'true');
     } else {
       this.element.removeAttribute('autohide');
+    }
+    if (!s && hasScroll) {
+      this.element.setAttribute('scrollable', 'true');
+    } else {
+      this.element.removeAttribute('scrollable');
+      this.element.removeAttribute('visible');
+      this.clear();
     }
   }
 

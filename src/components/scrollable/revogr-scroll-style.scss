@@ -1,7 +1,8 @@
 revogr-scroll-virtual {
   $min-size: 20px;
+  $hit-size: 8px;
 
-  // show scroll only for 1 sec
+  // Keep overlay scrollbars reachable while idle; expand while in use.
   &[autohide] {
     position: absolute;
     z-index: 100 !important;
@@ -10,8 +11,13 @@ revogr-scroll-virtual {
       top: 0;
       right: 0;
 
-      &[visible] {
-        min-width: $min-size !important;
+      &[scrollable] {
+        min-width: $hit-size;
+
+        &[visible],
+        &:hover {
+          min-width: $min-size;
+        }
       }
     }
 
@@ -19,8 +25,13 @@ revogr-scroll-virtual {
       bottom: 0;
       left: 0;
 
-      &[visible] {
-        min-height: $min-size !important;
+      &[scrollable] {
+        min-height: $hit-size;
+
+        &[visible],
+        &:hover {
+          min-height: $min-size;
+        }
       }
     }
   }
