@@ -34,9 +34,9 @@ export class RevogrScrollVirtual {
   @Prop() dimension: DimensionType = 'rgRow';
 
   /**
-   * Dimensions
+   * Content size for scrollbars without a dimension store.
    */
-  @Prop() realSize!: number;
+  @Prop() realSize = 0;
 
   /** Grid-owned size source, updated before component rendering. */
   @Prop() dimensionStore?: DimensionStore['store'];

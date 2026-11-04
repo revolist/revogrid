@@ -1993,7 +1993,6 @@ export class RevoGridComponent {
           dimension={typeCol}
           clientSize={viewports[typeCol].store.get('clientSize')}
           virtualSize={viewports[typeCol].store.get('virtualSize')}
-          realSize={dimensions[typeCol].store.get('realSize')}
           dimensionStore={dimensions[typeCol].store}
           ref={el => this.scrollingService.registerElement(el, 'colScroll')}
           onScrollvirtual={e => this.scrollingService.proxyScroll(e.detail)}

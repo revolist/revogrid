@@ -772,7 +772,8 @@ export namespace Components {
          */
         "dimensionStore"?: DimensionStore['store'];
         /**
-          * Dimensions
+          * Content size for scrollbars without a dimension store.
+          * @default 0
          */
         "realSize": number;
         "setScroll": (e: ViewPortScrollEvent) => Promise<void>;
@@ -2466,9 +2467,10 @@ declare namespace LocalJSX {
          */
         "onScrollvirtual"?: (event: RevogrScrollVirtualCustomEvent<ViewPortScrollEvent>) => void;
         /**
-          * Dimensions
+          * Content size for scrollbars without a dimension store.
+          * @default 0
          */
-        "realSize": number;
+        "realSize"?: number;
         /**
           * Virtual size
          */
@@ -2646,7 +2648,7 @@ declare namespace LocalJSX {
         "revogr-order-editor": Omit<RevogrOrderEditor, keyof RevogrOrderEditorAttributes> & { [K in keyof RevogrOrderEditor & keyof RevogrOrderEditorAttributes]?: RevogrOrderEditor[K] } & { [K in keyof RevogrOrderEditor & keyof RevogrOrderEditorAttributes as `attr:${K}`]?: RevogrOrderEditorAttributes[K] } & { [K in keyof RevogrOrderEditor & keyof RevogrOrderEditorAttributes as `prop:${K}`]?: RevogrOrderEditor[K] };
         "revogr-overlay-selection": Omit<RevogrOverlaySelection, keyof RevogrOverlaySelectionAttributes> & { [K in keyof RevogrOverlaySelection & keyof RevogrOverlaySelectionAttributes]?: RevogrOverlaySelection[K] } & { [K in keyof RevogrOverlaySelection & keyof RevogrOverlaySelectionAttributes as `attr:${K}`]?: RevogrOverlaySelectionAttributes[K] } & { [K in keyof RevogrOverlaySelection & keyof RevogrOverlaySelectionAttributes as `prop:${K}`]?: RevogrOverlaySelection[K] };
         "revogr-row-headers": Omit<RevogrRowHeaders, keyof RevogrRowHeadersAttributes> & { [K in keyof RevogrRowHeaders & keyof RevogrRowHeadersAttributes]?: RevogrRowHeaders[K] } & { [K in keyof RevogrRowHeaders & keyof RevogrRowHeadersAttributes as `attr:${K}`]?: RevogrRowHeadersAttributes[K] } & { [K in keyof RevogrRowHeaders & keyof RevogrRowHeadersAttributes as `prop:${K}`]?: RevogrRowHeaders[K] };
-        "revogr-scroll-virtual": Omit<RevogrScrollVirtual, keyof RevogrScrollVirtualAttributes> & { [K in keyof RevogrScrollVirtual & keyof RevogrScrollVirtualAttributes]?: RevogrScrollVirtual[K] } & { [K in keyof RevogrScrollVirtual & keyof RevogrScrollVirtualAttributes as `attr:${K}`]?: RevogrScrollVirtualAttributes[K] } & { [K in keyof RevogrScrollVirtual & keyof RevogrScrollVirtualAttributes as `prop:${K}`]?: RevogrScrollVirtual[K] } & OneOf<"realSize", RevogrScrollVirtual["realSize"], RevogrScrollVirtualAttributes["realSize"]> & OneOf<"virtualSize", RevogrScrollVirtual["virtualSize"], RevogrScrollVirtualAttributes["virtualSize"]> & OneOf<"clientSize", RevogrScrollVirtual["clientSize"], RevogrScrollVirtualAttributes["clientSize"]>;
+        "revogr-scroll-virtual": Omit<RevogrScrollVirtual, keyof RevogrScrollVirtualAttributes> & { [K in keyof RevogrScrollVirtual & keyof RevogrScrollVirtualAttributes]?: RevogrScrollVirtual[K] } & { [K in keyof RevogrScrollVirtual & keyof RevogrScrollVirtualAttributes as `attr:${K}`]?: RevogrScrollVirtualAttributes[K] } & { [K in keyof RevogrScrollVirtual & keyof RevogrScrollVirtualAttributes as `prop:${K}`]?: RevogrScrollVirtual[K] } & OneOf<"virtualSize", RevogrScrollVirtual["virtualSize"], RevogrScrollVirtualAttributes["virtualSize"]> & OneOf<"clientSize", RevogrScrollVirtual["clientSize"], RevogrScrollVirtualAttributes["clientSize"]>;
         "revogr-temp-range": RevogrTempRange;
         "revogr-viewport-scroll": Omit<RevogrViewportScroll, keyof RevogrViewportScrollAttributes> & { [K in keyof RevogrViewportScroll & keyof RevogrViewportScrollAttributes]?: RevogrViewportScroll[K] } & { [K in keyof RevogrViewportScroll & keyof RevogrViewportScrollAttributes as `attr:${K}`]?: RevogrViewportScrollAttributes[K] } & { [K in keyof RevogrViewportScroll & keyof RevogrViewportScrollAttributes as `prop:${K}`]?: RevogrViewportScroll[K] } & OneOf<"colType", RevogrViewportScroll["colType"], RevogrViewportScrollAttributes["colType"]>;
         "vnode-html": VnodeHtml;
