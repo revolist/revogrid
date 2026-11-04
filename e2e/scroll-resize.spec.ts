@@ -174,6 +174,27 @@ test('does not flash a scrollbar when columns and grid width resize together', a
   }
 });
 
+test('preserves horizontal scroll when replacing columns with equivalent widths', async ({ page }) => {
+  await mountGrid(page, {
+    columns: [{ prop: 'id', size: 500 }, { prop: 'name', size: 500 }],
+    source: [{ id: 0, name: 'Example' }],
+    width: 400,
+    height: 240,
+  });
+  const grid = page.locator('revo-grid');
+  const scrollbar = grid.locator('revogr-scroll-virtual.horizontal');
+  const viewport = grid.locator('revogr-viewport-scroll.rgCol');
+  await scrollbar.evaluate(el => { el.scrollLeft = 350; });
+  await expect.poll(() => viewport.evaluate(el => el.scrollLeft)).toBe(350);
+
+  await grid.evaluate(el => {
+    el.columns = el.columns.map(column => ({ ...column, name: 'Updated' }));
+  });
+  await expect(grid.locator('revogr-header .rgHeaderCell').first()).toHaveText('Updated');
+  expect(await scrollbar.evaluate(el => el.scrollLeft)).toBe(350);
+  await expect.poll(() => viewport.evaluate(el => el.scrollLeft)).toBe(350);
+});
+
 test('main scrollbar ignores a nested grid in the preceding pinned viewport', async ({ page }) => {
   await mountGrid(page, {
     columns: [{ prop: 'pinned', pin: 'colPinStart', size: 150 }, { prop: 'id', size: 1000 }],

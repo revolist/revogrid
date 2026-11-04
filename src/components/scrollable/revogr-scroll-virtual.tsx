@@ -123,7 +123,18 @@ export class RevogrScrollVirtual {
       this.resizeObserver = new ResizeObserver(() => this.updateScrollSize());
       this.resizeObserver.observe(this.element);
     }
-    this.stopSizeSync = this.dimensionStore?.onChange('realSize', () => this.updateScrollSize());
+    let sizeSyncQueued = false;
+    const stopSizeSync = this.dimensionStore?.onChange('realSize', () => {
+      if (sizeSyncQueued) return;
+      sizeSyncQueued = true;
+      // Column replacement resets and restores realSize synchronously. Apply
+      // only the settled size before paint so the browser cannot clamp scroll.
+      queueMicrotask(() => {
+        sizeSyncQueued = false;
+        if (this.stopSizeSync === stopSizeSync) this.updateScrollSize();
+      });
+    });
+    this.stopSizeSync = stopSizeSync;
   }
 
   disconnectedCallback() {
