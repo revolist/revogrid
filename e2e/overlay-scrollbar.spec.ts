@@ -1,24 +1,28 @@
 import { expect } from '@playwright/test';
-import { test } from '@stencil/playwright';
+import { test, type E2EPage } from '@stencil/playwright';
 import { mountGrid } from './helpers';
+
+async function mountOverlayGrid(page: E2EPage) {
+  await mountGrid(
+    page,
+    {
+      columns: Array.from({ length: 10 }, (_, i) => ({
+        prop: `c${i}`,
+        size: 150,
+      })),
+      source: Array.from({ length: 100 }, (_, id) => ({ c0: id })),
+      width: 400,
+      height: 240,
+    },
+    '* { scrollbar-width: none; }',
+  );
+}
 
 for (const axis of ['vertical', 'horizontal'] as const) {
   test(`overlay ${axis} scrollbar remains reachable while idle`, async ({
     page,
   }) => {
-    await mountGrid(
-      page,
-      {
-        columns: Array.from({ length: 10 }, (_, i) => ({
-          prop: `c${i}`,
-          size: 150,
-        })),
-        source: Array.from({ length: 100 }, (_, id) => ({ c0: id })),
-        width: 400,
-        height: 240,
-      },
-      '* { scrollbar-width: none; }',
-    );
+    await mountOverlayGrid(page);
     const scrollbar = page.locator(`revogr-scroll-virtual.${axis}`);
     const vertical = axis === 'vertical';
     const size = () =>
@@ -74,5 +78,35 @@ for (const axis of ['vertical', 'horizontal'] as const) {
     }, vertical);
     await expect(scrollbar).not.toHaveAttribute('scrollable');
     await expect.poll(size).toBeLessThanOrEqual(1);
+  });
+
+  test(`overlay ${axis} scrollbar can be dragged with a pen`, async ({ page, browserName }) => {
+    test.skip(browserName !== 'chromium', 'Pen input emulation requires Chromium CDP');
+    await mountOverlayGrid(page);
+    const scrollbar = page.locator(`revogr-scroll-virtual.${axis}`);
+    await expect(scrollbar).toHaveCSS('scrollbar-width', 'none');
+    await expect(scrollbar).toHaveAttribute('scrollable');
+    const bounds = (await scrollbar.boundingBox())!;
+    const vertical = axis === 'vertical';
+    const start = vertical
+      ? { x: bounds.x + bounds.width - 4, y: bounds.y + bounds.height / 2 }
+      : { x: bounds.x + bounds.width / 2, y: bounds.y + bounds.height - 4 };
+    const end = { x: start.x + (vertical ? 0 : 30), y: start.y + (vertical ? 30 : 0) };
+
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send('Input.dispatchMouseEvent', {
+      type: 'mousePressed', ...start, button: 'left', buttons: 1, clickCount: 1, pointerType: 'pen',
+    });
+    await cdp.send('Input.dispatchMouseEvent', {
+      type: 'mouseMoved', ...end, button: 'left', buttons: 1, pointerType: 'pen',
+    });
+    await cdp.send('Input.dispatchMouseEvent', {
+      type: 'mouseReleased', ...end, button: 'left', clickCount: 1, pointerType: 'pen',
+    });
+
+    await expect.poll(() => scrollbar.evaluate(
+      (el, vertical) => vertical ? el.scrollTop : el.scrollLeft,
+      vertical,
+    )).toBeGreaterThan(0);
   });
 }
