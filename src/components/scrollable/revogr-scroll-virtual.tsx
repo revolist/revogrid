@@ -127,18 +127,22 @@ export class RevogrScrollVirtual {
   }
 
   private getContentViewport() {
-    // The cached clientSize is updated by a throttled ResizeObserver. Use the
-    // current content viewport so a simultaneous source/host resize cannot add
-    // an artificial scroll range. The content viewport excludes pinned areas.
     const grid = this.element.closest('revo-grid');
-    const viewport = grid?.querySelector('revogr-viewport-scroll.rgCol')
-      ?? grid?.querySelector('revogr-viewport-scroll');
+    // Slotted content (including wrapped scrollbars) belongs to an external
+    // owner. Do not replace its supplied size with the grid's main viewport.
+    const slotted = this.element.closest('[slot]');
+    if (slotted && slotted !== grid && grid?.contains(slotted)) return null;
+    // The cached clientSize is updated by a throttled ResizeObserver. Measure
+    // only this grid's viewport, excluding pinned areas and nested grids.
+    const viewports = grid?.querySelector(':scope > .main-viewport > .viewports');
+    const viewport = viewports?.querySelector(':scope > revogr-viewport-scroll.rgCol')
+      ?? viewports?.querySelector(':scope > revogr-viewport-scroll');
     return viewport;
   }
 
   private getViewportSize() {
     const viewport = this.getContentViewport();
-    if (!viewport) return this.clientSize;
+    if (!viewport) return this.virtualSize || this.clientSize;
     if (this.dimension === 'rgCol') return viewport.clientWidth;
     // The body may still reflect the previous source while child components
     // render. Measure available space, excluding headers and pinned rows,
