@@ -216,6 +216,12 @@ export class RevoGridComponent {
   @Prop() applyOnClose = false;
 
   /**
+   * Keep a focused text input on selected editable cells so IME composition can
+   * start from the first keystroke. Opt-in; applies to the built-in text editor.
+   */
+  @Prop() imeFastEdit = false;
+
+  /**
    * Custom grid plugins. Can be added or removed at runtime.
    * Every plugin should be inherited from BasePlugin class.
    * 
@@ -1890,6 +1896,7 @@ export class RevoGridComponent {
             range={this.range}
             useClipboard={this.useClipboard}
             applyChangesOnClose={this.applyOnClose}
+            imeFastEdit={this.imeFastEdit}
             additionalData={this.additionalData}
             slot={data.slot}
             onBeforenextvpfocus={(e) => this.selectionStoreConnector?.beforeNextFocusCell(e.detail)}

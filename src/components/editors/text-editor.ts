@@ -34,7 +34,7 @@ export class TextEditor implements EditorBase {
   async componentDidRender(): Promise<void> {
     if (this.editInput) {
       await timeout();
-      this.editInput?.focus();
+      this.editInput?.focus({ preventScroll: true });
     }
   }
 
@@ -48,6 +48,9 @@ export class TextEditor implements EditorBase {
   }
 
   onKeyDown(e: KeyboardEvent) {
+    if (e.isComposing || e.keyCode === 229) {
+      return;
+    }
     const isEnter = isEnterKeyValue(e.key);
     const isKeyTab = isTab(e.key);
 
@@ -78,6 +81,11 @@ export class TextEditor implements EditorBase {
     return this.editInput?.value;
   }
 
+  /** Value rendered by the input; subclasses may preserve native input. */
+  protected getInputValue() {
+    return this.editCell?.val ?? '';
+  }
+
   /**
    * Render method for Editor plugin.
    * Renders input element with passed data from cell.
@@ -89,8 +97,8 @@ export class TextEditor implements EditorBase {
     return h('input', {
       type: 'text',
       enterKeyHint: 'enter',
-      // set input value from cell data
-      value: this.editCell?.val ?? '',
+      value: this.getInputValue(),
+      'aria-label': 'Cell editor',
       // save input element as ref for further usage
       ref: (el: HTMLInputElement | null) => {
         this.editInput = el;
