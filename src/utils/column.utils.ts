@@ -236,24 +236,21 @@ export function gatherGroup<T extends ColumnCollection>(
     res.columnGrouping[key].push(...rebasedItem);
   }
   res.maxLevel = Math.max(res.maxLevel, collection.maxLevel);
-  res.sort = Object.defineProperties(
-    Object.defineProperties({}, Object.getOwnPropertyDescriptors(res.sort)),
-    Object.getOwnPropertyDescriptors(collection.sort),
-  );
-  const columnByProp: ColumnCollection['columnByProp'] = {};
-  for (const prop of Object.keys(res.columnByProp)) {
-    Object.defineProperty(columnByProp, prop, {
+  // Define incoming own keys explicitly: transpiled object spread can treat
+  // "__proto__" as a prototype setter rather than a data property.
+  for (const prop of Object.keys(collection.sort)) {
+    Object.defineProperty(res.sort, prop, {
       configurable: true,
       enumerable: true,
-      value: [...res.columnByProp[prop]],
+      value: collection.sort[prop],
       writable: true,
     });
   }
   for (const prop of Object.keys(collection.columnByProp)) {
-    if (Object.prototype.hasOwnProperty.call(columnByProp, prop)) {
-      columnByProp[prop].push(...collection.columnByProp[prop]);
+    if (Object.prototype.hasOwnProperty.call(res.columnByProp, prop)) {
+      res.columnByProp[prop].push(...collection.columnByProp[prop]);
     } else {
-      Object.defineProperty(columnByProp, prop, {
+      Object.defineProperty(res.columnByProp, prop, {
         configurable: true,
         enumerable: true,
         value: [...collection.columnByProp[prop]],
@@ -261,7 +258,6 @@ export function gatherGroup<T extends ColumnCollection>(
       });
     }
   }
-  res.columnByProp = columnByProp;
   return res;
 }
 
