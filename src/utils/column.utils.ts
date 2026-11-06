@@ -157,11 +157,26 @@ export function getColumns(
         res.columns[regularColumn.pin].push(regularColumn);
       }
       if (regularColumn.order) {
-        res.sort[regularColumn.prop] = regularColumn;
+        Object.defineProperty(res.sort, regularColumn.prop, {
+          configurable: true,
+          enumerable: true,
+          value: regularColumn,
+          writable: true,
+        });
       }
       // it's possible that some columns have same prop, but better to avoid it
-      if (!res.columnByProp[regularColumn.prop]) {
-        res.columnByProp[regularColumn.prop] = [];
+      if (
+        !Object.prototype.hasOwnProperty.call(
+          res.columnByProp,
+          regularColumn.prop,
+        )
+      ) {
+        Object.defineProperty(res.columnByProp, regularColumn.prop, {
+          configurable: true,
+          enumerable: true,
+          value: [],
+          writable: true,
+        });
       }
       res.columnByProp[regularColumn.prop].push(regularColumn);
 
@@ -221,11 +236,28 @@ export function gatherGroup<T extends ColumnCollection>(
     res.columnGrouping[key].push(...rebasedItem);
   }
   res.maxLevel = Math.max(res.maxLevel, collection.maxLevel);
-  res.sort = { ...res.sort, ...collection.sort };
-  res.columnByProp = {
-    ...res.columnByProp,
-    ...collection.columnByProp,
-  };
+  // Define incoming own keys explicitly: transpiled object spread can treat
+  // "__proto__" as a prototype setter rather than a data property.
+  for (const prop of Object.keys(collection.sort)) {
+    Object.defineProperty(res.sort, prop, {
+      configurable: true,
+      enumerable: true,
+      value: collection.sort[prop],
+      writable: true,
+    });
+  }
+  for (const prop of Object.keys(collection.columnByProp)) {
+    if (Object.prototype.hasOwnProperty.call(res.columnByProp, prop)) {
+      res.columnByProp[prop].push(...collection.columnByProp[prop]);
+    } else {
+      Object.defineProperty(res.columnByProp, prop, {
+        configurable: true,
+        enumerable: true,
+        value: [...collection.columnByProp[prop]],
+        writable: true,
+      });
+    }
+  }
   return res;
 }
 
