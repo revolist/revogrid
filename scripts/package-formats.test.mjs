@@ -1,0 +1,73 @@
+import assert from 'node:assert/strict';
+import { execFileSync } from 'node:child_process';
+import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import test from 'node:test';
+
+const root = fileURLToPath(new URL('../', import.meta.url));
+
+test('packed Core and loader support CommonJS and ESM without browser globals', t => {
+  const directory = mkdtempSync(join(tmpdir(), 'revogrid-package-formats-'));
+  t.after(() => rmSync(directory, { recursive: true, force: true }));
+  const [archive] = JSON.parse(
+    execFileSync(
+      'npm',
+      ['pack', '--ignore-scripts', '--json', '--pack-destination', directory],
+      {
+        cwd: root,
+        encoding: 'utf8',
+        env: { ...process.env, npm_config_cache: join(directory, 'cache') },
+      },
+    ),
+  );
+  const packageDirectory = join(directory, 'node_modules/@revolist/revogrid');
+  mkdirSync(packageDirectory, { recursive: true });
+  execFileSync('tar', [
+    '-xzf',
+    join(directory, archive.filename),
+    '--strip-components=1',
+    '-C',
+    packageDirectory,
+  ]);
+  const checks = `
+    const assert = require('node:assert/strict');
+    const grid = require('@revolist/revogrid');
+    const loader = require('@revolist/revogrid/loader');
+    assert.equal(typeof grid.BasePlugin, 'function');
+    assert.equal(grid.filterCoreFunctionsIndexedByType.eq('Europe', 'Europe'), true);
+    assert.equal(grid.filterCoreFunctionsIndexedByType.eq('Europe', 'Asia'), false);
+    assert.equal(typeof loader.defineCustomElements, 'function');
+    assert.equal(typeof loader.setNonce, 'function');
+    for (const name of ['window', 'document', 'HTMLElement', 'customElements'])
+      assert.equal(name in globalThis, false, name);
+    console.log(JSON.stringify(Object.keys(grid).sort()));
+  `;
+  writeFileSync(join(directory, 'consumer.cjs'), checks);
+  writeFileSync(
+    join(directory, 'consumer.mjs'),
+    checks
+      .replace(
+        "const assert = require('node:assert/strict');",
+        "import assert from 'node:assert/strict';",
+      )
+      .replace(
+        "const grid = require('@revolist/revogrid');",
+        "import * as grid from '@revolist/revogrid';",
+      )
+      .replace(
+        "const loader = require('@revolist/revogrid/loader');",
+        "import * as loader from '@revolist/revogrid/loader';",
+      ),
+  );
+  const run = entry =>
+    JSON.parse(
+      execFileSync(process.execPath, [entry], {
+        cwd: directory,
+        encoding: 'utf8',
+        timeout: 10_000,
+      }),
+    );
+  assert.deepEqual(run('consumer.cjs'), run('consumer.mjs'));
+});
