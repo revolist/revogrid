@@ -11,7 +11,7 @@ const root = fileURLToPath(new URL('../', import.meta.url));
 test('packed Core and loader support CommonJS and ESM without browser globals', t => {
   const directory = mkdtempSync(join(tmpdir(), 'revogrid-package-formats-'));
   t.after(() => rmSync(directory, { recursive: true, force: true }));
-  const [archive] = JSON.parse(
+  const packed = JSON.parse(
     execFileSync(
       'npm',
       ['pack', '--ignore-scripts', '--json', '--pack-destination', directory],
@@ -22,6 +22,8 @@ test('packed Core and loader support CommonJS and ESM without browser globals', 
       },
     ),
   );
+  const archive = Array.isArray(packed) ? packed[0] : packed;
+  assert.ok(archive?.filename, `npm pack returned no filename: ${JSON.stringify(packed)}`);
   const packageDirectory = join(directory, 'node_modules/@revolist/revogrid');
   mkdirSync(packageDirectory, { recursive: true });
   execFileSync('tar', [
