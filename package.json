@@ -55,7 +55,7 @@
     "angular-datagrid",
     "angular-tree"
   ],
-  "main": "dist/index.cjs.js",
+  "main": "dist/cjs/index.cjs.js",
   "module": "dist/index.js",
   "unpkg": "dist/revo-grid/revo-grid.esm.js",
   "collection": "dist/collection/collection-manifest.json",
@@ -65,7 +65,7 @@
     ".": {
       "types": "./dist/types/index.d.ts",
       "import": "./dist/index.js",
-      "require": "./dist/index.cjs.js"
+      "require": "./dist/cjs/index.cjs.js"
     },
     "./standalone": {
       "types": "./standalone/index.d.ts",
@@ -82,7 +82,12 @@
     "./loader": {
       "types": "./loader/index.d.ts",
       "import": "./loader/index.js",
-      "require": "./loader/index.cjs"
+      "require": "./dist/cjs/loader.cjs.js"
+    },
+    "./hydrate": {
+      "types": "./hydrate/index.d.ts",
+      "import": "./hydrate/index.mjs",
+      "require": "./hydrate/index.js"
     }
   },
   "files": [
@@ -93,17 +98,19 @@
   ],
   "scripts": {
     "docs": "npx typedoc",
-    "build": "stencil build --prod && rm -f loader/package.json",
+    "build": "stencil build --prod && node scripts/finalize-package.mjs",
     "build:packages": "npm run api:clear && npm run build  && npm run api:update && npm run docs",
     "api:clear": "rm -rf docs/guide/api",
     "api:update": "./scripts/generate_api.sh",
     "readme": "node ./scripts/generate_readme.mjs",
     "test": "stencil test --spec",
-    "test:hydrate": "tsc --noEmit --strict --skipLibCheck --target es2020 --moduleResolution node test/hydrate-types.ts",
+    "test:hydrate": "tsc --noEmit --strict --skipLibCheck --target es2020 --moduleResolution node test/hydrate-types.ts && tsc --noEmit --strict --skipLibCheck --target es2020 --module nodenext --moduleResolution nodenext test/hydrate-package-types.ts",
+    "test:package-formats": "node --test scripts/package-formats.test.mjs",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "dev": "stencil build --dev --watch --serve",
-    "release": "npm run build && npm publish --public --tag pre-release && npm run package:update"
+    "release": "npm run build && npm publish --public --tag pre-release && npm run package:update",
+    "package:update": "node scripts/package-version.mjs"
   },
   "devDependencies": {
     "@angular/core": "^20.3.0",

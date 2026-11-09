@@ -40,6 +40,9 @@ jobs:
       - name: Check hydrate declarations
         run: npm run test:hydrate
 
+      - name: Check packed CommonJS and ESM entry points
+        run: npm run test:package-formats
+
       - name: Write job summary
         if: always()
         run: |

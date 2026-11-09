@@ -1,4 +1,5 @@
 import {
+  Build,
   Component,
   Element as StencilElement,
   Event,
@@ -158,6 +159,8 @@ export class RevogrScrollVirtual {
   }
 
   private getContentViewport() {
+    // Server rendering has no layout to measure.
+    if (!Build.isBrowser) return null;
     const grid = this.element.closest('revo-grid');
     // Slotted content (including wrapped scrollbars) belongs to an external
     // owner. Do not replace its supplied size with the grid's main viewport.
