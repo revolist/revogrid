@@ -8,6 +8,33 @@ import test from 'node:test';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 
+function selectArchive(packed) {
+  const archive = Array.isArray(packed)
+    ? packed[0]
+    : packed?.['@revolist/revogrid'] ?? packed;
+  assert.ok(
+    archive?.filename,
+    `npm pack returned no filename: ${JSON.stringify(packed)}`,
+  );
+  return archive;
+}
+
+for (const [shape, packed] of Object.entries({
+  array: [{ filename: 'revogrid.tgz' }],
+  flat: { filename: 'revogrid.tgz' },
+  keyed: { '@revolist/revogrid': { filename: 'revogrid.tgz' } },
+})) {
+  test(`selects the archive from ${shape} npm pack output`, () => {
+    assert.equal(selectArchive(packed).filename, 'revogrid.tgz');
+  });
+}
+
+test('rejects npm pack output without a filename', () => {
+  for (const packed of [[], {}, { '@revolist/revogrid': {} }]) {
+    assert.throws(() => selectArchive(packed), /npm pack returned no filename/);
+  }
+});
+
 test('packed Core and loader support CommonJS and ESM without browser globals', t => {
   const directory = mkdtempSync(join(tmpdir(), 'revogrid-package-formats-'));
   t.after(() => rmSync(directory, { recursive: true, force: true }));
@@ -22,8 +49,7 @@ test('packed Core and loader support CommonJS and ESM without browser globals', 
       },
     ),
   );
-  const archive = Array.isArray(packed) ? packed[0] : packed;
-  assert.ok(archive?.filename, `npm pack returned no filename: ${JSON.stringify(packed)}`);
+  const archive = selectArchive(packed);
   const packageDirectory = join(directory, 'node_modules/@revolist/revogrid');
   mkdirSync(packageDirectory, { recursive: true });
   execFileSync('tar', [
