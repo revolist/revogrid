@@ -83,6 +83,11 @@
       "types": "./loader/index.d.ts",
       "import": "./loader/index.js",
       "require": "./dist/cjs/loader.cjs.js"
+    },
+    "./hydrate": {
+      "types": "./hydrate/index.d.ts",
+      "import": "./hydrate/index.mjs",
+      "require": "./hydrate/index.js"
     }
   },
   "files": [
@@ -99,12 +104,13 @@
     "api:update": "./scripts/generate_api.sh",
     "readme": "node ./scripts/generate_readme.mjs",
     "test": "stencil test --spec",
-    "test:hydrate": "tsc --noEmit --strict --skipLibCheck --target es2020 --moduleResolution node test/hydrate-types.ts",
+    "test:hydrate": "tsc --noEmit --strict --skipLibCheck --target es2020 --moduleResolution node test/hydrate-types.ts && tsc --noEmit --strict --skipLibCheck --target es2020 --module nodenext --moduleResolution nodenext test/hydrate-package-types.ts",
     "test:package-formats": "node --test scripts/package-formats.test.mjs",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "dev": "stencil build --dev --watch --serve",
-    "release": "npm run build && npm publish --public --tag pre-release && npm run package:update"
+    "release": "npm run build && npm publish --public --tag pre-release && npm run package:update",
+    "package:update": "node scripts/package-version.mjs"
   },
   "devDependencies": {
     "@angular/core": "^20.3.0",

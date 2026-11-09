@@ -35,7 +35,7 @@ test('rejects npm pack output without a filename', () => {
   }
 });
 
-test('packed Core and loader support CommonJS and ESM without browser globals', t => {
+test('packed Core, loader and hydrate support CommonJS and ESM without browser globals', t => {
   const directory = mkdtempSync(join(tmpdir(), 'revogrid-package-formats-'));
   t.after(() => rmSync(directory, { recursive: true, force: true }));
   const packed = JSON.parse(
@@ -63,6 +63,7 @@ test('packed Core and loader support CommonJS and ESM without browser globals', 
     const assert = require('node:assert/strict');
     const grid = require('@revolist/revogrid');
     const loader = require('@revolist/revogrid/loader');
+    const hydrate = require('@revolist/revogrid/hydrate');
     assert.equal(typeof grid.BasePlugin, 'function');
     assert.equal(grid.filterCoreFunctionsIndexedByType.eq('Europe', 'Europe'), true);
     assert.equal(grid.filterCoreFunctionsIndexedByType.eq('Europe', 'Asia'), false);
@@ -70,7 +71,14 @@ test('packed Core and loader support CommonJS and ESM without browser globals', 
     assert.equal(typeof loader.setNonce, 'function');
     for (const name of ['window', 'document', 'HTMLElement', 'customElements'])
       assert.equal(name in globalThis, false, name);
-    console.log(JSON.stringify(Object.keys(grid).sort()));
+    hydrate.renderToString('<html><body><revo-grid></revo-grid></body></html>').then(result => {
+      assert.equal(result.diagnostics.some(diagnostic => diagnostic.level === 'error'), false);
+      assert.match(result.html, /<revo-grid/);
+      console.log(JSON.stringify(Object.keys(grid).sort()));
+    }).catch(error => {
+      console.error(error);
+      process.exitCode = 1;
+    });
   `;
   writeFileSync(join(directory, 'consumer.cjs'), checks);
   writeFileSync(
@@ -87,6 +95,10 @@ test('packed Core and loader support CommonJS and ESM without browser globals', 
       .replace(
         "const loader = require('@revolist/revogrid/loader');",
         "import * as loader from '@revolist/revogrid/loader';",
+      )
+      .replace(
+        "const hydrate = require('@revolist/revogrid/hydrate');",
+        "import * as hydrate from '@revolist/revogrid/hydrate';",
       ),
   );
   const run = entry =>
