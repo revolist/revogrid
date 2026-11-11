@@ -65,6 +65,8 @@ revogr-viewport-scroll {
 
   .vertical-inner {
     overflow-y: auto;
+    // This nested scroll container is the gesture target over data cells.
+    overscroll-behavior-x: contain;
     position: relative;
     width: 100%;
     flex-grow: 1;

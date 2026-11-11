@@ -18,6 +18,61 @@ import {
 } from './helpers';
 
 test.describe('virtualization', () => {
+  test('contains horizontal trackpad gestures after focus leaves the grid', async ({ page }) => {
+    await mountGrid(page, {
+      columns: [
+        { prop: 'id', size: 100, pin: 'colPinStart' },
+        { prop: 'name', size: 300 },
+        { prop: 'role', size: 300 },
+        { prop: 'city', size: 100, pin: 'colPinEnd' },
+      ],
+      source: buildRows(40, ['id', 'name', 'role', 'city']),
+      width: 520,
+      height: 240,
+    });
+    await dataCell(page, 0, 0).click();
+    await page.evaluate(() => {
+      const input = document.createElement('input');
+      input.id = 'outside-focus';
+      document.body.prepend(input);
+    });
+    await page.locator('#outside-focus').click();
+
+    const viewport = page.locator(SELECTORS.mainViewport);
+    const body = viewport.locator('.vertical-inner');
+    await expect.soft(body).toHaveCSS('overscroll-behavior-x', 'contain');
+
+    // The first event in a macOS gesture must be claimed even at a boundary.
+    const wheelIsCancelled = (selector: string, deltaX: number) => page.locator(selector).evaluate((el, deltaX) => {
+      const event = new WheelEvent('wheel', { deltaX, bubbles: true, cancelable: true });
+      el.dispatchEvent(event);
+      return event.defaultPrevented;
+    }, deltaX);
+    expect.soft(await wheelIsCancelled(`${SELECTORS.mainViewport} .header-wrapper`, -80)).toBe(true);
+
+    await body.hover();
+    await page.mouse.wheel(120, 0);
+    await expect.poll(() => viewport.evaluate(el => el.scrollLeft)).toBeGreaterThan(0);
+    await expect(page.locator('#outside-focus')).toBeFocused();
+
+    // Pinned panes have no local x range, but forward their gesture to the main pane.
+    const beforePinned = await viewport.evaluate(el => el.scrollLeft);
+    expect.soft(await wheelIsCancelled(`${SELECTORS.pinnedStartViewport} .header-wrapper`, 80)).toBe(true);
+    await expect.poll(() => viewport.evaluate(el => el.scrollLeft)).toBeGreaterThan(beforePinned);
+
+    await viewport.evaluate(el => { el.scrollLeft = el.scrollWidth; });
+    await expect.poll(() => viewport.evaluate(el => el.scrollLeft + el.clientWidth >= el.scrollWidth)).toBe(true);
+    expect(await wheelIsCancelled(`${SELECTORS.mainViewport} .header-wrapper`, 80)).toBe(true);
+
+    // Vertical gestures at the top still belong to the surrounding page.
+    const verticalCancelled = await body.evaluate(el => {
+      const event = new WheelEvent('wheel', { deltaY: -80, bubbles: true, cancelable: true });
+      el.dispatchEvent(event);
+      return event.defaultPrevented;
+    });
+    expect(verticalCancelled).toBe(false);
+  });
+
   test('uses Shift + wheel to scroll horizontally without scrolling rows', async ({ page }) => {
     const source = buildRows(40, ['id', 'name', 'role', 'city']);
 
