@@ -512,6 +512,9 @@ export class RevogrViewportScroll implements ElementScroll {
     if (!e.deltaX) {
       return;
     }
+    // Claim horizontal gestures even at boundaries and in pinned panes, where
+    // deltas can be forwarded. Otherwise macOS can start browser history navigation.
+    e.preventDefault?.();
     const { scrollLeft, scrollWidth, clientWidth } = this.horizontalScroll;
 
     // Detect if the user has reached the right end
@@ -522,7 +525,6 @@ export class RevogrViewportScroll implements ElementScroll {
     if (this.noHorizontalScrollTransfer) {
       if (!atRight && !atLeft) {
         const nextScrollLeft = scrollLeft + e[delta];
-        e.preventDefault?.();
         this.horizontalScroll.scrollLeft = nextScrollLeft;
         this.localScrollService?.scroll(
           this.horizontalScroll.scrollLeft,
@@ -533,9 +535,6 @@ export class RevogrViewportScroll implements ElementScroll {
         this.localScrollTimer.latestScrollUpdate(type);
       }
       return;
-    }
-    if (!atRight && !atLeft) {
-      e.preventDefault?.();
     }
     const pos = scrollLeft + e[delta];
     this.localScrollService?.scroll(pos, type, undefined, e[delta]);
