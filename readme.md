@@ -45,7 +45,7 @@ Used by some of the largest companies in Europe and the United States.
 
 - **High Performance**: Render 1M+ rows and millions of cells with no hard row limit in the grid. Virtualization keeps the DOM focused on the visible viewport.
 
-- **[Accessibility](https://rv-grid.com/guide/wcag)**: Follows WAI-ARIA best practices.
+- **[Accessibility](ACCESSIBILITY.md)**: Keyboard navigation, screen-reader-oriented grid semantics and high-contrast themes. See the [integration guide](https://rv-grid.com/guide/wcag).
 
 - **[RTL Support](https://rv-grid.com/guide/rtl)**: Comprehensive Right-to-Left language support for Arabic, Hebrew, Persian, and other RTL languages. Features automatic column reordering, proper text alignment, and layout adjustments for RTL interfaces.
 
