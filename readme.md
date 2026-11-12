@@ -486,13 +486,9 @@ If Playwright fails before any tests run with a Stencil dev-server startup error
 
 ## Contributing
 
-By getting involved, you'll have the opportunity to enhance your skills, gain valuable experience, and make a significant impact on an innovative project. Your contribution, no matter how big or small, is valuable.
+Bug reports, documentation, tests, and code contributions are welcome. See the [contributing guide](https://github.com/revolist/revogrid/blob/main/CONTRIBUTING.md) for local setup, testing, and pull request guidance.
 
-### Why Contribute?
-
-- **Expand Your Knowledge**: Working on complex libraries allows you to dive deep into modern web technologies, improve your coding skills, and learn best practices in performance optimization, data handling, and component-based architecture.
-- **Experience**: Contributing to an open-source project like provides you with practical experience that can be a great addition to your portfolio. It demonstrates your ability to work collaboratively, solve complex problems, and contribute to a project's success.
-- **Professional Growth**: By contributing, you become part of a network of talented developers. This can lead to mentorship opportunities, collaborations, and professional connections that can benefit your career. 
+Please follow our [Code of Conduct](https://github.com/revolist/revogrid/blob/main/CODE_OF_CONDUCT.md). Report security vulnerabilities privately using the [security policy](https://github.com/revolist/revogrid/blob/main/SECURITY.md).
 
 
 ## License
