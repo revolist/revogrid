@@ -5,7 +5,7 @@ const contains: LogicFunction = (value: LogicFunctionParam, extra?: LogicFunctio
   if (!extra) {
     return true;
   }
-  if (!value) {
+  if (value === null || value === undefined || value === '') {
     return false;
   }
   if (extra) {

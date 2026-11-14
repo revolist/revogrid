@@ -22,6 +22,42 @@ async function nextAnimationFrames(page: E2EPage, count = 2) {
 }
 
 test.describe('filtering', () => {
+  test('filters falsy cell values with text operators', async ({ page }) => {
+    await mountGrid(page, {
+      columns: [{ prop: 'name' }, { prop: 'value', filter: true }],
+      source: [],
+      filter: true,
+    });
+    await page.evaluate(() => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid')!;
+      grid.columns = [{ prop: 'name' }, { prop: 'value', filter: true, cellTemplate: () => 'Value' }];
+      grid.source = [
+        { name: 'Zero', value: 0 }, { name: 'BigInt zero', value: 0n },
+        { name: 'False', value: false }, { name: 'Ten', value: 10 },
+      ];
+    });
+    await page.waitForChanges();
+    for (const [type, value, names] of [
+      ['contains', '0', ['Zero', 'BigInt zero', 'Ten']],
+      ['begins', '0', ['Zero', 'BigInt zero']],
+      ['notContains', '0', ['False']],
+      ['contains', 'false', ['False']],
+      ['begins', 'false', ['False']],
+    ] as const) {
+      await page.evaluate(async ({ type, value }) => {
+        const grid = document.querySelector<HTMLRevoGridElement>('revo-grid')!;
+        await new Promise<void>(resolve => {
+          grid.addEventListener('afterfilterapply', () => resolve(), { once: true });
+          grid.dispatchEvent(new CustomEvent('filter', {
+            detail: { value: [{ id: 0, type, value, relation: 'and' }] },
+          }));
+        });
+      }, { type, value });
+      await page.waitForChanges();
+      await expectVisibleColumnValues(page, 0, [...names]);
+    }
+  });
+
   test('filters nested boxed BigInt using its digits despite toJSON substitutions', async ({ page }) => {
     await mountGrid(page, {
       columns: [{ prop: 'name' }, { prop: 'value', filter: true }],

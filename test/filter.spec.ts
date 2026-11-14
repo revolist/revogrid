@@ -150,6 +150,43 @@ describe('text filters with non-JSON cell values', () => {
   });
 });
 
+describe('text filters with falsy cell values', () => {
+  it('matches serialized zero, BigInt zero, and false', () => {
+    for (const [value, query] of [[0, '0'], [0n, '0'], [false, 'false']] as const) {
+      expect(contains(value, query)).toBe(true);
+      expect(beginsWith(value, query)).toBe(true);
+      expect(notContains(value, query)).toBe(false);
+      expect(contains(value, 'missing')).toBe(false);
+    }
+  });
+
+  it('preserves blank and empty-query behavior', () => {
+    for (const value of [null, undefined, '']) {
+      expect(contains(value, '0')).toBe(false);
+      expect(beginsWith(value, '0')).toBe(false);
+      expect(notContains(value, '0')).toBe(true);
+      expect(contains(value, '')).toBe(true);
+      expect(beginsWith(value, '')).toBe(false);
+    }
+    expect(contains(0, '')).toBe(true);
+    expect(beginsWith(0, '')).toBe(true);
+  });
+
+  it('applies the text predicates to grid rows', () => {
+    const rows = [0, 10, 20, 5].map(value => ({ value }));
+    for (const [type, expected] of Object.entries({
+      contains: [0, 10, 20], begins: [0], notContains: [5],
+    })) {
+      const trimmed = createFilterPlugin().getRowFilter(
+        rows,
+        { value: [{ id: 0, type, value: '0', relation: 'and' }] },
+        { value: { prop: 'value', filter: true } },
+      );
+      expect(rows.filter((_, index) => !trimmed[index]).map(row => row.value)).toEqual(expected);
+    }
+  });
+});
+
 describe('filter reorder helpers', () => {
   function createDataTransfer(payloads: Record<string, string>): DataTransfer {
     return {
