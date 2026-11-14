@@ -2,7 +2,7 @@ import { getFilterValue } from '../value';
 import { LogicFunction, LogicFunctionExtraParam, LogicFunctionParam } from '../../filter.types';
 
 const beginsWith: LogicFunction = (value: LogicFunctionParam, extra?: LogicFunctionExtraParam) => {
-  if (!value) {
+  if (value === null || value === undefined || value === '') {
     return false;
   }
   if (!extra) {
