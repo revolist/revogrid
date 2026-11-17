@@ -8,8 +8,11 @@ import {
 } from '../../utils';
 import { getRange } from '@store';
 
-import { isGroupingColumn } from '../../plugins/groupingRow/grouping.service';
-import slice from 'lodash/slice';
+import {
+  getGroupingName,
+  isGrouping,
+  isGroupingColumn,
+} from '../../plugins/groupingRow/grouping.service';
 import {
   DimensionCols,
   DimensionRows,
@@ -448,8 +451,7 @@ export default class ColumnService {
     range: RangeArea,
     store: Observable<DSourceState<DataType, DimensionRows>>,
   ) {
-    const cols = [...this.columns];
-    const props = slice(cols, range.x, range.x1 + 1).map(v => v.prop);
+    const columns = this.columns.slice(range.x, range.x1 + 1);
     const toCopy: DataFormat[][] = [];
     const mapping: { [rowIndex: number]: { [colProp: ColumnProp]: any } } = {};
 
@@ -459,16 +461,16 @@ export default class ColumnService {
       mapping[i] = {};
 
       // columns indexes
-      for (let prop of props) {
-        const item = getSourceItem(store, i);
-
-        // if no item - skip
-        if (!item) {
-          continue;
+      const item = getSourceItem(store, i);
+      if (item) {
+        for (const column of columns) {
+          let value = item[column.prop];
+          if (value == null && isGroupingColumn(column) && isGrouping(item)) {
+            value = getGroupingName(item);
+          }
+          rgRow.push(value);
+          mapping[i][column.prop] = value;
         }
-        const val = item[prop];
-        rgRow.push(val);
-        mapping[i][prop] = val;
       }
 
       toCopy.push(rgRow);

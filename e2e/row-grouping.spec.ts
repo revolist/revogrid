@@ -4,7 +4,11 @@ import {
   SELECTORS,
   buildColumns,
   clickFilterButton,
+  dataCell,
+  dispatchClipboardEvent,
+  expectFocusedCell,
   expectVisibleColumnValues,
+  getCopiedText,
   mainDataRows,
   mountGrid,
   visibleColumnValues,
@@ -698,6 +702,31 @@ test.describe('row grouping', () => {
         .locator('[data-testid="virtual-group-value"][data-prop="metric0"]'),
     ).toContainText('metric0:North-0');
     expect(await groupCells.count()).toBeLessThan(20);
+
+    await dataCell(page, 0, 1).click();
+    await expectFocusedCell(page, { x: 1, y: 0 });
+    await page.keyboard.press('ArrowRight');
+    await expectFocusedCell(page, { x: 2, y: 0 });
+    await page.keyboard.press('ArrowDown');
+    await expectFocusedCell(page, { x: 2, y: 1 });
+    await page.keyboard.press('ArrowUp');
+    await expectFocusedCell(page, { x: 2, y: 0 });
+
+    await page.keyboard.press('ArrowLeft');
+    await page.keyboard.press('ArrowLeft');
+    await expectFocusedCell(page, { x: 0, y: 0 });
+    expect(await getCopiedText(page)).toBe('North');
+
+    await dataCell(page, 0, 2).click();
+    await expectFocusedCell(page, { x: 2, y: 0 });
+    expect(await getCopiedText(page)).toBe('North-1');
+    await dispatchClipboardEvent(page, 'paste', 'Updated value');
+    await expect(dataCell(page, 0, 2)).toHaveText('metric1:Updated value');
+    const copiedGroupValue = await getCopiedText(page);
+    expect(copiedGroupValue).toBe('Updated value');
+    await dataCell(page, 1, 2).click();
+    await dispatchClipboardEvent(page, 'paste', copiedGroupValue);
+    await expect(dataCell(page, 1, 2)).toHaveText('Updated value');
 
     await mainGroupRows.getByTestId('virtual-group-toggle-North').click();
     await expect(

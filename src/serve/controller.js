@@ -85,9 +85,25 @@ globalThis.setGrouping = function (props = [], expandedAll = false) {
     props,
     expandedAll,
     prevExpanded: { 'a': true, 'a,c': true },
-    groupLabelTemplate(createElement, { name, depth, expanded, providers }) {
-      if (providers.colType !== 'rgCol') return;
-      return createElement('span', null, `${expanded ? '-' : '+'} ${props[depth]}: ${name}`);
+    groupCellTemplate(createElement, { column, group, value }) {
+      if (group.isLabelColumn) {
+        const label = `${group.prop}: ${group.name || '(empty)'}`;
+        if (!group.canExpand) {
+          return label;
+        }
+        const button = createElement('button', {
+          type: 'button',
+          class: 'group-expand',
+          'aria-expanded': String(group.expanded),
+          'aria-label': `${group.expanded ? 'Collapse' : 'Expand'} ${label}`,
+          onClick: group.onExpand,
+        }, group.expanded ? '−' : '+');
+        return createElement('span', null, button, label);
+      }
+      if (column.prop === 1 && value === undefined) {
+        return createElement('span', { class: 'text-muted' }, 'Paste a note');
+      }
+      return value ?? null;
     },
   };
 };
