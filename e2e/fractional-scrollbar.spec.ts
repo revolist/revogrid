@@ -53,6 +53,32 @@ for (const deviceScaleFactor of [1.25, 1.5]) {
       });
     }
 
+    test('reaches the top from a fractional offset and releases upward wheel events', async ({ page }) => {
+      await mountGrid(page, {
+        columns: [{ prop: 'id', size: 100 }],
+        source: buildRows(100, ['id']),
+        width: 620,
+        height: 360,
+        rowSize: 30,
+      }, `body > div { zoom: ${deviceScaleFactor}; }`);
+
+      const viewport = page.locator('revogr-viewport-scroll.rgCol .vertical-inner');
+      const offset = await viewport.evaluate(element => {
+        element.scrollTop = 0.6;
+        return element.scrollTop;
+      });
+      expect(offset).toBeGreaterThan(0);
+      expect(offset).toBeLessThan(1);
+      await page.waitForChanges();
+
+      const wheelUp = () => viewport.evaluate(element => element.dispatchEvent(
+        new WheelEvent('wheel', { deltaY: -10, bubbles: true, cancelable: true }),
+      ));
+      expect(await wheelUp()).toBe(false);
+      await expect.poll(() => viewport.evaluate(element => element.scrollTop)).toBe(0);
+      expect(await wheelUp()).toBe(true);
+    });
+
     for (const zoom of [1, 1.25, 1.5]) {
       test(`fitting content has no native scroll range at zoom ${zoom}`, async ({ page }) => {
         await mountGrid(page, {

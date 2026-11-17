@@ -37,8 +37,8 @@ export function applyScrollCoordinate(
   coordinate: number,
 ): number {
   const current = element[property];
-  // Fractional browser offsets can round to a nearby coordinate on write-back.
-  if (Math.abs(current - coordinate) < 1) {
+  // Reach zero exactly so the viewport can release upward wheel events.
+  if (current === coordinate || (coordinate !== 0 && Math.abs(current - coordinate) < 1)) {
     return current;
   }
   element[property] = coordinate;
