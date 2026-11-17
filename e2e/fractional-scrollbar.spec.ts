@@ -6,6 +6,53 @@ for (const deviceScaleFactor of [1.25, 1.5]) {
   test.describe(`fractional scrollbars at DPR ${deviceScaleFactor}`, () => {
     test.use({ deviceScaleFactor });
 
+    for (const axis of ['vertical', 'horizontal'] as const) {
+      test(`does not write back to a fractional native ${axis} scrollbar position`, async ({ page }) => {
+        await mountGrid(page, {
+          columns: [{ prop: 'id', size: 700 }, { prop: 'name', size: 700 }],
+          source: buildRows(100, ['id', 'name']),
+          width: 620,
+          height: 360,
+          rowSize: 30,
+        }, `body > div { zoom: ${deviceScaleFactor}; }`);
+
+        const virtualEvents = await page.spyOnEvent('scrollvirtual');
+        const bar = page.locator(`revogr-scroll-virtual.${axis}`);
+        const nativePosition = await bar.evaluate((element, axis) => {
+          const property = axis === 'vertical' ? 'scrollTop' : 'scrollLeft';
+          const native = Object.getOwnPropertyDescriptor(Element.prototype, property)!;
+          element[property] = 101;
+          let writes = 0;
+          Object.defineProperty(element, property, {
+            get: () => native.get!.call(element),
+            set: (value: number) => {
+              element.dataset.echoWrites = String(++writes);
+              native.set!.call(element, value);
+            },
+          });
+          element.dataset.echoWrites = '0';
+          return element[property];
+        }, axis);
+        expect(nativePosition).toBeGreaterThan(100);
+        expect(nativePosition).not.toBe(Math.round(nativePosition));
+
+        const dimension = axis === 'vertical' ? 'rgRow' : 'rgCol';
+        await expect.poll(() => virtualEvents.events.some(event =>
+          event.detail.dimension === dimension &&
+          event.detail.coordinate === nativePosition,
+        )).toBe(true);
+
+        const viewport = axis === 'vertical'
+          ? page.locator('revogr-viewport-scroll.rgCol .vertical-inner').first()
+          : page.locator('revogr-viewport-scroll.rgCol');
+        await expect.poll(() => viewport.evaluate((element, axis) =>
+          axis === 'vertical' ? element.scrollTop : element.scrollLeft, axis,
+        )).toBeGreaterThan(100);
+        await page.waitForChanges();
+        await expect(bar).toHaveAttribute('data-echo-writes', '0');
+      });
+    }
+
     for (const zoom of [1, 1.25, 1.5]) {
       test(`fitting content has no native scroll range at zoom ${zoom}`, async ({ page }) => {
         await mountGrid(page, {

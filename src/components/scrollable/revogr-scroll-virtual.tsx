@@ -10,6 +10,7 @@ import {
   Prop,
 } from '@stencil/core';
 import LocalScrollService, {
+  applyScrollCoordinate,
   getContentSize,
 } from '../../services/local.scroll.service';
 import type {
@@ -119,9 +120,7 @@ export class RevogrScrollVirtual {
       runScroll: e => this.scrollVirtual.emit(e),
       applyScroll: e => {
         const type = e.dimension === 'rgRow' ? 'scrollTop' : 'scrollLeft';
-        // this will trigger on scroll event
-        this.element[type] = e.coordinate;
-        const coordinate = this.element[type];
+        const coordinate = applyScrollCoordinate(this.element, type, e.coordinate);
         this.localScrollTimer.setCoordinate({ ...e, coordinate });
         return coordinate;
       },
