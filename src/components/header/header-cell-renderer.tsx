@@ -27,6 +27,7 @@ export const HeaderCellRenderer: FunctionalComponent<{
   }
   const resizeProps = {
     ...cellProps,
+    'data-rg-header-cell': '',
     onMouseDown(e: MouseEvent) {
       dispatch(e.currentTarget, ON_COLUMN_CLICK, {
         data,

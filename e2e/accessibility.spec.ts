@@ -146,7 +146,17 @@ test.describe('accessibility', () => {
     await expect
       .poll(() => header.getAttribute('id'))
       .toMatch(/^revo-a11y-header-/);
+    const originalHeader = await header.evaluateHandle(element => element);
     const previousId = (await header.getAttribute('id'))!;
+    await page.evaluate(id => {
+      const grid = document.querySelector('revo-grid')!;
+      const collision = document.createElement('div');
+      collision.id = id;
+      grid.before(collision);
+      grid.additionalData = { refreshHeaders: true };
+    }, previousId);
+    await expect(header).not.toHaveAttribute('id', previousId);
+    const updatedId = (await header.getAttribute('id'))!;
     await page.evaluate(id => {
       const grid = document.querySelector('revo-grid')!;
       const host = document.createElement('div');
@@ -159,8 +169,15 @@ test.describe('accessibility', () => {
         .querySelectorAll('style')
         .forEach(style => root.append(style.cloneNode(true)));
       root.append(grid);
-    }, previousId);
-    await expect(header).not.toHaveAttribute('id', previousId);
+    }, updatedId);
+    await expect(header).not.toHaveAttribute('id', updatedId);
+    expect(
+      await header.evaluate(
+        (element, original) => element === original,
+        originalHeader,
+      ),
+    ).toBe(true);
+    await originalHeader.dispose();
     await expect(page.locator('[role="row"][aria-owns]')).toHaveAttribute(
       'aria-owns',
       (await header.getAttribute('id'))!,
@@ -184,13 +201,17 @@ test.describe('accessibility', () => {
         const { detail } = event as CustomEvent<
           HTMLRevogrHeaderElementEventMap['beforeheaderrender']
         >;
-        detail.data.columnProperties = () => ({ role: 'columnheader cell' });
+        detail.data.columnProperties = () => ({
+          role: 'columnheader cell',
+          class: { rgHeaderCell: false },
+        });
       });
       void grid.scrollToColumnIndex(49);
     });
     const owner = page.locator('[role="row"][aria-owns]');
     const lastHeader = page.getByRole('columnheader', { name: 'Field 49' });
     await expect(lastHeader).toHaveAttribute('role', 'columnheader cell');
+    await expect(lastHeader).not.toHaveClass(/rgHeaderCell/);
     await expect
       .poll(() =>
         owner.evaluate(row =>
