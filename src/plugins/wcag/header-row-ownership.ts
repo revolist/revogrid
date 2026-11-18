@@ -2,10 +2,30 @@ import { h } from '@stencil/core';
 import { createStore } from '@stencil/store';
 import { columnTypes } from '@store';
 import type { DimensionCols } from '@type';
+import { HEADER_CLASS } from '../../utils/consts';
 
 type OwnedHeaders = Record<string, string>;
+type HeaderRoot = Document | DocumentFragment;
 
 let nextHeaderId = 0;
+const generatedIds = new WeakMap<Element, { id: string; root: HeaderRoot }>();
+
+function getHeaderId(cell: Element, root: HeaderRoot): string {
+  const generated = generatedIds.get(cell);
+  let id = cell.id;
+  if (id && (generated?.id !== id || generated.root === root)) {
+    return id;
+  }
+  // A reconnected grid can enter a root that already uses a retained ID.
+  if (!id || root.querySelectorAll(`#${id}`).length > 1) {
+    do {
+      id = `revo-a11y-header-${++nextHeaderId}`;
+    } while (root.getElementById(id));
+    cell.id = id;
+  }
+  generatedIds.set(cell, { id, root });
+  return id;
+}
 
 /** Associate mounted header cells with logical rows across the visual panes. */
 export class HeaderRowOwnership {
@@ -40,19 +60,11 @@ export class HeaderRowOwnership {
       ':scope > [data-rg-header-row], :scope > .group-rgRow > [data-rg-header-row]',
     );
     fragments.forEach(fragment => {
-      const ids: string[] = [];
-      fragment
-        .querySelectorAll(':scope > [role="columnheader"]')
-        .forEach(cell => {
-          if (!cell.id) {
-            let id: string;
-            do {
-              id = `revo-a11y-header-${++nextHeaderId}`;
-            } while (idRoot.getElementById(id));
-            cell.id = id;
-          }
-          ids.push(cell.id);
-        });
+      // Own the rendered cells without interpreting or rewriting custom roles.
+      const ids = Array.from(
+        fragment.querySelectorAll(`:scope > .${HEADER_CLASS}`),
+        cell => getHeaderId(cell, idRoot),
+      );
       const index = fragment.dataset.rgHeaderRow;
       if (index && ids.length) {
         rows[index] = ids.join(' ');

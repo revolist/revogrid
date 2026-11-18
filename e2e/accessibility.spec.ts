@@ -135,6 +135,89 @@ test.describe('accessibility', () => {
     await expect(page.locator('[role="row"][aria-owns]')).toHaveCount(1);
   });
 
+  test('rechecks generated header IDs after moving to a new DOM root', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: [{ prop: 'name', name: 'Name' }],
+      source: [{ name: 'Alice' }],
+    });
+    const header = page.getByRole('columnheader', { name: 'Name' });
+    await expect
+      .poll(() => header.getAttribute('id'))
+      .toMatch(/^revo-a11y-header-/);
+    const previousId = (await header.getAttribute('id'))!;
+    await page.evaluate(id => {
+      const grid = document.querySelector('revo-grid')!;
+      const host = document.createElement('div');
+      document.body.append(host);
+      const root = host.attachShadow({ mode: 'open' });
+      const collision = document.createElement('div');
+      collision.id = id;
+      root.append(collision);
+      document
+        .querySelectorAll('style')
+        .forEach(style => root.append(style.cloneNode(true)));
+      root.append(grid);
+    }, previousId);
+    await expect(header).not.toHaveAttribute('id', previousId);
+    await expect(page.locator('[role="row"][aria-owns]')).toHaveAttribute(
+      'aria-owns',
+      (await header.getAttribute('id'))!,
+    );
+  });
+
+  test('updates header ownership as columns enter and leave the viewport', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      width: 480,
+      columns: Array.from({ length: 50 }, (_, index) => ({
+        prop: `field-${index}`,
+        name: `Field ${index}`,
+      })),
+      source: [{}],
+    });
+    await page.evaluate(() => {
+      const grid = document.querySelector('revo-grid')!;
+      grid.addEventListener('beforeheaderrender', event => {
+        const { detail } = event as CustomEvent<
+          HTMLRevogrHeaderElementEventMap['beforeheaderrender']
+        >;
+        detail.data.columnProperties = () => ({ role: 'columnheader cell' });
+      });
+      void grid.scrollToColumnIndex(49);
+    });
+    const owner = page.locator('[role="row"][aria-owns]');
+    const lastHeader = page.getByRole('columnheader', { name: 'Field 49' });
+    await expect(lastHeader).toHaveAttribute('role', 'columnheader cell');
+    await expect
+      .poll(() =>
+        owner.evaluate(row =>
+          row
+            .getAttribute('aria-owns')!
+            .split(' ')
+            .map(id =>
+              row.ownerDocument.getElementById(id)?.textContent?.trim(),
+            ),
+        ),
+      )
+      .toContain('Field 49');
+    await expect(
+      page.getByRole('columnheader', { name: 'Field 0', exact: true }),
+    ).toHaveCount(0);
+    await expect
+      .poll(() =>
+        owner.evaluate(row =>
+          row
+            .getAttribute('aria-owns')!
+            .split(' ')
+            .every(id => !!row.ownerDocument.getElementById(id)),
+        ),
+      )
+      .toBe(true);
+  });
+
   test('owns group headers supplied by the render hook', async ({ page }) => {
     await mountGrid(page, {
       columns: [{ prop: 'name', name: 'Name' }],
@@ -308,6 +391,10 @@ test.describe('accessibility', () => {
       .poll(() => rowHeaderPane.evaluate(el => el.scrollTop))
       .toBeGreaterThan(rowHeaderStart);
     await expect(rowHeaderPane).toHaveAttribute('data-scroll-ended', 'true');
+    const synchronizedTop = await rowHeaderPane.evaluate(el => el.scrollTop);
+    await expect
+      .poll(() => dataPane.evaluate(el => el.scrollTop))
+      .toBe(synchronizedTop);
     await page.keyboard.press('Tab');
     await expect(dataPane).toBeFocused();
     const dataStart = await dataPane.evaluate(el => el.scrollTop);
