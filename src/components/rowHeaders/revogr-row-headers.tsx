@@ -3,7 +3,6 @@ import type { JSXBase } from '@stencil/core/internal';
 
 import { ViewportStore, DataStore } from '@store';
 import type {
-  CellProps,
   RowHeaders,
   ViewPortScrollEvent,
   DataType,
@@ -19,6 +18,7 @@ import { RowHeaderRender } from './row-header-render';
 import { calculateRowHeaderSize } from '../../utils/row-header-utils';
 import { HEADER_SLOT } from '../revoGrid/viewport.helpers';
 import { type JSX } from '../../components';
+import { withRowHeaderRole } from '../../plugins/wcag/row-header-properties';
 
 /**
  * Row headers component
@@ -83,7 +83,10 @@ export class RevogrRowHeaders {
   render() {
     const dataViews: HTMLElement[] = [];
     const viewport = new ViewportStore('colPinStart');
-    const cellProperties = this.rowHeaderColumn?.cellProperties;
+    const customCellProperties = this.rowHeaderColumn?.cellProperties;
+    const cellProperties = this.accessible
+      ? withRowHeaderRole(customCellProperties)
+      : customCellProperties;
 
     /** render viewports rows */
     let totalLength = 1;
@@ -103,13 +106,7 @@ export class RevogrRowHeaders {
       const column: ColumnRegular = {
         cellTemplate: RowHeaderRender(totalLength),
         ...this.rowHeaderColumn,
-        cellProperties: this.accessible
-          ? props => {
-              const defaults: CellProps = { role: 'rowheader' };
-              const customProps: CellProps = cellProperties?.(props) || {};
-              return { ...defaults, ...customProps };
-            }
-          : cellProperties,
+        cellProperties,
       };
       colData.updateData([column]);
       dataViews.push(

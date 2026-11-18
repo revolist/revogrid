@@ -1,5 +1,6 @@
 import { WCAGPlugin } from '../src/plugins/wcag';
 import { createStore } from '@stencil/store';
+import ColumnDataProvider from '../src/services/column.data.provider';
 
 describe('WCAGPlugin', () => {
   it('counts represented pinned rows in global indices and tracks item replacements', () => {
@@ -9,8 +10,16 @@ describe('WCAGPlugin', () => {
       rgRow: { store: createStore({ source: [{}, {}, {}], items: [0, 1, 2] }) },
       rowPinEnd: { store: createStore({ source: [{}], items: [0] }) },
     };
-    const plugin = new WCAGPlugin(revogrid, { data: { stores } } as never);
-    expect(revogrid.getAttribute('aria-rowcount')).toBe('6');
+    const columnProvider = new ColumnDataProvider();
+    columnProvider.stores.colPinStart.updateData([{ prop: 'id' }]);
+    const plugin = new WCAGPlugin(revogrid, {
+      data: { stores },
+      column: columnProvider,
+    } as never);
+    expect(plugin.treegridAttributes).toMatchObject({
+      'aria-rowcount': 6,
+      'aria-colcount': 1,
+    });
     const sourceReads = Object.values(stores).map(({ store }) =>
       jest.spyOn(store, 'get'),
     );
@@ -43,18 +52,18 @@ describe('WCAGPlugin', () => {
     for (const sourceRead of sourceReads) {
       expect(sourceRead).not.toHaveBeenCalled();
     }
-    const setAttribute = jest.spyOn(revogrid, 'setAttribute');
     stores.rgRow.store.set('source', [{ edited: true }, {}, {}]);
-    expect(setAttribute).not.toHaveBeenCalled();
+    expect(plugin.treegridAttributes['aria-rowcount']).toBe(6);
 
     stores.rowPinStart.store.set('items', [0]);
-    expect(revogrid.getAttribute('aria-rowcount')).toBe('5');
+    expect(plugin.treegridAttributes['aria-rowcount']).toBe(5);
     expect(
       column.cellProperties({ type: 'rgRow', rowIndex: 0 })['aria-rowindex'],
     ).toBe('2');
     plugin.destroy();
-    stores.rgRow.store.set('items', []);
-    expect(revogrid.getAttribute('aria-rowcount')).toBe('5');
+    const disposedRowCount = plugin.treegridAttributes['aria-rowcount'];
+    stores.rgRow.store.set('items', [0, 1]);
+    expect(plugin.treegridAttributes['aria-rowcount']).toBe(disposedRowCount);
   });
 
   it('uses one-based ARIA indices for headers, rows, and data cells', () => {
@@ -65,7 +74,8 @@ describe('WCAGPlugin', () => {
       get: () => [],
       onChange: () => () => {},
     };
-    new WCAGPlugin(revogrid, {
+    const plugin = new WCAGPlugin(revogrid, {
+      column: new ColumnDataProvider(),
       data: {
         stores: {
           rowPinStart: { store },
@@ -87,6 +97,7 @@ describe('WCAGPlugin', () => {
       }),
     );
 
+    expect(plugin.treegridAttributes['aria-colcount']).toBe(2);
     expect(firstColumn.columnProperties()).toMatchObject({
       'role': 'columnheader',
       'aria-colindex': '1',
