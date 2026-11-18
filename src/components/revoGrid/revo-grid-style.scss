@@ -361,11 +361,10 @@ revo-grid {
         width 0.3s ease-in-out;
     }
 
-    &:hover {
-      .value {
-        width: 63px;
-        opacity: 1;
-      }
+    &:hover .value,
+    .value:focus {
+      width: 63px;
+      opacity: 1;
     }
   }
 

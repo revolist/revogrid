@@ -574,6 +574,11 @@ export namespace Components {
     }
     interface RevogrHeader {
         /**
+          * Enable accessible header semantics.
+          * @default false
+         */
+        "accessible": boolean;
+        /**
           * Extra properties to pass into header renderer, such as vue or react components to handle parent
           * @default {}
          */
@@ -717,6 +722,11 @@ export namespace Components {
      */
     interface RevogrRowHeaders {
         /**
+          * Enable accessible row header semantics.
+          * @default false
+         */
+        "accessible": boolean;
+        /**
           * Additional data to pass to renderer
          */
         "additionalData": any;
@@ -803,6 +813,11 @@ export namespace Components {
      * Viewport scroll component for RevoGrid
      */
     interface RevogrViewportScroll {
+        /**
+          * Enable keyboard access to overflowing vertical viewports.
+          * @default false
+         */
+        "accessible": boolean;
         /**
           * Extra layer for scroll event monitoring, where MouseWheel event is not passing We need to trigger scroll event in case there is no mousewheel event
          */
@@ -2100,6 +2115,11 @@ declare namespace LocalJSX {
     }
     interface RevogrHeader {
         /**
+          * Enable accessible header semantics.
+          * @default false
+         */
+        "accessible"?: boolean;
+        /**
           * Extra properties to pass into header renderer, such as vue or react components to handle parent
           * @default {}
          */
@@ -2404,6 +2424,11 @@ declare namespace LocalJSX {
      */
     interface RevogrRowHeaders {
         /**
+          * Enable accessible row header semantics.
+          * @default false
+         */
+        "accessible"?: boolean;
+        /**
           * Additional data to pass to renderer
          */
         "additionalData"?: any;
@@ -2497,6 +2522,11 @@ declare namespace LocalJSX {
      * Viewport scroll component for RevoGrid
      */
     interface RevogrViewportScroll {
+        /**
+          * Enable keyboard access to overflowing vertical viewports.
+          * @default false
+         */
+        "accessible"?: boolean;
         "colType": DimensionCols | 'rowHeaders';
         /**
           * Height of inner content
@@ -2597,6 +2627,7 @@ declare namespace LocalJSX {
     }
     interface RevogrHeaderAttributes {
         "groupingDepth": number;
+        "accessible": boolean;
         "readonly": boolean;
         "canResize": boolean;
         "columnFilter": boolean;
@@ -2619,6 +2650,7 @@ declare namespace LocalJSX {
         "height": number;
         "rowClass": string;
         "resize": boolean;
+        "accessible": boolean;
         "additionalData": string;
     }
     interface RevogrScrollVirtualAttributes {
@@ -2633,6 +2665,7 @@ declare namespace LocalJSX {
         "contentHeight": number;
         "colType": DimensionCols | 'rowHeaders';
         "noHorizontalScrollTransfer": boolean;
+        "accessible": boolean;
     }
 
     interface IntrinsicElements {

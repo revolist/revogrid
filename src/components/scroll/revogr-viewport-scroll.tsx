@@ -8,6 +8,7 @@ import {
   Prop,
   Host,
   Listen,
+  State,
 } from '@stencil/core';
 
 import GridResizeService from '../revoGrid/viewport.resize.service';
@@ -61,6 +62,11 @@ export class RevogrViewportScroll implements ElementScroll {
   @Prop() colType!: DimensionCols | 'rowHeaders';
 
   @Prop() noHorizontalScrollTransfer = false;
+
+  /** Enable keyboard access to overflowing vertical viewports. */
+  @Prop() accessible = false;
+
+  @State() hasVerticalScroll = false;
 
   /**
    * Before scroll event
@@ -310,6 +316,7 @@ export class RevogrViewportScroll implements ElementScroll {
         break;
       case 'rgRow':
         el = this.verticalScroll;
+        this.hasVerticalScroll = hasScroll;
         break;
     }
     // based on scroll visibility assign or remove class and event
@@ -374,6 +381,7 @@ export class RevogrViewportScroll implements ElementScroll {
       ? Math.max(this.contentHeight, 0)
       : getContentSize(this.contentHeight, clientHeight);
     const physicalContentWidth = getContentSize(this.contentWidth, 0);
+    const keyboardScrollable = this.accessible && this.hasVerticalScroll;
     return (
       <Host
         onWheel={this.horizontalMouseWheel}
@@ -388,6 +396,8 @@ export class RevogrViewportScroll implements ElementScroll {
           </div>
           <div
             class="vertical-inner"
+            role={keyboardScrollable ? 'rowgroup' : undefined}
+            tabIndex={keyboardScrollable ? 0 : undefined}
             ref={el => (this.verticalScroll = el)}
             onWheel={this.verticalMouseWheel}
             onScroll={(e: MouseEvent) => this.applyScroll('rgRow', e)}

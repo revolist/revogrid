@@ -73,6 +73,11 @@ revogr-viewport-scroll {
     outline: none; // avoid accessibility focus issue
     @include noScroll;
 
+    &[tabindex='0']:focus-visible {
+      outline: 2px solid Highlight;
+      outline-offset: -2px;
+    }
+
     revogr-data,
     revogr-overlay-selection {
       height: 100%;

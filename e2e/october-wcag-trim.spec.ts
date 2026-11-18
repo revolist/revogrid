@@ -9,7 +9,7 @@ test('ARIA totals and pinned offsets follow represented rows after trim and untr
     pinnedTopSource: [{ name: 'top' }], pinnedBottomSource: [{ name: 'bottom' }],
     trimmedRows: { 0: true },
   });
-  const grid = page.locator('revo-grid');
+  const grid = page.getByRole('treegrid');
   await expect(grid).toHaveAttribute('aria-rowcount', '4');
   await expect(pinnedTopCell(page, 0, 0)).toHaveAttribute('aria-rowindex', '1');
   await expect(dataCell(page, 0, 0)).toHaveText('visible');

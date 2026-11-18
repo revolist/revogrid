@@ -18,6 +18,7 @@ export type SampleRow = {
 export type GridSetupOptions = {
   columns: ColumnData;
   source: Record<string, unknown>[];
+  accessible?: boolean;
   filter?: boolean | ColumnFilterConfig;
   rowHeaders?: boolean | (Partial<RowHeaders> & { __cellTestIds?: boolean });
   pinnedTopSource?: Record<string, unknown>[];

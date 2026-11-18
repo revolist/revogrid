@@ -436,7 +436,7 @@ test.describe('column groups', () => {
 });
 
 function groupHeaderCells(page: E2EPage, viewport = SELECTORS.mainViewport) {
-  return page.locator(`${viewport} revogr-header .group-rgRow > .rgHeaderCell`);
+  return page.locator(`${viewport} revogr-header .group-rgRow .rgHeaderCell`);
 }
 
 async function getVisibleColumnItemIndexes(page: E2EPage): Promise<number[]> {

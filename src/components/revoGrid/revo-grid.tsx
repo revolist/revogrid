@@ -10,6 +10,7 @@ import {
   EventEmitter,
   Method,
   Host,
+  forceUpdate,
 } from '@stencil/core';
 
 import type {
@@ -1592,6 +1593,14 @@ export class RevoGridComponent {
     this.additionaldatachanged.emit(data);
   }
 
+  @Watch('aria-label')
+  @Watch('aria-labelledby')
+  @Watch('aria-describedby')
+  @Watch('aria-description')
+  gridAccessibleLabelChanged() {
+    forceUpdate(this);
+  }
+
   /**
    * Watch for RTL changes and reapply column ordering
    */
@@ -1706,6 +1715,7 @@ export class RevoGridComponent {
   connectedCallback() {
     if (this.isInited) {
       this.setPlugins();
+      forceUpdate(this);
     }
     this.created.emit();
   }
@@ -1800,6 +1810,8 @@ export class RevoGridComponent {
     }
     const contentHeight =
       this.dimensionProvider.stores['rgRow'].store.get('realSize');
+    const wcag = this.pluginService.getByClass(WCAGPlugin);
+    const accessible = !!wcag;
 
     // init viewport service helpers
     this.viewport = new ViewportService(
@@ -1835,6 +1847,7 @@ export class RevoGridComponent {
       const anyView = this.viewport.columns[0];
       viewportSections.push(
         <revogr-row-headers
+          accessible={accessible}
           additionalData={this.additionalData}
           height={contentHeight}
           rowClass={this.rowClass}
@@ -1863,6 +1876,7 @@ export class RevoGridComponent {
     for (let view of this.viewport.columns) {
       const headerProperties: HeaderProperties = {
         ...view.headerProp,
+        accessible,
         type: view.type,
         additionalData: this.additionalData,
         viewportCol: view.viewportCol,
@@ -1944,6 +1958,7 @@ export class RevoGridComponent {
       viewPortHtml.push(
         <revogr-viewport-scroll
           {...view.prop}
+          accessible={accessible}
           ref={el =>
             this.scrollingService.registerElement(el, `${view.prop.key}`)
           }
@@ -2011,6 +2026,7 @@ export class RevoGridComponent {
         <slot name="header" />
         <div
           class="main-viewport"
+          {...wcag?.treegridAttributes}
           onClick={(e: MouseEvent) => {
             if (e.currentTarget === e.target) {
               this.viewport?.clearEdit();

@@ -18,6 +18,7 @@ import { RowHeaderRender } from './row-header-render';
 import { calculateRowHeaderSize } from '../../utils/row-header-utils';
 import { HEADER_SLOT } from '../revoGrid/viewport.helpers';
 import { type JSX } from '../../components';
+import { withRowHeaderRole } from '../../plugins/wcag/row-header-properties';
 
 /**
  * Row headers component
@@ -54,6 +55,8 @@ export class RevogrRowHeaders {
    * Row header column
    */
   @Prop() rowHeaderColumn: RowHeaders;
+  /** Enable accessible row header semantics. */
+  @Prop() accessible = false;
   /**
    * Additional data to pass to renderer
    */
@@ -80,6 +83,10 @@ export class RevogrRowHeaders {
   render() {
     const dataViews: HTMLElement[] = [];
     const viewport = new ViewportStore('colPinStart');
+    const customCellProperties = this.rowHeaderColumn?.cellProperties;
+    const cellProperties = this.accessible
+      ? withRowHeaderRole(customCellProperties)
+      : customCellProperties;
 
     /** render viewports rows */
     let totalLength = 1;
@@ -99,6 +106,7 @@ export class RevogrRowHeaders {
       const column: ColumnRegular = {
         cellTemplate: RowHeaderRender(totalLength),
         ...this.rowHeaderColumn,
+        cellProperties,
       };
       colData.updateData([column]);
       dataViews.push(
@@ -135,6 +143,7 @@ export class RevogrRowHeaders {
       JSXBase.HTMLAttributes<HTMLRevogrViewportScrollElement> = {
       contentHeight: this.height,
       contentWidth: 0,
+      accessible: this.accessible,
       style: { minWidth: `${colSize}px` },
       colType: 'rowHeaders',
       ref: (el) => this.elementToScroll.emit(el),
