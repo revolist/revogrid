@@ -11,7 +11,7 @@ import {
 } from '@stencil/core';
 
 import GridResizeService from '../revoGrid/viewport.resize.service';
-import LocalScrollService, { getContentSize } from '../../services/local.scroll.service';
+import LocalScrollService, { applyScrollCoordinate, getContentSize } from '../../services/local.scroll.service';
 import { LocalScrollTimer } from '../../services/local.scroll.timer';
 import {
   CONTENT_SLOT,
@@ -198,15 +198,11 @@ export class RevogrViewportScroll implements ElementScroll {
         let coordinate = e.coordinate;
         switch (e.dimension) {
           case 'rgCol':
-            // this will trigger on scroll event
-            this.horizontalScroll.scrollLeft = e.coordinate;
-            coordinate = this.horizontalScroll.scrollLeft;
+            coordinate = applyScrollCoordinate(this.horizontalScroll, 'scrollLeft', e.coordinate);
             break;
           case 'rgRow':
             if (this.verticalScroll) {
-              // this will trigger on scroll event
-              this.verticalScroll.scrollTop = e.coordinate;
-              coordinate = this.verticalScroll.scrollTop;
+              coordinate = applyScrollCoordinate(this.verticalScroll, 'scrollTop', e.coordinate);
               // for mobile devices to skip negative scroll loop. only on vertical scroll
               if (this.verticalScroll.style.transform) {
                 this.verticalScroll.style.transform = '';

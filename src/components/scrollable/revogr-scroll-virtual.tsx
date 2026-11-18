@@ -10,6 +10,7 @@ import {
   Prop,
 } from '@stencil/core';
 import LocalScrollService, {
+  applyScrollCoordinate,
   getContentSize,
 } from '../../services/local.scroll.service';
 import type {
@@ -119,9 +120,7 @@ export class RevogrScrollVirtual {
       runScroll: e => this.scrollVirtual.emit(e),
       applyScroll: e => {
         const type = e.dimension === 'rgRow' ? 'scrollTop' : 'scrollLeft';
-        // this will trigger on scroll event
-        this.element[type] = e.coordinate;
-        const coordinate = this.element[type];
+        const coordinate = applyScrollCoordinate(this.element, type, e.coordinate);
         this.localScrollTimer.setCoordinate({ ...e, coordinate });
         return coordinate;
       },
@@ -217,11 +216,7 @@ export class RevogrScrollVirtual {
     const content = this.element.firstElementChild as HTMLElement | null;
     if (content) {
       const property = vertical ? 'height' : 'width';
-      content.style[property] = `${getContentSize(
-        this.contentSize,
-        this.element[clientSize],
-        this.getViewportSize(),
-      )}px`;
+      content.style[property] = this.getSpacerSize();
     }
     const hasScroll = this.element[scrollExtent] > this.element[clientSize];
     const scrollSize = hasScroll ? this.scrollSize : 0;
@@ -235,6 +230,18 @@ export class RevogrScrollVirtual {
       },
       this.dimension,
     );
+  }
+
+  private getSpacerSize() {
+    const clientSize = this.dimension === 'rgRow'
+      ? this.element.clientHeight
+      : this.element.clientWidth;
+    const viewportSize = this.getViewportSize();
+    // clientWidth/clientHeight round fractional boxes up. A pixel spacer can
+    // therefore overflow even when content fits; percentages retain the exact
+    // available space without changing the mapping for real scroll ranges.
+    if (this.contentSize <= (viewportSize || clientSize)) return '100%';
+    return `${getContentSize(this.contentSize, clientSize, viewportSize)}px`;
   }
 
   private startOverlayDrag(event: PointerEvent) {
@@ -299,11 +306,7 @@ export class RevogrScrollVirtual {
   }
 
   render() {
-    const size = getContentSize(
-      this.contentSize,
-      this.dimension === 'rgRow' ?  this.element.clientHeight : this.element.clientWidth,
-      this.getViewportSize(), // measure with the same layout as the scrollbar
-    );
+    const size = this.getSpacerSize();
     return (
       <Host
         onScroll={(e: MouseEvent) => this.onScroll(e)}
@@ -315,7 +318,7 @@ export class RevogrScrollVirtual {
       >
         <div
           style={{
-            [this.dimension === 'rgRow' ? 'height' : 'width']: `${size}px`,
+            [this.dimension === 'rgRow' ? 'height' : 'width']: size,
           }}
         />
       </Host>

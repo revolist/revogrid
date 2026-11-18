@@ -30,6 +30,21 @@ const initialParams: Params = {
 };
 const NO_COORDINATE = -1;
 
+/** Apply a physical coordinate and return the browser's actual position. */
+export function applyScrollCoordinate(
+  element: HTMLElement,
+  property: 'scrollTop' | 'scrollLeft',
+  coordinate: number,
+): number {
+  const current = element[property];
+  // Reach zero exactly so the viewport can release upward wheel events.
+  if (current === coordinate || (coordinate !== 0 && Math.abs(current - coordinate) < 1)) {
+    return current;
+  }
+  element[property] = coordinate;
+  return element[property];
+}
+
 /**
  * Based on content size, client size and virtual size
  * return full size
