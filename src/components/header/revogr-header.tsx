@@ -239,6 +239,7 @@ export class RevogrHeaderComponent {
       h(HeaderRenderer, {
         key: this.getHeaderCellKey(detail.data, this.type, duplicateProps),
         ...detail,
+        accessible: this.accessible && this.type !== 'rowHeaders',
       }),
     );
     return { cells };

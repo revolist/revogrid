@@ -7,20 +7,17 @@ type OwnedHeaders = Record<string, string>;
 type HeaderRoot = Document | DocumentFragment;
 
 let nextHeaderId = 0;
-const generatedIds = new WeakMap<Element, string>();
-
 function getHeaderId(cell: Element, root: HeaderRoot): string {
   let id = cell.id;
-  if (id && generatedIds.get(cell) !== id) {
-    return id;
-  }
-  // Applications can introduce a collision between header renders.
-  if (!id || root.querySelectorAll(`#${id}`).length > 1) {
+  if (
+    !id ||
+    /\s/.test(id) ||
+    root.querySelectorAll(`#${CSS.escape(id)}`).length > 1
+  ) {
     do {
       id = `revo-a11y-header-${++nextHeaderId}`;
     } while (root.getElementById(id));
     cell.id = id;
-    generatedIds.set(cell, id);
   }
   return id;
 }

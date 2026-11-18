@@ -31,7 +31,6 @@ const HeaderGroupRenderer = (
     maxWidth: 0,
 
     active: p.active || ['r'],
-    role: p.accessible ? 'columnheader' : undefined,
     class: {
       [HEADER_CLASS]: true,
     },
@@ -43,6 +42,7 @@ const HeaderGroupRenderer = (
   };
   return (
     <HeaderCellRenderer
+      accessible={p.accessible}
       data={{
         ...p.group,
         prop: '',

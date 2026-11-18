@@ -157,6 +157,8 @@ test.describe('accessibility', () => {
     }, previousId);
     await expect(header).not.toHaveAttribute('id', previousId);
     const updatedId = (await header.getAttribute('id'))!;
+    const owner = page.locator('[role="row"][aria-owns]');
+    await expect(owner).toHaveAttribute('aria-owns', updatedId);
     await page.evaluate(id => {
       const grid = document.querySelector('revo-grid')!;
       const host = document.createElement('div');
@@ -178,7 +180,7 @@ test.describe('accessibility', () => {
       ),
     ).toBe(true);
     await originalHeader.dispose();
-    await expect(page.locator('[role="row"][aria-owns]')).toHaveAttribute(
+    await expect(owner).toHaveAttribute(
       'aria-owns',
       (await header.getAttribute('id'))!,
     );
@@ -237,6 +239,50 @@ test.describe('accessibility', () => {
         ),
       )
       .toBe(true);
+  });
+
+  test('preserves valid custom header IDs and keeps accessible cells addressable', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: [{ prop: 'name', name: 'Name' }],
+      source: [{ name: 'Alice' }],
+    });
+    await page.evaluate(() => {
+      const grid = document.querySelector('revo-grid')!;
+      grid.addEventListener('beforeheaderrender', event => {
+        const { detail } = event as CustomEvent<
+          HTMLRevogrHeaderElementEventMap['beforeheaderrender']
+        >;
+        detail.data.columnProperties = () => ({
+          id: detail.data.prop === 'status' ? '1.status' : 'duplicate-header',
+          role: 'button',
+        });
+      });
+      grid.columns = [
+        { prop: 'status', name: 'Status' },
+        { prop: 'stage', name: 'Stage' },
+        { prop: 'team', name: 'Team' },
+      ];
+    });
+    await expect(
+      page.getByRole('columnheader', { name: 'Status' }),
+    ).toHaveAttribute('id', '1.status');
+    const owner = page.locator('[role="row"][aria-owns]');
+    await expect
+      .poll(() =>
+        owner.evaluate(row => {
+          const ids = row.getAttribute('aria-owns')!.split(' ');
+          return ids.map(id => {
+            const matches = row.ownerDocument.querySelectorAll(
+              `#${CSS.escape(id)}`,
+            );
+            return matches.length === 1 && matches[0].textContent?.trim();
+          });
+        }),
+      )
+      .toEqual(['Status', 'Stage', 'Team']);
+    await expect(page.getByRole('columnheader')).toHaveCount(3);
   });
 
   test('owns group headers supplied by the render hook', async ({ page }) => {
