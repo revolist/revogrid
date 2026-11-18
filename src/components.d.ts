@@ -18,10 +18,12 @@ import { ColumnCollection } from "./utils/column.utils";
 import { DataInput } from "./plugins/export/types";
 import { Observable } from "./utils";
 import { DimensionStore, DSourceState, Groups } from "./store/index";
+import { HeaderRowIndices } from "./plugins/wcag/header-row-indices";
 import { ResizeProps } from "./components/header/resizable.directive";
 import { HeaderRenderProps } from "./components/header/header-renderer";
 import { HeaderGroupRendererProps } from "./components/header/header-group-renderer";
 import { EventData } from "./components/overlay/selection.utils";
+import { TreegridOwnership } from "./plugins/wcag/treegrid-ownership";
 export { AdditionalData, AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, CellTemplateProp, ChangedRange, ClipboardConfig, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, ExtraNodeFuncConfig, FocusAfterRenderEvent, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, Nullable, PluginBaseComponent, PluginProviders, PositionItem, ProvidersColumns, RangeArea, RangeClipboardCopyEventProps, RangeClipboardPasteEvent, RowDefinition, RowDragStartDetails, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, ThemeDefinition, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
 export { RowResizeConfig } from "./plugins/row-resize";
 export { GridPlugin } from "./plugins/base.plugin";
@@ -35,10 +37,12 @@ export { ColumnCollection } from "./utils/column.utils";
 export { DataInput } from "./plugins/export/types";
 export { Observable } from "./utils";
 export { DimensionStore, DSourceState, Groups } from "./store/index";
+export { HeaderRowIndices } from "./plugins/wcag/header-row-indices";
 export { ResizeProps } from "./components/header/resizable.directive";
 export { HeaderRenderProps } from "./components/header/header-renderer";
 export { HeaderGroupRendererProps } from "./components/header/header-group-renderer";
 export { EventData } from "./components/overlay/selection.utils";
+export { TreegridOwnership } from "./plugins/wcag/treegrid-ownership";
 export namespace Components {
     /**
      * Revogrid - High-performance, customizable grid library for managing large datasets.
@@ -609,6 +613,10 @@ export namespace Components {
          */
         "groups": Groups;
         /**
+          * Logical ARIA row indices shared by the column panes.
+         */
+        "headerRowIndices"?: HeaderRowIndices;
+        /**
           * Readonly mode
          */
         "readonly": boolean;
@@ -759,6 +767,10 @@ export namespace Components {
           * Row header column
          */
         "rowHeaderColumn": RowHeaders;
+        /**
+          * Accessibility ownership of the row-header data panes.
+         */
+        "treegridOwnership"?: TreegridOwnership;
     }
     /**
      * Virtual scroll component
@@ -2150,6 +2162,10 @@ declare namespace LocalJSX {
          */
         "groups"?: Groups;
         /**
+          * Logical ARIA row indices shared by the column panes.
+         */
+        "headerRowIndices"?: HeaderRowIndices;
+        /**
           * After all header cells rendered. Finalizes cell rendering.
          */
         "onAfterheaderrender"?: (event: RevogrHeaderCustomEvent<ProvidersColumns>) => void;
@@ -2469,6 +2485,10 @@ declare namespace LocalJSX {
           * Row header column
          */
         "rowHeaderColumn"?: RowHeaders;
+        /**
+          * Accessibility ownership of the row-header data panes.
+         */
+        "treegridOwnership"?: TreegridOwnership;
     }
     /**
      * Virtual scroll component

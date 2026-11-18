@@ -17,7 +17,7 @@ describe('WCAGPlugin', () => {
       column: columnProvider,
     } as never);
     expect(plugin.treegridAttributes).toMatchObject({
-      'aria-rowcount': 6,
+      'aria-rowcount': 7,
       'aria-colcount': 1,
     });
     const sourceReads = Object.values(stores).map(({ store }) =>
@@ -33,9 +33,9 @@ describe('WCAGPlugin', () => {
       }),
     );
     for (const [type, index] of [
-      ['rowPinStart', '1'],
-      ['rgRow', '3'],
-      ['rowPinEnd', '6'],
+      ['rowPinStart', '2'],
+      ['rgRow', '4'],
+      ['rowPinEnd', '7'],
     ]) {
       expect(
         column.cellProperties({ type, rowIndex: 0 })['aria-rowindex'],
@@ -52,14 +52,14 @@ describe('WCAGPlugin', () => {
     for (const sourceRead of sourceReads) {
       expect(sourceRead).not.toHaveBeenCalled();
     }
-    stores.rgRow.store.set('source', [{ edited: true }, {}, {}]);
-    expect(plugin.treegridAttributes['aria-rowcount']).toBe(6);
+    stores.rgRow.store.set('source', [{ edited: true }, {}, {}, {}]);
+    expect(plugin.treegridAttributes['aria-rowcount']).toBe(7);
 
     stores.rowPinStart.store.set('items', [0]);
-    expect(plugin.treegridAttributes['aria-rowcount']).toBe(5);
+    expect(plugin.treegridAttributes['aria-rowcount']).toBe(6);
     expect(
       column.cellProperties({ type: 'rgRow', rowIndex: 0 })['aria-rowindex'],
-    ).toBe('2');
+    ).toBe('3');
     plugin.destroy();
     const disposedRowCount = plugin.treegridAttributes['aria-rowcount'];
     stores.rgRow.store.set('items', [0, 1]);

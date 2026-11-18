@@ -9,11 +9,14 @@ import { ColumnTemplateProp } from '@type';
 
 export const ON_COLUMN_CLICK = 'columnclick';
 
+const cellRole = /^\s*(columnheader|rowheader|gridcell|cell)(?:\s|$)/;
+
 export const HeaderCellRenderer: FunctionalComponent<{
   props: ResizableElementHTMLAttributes;
   additionalData: any;
   data?: ColumnTemplateProp;
-}> = ({ data, props, additionalData }, children) => {
+  accessible?: boolean;
+}> = ({ data, props, additionalData, accessible }, children) => {
   let colTemplate: ReturnType<typeof h> = data?.name || '';
   let cellProps = props;
   if (data?.columnTemplate) {
@@ -27,6 +30,12 @@ export const HeaderCellRenderer: FunctionalComponent<{
   }
   const resizeProps = {
     ...cellProps,
+    ...(accessible && {
+      'data-rg-header-cell': '',
+      'role': cellRole.test(cellProps.role ?? '')
+        ? cellProps.role
+        : 'columnheader',
+    }),
     onMouseDown(e: MouseEvent) {
       dispatch(e.currentTarget, ON_COLUMN_CLICK, {
         data,

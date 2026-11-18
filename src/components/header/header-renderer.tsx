@@ -36,7 +36,9 @@ type KeyedResizableElementHTMLAttributes = ResizableElementHTMLAttributes & {
   key: string;
 };
 
-const HeaderRenderer = (p: HeaderRenderProps): ReturnType<typeof h> => {
+const HeaderRenderer = (
+  p: HeaderRenderProps & { accessible?: boolean },
+): ReturnType<typeof h> => {
   const hasSortingSign = !!(
     p.data?.sortable ||
     p.data?.order ||
@@ -92,6 +94,7 @@ const HeaderRenderer = (p: HeaderRenderProps): ReturnType<typeof h> => {
   }
   return (
     <HeaderCellRenderer
+      accessible={p.accessible}
       data={p.data}
       props={dataProps}
       additionalData={p.additionalData}

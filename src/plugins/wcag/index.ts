@@ -2,6 +2,12 @@ import type { CellProps, DimensionRows, PluginProviders } from '@type';
 import { BasePlugin } from '../base.plugin';
 import { ColumnCollection } from 'src/utils';
 import { createStore } from '@stencil/store';
+import { columnTypes } from '@store';
+import {
+  getHeaderRowIndices,
+  type HeaderRowIndices,
+} from './header-row-indices';
+import { TreegridOwnership } from './treegrid-ownership';
 
 const toAriaIndex = (index: number) => `${index + 1}`;
 
@@ -27,13 +33,23 @@ const toAriaIndex = (index: number) => `${index + 1}`;
  * default behavior and may conflict with other plugins if added earlier.
  */
 export class WCAGPlugin extends BasePlugin {
-  private readonly unsubscribeRowSources: Array<() => void> = [];
+  private static readonly active = new WeakMap<
+    HTMLRevoGridElement,
+    WCAGPlugin
+  >();
+  readonly ownership = new TreegridOwnership();
+  private readonly unsubscribe: Array<() => void> = [];
   private readonly counts = createStore({
     rowPinStart: 0,
     rgRow: 0,
     rowPinEnd: 0,
     columns: 0,
+    headers: { groups: {}, leaf: 0 } as HeaderRowIndices,
   });
+
+  get headerRowIndices() {
+    return this.counts.state.headers;
+  }
 
   get treegridAttributes() {
     const { rowPinStart, rgRow, rowPinEnd, columns } = this.counts.state;
@@ -48,14 +64,17 @@ export class WCAGPlugin extends BasePlugin {
         this.revogrid.getAttribute('aria-description') ?? undefined,
       'aria-keyshortcuts': 'Enter',
       'aria-multiselectable': 'true',
-      'aria-rowcount': rowPinStart + rgRow + rowPinEnd,
+      'aria-rowcount':
+        this.headerRowIndices.leaf + rowPinStart + rgRow + rowPinEnd,
       'aria-colcount': columns,
+      'aria-owns': this.ownership.rowGroupIds,
       'tabIndex': 0,
     } as const;
   }
 
   constructor(revogrid: HTMLRevoGridElement, providers: PluginProviders) {
     super(revogrid, providers);
+    WCAGPlugin.active.set(revogrid, this);
 
     const columnStores = providers.column.stores;
     this.counts.state.columns =
@@ -63,10 +82,25 @@ export class WCAGPlugin extends BasePlugin {
       columnStores.rgCol.store.get('source').length +
       columnStores.colPinEnd.store.get('source').length;
 
+    const updateHeaderIndices = () => {
+      this.counts.state.headers = getHeaderRowIndices(columnStores);
+    };
+    updateHeaderIndices();
+    this.addEventListener('aftercolumnsset', event => {
+      if (this.isOwnEvent(event)) {
+        updateHeaderIndices();
+      }
+    });
+    for (const type of columnTypes) {
+      this.unsubscribe.push(
+        columnStores[type].store.onChange('items', updateHeaderIndices),
+      );
+    }
+
     for (const type of ['rowPinStart', 'rgRow', 'rowPinEnd'] as const) {
       this.counts.state[type] =
         providers.data.stores[type].store.get('items').length;
-      this.unsubscribeRowSources.push(
+      this.unsubscribe.push(
         providers.data.stores[type].store.onChange('items', items => {
           this.counts.state[type] = items.length;
         }),
@@ -78,7 +112,11 @@ export class WCAGPlugin extends BasePlugin {
      */
     this.addEventListener(
       'beforecolumnsset',
-      ({ detail }: CustomEvent<ColumnCollection>) => {
+      (event: CustomEvent<ColumnCollection>) => {
+        if (!this.isOwnEvent(event)) {
+          return;
+        }
+        const { detail } = event;
         const columns = [
           ...detail.columns.colPinStart,
           ...detail.columns.rgCol,
@@ -103,10 +141,9 @@ export class WCAGPlugin extends BasePlugin {
             const wcagProps: CellProps = {
               ['role']: 'gridcell',
               ['aria-colindex']: toAriaIndex(index),
-              ['aria-rowindex']: this.getRowAriaIndex(
-                args[0].type,
-                args[0].rowIndex,
-              ),
+              ['aria-rowindex']: WCAGPlugin.active
+                .get(revogrid)
+                ?.getRowAriaIndex(args[0].type, args[0].rowIndex),
               ['tabindex']: -1,
             };
             const columnProps: CellProps = cellProperties?.(...args) || {};
@@ -125,9 +162,13 @@ export class WCAGPlugin extends BasePlugin {
      */
     this.addEventListener(
       'beforerowrender',
-      ({
-        detail,
-      }: CustomEvent<HTMLRevogrDataElementEventMap['beforerowrender']>) => {
+      (
+        event: CustomEvent<HTMLRevogrDataElementEventMap['beforerowrender']>,
+      ) => {
+        if (!this.isOwnEvent(event)) {
+          return;
+        }
+        const { detail } = event;
         detail.node.$attrs$ = {
           ...detail.node.$attrs$,
           role: 'row',
@@ -143,7 +184,7 @@ export class WCAGPlugin extends BasePlugin {
     this.addEventListener(
       'afterfocus',
       async (e: CustomEvent<HTMLRevogrFocusElementEventMap['afterfocus']>) => {
-        if (e.defaultPrevented) {
+        if (e.defaultPrevented || !this.isOwnEvent(e)) {
           return;
         }
         const el = this.revogrid.querySelector(
@@ -156,21 +197,35 @@ export class WCAGPlugin extends BasePlugin {
     );
   }
 
+  private isOwnEvent(event: Event): boolean {
+    const origin = event
+      .composedPath()
+      .find(
+        target =>
+          target === this.revogrid ||
+          (target instanceof Element && target.localName === 'revo-grid'),
+      );
+    return origin === this.revogrid;
+  }
+
   private getRowAriaIndex(type: DimensionRows, index: number): string {
+    const rowIndex = this.headerRowIndices.leaf + index;
     if (type === 'rowPinStart') {
-      return toAriaIndex(index);
+      return toAriaIndex(rowIndex);
     }
     const pinnedTopCount = this.counts.state.rowPinStart;
     if (type === 'rowPinEnd') {
       const mainCount = this.counts.state.rgRow;
-      return toAriaIndex(pinnedTopCount + mainCount + index);
+      return toAriaIndex(pinnedTopCount + mainCount + rowIndex);
     }
-    return toAriaIndex(pinnedTopCount + index);
+    return toAriaIndex(pinnedTopCount + rowIndex);
   }
 
   destroy() {
-    this.unsubscribeRowSources.forEach(unsubscribe => unsubscribe());
-    this.unsubscribeRowSources.length = 0;
+    WCAGPlugin.active.delete(this.revogrid);
+    this.ownership.destroy();
+    this.unsubscribe.forEach(unsubscribe => unsubscribe());
+    this.unsubscribe.length = 0;
     this.counts.dispose();
     super.destroy();
   }

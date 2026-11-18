@@ -19,6 +19,7 @@ import { calculateRowHeaderSize } from '../../utils/row-header-utils';
 import { HEADER_SLOT } from '../revoGrid/viewport.helpers';
 import { type JSX } from '../../components';
 import { withRowHeaderRole } from '../../plugins/wcag/row-header-properties';
+import type { TreegridOwnership } from '../../plugins/wcag/treegrid-ownership';
 
 /**
  * Row headers component
@@ -57,6 +58,8 @@ export class RevogrRowHeaders {
   @Prop() rowHeaderColumn: RowHeaders;
   /** Enable accessible row header semantics. */
   @Prop() accessible = false;
+  /** Accessibility ownership of the row-header data panes. */
+  @Prop() treegridOwnership?: TreegridOwnership;
   /**
    * Additional data to pass to renderer
    */
@@ -112,6 +115,12 @@ export class RevogrRowHeaders {
       dataViews.push(
         <revogr-data
           {...data}
+          {...this.treegridOwnership?.rowGroupProps(
+            'rowHeaders',
+            data.type,
+            itemCount > 0,
+          )}
+          key={data.type}
           colType="rowHeaders"
           jobsBeforeRender={this.jobsBeforeRender}
           rowClass={this.rowClass}
