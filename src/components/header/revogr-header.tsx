@@ -194,11 +194,10 @@ export class RevogrHeaderComponent {
       <div key="groups" class="group-rgRow">
         {groupRow}
       </div>,
-      <div /* NOSONAR: The virtualized grid uses positioned divs for header rows. */
+      <div
         key="columns"
         class={`${HEADER_ROW_CLASS} ${HEADER_ACTUAL_ROW_CLASS}`}
-        role={exposeRow ? 'row' : undefined}
-        aria-rowindex={exposeRow ? this.headerRowIndices?.leaf : undefined}
+        data-rg-header-row={exposeRow ? this.headerRowIndices?.leaf : undefined}
       >
         {cells}
       </div>,
@@ -262,11 +261,10 @@ export class RevogrHeaderComponent {
     const exposeRow = this.accessible && groupCells.length > 0;
 
     return (
-      <div /* NOSONAR: Group headers share the virtualized div layout of column headers. */
+      <div
         key={`group-row-${level}`}
         class={`${HEADER_ROW_CLASS} group`}
-        role={exposeRow ? 'row' : undefined}
-        aria-rowindex={exposeRow ? this.headerRowIndices?.groups[level] : undefined}
+        data-rg-header-row={exposeRow ? this.headerRowIndices?.groups[level] : undefined}
       >
         {groupCells}
       </div>

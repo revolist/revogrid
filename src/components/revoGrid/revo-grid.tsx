@@ -1888,7 +1888,21 @@ export class RevoGridComponent {
       };
       // Column headers
       const dataViews: VNode[] = [
-        <revogr-header {...headerProperties} slot={HEADER_SLOT} />,
+        <revogr-header
+          {...headerProperties}
+          slot={HEADER_SLOT}
+          onAfterheaderrender={event => {
+            const header = event.currentTarget;
+            if (header instanceof HTMLElement && event.target === header) {
+              wcag?.headerOwnership.update(view.type, header);
+            }
+          }}
+          ref={el => {
+            if (!el) {
+              wcag?.headerOwnership.clear(view.type);
+            }
+          }}
+        />,
       ];
 
       // Render viewport data (vertical sections)
@@ -2035,6 +2049,7 @@ export class RevoGridComponent {
           }}
         >
           <div class="viewports">
+            {wcag && <revogr-extra class="rg-accessible-header-rows" nodes={wcag.headerNodes} />}
             <slot name="viewport" />
             {viewportSections}
             {verticalScroll}

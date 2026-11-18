@@ -21,9 +21,8 @@ export function getHeaderRowIndices(
     hasColumns = true;
     const groupsByLevel: Groups = store.get('groups');
     for (const [level, groups] of Object.entries(groupsByLevel)) {
-      if (
-        groups.some(group => (group.indexes[0] ?? columnCount) < columnCount)
-      ) {
+      // A render hook can replace a group's range, including an empty range.
+      if (groups.length) {
         levels.add(Number(level));
       }
     }

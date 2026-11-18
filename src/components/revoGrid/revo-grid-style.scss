@@ -419,6 +419,10 @@ revo-grid {
     flex-direction: row;
   }
 
+  .rg-accessible-header-rows {
+    position: absolute;
+  }
+
   .draggable {
     $s: 30px;
     position: fixed;

@@ -31,40 +31,151 @@ test.describe('accessibility', () => {
       rowHeaders: true,
     });
 
-    const header = page
-      .locator(SELECTORS.mainViewport)
-      .locator('revogr-header');
-    const rows = header.getByRole('row');
-    await expect(rows).toHaveCount(3);
-    for (const pane of [
-      SELECTORS.mainViewport,
-      SELECTORS.pinnedStartViewport,
-    ]) {
-      const headers = page
-        .locator(pane)
-        .locator('revogr-header')
-        .getByRole('row');
-      for (const index of [1, 2, 3]) {
-        await expect(headers.nth(index - 1)).toHaveAttribute(
-          'aria-rowindex',
-          String(index),
-        );
-      }
+    const headerRows = page.locator('[role="row"][aria-owns]');
+    await expect(headerRows).toHaveCount(3);
+    for (const [index, names] of [
+      ['1', ['People', 'People']],
+      ['2', ['Identity', 'Identity']],
+      ['3', ['ID', 'Name']],
+    ] as const) {
+      const owner = headerRows.and(page.locator(`[aria-rowindex="${index}"]`));
+      await expect
+        .poll(() =>
+          owner.evaluate(row =>
+            row
+              .getAttribute('aria-owns')!
+              .split(' ')
+              .map(id =>
+                row.ownerDocument.getElementById(id)?.textContent?.trim(),
+              ),
+          ),
+        )
+        .toEqual(names);
     }
+    await expect(page.locator('revogr-header [role="row"]')).toHaveCount(0);
     await expect(page.getByRole('treegrid')).toHaveAttribute(
       'aria-rowcount',
       '4',
     );
     await expect(dataCell(page, 0, 0)).toHaveAttribute('aria-rowindex', '4');
+
+    const session = await page.context().newCDPSession(page);
+    const { nodes } = await session.send('Accessibility.getFullAXTree');
+    await session.detach();
+    const byId = new Map(nodes.map(node => [node.nodeId, node]));
+    const ownedHeaderRows = nodes
+      .filter(node => !node.ignored && node.role?.value === 'row')
+      .map(row => (row.childIds ?? []).map(id => byId.get(id)))
+      .filter(children =>
+        children.some(child => child?.role?.value === 'columnheader'),
+      );
+    expect(
+      ownedHeaderRows.map(children =>
+        children.map(child => String(child?.name?.value).toLowerCase()),
+      ),
+    ).toEqual([
+      ['people', 'people'],
+      ['identity', 'identity'],
+      ['id', 'name'],
+    ]);
+
+    await page.evaluate(() => {
+      document.querySelector('revo-grid')!.columns = [
+        { prop: 'name', name: 'Name' },
+      ];
+    });
+    await expect(headerRows).toHaveCount(1);
+    await expect
+      .poll(
+        async () =>
+          (await headerRows.getAttribute('aria-owns'))?.split(' ').length,
+      )
+      .toBe(1);
+  });
+
+  test('uses current row indices after the grid reconnects', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: [{ prop: 'name', name: 'Name' }],
+      source: [{ name: 'Alice' }],
+    });
+    const cell = dataCell(page, 0, 0);
+    await expect(cell).toHaveAttribute('aria-rowindex', '2');
+
+    await page.evaluate(() => {
+      const grid = document.querySelector('revo-grid')!;
+      grid.remove();
+      document.body.firstElementChild!.append(grid);
+    });
+    await expect(page.locator('revogr-data .rgRow').first()).toHaveAttribute(
+      'aria-rowindex',
+      '2',
+    );
+    await expect(cell).toHaveAttribute('aria-rowindex', '2');
+    await expect(page.locator('[role="row"][aria-owns]')).toHaveCount(1);
+  });
+
+  test('owns group headers supplied by the render hook', async ({ page }) => {
+    await mountGrid(page, {
+      columns: [{ prop: 'name', name: 'Name' }],
+      source: [{ name: 'Alice' }],
+    });
+    await page.evaluate(() => {
+      const grid = document.querySelector('revo-grid')!;
+      grid.addEventListener('beforecolumnapplied', ({ detail }) => {
+        for (const group of detail.columnGrouping.rgCol) {
+          group.indexes = [];
+        }
+      });
+      grid.addEventListener('beforegroupheaderrender', event => {
+        const { detail } = event as CustomEvent<
+          HTMLRevogrHeaderElementEventMap['beforegroupheaderrender']
+        >;
+        detail.group = { ...detail.group, indexes: [0] };
+      });
+      grid.columns = [
+        { name: 'People', children: [{ prop: 'name', name: 'Name' }] },
+      ];
+    });
+    const treegrid = page.getByRole('treegrid');
+    await expect(treegrid).toHaveAttribute('aria-rowcount', '3');
+    const group = page.getByRole('columnheader', { name: 'People' });
+    await expect(group).toBeVisible();
+    await expect
+      .poll(() => group.getAttribute('id'))
+      .toMatch(/^revo-a11y-header-/);
     await expect(
-      rows.nth(0).getByRole('columnheader', { name: 'People' }),
-    ).toBeVisible();
-    await expect(
-      rows.nth(1).getByRole('columnheader', { name: 'Identity' }),
-    ).toBeVisible();
-    await expect(
-      rows.nth(2).getByRole('columnheader', { name: 'Name' }),
-    ).toBeVisible();
+      treegrid.locator('[role="row"][aria-rowindex="1"]'),
+    ).toHaveAttribute('aria-owns', (await group.getAttribute('id'))!);
+  });
+
+  test('leaves nested grids in charge of their own row indices', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: [{ name: 'People', children: [{ prop: 'name', name: 'Name' }] }],
+      source: [{ name: 'Alice' }],
+    });
+    await page.evaluate(() => {
+      const nested = document.createElement('revo-grid');
+      nested.slot = 'footer';
+      nested.style.height = '300px';
+      nested.columns = [{ prop: 'name', name: 'Name' }];
+      nested.source = [{ name: 'Ben' }];
+      document.querySelector('revo-grid')!.append(nested);
+    });
+    const nested = page.locator('revo-grid revo-grid');
+    await expect(nested.getByRole('treegrid')).toHaveAttribute(
+      'aria-rowcount',
+      '2',
+    );
+    const nestedCell = nested.getByRole('gridcell', { name: 'Ben' });
+    await expect(nestedCell).toHaveAttribute('aria-rowindex', '2');
+    await expect(nested.locator('revogr-data [role="row"]')).toHaveAttribute(
+      'aria-rowindex',
+      '2',
+    );
   });
 
   test('exposes row-number cells as row headers and preserves custom properties', async ({
