@@ -80,15 +80,34 @@ test.describe('accessibility', () => {
     ]);
 
     await page.evaluate(() => {
+      const ids = Array.from(
+        document.querySelectorAll('[id^="revo-a11y-header-"]'),
+        header => Number(header.id.split('-').at(-1)),
+      );
+      const collision = document.createElement('div');
+      collision.id = `revo-a11y-header-${Math.max(...ids) + 1}`;
+      document.body.append(collision);
       document.querySelector('revo-grid')!.columns = [
-        { prop: 'name', name: 'Name' },
+        { prop: 'replacement', name: 'Name' },
       ];
     });
     await expect(headerRows).toHaveCount(1);
+    await expect(headerRows).toHaveAttribute('aria-rowindex', '1');
+    const name = page.getByRole('columnheader', { name: 'Name' });
     await expect
-      .poll(
-        async () =>
-          (await headerRows.getAttribute('aria-owns'))?.split(' ').length,
+      .poll(() => name.getAttribute('id'))
+      .toMatch(/^revo-a11y-header-/);
+    await expect(headerRows).toHaveAttribute(
+      'aria-owns',
+      (await name.getAttribute('id'))!,
+    );
+    await expect
+      .poll(() =>
+        name.evaluate(
+          header =>
+            header.ownerDocument.querySelectorAll(`#${CSS.escape(header.id)}`)
+              .length,
+        ),
       )
       .toBe(1);
   });

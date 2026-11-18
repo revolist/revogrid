@@ -33,6 +33,9 @@ export class HeaderRowOwnership {
 
   private update(type: DimensionCols, header: HTMLElement) {
     const rows: OwnedHeaders = {};
+    const root = header.getRootNode();
+    const idRoot =
+      root instanceof DocumentFragment ? root : header.ownerDocument;
     const fragments = header.querySelectorAll<HTMLElement>(
       ':scope > [data-rg-header-row], :scope > .group-rgRow > [data-rg-header-row]',
     );
@@ -41,7 +44,13 @@ export class HeaderRowOwnership {
       fragment
         .querySelectorAll(':scope > [role="columnheader"]')
         .forEach(cell => {
-          cell.id ||= `revo-a11y-header-${++nextHeaderId}`;
+          if (!cell.id) {
+            let id: string;
+            do {
+              id = `revo-a11y-header-${++nextHeaderId}`;
+            } while (idRoot.getElementById(id));
+            cell.id = id;
+          }
           ids.push(cell.id);
         });
       const index = fragment.dataset.rgHeaderRow;
