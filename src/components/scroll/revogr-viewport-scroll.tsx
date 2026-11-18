@@ -396,7 +396,7 @@ export class RevogrViewportScroll implements ElementScroll {
           </div>
           <div
             class="vertical-inner"
-            tabIndex={keyboardScrollable ? 0 : undefined}
+            tabIndex={keyboardScrollable ? 0 : undefined} /* NOSONAR: Overflowing panes need focus for native keyboard scrolling. */
             ref={el => (this.verticalScroll = el)}
             onWheel={this.verticalMouseWheel}
             onScroll={(e: MouseEvent) => this.applyScroll('rgRow', e)}
