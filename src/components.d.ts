@@ -18,6 +18,7 @@ import { ColumnCollection } from "./utils/column.utils";
 import { DataInput } from "./plugins/export/types";
 import { Observable } from "./utils";
 import { DimensionStore, DSourceState, Groups } from "./store/index";
+import { HeaderRowIndices } from "./plugins/wcag/header-row-indices";
 import { ResizeProps } from "./components/header/resizable.directive";
 import { HeaderRenderProps } from "./components/header/header-renderer";
 import { HeaderGroupRendererProps } from "./components/header/header-group-renderer";
@@ -35,6 +36,7 @@ export { ColumnCollection } from "./utils/column.utils";
 export { DataInput } from "./plugins/export/types";
 export { Observable } from "./utils";
 export { DimensionStore, DSourceState, Groups } from "./store/index";
+export { HeaderRowIndices } from "./plugins/wcag/header-row-indices";
 export { ResizeProps } from "./components/header/resizable.directive";
 export { HeaderRenderProps } from "./components/header/header-renderer";
 export { HeaderGroupRendererProps } from "./components/header/header-group-renderer";
@@ -608,6 +610,10 @@ export namespace Components {
           * Column groups
          */
         "groups": Groups;
+        /**
+          * Logical ARIA row indices shared by the column panes.
+         */
+        "headerRowIndices"?: HeaderRowIndices;
         /**
           * Readonly mode
          */
@@ -2149,6 +2155,10 @@ declare namespace LocalJSX {
           * Column groups
          */
         "groups"?: Groups;
+        /**
+          * Logical ARIA row indices shared by the column panes.
+         */
+        "headerRowIndices"?: HeaderRowIndices;
         /**
           * After all header cells rendered. Finalizes cell rendering.
          */

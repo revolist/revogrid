@@ -2,6 +2,11 @@ import type { CellProps, DimensionRows, PluginProviders } from '@type';
 import { BasePlugin } from '../base.plugin';
 import { ColumnCollection } from 'src/utils';
 import { createStore } from '@stencil/store';
+import { columnTypes } from '@store';
+import {
+  getHeaderRowIndices,
+  type HeaderRowIndices,
+} from './header-row-indices';
 
 const toAriaIndex = (index: number) => `${index + 1}`;
 
@@ -27,13 +32,18 @@ const toAriaIndex = (index: number) => `${index + 1}`;
  * default behavior and may conflict with other plugins if added earlier.
  */
 export class WCAGPlugin extends BasePlugin {
-  private readonly unsubscribeRowSources: Array<() => void> = [];
+  private readonly unsubscribe: Array<() => void> = [];
   private readonly counts = createStore({
     rowPinStart: 0,
     rgRow: 0,
     rowPinEnd: 0,
     columns: 0,
+    headers: { groups: {}, leaf: 0 } as HeaderRowIndices,
   });
+
+  get headerRowIndices() {
+    return this.counts.state.headers;
+  }
 
   get treegridAttributes() {
     const { rowPinStart, rgRow, rowPinEnd, columns } = this.counts.state;
@@ -48,7 +58,8 @@ export class WCAGPlugin extends BasePlugin {
         this.revogrid.getAttribute('aria-description') ?? undefined,
       'aria-keyshortcuts': 'Enter',
       'aria-multiselectable': 'true',
-      'aria-rowcount': rowPinStart + rgRow + rowPinEnd,
+      'aria-rowcount':
+        this.headerRowIndices.leaf + rowPinStart + rgRow + rowPinEnd,
       'aria-colcount': columns,
       'tabIndex': 0,
     } as const;
@@ -63,10 +74,21 @@ export class WCAGPlugin extends BasePlugin {
       columnStores.rgCol.store.get('source').length +
       columnStores.colPinEnd.store.get('source').length;
 
+    const updateHeaderIndices = () => {
+      this.counts.state.headers = getHeaderRowIndices(columnStores);
+    };
+    updateHeaderIndices();
+    this.addEventListener('aftercolumnsset', updateHeaderIndices);
+    for (const type of columnTypes) {
+      this.unsubscribe.push(
+        columnStores[type].store.onChange('items', updateHeaderIndices),
+      );
+    }
+
     for (const type of ['rowPinStart', 'rgRow', 'rowPinEnd'] as const) {
       this.counts.state[type] =
         providers.data.stores[type].store.get('items').length;
-      this.unsubscribeRowSources.push(
+      this.unsubscribe.push(
         providers.data.stores[type].store.onChange('items', items => {
           this.counts.state[type] = items.length;
         }),
@@ -157,20 +179,21 @@ export class WCAGPlugin extends BasePlugin {
   }
 
   private getRowAriaIndex(type: DimensionRows, index: number): string {
+    const rowIndex = this.headerRowIndices.leaf + index;
     if (type === 'rowPinStart') {
-      return toAriaIndex(index);
+      return toAriaIndex(rowIndex);
     }
     const pinnedTopCount = this.counts.state.rowPinStart;
     if (type === 'rowPinEnd') {
       const mainCount = this.counts.state.rgRow;
-      return toAriaIndex(pinnedTopCount + mainCount + index);
+      return toAriaIndex(pinnedTopCount + mainCount + rowIndex);
     }
-    return toAriaIndex(pinnedTopCount + index);
+    return toAriaIndex(pinnedTopCount + rowIndex);
   }
 
   destroy() {
-    this.unsubscribeRowSources.forEach(unsubscribe => unsubscribe());
-    this.unsubscribeRowSources.length = 0;
+    this.unsubscribe.forEach(unsubscribe => unsubscribe());
+    this.unsubscribe.length = 0;
     this.counts.dispose();
     super.destroy();
   }

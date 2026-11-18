@@ -1877,6 +1877,7 @@ export class RevoGridComponent {
       const headerProperties: HeaderProperties = {
         ...view.headerProp,
         accessible,
+        headerRowIndices: wcag?.headerRowIndices,
         type: view.type,
         additionalData: this.additionalData,
         viewportCol: view.viewportCol,

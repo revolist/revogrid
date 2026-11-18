@@ -17,11 +17,17 @@ test.describe('accessibility', () => {
         {
           name: 'People',
           children: [
-            { name: 'Identity', children: [{ prop: 'name', name: 'Name' }] },
+            {
+              name: 'Identity',
+              children: [
+                { prop: 'id', name: 'ID', pin: 'colPinStart' },
+                { prop: 'name', name: 'Name' },
+              ],
+            },
           ],
         },
       ],
-      source: [{ name: 'Alice' }],
+      source: [{ id: 1, name: 'Alice' }],
       rowHeaders: true,
     });
 
@@ -30,6 +36,26 @@ test.describe('accessibility', () => {
       .locator('revogr-header');
     const rows = header.getByRole('row');
     await expect(rows).toHaveCount(3);
+    for (const pane of [
+      SELECTORS.mainViewport,
+      SELECTORS.pinnedStartViewport,
+    ]) {
+      const headers = page
+        .locator(pane)
+        .locator('revogr-header')
+        .getByRole('row');
+      for (const index of [1, 2, 3]) {
+        await expect(headers.nth(index - 1)).toHaveAttribute(
+          'aria-rowindex',
+          String(index),
+        );
+      }
+    }
+    await expect(page.getByRole('treegrid')).toHaveAttribute(
+      'aria-rowcount',
+      '4',
+    );
+    await expect(dataCell(page, 0, 0)).toHaveAttribute('aria-rowindex', '4');
     await expect(
       rows.nth(0).getByRole('columnheader', { name: 'People' }),
     ).toBeVisible();
@@ -137,15 +163,28 @@ test.describe('accessibility', () => {
     await grid.getByRole('treegrid').focus();
     await page.keyboard.press('Tab');
     await expect(rowHeaderPane).toBeFocused();
+    const rowHeaderStart = await rowHeaderPane.evaluate(el => {
+      el.addEventListener(
+        'scrollend',
+        () => {
+          el.setAttribute('data-scroll-ended', 'true');
+        },
+        { once: true },
+      );
+      return el.scrollTop;
+    });
+    await page.keyboard.press('PageDown');
+    await expect
+      .poll(() => rowHeaderPane.evaluate(el => el.scrollTop))
+      .toBeGreaterThan(rowHeaderStart);
+    await expect(rowHeaderPane).toHaveAttribute('data-scroll-ended', 'true');
     await page.keyboard.press('Tab');
     await expect(dataPane).toBeFocused();
+    const dataStart = await dataPane.evaluate(el => el.scrollTop);
     await page.keyboard.press('PageDown');
     await expect
       .poll(() => dataPane.evaluate(el => el.scrollTop))
-      .toBeGreaterThan(0);
-    await expect
-      .poll(() => rowHeaderPane.evaluate(el => el.scrollTop))
-      .toBeGreaterThan(0);
+      .toBeGreaterThan(dataStart);
 
     await page.evaluate(() => {
       document.querySelector('revo-grid')!.source = [{ name: 'Alice' }];
@@ -188,30 +227,30 @@ test.describe('accessibility', () => {
     const bottomRows = page.locator(
       'revogr-data[type="rowPinEnd"] [role="row"]',
     );
-    await expect(mainRows.first()).toHaveAttribute('aria-rowindex', '2');
-    await expect(bottomRows.first()).toHaveAttribute('aria-rowindex', '3');
+    await expect(mainRows.first()).toHaveAttribute('aria-rowindex', '3');
+    await expect(bottomRows.first()).toHaveAttribute('aria-rowindex', '4');
 
     await page.evaluate(() => {
       const grid = document.querySelector('revo-grid')!;
       grid.pinnedTopSource = [{ name: 'top' }, { name: 'new top' }];
     });
-    await expect(mainRows.first()).toHaveAttribute('aria-rowindex', '3');
+    await expect(mainRows.first()).toHaveAttribute('aria-rowindex', '4');
     await expect(
       mainRows.first().locator('[role="gridcell"]').first(),
-    ).toHaveAttribute('aria-rowindex', '3');
-    await expect(bottomRows.first()).toHaveAttribute('aria-rowindex', '4');
+    ).toHaveAttribute('aria-rowindex', '4');
+    await expect(bottomRows.first()).toHaveAttribute('aria-rowindex', '5');
 
     await page.evaluate(() => {
       const grid = document.querySelector('revo-grid')!;
       grid.source = [{ name: 'main' }, { name: 'new main' }];
     });
-    await expect(bottomRows.first()).toHaveAttribute('aria-rowindex', '5');
+    await expect(bottomRows.first()).toHaveAttribute('aria-rowindex', '6');
     await expect(
       bottomRows.first().locator('[role="gridcell"]').first(),
-    ).toHaveAttribute('aria-rowindex', '5');
+    ).toHaveAttribute('aria-rowindex', '6');
     await expect(page.getByRole('treegrid')).toHaveAttribute(
       'aria-rowcount',
-      '5',
+      '6',
     );
   });
 
@@ -228,6 +267,6 @@ test.describe('accessibility', () => {
 
     await expect(firstCell).toHaveAttribute('role', 'gridcell');
     await expect(firstCell).toHaveAttribute('aria-colindex', '1');
-    await expect(firstCell).toHaveAttribute('aria-rowindex', '1');
+    await expect(firstCell).toHaveAttribute('aria-rowindex', '2');
   });
 });

@@ -10,6 +10,7 @@ import {
 
 import { getItemByIndex, Groups } from '@store';
 import { HEADER_ACTUAL_ROW_CLASS, HEADER_ROW_CLASS } from '../../utils/consts';
+import type { HeaderRowIndices } from '../../plugins/wcag/header-row-indices';
 import HeaderRenderer, { HeaderRenderProps } from './header-renderer';
 import { ResizeProps } from './resizable.directive';
 import type {
@@ -56,6 +57,9 @@ export class RevogrHeaderComponent {
 
   /** Enable accessible header semantics. */
   @Prop() accessible = false;
+
+  /** Logical ARIA row indices shared by the column panes. */
+  @Prop() headerRowIndices?: HeaderRowIndices;
 
   /**
    * Readonly mode
@@ -183,13 +187,18 @@ export class RevogrHeaderComponent {
 
     const { cells } = this.renderHeaderColumns(cols, range);
     const groupRow = this.renderGroupingColumns();
-    const hasColumnHeaders = this.type !== 'rowHeaders' && cells.length > 0;
+    const exposeRow =
+      this.accessible && this.type !== 'rowHeaders' && cells.length > 0;
 
     return [
-      <div class="group-rgRow">{groupRow}</div>,
-      <div
+      <div key="groups" class="group-rgRow">
+        {groupRow}
+      </div>,
+      <div /* NOSONAR: The virtualized grid uses positioned divs for header rows. */
+        key="columns"
         class={`${HEADER_ROW_CLASS} ${HEADER_ACTUAL_ROW_CLASS}`}
-        role={this.accessible && hasColumnHeaders ? 'row' : undefined}
+        role={exposeRow ? 'row' : undefined}
+        aria-rowindex={exposeRow ? this.headerRowIndices?.leaf : undefined}
       >
         {cells}
       </div>,
@@ -250,12 +259,14 @@ export class RevogrHeaderComponent {
     const groupCells = (this.groups[level] || [])
       .map(group => this.renderGroupColumn(group, level, visibleGroupRange))
       .filter((cell): cell is VNode => !!cell);
+    const exposeRow = this.accessible && groupCells.length > 0;
 
     return (
-      <div
+      <div /* NOSONAR: Group headers share the virtualized div layout of column headers. */
         key={`group-row-${level}`}
         class={`${HEADER_ROW_CLASS} group`}
-        role={this.accessible && groupCells.length ? 'row' : undefined}
+        role={exposeRow ? 'row' : undefined}
+        aria-rowindex={exposeRow ? this.headerRowIndices?.groups[level] : undefined}
       >
         {groupCells}
       </div>
