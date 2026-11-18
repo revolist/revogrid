@@ -394,9 +394,8 @@ export class RevogrViewportScroll implements ElementScroll {
           <div class="header-wrapper" ref={e => (this.header = e)}>
             <slot name={HEADER_SLOT} />
           </div>
-          <div /* NOSONAR: The vertical scroll container groups virtualized div rows. */
+          <div
             class="vertical-inner"
-            role={keyboardScrollable ? 'rowgroup' : undefined}
             tabIndex={keyboardScrollable ? 0 : undefined}
             ref={el => (this.verticalScroll = el)}
             onWheel={this.verticalMouseWheel}

@@ -419,8 +419,16 @@ revo-grid {
     flex-direction: row;
   }
 
-  .rg-accessible-header-rows {
+  .rg-semantic-treegrid {
     position: absolute;
+    inset: 0;
+    pointer-events: none;
+
+    &:focus-visible {
+      z-index: 3;
+      outline: 2px solid Highlight;
+      outline-offset: -2px;
+    }
   }
 
   .draggable {

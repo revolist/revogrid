@@ -1,32 +1,73 @@
 import { h } from '@stencil/core';
 import { createStore } from '@stencil/store';
-import { columnTypes } from '@store';
-import type { DimensionCols } from '@type';
+import { columnTypes, rowTypes } from '@store';
+import type { DimensionCols, DimensionRows } from '@type';
 
 type OwnedHeaders = Record<string, string>;
 type HeaderRoot = Document | DocumentFragment;
+type Pane = DimensionCols | 'rowHeaders';
+type RowGroupKey = `${Pane}-${DimensionRows}`;
 
-let nextHeaderId = 0;
-function getHeaderId(cell: Element, root: HeaderRoot): string {
-  let id = cell.id;
+const rowGroupOrder = (['rowHeaders', ...columnTypes] as const).flatMap(pane =>
+  rowTypes.map(row => `${pane}-${row}` as const),
+);
+
+function getIdRoot(element: Element): HeaderRoot {
+  const root = element.getRootNode();
+  return root instanceof DocumentFragment ? root : element.ownerDocument;
+}
+
+const nextId = { header: 0, rowgroup: 0 };
+function ensureId(
+  element: Element,
+  root: HeaderRoot,
+  prefix: 'header' | 'rowgroup',
+): string {
+  let id = element.id;
   if (
     !id ||
     /\s/.test(id) ||
     root.querySelectorAll(`#${CSS.escape(id)}`).length > 1
   ) {
     do {
-      id = `revo-a11y-header-${++nextHeaderId}`;
+      id = `revo-a11y-${prefix}-${++nextId[prefix]}`;
     } while (root.getElementById(id));
-    cell.id = id;
+    element.id = id;
   }
   return id;
 }
 
-/** Associate mounted header cells with logical rows across the visual panes. */
-export class HeaderRowOwnership {
+/** Associate the treegrid with mounted headers and rowgroups in the visual panes. */
+export class TreegridOwnership {
   private readonly panes = createStore<
     Partial<Record<DimensionCols, OwnedHeaders>>
   >({});
+
+  private readonly rowGroups = createStore<
+    Partial<Record<RowGroupKey, string>>
+  >({});
+
+  get rowGroupIds() {
+    return (
+      rowGroupOrder
+        .map(key => this.rowGroups.state[key])
+        .filter(Boolean)
+        .join(' ') || undefined
+    );
+  }
+
+  rowGroupProps(pane: Pane, row: DimensionRows, hasRows: boolean) {
+    const key: RowGroupKey = `${pane}-${row}`;
+    return {
+      role: hasRows ? 'rowgroup' : undefined,
+      ref: (element?: HTMLRevogrDataElement) => {
+        this.rowGroups.state[key] =
+          element && hasRows
+            ? ensureId(element, getIdRoot(element), 'rowgroup')
+            : undefined;
+      },
+    };
+  }
 
   paneProps(type: DimensionCols) {
     return {
@@ -48,9 +89,7 @@ export class HeaderRowOwnership {
 
   private update(type: DimensionCols, header: HTMLElement) {
     const rows: OwnedHeaders = {};
-    const root = header.getRootNode();
-    const idRoot =
-      root instanceof DocumentFragment ? root : header.ownerDocument;
+    const idRoot = getIdRoot(header);
     const fragments = header.querySelectorAll<HTMLElement>(
       ':scope > [data-rg-header-row], :scope > .group-rgRow > [data-rg-header-row]',
     );
@@ -58,7 +97,7 @@ export class HeaderRowOwnership {
       // Own the rendered cells without interpreting or rewriting custom roles.
       const ids = Array.from(
         fragment.querySelectorAll(':scope > [data-rg-header-cell]'),
-        cell => getHeaderId(cell, idRoot),
+        cell => ensureId(cell, idRoot, 'header'),
       );
       const index = fragment.dataset.rgHeaderRow;
       if (index && ids.length) {
@@ -101,5 +140,6 @@ export class HeaderRowOwnership {
 
   destroy() {
     this.panes.dispose();
+    this.rowGroups.dispose();
   }
 }

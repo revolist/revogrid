@@ -1848,6 +1848,7 @@ export class RevoGridComponent {
       viewportSections.push(
         <revogr-row-headers
           accessible={accessible}
+          treegridOwnership={wcag?.ownership}
           additionalData={this.additionalData}
           height={contentHeight}
           rowClass={this.rowClass}
@@ -1890,7 +1891,7 @@ export class RevoGridComponent {
       const dataViews: VNode[] = [
         <revogr-header
           {...headerProperties}
-          {...wcag?.headerOwnership.paneProps(view.type)}
+          {...wcag?.ownership.paneProps(view.type)}
           slot={HEADER_SLOT}
         />,
       ];
@@ -1924,6 +1925,11 @@ export class RevoGridComponent {
           >
             <revogr-data
               {...data}
+              {...wcag?.ownership.rowGroupProps(
+                view.type,
+                data.type,
+                data.dataStore.get('items').length > 0,
+              )}
               colType={view.type}
               key={key}
               readonly={this.readonly}
@@ -2031,20 +2037,21 @@ export class RevoGridComponent {
         <slot name="header" />
         <div
           class="main-viewport"
-          {...wcag?.treegridAttributes}
           onClick={(e: MouseEvent) => {
             if (e.currentTarget === e.target) {
               this.viewport?.clearEdit();
             }
           }}
         >
-          <div class="viewports">
-            {wcag && (
+          {wcag && (
+            <div class="rg-semantic-treegrid" {...wcag.treegridAttributes}>
               <revogr-extra
                 class="rg-accessible-header-rows"
-                nodes={wcag.headerOwnership.nodes}
+                nodes={wcag.ownership.nodes}
               />
-            )}
+            </div>
+          )}
+          <div class="viewports">
             <slot name="viewport" />
             {viewportSections}
             {verticalScroll}

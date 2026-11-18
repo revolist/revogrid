@@ -23,6 +23,7 @@ import { ResizeProps } from "./components/header/resizable.directive";
 import { HeaderRenderProps } from "./components/header/header-renderer";
 import { HeaderGroupRendererProps } from "./components/header/header-group-renderer";
 import { EventData } from "./components/overlay/selection.utils";
+import { TreegridOwnership } from "./plugins/wcag/treegrid-ownership";
 export { AdditionalData, AfterEditEvent, AllDimensionType, ApplyFocusEvent, BeforeCellRenderEvent, BeforeEdit, BeforeRangeSaveDataDetails, BeforeRowRenderEvent, BeforeSaveDataDetails, Cell, CellTemplateProp, ChangedRange, ClipboardConfig, ColumnDataSchemaModel, ColumnGrouping, ColumnProp, ColumnRegular, ColumnType, DataFormat, DataType, DimensionCols, DimensionRows, DimensionSettingsState, DimensionType, DimensionTypeCol, DragStartEvent, EditCell, EditorCtr, Editors, ElementScroll, ExtraNodeFuncConfig, FocusAfterRenderEvent, FocusRenderEvent, FocusTemplateFunc, InitialHeaderClick, MultiDimensionType, Nullable, PluginBaseComponent, PluginProviders, PositionItem, ProvidersColumns, RangeArea, RangeClipboardCopyEventProps, RangeClipboardPasteEvent, RowDefinition, RowDragStartDetails, RowHeaders, SaveDataDetails, SelectionStoreState, TempRange, ThemeDefinition, ViewportData, ViewPortResizeEvent, ViewPortScrollEvent, ViewportState, ViewSettingSizeProp } from "./types/index";
 export { RowResizeConfig } from "./plugins/row-resize";
 export { GridPlugin } from "./plugins/base.plugin";
@@ -41,6 +42,7 @@ export { ResizeProps } from "./components/header/resizable.directive";
 export { HeaderRenderProps } from "./components/header/header-renderer";
 export { HeaderGroupRendererProps } from "./components/header/header-group-renderer";
 export { EventData } from "./components/overlay/selection.utils";
+export { TreegridOwnership } from "./plugins/wcag/treegrid-ownership";
 export namespace Components {
     /**
      * Revogrid - High-performance, customizable grid library for managing large datasets.
@@ -765,6 +767,10 @@ export namespace Components {
           * Row header column
          */
         "rowHeaderColumn": RowHeaders;
+        /**
+          * Accessibility ownership of the row-header data panes.
+         */
+        "treegridOwnership"?: TreegridOwnership;
     }
     /**
      * Virtual scroll component
@@ -2479,6 +2485,10 @@ declare namespace LocalJSX {
           * Row header column
          */
         "rowHeaderColumn"?: RowHeaders;
+        /**
+          * Accessibility ownership of the row-header data panes.
+         */
+        "treegridOwnership"?: TreegridOwnership;
     }
     /**
      * Virtual scroll component

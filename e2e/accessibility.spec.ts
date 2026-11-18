@@ -53,17 +53,21 @@ test.describe('accessibility', () => {
         .toEqual(names);
     }
     await expect(page.locator('revogr-header [role="row"]')).toHaveCount(0);
-    await expect(page.getByRole('treegrid')).toHaveAttribute(
-      'aria-rowcount',
-      '4',
-    );
+    const treegrid = page.getByRole('treegrid');
+    await expect(treegrid).toHaveAttribute('aria-rowcount', '4');
+    await expect(treegrid.locator('revogr-header')).toHaveCount(0);
     await expect(dataCell(page, 0, 0)).toHaveAttribute('aria-rowindex', '4');
 
     const session = await page.context().newCDPSession(page);
     const { nodes } = await session.send('Accessibility.getFullAXTree');
     await session.detach();
     const byId = new Map(nodes.map(node => [node.nodeId, node]));
-    const ownedHeaderRows = nodes
+    const tree = nodes.find(node => node.role?.value === 'treegrid')!;
+    const descendants = [tree];
+    for (const node of descendants) {
+      descendants.push(...(node.childIds ?? []).map(id => byId.get(id)!));
+    }
+    const ownedHeaderRows = descendants
       .filter(node => !node.ignored && node.role?.value === 'row')
       .map(row => (row.childIds ?? []).map(id => byId.get(id)))
       .filter(children =>
@@ -78,6 +82,14 @@ test.describe('accessibility', () => {
       ['identity', 'identity'],
       ['id', 'name'],
     ]);
+    expect(
+      descendants.some(
+        node => node.role?.value === 'gridcell' && node.name?.value === 'Alice',
+      ),
+    ).toBe(true);
+    expect(descendants.some(node => node.role?.value === 'rowheader')).toBe(
+      true,
+    );
 
     await page.evaluate(() => {
       const ids = Array.from(

@@ -7,7 +7,7 @@ import {
   getHeaderRowIndices,
   type HeaderRowIndices,
 } from './header-row-indices';
-import { HeaderRowOwnership } from './header-row-ownership';
+import { TreegridOwnership } from './treegrid-ownership';
 
 const toAriaIndex = (index: number) => `${index + 1}`;
 
@@ -37,7 +37,7 @@ export class WCAGPlugin extends BasePlugin {
     HTMLRevoGridElement,
     WCAGPlugin
   >();
-  readonly headerOwnership = new HeaderRowOwnership();
+  readonly ownership = new TreegridOwnership();
   private readonly unsubscribe: Array<() => void> = [];
   private readonly counts = createStore({
     rowPinStart: 0,
@@ -67,6 +67,7 @@ export class WCAGPlugin extends BasePlugin {
       'aria-rowcount':
         this.headerRowIndices.leaf + rowPinStart + rgRow + rowPinEnd,
       'aria-colcount': columns,
+      'aria-owns': this.ownership.rowGroupIds,
       'tabIndex': 0,
     } as const;
   }
@@ -222,7 +223,7 @@ export class WCAGPlugin extends BasePlugin {
 
   destroy() {
     WCAGPlugin.active.delete(this.revogrid);
-    this.headerOwnership.destroy();
+    this.ownership.destroy();
     this.unsubscribe.forEach(unsubscribe => unsubscribe());
     this.unsubscribe.length = 0;
     this.counts.dispose();
