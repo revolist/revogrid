@@ -87,7 +87,8 @@ globalThis.setGrouping = function (props = [], expandedAll = false) {
     prevExpanded: { 'a': true, 'a,c': true },
     groupCellTemplate(createElement, { column, group, value }) {
       if (group.isLabelColumn) {
-        const label = `${group.prop}: ${group.name || '(empty)'}`;
+        const { name } = group;
+        const label = `${group.prop}: ${name == null || name === '' ? '(empty)' : name}`;
         if (!group.canExpand) {
           return label;
         }
