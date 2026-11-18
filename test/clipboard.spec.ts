@@ -52,3 +52,37 @@ describe('clipboard tabular text', () => {
     ]);
   });
 });
+
+describe('clipboard paste events', () => {
+  it('emits afterpasteapply with the data replaced in beforepasteapply', () => {
+    const clipboard = new Clipboard();
+    const replaced = [['replaced']];
+    const pasteRegion = jest.fn();
+    const afterPasteApply = jest.fn(payload => ({
+      detail: payload,
+      defaultPrevented: false,
+    }));
+    (clipboard as any).beforePaste = {
+      emit: jest.fn(p => ({ detail: p, defaultPrevented: false })),
+    };
+    (clipboard as any).beforePasteApply = {
+      emit: jest.fn(p => ({
+        detail: { ...p, parsed: replaced },
+        defaultPrevented: false,
+      })),
+    };
+    (clipboard as any).pasteRegion = { emit: pasteRegion };
+    (clipboard as any).afterPasteApply = { emit: afterPasteApply };
+
+    clipboard.onPaste({
+      clipboardData: {
+        types: ['text/plain'],
+        getData: () => 'original',
+      },
+      preventDefault: jest.fn(),
+    } as unknown as ClipboardEvent);
+
+    expect(pasteRegion).toHaveBeenCalledWith(replaced);
+    expect(afterPasteApply.mock.calls[0][0].parsed).toBe(replaced);
+  });
+});

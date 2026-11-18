@@ -116,6 +116,29 @@ test.describe('clipboard', () => {
     await expect(dataCell(page, 2, 2)).toHaveText('PM');
   });
 
+  test('emits afterpasteapply with the replaced paste data', async ({ page }) => {
+    await mountGrid(page, {
+      columns: basicColumns(['id', 'name', 'role']),
+      source: SAMPLE_ROWS.trio,
+      range: true,
+    });
+    await page.evaluate(() => {
+      const grid = document.querySelector('revo-grid') as HTMLElement;
+      (window as any).__afterPaste = null;
+      grid.addEventListener('beforepasteapply', (e: Event) => {
+        (e as CustomEvent).detail.parsed = [['Replaced']];
+      });
+      grid.addEventListener('afterpasteapply', (e: Event) => {
+        (window as any).__afterPaste = (e as CustomEvent).detail.parsed;
+      });
+    });
+    await setCellsFocus(page, { x: 1, y: 1 });
+    await dispatchClipboardEvent(page, 'paste', 'Nia\tQA');
+
+    await expect(dataCell(page, 1, 1)).toHaveText('Replaced');
+    expect(await page.evaluate(() => (window as any).__afterPaste)).toEqual([['Replaced']]);
+  });
+
   test('cuts the selected range as tabular text and clears the source cells', async ({ page }) => {
     await mountGrid(page, {
       columns: basicColumns(['id', 'name', 'role']),
