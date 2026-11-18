@@ -21,7 +21,9 @@ type KeyedGroupCellProps = CellProps & Partial<ResizeProps> & {
   key: string;
 };
 
-const HeaderGroupRenderer = (p: HeaderGroupRendererProps): ReturnType<typeof h> => {
+const HeaderGroupRenderer = (
+  p: HeaderGroupRendererProps & { accessible?: boolean },
+): ReturnType<typeof h> => {
   const groupProps: KeyedGroupCellProps = {
     key: `${p.group.name}-${p.group.indexes.join('-')}`,
     canResize: p.canResize,
@@ -29,6 +31,7 @@ const HeaderGroupRenderer = (p: HeaderGroupRendererProps): ReturnType<typeof h> 
     maxWidth: 0,
 
     active: p.active || ['r'],
+    role: p.accessible ? 'columnheader' : undefined,
     class: {
       [HEADER_CLASS]: true,
     },

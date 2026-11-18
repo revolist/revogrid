@@ -3,6 +3,7 @@ import type { JSXBase } from '@stencil/core/internal';
 
 import { ViewportStore, DataStore } from '@store';
 import type {
+  CellProps,
   RowHeaders,
   ViewPortScrollEvent,
   DataType,
@@ -54,6 +55,8 @@ export class RevogrRowHeaders {
    * Row header column
    */
   @Prop() rowHeaderColumn: RowHeaders;
+  /** Enable accessible row header semantics. */
+  @Prop() accessible = false;
   /**
    * Additional data to pass to renderer
    */
@@ -80,6 +83,7 @@ export class RevogrRowHeaders {
   render() {
     const dataViews: HTMLElement[] = [];
     const viewport = new ViewportStore('colPinStart');
+    const cellProperties = this.rowHeaderColumn?.cellProperties;
 
     /** render viewports rows */
     let totalLength = 1;
@@ -99,6 +103,13 @@ export class RevogrRowHeaders {
       const column: ColumnRegular = {
         cellTemplate: RowHeaderRender(totalLength),
         ...this.rowHeaderColumn,
+        cellProperties: this.accessible
+          ? props => {
+              const defaults: CellProps = { role: 'rowheader' };
+              const customProps: CellProps = cellProperties?.(props) || {};
+              return { ...defaults, ...customProps };
+            }
+          : cellProperties,
       };
       colData.updateData([column]);
       dataViews.push(
@@ -135,6 +146,7 @@ export class RevogrRowHeaders {
       JSXBase.HTMLAttributes<HTMLRevogrViewportScrollElement> = {
       contentHeight: this.height,
       contentWidth: 0,
+      accessible: this.accessible,
       style: { minWidth: `${colSize}px` },
       colType: 'rowHeaders',
       ref: (el) => this.elementToScroll.emit(el),

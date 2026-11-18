@@ -12,8 +12,8 @@ const toAriaIndex = (index: number) => `${index + 1}`;
  *
  * The WCAG Plugin performs the following tasks:
  * - Sets the 'dir' attribute to 'ltr' for left-to-right text direction.
- * - Sets the 'role' attribute to 'treegrid' for treelike hierarchical structure.
- * - Sets the 'aria-keyshortcuts' attribute to 'Enter' and 'Esc' for keyboard shortcuts.
+ * - Provides the treegrid role, accessible name, and counts for the main viewport.
+ * - Exposes the 'Enter' keyboard shortcut.
  * - Adds event listeners for keyboard navigation and editing.
  *
  * By default, the plugin adds ARIA roles and properties to the grid elements, providing semantic information
@@ -28,32 +28,50 @@ const toAriaIndex = (index: number) => `${index + 1}`;
  */
 export class WCAGPlugin extends BasePlugin {
   private readonly unsubscribeRowSources: Array<() => void> = [];
-  private readonly rowLengths = createStore({
+  private readonly counts = createStore({
     rowPinStart: 0,
     rgRow: 0,
     rowPinEnd: 0,
+    columns: 0,
   });
+
+  get treegridAttributes() {
+    const { rowPinStart, rgRow, rowPinEnd, columns } = this.counts.state;
+    return {
+      'role': 'treegrid',
+      'aria-label': this.revogrid.getAttribute('aria-label') ?? undefined,
+      'aria-labelledby':
+        this.revogrid.getAttribute('aria-labelledby') ?? undefined,
+      'aria-describedby':
+        this.revogrid.getAttribute('aria-describedby') ?? undefined,
+      'aria-description':
+        this.revogrid.getAttribute('aria-description') ?? undefined,
+      'aria-keyshortcuts': 'Enter',
+      'aria-multiselectable': 'true',
+      'aria-rowcount': rowPinStart + rgRow + rowPinEnd,
+      'aria-colcount': columns,
+      'tabIndex': 0,
+    } as const;
+  }
 
   constructor(revogrid: HTMLRevoGridElement, providers: PluginProviders) {
     super(revogrid, providers);
 
-    revogrid.setAttribute('role', 'treegrid');
-    revogrid.setAttribute('aria-keyshortcuts', 'Enter');
-    revogrid.setAttribute('aria-multiselectable', 'true');
-    revogrid.setAttribute('tabindex', '0');
+    const columnStores = providers.column.stores;
+    this.counts.state.columns =
+      columnStores.colPinStart.store.get('source').length +
+      columnStores.rgCol.store.get('source').length +
+      columnStores.colPinEnd.store.get('source').length;
+
     for (const type of ['rowPinStart', 'rgRow', 'rowPinEnd'] as const) {
-      this.rowLengths.state[type] =
+      this.counts.state[type] =
         providers.data.stores[type].store.get('items').length;
       this.unsubscribeRowSources.push(
         providers.data.stores[type].store.onChange('items', items => {
-          if (this.rowLengths.state[type] !== items.length) {
-            this.rowLengths.state[type] = items.length;
-            this.updateRowCount();
-          }
+          this.counts.state[type] = items.length;
         }),
       );
     }
-    this.updateRowCount();
 
     /**
      * Before Columns Set Event
@@ -67,7 +85,7 @@ export class WCAGPlugin extends BasePlugin {
           ...detail.columns.colPinEnd,
         ];
 
-        revogrid.setAttribute('aria-colcount', `${columns.length}`);
+        this.counts.state.columns = columns.length;
 
         columns.forEach((column, index) => {
           const { columnProperties, cellProperties } = column;
@@ -142,24 +160,18 @@ export class WCAGPlugin extends BasePlugin {
     if (type === 'rowPinStart') {
       return toAriaIndex(index);
     }
-    const pinnedTopCount = this.rowLengths.state.rowPinStart;
+    const pinnedTopCount = this.counts.state.rowPinStart;
     if (type === 'rowPinEnd') {
-      const mainCount = this.rowLengths.state.rgRow;
+      const mainCount = this.counts.state.rgRow;
       return toAriaIndex(pinnedTopCount + mainCount + index);
     }
     return toAriaIndex(pinnedTopCount + index);
   }
 
-  private updateRowCount() {
-    const lengths = this.rowLengths.state;
-    const rowCount = lengths.rowPinStart + lengths.rgRow + lengths.rowPinEnd;
-    this.revogrid.setAttribute('aria-rowcount', `${rowCount}`);
-  }
-
   destroy() {
     this.unsubscribeRowSources.forEach(unsubscribe => unsubscribe());
     this.unsubscribeRowSources.length = 0;
-    this.rowLengths.dispose();
+    this.counts.dispose();
     super.destroy();
   }
 }

@@ -54,6 +54,9 @@ export class RevogrHeaderComponent {
    */
   @Prop() groupingDepth = 0;
 
+  /** Enable accessible header semantics. */
+  @Prop() accessible = false;
+
   /**
    * Readonly mode
    */
@@ -180,10 +183,14 @@ export class RevogrHeaderComponent {
 
     const { cells } = this.renderHeaderColumns(cols, range);
     const groupRow = this.renderGroupingColumns();
+    const hasColumnHeaders = this.type !== 'rowHeaders' && cells.length > 0;
 
     return [
       <div class="group-rgRow">{groupRow}</div>,
-      <div class={`${HEADER_ROW_CLASS} ${HEADER_ACTUAL_ROW_CLASS}`}>
+      <div
+        class={`${HEADER_ROW_CLASS} ${HEADER_ACTUAL_ROW_CLASS}`}
+        role={this.accessible && hasColumnHeaders ? 'row' : undefined}
+      >
         {cells}
       </div>,
     ];
@@ -233,7 +240,7 @@ export class RevogrHeaderComponent {
     const visibleGroupRange = this.getVisibleGroupRange();
     return Array.from({ length: this.groupingDepth }, (_, level) =>
       this.renderGroupRow(level, visibleGroupRange),
-    ).flat();
+    );
   }
 
   private renderGroupRow(
@@ -244,16 +251,15 @@ export class RevogrHeaderComponent {
       .map(group => this.renderGroupColumn(group, level, visibleGroupRange))
       .filter((cell): cell is VNode => !!cell);
 
-    return [
-      ...groupCells,
-      h('div', {
-        key: `group-row-${level}`,
-        class: {
-          [HEADER_ROW_CLASS]: true,
-          group: true,
-        },
-      }),
-    ];
+    return (
+      <div
+        key={`group-row-${level}`}
+        class={`${HEADER_ROW_CLASS} group`}
+        role={this.accessible && groupCells.length ? 'row' : undefined}
+      >
+        {groupCells}
+      </div>
+    );
   }
 
   private renderGroupColumn(
@@ -320,6 +326,7 @@ export class RevogrHeaderComponent {
     return h(GroupHeaderRenderer, {
       key: this.getGroupHeaderCellKey(event.detail.group, level),
       ...event.detail,
+      accessible: this.accessible,
     });
   }
 

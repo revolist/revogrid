@@ -28,6 +28,7 @@ export async function mountGrid(page: E2EPage, options: GridSetupOptions, css = 
   const width = options.width ?? 900;
   const height = options.height ?? 360;
   const initialAttrs = [
+    options.accessible === false ? 'accessible="false"' : '',
     options.filter ? 'filter' : '',
     options.exporting ? 'exporting' : '',
     options.canMoveColumns ? 'can-move-columns' : '',
