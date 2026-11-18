@@ -38,7 +38,6 @@ export class WCAGPlugin extends BasePlugin {
     WCAGPlugin
   >();
   readonly headerOwnership = new HeaderRowOwnership();
-  readonly headerNodes = [this.headerOwnership.render];
   private readonly unsubscribe: Array<() => void> = [];
   private readonly counts = createStore({
     rowPinStart: 0,

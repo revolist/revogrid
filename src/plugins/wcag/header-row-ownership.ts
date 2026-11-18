@@ -13,7 +13,25 @@ export class HeaderRowOwnership {
     Partial<Record<DimensionCols, OwnedHeaders>>
   >({});
 
-  update(type: DimensionCols, header: HTMLElement) {
+  paneProps(type: DimensionCols) {
+    return {
+      onAfterheaderrender: (event: Event) => {
+        const header = event.currentTarget;
+        if (header instanceof HTMLElement && event.target === header) {
+          this.update(type, header);
+        }
+      },
+      ref: (header?: HTMLRevogrHeaderElement) => {
+        if (!header) {
+          this.panes.state[type] = undefined;
+        }
+      },
+    };
+  }
+
+  readonly nodes = [() => this.render()];
+
+  private update(type: DimensionCols, header: HTMLElement) {
     const rows: OwnedHeaders = {};
     const fragments = header.querySelectorAll<HTMLElement>(
       ':scope > [data-rg-header-row], :scope > .group-rgRow > [data-rg-header-row]',
@@ -43,11 +61,7 @@ export class HeaderRowOwnership {
     }
   }
 
-  clear(type: DimensionCols) {
-    this.panes.state[type] = undefined;
-  }
-
-  readonly render = () => {
+  private render() {
     const rows: OwnedHeaders = {};
     for (const type of columnTypes) {
       for (const [index, ids] of Object.entries(this.panes.state[type] ?? {})) {
@@ -67,7 +81,7 @@ export class HeaderRowOwnership {
         }),
       ),
     );
-  };
+  }
 
   destroy() {
     this.panes.dispose();
