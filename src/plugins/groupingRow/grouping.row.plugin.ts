@@ -6,7 +6,6 @@ import {
   type DSourceState,
 } from '@store';
 import type {
-  BeforeSaveDataDetails,
   ColumnRegular,
   DataType,
   DimensionRows,
@@ -68,13 +67,6 @@ export class GroupingRowPlugin extends BasePlugin {
     providers: PluginProviders,
   ) {
     super(revogrid, providers);
-  }
-
-  // befoce cell focus
-  private onFocus(e: CustomEvent<BeforeSaveDataDetails>) {
-    if (isGrouping(e.detail.model)) {
-      e.preventDefault();
-    }
   }
 
   // expand event triggered
@@ -366,11 +358,15 @@ export class GroupingRowPlugin extends BasePlugin {
     this.addEventListener('beforefiltertrimmed', ({ detail }) => {
       detail.itemsToFilter = this.beforeFilterTrimmed(detail.itemsToFilter);
     });
-    /**
-     * Apply logic for focus inside of grouping
-     * We can't focus on grouping rows, navigation only inside of groups for now
-     */
-    this.addEventListener('beforecellfocus', e => this.onFocus(e));
+    // Only group rows rendered as individual cells participate in cell focus.
+    this.addEventListener('beforecellfocus', e => {
+      if (
+        isGrouping(e.detail.model) &&
+        !this.getStore().get('groupingCellRenderer')
+      ) {
+        e.preventDefault();
+      }
+    });
     /**
      * Prevent rgRow drag outside the group
      */
