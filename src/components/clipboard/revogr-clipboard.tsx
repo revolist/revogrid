@@ -159,7 +159,7 @@ export class Clipboard {
     // post paste action
     const afterPasteApply = this.afterPasteApply.emit({
       raw: data,
-      parsed: parsedData,
+      parsed: beforePasteApply.detail.parsed,
       dataText,
       event: e,
     });
