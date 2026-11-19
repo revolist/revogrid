@@ -85,4 +85,25 @@ describe('clipboard paste events', () => {
     expect(pasteRegion).toHaveBeenCalledWith(replaced);
     expect(afterPasteApply.mock.calls[0][0].parsed).toBe(replaced);
   });
+
+  it.each([
+    [['text/html', 'text/plain']],
+    [['text/plain', 'text/html']],
+  ])('reads text/html when types are %j', types => {
+    const clipboard = new Clipboard();
+    const beforePaste = jest.fn(p => ({ detail: p, defaultPrevented: true }));
+    (clipboard as any).beforePaste = { emit: beforePaste };
+
+    clipboard.onPaste({
+      clipboardData: {
+        types,
+        getData: (type: string) =>
+          type === 'text/html' ? '<table></table>' : 'plain',
+      },
+      preventDefault: jest.fn(),
+    } as unknown as ClipboardEvent);
+
+    expect(beforePaste.mock.calls[0][0].isHTML).toBe(true);
+    expect(beforePaste.mock.calls[0][0].raw).toBe('<table></table>');
+  });
 });
