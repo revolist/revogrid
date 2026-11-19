@@ -120,7 +120,7 @@ export class Clipboard {
       return;
     }
     const clipboardData = this.getData(e);
-    const isHTML = (clipboardData?.types.indexOf('text/html') || -1) > -1;
+    const isHTML = !!clipboardData?.types?.includes('text/html');
     const data = (isHTML
       ? clipboardData?.getData('text/html')
       : clipboardData?.getData('text')) || '';
