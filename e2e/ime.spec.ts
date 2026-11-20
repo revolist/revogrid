@@ -357,8 +357,18 @@ test('IME fast edit autosaves a new session after cancelling the previous one', 
     document.querySelector('revo-grid')!.applyOnClose = true;
   });
   const input = page.locator('revogr-edit input');
-  await page.keyboard.type('Discarded');
-  await input.press('Escape');
+  // Cancel in the same browser task as the first input, before an active
+  // editor render can update the virtual DOM's empty value.
+  await input.evaluate((element: HTMLInputElement) => {
+    element.value = 'Discarded';
+    element.dispatchEvent(new InputEvent('input', { bubbles: true }));
+    element.dispatchEvent(new KeyboardEvent('keydown', {
+      key: 'Escape',
+      code: 'Escape',
+      bubbles: true,
+      cancelable: true,
+    }));
+  });
   await expect(input).toHaveValue('');
   await expect(dataCell(page, 0, 0)).toHaveText('Original');
   await page.keyboard.type('Saved after cancellation');

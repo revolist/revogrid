@@ -20,6 +20,11 @@ export class ImeTextEditor extends TextEditor {
     if (requestEdit && this.mode !== 'ready') {
       this.mode = 'ready';
       this.focusPending = true;
+      // An edit cancelled before rendering can leave the VNode value empty
+      // while the live input still contains the discarded text.
+      if (this.editInput) {
+        this.editInput.value = '';
+      }
     } else if (!requestEdit && this.mode === 'ready') {
       this.mode = 'edit';
     }
