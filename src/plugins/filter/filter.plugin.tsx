@@ -141,6 +141,12 @@ export class FilterPlugin extends BasePlugin {
     this.addEventListener('headerclick', e => {
       void this.headerclick(e);
     });
+    this.addEventListener('beforeheaderrender', ({ target, detail }) => {
+      const label = this.config?.localization?.captions?.filterButton;
+      if (label && target instanceof Element && target.closest('revo-grid') === this.revogrid) {
+        detail.filterButtonLabel = label;
+      }
+    });
     this.addEventListener(
       FILTER_CONFIG_CHANGED_EVENT,
       ({ detail }: CustomEvent<ColumnFilterConfig | boolean>) => {

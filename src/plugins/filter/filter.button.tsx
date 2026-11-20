@@ -11,19 +11,22 @@ export const REORDER_BUTTON = 'reorder-button';
 
 type Props = {
   column: ColumnRegular;
+  label?: string;
 };
-export const FilterButton = ({ column }: Props) => {
+export const FilterButton = ({ column, label = 'Filter {column}' }: Props) => {
   const active = !!column?.[FILTER_PROP];
+  const columnName = column.name || String(column.prop);
   return (
     <span class="filter-button-wrapper">
       <button
         type="button"
+        aria-label={label.replace(/\{column\}/g, () => columnName)}
         class={{
           [FILTER_BUTTON_CLASS]: true,
           [FILTER_BUTTON_ACTIVE]: active,
         }}
       >
-        <svg class="filter-img" viewBox="0 0 64 64">
+        <svg class="filter-img" viewBox="0 0 64 64" aria-hidden="true">
           <g stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
             <path d="M43,48 L43,56 L21,56 L21,48 L43,48 Z M53,28 L53,36 L12,36 L12,28 L53,28 Z M64,8 L64,16 L0,16 L0,8 L64,8 Z" fill="currentColor"></path>
           </g>

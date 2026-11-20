@@ -26,6 +26,7 @@ export type HeaderRenderProps = {
   range?: RangeArea | null;
   canResize?: boolean;
   canFilter?: boolean;
+  filterButtonLabel?: string;
   renderOffset?: number;
   onResize?(e: ResizeEvent): void;
   onClick?(data: InitialHeaderClick): void;
@@ -49,12 +50,19 @@ const HeaderRenderer = (
     [HEADER_CLASS]: true,
     [HEADER_SORTABLE_CLASS]: !!p.data?.sortable,
   };
-  if (p.data?.order) {
-    cellClass[p.data.order] = true;
+  const { order, sortIndex } = p.data;
+  if (order) {
+    cellClass[order] = true;
   }
+  // ARIA exposes the primary sort column when multiple columns are sorted.
+  const ariaSort =
+    p.accessible && order && (sortIndex ?? 1) === 1
+      ? { asc: 'ascending', desc: 'descending' }[order]
+      : undefined;
   const dataProps: KeyedResizableElementHTMLAttributes = {
     key: String(p.data?.prop ?? p.column.itemIndex),
     [DATA_COL]: p.column.itemIndex,
+    ...(ariaSort && { 'aria-sort': ariaSort }),
     canResize: p.canResize,
     minWidth: p.data?.minSize || MIN_COL_SIZE,
     maxWidth: p.data?.maxSize,
@@ -102,7 +110,9 @@ const HeaderRenderer = (
       {hasSortingSign || hasFilterButton ? (
         <span class="header-controls">
           {hasSortingSign ? <SortingSign column={p.data} /> : null}
-          {hasFilterButton ? <FilterButton column={p.data} /> : null}
+          {hasFilterButton ? (
+            <FilterButton column={p.data} label={p.filterButtonLabel} />
+          ) : null}
         </span>
       ) : null}
     </HeaderCellRenderer>

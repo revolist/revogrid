@@ -113,6 +113,8 @@ export interface FilterCaptions {
   filterCondition: string;
   removeFilter: string;
   reorderFilter: string;
+  /** Accessible name for the header filter button. Use {column} for the column name. */
+  filterButton?: string;
 };
 
 export interface FilterLocalization {

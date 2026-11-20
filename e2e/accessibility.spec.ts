@@ -1,14 +1,80 @@
 import { expect } from '@playwright/test';
 import { test } from '@stencil/playwright';
+import { filterNames } from '../src/plugins/filter/filter.indexed';
 import {
   buildColumns,
   dataCell,
   mountGrid,
+  pinnedStartCell,
   rowHeaderCell,
   SELECTORS,
 } from './helpers';
 
 test.describe('accessibility', () => {
+  test('sorts focused column headers and names their filter buttons', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: [
+        { prop: 'name', name: 'Name', sortable: true, pin: 'colPinStart' },
+        { prop: 'city', name: 'City' },
+      ],
+      source: [
+        { name: 'Zoe', city: 'Porto' },
+        { name: 'Ada', city: 'Lisbon' },
+      ],
+      filter: true,
+    });
+
+    const nameHeader = page.getByRole('columnheader').filter({ hasText: 'Name' });
+    const nameFilter = nameHeader.getByRole('button', { name: 'Filter Name' });
+    const cityFilter = page.getByRole('button', { name: 'Filter City' });
+    await expect(nameHeader).toHaveAttribute('tabindex', '0');
+    await page.keyboard.press('Tab'); // Attribution link
+    await page.keyboard.press('Tab');
+    await expect(page.getByRole('treegrid')).toBeFocused();
+    await page.keyboard.press('Tab');
+    await expect(nameHeader).toBeFocused();
+    await expect(nameHeader).toHaveCSS('outline-style', 'solid');
+    await expect(nameHeader).toHaveCSS('outline-width', '2px');
+
+    await page.keyboard.press('Enter');
+    await expect(nameHeader).toHaveAttribute('aria-sort', 'ascending');
+    await expect(pinnedStartCell(page, 0)).toHaveText('Ada');
+    await expect(nameHeader).toBeFocused();
+
+    await page.keyboard.press('Enter');
+    await expect(nameHeader).toHaveAttribute('aria-sort', 'descending');
+    await expect(pinnedStartCell(page, 0)).toHaveText('Zoe');
+
+    await page.keyboard.press('Enter');
+    await expect(nameHeader).not.toHaveAttribute('aria-sort', /.+/);
+    await page.keyboard.press('Tab');
+    await expect(nameFilter).toBeFocused();
+    await page.keyboard.press('Tab');
+    await expect(cityFilter).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(page.getByRole('dialog')).toBeVisible();
+    await expect(nameHeader).not.toHaveAttribute('aria-sort', /.+/);
+  });
+
+  test('localizes the header filter button name', async ({ page }) => {
+    await mountGrid(page, {
+      columns: [{ prop: 'city', name: 'Cidade' }],
+      source: [{ city: 'Lisboa' }],
+      filter: {
+        localization: {
+          captions: { filterButton: 'Filtrar {column}' },
+          filterNames,
+        },
+      },
+    });
+
+    await expect(
+      page.getByRole('button', { name: 'Filtrar Cidade', exact: true }),
+    ).toBeAttached();
+  });
+
   test('owns leaf and grouped column headers in their respective rows', async ({
     page,
   }) => {
