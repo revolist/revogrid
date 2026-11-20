@@ -123,9 +123,6 @@ export class OverlaySelection {
    * If true applys changes when cell closes if not Escape.
    */
   @Prop() applyChangesOnClose = false;
-
-  /** Keep the built-in text input ready for native IME composition. */
-  @Prop() imeFastEdit = false;
   /**
    * Additional data to pass to renderer.
    */
@@ -314,11 +311,17 @@ export class OverlaySelection {
   onCellFocus(e: FocusEvent) {
     // The accessibility layer also focuses gridcells after selection. Return
     // native focus to the ready input, including repeated clicks on one cell.
+    const editor = this.revogrEdit;
     if (
-      this.imeFastEdit && this.revogrEdit?.imeReady &&
-      e.target instanceof HTMLElement && e.target.getAttribute('role') === 'gridcell'
+      !editor?.requestEdit ||
+      !(e.target instanceof HTMLElement) ||
+      e.target.getAttribute('role') !== 'gridcell'
     ) {
-      void this.revogrEdit?.focusReadyInput();
+      return;
+    }
+    const focus = this.selectionStore.get('focus');
+    if (focus && focus.x === editor.editCell.x && focus.y === editor.editCell.y) {
+      void editor.focusReadyInput();
     }
   }
 
@@ -373,15 +376,6 @@ export class OverlaySelection {
     // Emit before key down event and check if default prevention is set.
     const proxy = this.beforeKeyDown.emit({ original: e, ...this.getData() });
     if (e.defaultPrevented || proxy.defaultPrevented) {
-      return;
-    }
-    // The ready input receives printable text natively; input/compositionstart
-    // requests editing without preventing the browser's composition.
-    if (
-      e.target instanceof HTMLInputElement &&
-      this.revogrEdit?.imeReady && this.revogrEdit.contains(e.target) &&
-      !e.ctrlKey && !e.metaKey && !e.altKey && e.key.length === 1
-    ) {
       return;
     }
     // Invoke key down on keyboard service.
@@ -540,14 +534,17 @@ export class OverlaySelection {
   }
 
   private renderEditor() {
-    // Check if edit access
     const activeEdit = this.selectionStore.get('edit');
-    const focus = this.selectionStore.get('focus');
-    const ready = !activeEdit && this.imeFastEdit && this.canEdit() && focus &&
-      !getCellEditor(this.columnService.columns[focus.x], this.editors);
-    const editCell = activeEdit || (ready ? focus : null);
-    // Readonly or Editor closed
+    const editCell = activeEdit || this.selectionStore.get('focus');
     if (this.readonly || !editCell) {
+      return null;
+    }
+    const editor = getCellEditor(
+      this.columnService.columns[editCell.x],
+      this.editors,
+    );
+    const ready = !activeEdit && editor?.prepareOnFocus && this.canEdit();
+    if (!activeEdit && !ready) {
       return null;
     }
     const enteredOrModelValue =
@@ -590,10 +587,16 @@ export class OverlaySelection {
     const styles = styleByCellProps(cell);
     return (
       <revogr-edit
-        key={this.imeFastEdit ? `${editCell.x}:${editCell.y}` : undefined}
+        key={editor?.prepareOnFocus ? `${editCell.x}:${editCell.y}` : undefined}
         style={styles}
-        imeReady={!!ready}
-        requestNativeEdit={() => this.doEdit()}
+        requestEdit={
+          ready
+            ? () => {
+                const focus = this.selectionStore.get('focus');
+                return focus?.x === editCell.x && focus.y === editCell.y && this.doEdit();
+              }
+            : undefined
+        }
         ref={el => (this.revogrEdit = el)}
         additionalData={this.additionalData}
         editCell={editable}
@@ -602,10 +605,7 @@ export class OverlaySelection {
           this.cellEditDone.emit(e.detail);
         }}
         column={this.columnService.rowDataModel(editCell.y, editCell.x)}
-        editor={getCellEditor(
-          this.columnService.columns[editCell.x],
-          this.editors,
-        )}
+        editor={editor}
       />
     );
   }

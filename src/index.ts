@@ -5,6 +5,7 @@ export * from './plugins';
 export * from './components';
 export * from './utils';
 export * from './components/data/cell-renderer';
+export { ImeTextEditor } from './components/editors/ime-text-editor';
 export { TextEditor } from './components/editors/text-editor';
 export * from './components/editors/edit.utils';
 export { h, type FunctionalComponent } from '@stencil/core';

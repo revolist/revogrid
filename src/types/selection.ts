@@ -178,7 +178,10 @@ export type Editors = {
 /**
  * Editor component
  */
-export type EditorCtr = EditorCtrCallable | EditorCtrConstructible;
+export type EditorCtr = (EditorCtrCallable | EditorCtrConstructible) & {
+  /** Mount the editor when its editable cell receives focus. */
+  prepareOnFocus?: boolean;
+};
 
 
 /**
@@ -208,6 +211,9 @@ export interface EditorCtrConstructible {
 export interface EditorBase {
   element?: Element | null;
   editCell?: EditCell;
+  /** Prepare for native input, or begin an active edit when no callback is supplied. */
+  prepareForEdit?(requestEdit?: () => boolean): void;
+  focusReadyInput?(): void;
   /**
    * Consume printable input that reached the grid while the editor mounted.
    * Return true when the editor handled the value.

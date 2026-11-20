@@ -1,25 +1,24 @@
-import type { ColumnDataSchemaModel } from '@type';
-import { TextEditor, type SaveCallback } from './text-editor';
+import type { h, VNode } from '@stencil/core';
+import { isShortcutModifier } from '../../utils/key.utils';
+import { TextEditor } from './text-editor';
 
-/** Built-in text editor that keeps a native input ready for IME composition. */
+/**
+ * Keeps a native input focused on selection so IME composition can start with
+ * the first keystroke. Use as the editor on a column or a column type.
+ */
 export class ImeTextEditor extends TextEditor {
-  private mode: 'ready' | 'native' | 'edit' = 'ready';
-  private focusPending = true;
+  static readonly prepareOnFocus = true;
 
-  constructor(
-    data: ColumnDataSchemaModel,
-    save: SaveCallback,
-    private readonly requestEdit: () => boolean,
-  ) {
-    super(data, save);
-  }
+  private requestEdit?: () => boolean;
+  private mode: 'ready' | 'native' | 'edit' = 'edit';
+  private focusPending = false;
 
-  setReady(ready: boolean) {
-    if (ready && this.mode !== 'ready') {
+  prepareForEdit(requestEdit?: () => boolean) {
+    this.requestEdit = requestEdit;
+    if (requestEdit && this.mode !== 'ready') {
       this.mode = 'ready';
       this.focusPending = true;
-    } else if (!ready && this.mode === 'ready') {
-      // Enter/double-click opens the existing cell value without native input.
+    } else if (!requestEdit && this.mode === 'ready') {
       this.mode = 'edit';
     }
   }
@@ -30,9 +29,7 @@ export class ImeTextEditor extends TextEditor {
     }
   }
 
-  async componentDidRender(): Promise<void> {
-    this.editInput?.addEventListener('compositionstart', this.onNativeInput);
-    this.editInput?.addEventListener('input', this.onNativeInput);
+  async componentDidRender() {
     if (this.mode === 'edit') {
       await super.componentDidRender();
     } else if (this.focusPending) {
@@ -41,24 +38,35 @@ export class ImeTextEditor extends TextEditor {
     }
   }
 
-  private readonly onNativeInput = () => {
+  private startNativeEdit() {
     if (this.mode !== 'ready') {
       return;
     }
-    // Synchronous activation also handles a Tab arriving before the next render.
+    // Preserve the same input and its browser-owned composition on activation.
     this.mode = 'native';
-    if (!this.requestEdit()) {
+    if (!this.requestEdit?.()) {
       this.mode = 'ready';
       if (this.editInput) {
         this.editInput.value = '';
       }
       super.beforeDisconnect();
     }
-  };
+  }
 
-  onKeyDown(e: KeyboardEvent) {
+  onKeyDown(event: KeyboardEvent) {
+    if (
+      event.isComposing ||
+      event.keyCode === 229 ||
+      (this.mode === 'ready' &&
+        event.key.length === 1 &&
+        !isShortcutModifier(event))
+    ) {
+      // Let the native input handle these keys without triggering grid shortcuts.
+      event.stopPropagation();
+      return;
+    }
     if (this.mode !== 'ready') {
-      super.onKeyDown(e);
+      super.onKeyDown(event);
     }
   }
 
@@ -69,20 +77,23 @@ export class ImeTextEditor extends TextEditor {
   }
 
   beforeAutoSave() {
-    // The transparent input is empty until a real edit starts.
     return this.mode !== 'ready';
   }
 
-  protected getInputValue() {
-    if (this.mode === 'ready') {
-      return '';
-    }
-    // Renders must preserve the browser's unfinished composition.
-    return this.mode === 'native' ? this.getValue() : super.getInputValue();
-  }
-
-  disconnectedCallback() {
-    this.editInput?.removeEventListener('compositionstart', this.onNativeInput);
-    this.editInput?.removeEventListener('input', this.onNativeInput);
+  render(createElement: typeof h): VNode {
+    const value = this.mode === 'native' ? this.getValue() : this.editCell?.val;
+    return createElement('input', {
+      type: 'text',
+      enterKeyHint: 'enter',
+      tabIndex: this.mode === 'ready' ? -1 : undefined,
+      'aria-label': this.data.column.name ?? String(this.data.prop),
+      value: this.mode === 'ready' ? '' : value ?? '',
+      ref: (input: HTMLInputElement | null) => {
+        this.editInput = input;
+      },
+      onCompositionStart: () => this.startNativeEdit(),
+      onInput: () => this.startNativeEdit(),
+      onKeyDown: (event: KeyboardEvent) => this.onKeyDown(event),
+    });
   }
 }

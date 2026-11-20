@@ -202,11 +202,6 @@ export namespace Components {
          */
         "hideAttribution": boolean;
         /**
-          * Keep a focused text input on selected editable cells so IME composition can start from the first keystroke. Opt-in; applies to the built-in text editor.
-          * @default false
-         */
-        "imeFastEdit": boolean;
-        /**
           * Prevent rendering until job is done. Can be used for initial rendering performance improvement. When several plugins require initial rendering this will prevent double initial rendering.
           * @default []
          */
@@ -461,7 +456,7 @@ export namespace Components {
          */
         "beforeDisconnect": () => Promise<void>;
         /**
-          * Cancel pending changes without autosave.
+          * Cancel pending changes flag. Editor will be closed without autosave.
          */
         "cancelChanges": () => Promise<void>;
         /**
@@ -477,18 +472,13 @@ export namespace Components {
          */
         "editor": EditorCtr | null;
         /**
-          * Focus the native IME input while the cell is selected.
+          * Restore focus to a prepared editor.
          */
         "focusReadyInput": () => Promise<void>;
         /**
-          * Keep the built-in editor mounted but transparent until native input.
-          * @default false
+          * Prepare the editor to start editing through the selection owner.
          */
-        "imeReady": boolean;
-        /**
-          * Requests editing through the selection owner. False means editing was vetoed.
-         */
-        "requestNativeEdit"?: () => boolean;
+        "requestEdit"?: () => boolean;
         /**
           * Save on editor close. Defines if data should be saved on editor close.
           * @default false
@@ -704,11 +694,6 @@ export namespace Components {
           * Custom editors register.
          */
         "editors": Editors;
-        /**
-          * Keep the built-in text input ready for native IME composition.
-          * @default false
-         */
-        "imeFastEdit": boolean;
         /**
           * Is mobile view mode.
          */
@@ -1505,11 +1490,6 @@ declare namespace LocalJSX {
          */
         "hideAttribution"?: boolean;
         /**
-          * Keep a focused text input on selected editable cells so IME composition can start from the first keystroke. Opt-in; applies to the built-in text editor.
-          * @default false
-         */
-        "imeFastEdit"?: boolean;
-        /**
           * Prevent rendering until job is done. Can be used for initial rendering performance improvement. When several plugins require initial rendering this will prevent double initial rendering.
           * @default []
          */
@@ -2005,11 +1985,6 @@ declare namespace LocalJSX {
          */
         "editor"?: EditorCtr | null;
         /**
-          * Keep the built-in editor mounted but transparent until native input.
-          * @default false
-         */
-        "imeReady"?: boolean;
-        /**
           * Cell edit event initiator, first in the cellEdit event chain
          */
         "onCelleditinit"?: (event: RevogrEditCustomEvent<SaveDataDetails>) => void;
@@ -2018,9 +1993,9 @@ declare namespace LocalJSX {
          */
         "onCloseedit"?: (event: RevogrEditCustomEvent<boolean | undefined>) => void;
         /**
-          * Requests editing through the selection owner. False means editing was vetoed.
+          * Prepare the editor to start editing through the selection owner.
          */
-        "requestNativeEdit"?: () => boolean;
+        "requestEdit"?: () => boolean;
         /**
           * Save on editor close. Defines if data should be saved on editor close.
           * @default false
@@ -2301,11 +2276,6 @@ declare namespace LocalJSX {
           * Custom editors register.
          */
         "editors"?: Editors;
-        /**
-          * Keep the built-in text input ready for native IME composition.
-          * @default false
-         */
-        "imeFastEdit"?: boolean;
         /**
           * Is mobile view mode.
          */
@@ -2589,7 +2559,6 @@ declare namespace LocalJSX {
         "canFocus": boolean;
         "useClipboard": boolean | ClipboardConfig;
         "applyOnClose": boolean;
-        "imeFastEdit": boolean;
         "theme": string;
         "rowClass": string;
         "autoSizeColumn": boolean | AutoSizeColumnConfig;
@@ -2617,7 +2586,6 @@ declare namespace LocalJSX {
     }
     interface RevogrEditAttributes {
         "saveOnClose": boolean;
-        "imeReady": boolean;
         "additionalData": string;
     }
     interface RevogrFilterPanelAttributes {
@@ -2646,7 +2614,6 @@ declare namespace LocalJSX {
         "canDrag": boolean;
         "useClipboard": boolean | ClipboardConfig;
         "applyChangesOnClose": boolean;
-        "imeFastEdit": boolean;
         "additionalData": string;
         "isMobileDevice": boolean;
     }

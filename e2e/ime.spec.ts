@@ -1,5 +1,5 @@
 import { expect } from '@playwright/test';
-import { test } from '@stencil/playwright';
+import { test, type E2EPage } from '@stencil/playwright';
 import {
   dataCell,
   dispatchClipboardEvent,
@@ -8,16 +8,35 @@ import {
   setCellsFocus,
 } from './helpers';
 
-test('IME fast edit keeps the first Korean syllable in the same focused input', async ({
+async function installImeEditor(page: E2EPage, useColumnType = false) {
+  await page.evaluate(async useColumnType => {
+    const loadModule = Function(
+      'return import("/build/index.esm.js")',
+    ) as () => Promise<Pick<typeof import('../src'), 'ImeTextEditor'>>;
+    const { ImeTextEditor } = await loadModule();
+    const grid = document.querySelector('revo-grid')!;
+    if (useColumnType) {
+      grid.columnTypes = { ime: { editor: ImeTextEditor } };
+    }
+    grid.columns = grid.columns.map(column =>
+      'prop' in column && (column.prop === 'name' || column.prop === 'locked')
+        ? useColumnType
+          ? { ...column, columnType: 'ime' }
+          : { ...column, editor: ImeTextEditor }
+        : column,
+    );
+  }, useColumnType);
+  await page.waitForChanges();
+}
+
+test('IME column type keeps the first Korean syllable in the same focused input', async ({
   page,
 }) => {
   await mountGrid(page, {
     columns: [{ prop: 'name', name: 'Name' }],
     source: [{ name: 'Original' }, { name: 'Next' }],
   });
-  await page.evaluate(() => {
-    Object.assign(document.querySelector('revo-grid')!, { imeFastEdit: true });
-  });
+  await installImeEditor(page, true);
   await setCellsFocus(page, { x: 0, y: 0 });
   const input = page.locator('revogr-edit input');
   await expect(input).toBeFocused();
@@ -76,15 +95,14 @@ async function readyGrid(page: Parameters<typeof mountGrid>[0]) {
     columns: [
       { prop: 'name', name: 'Name' },
       { prop: 'locked', readonly: true },
+      { prop: 'plain' },
     ],
     source: [
-      { name: 'Original', locked: 'Locked' },
+      { name: 'Original', locked: 'Locked', plain: 'Plain' },
       { name: 'Next', locked: 'Locked' },
     ],
   });
-  await page.evaluate(() => {
-    document.querySelector('revo-grid')!.imeFastEdit = true;
-  });
+  await installImeEditor(page);
   await setCellsFocus(page, { x: 0, y: 0 });
   await expect(page.locator('revogr-edit input')).toBeFocused();
 }
@@ -150,10 +168,21 @@ test('IME fast edit keeps clipboard and clear actions on the selected cell', asy
   await expect(page.locator('revogr-edit')).toHaveClass(/ime-ready/);
 });
 
-test('IME fast edit excludes custom editors and refocuses a clicked cell', async ({
+test('IME editor opts in per column and refocuses a clicked cell', async ({
   page,
 }) => {
   await readyGrid(page);
+  const plain = dataCell(page, 0, 2);
+  await plain.click();
+  await expect(page.locator('revogr-edit input')).toHaveCount(0);
+  await expect(plain).toBeFocused();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('revogr-edit input')).toHaveValue('Plain');
+  await page.keyboard.press('Escape');
+  await expect(page.locator('revogr-edit input')).toHaveCount(0);
+
+  await dataCell(page, 0, 0).click();
+  await expect(page.locator('revogr-edit input')).toBeFocused();
   await dataCell(page, 0, 0).click();
   await expect(page.locator('revogr-edit input')).toBeFocused();
   await page.evaluate(() => {
