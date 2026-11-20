@@ -1136,9 +1136,13 @@ export class RevoGridComponent {
   @Listen('beforeheaderclick') onHeaderClick(
     e: CustomEvent<InitialHeaderClick>,
   ) {
+    const { column, originalEvent } = e.detail;
+    if (!column) {
+      return;
+    }
     const { defaultPrevented } = this.headerclick.emit({
-      ...e.detail.column,
-      originalEvent: e.detail.originalEvent,
+      ...column,
+      originalEvent,
     });
     if (defaultPrevented) {
       e.preventDefault();

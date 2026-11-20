@@ -210,6 +210,7 @@ export class RevogrHeaderComponent {
   ) {
     const columnsToRender: HeaderRenderProps[] = [];
     const renderOffset = this.viewportCol.get('renderOffset') || 0;
+    const providers = this.providers;
     for (let rgCol of cols) {
       const colData = this.colData[rgCol.itemIndex];
       const props: HeaderRenderProps = {
@@ -218,7 +219,7 @@ export class RevogrHeaderComponent {
         data: {
           ...colData,
           index: rgCol.itemIndex,
-          providers: this.providers,
+          providers: { ...providers },
         },
         canFilter: !!this.columnFilter,
         canResize: this.canResize,
@@ -245,6 +246,7 @@ export class RevogrHeaderComponent {
         ),
         ...detail,
         accessible: this.accessible && this.type !== 'rowHeaders',
+        providers,
       }),
     );
     return { cells };

@@ -61,9 +61,6 @@ export const HeaderCellRenderer: FunctionalComponent<{
       },
     }),
     onMouseDown(e: MouseEvent) {
-      if (!data) {
-        return;
-      }
       dispatch(e.currentTarget, ON_COLUMN_CLICK, {
         data,
         event: e,

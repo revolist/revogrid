@@ -113,6 +113,9 @@ export class AutoSizeColumnPlugin extends BasePlugin {
         break;
       default:
         this.addEventListener('headerdblclick', ({ detail }: CustomEvent<InitialHeaderClick>) => {
+          if (!detail.column) {
+            return;
+          }
           const type = getColumnType(detail.column);
           const size = this.getColumnSize(detail.index, type);
           if (size) {

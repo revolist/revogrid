@@ -85,6 +85,7 @@ test.describe('accessibility', () => {
       source: [{ name: 'Ada' }],
       filter: true,
       canMoveColumns: true,
+      autoSizeColumn: true,
     });
 
     await page.evaluate(() => {
@@ -104,6 +105,10 @@ test.describe('accessibility', () => {
     await page.waitForChanges();
 
     const headers = page.getByRole('columnheader');
+    const columnClicks = await page.spyOnEvent('columnclick');
+    const headerClicks = await page.spyOnEvent('beforeheaderclick');
+    const headerDoubleClicks = await page.spyOnEvent('headerdblclick');
+    const dragStarts = await page.spyOnEvent('columndragstart');
     await expect(headers).toHaveCount(2);
     for (const header of await headers.all()) {
       await expect(header).toHaveText('');
@@ -111,6 +116,16 @@ test.describe('accessibility', () => {
       await expect(header.getByRole('button')).toHaveCount(0);
       await header.dblclick();
     }
+    await expect
+      .poll(() => columnClicks.events.map(event => event.detail.data))
+      .toEqual([null, null, undefined, undefined]);
+    await expect
+      .poll(() => headerClicks.events.map(event => event.detail.column))
+      .toEqual([null, null, undefined, undefined]);
+    await expect
+      .poll(() => headerDoubleClicks.events.map(event => event.detail.column))
+      .toEqual([null, undefined]);
+    expect(dragStarts.length).toBe(0);
     expect(pageErrors).toEqual([]);
   });
 

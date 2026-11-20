@@ -30,7 +30,7 @@ export const COLUMN_DRAG_START_EVENT = 'columndragstart';
 
 export type DragStartEventDetails = {
   event: MouseEvent;
-  data: ColumnPropProp;
+  data: ColumnPropProp | null | undefined;
 };
 
 export type ColumnDragStartEventData = ColumnPropProp;
@@ -126,7 +126,7 @@ export class ColumnMovePlugin extends BasePlugin {
   }
 
   dragStart({ event, data }: DragStartEventDetails) {
-    if (event.defaultPrevented) {
+    if (!data || event.defaultPrevented) {
       return;
     }
     this.preventNextHeaderClick = false;

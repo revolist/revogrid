@@ -3,6 +3,7 @@ import type {
   VirtualPositionItem,
   ColumnTemplateProp,
   InitialHeaderClick,
+  ProvidersColumns,
   RangeArea,
 } from '@type';
 
@@ -38,12 +39,13 @@ type KeyedResizableElementHTMLAttributes = ResizableElementHTMLAttributes & {
 };
 
 const HeaderRenderer = (
-  p: HeaderRenderProps & { accessible?: boolean },
+  p: HeaderRenderProps & { accessible?: boolean; providers: ProvidersColumns },
 ): ReturnType<typeof h> => {
   const data = p.data;
   const { order, sortIndex, sortable } = data ?? {};
   const hasSortingSign = !!(sortable || order || sortIndex);
   const hasFilterButton = p.canFilter && data && data.filter !== false;
+  const providers = data?.providers ?? p.providers;
   const cellClass: { [key: string]: boolean } = {
     [HEADER_CLASS]: true,
     [HEADER_SORTABLE_CLASS]: !!sortable,
@@ -71,25 +73,22 @@ const HeaderRenderer = (
     },
     onResize: p.onResize,
     onDblClick(originalEvent: MouseEvent) {
-      if (!data) {
-        return;
-      }
       p.onDblClick?.({
         column: data,
         index: p.column.itemIndex,
         originalEvent,
-        providers: data.providers,
+        providers,
       });
     },
     onClick(originalEvent: MouseEvent) {
-      if (!data || originalEvent.defaultPrevented || !p.onClick) {
+      if (originalEvent.defaultPrevented) {
         return;
       }
-      p.onClick({
+      p.onClick?.({
         column: data,
         index: p.column.itemIndex,
         originalEvent,
-        providers: data.providers,
+        providers,
       });
     },
   };
