@@ -40,17 +40,14 @@ type KeyedResizableElementHTMLAttributes = ResizableElementHTMLAttributes & {
 const HeaderRenderer = (
   p: HeaderRenderProps & { accessible?: boolean },
 ): ReturnType<typeof h> => {
-  const hasSortingSign = !!(
-    p.data?.sortable ||
-    p.data?.order ||
-    p.data?.sortIndex
-  );
-  const hasFilterButton = !!(p.canFilter && p.data?.filter !== false);
+  const data = p.data;
+  const { order, sortIndex, sortable } = data ?? {};
+  const hasSortingSign = !!(sortable || order || sortIndex);
+  const hasFilterButton = p.canFilter && data && data.filter !== false;
   const cellClass: { [key: string]: boolean } = {
     [HEADER_CLASS]: true,
-    [HEADER_SORTABLE_CLASS]: !!p.data?.sortable,
+    [HEADER_SORTABLE_CLASS]: !!sortable,
   };
-  const { order, sortIndex } = p.data;
   if (order) {
     cellClass[order] = true;
   }
@@ -60,12 +57,12 @@ const HeaderRenderer = (
       ? { asc: 'ascending', desc: 'descending' }[order]
       : undefined;
   const dataProps: KeyedResizableElementHTMLAttributes = {
-    key: String(p.data?.prop ?? p.column.itemIndex),
+    key: String(data?.prop ?? p.column.itemIndex),
     [DATA_COL]: p.column.itemIndex,
     ...(ariaSort && { 'aria-sort': ariaSort }),
     canResize: p.canResize,
-    minWidth: p.data?.minSize || MIN_COL_SIZE,
-    maxWidth: p.data?.maxSize,
+    minWidth: data?.minSize || MIN_COL_SIZE,
+    maxWidth: data?.maxSize,
     active: p.active || ['r'],
     class: cellClass,
     style: {
@@ -74,22 +71,25 @@ const HeaderRenderer = (
     },
     onResize: p.onResize,
     onDblClick(originalEvent: MouseEvent) {
+      if (!data) {
+        return;
+      }
       p.onDblClick?.({
-        column: p.data,
+        column: data,
         index: p.column.itemIndex,
         originalEvent,
-        providers: p.data.providers,
+        providers: data.providers,
       });
     },
     onClick(originalEvent: MouseEvent) {
-      if (originalEvent.defaultPrevented || !p.onClick) {
+      if (!data || originalEvent.defaultPrevented || !p.onClick) {
         return;
       }
       p.onClick({
-        column: p.data,
+        column: data,
         index: p.column.itemIndex,
         originalEvent,
-        providers: p.data.providers,
+        providers: data.providers,
       });
     },
   };
@@ -103,15 +103,15 @@ const HeaderRenderer = (
   return (
     <HeaderCellRenderer
       accessible={p.accessible}
-      data={p.data}
+      data={data}
       props={dataProps}
       additionalData={p.additionalData}
     >
       {hasSortingSign || hasFilterButton ? (
         <span class="header-controls">
-          {hasSortingSign ? <SortingSign column={p.data} /> : null}
+          {hasSortingSign ? <SortingSign column={data} /> : null}
           {hasFilterButton ? (
-            <FilterButton column={p.data} label={p.filterButtonLabel} />
+            <FilterButton column={data} label={p.filterButtonLabel} />
           ) : null}
         </span>
       ) : null}

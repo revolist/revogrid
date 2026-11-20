@@ -75,6 +75,45 @@ test.describe('accessibility', () => {
     ).toBeAttached();
   });
 
+  test('renders a blank header when the render hook clears column data', async ({
+    page,
+  }) => {
+    const pageErrors: Error[] = [];
+    page.on('pageerror', error => pageErrors.push(error));
+    await mountGrid(page, {
+      columns: [{ prop: 'name', name: 'Name', sortable: true }],
+      source: [{ name: 'Ada' }],
+      filter: true,
+      canMoveColumns: true,
+    });
+
+    await page.evaluate(() => {
+      const grid = document.querySelector('revo-grid')!;
+      grid.addEventListener('beforeheaderrender', event => {
+        const { detail } = event as CustomEvent<{
+          data: unknown;
+          column: { itemIndex: number };
+        }>;
+        detail.data = detail.column.itemIndex === 0 ? null : undefined;
+      });
+      grid.columns = [
+        { prop: 'name', name: 'Name', sortable: true },
+        { prop: 'city', name: 'City', sortable: true },
+      ];
+    });
+    await page.waitForChanges();
+
+    const headers = page.getByRole('columnheader');
+    await expect(headers).toHaveCount(2);
+    for (const header of await headers.all()) {
+      await expect(header).toHaveText('');
+      await expect(header).not.toHaveAttribute('tabindex', '0');
+      await expect(header.getByRole('button')).toHaveCount(0);
+      await header.dblclick();
+    }
+    expect(pageErrors).toEqual([]);
+  });
+
   test('owns leaf and grouped column headers in their respective rows', async ({
     page,
   }) => {

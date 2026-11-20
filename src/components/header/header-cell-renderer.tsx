@@ -41,12 +41,11 @@ export const HeaderCellRenderer: FunctionalComponent<{
       tabIndex: 0,
       onKeyDown(event: KeyboardEvent) {
         cellProps.onKeyDown?.(event);
-        if (
-          event.defaultPrevented ||
-          event.target !== event.currentTarget ||
-          event.key !== 'Enter' ||
-          event.repeat
-        ) {
+        const isHeaderEnter =
+          event.key === 'Enter' &&
+          event.target === event.currentTarget &&
+          !event.repeat;
+        if (event.defaultPrevented || !isHeaderEnter) {
           return;
         }
         event.preventDefault();
@@ -62,6 +61,9 @@ export const HeaderCellRenderer: FunctionalComponent<{
       },
     }),
     onMouseDown(e: MouseEvent) {
+      if (!data) {
+        return;
+      }
       dispatch(e.currentTarget, ON_COLUMN_CLICK, {
         data,
         event: e,

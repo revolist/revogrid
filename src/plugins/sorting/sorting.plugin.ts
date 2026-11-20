@@ -128,7 +128,7 @@ export class SortingPlugin extends BasePlugin {
       detail,
     }) => {
       const { data: column } = detail;
-      if (column.sortable) {
+      if (column?.sortable) {
         detail.data = {
           ...column,
           order: this.sorting?.[column.prop],

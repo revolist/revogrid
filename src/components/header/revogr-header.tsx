@@ -237,7 +237,12 @@ export class RevogrHeaderComponent {
     const duplicateProps = this.getDuplicateHeaderProps(columnsToRender);
     const cells = columnsToRender.map(detail =>
       h(HeaderRenderer, {
-        key: this.getHeaderCellKey(detail.data, this.type, duplicateProps),
+        key: this.getHeaderCellKey(
+          detail.data,
+          this.type,
+          duplicateProps,
+          detail.column.itemIndex,
+        ),
         ...detail,
         accessible: this.accessible && this.type !== 'rowHeaders',
       }),
@@ -385,9 +390,10 @@ export class RevogrHeaderComponent {
     column: ColumnRegular | undefined,
     type: DimensionCols | 'rowHeaders',
     duplicateProps: Set<string>,
+    itemIndex: number,
   ) {
     if (column?.prop === undefined) {
-      return `${type}-${String(column?.index)}`;
+      return `${type}-${column?.index ?? itemIndex}`;
     }
     const propKey = String(column.prop);
     if (duplicateProps.has(propKey)) {
