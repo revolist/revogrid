@@ -1,5 +1,64 @@
 import { generateFakeDataObjectAsync } from './data.js';
 import { modernThemeDefinitions } from './build/index.esm.js';
+import { createFrameworkMount, uiComponents } from './revo-ui/revo-ui.js';
+
+const dataPresets = {
+  '1 × 1': { rows: 1, cols: 1 },
+  '20 × 2': { rows: 20, cols: 2 },
+  '100 × 100': { rows: 100, cols: 100 },
+  '1K × 1K': { rows: 1000, cols: 1000 },
+  '10K × 5K': { rows: 10000, cols: 5000 },
+  '1M × 2': { rows: 1000000, cols: 2 },
+};
+const initialDataPreset = '100 × 100';
+
+const themes = {
+  default: 'Excel',
+  material: 'Material',
+  darkMaterial: 'Material dark',
+  compact: 'Compact',
+  darkCompact: 'Compact dark',
+  ocean: 'Ocean',
+  midnight: 'Midnight',
+  aurora: 'Aurora',
+  highContrast: 'High contrast',
+  highContrastDark: 'High contrast dark',
+};
+
+const pinPositions = [
+  { value: 'topPinned', label: 'Top', index: 0 },
+  { value: 'bottomPinned', label: 'Bottom', index: 1 },
+  { value: 'colPinStart', label: 'Left', index: 0 },
+  { value: 'colPinEnd', label: 'Right', index: 1 },
+];
+
+function mountPicker(id, component, source, { value, onChange, placeholder, actionOnly = false }) {
+  const mount = createFrameworkMount(document.getElementById(`${id}-picker`), () => {}, { styles: false });
+  const render = () => mount.render(component, {
+    source,
+    value,
+    placeholder,
+    className: component === uiComponents.Dropdown ? 'rv-select' : undefined,
+    config: { ariaLabelledBy: `${id}-label`, topLayer: true },
+    onChange(nextValue) {
+      if (!actionOnly) {
+        value = nextValue;
+        render();
+      }
+      onChange(nextValue);
+    },
+  });
+  render();
+}
+
+function mountActionPicker(id, placeholder, actions) {
+  mountPicker(id, uiComponents.Dropdown,
+    Object.keys(actions).map(value => ({ value, label: value })), {
+      onChange: value => actions[value](),
+      placeholder,
+      actionOnly: true,
+    });
+}
 
 /**
  * Map of prevented events
@@ -221,33 +280,11 @@ globalThis.setRtl = function (checked) {
   globalThis.document.dir = checked ? 'rtl' : 'ltr';
 };
 
-/**
- * Set pinned rows/columns
- * @param {string} type - Type of pinned rows/columns
- * @param {boolean} checked - True if rows/columns are pinned, false otherwise
- */
-globalThis.setPinned = function (type, checked) {
-  const val = [];
-  if (checked) {
-    switch (type) {
-      case 'colPinStart':
-        val.push(0);
-        break;
-      case 'colPinEnd':
-        val.push(1);
-        break;
-      case 'topPinned':
-        val.push(0);
-        break;
-      case 'bottomPinned':
-        val.push(1);
-        break;
-    }
-  }
-  void globalThis.setData({
-    [type]: val,
-  });
-};
+function setPinned(positions) {
+  void globalThis.setData(Object.fromEntries(pinPositions.map(({ value, index }) => [
+    value, positions.includes(value) ? [index] : [],
+  ])));
+}
 
 /**
  * Prevent event debug
@@ -318,11 +355,8 @@ globalThis.theme = function (theme) {
   const definition = modernThemeDefinitions.find(
     item => item.name === selectedTheme,
   );
-  if (definition?.colorScheme === 'dark' || selectedTheme.includes('dark')) {
-    document.documentElement.setAttribute('data-bs-theme', 'dark');
-  } else {
-    document.documentElement.removeAttribute('data-bs-theme');
-  }
+  const dark = definition?.colorScheme === 'dark' || selectedTheme.toLowerCase().includes('dark');
+  document.documentElement.dataset.theme = dark ? 'dark' : 'light';
   grid.theme = selectedTheme;
 };
 
@@ -454,19 +488,46 @@ function onLoad() {
   grid.useClipboard = { rangeFill: true };
   grid.resize = true;
   grid.resizeRow = { fullRow: true };
+  grid.filter = { disableDynamicFiltering: true };
 
   grid.exporting = true;
   grid.rowHeaders = true;
-  const initialTheme = new URLSearchParams(location.search).get('theme');
-  if (initialTheme) {
-    globalThis.theme(initialTheme);
-    const themeOption = Array.from(
-      document.querySelectorAll('input[name="theme"]'),
-    ).find(option => option.value === initialTheme);
-    if (themeOption) {
-      themeOption.checked = true;
-    }
-  }
+  const initialTheme = new URLSearchParams(location.search).get('theme') || 'default';
+  globalThis.theme(initialTheme);
+  mountPicker('data', uiComponents.Dropdown,
+    Object.keys(dataPresets).map(value => ({ value, label: value })), {
+      value: initialDataPreset,
+      onChange: value => void globalThis.setData(dataPresets[value]),
+    });
+  mountPicker('theme', uiComponents.Dropdown,
+    Object.entries(themes).map(([value, label]) => ({ value, label })), {
+      value: Object.hasOwn(themes, initialTheme) ? initialTheme : 'default',
+      onChange: globalThis.theme,
+    });
+  mountPicker('pin', uiComponents.MultiSelect, pinPositions, {
+    value: [],
+    onChange: setPinned,
+    placeholder: 'Select positions',
+  });
+  mountActionPicker('filter', 'Filter actions', {
+    'Set filter': globalThis.setFilter,
+    'Clear filter': globalThis.clearFilter,
+    'Trim 3rd row': () => globalThis.setTrimmed([2]),
+    'Clear trimmed': () => globalThis.setTrimmed([]),
+  });
+  mountActionPicker('sorting', 'Sorting actions', {
+    'Sort 2nd': () => globalThis.sortColumn(1),
+    'Clear sorting': globalThis.clearSorting,
+  });
+  mountActionPicker('row-grouping', 'Row grouping actions', {
+    'Group rows': () => globalThis.setGrouping(['key', 'key2']),
+    'Clear row grouping': globalThis.clearGrouping,
+  });
+  mountActionPicker('column-grouping', 'Column grouping actions', {
+    'Group columns': () => globalThis.showColGrouping(true),
+    'Clear column grouping': () => globalThis.showColGrouping(false),
+    'Column grouping demo': globalThis.setColumnGroupOffsetBugDemo,
+  });
   // grid.rowDefinitions = [{
   //   size: 200,
   //   type: 'rgRow',
@@ -478,7 +539,7 @@ function onLoad() {
     mode: 'autoSizeAll',
   };*/
   // default
-  void globalThis.setData({ rows: 100, cols: 100 });
+  void globalThis.setData(dataPresets[initialDataPreset]);
 
   // events testing
   // 'beforerange', 'setRange', 'beforefocuslost', 'beforecellfocus', 'afterfocus', 'beforeedit', 'aftercolumnresize'

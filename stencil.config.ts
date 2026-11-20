@@ -8,6 +8,7 @@ import { vueOutputTarget as vue2OutputTarget } from '@revolist/stencil-vue2-outp
 import { dashOutputTarget } from '@revolist/stencil-dash-output-target';
 import { eventListOutputTarget } from './scripts/event-list.plugin';
 import { hydrateTypesOutputTarget } from './scripts/hydrate-types.plugin';
+import { demoDropdownStyles } from './scripts/demo-dropdown-styles.plugin';
 
 const componentCorePackage = '@revolist/revogrid';
 const parent = './packages';
@@ -174,11 +175,13 @@ export const config: Config = {
       type: 'dist-hydrate-script',
     },
     hydrateTypesOutputTarget(),
+    demoDropdownStyles,
     {
       type: 'www',
       copy: [
         { src: 'serve', dest: '.' },
-        { src: '../node_modules/bootstrap/dist', dest: './bootstrap' },
+        { src: '../node_modules/@revolist/ui/browser/revo-ui.js', dest: './revo-ui/revo-ui.js' },
+        { src: '../node_modules/@revolist/ui/styles.css', dest: './revo-ui/styles.css' },
         { src: '**/e2e/*.html' },
         { src: '**/e2e/*.css' },
       ],
