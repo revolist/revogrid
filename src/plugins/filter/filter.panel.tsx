@@ -766,7 +766,7 @@ export class FilterPanel {
                   type="button"
                   id="revo-button-ok"
                   aria-label="ok"
-                  class="revo-button green"
+                  class="revo-button outline"
                   onClick={() => this.onCancel()}
                 >
                   {capts.cancel}

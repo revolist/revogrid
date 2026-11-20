@@ -1,14 +1,87 @@
-body,
-html {
+html,
+body {
   height: 100%;
-  width: 100%;
-  padding: 0;
-  box-sizing: border-box;
   margin: 0;
-  overflow: hidden;
-  display: flex;
 }
 
+body {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  overflow: hidden;
+  background: var(--rv-ui-canvas);
+  color: var(--rv-ui-text);
+  font: 14px/1.5 system-ui, sans-serif;
+}
+
+.demo-sidebar {
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  min-height: 0;
+  box-sizing: border-box;
+  padding: 16px;
+  overflow: auto;
+  border-inline-end: 1px solid var(--rv-ui-border);
+  background: var(--rv-ui-surface);
+}
+
+.demo-sidebar h2 {
+  margin: 0 0 6px;
+  font-size: 14px;
+}
+
+.demo-sidebar p {
+  margin: 8px 0;
+  color: var(--rv-ui-text-muted);
+}
+
+.demo-sidebar .rv-button {
+  padding-inline: 9px;
+  font-size: 13px;
+}
+
+.demo-actions,
+.demo-toggles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.demo-data-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: stretch;
+  gap: 6px;
+}
+
+.demo-data-actions .rv-button {
+  white-space: nowrap;
+}
+
+.demo-toggles {
+  margin-block-start: 8px;
+}
+
+.demo-toggles label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.grid-holder {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+}
+
+revo-grid {
+  display: block;
+  height: 100%;
+}
+
+.grid-holder > revo-grid[theme='material'] {
+  background-color: #fff;
+}
 
 .inner-cell {
   width: 100%;
@@ -17,22 +90,24 @@ html {
 
 .loader {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  line-height: calc(60vh);
-  text-align: center;
-  background-color: rgba(255, 255, 255, 0.8);
+  inset: 0;
   z-index: 1000;
+  padding: 24px;
+  text-align: center;
+  background: color-mix(in srgb, var(--rv-ui-surface) 84%, transparent);
   font-weight: 600;
-  font-family: sans-serif;
 }
 
-.scrollable {
-  overflow-y: auto;
-  height: 100%;
-  border: 10px solid var(--bs-tertiary-bg);
+@media (max-width: 640px) {
+  body {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 42%) minmax(0, 1fr);
+  }
+
+  .demo-sidebar {
+    border-inline-end: 0;
+    border-block-end: 1px solid var(--rv-ui-border);
+  }
 }
 
 .highlighted-row {
