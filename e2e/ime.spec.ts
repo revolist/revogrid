@@ -155,6 +155,53 @@ test('IME fast edit respects edit vetoes and readonly grids', async ({
   await expect(page.locator('revogr-edit input')).toHaveCount(0);
 });
 
+test('IME editor retries composition after a one-time edit veto', async ({ page }) => {
+  await readyGrid(page);
+  await page.evaluate(() => {
+    document.querySelector('revo-grid')!.addEventListener(
+      'beforeeditstart',
+      event => event.preventDefault(),
+      { once: true },
+    );
+  });
+  const input = page.locator('revogr-edit input');
+  const session = await page.context().newCDPSession(page);
+  await session.send('Input.imeSetComposition', {
+    text: 'ㅇ',
+    selectionStart: 1,
+    selectionEnd: 1,
+  });
+  await expect(input).toBeFocused();
+  await expect(input).toHaveValue('');
+  await expect(dataCell(page, 0, 0)).toHaveText('Original');
+
+  await session.send('Input.imeSetComposition', {
+    text: '안',
+    selectionStart: 1,
+    selectionEnd: 1,
+  });
+  await session.send('Input.insertText', { text: '안' });
+  await input.press('Enter');
+  await expect(dataCell(page, 0, 0)).toHaveText('안');
+  await session.detach();
+});
+
+test('IME editor uses beforeeditrender positioning while prepared', async ({ page }) => {
+  await readyGrid(page);
+  await page.evaluate(() => {
+    document.querySelector('revo-grid')!.addEventListener('beforeeditrender', event => {
+      event.detail.range.x = 1;
+      event.detail.range.x1 = 1;
+    });
+  });
+  await setCellsFocus(page, { x: 0, y: 1 });
+  const editor = page.locator('revogr-edit');
+  await expect(editor).toHaveCSS('left', '100px');
+  await page.keyboard.type('New');
+  await expect(editor).toHaveCSS('left', '100px');
+  await expect(editor.locator('input')).toHaveValue('New');
+});
+
 test('IME fast edit keeps clipboard and clear actions on the selected cell', async ({
   page,
 }) => {
@@ -291,8 +338,8 @@ for (const { language, segments } of compositionCases) {
         ).toBe(true);
       }
 
-      // Candidate-confirmation/navigation keys belong to the IME. Include
-      // legacy keyCode 229 without isComposing for older browser event paths.
+      // Candidate-confirmation/navigation keys belong to the IME, including
+      // keyboard events that omit isComposing during native composition.
       await input.evaluate(el => {
         for (const key of ['Enter', 'Tab', 'Escape', 'ArrowLeft']) {
           el.dispatchEvent(
@@ -309,7 +356,6 @@ for (const { language, segments } of compositionCases) {
           new KeyboardEvent('keydown', {
             key: 'Enter',
             code: 'Enter',
-            keyCode: 229,
             bubbles: true,
             cancelable: true,
           }),

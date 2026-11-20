@@ -13,12 +13,14 @@ export class ImeTextEditor extends TextEditor {
   private requestEdit?: () => boolean;
   private mode: 'ready' | 'native' | 'edit' = 'edit';
   private focusPending = false;
+  private composing = false;
   private focusScope?: Element | null;
 
   prepareForEdit(requestEdit?: () => boolean) {
     this.requestEdit = requestEdit;
     if (requestEdit && this.mode !== 'ready') {
       this.mode = 'ready';
+      this.composing = false;
       this.focusPending = true;
       // An edit cancelled before rendering can leave the VNode value empty
       // while the live input still contains the discarded text.
@@ -65,19 +67,31 @@ export class ImeTextEditor extends TextEditor {
     }
     // Preserve the same input and its browser-owned composition on activation.
     this.mode = 'native';
-    if (!this.requestEdit?.()) {
-      this.mode = 'ready';
-      if (this.editInput) {
-        this.editInput.value = '';
-      }
-      super.beforeDisconnect();
+    if (this.requestEdit?.()) {
+      return;
     }
+    const input = this.editInput;
+    if (input) {
+      // Blur cancels the rejected native composition. Keep ordinary input
+      // focused, and leave any focus change by the veto handler in place.
+      const restoreFocus = this.composing && input.matches(':focus');
+      if (restoreFocus) {
+        input.blur();
+      }
+      input.value = '';
+      if (restoreFocus) {
+        input.focus({ preventScroll: true });
+      }
+    }
+    this.composing = false;
+    this.mode = 'ready';
   }
 
   onKeyDown(event: KeyboardEvent) {
     if (
       event.isComposing ||
-      event.keyCode === 229 ||
+      this.composing ||
+      event.key === 'Process' ||
       (this.mode === 'ready' &&
         event.key.length === 1 &&
         !isShortcutModifier(event))
@@ -117,7 +131,12 @@ export class ImeTextEditor extends TextEditor {
       ref: (input: HTMLInputElement | null) => {
         this.editInput = input;
       },
-      onCompositionStart: () => this.startNativeEdit(),
+      'on-compositionstart': () => {
+        this.composing = true;
+      },
+      'on-compositionend': () => {
+        this.composing = false;
+      },
       onInput: () => this.startNativeEdit(),
       onKeyDown: (event: KeyboardEvent) => this.onKeyDown(event),
     });

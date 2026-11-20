@@ -537,7 +537,7 @@ export class OverlaySelection {
         activeEdit?.val || undefined,
       ),
     };
-    const renderDetails = {
+    const renderEvent = this.beforeEditRender.emit({
       range: {
         ...editCell,
         x1: editCell.x,
@@ -546,15 +546,14 @@ export class OverlaySelection {
       ...this.types,
       rowDimension: { ...this.dimensionRow.state },
       colDimension: { ...this.dimensionCol.state },
-    };
-    const renderEvent = ready ? undefined : this.beforeEditRender.emit(renderDetails);
+    });
 
     // Render prevented
-    if (renderEvent?.defaultPrevented) {
+    if (renderEvent.defaultPrevented) {
       return null;
     }
 
-    const { range, rowDimension, colDimension } = renderEvent?.detail ?? renderDetails;
+    const { range, rowDimension, colDimension } = renderEvent.detail;
     const cell = getCell(range, rowDimension, colDimension);
     const styles = styleByCellProps(cell);
     return (
