@@ -102,7 +102,7 @@ export class FilterPlugin extends BasePlugin {
     }
 
     const existingNodes = this.revogrid.registerVNode.filter(
-      n => typeof n === 'object' && n.$tag$ !== FILTE_PANEL,
+      node => typeof node === 'function' || node.$tag$ !== FILTE_PANEL,
     );
     this.revogrid.registerVNode = [
       ...existingNodes,
@@ -121,30 +121,6 @@ export class FilterPlugin extends BasePlugin {
         {this.extraContent()}
       </revogr-filter-panel>,
     ];
-
-    const aftersourceset = () => {
-      const filterCollectionProps = Object.keys(this.filterCollection);
-      if (filterCollectionProps.length > 0) {
-        // handle old way of filtering by reworking FilterCollection to new MultiFilterItem
-        filterCollectionProps.forEach((prop, index) => {
-          if (!this.multiFilterItems[prop]) {
-            this.multiFilterItems[prop] = [
-              {
-                id: index,
-                type: this.filterCollection[prop].type,
-                value: this.filterCollection[prop].value,
-                relation: 'and',
-              },
-            ];
-          }
-        });
-      }
-      if (!this.hasActiveFilters()) {
-        this.cancelFiltering();
-        return;
-      }
-      void this.runFiltering(this.multiFilterItems);
-    };
 
     /**
      * This executes before the data store replaces its source.
@@ -182,22 +158,42 @@ export class FilterPlugin extends BasePlugin {
               ? { ...detail, multiFilterItems: this.multiFilterItems }
               : detail,
           );
-          if (!detail.multiFilterItems || !Object.keys(detail.multiFilterItems).length) {
-            if (preserveCurrentFilters) {
-              aftersourceset();
-              return;
-            }
+          if (!preserveCurrentFilters && !this.hasActiveFilters()) {
             void this.clearFiltering();
             return;
           }
         }
-        aftersourceset();
+        this.applySourceFilters();
       },
     );
-    this.addEventListener('aftersourceset', aftersourceset);
+    this.addEventListener('aftersourceset', () => this.applySourceFilters());
     this.addEventListener('filter', ({ detail }: CustomEvent) =>
       this.onFilterChange(detail),
     );
+  }
+
+  applySourceFilters() {
+    const filterCollectionProps = Object.keys(this.filterCollection);
+    if (filterCollectionProps.length > 0) {
+      // handle old way of filtering by reworking FilterCollection to new MultiFilterItem
+      filterCollectionProps.forEach((prop, index) => {
+        if (!this.multiFilterItems[prop]) {
+          this.multiFilterItems[prop] = [
+            {
+              id: index,
+              type: this.filterCollection[prop].type,
+              value: this.filterCollection[prop].value,
+              relation: 'and',
+            },
+          ];
+        }
+      });
+    }
+    if (!this.hasActiveFilters()) {
+      this.cancelFiltering();
+      return;
+    }
+    void this.runFiltering(this.multiFilterItems);
   }
 
   beforeshow(_: ShowData) {
@@ -214,20 +210,17 @@ export class FilterPlugin extends BasePlugin {
     if (this.pop) {
       this.pop.allowDuplicateOperators = this.allowDuplicateOperators;
     }
-    if (config.multiFilterItems) {
-      this.multiFilterItems = { ...config.multiFilterItems };
-    } else {
-      this.multiFilterItems = {};
-    }
+    this.multiFilterItems = Object.fromEntries(
+      Object.entries(config.multiFilterItems ?? {}).filter(([, conditions]) => conditions.length > 0),
+    );
     // Add custom filters
     if (config.customFilters) {
       for (let customFilterType in config.customFilters) {
         const cFilter = config.customFilters[customFilterType];
-        if (!this.filterByType[cFilter.columnFilterType]) {
-          this.filterByType[cFilter.columnFilterType] = [];
+        const operators = this.filterByType[cFilter.columnFilterType] ?? [];
+        if (!operators.includes(customFilterType)) {
+          this.filterByType[cFilter.columnFilterType] = [...operators, customFilterType];
         }
-        // add custom filter type
-        this.filterByType[cFilter.columnFilterType].push(customFilterType);
         // add custom filter function
         this.filterFunctionsIndexedByType[customFilterType] = cFilter.func;
         // add custom filter name

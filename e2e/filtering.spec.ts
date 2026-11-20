@@ -1,5 +1,6 @@
 import { expect } from '@playwright/test';
 import { test, type E2EPage } from '@stencil/playwright';
+import type { BasePlugin } from '../src/plugins/base.plugin';
 import {
   SELECTORS,
   buildColumns,
@@ -22,6 +23,103 @@ async function nextAnimationFrames(page: E2EPage, count = 2) {
 }
 
 test.describe('filtering', () => {
+  test('ignores empty condition lists in runtime filter configuration', async ({ page }) => {
+    await mountGrid(page, {
+      columns: [{ prop: 'name', filter: true }, { prop: 'role', filter: true }],
+      source: [{ name: 'Alice', role: 'Admin' }, { name: 'Bob', role: 'User' }],
+    });
+    const grid = page.locator<HTMLRevoGridElement>(SELECTORS.grid);
+    await grid.evaluate(element => {
+      element.filter = {
+        multiFilterItems: {
+          name: [],
+          role: [{ id: 0, type: 'eq', value: 'Admin' }],
+        },
+      };
+    });
+    await expectVisibleColumnValues(page, 0, ['Alice']);
+
+    await grid.evaluate(element => {
+      element.filter = { multiFilterItems: { role: [] } };
+    });
+    await expectVisibleColumnValues(page, 0, ['Alice', 'Bob']);
+  });
+
+  test('reapplies the same filter configuration after disabling filtering', async ({ page }) => {
+    await mountGrid(page, {
+      columns: [
+        { prop: 'name', name: 'Name', filter: true, ...withHeaderTestId('restored-filter-header') },
+      ],
+      source: [{ name: 'Alice' }, { name: 'Bob' }],
+    });
+    const grid = page.locator<HTMLRevoGridElement>(SELECTORS.grid);
+    await grid.evaluate(element => {
+      element.filter = {
+        customFilters: {
+          isAlice: { name: 'Is Alice', columnFilterType: 'string', func: value => value === 'Alice' },
+        },
+        multiFilterItems: {
+          name: [{ id: 0, type: 'isAlice', relation: 'and' }],
+        },
+      };
+    });
+    await expectVisibleColumnValues(page, 0, ['Alice']);
+
+    await grid.evaluate(element => {
+      const config = element.filter;
+      element.filter = false;
+      element.filter = config;
+    });
+    await expectVisibleColumnValues(page, 0, ['Alice']);
+    await clickFilterButton(page, 'restored-filter-header');
+    const operators = page.locator(SELECTORS.filterPanel).getByRole('combobox').first();
+    await expect(operators.locator('option[value="isAlice"]')).toHaveCount(1);
+  });
+
+  test('enables filtering after mount and applies the initial configuration', async ({ page }) => {
+    await mountGrid(page, {
+      columns: [
+        { prop: 'name', name: 'Name', filter: true, ...withHeaderTestId('late-filter-header') },
+      ],
+      source: [{ name: 'Alice' }, { name: 'Bob' }],
+    });
+    await expectVisibleColumnValues(page, 0, ['Alice', 'Bob']);
+    await expect(page.locator('revogr-filter-panel')).toHaveCount(0);
+
+    const grid = page.locator<HTMLRevoGridElement>(SELECTORS.grid);
+    await grid.evaluate(async element => {
+      const [plugin] = (await element.getPlugins()) as BasePlugin[];
+      element.registerVNode = [
+        () => plugin.h('span', { 'data-testid': 'custom-grid-content' }, 'Custom content'),
+      ];
+    });
+    const customContent = page.getByTestId('custom-grid-content');
+    await expect(customContent).toHaveText('Custom content');
+
+    await grid.evaluate(element => {
+      element.filter = {
+        collection: { name: { type: 'eq', value: 'Alice' } },
+      };
+    });
+    await expect(page.locator('revogr-filter-panel')).toHaveCount(1);
+    await expectVisibleColumnValues(page, 0, ['Alice']);
+    await expect(customContent).toHaveText('Custom content');
+
+    await grid.evaluate(element => {
+      element.filter = false;
+    });
+    await expectVisibleColumnValues(page, 0, ['Alice', 'Bob']);
+    await grid.evaluate(element => {
+      element.filter = {
+        collection: { name: { type: 'eq', value: 'Bob' } },
+      };
+    });
+    await expectVisibleColumnValues(page, 0, ['Bob']);
+    await clickFilterButton(page, 'late-filter-header');
+    await expect(page.locator(SELECTORS.filterPanel)).toBeVisible();
+    await expect(page.locator('revogr-filter-panel')).toHaveCount(1);
+  });
+
   test('filters falsy cell values with text operators', async ({ page }) => {
     await mountGrid(page, {
       columns: [{ prop: 'name' }, { prop: 'value', filter: true }],

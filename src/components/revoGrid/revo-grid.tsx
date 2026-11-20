@@ -87,7 +87,7 @@ import { ColumnMovePlugin } from '../../plugins/moveColumn/column.drag.plugin';
 import { getPropertyFromEvent } from '../../utils/events';
 import { isMobileDevice } from '../../utils/mobile';
 import type { Observable } from '../../utils';
-import type { GridPlugin } from '../../plugins/base.plugin';
+import type { BasePlugin, GridPlugin } from '../../plugins/base.plugin';
 import { ColumnCollection, getColumnByProp, getColumns } from '../../utils/column.utils';
 import { WCAGPlugin } from '../../plugins/wcag';
 import type {
@@ -1568,6 +1568,23 @@ export class RevoGridComponent {
 
   @Watch('filter') applyFilter(cfg: boolean | ColumnFilterConfig) {
     this.filterconfigchanged.emit(cfg);
+    // Existing plugins handle the event. A newly added plugin starts with the
+    // current config and applies it to the source that is already loaded.
+    if (this.filter === cfg) {
+      this.ensureFilterPlugin(cfg)?.applySourceFilters();
+    }
+  }
+
+  @Watch('exporting') applyExporting() {
+    if (this.exporting) {
+      this.ensureCorePlugin(ExportFilePlugin);
+    }
+  }
+
+  @Watch('canMoveColumns') applyColumnMove() {
+    if (this.canMoveColumns) {
+      this.ensureCorePlugin(ColumnMovePlugin);
+    }
   }
 
   @Watch('sorting') applySorting(cfg?: SortingConfig) {
@@ -1654,21 +1671,8 @@ export class RevoGridComponent {
       ));
     }
 
-    // register filter plugin
-    if (this.filter) {
-      this.pluginService.add(
-        new FilterPlugin(
-          this.element,
-          pluginData,
-          typeof this.filter === 'object' ? this.filter : undefined,
-        ),
-      );
-    }
-
-    // register export plugin
-    if (this.exporting) {
-      this.pluginService.add(new ExportFilePlugin(this.element, pluginData));
-    }
+    this.ensureFilterPlugin(this.filter);
+    this.applyExporting();
 
     // register sorting plugin
     this.pluginService.add(new SortingPlugin(this.element, pluginData));
@@ -1678,9 +1682,34 @@ export class RevoGridComponent {
     this.pluginService.add(
       new RowResizePlugin(this.element, pluginData),
     );
-    if (this.canMoveColumns) {
-      this.pluginService.add(new ColumnMovePlugin(this.element, pluginData));
+    this.applyColumnMove();
+  }
+
+  private ensureFilterPlugin(cfg: boolean | ColumnFilterConfig) {
+    if (!cfg) {
+      return;
     }
+    return this.ensureCorePlugin(FilterPlugin, providers => new FilterPlugin(
+      this.element,
+      providers,
+      typeof cfg === 'object' ? cfg : undefined,
+    ));
+  }
+
+  private ensureCorePlugin<T extends BasePlugin>(
+    Plugin: new (element: HTMLRevoGridElement, providers: PluginProviders) => T,
+    create = (providers: PluginProviders) => new Plugin(this.element, providers),
+  ): T | undefined {
+    if (!this.element.isConnected || this.pluginService.getByClass(Plugin)) {
+      return;
+    }
+    const providers = this.getPluginData();
+    if (!providers) {
+      return;
+    }
+    const plugin = create(providers);
+    this.pluginService.add(plugin);
+    return plugin;
   }
 
   private syncRowResizeConfig() {

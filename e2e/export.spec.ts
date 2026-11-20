@@ -6,9 +6,20 @@ import {
   basicColumns,
   getExportCsv,
   mountGrid,
+  SELECTORS,
 } from './helpers';
 
 test.describe('export', () => {
+  test('enables exporting after mount', async ({ page }) => {
+    await mountGrid(page, { columns: basicColumns(), source: SAMPLE_ROWS.pair });
+    expect(await getExportCsv(page)).toBeNull();
+
+    await page.locator<HTMLRevoGridElement>(SELECTORS.grid).evaluate(grid => {
+      grid.exporting = true;
+    });
+    expect(await getExportCsv(page)).toContain('1,Alice,Engineer,Lisbon');
+  });
+
   test('cancels file download before export and still allows a later download', async ({ page }) => {
     await mountGrid(page, {
       columns: basicColumns(), source: SAMPLE_ROWS.pair, exporting: true,
