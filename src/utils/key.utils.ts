@@ -75,22 +75,31 @@ export function isEnterKeyValue(key: string): boolean {
 }
 
 export function isCut(event: KeyboardEvent): boolean {
-  return (
-    (event.ctrlKey && event.code === 'KeyX') || // Ctrl + X on Windows
-    (event.metaKey && event.code === 'KeyX')
-  ); // Cmd + X on Mac
+  return isClipboardShortcut(event, 'x', codesLetter.X);
 }
 export function isCopy(event: KeyboardEvent): boolean {
-  return (
-    (event.ctrlKey && event.code === 'KeyC') || // Ctrl + C on Windows
-    (event.metaKey && event.code === 'KeyC')
-  ); // Cmd + C on Mac
+  return isClipboardShortcut(event, 'c', codesLetter.C);
 }
 export function isPaste(event: KeyboardEvent): boolean {
+  return isClipboardShortcut(event, 'v', codesLetter.V);
+}
+
+function isClipboardShortcut(
+  event: KeyboardEvent,
+  key: string,
+  code: codesLetter,
+): boolean {
+  if (!isShortcutModifier(event)) {
+    return false;
+  }
+
+  // Keep physical shortcuts for non-Latin letters while honoring remapped Latin keys.
   return (
-    (event.ctrlKey && event.code === 'KeyV') || // Ctrl + V on Windows
-    (event.metaKey && event.code === 'KeyV')
-  ); // Cmd + V on Mac
+    event.key.toLowerCase() === key ||
+    (event.code === code &&
+      /^\p{Letter}$/u.test(event.key) &&
+      !/^\p{Script=Latin}$/u.test(event.key))
+  );
 }
 export function isAll(event: KeyboardEvent): boolean {
   return (

@@ -36,6 +36,9 @@ export class Clipboard {
    */
   @Prop() readonly: boolean;
 
+  /** @internal Resolve the selected cells during native copy and cut events. */
+  @Prop() getCopyData?: () => DataFormat[][] | false | undefined;
+
   /**
    * Paste 1. Fired before paste applied to the grid
    * defaultPrevented - if true, paste will be canceled
@@ -109,9 +112,10 @@ export class Clipboard {
 
   /**
    * Copy 2. Fired when region copied
-   * defaultPrevented - if true, copy will be canceled
+   * Call preventDefault() to skip the default clipboard write.
+   * Use beforecut to cancel a cut before the source cells are cleared.
    */
-  @Event({ eventName: 'copyregion' })
+  @Event({ eventName: 'copyregion', cancelable: true })
   copyRegion: EventEmitter<DataTransfer>;
 
   @Listen('paste', { target: 'document' }) onPaste(e: ClipboardEvent) {
@@ -182,7 +186,12 @@ export class Clipboard {
     }
     const data = this.getData(beforeCopy.detail.event);
     e.preventDefault();
-    this.copyRegion.emit(data || undefined);
+    const values = this.getCopyData ? this.getCopyData() : false;
+    const copyRegion = this.copyRegion.emit(data || undefined);
+    if (data && values !== false && !copyRegion.defaultPrevented) {
+      // The browser only allows clipboard writes during native event dispatch.
+      this.writeCopyData(data, values);
+    }
   }
 
   /**
@@ -208,6 +217,10 @@ export class Clipboard {
   }
 
   @Method() async doCopy(e: DataTransfer, data?: DataFormat[][]) {
+    this.writeCopyData(e, data);
+  }
+
+  private writeCopyData(e: DataTransfer, data?: DataFormat[][]) {
     const beforeCopyApply = this.beforeCopyApply.emit({
       event: e,
       data,

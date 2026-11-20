@@ -296,7 +296,6 @@ export class OverlaySelection {
 
   // #region Private Properties
   @Element() element: HTMLElement;
-  private clipboard?: HTMLRevogrClipboardElement;
 
   protected columnService: ColumnService;
   private keyboardService: KeyboardService | null = null;
@@ -615,9 +614,8 @@ export class OverlaySelection {
         nodes.push(
           <revogr-clipboard
             readonly={this.readonly}
-            onCopyregion={e => this.onCopy(e.detail)}
+            getCopyData={() => this.getCopyData()}
             onClearregion={() => !this.readonly && this.clearCell()}
-            ref={e => (this.clipboard = e)}
             onPasteregion={e => this.onPaste(e.detail)}
           />,
         );
@@ -854,7 +852,7 @@ export class OverlaySelection {
     }
     return range;
   }
-  private onCopy(e: DataTransfer) {
+  private getCopyData() {
     const range = this.getRegion();
     const canCopyEvent = this.beforeCopyRegion.emit(range);
     if (canCopyEvent.defaultPrevented) {
@@ -878,8 +876,7 @@ export class OverlaySelection {
       }
     }
 
-    this.clipboard?.doCopy(e, rangeData);
-    return true;
+    return rangeData;
   }
 
   private onPaste(data: string[][]) {
