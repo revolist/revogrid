@@ -1895,7 +1895,7 @@ declare namespace LocalJSX {
          */
         "onClearregion"?: (event: RevogrClipboardCustomEvent<DataTransfer>) => void;
         /**
-          * Copy 2. Fired when region copied defaultPrevented - if true, copy will be canceled
+          * Copy 2. Fired when region copied Call preventDefault() to skip the default clipboard write. Use beforecut to cancel a cut before the source cells are cleared.
          */
         "onCopyregion"?: (event: RevogrClipboardCustomEvent<DataTransfer>) => void;
         /**

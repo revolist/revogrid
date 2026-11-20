@@ -96,6 +96,30 @@ test.describe('clipboard', () => {
     await expect(copiedText).toBe('Alice\tEngineer\nBen\tDesigner');
   });
 
+  test('preserves custom clipboard text when copyregion is canceled', async ({ page }) => {
+    await mountGrid(page, {
+      columns: basicColumns(['id', 'name', 'role']),
+      source: SAMPLE_ROWS.pair,
+      range: true,
+    });
+    await setCellsFocus(page, { x: 1, y: 0 });
+    await page.locator('revo-grid').evaluate(grid => {
+      grid.addEventListener(
+        'copyregion',
+        event => {
+          event.preventDefault();
+          (event as CustomEvent<DataTransfer>).detail.setData(
+            'text/plain',
+            'Custom clipboard text',
+          );
+        },
+        { once: true },
+      );
+    });
+
+    expect(await getFirefoxCopiedText(page)).toBe('Custom clipboard text');
+  });
+
   test('pastes tabular data into the focused cell from keyboard paste flow', async ({ page }) => {
     await mountGrid(page, {
       columns: basicColumns(['id', 'name', 'role']),
@@ -116,7 +140,7 @@ test.describe('clipboard', () => {
     await expect(dataCell(page, 2, 2)).toHaveText('PM');
   });
 
-  test('recognizes paste by the logical key on remapped layouts', async ({ page }) => {
+  test('recognizes remapped Latin and physical non-Latin paste shortcuts', async ({ page }) => {
     await mountGrid(page, {
       columns: basicColumns(['id', 'name', 'role']),
       source: SAMPLE_ROWS.pair,
@@ -130,8 +154,11 @@ test.describe('clipboard', () => {
       grid.addEventListener('beforepasteregion', () => recognized.push(currentKey));
       for (const init of [
         { code: 'KeyV', key: 'k', ctrlKey: true },
+        { code: 'KeyV', key: 'é', ctrlKey: true },
         { code: 'KeyK', key: 'v', ctrlKey: true },
         { code: 'KeyK', key: 'V', metaKey: true, shiftKey: true },
+        { code: 'KeyV', key: 'м', ctrlKey: true },
+        { code: 'KeyK', key: 'м', ctrlKey: true },
       ]) {
         currentKey = init.key;
         document.dispatchEvent(new KeyboardEvent('keydown', {
@@ -143,7 +170,7 @@ test.describe('clipboard', () => {
       return recognized;
     });
 
-    expect(pasteKeys).toEqual(['v', 'V']);
+    expect(pasteKeys).toEqual(['v', 'V', 'м']);
     await expect(page.locator(SELECTORS.editInput)).toHaveCount(0);
   });
 
