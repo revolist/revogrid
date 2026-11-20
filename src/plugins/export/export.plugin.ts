@@ -154,19 +154,14 @@ export class ExportFilePlugin extends BasePlugin {
   }
 
   private async getSource() {
-    const data: DataType[][] = [];
-    const promisesData: Promise<number>[] = [];
-    rowTypes.forEach(t => {
-      const dataPart: DataType[] = [];
-      data.push(dataPart);
-      const promise = this.revogrid.getVisibleSource(t).then((d: DataType[]) => dataPart.push(...d));
-      promisesData.push(promise);
-    });
-    await Promise.all(promisesData);
-    return data.reduce((r, v) => {
-      r.push(...v);
-      return r;
-    }, []);
+    const sections = await Promise.all(rowTypes.map(type => this.revogrid.getVisibleSource(type)));
+    const rows: DataType[] = [];
+    for (const section of sections) {
+      for (const row of section) {
+        rows.push(row);
+      }
+    }
+    return rows;
   }
 
   // get correct class for future multiple types support

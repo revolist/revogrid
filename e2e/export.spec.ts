@@ -60,4 +60,28 @@ test.describe('export', () => {
     expect(csv).toContain('1,Alice,Engineer,Lisbon');
     expect(csv).toContain('2,Ben,Designer,Porto');
   });
+
+  test('exports 200,000 rows in order with pinned rows', async ({ page }) => {
+    const rowCount = 200_000;
+    await mountGrid(page, {
+      columns: [{ prop: 'id', name: 'ID' }],
+      source: [],
+      pinnedTopSource: [{ id: 'top' }],
+      pinnedBottomSource: [{ id: 'bottom' }],
+      exporting: true,
+    });
+
+    await page.locator<HTMLRevoGridElement>(SELECTORS.grid).evaluate((grid, count) => {
+      grid.source = Array.from({ length: count }, (_, id) => ({ id }));
+    }, rowCount);
+    await page.waitForChanges();
+
+    const lines = (await getExportCsv(page))?.split('\r\n') ?? [];
+    expect(lines).toHaveLength(rowCount + 3);
+    expect(lines[0]).toBe('\uFEFF"ID"');
+    expect(lines[1]).toBe('top');
+    expect(lines[rowCount + 2]).toBe('bottom');
+    const firstWrongRow = lines.slice(2, -1).findIndex((line, id) => line !== String(id));
+    expect(firstWrongRow).toBe(-1);
+  });
 });
