@@ -1567,7 +1567,20 @@ export class RevoGridComponent {
   }
 
   @Watch('filter') applyFilter(cfg: boolean | ColumnFilterConfig) {
+    this.ensureFilterPlugin(cfg);
     this.filterconfigchanged.emit(cfg);
+  }
+
+  @Watch('exporting') applyExporting() {
+    if (this.exporting) {
+      this.ensureCorePlugin(ExportFilePlugin);
+    }
+  }
+
+  @Watch('canMoveColumns') applyColumnMove() {
+    if (this.canMoveColumns) {
+      this.ensureCorePlugin(ColumnMovePlugin);
+    }
   }
 
   @Watch('sorting') applySorting(cfg?: SortingConfig) {
@@ -1654,21 +1667,8 @@ export class RevoGridComponent {
       ));
     }
 
-    // register filter plugin
-    if (this.filter) {
-      this.pluginService.add(
-        new FilterPlugin(
-          this.element,
-          pluginData,
-          typeof this.filter === 'object' ? this.filter : undefined,
-        ),
-      );
-    }
-
-    // register export plugin
-    if (this.exporting) {
-      this.pluginService.add(new ExportFilePlugin(this.element, pluginData));
-    }
+    this.ensureFilterPlugin(this.filter);
+    this.applyExporting();
 
     // register sorting plugin
     this.pluginService.add(new SortingPlugin(this.element, pluginData));
@@ -1678,8 +1678,29 @@ export class RevoGridComponent {
     this.pluginService.add(
       new RowResizePlugin(this.element, pluginData),
     );
-    if (this.canMoveColumns) {
-      this.pluginService.add(new ColumnMovePlugin(this.element, pluginData));
+    this.applyColumnMove();
+  }
+
+  private ensureFilterPlugin(cfg: boolean | ColumnFilterConfig) {
+    if (cfg) {
+      this.ensureCorePlugin(FilterPlugin, providers => new FilterPlugin(
+        this.element,
+        providers,
+        typeof cfg === 'object' ? cfg : undefined,
+      ));
+    }
+  }
+
+  private ensureCorePlugin(
+    Plugin: GridPlugin,
+    create = (providers: PluginProviders) => new Plugin(this.element, providers),
+  ) {
+    if (!this.element.isConnected || this.pluginService.getByClass(Plugin)) {
+      return;
+    }
+    const providers = this.getPluginData();
+    if (providers) {
+      this.pluginService.add(create(providers));
     }
   }
 

@@ -22,6 +22,37 @@ async function nextAnimationFrames(page: E2EPage, count = 2) {
 }
 
 test.describe('filtering', () => {
+  test('enables filtering after mount and applies the initial configuration', async ({ page }) => {
+    await mountGrid(page, {
+      columns: [
+        { prop: 'name', name: 'Name', filter: true, ...withHeaderTestId('late-filter-header') },
+      ],
+      source: [{ name: 'Alice' }, { name: 'Bob' }],
+    });
+    await expectVisibleColumnValues(page, 0, ['Alice', 'Bob']);
+    await expect(page.locator('revogr-filter-panel')).toHaveCount(0);
+
+    const grid = page.locator<HTMLRevoGridElement>(SELECTORS.grid);
+    await grid.evaluate(element => {
+      element.filter = {
+        collection: { name: { type: 'eq', value: 'Alice' } },
+      };
+    });
+    await expect(page.locator('revogr-filter-panel')).toHaveCount(1);
+    await expectVisibleColumnValues(page, 0, ['Alice']);
+
+    await grid.evaluate(element => {
+      element.filter = false;
+    });
+    await expectVisibleColumnValues(page, 0, ['Alice', 'Bob']);
+    await grid.evaluate(element => {
+      element.filter = true;
+    });
+    await clickFilterButton(page, 'late-filter-header');
+    await expect(page.locator(SELECTORS.filterPanel)).toBeVisible();
+    await expect(page.locator('revogr-filter-panel')).toHaveCount(1);
+  });
+
   test('filters falsy cell values with text operators', async ({ page }) => {
     await mountGrid(page, {
       columns: [{ prop: 'name' }, { prop: 'value', filter: true }],

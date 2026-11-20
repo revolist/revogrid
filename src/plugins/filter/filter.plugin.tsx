@@ -172,7 +172,8 @@ export class FilterPlugin extends BasePlugin {
           void this.clearFiltering();
           return;
         }
-        if (typeof detail === 'object') {
+        // Late registration already initialized the plugin with this config.
+        if (typeof detail === 'object' && detail !== this.config) {
           const detailKeys = Object.keys(detail);
           const preserveCurrentFilters =
             !detailKeys.includes('multiFilterItems') &&

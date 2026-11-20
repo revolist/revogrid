@@ -261,7 +261,7 @@ test.describe('reordering', () => {
       ]);
   });
 
-  test('reorders columns by dragging the header', async ({ page }) => {
+  test('reorders columns by dragging the header after enabling column moves', async ({ page }) => {
     const source = [
       { id: 1, name: 'Alice', role: 'Engineer' },
       { id: 2, name: 'Ben', role: 'Designer' },
@@ -276,7 +276,6 @@ test.describe('reordering', () => {
     await mountGrid(page, {
       columns,
       source,
-      canMoveColumns: true,
     });
 
     const beforeHeaders = await visibleHeaderTexts(page);
@@ -285,6 +284,7 @@ test.describe('reordering', () => {
       if (!grid) {
         throw new Error('Grid element was not found');
       }
+      grid.canMoveColumns = true;
       grid.addEventListener('columndragend', ((event: CustomEvent) => {
         (window as any).__columnDragEnd = {
           columns: event.detail.columns.map((column: any) => column.prop),
