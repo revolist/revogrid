@@ -21,7 +21,7 @@ async function runClipboardAction(
       setData(type: string, value: string) {
         if (
           currentAction.requirePreventDefaultBeforeWrite &&
-          !this.event.defaultPrevented
+          (!this.event.defaultPrevented || this.event.eventPhase === Event.NONE)
         ) {
           throw new DOMException(
             'Modifications are not allowed for this document',

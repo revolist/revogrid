@@ -75,22 +75,13 @@ export function isEnterKeyValue(key: string): boolean {
 }
 
 export function isCut(event: KeyboardEvent): boolean {
-  return (
-    (event.ctrlKey && event.code === 'KeyX') || // Ctrl + X on Windows
-    (event.metaKey && event.code === 'KeyX')
-  ); // Cmd + X on Mac
+  return isShortcutModifier(event) && event.key.toLowerCase() === 'x';
 }
 export function isCopy(event: KeyboardEvent): boolean {
-  return (
-    (event.ctrlKey && event.code === 'KeyC') || // Ctrl + C on Windows
-    (event.metaKey && event.code === 'KeyC')
-  ); // Cmd + C on Mac
+  return isShortcutModifier(event) && event.key.toLowerCase() === 'c';
 }
 export function isPaste(event: KeyboardEvent): boolean {
-  return (
-    (event.ctrlKey && event.code === 'KeyV') || // Ctrl + V on Windows
-    (event.metaKey && event.code === 'KeyV')
-  ); // Cmd + V on Mac
+  return isShortcutModifier(event) && event.key.toLowerCase() === 'v';
 }
 export function isAll(event: KeyboardEvent): boolean {
   return (

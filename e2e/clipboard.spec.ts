@@ -84,7 +84,7 @@ test.describe('clipboard', () => {
     await expect(copiedText).toBe('Alice');
   });
 
-  test('prevents the copy event before writing clipboard data', async ({ page }) => {
+  test('writes clipboard data during the canceled copy event', async ({ page }) => {
     await mountGrid(page, {
       columns: basicColumns(['id', 'name', 'role']),
       source: SAMPLE_ROWS.pair,
@@ -114,6 +114,37 @@ test.describe('clipboard', () => {
     await expect(dataCell(page, 1, 2)).toHaveText('QA');
     await expect(dataCell(page, 2, 1)).toHaveText('Ola');
     await expect(dataCell(page, 2, 2)).toHaveText('PM');
+  });
+
+  test('recognizes paste by the logical key on remapped layouts', async ({ page }) => {
+    await mountGrid(page, {
+      columns: basicColumns(['id', 'name', 'role']),
+      source: SAMPLE_ROWS.pair,
+      range: true,
+    });
+    await setCellsFocus(page, { x: 1, y: 0 });
+
+    const pasteKeys = await page.locator('revo-grid').evaluate(grid => {
+      const recognized: string[] = [];
+      let currentKey: string;
+      grid.addEventListener('beforepasteregion', () => recognized.push(currentKey));
+      for (const init of [
+        { code: 'KeyV', key: 'k', ctrlKey: true },
+        { code: 'KeyK', key: 'v', ctrlKey: true },
+        { code: 'KeyK', key: 'V', metaKey: true, shiftKey: true },
+      ]) {
+        currentKey = init.key;
+        document.dispatchEvent(new KeyboardEvent('keydown', {
+          bubbles: true,
+          cancelable: true,
+          ...init,
+        }));
+      }
+      return recognized;
+    });
+
+    expect(pasteKeys).toEqual(['v', 'V']);
+    await expect(page.locator(SELECTORS.editInput)).toHaveCount(0);
   });
 
   test('emits afterpasteapply with the replaced paste data', async ({ page }) => {

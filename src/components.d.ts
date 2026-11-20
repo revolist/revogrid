@@ -377,6 +377,7 @@ export namespace Components {
      */
     interface RevogrClipboard {
         "doCopy": (e: DataTransfer, data?: DataFormat[][]) => Promise<void>;
+        "getCopyData"?: () => DataFormat[][] | false | undefined;
         /**
           * If readonly mode - disabled Paste event
          */
@@ -1842,6 +1843,7 @@ declare namespace LocalJSX {
      * This Clipboard provides functionality for handling clipboard events in a web application.
      */
     interface RevogrClipboard {
+        "getCopyData"?: () => DataFormat[][] | false | undefined;
         /**
           * Paste 4. Fired after paste applied to the grid defaultPrevented - if true, paste will be canceled
          */
