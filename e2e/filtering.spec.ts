@@ -23,6 +23,28 @@ async function nextAnimationFrames(page: E2EPage, count = 2) {
 }
 
 test.describe('filtering', () => {
+  test('ignores empty condition lists in runtime filter configuration', async ({ page }) => {
+    await mountGrid(page, {
+      columns: [{ prop: 'name', filter: true }, { prop: 'role', filter: true }],
+      source: [{ name: 'Alice', role: 'Admin' }, { name: 'Bob', role: 'User' }],
+    });
+    const grid = page.locator<HTMLRevoGridElement>(SELECTORS.grid);
+    await grid.evaluate(element => {
+      element.filter = {
+        multiFilterItems: {
+          name: [],
+          role: [{ id: 0, type: 'eq', value: 'Admin' }],
+        },
+      };
+    });
+    await expectVisibleColumnValues(page, 0, ['Alice']);
+
+    await grid.evaluate(element => {
+      element.filter = { multiFilterItems: { role: [] } };
+    });
+    await expectVisibleColumnValues(page, 0, ['Alice', 'Bob']);
+  });
+
   test('reapplies the same filter configuration after disabling filtering', async ({ page }) => {
     await mountGrid(page, {
       columns: [

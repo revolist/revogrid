@@ -210,11 +210,9 @@ export class FilterPlugin extends BasePlugin {
     if (this.pop) {
       this.pop.allowDuplicateOperators = this.allowDuplicateOperators;
     }
-    if (config.multiFilterItems) {
-      this.multiFilterItems = { ...config.multiFilterItems };
-    } else {
-      this.multiFilterItems = {};
-    }
+    this.multiFilterItems = Object.fromEntries(
+      Object.entries(config.multiFilterItems ?? {}).filter(([, conditions]) => conditions.length > 0),
+    );
     // Add custom filters
     if (config.customFilters) {
       for (let customFilterType in config.customFilters) {
