@@ -1,5 +1,6 @@
 import { expect } from '@playwright/test';
 import { test, type E2EPage } from '@stencil/playwright';
+import type { BasePlugin } from '../src/plugins/base.plugin';
 import {
   SELECTORS,
   buildColumns,
@@ -53,6 +54,15 @@ test.describe('filtering', () => {
     await expect(page.locator('revogr-filter-panel')).toHaveCount(0);
 
     const grid = page.locator<HTMLRevoGridElement>(SELECTORS.grid);
+    await grid.evaluate(async element => {
+      const [plugin] = (await element.getPlugins()) as BasePlugin[];
+      element.registerVNode = [
+        () => plugin.h('span', { 'data-testid': 'custom-grid-content' }, 'Custom content'),
+      ];
+    });
+    const customContent = page.getByTestId('custom-grid-content');
+    await expect(customContent).toHaveText('Custom content');
+
     await grid.evaluate(element => {
       element.filter = {
         collection: { name: { type: 'eq', value: 'Alice' } },
@@ -60,6 +70,7 @@ test.describe('filtering', () => {
     });
     await expect(page.locator('revogr-filter-panel')).toHaveCount(1);
     await expectVisibleColumnValues(page, 0, ['Alice']);
+    await expect(customContent).toHaveText('Custom content');
 
     await grid.evaluate(element => {
       element.filter = false;

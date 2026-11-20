@@ -102,7 +102,7 @@ export class FilterPlugin extends BasePlugin {
     }
 
     const existingNodes = this.revogrid.registerVNode.filter(
-      n => typeof n === 'object' && n.$tag$ !== FILTE_PANEL,
+      node => typeof node === 'function' || node.$tag$ !== FILTE_PANEL,
     );
     this.revogrid.registerVNode = [
       ...existingNodes,
