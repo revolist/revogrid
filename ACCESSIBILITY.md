@@ -33,6 +33,8 @@ Accessibility behavior is enabled by default through `accessible: true`.
 
 - The grid exposes a `treegrid` role, a keyboard entry point and row and column counts.
 - Rendered rows, column headers and data cells expose `row`, `columnheader` and `gridcell` roles.
+- Tab reaches rendered sortable headers. Enter cycles the sort and the primary sorted header exposes its direction through `aria-sort`.
+- Filter buttons include the column name in their accessible label. Localize the label through `filter.localization.captions.filterButton` using `{column}` for the column name.
 - Cells provide one-based row and column indices to describe their logical positions in virtualized data.
 - Pinned top, main and pinned bottom rows use a shared index sequence. Counts and offsets update when those sections change length.
 - The accessibility plugin moves DOM focus to a cell after the grid applies a focus change.

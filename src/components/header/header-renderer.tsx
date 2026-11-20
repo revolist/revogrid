@@ -3,6 +3,7 @@ import type {
   VirtualPositionItem,
   ColumnTemplateProp,
   InitialHeaderClick,
+  ProvidersColumns,
   RangeArea,
 } from '@type';
 
@@ -22,10 +23,11 @@ import { ResizableElementHTMLAttributes } from './resizable.element';
 export type HeaderRenderProps = {
   column: VirtualPositionItem;
   additionalData: any;
-  data: ColumnTemplateProp;
+  data: ColumnTemplateProp | null | undefined;
   range?: RangeArea | null;
   canResize?: boolean;
   canFilter?: boolean;
+  filterButtonLabel?: string;
   renderOffset?: number;
   onResize?(e: ResizeEvent): void;
   onClick?(data: InitialHeaderClick): void;
@@ -37,29 +39,36 @@ type KeyedResizableElementHTMLAttributes = ResizableElementHTMLAttributes & {
 };
 
 const HeaderRenderer = (
-  p: HeaderRenderProps & { accessible?: boolean },
+  p: HeaderRenderProps & { key: string; accessible?: boolean; providers: ProvidersColumns },
 ): ReturnType<typeof h> => {
-  const hasSortingSign = !!(
-    p.data?.sortable ||
-    p.data?.order ||
-    p.data?.sortIndex
-  );
-  const hasFilterButton = !!(p.canFilter && p.data?.filter !== false);
-  const cellClass: { [key: string]: boolean } = {
-    [HEADER_CLASS]: true,
-    [HEADER_SORTABLE_CLASS]: !!p.data?.sortable,
-  };
-  if (p.data?.order) {
-    cellClass[p.data.order] = true;
-  }
+  const data = p.data;
+  const { order, sortable } = data ?? {};
+  const sortIndex = data?.sortIndex;
+  const hasSortingSign = data && (sortable || order || sortIndex);
+  const hasFilterButton = p.canFilter && data && data.filter !== false;
+  const providers = data?.providers ?? p.providers;
+  const columnIndex = p.column.itemIndex;
+  const range = p.range;
+  const inSelectedRange = !!range && columnIndex >= range.x && columnIndex <= range.x1;
+  // ARIA exposes the primary sort column when multiple columns are sorted.
+  const ariaSort =
+    p.accessible && order && (sortIndex ?? 1) === 1
+      ? { asc: 'ascending', desc: 'descending' }[order]
+      : undefined;
   const dataProps: KeyedResizableElementHTMLAttributes = {
-    key: String(p.data?.prop ?? p.column.itemIndex),
-    [DATA_COL]: p.column.itemIndex,
+    key: p.key,
+    [DATA_COL]: columnIndex,
+    ...(ariaSort && { 'aria-sort': ariaSort }),
     canResize: p.canResize,
-    minWidth: p.data?.minSize || MIN_COL_SIZE,
-    maxWidth: p.data?.maxSize,
+    minWidth: data?.minSize || MIN_COL_SIZE,
+    maxWidth: data?.maxSize,
     active: p.active || ['r'],
-    class: cellClass,
+    class: {
+      [HEADER_CLASS]: true,
+      [HEADER_SORTABLE_CLASS]: !!sortable,
+      [FOCUS_CLASS]: inSelectedRange,
+      ...(order && { [order]: true }),
+    },
     style: {
       width: `${p.column.size}px`,
       transform: `translateX(${p.column.start - (p.renderOffset || 0)}px)`,
@@ -67,42 +76,37 @@ const HeaderRenderer = (
     onResize: p.onResize,
     onDblClick(originalEvent: MouseEvent) {
       p.onDblClick?.({
-        column: p.data,
-        index: p.column.itemIndex,
+        column: data,
+        index: columnIndex,
         originalEvent,
-        providers: p.data.providers,
+        providers,
       });
     },
     onClick(originalEvent: MouseEvent) {
-      if (originalEvent.defaultPrevented || !p.onClick) {
+      if (originalEvent.defaultPrevented) {
         return;
       }
-      p.onClick({
-        column: p.data,
-        index: p.column.itemIndex,
+      p.onClick?.({
+        column: data,
+        index: columnIndex,
         originalEvent,
-        providers: p.data.providers,
+        providers,
       });
     },
   };
-  if (p.range) {
-    if (p.column.itemIndex >= p.range.x && p.column.itemIndex <= p.range.x1) {
-      if (typeof dataProps.class === 'object') {
-        dataProps.class[FOCUS_CLASS] = true;
-      }
-    }
-  }
   return (
     <HeaderCellRenderer
       accessible={p.accessible}
-      data={p.data}
+      data={data}
       props={dataProps}
       additionalData={p.additionalData}
     >
       {hasSortingSign || hasFilterButton ? (
         <span class="header-controls">
-          {hasSortingSign ? <SortingSign column={p.data} /> : null}
-          {hasFilterButton ? <FilterButton column={p.data} /> : null}
+          {hasSortingSign ? <SortingSign column={data} /> : null}
+          {hasFilterButton ? (
+            <FilterButton column={data} label={p.filterButtonLabel} />
+          ) : null}
         </span>
       ) : null}
     </HeaderCellRenderer>

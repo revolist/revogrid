@@ -557,9 +557,9 @@ export type InitialHeaderClick = {
    */
   originalEvent: MouseEvent;
   /**
-   * The column that was clicked.
+   * The clicked column, if the header render hook provided column data.
    */
-  column: ColumnRegular;
+  column: ColumnRegular | null | undefined;
   providers: ProvidersColumns;
 };
 

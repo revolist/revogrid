@@ -29,6 +29,7 @@ export type GridSetupOptions = {
   resizeRow?: boolean | RowResizeConfig;
   readonly?: boolean;
   canMoveColumns?: boolean;
+  autoSizeColumn?: boolean;
   grouping?: Record<string, unknown>;
   trimmedRows?: Record<number, boolean>;
   rtl?: boolean;

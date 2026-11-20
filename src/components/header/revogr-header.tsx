@@ -210,6 +210,7 @@ export class RevogrHeaderComponent {
   ) {
     const columnsToRender: HeaderRenderProps[] = [];
     const renderOffset = this.viewportCol.get('renderOffset') || 0;
+    const providers = this.providers;
     for (let rgCol of cols) {
       const colData = this.colData[rgCol.itemIndex];
       const props: HeaderRenderProps = {
@@ -218,7 +219,7 @@ export class RevogrHeaderComponent {
         data: {
           ...colData,
           index: rgCol.itemIndex,
-          providers: this.providers,
+          providers: { ...providers },
         },
         canFilter: !!this.columnFilter,
         canResize: this.canResize,
@@ -237,9 +238,14 @@ export class RevogrHeaderComponent {
     const duplicateProps = this.getDuplicateHeaderProps(columnsToRender);
     const cells = columnsToRender.map(detail =>
       h(HeaderRenderer, {
-        key: this.getHeaderCellKey(detail.data, this.type, duplicateProps),
+        key: this.getHeaderCellKey(
+          detail.data,
+          duplicateProps,
+          detail.column.itemIndex,
+        ),
         ...detail,
         accessible: this.accessible && this.type !== 'rowHeaders',
+        providers,
       }),
     );
     return { cells };
@@ -382,18 +388,18 @@ export class RevogrHeaderComponent {
   }
 
   private getHeaderCellKey(
-    column: ColumnRegular | undefined,
-    type: DimensionCols | 'rowHeaders',
+    column: HeaderRenderProps['data'],
     duplicateProps: Set<string>,
+    itemIndex: number,
   ) {
-    if (column?.prop === undefined) {
-      return `${type}-${String(column?.index)}`;
+    if (column?.prop == null) {
+      return `position:${itemIndex}`;
     }
     const propKey = String(column.prop);
     if (duplicateProps.has(propKey)) {
-      return `${type}-${propKey}-${String(column.index)}`;
+      return `duplicate:${itemIndex}:${propKey}`;
     }
-    return `${type}-${propKey}`;
+    return `property:${propKey}`;
   }
 
   private getDuplicateHeaderProps(columns: HeaderRenderProps[]) {
@@ -401,7 +407,7 @@ export class RevogrHeaderComponent {
     const duplicateProps = new Set<string>();
 
     columns.forEach(({ data }) => {
-      if (data?.prop !== undefined) {
+      if (data?.prop != null) {
         const propKey = String(data.prop);
         if (seenProps.has(propKey)) {
           duplicateProps.add(propKey);

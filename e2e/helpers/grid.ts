@@ -32,6 +32,7 @@ export async function mountGrid(page: E2EPage, options: GridSetupOptions, css = 
     options.filter ? 'filter' : '',
     options.exporting ? 'exporting' : '',
     options.canMoveColumns ? 'can-move-columns' : '',
+    options.autoSizeColumn ? 'auto-size-column' : '',
   ]
     .filter(Boolean)
     .join(' ');

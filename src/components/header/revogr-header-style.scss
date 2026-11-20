@@ -38,6 +38,11 @@ revogr-header {
       cursor: pointer;
     }
 
+    &[data-rg-header-cell].sortable:focus-visible {
+      outline: 2px solid Highlight;
+      outline-offset: -2px;
+    }
+
     .sort-indicator {
       display: inline-flex;
       align-items: flex-start;

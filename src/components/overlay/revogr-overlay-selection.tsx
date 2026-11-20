@@ -355,6 +355,14 @@ export class OverlaySelection {
    * This event is fired when keyboard key is pressed.
    */
   @Listen('keydown', { target: 'document' }) onKeyDown(e: KeyboardEvent) {
+    const keyboardArea = e.composedPath().find(
+      (target): target is HTMLElement =>
+        target instanceof HTMLElement &&
+        (target.localName === 'revogr-header' || target.localName === 'revo-grid'),
+    );
+    if (keyboardArea?.localName === 'revogr-header') {
+      return;
+    }
     // Emit before key down event and check if default prevention is set.
     const proxy = this.beforeKeyDown.emit({ original: e, ...this.getData() });
     if (e.defaultPrevented || proxy.defaultPrevented) {

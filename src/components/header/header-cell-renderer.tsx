@@ -14,7 +14,7 @@ const cellRole = /^\s*(columnheader|rowheader|gridcell|cell)(?:\s|$)/;
 export const HeaderCellRenderer: FunctionalComponent<{
   props: ResizableElementHTMLAttributes;
   additionalData: any;
-  data?: ColumnTemplateProp;
+  data?: ColumnTemplateProp | null;
   accessible?: boolean;
 }> = ({ data, props, additionalData, accessible }, children) => {
   let colTemplate: ReturnType<typeof h> = data?.name || '';
@@ -28,6 +28,7 @@ export const HeaderCellRenderer: FunctionalComponent<{
       cellProps = doPropMerge(props, extra);
     }
   }
+  const keyboardSortable = accessible && data?.sortable;
   const resizeProps = {
     ...cellProps,
     ...(accessible && {
@@ -35,6 +36,29 @@ export const HeaderCellRenderer: FunctionalComponent<{
       'role': cellRole.test(cellProps.role ?? '')
         ? cellProps.role
         : 'columnheader',
+    }),
+    ...(keyboardSortable && {
+      tabIndex: 0,
+      onKeyDown(event: KeyboardEvent) {
+        cellProps.onKeyDown?.(event);
+        const isHeaderEnter =
+          event.key === 'Enter' &&
+          event.target === event.currentTarget &&
+          !event.repeat;
+        if (event.defaultPrevented || !isHeaderEnter) {
+          return;
+        }
+        event.preventDefault();
+        // Use the cancellable header click path and keep its MouseEvent payload.
+        event.currentTarget?.dispatchEvent(
+          new MouseEvent('click', {
+            bubbles: true,
+            cancelable: true,
+            composed: true,
+            shiftKey: event.shiftKey,
+          }),
+        );
+      },
     }),
     onMouseDown(e: MouseEvent) {
       dispatch(e.currentTarget, ON_COLUMN_CLICK, {
