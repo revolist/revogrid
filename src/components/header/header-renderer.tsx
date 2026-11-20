@@ -23,7 +23,7 @@ import { ResizableElementHTMLAttributes } from './resizable.element';
 export type HeaderRenderProps = {
   column: VirtualPositionItem;
   additionalData: any;
-  data: ColumnTemplateProp;
+  data: ColumnTemplateProp | null | undefined;
   range?: RangeArea | null;
   canResize?: boolean;
   canFilter?: boolean;
@@ -39,11 +39,12 @@ type KeyedResizableElementHTMLAttributes = ResizableElementHTMLAttributes & {
 };
 
 const HeaderRenderer = (
-  p: HeaderRenderProps & { accessible?: boolean; providers: ProvidersColumns },
+  p: HeaderRenderProps & { key: string; accessible?: boolean; providers: ProvidersColumns },
 ): ReturnType<typeof h> => {
   const data = p.data;
-  const { order, sortIndex, sortable } = data ?? {};
-  const hasSortingSign = !!(sortable || order || sortIndex);
+  const { order, sortable } = data ?? {};
+  const sortIndex = data?.sortIndex;
+  const hasSortingSign = data && (sortable || order || sortIndex);
   const hasFilterButton = p.canFilter && data && data.filter !== false;
   const providers = data?.providers ?? p.providers;
   const columnIndex = p.column.itemIndex;
@@ -55,7 +56,7 @@ const HeaderRenderer = (
       ? { asc: 'ascending', desc: 'descending' }[order]
       : undefined;
   const dataProps: KeyedResizableElementHTMLAttributes = {
-    key: String(data?.prop ?? columnIndex),
+    key: p.key,
     [DATA_COL]: columnIndex,
     ...(ariaSort && { 'aria-sort': ariaSort }),
     canResize: p.canResize,

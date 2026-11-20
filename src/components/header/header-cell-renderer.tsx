@@ -14,7 +14,7 @@ const cellRole = /^\s*(columnheader|rowheader|gridcell|cell)(?:\s|$)/;
 export const HeaderCellRenderer: FunctionalComponent<{
   props: ResizableElementHTMLAttributes;
   additionalData: any;
-  data?: ColumnTemplateProp;
+  data?: ColumnTemplateProp | null;
   accessible?: boolean;
 }> = ({ data, props, additionalData, accessible }, children) => {
   let colTemplate: ReturnType<typeof h> = data?.name || '';

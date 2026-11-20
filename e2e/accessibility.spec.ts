@@ -75,30 +75,45 @@ test.describe('accessibility', () => {
     ).toBeAttached();
   });
 
-  test('keeps header keystrokes out of a selected data cell', async ({ page }) => {
-    await mountGrid(page, {
-      columns: [
-        { prop: 'name', name: 'Name', sortable: true },
-        { prop: 'city', name: 'City' },
-      ],
-      source: [{ name: 'Ada', city: 'Lisbon' }],
-      filter: true,
-      range: true,
+  for (const root of ['document', 'shadow root']) {
+    test(`keeps header keystrokes out of a selected data cell in the ${root}`, async ({ page }) => {
+      await mountGrid(page, {
+        columns: [
+          { prop: 'name', name: 'Name', sortable: true },
+          { prop: 'city', name: 'City' },
+        ],
+        source: [{ name: 'Ada', city: 'Lisbon' }],
+        filter: true,
+        range: true,
+      });
+
+      if (root === 'shadow root') {
+        await page.evaluate(() => {
+          const grid = document.querySelector('revo-grid')!;
+          const host = document.createElement('div');
+          host.style.height = '100%';
+          grid.after(host);
+          const shadow = host.attachShadow({ mode: 'open' });
+          document.querySelectorAll('style').forEach(style => shadow.append(style.cloneNode(true)));
+          shadow.append(grid);
+        });
+        await page.waitForChanges();
+      }
+
+      const cell = dataCell(page, 0, 0);
+      const header = page.getByRole('columnheader').filter({ hasText: 'Name' });
+      const filter = header.getByRole('button', { name: 'Filter Name' });
+      await cell.click();
+      await expect(cell).toBeFocused();
+      await header.click();
+      await expect(header).toBeFocused();
+
+      await page.keyboard.press('Delete');
+      await page.keyboard.press('Tab');
+      await expect(filter).toBeFocused();
+      await expect(cell).toHaveText('Ada');
     });
-
-    const cell = dataCell(page, 0, 0);
-    const header = page.getByRole('columnheader').filter({ hasText: 'Name' });
-    const filter = header.getByRole('button', { name: 'Filter Name' });
-    await cell.click();
-    await expect(cell).toBeFocused();
-    await header.click();
-    await expect(header).toBeFocused();
-
-    await page.keyboard.press('Delete');
-    await page.keyboard.press('Tab');
-    await expect(filter).toBeFocused();
-    await expect(cell).toHaveText('Ada');
-  });
+  }
 
   test('renders a blank header when the render hook clears column data', async ({
     page,
@@ -116,10 +131,9 @@ test.describe('accessibility', () => {
     await page.evaluate(() => {
       const grid = document.querySelector('revo-grid')!;
       grid.addEventListener('beforeheaderrender', event => {
-        const { detail } = event as CustomEvent<{
-          data: unknown;
-          column: { itemIndex: number };
-        }>;
+        const { detail } = event as CustomEvent<
+          HTMLRevogrHeaderElementEventMap['beforeheaderrender']
+        >;
         detail.data = detail.column.itemIndex === 0 ? null : undefined;
       });
       grid.columns = [
@@ -152,6 +166,40 @@ test.describe('accessibility', () => {
       .toEqual([null, undefined]);
     expect(dragStarts.length).toBe(0);
     expect(pageErrors).toEqual([]);
+  });
+
+  test('preserves the header for a numeric property that matches a blank header index', async ({
+    page,
+  }) => {
+    await mountGrid(page, {
+      columns: [{ prop: 'blank', name: 'Blank' }, { prop: '0', name: 'Zero' }],
+      source: [{ '0': 'value' }],
+    });
+    await page.evaluate(() => {
+      const grid = document.querySelector('revo-grid')!;
+      grid.addEventListener('beforeheaderrender', event => {
+        const { detail } = event as CustomEvent<
+          HTMLRevogrHeaderElementEventMap['beforeheaderrender']
+        >;
+        if (detail.data?.prop === 'blank') {
+          detail.data = null;
+        }
+      });
+      grid.columns = [{ prop: 'blank', name: 'Blank' }, { prop: '0', name: 'Zero' }];
+    });
+
+    const header = page.getByRole('columnheader', { name: 'Zero', exact: true });
+    await expect(page.getByRole('columnheader', { name: '', exact: true })).toHaveCount(1);
+    await header.evaluate(element => element.setAttribute('data-original-header', 'true'));
+    await page.evaluate(() => {
+      document.querySelector('revo-grid')!.columns = [
+        { prop: '0', name: 'Zero' },
+        { prop: 'blank', name: 'Blank' },
+      ];
+    });
+
+    await expect(header).toHaveAttribute('data-rgcol', '0');
+    await expect(header).toHaveAttribute('data-original-header', 'true');
   });
 
   test('owns leaf and grouped column headers in their respective rows', async ({
@@ -360,7 +408,11 @@ test.describe('accessibility', () => {
         const { detail } = event as CustomEvent<
           HTMLRevogrHeaderElementEventMap['beforeheaderrender']
         >;
-        detail.data.columnProperties = () => ({
+        const { data } = detail;
+        if (!data) {
+          return;
+        }
+        data.columnProperties = () => ({
           role: 'columnheader cell',
           class: { rgHeaderCell: false },
         });
@@ -411,8 +463,12 @@ test.describe('accessibility', () => {
         const { detail } = event as CustomEvent<
           HTMLRevogrHeaderElementEventMap['beforeheaderrender']
         >;
-        detail.data.columnProperties = () => ({
-          id: detail.data.prop === 'status' ? '1.status' : 'duplicate-header',
+        const { data } = detail;
+        if (!data) {
+          return;
+        }
+        data.columnProperties = () => ({
+          id: data.prop === 'status' ? '1.status' : 'duplicate-header',
           role: 'button',
         });
       });

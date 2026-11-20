@@ -355,10 +355,11 @@ export class OverlaySelection {
    * This event is fired when keyboard key is pressed.
    */
   @Listen('keydown', { target: 'document' }) onKeyDown(e: KeyboardEvent) {
-    const keyboardArea =
-      e.target instanceof globalThis.Element
-        ? e.target.closest('revogr-header, revo-grid')
-        : null;
+    const keyboardArea = e.composedPath().find(
+      (target): target is HTMLElement =>
+        target instanceof HTMLElement &&
+        (target.localName === 'revogr-header' || target.localName === 'revo-grid'),
+    );
     if (keyboardArea?.localName === 'revogr-header') {
       return;
     }
