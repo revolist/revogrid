@@ -523,23 +523,25 @@ export class OverlaySelection {
   }
 
   private renderEditor() {
-    // Check if edit access
-    const editCell = this.selectionStore.get('edit');
-    // Readonly or Editor closed
+    const activeEdit = this.selectionStore.get('edit');
+    const editCell = activeEdit || this.selectionStore.get('focus');
     if (this.readonly || !editCell) {
       return null;
     }
-    const enteredOrModelValue =
-      editCell.val ||
-        getCellData(
-          this.columnService.rowDataModel(editCell.y, editCell.x).value
-        );
+    const editor = getCellEditor(
+      this.columnService.columns[editCell.x],
+      this.editors,
+    );
+    const ready = !activeEdit && editor?.prepareOnFocus && this.canEdit();
+    if (!activeEdit && !ready) {
+      return null;
+    }
     const editable = {
       ...editCell,
       ...this.columnService.getSaveData(
         editCell.y,
         editCell.x,
-        enteredOrModelValue,
+        activeEdit?.val || undefined,
       ),
     };
     const renderEvent = this.beforeEditRender.emit({
@@ -558,15 +560,14 @@ export class OverlaySelection {
       return null;
     }
 
-    const cell = getCell(
-      renderEvent.detail.range,
-      renderEvent.detail.rowDimension,
-      renderEvent.detail.colDimension,
-    );
+    const { range, rowDimension, colDimension } = renderEvent.detail;
+    const cell = getCell(range, rowDimension, colDimension);
     const styles = styleByCellProps(cell);
     return (
       <revogr-edit
+        key={editor?.prepareOnFocus ? `${editCell.x}:${editCell.y}` : undefined}
         style={styles}
+        requestEdit={ready ? () => this.doEdit('', editCell) : undefined}
         ref={el => (this.revogrEdit = el)}
         additionalData={this.additionalData}
         editCell={editable}
@@ -575,10 +576,7 @@ export class OverlaySelection {
           this.cellEditDone.emit(e.detail);
         }}
         column={this.columnService.rowDataModel(editCell.y, editCell.x)}
-        editor={getCellEditor(
-          this.columnService.columns[editCell.x],
-          this.editors,
-        )}
+        editor={editor}
       />
     );
   }
@@ -605,7 +603,8 @@ export class OverlaySelection {
     // Editor
     if (editCell) {
       nodes.push(editCell);
-    } else {
+    }
+    if (!editCell || !this.selectionStore.get('edit')) {
       const range = this.selectionStore.get('range');
       const focus = this.selectionStore.get('focus');
 
@@ -808,12 +807,13 @@ export class OverlaySelection {
   /**
    * Start cell editing
    */
-  protected doEdit(val = ''): boolean {
-    if (!this.canEdit()) {
-      return false;
-    }
+  protected doEdit(val = '', expectedFocus?: Cell): boolean {
     const focus = this.selectionStore.get('focus');
-    if (!focus) {
+    if (
+      !focus ||
+      (expectedFocus && (focus.x !== expectedFocus.x || focus.y !== expectedFocus.y)) ||
+      !this.canEdit()
+    ) {
       return false;
     }
     const data = this.columnService.getSaveData(focus.y, focus.x);

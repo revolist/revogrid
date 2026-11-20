@@ -477,6 +477,10 @@ export namespace Components {
          */
         "editor": EditorCtr | null;
         /**
+          * Prepare the editor to start editing through the selection owner.
+         */
+        "requestEdit"?: () => boolean;
+        /**
           * Save on editor close. Defines if data should be saved on editor close.
           * @default false
          */
@@ -2018,6 +2022,10 @@ declare namespace LocalJSX {
           * Close editor event pass true if requires focus next
          */
         "onCloseedit"?: (event: RevogrEditCustomEvent<boolean | undefined>) => void;
+        /**
+          * Prepare the editor to start editing through the selection owner.
+         */
+        "requestEdit"?: () => boolean;
         /**
           * Save on editor close. Defines if data should be saved on editor close.
           * @default false

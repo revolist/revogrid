@@ -49,6 +49,9 @@ export class RevoEdit {
    * Save on editor close. Defines if data should be saved on editor close.
    */
   @Prop() saveOnClose = false;
+
+  /** Prepare the editor to start editing through the selection owner. */
+  @Prop() requestEdit?: () => boolean;
   /**
    * Additional data to pass to renderer
    */
@@ -205,8 +208,14 @@ export class RevoEdit {
   render() {
     if (this.currentEditor) {
       this.currentEditor.editCell = this.editCell;
+      if (this.requestEdit) {
+        this.preventSaveOnClose = false;
+      }
+      if (this.editor?.prepareOnFocus) {
+        this.currentEditor.prepareForEdit?.(this.requestEdit);
+      }
       return (
-        <Host class={EDIT_INPUT_WR}>
+        <Host class={{ [EDIT_INPUT_WR]: true, 'editor-prepared': !!this.requestEdit }}>
           {this.currentEditor.render(h, this.additionalData)}
         </Host>
       );
