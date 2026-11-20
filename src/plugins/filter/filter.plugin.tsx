@@ -122,30 +122,6 @@ export class FilterPlugin extends BasePlugin {
       </revogr-filter-panel>,
     ];
 
-    const aftersourceset = () => {
-      const filterCollectionProps = Object.keys(this.filterCollection);
-      if (filterCollectionProps.length > 0) {
-        // handle old way of filtering by reworking FilterCollection to new MultiFilterItem
-        filterCollectionProps.forEach((prop, index) => {
-          if (!this.multiFilterItems[prop]) {
-            this.multiFilterItems[prop] = [
-              {
-                id: index,
-                type: this.filterCollection[prop].type,
-                value: this.filterCollection[prop].value,
-                relation: 'and',
-              },
-            ];
-          }
-        });
-      }
-      if (!this.hasActiveFilters()) {
-        this.cancelFiltering();
-        return;
-      }
-      void this.runFiltering(this.multiFilterItems);
-    };
-
     /**
      * This executes before the data store replaces its source.
      * For a large source with active filters:
@@ -172,8 +148,7 @@ export class FilterPlugin extends BasePlugin {
           void this.clearFiltering();
           return;
         }
-        // Late registration already initialized the plugin with this config.
-        if (typeof detail === 'object' && detail !== this.config) {
+        if (typeof detail === 'object') {
           const detailKeys = Object.keys(detail);
           const preserveCurrentFilters =
             !detailKeys.includes('multiFilterItems') &&
@@ -185,20 +160,44 @@ export class FilterPlugin extends BasePlugin {
           );
           if (!detail.multiFilterItems || !Object.keys(detail.multiFilterItems).length) {
             if (preserveCurrentFilters) {
-              aftersourceset();
+              this.applySourceFilters();
               return;
             }
             void this.clearFiltering();
             return;
           }
         }
-        aftersourceset();
+        this.applySourceFilters();
       },
     );
-    this.addEventListener('aftersourceset', aftersourceset);
+    this.addEventListener('aftersourceset', () => this.applySourceFilters());
     this.addEventListener('filter', ({ detail }: CustomEvent) =>
       this.onFilterChange(detail),
     );
+  }
+
+  applySourceFilters() {
+    const filterCollectionProps = Object.keys(this.filterCollection);
+    if (filterCollectionProps.length > 0) {
+      // handle old way of filtering by reworking FilterCollection to new MultiFilterItem
+      filterCollectionProps.forEach((prop, index) => {
+        if (!this.multiFilterItems[prop]) {
+          this.multiFilterItems[prop] = [
+            {
+              id: index,
+              type: this.filterCollection[prop].type,
+              value: this.filterCollection[prop].value,
+              relation: 'and',
+            },
+          ];
+        }
+      });
+    }
+    if (!this.hasActiveFilters()) {
+      this.cancelFiltering();
+      return;
+    }
+    void this.runFiltering(this.multiFilterItems);
   }
 
   beforeshow(_: ShowData) {

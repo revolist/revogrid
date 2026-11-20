@@ -22,6 +22,26 @@ async function nextAnimationFrames(page: E2EPage, count = 2) {
 }
 
 test.describe('filtering', () => {
+  test('reapplies the same filter configuration after disabling filtering', async ({ page }) => {
+    await mountGrid(page, {
+      columns: [{ prop: 'name', name: 'Name', filter: true }],
+      source: [{ name: 'Alice' }, { name: 'Bob' }],
+      filter: {
+        multiFilterItems: {
+          name: [{ id: 0, type: 'eq', value: 'Alice', relation: 'and' }],
+        },
+      },
+    });
+    await expectVisibleColumnValues(page, 0, ['Alice']);
+
+    await page.locator<HTMLRevoGridElement>(SELECTORS.grid).evaluate(grid => {
+      const config = grid.filter;
+      grid.filter = false;
+      grid.filter = config;
+    });
+    await expectVisibleColumnValues(page, 0, ['Alice']);
+  });
+
   test('enables filtering after mount and applies the initial configuration', async ({ page }) => {
     await mountGrid(page, {
       columns: [

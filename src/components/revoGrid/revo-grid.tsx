@@ -87,7 +87,7 @@ import { ColumnMovePlugin } from '../../plugins/moveColumn/column.drag.plugin';
 import { getPropertyFromEvent } from '../../utils/events';
 import { isMobileDevice } from '../../utils/mobile';
 import type { Observable } from '../../utils';
-import type { GridPlugin } from '../../plugins/base.plugin';
+import type { BasePlugin, GridPlugin } from '../../plugins/base.plugin';
 import { ColumnCollection, getColumnByProp, getColumns } from '../../utils/column.utils';
 import { WCAGPlugin } from '../../plugins/wcag';
 import type {
@@ -1567,8 +1567,12 @@ export class RevoGridComponent {
   }
 
   @Watch('filter') applyFilter(cfg: boolean | ColumnFilterConfig) {
-    this.ensureFilterPlugin(cfg);
     this.filterconfigchanged.emit(cfg);
+    // Existing plugins handle the event. A newly added plugin starts with the
+    // current config and applies it to the source that is already loaded.
+    if (this.filter === cfg) {
+      this.ensureFilterPlugin(cfg)?.applySourceFilters();
+    }
   }
 
   @Watch('exporting') applyExporting() {
@@ -1682,26 +1686,30 @@ export class RevoGridComponent {
   }
 
   private ensureFilterPlugin(cfg: boolean | ColumnFilterConfig) {
-    if (cfg) {
-      this.ensureCorePlugin(FilterPlugin, providers => new FilterPlugin(
-        this.element,
-        providers,
-        typeof cfg === 'object' ? cfg : undefined,
-      ));
+    if (!cfg) {
+      return;
     }
+    return this.ensureCorePlugin(FilterPlugin, providers => new FilterPlugin(
+      this.element,
+      providers,
+      typeof cfg === 'object' ? cfg : undefined,
+    ));
   }
 
-  private ensureCorePlugin(
-    Plugin: GridPlugin,
+  private ensureCorePlugin<T extends BasePlugin>(
+    Plugin: new (element: HTMLRevoGridElement, providers: PluginProviders) => T,
     create = (providers: PluginProviders) => new Plugin(this.element, providers),
-  ) {
+  ): T | undefined {
     if (!this.element.isConnected || this.pluginService.getByClass(Plugin)) {
       return;
     }
     const providers = this.getPluginData();
-    if (providers) {
-      this.pluginService.add(create(providers));
+    if (!providers) {
+      return;
     }
+    const plugin = create(providers);
+    this.pluginService.add(plugin);
+    return plugin;
   }
 
   private syncRowResizeConfig() {
