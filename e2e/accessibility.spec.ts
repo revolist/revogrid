@@ -75,6 +75,31 @@ test.describe('accessibility', () => {
     ).toBeAttached();
   });
 
+  test('keeps header keystrokes out of a selected data cell', async ({ page }) => {
+    await mountGrid(page, {
+      columns: [
+        { prop: 'name', name: 'Name', sortable: true },
+        { prop: 'city', name: 'City' },
+      ],
+      source: [{ name: 'Ada', city: 'Lisbon' }],
+      filter: true,
+      range: true,
+    });
+
+    const cell = dataCell(page, 0, 0);
+    const header = page.getByRole('columnheader').filter({ hasText: 'Name' });
+    const filter = header.getByRole('button', { name: 'Filter Name' });
+    await cell.click();
+    await expect(cell).toBeFocused();
+    await header.click();
+    await expect(header).toBeFocused();
+
+    await page.keyboard.press('Delete');
+    await page.keyboard.press('Tab');
+    await expect(filter).toBeFocused();
+    await expect(cell).toHaveText('Ada');
+  });
+
   test('renders a blank header when the render hook clears column data', async ({
     page,
   }) => {

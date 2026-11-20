@@ -46,27 +46,28 @@ const HeaderRenderer = (
   const hasSortingSign = !!(sortable || order || sortIndex);
   const hasFilterButton = p.canFilter && data && data.filter !== false;
   const providers = data?.providers ?? p.providers;
-  const cellClass: { [key: string]: boolean } = {
-    [HEADER_CLASS]: true,
-    [HEADER_SORTABLE_CLASS]: !!sortable,
-  };
-  if (order) {
-    cellClass[order] = true;
-  }
+  const columnIndex = p.column.itemIndex;
+  const range = p.range;
+  const inSelectedRange = !!range && columnIndex >= range.x && columnIndex <= range.x1;
   // ARIA exposes the primary sort column when multiple columns are sorted.
   const ariaSort =
     p.accessible && order && (sortIndex ?? 1) === 1
       ? { asc: 'ascending', desc: 'descending' }[order]
       : undefined;
   const dataProps: KeyedResizableElementHTMLAttributes = {
-    key: String(data?.prop ?? p.column.itemIndex),
-    [DATA_COL]: p.column.itemIndex,
+    key: String(data?.prop ?? columnIndex),
+    [DATA_COL]: columnIndex,
     ...(ariaSort && { 'aria-sort': ariaSort }),
     canResize: p.canResize,
     minWidth: data?.minSize || MIN_COL_SIZE,
     maxWidth: data?.maxSize,
     active: p.active || ['r'],
-    class: cellClass,
+    class: {
+      [HEADER_CLASS]: true,
+      [HEADER_SORTABLE_CLASS]: !!sortable,
+      [FOCUS_CLASS]: inSelectedRange,
+      ...(order && { [order]: true }),
+    },
     style: {
       width: `${p.column.size}px`,
       transform: `translateX(${p.column.start - (p.renderOffset || 0)}px)`,
@@ -75,7 +76,7 @@ const HeaderRenderer = (
     onDblClick(originalEvent: MouseEvent) {
       p.onDblClick?.({
         column: data,
-        index: p.column.itemIndex,
+        index: columnIndex,
         originalEvent,
         providers,
       });
@@ -86,19 +87,12 @@ const HeaderRenderer = (
       }
       p.onClick?.({
         column: data,
-        index: p.column.itemIndex,
+        index: columnIndex,
         originalEvent,
         providers,
       });
     },
   };
-  if (p.range) {
-    if (p.column.itemIndex >= p.range.x && p.column.itemIndex <= p.range.x1) {
-      if (typeof dataProps.class === 'object') {
-        dataProps.class[FOCUS_CLASS] = true;
-      }
-    }
-  }
   return (
     <HeaderCellRenderer
       accessible={p.accessible}
