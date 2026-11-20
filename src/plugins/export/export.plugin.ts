@@ -156,7 +156,12 @@ export class ExportFilePlugin extends BasePlugin {
   private async getSource() {
     const sections = await Promise.all(rowTypes.map(type => this.revogrid.getVisibleSource(type)));
     const rows: DataType[] = [];
-    return rows.concat(...sections);
+    for (const section of sections) {
+      for (const row of section) {
+        rows.push(row);
+      }
+    }
+    return rows;
   }
 
   // get correct class for future multiple types support
