@@ -25,22 +25,33 @@ async function nextAnimationFrames(page: E2EPage, count = 2) {
 test.describe('filtering', () => {
   test('reapplies the same filter configuration after disabling filtering', async ({ page }) => {
     await mountGrid(page, {
-      columns: [{ prop: 'name', name: 'Name', filter: true }],
+      columns: [
+        { prop: 'name', name: 'Name', filter: true, ...withHeaderTestId('restored-filter-header') },
+      ],
       source: [{ name: 'Alice' }, { name: 'Bob' }],
-      filter: {
-        multiFilterItems: {
-          name: [{ id: 0, type: 'eq', value: 'Alice', relation: 'and' }],
+    });
+    const grid = page.locator<HTMLRevoGridElement>(SELECTORS.grid);
+    await grid.evaluate(element => {
+      element.filter = {
+        customFilters: {
+          isAlice: { name: 'Is Alice', columnFilterType: 'string', func: value => value === 'Alice' },
         },
-      },
+        multiFilterItems: {
+          name: [{ id: 0, type: 'isAlice', relation: 'and' }],
+        },
+      };
     });
     await expectVisibleColumnValues(page, 0, ['Alice']);
 
-    await page.locator<HTMLRevoGridElement>(SELECTORS.grid).evaluate(grid => {
-      const config = grid.filter;
-      grid.filter = false;
-      grid.filter = config;
+    await grid.evaluate(element => {
+      const config = element.filter;
+      element.filter = false;
+      element.filter = config;
     });
     await expectVisibleColumnValues(page, 0, ['Alice']);
+    await clickFilterButton(page, 'restored-filter-header');
+    const operators = page.locator(SELECTORS.filterPanel).getByRole('combobox').first();
+    await expect(operators.locator('option[value="isAlice"]')).toHaveCount(1);
   });
 
   test('enables filtering after mount and applies the initial configuration', async ({ page }) => {
@@ -77,8 +88,11 @@ test.describe('filtering', () => {
     });
     await expectVisibleColumnValues(page, 0, ['Alice', 'Bob']);
     await grid.evaluate(element => {
-      element.filter = true;
+      element.filter = {
+        collection: { name: { type: 'eq', value: 'Bob' } },
+      };
     });
+    await expectVisibleColumnValues(page, 0, ['Bob']);
     await clickFilterButton(page, 'late-filter-header');
     await expect(page.locator(SELECTORS.filterPanel)).toBeVisible();
     await expect(page.locator('revogr-filter-panel')).toHaveCount(1);

@@ -158,11 +158,7 @@ export class FilterPlugin extends BasePlugin {
               ? { ...detail, multiFilterItems: this.multiFilterItems }
               : detail,
           );
-          if (!detail.multiFilterItems || !Object.keys(detail.multiFilterItems).length) {
-            if (preserveCurrentFilters) {
-              this.applySourceFilters();
-              return;
-            }
+          if (!preserveCurrentFilters && !this.hasActiveFilters()) {
             void this.clearFiltering();
             return;
           }
@@ -223,11 +219,10 @@ export class FilterPlugin extends BasePlugin {
     if (config.customFilters) {
       for (let customFilterType in config.customFilters) {
         const cFilter = config.customFilters[customFilterType];
-        if (!this.filterByType[cFilter.columnFilterType]) {
-          this.filterByType[cFilter.columnFilterType] = [];
+        const operators = this.filterByType[cFilter.columnFilterType] ?? [];
+        if (!operators.includes(customFilterType)) {
+          this.filterByType[cFilter.columnFilterType] = [...operators, customFilterType];
         }
-        // add custom filter type
-        this.filterByType[cFilter.columnFilterType].push(customFilterType);
         // add custom filter function
         this.filterFunctionsIndexedByType[customFilterType] = cFilter.func;
         // add custom filter name
