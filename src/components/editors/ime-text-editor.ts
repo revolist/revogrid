@@ -1,4 +1,5 @@
 import type { h, VNode } from '@stencil/core';
+import { DATA_COL, DATA_ROW } from '../../utils/consts';
 import { isShortcutModifier } from '../../utils/key.utils';
 import { TextEditor } from './text-editor';
 
@@ -12,6 +13,7 @@ export class ImeTextEditor extends TextEditor {
   private requestEdit?: () => boolean;
   private mode: 'ready' | 'native' | 'edit' = 'edit';
   private focusPending = false;
+  private focusScope?: Element | null;
 
   prepareForEdit(requestEdit?: () => boolean) {
     this.requestEdit = requestEdit;
@@ -23,18 +25,32 @@ export class ImeTextEditor extends TextEditor {
     }
   }
 
-  focusReadyInput() {
-    if (this.mode === 'ready') {
+  private readonly onCellFocus = (event: Event) => {
+    const cell = event.target;
+    if (
+      this.mode === 'ready' &&
+      this.editCell &&
+      cell instanceof HTMLElement &&
+      cell.getAttribute('role') === 'gridcell' &&
+      cell.getAttribute(DATA_COL) === String(this.editCell.x) &&
+      cell.getAttribute(DATA_ROW) === String(this.editCell.y) &&
+      cell.closest('revogr-overlay-selection') === this.focusScope
+    ) {
       this.editInput?.focus({ preventScroll: true });
     }
-  }
+  };
 
   async componentDidRender() {
     if (this.mode === 'edit') {
       await super.componentDidRender();
     } else if (this.focusPending) {
       this.focusPending = false;
-      this.focusReadyInput();
+      // The accessibility layer can focus the cell again without moving selection.
+      if (!this.focusScope) {
+        this.focusScope = this.editInput?.closest('revogr-overlay-selection');
+        this.focusScope?.addEventListener('focusin', this.onCellFocus);
+      }
+      this.editInput?.focus({ preventScroll: true });
     }
   }
 
@@ -74,6 +90,11 @@ export class ImeTextEditor extends TextEditor {
     if (this.mode !== 'ready') {
       super.beforeDisconnect();
     }
+  }
+
+  disconnectedCallback() {
+    this.focusScope?.removeEventListener('focusin', this.onCellFocus);
+    this.focusScope = null;
   }
 
   beforeAutoSave() {

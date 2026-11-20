@@ -307,24 +307,6 @@ export class OverlaySelection {
   // #endregion
 
   // #region Listeners
-  @Listen('focusin')
-  onCellFocus(e: FocusEvent) {
-    // The accessibility layer also focuses gridcells after selection. Return
-    // native focus to the ready input, including repeated clicks on one cell.
-    const editor = this.revogrEdit;
-    if (
-      !editor?.requestEdit ||
-      !(e.target instanceof HTMLElement) ||
-      e.target.getAttribute('role') !== 'gridcell'
-    ) {
-      return;
-    }
-    const focus = this.selectionStore.get('focus');
-    if (focus && focus.x === editor.editCell.x && focus.y === editor.editCell.y) {
-      void editor.focusReadyInput();
-    }
-  }
-
   @Listen('touchmove', { target: 'document' })
   @Listen('mousemove', { target: 'document' })
   onMouseMove(e: MouseEvent | TouchEvent) {
@@ -570,20 +552,15 @@ export class OverlaySelection {
       rowDimension: { ...this.dimensionRow.state },
       colDimension: { ...this.dimensionCol.state },
     };
-    const renderEvent = ready
-      ? { detail: renderDetails, defaultPrevented: false }
-      : this.beforeEditRender.emit(renderDetails);
+    const renderEvent = ready ? undefined : this.beforeEditRender.emit(renderDetails);
 
     // Render prevented
-    if (renderEvent.defaultPrevented) {
+    if (renderEvent?.defaultPrevented) {
       return null;
     }
 
-    const cell = getCell(
-      renderEvent.detail.range,
-      renderEvent.detail.rowDimension,
-      renderEvent.detail.colDimension,
-    );
+    const { range, rowDimension, colDimension } = renderEvent?.detail ?? renderDetails;
+    const cell = getCell(range, rowDimension, colDimension);
     const styles = styleByCellProps(cell);
     return (
       <revogr-edit

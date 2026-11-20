@@ -11,13 +11,9 @@ revogr-edit {
     background-color: var(--rg-theme-background);
   }
 
-  &.ime-ready {
-    background: transparent;
+  &.editor-prepared {
+    opacity: 0;
     pointer-events: none;
-
-    input {
-      opacity: 0;
-    }
   }
 
   revo-dropdown {

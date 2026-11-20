@@ -148,7 +148,7 @@ test('IME fast edit respects edit vetoes and readonly grids', async ({
   });
   await page.keyboard.type('Rejected');
   await expect(dataCell(page, 0, 0)).toHaveText('Original');
-  await expect(page.locator('revogr-edit')).toHaveClass(/ime-ready/);
+  await expect(page.locator('revogr-edit')).toHaveClass(/editor-prepared/);
   await page.evaluate(() => {
     document.querySelector('revo-grid')!.readonly = true;
   });
@@ -162,10 +162,10 @@ test('IME fast edit keeps clipboard and clear actions on the selected cell', asy
   expect(await getCopiedText(page)).toBe('Original');
   await dispatchClipboardEvent(page, 'paste', 'Pasted');
   await expect(dataCell(page, 0, 0)).toHaveText('Pasted');
-  await expect(page.locator('revogr-edit')).toHaveClass(/ime-ready/);
+  await expect(page.locator('revogr-edit')).toHaveClass(/editor-prepared/);
   await page.keyboard.press('Delete');
   await expect(dataCell(page, 0, 0)).toHaveText('');
-  await expect(page.locator('revogr-edit')).toHaveClass(/ime-ready/);
+  await expect(page.locator('revogr-edit')).toHaveClass(/editor-prepared/);
 });
 
 test('IME editor opts in per column and refocuses a clicked cell', async ({
@@ -181,9 +181,12 @@ test('IME editor opts in per column and refocuses a clicked cell', async ({
   await page.keyboard.press('Escape');
   await expect(page.locator('revogr-edit input')).toHaveCount(0);
 
-  await dataCell(page, 0, 0).click();
+  const ime = dataCell(page, 0, 0);
+  await ime.click();
   await expect(page.locator('revogr-edit input')).toBeFocused();
-  await dataCell(page, 0, 0).click();
+  await ime.focus();
+  await expect(page.locator('revogr-edit input')).toBeFocused();
+  await ime.click();
   await expect(page.locator('revogr-edit input')).toBeFocused();
   await page.evaluate(() => {
     document.querySelector('revo-grid')!.columns = [
@@ -341,7 +344,7 @@ for (const { language, segments } of compositionCases) {
     await input.press('Escape');
     await expect(dataCell(page, 1, 0)).toHaveText('Next');
     await expect(input).toHaveValue('');
-    await expect(page.locator('revogr-edit')).toHaveClass(/ime-ready/);
+    await expect(page.locator('revogr-edit')).toHaveClass(/editor-prepared/);
     await session.detach();
   });
 }

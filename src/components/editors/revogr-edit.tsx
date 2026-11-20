@@ -75,13 +75,6 @@ export class RevoEdit {
   private currentEditor: EditorBase | null = null;
   private preventSaveOnClose = false;
 
-  /** Restore focus to a prepared editor. */
-  @Method() async focusReadyInput() {
-    if (this.requestEdit) {
-      this.currentEditor?.focusReadyInput?.();
-    }
-  }
-
   /**
    * Cancel pending changes flag. Editor will be closed without autosave.
    */
@@ -222,7 +215,7 @@ export class RevoEdit {
         this.currentEditor.prepareForEdit?.(this.requestEdit);
       }
       return (
-        <Host class={{ [EDIT_INPUT_WR]: true, 'ime-ready': !!this.requestEdit }}>
+        <Host class={{ [EDIT_INPUT_WR]: true, 'editor-prepared': !!this.requestEdit }}>
           {this.currentEditor.render(h, this.additionalData)}
         </Host>
       );

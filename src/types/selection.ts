@@ -213,7 +213,6 @@ export interface EditorBase {
   editCell?: EditCell;
   /** Prepare for native input, or begin an active edit when no callback is supplied. */
   prepareForEdit?(requestEdit?: () => boolean): void;
-  focusReadyInput?(): void;
   /**
    * Consume printable input that reached the grid while the editor mounted.
    * Return true when the editor handled the value.

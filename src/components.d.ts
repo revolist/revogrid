@@ -472,10 +472,6 @@ export namespace Components {
          */
         "editor": EditorCtr | null;
         /**
-          * Restore focus to a prepared editor.
-         */
-        "focusReadyInput": () => Promise<void>;
-        /**
           * Prepare the editor to start editing through the selection owner.
          */
         "requestEdit"?: () => boolean;
