@@ -529,17 +529,12 @@ export class OverlaySelection {
     if (!activeEdit && !ready) {
       return null;
     }
-    const enteredOrModelValue =
-      activeEdit?.val ||
-        getCellData(
-          this.columnService.rowDataModel(editCell.y, editCell.x).value
-        );
     const editable = {
       ...editCell,
       ...this.columnService.getSaveData(
         editCell.y,
         editCell.x,
-        enteredOrModelValue,
+        activeEdit?.val || undefined,
       ),
     };
     const renderDetails = {
@@ -566,14 +561,7 @@ export class OverlaySelection {
       <revogr-edit
         key={editor?.prepareOnFocus ? `${editCell.x}:${editCell.y}` : undefined}
         style={styles}
-        requestEdit={
-          ready
-            ? () => {
-                const focus = this.selectionStore.get('focus');
-                return focus?.x === editCell.x && focus.y === editCell.y && this.doEdit();
-              }
-            : undefined
-        }
+        requestEdit={ready ? () => this.doEdit('', editCell) : undefined}
         ref={el => (this.revogrEdit = el)}
         additionalData={this.additionalData}
         editCell={editable}
@@ -814,12 +802,13 @@ export class OverlaySelection {
   /**
    * Start cell editing
    */
-  protected doEdit(val = ''): boolean {
-    if (!this.canEdit()) {
-      return false;
-    }
+  protected doEdit(val = '', expectedFocus?: Cell): boolean {
     const focus = this.selectionStore.get('focus');
-    if (!focus) {
+    if (
+      !focus ||
+      (expectedFocus && (focus.x !== expectedFocus.x || focus.y !== expectedFocus.y)) ||
+      !this.canEdit()
+    ) {
       return false;
     }
     const data = this.columnService.getSaveData(focus.y, focus.x);
