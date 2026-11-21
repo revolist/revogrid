@@ -234,10 +234,19 @@ export class Clipboard {
 
   parserCopy(data: DataFormat[][]) {
     return data
-      .map(rgRow =>
+      .map((rgRow, rowIndex) =>
         rgRow
           .map(value => {
             const text = value == null ? '' : String(value);
+            // A final one-cell blank row otherwise looks like a row terminator.
+            if (
+              text === '' &&
+              rgRow.length === 1 &&
+              rowIndex === data.length - 1 &&
+              rowIndex > 0
+            ) {
+              return '""';
+            }
             return /[\t\r\n"]/.test(text)
               ? `"${text.replace(/"/g, '""')}"`
               : text;
@@ -262,10 +271,15 @@ export class Clipboard {
         break;
       }
       if (data[position] !== '\t') {
-        result.push([]);
         if (data[position] === '\r' && data[position + 1] === '\n') {
           position++;
         }
+        // The last row separator terminates the previous row; it does not
+        // represent another cell. Earlier separators still preserve blank rows.
+        if (position + 1 === data.length) {
+          break;
+        }
+        result.push([]);
       }
       position++;
     }

@@ -14,6 +14,32 @@ import {
 } from './helpers';
 
 test.describe('range selection', () => {
+
+  test('does not clear the next row when pasted text ends in CRLF', async ({ page }) => {
+    await mountGrid(page, {
+      columns: [{ name: 'Value', prop: 'value' }],
+      source: [{ value: 'before' }, { value: 'keep' }],
+      range: true,
+    });
+    await setCellsFocus(page, { x: 0, y: 0 }, { x: 0, y: 0 });
+    await dispatchClipboardEvent(page, 'paste', 'pasted\r\n');
+    await expect(dataCell(page, 0, 0)).toHaveText('pasted');
+    await expect(dataCell(page, 1, 0)).toHaveText('keep');
+  });
+
+  test('preserves the next row after a large terminated text paste', async ({ page }) => {
+    const size = 10000;
+    await mountGrid(page, {
+      columns: [{ name: 'Value', prop: 'value' }],
+      source: Array.from({ length: size + 1 }, (_, id) => ({ id, value: `old-${id}` })),
+      range: true,
+    });
+    await setCellsFocus(page, { x: 0, y: 0 }, { x: 0, y: 0 });
+    await dispatchClipboardEvent(page, 'paste', Array.from({ length: size }, (_, id) => `new-${id}`).join('\r\n') + '\r\n');
+    await expect.poll(() => page.evaluate(() => (document.querySelector('revo-grid') as HTMLRevoGridElement).source?.[9999]?.value)).toBe('new-9999');
+    expect(await page.evaluate(() => (document.querySelector('revo-grid') as HTMLRevoGridElement).source?.[10000])).toEqual({ id: 10000, value: 'old-10000' });
+  });
+
   test('applies pasted values across the selected range', async ({ page }) => {
     await mountGrid(page, {
       columns: basicColumns(),
