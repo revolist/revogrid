@@ -31,6 +31,11 @@ describe('clipboard tabular text', () => {
     expect(parse(clipboard.parserCopy(data))).toEqual(data);
   });
 
+  it('round-trips an explicitly blank last row', () => {
+    const data = [['a'], ['']];
+    expect(parse(clipboard.parserCopy(data))).toEqual(data);
+  });
+
   it.each(['\n', '\r', '\r\n'])(
     'parses spreadsheet quoted fields with %j row separators',
     separator => {
@@ -43,9 +48,28 @@ describe('clipboard tabular text', () => {
     },
   );
 
-  it('preserves ordinary text, literal unmatched quotes, and trailing empty rows', () => {
+  it('round-trips an explicitly blank last row', () => {
+    const data = [['a'], ['']];
+    expect(parse(clipboard.parserCopy(data))).toEqual(data);
+  });
+
+  it.each(['\n', '\r', '\r\n'])(
+    'ignores one final row terminator %j without losing explicit empty fields',
+    separator => {
+      expect(parse(`pasted${separator}`)).toEqual([['pasted']]);
+      expect(parse(`a\tb${separator}c\td${separator}`)).toEqual([
+        ['a', 'b'],
+        ['c', 'd'],
+      ]);
+      expect(parse(`a\t${separator}`)).toEqual([['a', '']]);
+      expect(parse(`a${separator}${separator}`)).toEqual([['a'], ['']]);
+      expect(parse(`a${separator}""`)).toEqual([['a'], ['']]);
+    },
+  );
+
+  it('preserves ordinary text, literal unmatched quotes, and explicit empty rows', () => {
     expect(parse('')).toEqual([['']]);
-    expect(parse('a\t\tb\r\n\t\n')).toEqual([['a', '', 'b'], ['', ''], ['']]);
+    expect(parse('a\t\tb\r\n\t\n')).toEqual([['a', '', 'b'], ['', '']]);
     expect(parse('say "hi"\t"unclosed\n"closed" suffix')).toEqual([
       ['say "hi"', '"unclosed'],
       ['"closed" suffix'],
