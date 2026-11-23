@@ -4,6 +4,7 @@ import {
   SELECTORS,
   buildColumns,
   cancelEditCellValue,
+  callGridMethod,
   dataCell,
   editCellValue,
   mountGrid,
@@ -36,6 +37,40 @@ test.describe('editing', () => {
     await cancelEditCellValue(page, 1, 'name', 'Benny');
     await expect(page.locator(SELECTORS.editInput)).toHaveCount(0);
     await expect(dataCell(page, 1, 1)).toHaveText('Ben');
+  });
+
+  test('cancels a pending edit when the application replaces its target during beforeedit', async ({ page }) => {
+    const source = [
+      { id: 1, name: 'Removed', role: 'Engineer' },
+      { id: 2, name: 'Neighbor', role: 'Designer' },
+    ];
+    const replacement = [
+      { id: 3, name: 'Replacement', role: 'Manager' },
+      source[1],
+    ];
+
+    await mountGrid(page, {
+      columns: buildColumns([{ prop: 'name' }, { prop: 'role' }]),
+      source,
+    });
+    await page.evaluate(nextSource => {
+      const grid = document.querySelector<HTMLRevoGridElement>('revo-grid')!;
+      grid.addEventListener('beforeedit', event => {
+        event.preventDefault();
+        grid.source = nextSource;
+      }, { once: true });
+    }, replacement);
+
+    await editCellValue(page, 0, 'name', 'Discarded');
+    await expect(dataCell(page, 0, 0)).toHaveText('Replacement');
+    expect(await callGridMethod(page, 'getSource')).toEqual(replacement);
+
+    await editCellValue(page, 0, 'name', 'Committed');
+    await expect(dataCell(page, 0, 0)).toHaveText('Committed');
+    expect(await callGridMethod(page, 'getSource')).toEqual([
+      { ...replacement[0], name: 'Committed' },
+      replacement[1],
+    ]);
   });
 
   test('does not start editing from browser shortcut keys', async ({ page }) => {

@@ -17,11 +17,13 @@ export default createConfig({
   // policy blocking requests to 0.0.0.0 (non-secure loopback context).
   use: {
     baseURL: 'http://localhost:3333',
+    trace: 'retain-on-failure',
+    screenshot: 'only-on-failure',
   },
-  // On CI: inline annotations in the Actions log + HTML report artifact.
+  // On CI: annotations, an HTML report, and machine-readable results.
   // Locally: default list output.
   reporter: process.env.CI
-    ? [['github'], ['html', { open: 'never' }]]
+    ? [['github'], ['html', { open: 'never' }], ['json', { outputFile: 'playwright-results.json' }]]
     : [['list']],
   webServer: {
     command: 'stencil build --dev --watch --serve --no-open',
