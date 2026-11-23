@@ -1,0 +1,29 @@
+name: Core Exploratory QA
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/exploratory.yml'
+      - '.github/workflows/e2e.yml'
+      - 'playwright.config.ts'
+      - 'e2e/exploratory.spec.ts'
+      - 'e2e/helpers/exploratory/**'
+  schedule:
+    - cron: '17 3 * * 1'
+  workflow_dispatch:
+    inputs:
+      exploratory_seeds:
+        description: 'Comma-separated exploratory seeds. Leave empty for the fixed corpus.'
+        type: string
+        required: false
+
+permissions:
+  contents: read
+
+jobs:
+  exploratory:
+    name: Exploratory corpus
+    uses: ./.github/workflows/e2e.yml
+    with:
+      exploratory_mode: ${{ github.event_name == 'schedule' && 'rotating' || 'fixed' }}
+      exploratory_seeds: ${{ inputs.exploratory_seeds || '' }}
