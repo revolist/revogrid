@@ -5,9 +5,15 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      exploratory_seeds:
+        description: 'Comma-separated exploratory seeds. Leave empty for the fixed corpus.'
+        type: string
+        required: false
 
 concurrency:
-  group: ci-e2e-${{ github.ref }}
+  group: ci-e2e-${{ github.ref }}-${{ github.event_name == 'workflow_dispatch' && 'exploratory' || 'regression' }}
   cancel-in-progress: true
 
 permissions:
@@ -38,9 +44,16 @@ jobs:
         id: playwright
         timeout-minutes: 20
         shell: bash
+        env:
+          REVOGRID_QA: ${{ github.event_name == 'workflow_dispatch' && '1' || '0' }}
+          REVOGRID_QA_SEEDS: ${{ inputs.exploratory_seeds }}
         run: |
           set -o pipefail
-          npm run test:e2e 2>&1 | tee "$RUNNER_TEMP/playwright-run.log"
+          args=()
+          if [[ "$REVOGRID_QA" == 1 ]]; then
+            args+=(e2e/exploratory.spec.ts --workers=4)
+          fi
+          npm run test:e2e -- "${args[@]}" 2>&1 | tee "$RUNNER_TEMP/playwright-run.log"
           if [[ ! -s playwright-results.json ]]; then
             echo "::error::Playwright exited successfully without producing playwright-results.json"
             exit 1
