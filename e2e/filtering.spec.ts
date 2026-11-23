@@ -842,7 +842,9 @@ test.describe('filtering', () => {
       if (!wrapper) {
         throw new Error('Grid wrapper was not found');
       }
-      wrapper.style.marginTop = '160px';
+      // Keep the header near the viewport edge without introducing document scroll.
+      wrapper.style.position = 'fixed';
+      wrapper.style.top = '160px';
     });
 
     await clickFilterButton(page, 'bottom-filter-role');

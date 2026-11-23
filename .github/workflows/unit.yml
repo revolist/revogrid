@@ -25,14 +25,23 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: latest
+          node-version: 24.22.1
           cache: npm
 
       - name: Install dependencies
         run: npm ci
 
       - name: Run unit tests
-        run: npm test -- --runInBand --json --outputFile=jest-results.json || true
+        id: jest
+        shell: bash
+        run: |
+          set -o pipefail
+          npm test -- --runInBand --json --outputFile=jest-results.json 2>&1 | tee jest-run.log
+          if [[ ! -s jest-results.json ]]; then
+            echo "::error::Jest exited successfully without producing jest-results.json"
+            exit 1
+          fi
+          node -e "if (!require('./jest-results.json').success) process.exit(1)"
 
       - name: Build hydrate output
         run: npm run build
@@ -53,6 +62,7 @@ jobs:
             FAILED=$(node -p "require('./jest-results.json').numFailedTests")
             SKIPPED=$(node -p "require('./jest-results.json').numPendingTests")
             SUITES=$(node -p "require('./jest-results.json').numTotalTestSuites")
+            FAILED_SUITES=$(node -p "require('./jest-results.json').numFailedTestSuites")
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "| Result | Count |" >> $GITHUB_STEP_SUMMARY
             echo "|---|---|" >> $GITHUB_STEP_SUMMARY
@@ -60,14 +70,24 @@ jobs:
             echo "| ❌ Failed | $FAILED |" >> $GITHUB_STEP_SUMMARY
             echo "| ⏭️ Skipped | $SKIPPED |" >> $GITHUB_STEP_SUMMARY
             echo "| 📦 Total | $TOTAL |" >> $GITHUB_STEP_SUMMARY
+            echo "| Failed suites | $FAILED_SUITES |" >> $GITHUB_STEP_SUMMARY
             echo "| 🗂️ Suites | $SUITES |" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "| | |" >> $GITHUB_STEP_SUMMARY
             echo "|---|---|" >> $GITHUB_STEP_SUMMARY
-            echo "| Branch | \`${{ github.ref_name }}\` |" >> $GITHUB_STEP_SUMMARY
-            echo "| Commit | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
+            echo "| Branch | \`$GITHUB_REF_NAME\` |" >> $GITHUB_STEP_SUMMARY
+            echo "| Commit | \`$GITHUB_SHA\` |" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "Jest did not produce a results file. Test step outcome is ${{ steps.jest.outcome }}." >> $GITHUB_STEP_SUMMARY
           fi
-          node -e "
-            const r = require('./jest-results.json');
-            if (r.numFailedTests > 0) process.exit(1);
-          "
+
+      - name: Upload Jest evidence
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: jest-results
+          path: |
+            jest-results.json
+            jest-run.log
+          retention-days: 14
+          if-no-files-found: ignore

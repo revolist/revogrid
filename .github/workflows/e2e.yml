@@ -28,15 +28,23 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v5
         with:
-          node-version: lts/*
+          node-version: 24.22.1
           cache: npm
 
       - name: Install dependencies
         run: npm ci
 
       - name: Run e2e tests
+        id: playwright
         timeout-minutes: 20
-        run: npm run test:e2e
+        shell: bash
+        run: |
+          set -o pipefail
+          npm run test:e2e 2>&1 | tee "$RUNNER_TEMP/playwright-run.log"
+          if [[ ! -s playwright-results.json ]]; then
+            echo "::error::Playwright exited successfully without producing playwright-results.json"
+            exit 1
+          fi
 
       - name: Upload Playwright HTML report
         if: always()
@@ -51,22 +59,38 @@ jobs:
         if: always()
         run: |
           echo "## E2E Test Results" >> $GITHUB_STEP_SUMMARY
-          if [ -f playwright-report/index.html ]; then
-            echo "📄 Full HTML report uploaded as artifact **playwright-report**" >> $GITHUB_STEP_SUMMARY
+          if [ -f playwright-results.json ]; then
+            node --input-type=commonjs <<'JS' >> "$GITHUB_STEP_SUMMARY"
+          const { errors, stats } = require('./playwright-results.json');
+          const { expected, unexpected, skipped, flaky, duration } = stats;
+          console.log(`Passed ${expected}, failed ${unexpected}, skipped ${skipped}, passed on retry ${flaky}. Duration ${(duration / 1000).toFixed(2)} s.`);
+          for (const error of errors) {
+            const message = error.message ?? error.stack ?? 'Unknown runner error';
+            const kind = /config\.webServer|waiting.*webServer/i.test(message) ? 'Web server startup' : 'Runner';
+            console.log(`${kind} error`);
+            console.log('~~~~text');
+            console.log(message);
+            console.log('~~~~');
+          }
+          JS
+          else
+            echo "Playwright did not produce a results file. Test step outcome is ${{ steps.playwright.outcome }}." >> $GITHUB_STEP_SUMMARY
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| | |" >> $GITHUB_STEP_SUMMARY
           echo "|---|---|" >> $GITHUB_STEP_SUMMARY
-          echo "| Branch | \`${{ github.ref_name }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Commit | \`${{ github.sha }}\` |" >> $GITHUB_STEP_SUMMARY
-          echo "| Runner | \`${{ runner.os }}\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Branch | \`$GITHUB_REF_NAME\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Commit | \`$GITHUB_SHA\` |" >> $GITHUB_STEP_SUMMARY
+          echo "| Runner | \`$RUNNER_OS\` |" >> $GITHUB_STEP_SUMMARY
 
-      - name: Upload Playwright trace artifacts on failure
-        if: failure()
+      - name: Upload Playwright execution evidence
+        if: always()
         uses: actions/upload-artifact@v5
         with:
-          name: playwright-artifacts
+          name: playwright-results
           if-no-files-found: ignore
+          retention-days: 14
           path: |
-            test-results
-            test-results
+            playwright-results.json
+            ${{ runner.temp }}/playwright-run.log
+            test-results/

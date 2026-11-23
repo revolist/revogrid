@@ -4,6 +4,7 @@ import {
   SELECTORS,
   SAMPLE_ROWS,
   basicColumns,
+  callGridMethod,
   dataCell,
   dispatchClipboardEvent,
   expectFocusedCell,
@@ -21,6 +22,36 @@ import {
 } from './helpers';
 
 test.describe('clipboard', () => {
+  test('pastes into the current visible rows when trimming changes after selection', async ({ page }) => {
+    const source = [
+      { id: 1, name: 'First', role: 'Engineer' },
+      { id: 2, name: 'Hidden', role: 'Designer' },
+      { id: 3, name: 'Third', role: 'Manager' },
+      { id: 4, name: 'Neighbor', role: 'Analyst' },
+    ];
+    const pinnedTopSource = [{ id: 5, name: 'Pinned', role: 'Lead' }];
+    await mountGrid(page, {
+      columns: basicColumns(['id', 'name', 'role']),
+      source,
+      pinnedTopSource,
+      range: true,
+    });
+
+    await setCellsFocus(page, { x: 1, y: 0 }, { x: 1, y: 1 });
+    await callGridMethod(page, 'addTrimmed', { 1: true });
+    await page.waitForChanges();
+    await expect(dataCell(page, 1, 1)).toHaveText('Third');
+    await dispatchClipboardEvent(page, 'paste', 'Updated first\nUpdated third');
+
+    expect(await callGridMethod(page, 'getSource')).toEqual([
+      { ...source[0], name: 'Updated first' },
+      source[1],
+      { ...source[2], name: 'Updated third' },
+      source[3],
+    ]);
+    expect(await callGridMethod(page, 'getSource', 'rowPinStart')).toEqual(pinnedTopSource);
+  });
+
   test('round-trips copied cells containing tabs, line breaks, quotes, and empty values', async ({ page }) => {
     const values = [
       { id: 'tab\tvalue', name: 'line\nvalue', role: 'say "hi"' },

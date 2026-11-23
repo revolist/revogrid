@@ -101,6 +101,7 @@ test.describe('lifecycle', () => {
       headers: [...grid.querySelectorAll('revogr-header .rgHeaderCell')].map(el => el.textContent),
       rows: grid.querySelectorAll('revogr-data[type="rgRow"] .rgRow').length,
     }));
+    await expect.poll(async () => (await visible('control')).rows).toBeGreaterThan(0);
     await expect.poll(() => visible('moved')).toEqual(await visible('control'));
     const original = await page.locator('#moved revo-grid').elementHandle();
 
