@@ -5,9 +5,17 @@ on:
   push:
     branches:
       - main
+  workflow_call:
+    inputs:
+      exploratory_mode:
+        type: string
+        required: true
+      exploratory_seeds:
+        type: string
+        default: ''
 
 concurrency:
-  group: ci-e2e-${{ github.ref }}
+  group: ci-e2e-${{ github.ref }}-${{ inputs.exploratory_mode || 'regression' }}
   cancel-in-progress: true
 
 permissions:
@@ -38,9 +46,22 @@ jobs:
         id: playwright
         timeout-minutes: 20
         shell: bash
+        env:
+          REVOGRID_QA: ${{ inputs.exploratory_mode != '' && '1' || '0' }}
+          EXPLORATORY_MODE: ${{ inputs.exploratory_mode }}
+          REVOGRID_QA_SEEDS: ${{ inputs.exploratory_seeds }}
         run: |
           set -o pipefail
-          npm run test:e2e 2>&1 | tee "$RUNNER_TEMP/playwright-run.log"
+          args=()
+          if [[ "$REVOGRID_QA" == 1 ]]; then
+            args+=(e2e/exploratory.spec.ts --workers=4)
+            if [[ "$EXPLORATORY_MODE" == rotating ]]; then
+              REVOGRID_QA_SEEDS=$(node -p 'const week = Math.floor(Date.now() / 604800000); Array.from({ length: 32 }, (_, i) => week * 32 + i).join(",")')
+              export REVOGRID_QA_SEEDS
+            fi
+            echo "Exploratory seeds: ${REVOGRID_QA_SEEDS:-fixed corpus}" | tee -a "$GITHUB_STEP_SUMMARY"
+          fi
+          npm run test:e2e -- "${args[@]}" 2>&1 | tee "$RUNNER_TEMP/playwright-run.log"
           if [[ ! -s playwright-results.json ]]; then
             echo "::error::Playwright exited successfully without producing playwright-results.json"
             exit 1
