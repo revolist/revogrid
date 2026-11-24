@@ -50,7 +50,8 @@ revogr-viewport-scroll {
   }
 
   .content-wrapper {
-    overflow: hidden;
+    // Focusing an editor that overflows its row must not scroll one viewport independently.
+    overflow: clip;
   }
 
   .inner-content-table {
