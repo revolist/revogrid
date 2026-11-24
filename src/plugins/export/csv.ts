@@ -66,7 +66,12 @@ export class ExportCsv implements Formatter {
 
   private parseCell(value: any, columnDelimiter: string, force = false) {
     let escape = value;
-    if (typeof value !== 'string') {
+    if (value === null) {
+      return '';
+    }
+    if (value instanceof Date && !Number.isNaN(value.getTime())) {
+      escape = value.toISOString();
+    } else if (typeof value !== 'string') {
       escape = stringifyCellValue(value);
     }
     const toEscape = [CARRIAGE_RETURN, DOUBLE_QT, LINE_FEED, columnDelimiter];

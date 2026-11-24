@@ -127,6 +127,16 @@ line2" → wrapped in double quotes (newline character triggers quoting)`, () =>
     it('value undefined → "" (missing cell values output as empty string)', () => {
       expect(doExport({ data: [{ v: undefined }], headers: [], props: ['v'] })).toBe('');
     });
+
+    it('value null → "" (null cells export empty, not the word null)', () => {
+      expect(doExport({ data: [{ v: null }], headers: [], props: ['v'] })).toBe('');
+      expect(doExport({ data: [{ a: 'x', v: null, b: 'y' }], headers: [], props: ['a', 'v', 'b'] })).toBe('x,,y');
+    });
+
+    it('value Date → ISO string without extra quotes', () => {
+      const d = new Date('2024-01-02T03:04:05.000Z');
+      expect(doExport({ data: [{ v: d }], headers: [], props: ['v'] })).toBe('2024-01-02T03:04:05.000Z');
+    });
   });
 
   describe('doExport — headers', () => {
