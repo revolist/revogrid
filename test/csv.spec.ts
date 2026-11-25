@@ -145,6 +145,15 @@ line2" → wrapped in double quotes (newline character triggers quoting)`, () =>
   });
 
   describe('doExport — custom delimiters', () => {
+    it('quotes cells containing the configured row delimiter', () => {
+      const result = doExport({
+        data: [{ v: 'red|blue' }, { v: 'green' }],
+        headers: [],
+        props: ['v'],
+      }, { rowDelimiter: '|' });
+      expect(result).toBe('"red|blue"|green');
+    });
+
     it('columnDelimiter=";": {a:"1",b:"2"} → "1;2" (semicolon used instead of comma)', () => {
       expect(doExport({ data: [{ a: '1', b: '2' }], headers: [], props: ['a', 'b'] }, { columnDelimiter: ';' })).toBe('1;2');
     });
