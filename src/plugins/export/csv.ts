@@ -70,6 +70,9 @@ export class ExportCsv implements Formatter {
       escape = stringifyCellValue(value);
     }
     const toEscape = [CARRIAGE_RETURN, DOUBLE_QT, LINE_FEED, columnDelimiter];
+    if (this.options.rowDelimiter) {
+      toEscape.push(this.options.rowDelimiter);
+    }
     if (typeof escape === 'undefined') {
       return '';
     }
