@@ -23,6 +23,36 @@ async function nextAnimationFrames(page: E2EPage, count = 2) {
 }
 
 test.describe('filtering', () => {
+  test('preserves custom popup input styles without changing Core filter inputs', async ({ page }) => {
+    await mountGrid(page, {
+      columns: [{ prop: 'name', name: 'Name', filter: true, ...withHeaderTestId('filter-input-ownership') }],
+      source: [{ name: 'Alice' }, { name: 'Bob' }],
+      filter: true,
+    });
+    await clickFilterButton(page, 'filter-input-ownership');
+    const panel = page.locator(SELECTORS.filterPanel);
+    await panel.locator('#add-filter').selectOption('contains');
+    const coreInput = panel.locator('input[placeholder="Enter value..."]').first();
+    await expect(coreInput).toHaveCSS('padding-left', '10px');
+    await coreInput.fill('Alice');
+    await expectVisibleColumnValues(page, 0, ['Alice']);
+
+    await panel.evaluate(dialog => {
+      const style = document.createElement('style');
+      style.textContent = '.custom-search-input { padding-left: 32px; margin: 0; }';
+      const input = document.createElement('input');
+      input.type = 'text';
+      input.className = 'custom-search-input';
+      input.setAttribute('aria-label', 'Custom search');
+      dialog.append(style, input);
+    });
+    const custom = panel.getByRole('textbox', { name: 'Custom search' });
+    await expect(custom).toHaveCSS('padding-left', '32px');
+    await expect(custom).toHaveCSS('margin-top', '0px');
+    await custom.fill('Last');
+    await expect(custom).toHaveValue('Last');
+  });
+
   test('ignores empty condition lists in runtime filter configuration', async ({ page }) => {
     await mountGrid(page, {
       columns: [{ prop: 'name', filter: true }, { prop: 'role', filter: true }],

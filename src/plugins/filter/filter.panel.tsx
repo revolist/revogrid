@@ -651,6 +651,7 @@ export class FilterPanel {
     }
     return (
       <input
+        class="filter-value-input"
         id={`filter-input-${currentFilter[index].id}`}
         placeholder={capts.placeholder}
         type={extra === 'datepicker' ? 'date' : 'text'}
