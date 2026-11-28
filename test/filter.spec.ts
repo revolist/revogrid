@@ -5,6 +5,9 @@ import contains, { notContains } from '../src/plugins/filter/conditions/string/c
 import beginsWith from '../src/plugins/filter/conditions/string/beginswith';
 import gtThan from '../src/plugins/filter/conditions/number/greaterThan';
 import lt from '../src/plugins/filter/conditions/number/lessThan';
+import gtThanEq from '../src/plugins/filter/conditions/number/greaterThanOrEqual';
+import lsEq from '../src/plugins/filter/conditions/number/lessThanOrEqual';
+import { filterCoreFunctionsIndexedByType } from '../src/plugins/filter/filter.indexed';
 import { FilterPlugin } from '../src/plugins/filter/filter.plugin';
 import { ASYNC_FILTER_ROW_THRESHOLD } from '../src/plugins/filter/filter.constants';
 import { getFilterReorderId, moveFilterItem } from '../src/plugins/filter/filter.reorder';
@@ -576,6 +579,40 @@ describe.each([
   it('fn("hello", "5") → false, fn(undefined, "5") → false (only works on numeric values)', () => {
     expect(fn('hello', '5')).toBe(false);
     expect(fn(undefined, '5')).toBe(false);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// number = / != / >= / <= — the input is read as a number
+// ---------------------------------------------------------------------------
+describe('number equality filters', () => {
+  const { eqN, neqN, gte, lte } = filterCoreFunctionsIndexedByType;
+
+  it('eqN matches a number cell by value, not by text', () => {
+    expect(eqN(10.5, '10.50')).toBe(true);
+    expect(eqN(7, ' 7')).toBe(true);
+    expect(eqN(1000, '1e3')).toBe(true);
+    expect(eqN(10.5, '10.6')).toBe(false);
+    expect(neqN(10.5, '10.50')).toBe(false);
+    expect(neqN(10.5, '10.6')).toBe(true);
+  });
+
+  it('gte and lte include the boundary when the input has a different text form', () => {
+    expect(gte(10.5, '10.50')).toBe(true);
+    expect(lte(10.5, '10.50')).toBe(true);
+    expect(gtThanEq(5, '5.0')).toBe(true);
+    expect(lsEq(5, '5.0')).toBe(true);
+    expect(gte(4.9, '5.0')).toBe(false);
+    expect(lte(5.1, '5.0')).toBe(false);
+  });
+
+  it('an empty input matches everything and other cells keep the text compare', () => {
+    expect(eqN(3, '')).toBe(true);
+    expect(eqN(3, '  ')).toBe(true);
+    expect(eqN(undefined, '5')).toBe(true);
+    expect(eqN('05', '05')).toBe(true);
+    expect(eqN('05', '5')).toBe(false);
+    expect(eqN(BigInt('9007199254740993'), '9007199254740993')).toBe(true);
   });
 });
 

@@ -5,6 +5,7 @@ import gtThan from './conditions/number/greaterThan';
 import gtThanEq from './conditions/number/greaterThanOrEqual';
 import lt from './conditions/number/lessThan';
 import lsEq from './conditions/number/lessThanOrEqual';
+import eqN, { neqN } from './conditions/number/equal';
 import set, { notSet } from './conditions/set';
 import beginsWith from './conditions/string/beginswith';
 import contains, { notContains } from './conditions/string/contains';
@@ -21,8 +22,8 @@ export const filterCoreFunctionsIndexedByType: Record<FilterType, LogicFunction>
   contains: contains,
   notContains: notContains,
 
-  eqN: eq,
-  neqN: notEq,
+  eqN: eqN,
+  neqN: neqN,
   gt: gtThan,
   gte: gtThanEq,
   lt: lt,
